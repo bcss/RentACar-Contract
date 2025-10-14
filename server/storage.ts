@@ -1,0 +1,189 @@
+import {
+  users,
+  contracts,
+  auditLogs,
+  contractCounter,
+  type User,
+  type UpsertUser,
+  type Contract,
+  type InsertContract,
+  type InsertAuditLog,
+  type AuditLog,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, or, like, sql } from "drizzle-orm";
+
+// Interface for storage operations
+export interface IStorage {
+  // User operations (Required for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(userId: string, role: string): Promise<User>;
+  
+  // Contract operations
+  getContract(id: string): Promise<Contract | undefined>;
+  getAllContracts(): Promise<Contract[]>;
+  searchContracts(query: string): Promise<Contract[]>;
+  createContract(contract: InsertContract): Promise<Contract>;
+  updateContract(id: string, contract: Partial<InsertContract>): Promise<Contract>;
+  finalizeContract(id: string, userId: string): Promise<Contract>;
+  
+  // Contract counter
+  getNextContractNumber(): Promise<number>;
+  
+  // Audit log operations
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getAllAuditLogs(): Promise<AuditLog[]>;
+  getRecentAuditLogs(limit: number): Promise<AuditLog[]>;
+}
+
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ role, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  // Contract operations
+  async getContract(id: string): Promise<Contract | undefined> {
+    const [contract] = await db.select().from(contracts).where(eq(contracts.id, id));
+    return contract;
+  }
+
+  async getAllContracts(): Promise<Contract[]> {
+    return await db.select().from(contracts).orderBy(desc(contracts.createdAt));
+  }
+
+  async searchContracts(query: string): Promise<Contract[]> {
+    const searchTerm = `%${query}%`;
+    return await db
+      .select()
+      .from(contracts)
+      .where(
+        or(
+          like(sql`CAST(${contracts.contractNumber} AS TEXT)`, searchTerm),
+          like(contracts.customerNameEn, searchTerm),
+          like(contracts.customerNameAr, searchTerm)
+        )
+      )
+      .orderBy(desc(contracts.createdAt));
+  }
+
+  async createContract(contract: InsertContract): Promise<Contract> {
+    const contractNumber = await this.getNextContractNumber();
+    
+    const [newContract] = await db
+      .insert(contracts)
+      .values({
+        ...contract,
+        contractNumber,
+      })
+      .returning();
+    
+    return newContract;
+  }
+
+  async updateContract(id: string, contractData: Partial<InsertContract>): Promise<Contract> {
+    const [updated] = await db
+      .update(contracts)
+      .set({
+        ...contractData,
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async finalizeContract(id: string, userId: string): Promise<Contract> {
+    const [finalized] = await db
+      .update(contracts)
+      .set({
+        status: 'finalized',
+        finalizedBy: userId,
+        finalizedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return finalized;
+  }
+
+  // Contract counter
+  async getNextContractNumber(): Promise<number> {
+    // Initialize counter if it doesn't exist
+    const [counter] = await db.select().from(contractCounter);
+    
+    if (!counter) {
+      await db.insert(contractCounter).values({
+        id: 'singleton',
+        currentNumber: 15500,
+      });
+      return 15500;
+    }
+
+    // Increment and return
+    const [updated] = await db
+      .update(contractCounter)
+      .set({ currentNumber: sql`${contractCounter.currentNumber} + 1` })
+      .where(eq(contractCounter.id, 'singleton'))
+      .returning();
+    
+    return updated.currentNumber;
+  }
+
+  // Audit log operations
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const [newLog] = await db
+      .insert(auditLogs)
+      .values(log)
+      .returning();
+    
+    return newLog;
+  }
+
+  async getAllAuditLogs(): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt));
+  }
+
+  async getRecentAuditLogs(limit: number): Promise<AuditLog[]> {
+    return await db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit);
+  }
+}
+
+export const storage = new DatabaseStorage();
