@@ -1,0 +1,173 @@
+Here’s your request rewritten as a clear User Story and a complete PRD (Product Requirements Document) — structured for both developers and management review.
+
+⸻
+
+🧩 User Story
+
+Title:
+
+Contract Lifecycle Management with Role-Based Access and Bilingual Support
+
+As a:
+
+System user (e.g., contract manager, admin, staff)
+
+I want to:
+
+Create, edit, save, print, and finalize rental contracts through a web-based application with multi-language support (English/Arabic) and defined user permissions.
+
+So that I can:
+
+Digitally manage contracts efficiently, maintain audit trails, and ensure accuracy, accountability, and compliance with internal control policies.
+
+⸻
+
+📘 Product Requirements Document (PRD)
+
+1. Overview
+
+Product Name:
+
+Contract Lifecycle Management Module
+
+Version:
+
+v1.0
+
+Purpose:
+
+This module digitizes the creation, modification, and management of contracts, ensuring data integrity, accountability, and bilingual accessibility. Once finalized, contracts become immutable for compliance and audit purposes.
+
+⸻
+
+2. Functional Requirements
+
+2.1 Contract Lifecycle
+
+Stage	Description	Access
+Drafting	Users can create new contracts by entering data into form fields.	All authorized users
+Editing	Users can update saved drafts anytime before finalization.	Contract creator, Admin
+Finalization/Closure	Once a contract is finalized (“closed”), it becomes locked — no further edits allowed.	Admin-only action
+Viewing/Search	Users can search and view all contracts (by ID, name, date, etc.).	All roles
+Printing	Contracts can be printed in the exact uploaded template layout with entered data populated.	All roles
+Emailing (optional)	Users can send finalized contracts via email directly from the system.	Admin, authorized staff
+
+
+⸻
+
+2.2 Contract Numbering
+	•	The contract numbering must start from 15500.
+	•	All subsequent contracts must increment sequentially (15501, 15502, …).
+	•	The system should prevent any manual alteration to the sequence.
+
+⸻
+
+2.3 Multi-Language Support
+	•	Full UI and contract field translations between English and Arabic.
+	•	User can switch language dynamically without logging out.
+	•	Stored data should be language-independent (UTF-8 encoding).
+
+⸻
+
+2.4 Roles & Permissions
+
+Role	Permissions
+Admin	Create, Edit, Finalize, Delete (if permitted), Print, Email, View all, View/Edit Logs, Manage Users
+Manager	Create, Edit own contracts, Print, Email, View own and subordinate contracts
+Staff/User	Create and Edit own drafts, Print before finalization
+Viewer/Auditor	Read-only access to finalized contracts and logs
+
+
+⸻
+
+2.5 Logging & Auditing
+	•	Audit Logs:
+Every action (create, edit, finalize, print, delete, login, logout, etc.) must be logged with:
+	•	Username
+	•	Timestamp
+	•	Action Type
+	•	Affected Contract ID
+	•	IP address (if available)
+	•	Error Logs:
+System errors, API failures, and permission violations should be recorded and accessible only by the Admin.
+	•	Log Retention:
+Minimum 1 year (configurable).
+
+⸻
+
+2.6 Data Integrity
+	•	Contract templates should retain exact formatting of the uploaded version (PDF/DOCX).
+	•	Input data must overlay precisely in designated fields during preview and printing.
+	•	No UI or print layout modifications to original templates.
+
+⸻
+
+2.7 Search & Filter
+	•	Searchable by:
+	•	Contract ID
+	•	Customer name
+	•	Date range
+	•	Status (Draft/Finalized)
+	•	User
+	•	Support pagination and export of search results (PDF/CSV).
+
+⸻
+
+3. Non-Functional Requirements
+
+3.1 Security
+	•	Role-based access control (RBAC)
+	•	Encrypted storage (AES-256 for sensitive data)
+	•	HTTPS for all connections
+	•	Audit-proof (no post-finalization edits)
+
+3.2 Performance
+	•	Contract search < 2 seconds average
+	•	Print generation < 5 seconds
+
+3.3 Localization
+	•	Bidirectional (LTR/RTL) layout support for English and Arabic
+
+3.4 Reliability
+	•	Autosave during contract editing
+	•	Graceful error handling with retry for email sending
+
+3.5 Scalability
+	•	Multi-branch and multi-user ready (future-proof for SaaS expansion)
+
+⸻
+
+4. Admin Console
+
+Feature	Description
+User Management	Add/Edit/Delete users, assign roles
+Logs Viewer	View/download all audit and error logs
+System Configuration	Set numbering prefix, email SMTP settings, language defaults
+Template Management	Upload/replace contract templates
+
+
+⸻
+
+5. Acceptance Criteria
+
+ID	Criteria	Status
+AC-1	User can create and edit contracts until finalized	✅
+AC-2	Contracts are sequentially numbered starting from 15500	✅
+AC-3	Finalized contracts are locked for editing	✅
+AC-4	Application supports English ↔ Arabic switch	✅
+AC-5	Print output exactly matches uploaded template	✅
+AC-6	All user actions are logged with timestamps	✅
+AC-7	Admin has exclusive access to error and audit logs	✅
+
+
+⸻
+
+6. Future Enhancements
+	•	Email notification templates (e.g., contract approved, contract expired)
+	•	Digital signature integration (DocuSign API / open-source alternatives)
+	•	Multi-tenant SaaS support for different branches or clients
+	•	Integration with OCR for automatic contract data extraction
+
+⸻
+
+Would you like me to add system architecture and flow diagrams (in Mermaid + draw.io format) to make this PRD ready for implementation and documentation upload (e.g., for GitHub or internal review)?
