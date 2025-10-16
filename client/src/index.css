@@ -335,3 +335,46 @@
     inset: -1px;
   }
 }
+/* Print Styles */
+@page {
+  margin: 1cm;
+}
+
+@media print {
+  /* Hide navigation, buttons, and UI elements */
+  aside,
+  header,
+  .print-hide,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Optimize page for printing */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Ensure content fits on page */
+  .print-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Avoid page breaks inside elements */
+  .print-avoid-break {
+    page-break-inside: avoid;
+  }
+
+  /* Print-specific typography */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  /* Ensure borders and backgrounds print */
+  * {
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+}

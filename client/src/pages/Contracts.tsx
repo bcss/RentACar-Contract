@@ -198,9 +198,12 @@ export default function Contracts() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          asChild
                           data-testid={`button-print-${contract.id}`}
                         >
-                          <span className="material-icons">print</span>
+                          <Link href={`/contracts/${contract.id}`}>
+                            <span className="material-icons">print</span>
+                          </Link>
                         </Button>
                       </div>
                     </TableCell>

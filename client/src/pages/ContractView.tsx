@@ -99,6 +99,27 @@ export default function ContractView() {
     );
   }
 
+  const handlePrint = async () => {
+    try {
+      // Log print action
+      await apiRequest('POST', '/api/audit-logs', {
+        action: 'print',
+        contractId: contract?.id,
+        details: `Printed contract #${contract?.contractNumber}`,
+      });
+      
+      // Trigger browser print
+      window.print();
+      
+      toast({
+        title: t('common.success'),
+        description: t('msg.printSuccess'),
+      });
+    } catch (error) {
+      console.error('Print error:', error);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     if (status === 'finalized') {
       return (
@@ -167,7 +188,7 @@ export default function ContractView() {
               )}
             </>
           )}
-          <Button variant="outline" data-testid="button-print">
+          <Button variant="outline" onClick={handlePrint} data-testid="button-print">
             <span className="material-icons">print</span>
             <span>{t('common.print')}</span>
           </Button>
