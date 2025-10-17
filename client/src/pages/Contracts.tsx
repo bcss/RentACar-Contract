@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
@@ -24,14 +24,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { format } from 'date-fns';
 
 export default function Contracts() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -50,6 +63,38 @@ export default function Contracts() {
     queryKey: ['/api/contracts'],
     enabled: isAuthenticated,
   });
+
+  const disableContractMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest('POST', `/api/contracts/${id}/disable`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
+      toast({
+        title: t('contracts.contractDisabled'),
+      });
+      setIsDisableDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message,
+      });
+    },
+  });
+
+  const handleDisableContract = () => {
+    if (selectedContract) {
+      disableContractMutation.mutate(selectedContract.id);
+    }
+  };
+
+  const openDisableDialog = (contract: Contract) => {
+    setSelectedContract(contract);
+    setIsDisableDialogOpen(true);
+  };
 
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = 
@@ -205,6 +250,16 @@ export default function Contracts() {
                             <span className="material-icons">print</span>
                           </Link>
                         </Button>
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openDisableDialog(contract)}
+                            data-testid={`button-disable-contract-${contract.id}`}
+                          >
+                            <span className="material-icons">block</span>
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -214,6 +269,30 @@ export default function Contracts() {
           )}
         </CardContent>
       </Card>
+
+      {/* Disable Contract Dialog */}
+      <AlertDialog open={isDisableDialogOpen} onOpenChange={setIsDisableDialogOpen}>
+        <AlertDialogContent data-testid="dialog-disable-contract">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('contracts.disableContract')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('contracts.confirmDisableContract')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-disable">
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDisableContract}
+              disabled={disableContractMutation.isPending}
+              data-testid="button-confirm-disable"
+            >
+              {t('contracts.disableContract')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
