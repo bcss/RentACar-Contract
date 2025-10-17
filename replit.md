@@ -34,6 +34,8 @@ Preferred communication style: Simple, everyday language.
 - Custom hooks for authentication and authorization
 - Form validation using Zod schemas shared with backend
 - Responsive layouts with mobile support
+- Print functionality with audit logging and bilingual support
+- Contract lifecycle management (draft → finalized with immutability)
 
 ### Backend Architecture
 
@@ -94,6 +96,13 @@ Preferred communication style: Simple, everyday language.
 - Client-side role checking for UI rendering
 - Session secret management via environment variables
 - CSRF protection through session middleware
+- Full proxy trust configuration for Replit environment (trust proxy: true)
+
+**Recent Fixes (October 2025):**
+- Fixed Google login infinite loop by configuring Express to trust full Replit proxy chain
+- Fixed application loading state bug in useAuth hook to handle 401 responses gracefully
+- Fixed date handling in contract forms to prevent "Invalid time value" errors
+- Corrected CSS @page rule placement for proper 1cm print margins
 
 ### External Dependencies
 
