@@ -15,6 +15,8 @@ import Contracts from "@/pages/Contracts";
 import ContractForm from "@/pages/ContractForm";
 import ContractView from "@/pages/ContractView";
 import Users from "@/pages/Users";
+import DisabledUsers from "@/pages/DisabledUsers";
+import DisabledContracts from "@/pages/DisabledContracts";
 import AuditLogs from "@/pages/AuditLogs";
 import NotFound from "@/pages/not-found";
 import "@/lib/i18n";
@@ -38,6 +40,8 @@ function Router() {
       <Route path="/contracts/:id" component={ContractView} />
       <Route path="/contracts/:id/edit" component={ContractForm} />
       <Route path="/users" component={Users} />
+      <Route path="/disabled-users" component={DisabledUsers} />
+      <Route path="/disabled-contracts" component={DisabledContracts} />
       <Route path="/audit-logs" component={AuditLogs} />
       <Route component={NotFound} />
     </Switch>

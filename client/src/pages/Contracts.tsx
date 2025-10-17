@@ -71,6 +71,7 @@ export default function Contracts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts/disabled'] });
       toast({
         title: t('contracts.contractDisabled'),
       });

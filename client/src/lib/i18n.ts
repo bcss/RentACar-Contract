@@ -8,6 +8,8 @@ const resources = {
       "nav.contracts": "Contracts",
       "nav.users": "Users",
       "nav.auditLogs": "Audit Logs",
+      "nav.disabledUsers": "Disabled Users",
+      "nav.disabledContracts": "Disabled Contracts",
       "nav.settings": "Settings",
       
       // Common
@@ -187,6 +189,8 @@ const resources = {
       "nav.contracts": "العقود",
       "nav.users": "المستخدمون",
       "nav.auditLogs": "سجلات التدقيق",
+      "nav.disabledUsers": "المستخدمون المعطلون",
+      "nav.disabledContracts": "العقود المعطلة",
       "nav.settings": "الإعدادات",
       
       // Common

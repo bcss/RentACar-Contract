@@ -116,6 +116,7 @@ export default function Users() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/disabled'] });
       toast({
         title: t('users.userDisabled'),
       });

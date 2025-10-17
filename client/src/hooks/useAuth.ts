@@ -2,15 +2,25 @@ import { useQuery } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import { getQueryFn } from "@/lib/queryClient";
 
-export function useAuth() {
-  const { data: user, isLoading } = useQuery<User>({
+interface UseAuthReturn {
+  user: User | undefined;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  isManager: boolean;
+  isStaff: boolean;
+  isViewer: boolean;
+}
+
+export function useAuth(): UseAuthReturn {
+  const { data: user, isLoading } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
   });
 
   return {
-    user,
+    user: user || undefined,
     isLoading,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',

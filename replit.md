@@ -110,10 +110,21 @@ Preferred communication style: Simple, everyday language.
 
 **Recent Changes (October 2025):**
 
+**Disable-Only Architecture Implementation (Latest):**
+- **Strict No-Deletion Policy:** Replaced all delete operations with disable/enable functionality for both users and contracts
+- **Database Schema Updates:** Added `disabled`, `disabledBy`, and `disabledAt` fields to users and contracts tables
+- **System Error Logging:** Implemented SystemErrors table for tracking system-level errors with errorType, errorMessage, endpoint, and stack trace
+- **Separate Disabled Views:** Created dedicated pages for disabled users (/disabled-users) and disabled contracts (/disabled-contracts) with enable functionality
+- **Admin-Only Operations:** Disable/enable buttons are restricted to admin users only
+- **Enhanced Audit Logs:** Added tabbed interface with "Audit Trail" for user actions and "System Errors" for system-level error tracking
+- **Navigation Updates:** Added menu items for disabled users and disabled contracts in the sidebar (admin-only visibility)
+- **Cache Invalidation:** Implemented proper query cache invalidation to ensure both active and disabled lists update immediately after disable/enable operations
+- **Bilingual Support:** All new features include complete English and Arabic translations
+
 **Authentication System Overhaul:**
 - **Replaced OAuth with Internal Authentication:** Completely removed Replit OAuth, implemented username/password authentication using Passport.js with bcrypt password hashing
-- **Super Admin Account:** Created immutable super admin (username: "superadmin", default password: "Admin@123456") that cannot be deleted
-- **User Management UI:** Built comprehensive admin interface for creating, editing, and deleting users with role assignment
+- **Super Admin Account:** Created immutable super admin (username: "superadmin", default password: "Admin@123456") that cannot be deleted or disabled
+- **User Management UI:** Built comprehensive admin interface for creating, editing, and disabling users with role assignment
 - **Password Management:** Implemented secure password hashing, validation, and optional password changes during user edits
 - **Database Schema Updates:** Added username, passwordHash, isImmutable, and lastPasswordChange fields to users table
 - **Login Form:** Replaced OAuth button with username/password login form supporting both English and Arabic

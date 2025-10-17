@@ -35,6 +35,18 @@ export function AppSidebar() {
       show: isAdmin,
     },
     {
+      title: t('nav.disabledUsers'),
+      icon: 'person_off',
+      url: '/disabled-users',
+      show: isAdmin,
+    },
+    {
+      title: t('nav.disabledContracts'),
+      icon: 'block',
+      url: '/disabled-contracts',
+      show: isAdmin,
+    },
+    {
       title: t('nav.auditLogs'),
       icon: 'history',
       url: '/audit-logs',
