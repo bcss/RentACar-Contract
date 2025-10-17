@@ -34,6 +34,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { format } from 'date-fns';
 
@@ -43,7 +44,9 @@ export default function Contracts() {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState('active');
   const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
+  const [isEnableDialogOpen, setIsEnableDialogOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
 
   useEffect(() => {
@@ -61,6 +64,11 @@ export default function Contracts() {
 
   const { data: contracts = [], isLoading: contractsLoading } = useQuery<Contract[]>({
     queryKey: ['/api/contracts'],
+    enabled: isAuthenticated,
+  });
+
+  const { data: disabledContracts = [], isLoading: disabledContractsLoading } = useQuery<Contract[]>({
+    queryKey: ['/api/contracts/disabled'],
     enabled: isAuthenticated,
   });
 
@@ -86,9 +94,37 @@ export default function Contracts() {
     },
   });
 
+  const enableContractMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest('POST', `/api/contracts/${id}/enable`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts/disabled'] });
+      toast({
+        title: t('contracts.contractEnabled'),
+      });
+      setIsEnableDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message,
+      });
+    },
+  });
+
   const handleDisableContract = () => {
     if (selectedContract) {
       disableContractMutation.mutate(selectedContract.id);
+    }
+  };
+
+  const handleEnableContract = () => {
+    if (selectedContract) {
+      enableContractMutation.mutate(selectedContract.id);
     }
   };
 
@@ -97,7 +133,23 @@ export default function Contracts() {
     setIsDisableDialogOpen(true);
   };
 
+  const openEnableDialog = (contract: Contract) => {
+    setSelectedContract(contract);
+    setIsEnableDialogOpen(true);
+  };
+
   const filteredContracts = contracts.filter(contract => {
+    const matchesSearch = 
+      contract.contractNumber.toString().includes(searchTerm) ||
+      contract.customerNameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contract.customerNameAr && contract.customerNameAr.includes(searchTerm));
+    
+    const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const filteredDisabledContracts = disabledContracts.filter(contract => {
     const matchesSearch = 
       contract.contractNumber.toString().includes(searchTerm) ||
       contract.customerNameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -185,89 +237,159 @@ export default function Contracts() {
       </Card>
 
       <Card>
-        <CardContent className="p-0">
-          {filteredContracts.length === 0 ? (
-            <div className="p-12 text-center">
-              <span className="material-icons text-6xl text-muted-foreground">description</span>
-              <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('contracts.contractNumber')}</TableHead>
-                  <TableHead>{t('contracts.customerName')}</TableHead>
-                  <TableHead>{t('contracts.status')}</TableHead>
-                  <TableHead>{t('contracts.createdDate')}</TableHead>
-                  <TableHead className="text-right">{t('contracts.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredContracts.map((contract) => (
-                  <TableRow key={contract.id} className="hover-elevate" data-testid={`row-contract-${contract.id}`}>
-                    <TableCell className="font-mono font-medium" data-testid={`text-contract-number-${contract.id}`}>
-                      #{contract.contractNumber}
-                    </TableCell>
-                    <TableCell data-testid={`text-customer-name-${contract.id}`}>
-                      {contract.customerNameEn}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(contract.status)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {contract.createdAt && format(new Date(contract.createdAt), 'PP')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          asChild
-                          data-testid={`button-view-${contract.id}`}
-                        >
-                          <Link href={`/contracts/${contract.id}`}>
-                            <span className="material-icons">visibility</span>
-                          </Link>
-                        </Button>
-                        {contract.status === 'draft' && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            asChild
-                            data-testid={`button-edit-${contract.id}`}
-                          >
-                            <Link href={`/contracts/${contract.id}/edit`}>
-                              <span className="material-icons">edit</span>
-                            </Link>
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          asChild
-                          data-testid={`button-print-${contract.id}`}
-                        >
-                          <Link href={`/contracts/${contract.id}`}>
-                            <span className="material-icons">print</span>
-                          </Link>
-                        </Button>
-                        {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openDisableDialog(contract)}
-                            data-testid={`button-disable-contract-${contract.id}`}
-                          >
-                            <span className="material-icons">block</span>
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+        <CardContent className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="active" data-testid="tab-active-contracts">
+                {t('contracts.activeContracts')} ({contracts.length})
+              </TabsTrigger>
+              <TabsTrigger value="disabled" data-testid="tab-disabled-contracts">
+                {t('contracts.disabledContracts')} ({disabledContracts.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="active" className="mt-4">
+              {contractsLoading ? (
+                <div className="text-center py-8">{t('common.loading')}</div>
+              ) : filteredContracts.length === 0 ? (
+                <div className="p-12 text-center">
+                  <span className="material-icons text-6xl text-muted-foreground">description</span>
+                  <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('contracts.contractNumber')}</TableHead>
+                      <TableHead>{t('contracts.customerName')}</TableHead>
+                      <TableHead>{t('contracts.status')}</TableHead>
+                      <TableHead>{t('contracts.createdDate')}</TableHead>
+                      <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredContracts.map((contract) => (
+                      <TableRow key={contract.id} className="hover-elevate" data-testid={`row-contract-${contract.id}`}>
+                        <TableCell className="font-mono font-medium" data-testid={`text-contract-number-${contract.id}`}>
+                          #{contract.contractNumber}
+                        </TableCell>
+                        <TableCell data-testid={`text-customer-name-${contract.id}`}>
+                          {contract.customerNameEn}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(contract.status)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {contract.createdAt && format(new Date(contract.createdAt), 'PP')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              asChild
+                              data-testid={`button-view-${contract.id}`}
+                            >
+                              <Link href={`/contracts/${contract.id}`}>
+                                <span className="material-icons">visibility</span>
+                              </Link>
+                            </Button>
+                            {contract.status === 'draft' && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                asChild
+                                data-testid={`button-edit-${contract.id}`}
+                              >
+                                <Link href={`/contracts/${contract.id}/edit`}>
+                                  <span className="material-icons">edit</span>
+                                </Link>
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              asChild
+                              data-testid={`button-print-${contract.id}`}
+                            >
+                              <Link href={`/contracts/${contract.id}`}>
+                                <span className="material-icons">print</span>
+                              </Link>
+                            </Button>
+                            {isAdmin && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openDisableDialog(contract)}
+                                data-testid={`button-disable-contract-${contract.id}`}
+                              >
+                                <span className="material-icons">block</span>
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+
+            <TabsContent value="disabled" className="mt-4">
+              {disabledContractsLoading ? (
+                <div className="text-center py-8">{t('common.loading')}</div>
+              ) : filteredDisabledContracts.length === 0 ? (
+                <div className="p-12 text-center">
+                  <span className="material-icons text-6xl text-muted-foreground">description</span>
+                  <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('contracts.contractNumber')}</TableHead>
+                      <TableHead>{t('contracts.customerName')}</TableHead>
+                      <TableHead>{t('contracts.status')}</TableHead>
+                      <TableHead>{t('contracts.disabledDate')}</TableHead>
+                      <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDisabledContracts.map((contract) => (
+                      <TableRow key={contract.id} className="hover-elevate" data-testid={`row-disabled-contract-${contract.id}`}>
+                        <TableCell className="font-mono font-medium" data-testid={`text-contract-number-${contract.id}`}>
+                          #{contract.contractNumber}
+                        </TableCell>
+                        <TableCell data-testid={`text-customer-name-${contract.id}`}>
+                          {contract.customerNameEn}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(contract.status)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {contract.disabledAt ? format(new Date(contract.disabledAt), 'PP p') : '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {isAdmin && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEnableDialog(contract)}
+                                data-testid={`button-enable-contract-${contract.id}`}
+                              >
+                                <span className="material-icons">check_circle</span>
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -290,6 +412,30 @@ export default function Contracts() {
               data-testid="button-confirm-disable"
             >
               {t('contracts.disableContract')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Enable Contract Dialog */}
+      <AlertDialog open={isEnableDialogOpen} onOpenChange={setIsEnableDialogOpen}>
+        <AlertDialogContent data-testid="dialog-enable-contract">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('contracts.enableContract')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('contracts.confirmEnableContract')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-enable">
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleEnableContract}
+              disabled={enableContractMutation.isPending}
+              data-testid="button-confirm-enable"
+            >
+              {t('contracts.enableContract')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
