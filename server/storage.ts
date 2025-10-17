@@ -21,17 +21,22 @@ export interface IStorage {
   createUser(user: Omit<UpsertUser, 'id'>): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
+  getDisabledUsers(): Promise<User[]>;
   updateUserRole(userId: string, role: string): Promise<User>;
   updateUserPassword(userId: string, passwordHash: string): Promise<User>;
-  deleteUser(userId: string): Promise<void>;
+  disableUser(userId: string, disabledBy: string): Promise<User>;
+  enableUser(userId: string): Promise<User>;
   
   // Contract operations
   getContract(id: string): Promise<Contract | undefined>;
   getAllContracts(): Promise<Contract[]>;
+  getDisabledContracts(): Promise<Contract[]>;
   searchContracts(query: string): Promise<Contract[]>;
   createContract(contract: InsertContract): Promise<Contract>;
   updateContract(id: string, contract: Partial<InsertContract>): Promise<Contract>;
   finalizeContract(id: string, userId: string): Promise<Contract>;
+  disableContract(id: string, userId: string): Promise<Contract>;
+  enableContract(id: string): Promise<Contract>;
   
   // Contract counter
   getNextContractNumber(): Promise<number>;
@@ -65,7 +70,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+    return await db.select().from(users).where(eq(users.disabled, false)).orderBy(desc(users.createdAt));
+  }
+
+  async getDisabledUsers(): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.disabled, true)).orderBy(desc(users.disabledAt));
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -100,13 +109,37 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async deleteUser(userId: string): Promise<void> {
-    // Check if user is immutable before deleting
+  async disableUser(userId: string, disabledBy: string): Promise<User> {
+    // Check if user is immutable before disabling
     const user = await this.getUser(userId);
     if (user?.isImmutable) {
-      throw new Error("Cannot delete immutable user");
+      throw new Error("Cannot disable immutable user");
     }
-    await db.delete(users).where(eq(users.id, userId));
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        disabled: true, 
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
+  }
+
+  async enableUser(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        disabled: false, 
+        disabledBy: null,
+        disabledAt: null,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
 
   // Contract operations
@@ -116,7 +149,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllContracts(): Promise<Contract[]> {
-    return await db.select().from(contracts).orderBy(desc(contracts.createdAt));
+    return await db.select().from(contracts).where(eq(contracts.disabled, false)).orderBy(desc(contracts.createdAt));
+  }
+
+  async getDisabledContracts(): Promise<Contract[]> {
+    return await db.select().from(contracts).where(eq(contracts.disabled, true)).orderBy(desc(contracts.disabledAt));
   }
 
   async searchContracts(query: string): Promise<Contract[]> {
@@ -174,6 +211,36 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return finalized;
+  }
+
+  async disableContract(id: string, userId: string): Promise<Contract> {
+    const [disabled] = await db
+      .update(contracts)
+      .set({
+        disabled: true,
+        disabledBy: userId,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return disabled;
+  }
+
+  async enableContract(id: string): Promise<Contract> {
+    const [enabled] = await db
+      .update(contracts)
+      .set({
+        disabled: false,
+        disabledBy: null,
+        disabledAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return enabled;
   }
 
   // Contract counter

@@ -142,6 +142,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Disable contract (Admin only)
+  app.post('/api/contracts/:id/disable', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.disableContract(req.params.id, userId);
+      
+      // Create audit log
+      await createAuditLog(userId, 'disable', contract.id, req.ip, `Disabled contract #${contract.contractNumber}`);
+      
+      res.json(contract);
+    } catch (error: any) {
+      console.error("Error disabling contract:", error);
+      res.status(400).json({ message: error.message || "Failed to disable contract" });
+    }
+  });
+
+  // Enable contract (Admin only)
+  app.post('/api/contracts/:id/enable', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.enableContract(req.params.id);
+      
+      // Create audit log
+      await createAuditLog(userId, 'enable', contract.id, req.ip, `Enabled contract #${contract.contractNumber}`);
+      
+      res.json(contract);
+    } catch (error: any) {
+      console.error("Error enabling contract:", error);
+      res.status(400).json({ message: error.message || "Failed to enable contract" });
+    }
+  });
+
+  // Get disabled contracts (Admin only)
+  app.get('/api/contracts/disabled', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const contracts = await storage.getDisabledContracts();
+      res.json(contracts);
+    } catch (error: any) {
+      console.error("Error fetching disabled contracts:", error);
+      res.status(500).json({ message: "Failed to fetch disabled contracts" });
+    }
+  });
+
   // User management routes (Admin only)
   app.get('/api/users', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
@@ -217,19 +260,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete user (Admin only, cannot delete immutable users)
-  app.delete('/api/users/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+  // Disable user (Admin only, cannot disable immutable users)
+  app.post('/api/users/:id/disable', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
       const adminId = req.user.id;
-      await storage.deleteUser(req.params.id);
+      const user = await storage.disableUser(req.params.id, adminId);
       
       // Create audit log
-      await createAuditLog(adminId, 'delete', undefined, req.ip, `Deleted user ${req.params.id}`);
+      await createAuditLog(adminId, 'disable', undefined, req.ip, `Disabled user ${user.username}`);
       
-      res.json({ message: "User deleted successfully" });
+      res.json(user);
     } catch (error: any) {
-      console.error("Error deleting user:", error);
-      res.status(400).json({ message: error.message || "Failed to delete user" });
+      console.error("Error disabling user:", error);
+      res.status(400).json({ message: error.message || "Failed to disable user" });
+    }
+  });
+
+  // Enable user (Admin only)
+  app.post('/api/users/:id/enable', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const adminId = req.user.id;
+      const user = await storage.enableUser(req.params.id);
+      
+      // Create audit log
+      await createAuditLog(adminId, 'enable', undefined, req.ip, `Enabled user ${user.username}`);
+      
+      res.json(user);
+    } catch (error: any) {
+      console.error("Error enabling user:", error);
+      res.status(400).json({ message: error.message || "Failed to enable user" });
+    }
+  });
+
+  // Get disabled users (Admin only)
+  app.get('/api/users/disabled', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getDisabledUsers();
+      res.json(users);
+    } catch (error: any) {
+      console.error("Error fetching disabled users:", error);
+      res.status(500).json({ message: "Failed to fetch disabled users" });
     }
   });
 
