@@ -156,6 +156,10 @@ const resources = {
       "audit.contract": "Contract",
       "audit.timestamp": "Timestamp",
       "audit.details": "Details",
+      "audit.auditTrail": "Audit Trail",
+      "audit.systemErrors": "System Errors",
+      "audit.errorMessage": "Error Message",
+      "audit.severity": "Severity",
       
       // Actions
       "action.create": "Create",
@@ -331,6 +335,10 @@ const resources = {
       "audit.contract": "العقد",
       "audit.timestamp": "الوقت",
       "audit.details": "التفاصيل",
+      "audit.auditTrail": "سجل التدقيق",
+      "audit.systemErrors": "أخطاء النظام",
+      "audit.errorMessage": "رسالة الخطأ",
+      "audit.severity": "الخطورة",
       
       // Actions
       "action.create": "إنشاء",
