@@ -13,7 +13,7 @@ import { format } from 'date-fns';
 export default function Dashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -77,12 +77,22 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">{t('dashboard.title')}</h1>
           <p className="text-muted-foreground">{t('auth.welcomeBack')}</p>
         </div>
-        <Button asChild data-testid="button-new-contract">
-          <Link href="/contracts/new">
-            <span className="material-icons">add</span>
-            <span>{t('contracts.newContract')}</span>
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Button asChild variant="outline" data-testid="button-add-user">
+              <Link href="/users?action=add">
+                <span className="material-icons">person_add</span>
+                <span>{t('users.addUser')}</span>
+              </Link>
+            </Button>
+          )}
+          <Button asChild data-testid="button-new-contract">
+            <Link href="/contracts/new">
+              <span className="material-icons">add</span>
+              <span>{t('contracts.newContract')}</span>
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}

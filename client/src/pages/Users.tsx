@@ -5,6 +5,7 @@ import { User } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -44,10 +45,12 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 export default function Users() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
+  const [isEnableDialogOpen, setIsEnableDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // Form state
@@ -63,6 +66,10 @@ export default function Users() {
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ['/api/users'],
+  });
+
+  const { data: disabledUsers = [], isLoading: isLoadingDisabled } = useQuery<User[]>({
+    queryKey: ['/api/users/disabled'],
   });
 
   const createUserMutation = useMutation({
@@ -121,6 +128,28 @@ export default function Users() {
         title: t('users.userDisabled'),
       });
       setIsDisableDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message,
+      });
+    },
+  });
+
+  const enableUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest('POST', `/api/users/${id}/enable`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/disabled'] });
+      toast({
+        title: t('users.userEnabled'),
+      });
+      setIsEnableDialogOpen(false);
     },
     onError: (error: any) => {
       toast({
@@ -206,7 +235,27 @@ export default function Users() {
     setIsDisableDialogOpen(true);
   };
 
+  const openEnableDialog = (user: User) => {
+    setSelectedUser(user);
+    setIsEnableDialogOpen(true);
+  };
+
+  const handleEnableUser = () => {
+    if (selectedUser) {
+      enableUserMutation.mutate(selectedUser.id);
+    }
+  };
+
   const filteredUsers = users.filter((user) => {
+    const search = searchQuery.toLowerCase();
+    return (
+      user.username.toLowerCase().includes(search) ||
+      (user.firstName && user.firstName.toLowerCase().includes(search)) ||
+      (user.lastName && user.lastName.toLowerCase().includes(search))
+    );
+  });
+
+  const filteredDisabledUsers = disabledUsers.filter((user) => {
     const search = searchQuery.toLowerCase();
     return (
       user.username.toLowerCase().includes(search) ||
@@ -233,54 +282,117 @@ export default function Users() {
             data-testid="input-search-users"
           />
 
-          {isLoading ? (
-            <div className="text-center py-8">{t('common.loading')}</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('users.username')}</TableHead>
-                  <TableHead>{t('users.name')}</TableHead>
-                  <TableHead>{t('users.email')}</TableHead>
-                  <TableHead>{t('users.role')}</TableHead>
-                  <TableHead className="text-right">{t('contracts.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
-                    <TableCell className="font-medium">{user.username}</TableCell>
-                    <TableCell>
-                      {user.firstName || user.lastName
-                        ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-                        : '-'}
-                    </TableCell>
-                    <TableCell>{user.email || '-'}</TableCell>
-                    <TableCell>{t(`role.${user.role}`)}</TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditDialog(user)}
-                        data-testid={`button-edit-user-${user.id}`}
-                      >
-                        <span className="material-icons text-base">edit</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openDisableDialog(user)}
-                        disabled={user.isImmutable}
-                        data-testid={`button-disable-user-${user.id}`}
-                      >
-                        <span className="material-icons text-base">block</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="active" data-testid="tab-active-users">
+                {t('users.activeUsers')} ({users.length})
+              </TabsTrigger>
+              <TabsTrigger value="disabled" data-testid="tab-disabled-users">
+                {t('users.disabledUsers')} ({disabledUsers.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="active" className="mt-4">
+              {isLoading ? (
+                <div className="text-center py-8">{t('common.loading')}</div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">{t('common.noResults')}</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('users.username')}</TableHead>
+                      <TableHead>{t('users.name')}</TableHead>
+                      <TableHead>{t('users.email')}</TableHead>
+                      <TableHead>{t('users.role')}</TableHead>
+                      <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
+                        <TableCell className="font-medium">{user.username}</TableCell>
+                        <TableCell>
+                          {user.firstName || user.lastName
+                            ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+                            : '-'}
+                        </TableCell>
+                        <TableCell>{user.email || '-'}</TableCell>
+                        <TableCell>{t(`role.${user.role}`)}</TableCell>
+                        <TableCell className="text-right space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(user)}
+                            data-testid={`button-edit-user-${user.id}`}
+                          >
+                            <span className="material-icons text-base">edit</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openDisableDialog(user)}
+                            disabled={user.isImmutable}
+                            data-testid={`button-disable-user-${user.id}`}
+                          >
+                            <span className="material-icons text-base">block</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+
+            <TabsContent value="disabled" className="mt-4">
+              {isLoadingDisabled ? (
+                <div className="text-center py-8">{t('common.loading')}</div>
+              ) : filteredDisabledUsers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">{t('common.noResults')}</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('users.username')}</TableHead>
+                      <TableHead>{t('users.name')}</TableHead>
+                      <TableHead>{t('users.email')}</TableHead>
+                      <TableHead>{t('users.role')}</TableHead>
+                      <TableHead>{t('users.disabledAt')}</TableHead>
+                      <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDisabledUsers.map((user) => (
+                      <TableRow key={user.id} data-testid={`row-disabled-user-${user.id}`}>
+                        <TableCell className="font-medium">{user.username}</TableCell>
+                        <TableCell>
+                          {user.firstName || user.lastName
+                            ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+                            : '-'}
+                        </TableCell>
+                        <TableCell>{user.email || '-'}</TableCell>
+                        <TableCell>{t(`role.${user.role}`)}</TableCell>
+                        <TableCell>
+                          {user.disabledAt ? new Date(user.disabledAt).toLocaleString() : '-'}
+                        </TableCell>
+                        <TableCell className="text-right space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEnableDialog(user)}
+                            data-testid={`button-enable-user-${user.id}`}
+                          >
+                            <span className="material-icons text-base">check_circle</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -509,6 +621,30 @@ export default function Users() {
                 {t('users.disableUser')}
               </AlertDialogAction>
             )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Enable User Dialog */}
+      <AlertDialog open={isEnableDialogOpen} onOpenChange={setIsEnableDialogOpen}>
+        <AlertDialogContent data-testid="dialog-enable-user">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('users.enableUser')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('users.confirmEnableUser')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-enable">
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleEnableUser}
+              disabled={enableUserMutation.isPending}
+              data-testid="button-confirm-enable"
+            >
+              {t('users.enableUser')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
