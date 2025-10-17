@@ -5,6 +5,7 @@ const resources = {
   en: {
     translation: {
       // Navigation
+      "nav.dashboard": "Dashboard",
       "nav.contracts": "Contracts",
       "nav.users": "Users",
       "nav.auditLogs": "Audit Logs",
@@ -31,6 +32,8 @@ const resources = {
       "common.noResults": "No results found",
       "common.error": "Error",
       "common.success": "Success",
+      "common.active": "Active",
+      "common.disabled": "Disabled",
       
       // Auth
       "auth.login": "Log In",
@@ -62,6 +65,11 @@ const resources = {
       "dashboard.draftContracts": "Draft Contracts",
       "dashboard.finalizedContracts": "Finalized Contracts",
       "dashboard.recentActivity": "Recent Activity",
+      "dashboard.unacknowledgedErrors": "Unacknowledged System Errors",
+      "dashboard.acknowledgeAll": "Acknowledge All",
+      "dashboard.viewAllErrors": "View All {{count}} Errors",
+      "dashboard.pendingErrors": "{{count}} Pending",
+      "dashboard.confirmAcknowledgeAll": "Are you sure you want to acknowledge all system errors?",
       
       // Contracts
       "contracts.title": "Contracts",
@@ -83,6 +91,7 @@ const resources = {
       "contracts.contractEnabled": "Contract enabled successfully",
       "contracts.confirmDisableContract": "Are you sure you want to disable this contract?",
       "contracts.confirmEnableContract": "Are you sure you want to enable this contract?",
+      "contracts.activeContracts": "Active Contracts",
       
       // Contract Form
       "form.customerInfo": "Customer Information",
@@ -144,6 +153,7 @@ const resources = {
       "users.disabledUsers": "Disabled Users",
       "users.disabledBy": "Disabled By",
       "users.disabledAt": "Disabled At",
+      "users.activeUsers": "Active Users",
       
       // Roles
       "role.admin": "Admin",
@@ -162,6 +172,36 @@ const resources = {
       "audit.systemErrors": "System Errors",
       "audit.errorMessage": "Error Message",
       "audit.severity": "Severity",
+      "audit.errorType": "Error Type",
+      "audit.endpoint": "Endpoint",
+      "audit.stackTrace": "Stack Trace",
+      "audit.status": "Status",
+      "audit.acknowledge": "Acknowledge",
+      "audit.acknowledgeError": "Acknowledge Error?",
+      "audit.acknowledged": "Acknowledged",
+      "audit.pending": "Pending",
+      "audit.acknowledgedBy": "Acknowledged By",
+      "audit.acknowledgedAt": "Acknowledged At",
+      "audit.confirmAcknowledge": "Are you sure you want to acknowledge this error?",
+      "audit.errorAcknowledged": "Error acknowledged successfully",
+      "audit.allErrorsAcknowledged": "All errors acknowledged successfully",
+      
+      // Filters
+      "filter.byAction": "Filter by Action",
+      "filter.byUser": "Filter by User",
+      "filter.byErrorType": "Filter by Error Type",
+      "filter.byEndpoint": "Filter by Endpoint",
+      "filter.fromDate": "From Date",
+      "filter.toDate": "To Date",
+      "filter.clearFilters": "Clear Filters",
+      "filter.allActions": "All Actions",
+      "filter.allUsers": "All Users",
+      "filter.allErrorTypes": "All Error Types",
+      "filter.allEndpoints": "All Endpoints",
+      
+      // Settings
+      "settings.changePassword": "Change Password",
+      "settings.userProfile": "User Profile",
       
       // Actions
       "action.create": "Create",
@@ -186,6 +226,7 @@ const resources = {
   ar: {
     translation: {
       // Navigation
+      "nav.dashboard": "لوحة التحكم",
       "nav.contracts": "العقود",
       "nav.users": "المستخدمون",
       "nav.auditLogs": "سجلات التدقيق",
@@ -212,6 +253,8 @@ const resources = {
       "common.noResults": "لا توجد نتائج",
       "common.error": "خطأ",
       "common.success": "نجح",
+      "common.active": "نشط",
+      "common.disabled": "معطل",
       
       // Auth
       "auth.login": "تسجيل الدخول",
@@ -243,6 +286,11 @@ const resources = {
       "dashboard.draftContracts": "المسودات",
       "dashboard.finalizedContracts": "العقود المكتملة",
       "dashboard.recentActivity": "النشاط الأخير",
+      "dashboard.unacknowledgedErrors": "أخطاء النظام غير المعتمدة",
+      "dashboard.acknowledgeAll": "اعتماد الكل",
+      "dashboard.viewAllErrors": "عرض جميع الأخطاء ({{count}})",
+      "dashboard.pendingErrors": "{{count}} قيد الانتظار",
+      "dashboard.confirmAcknowledgeAll": "هل أنت متأكد أنك تريد اعتماد جميع أخطاء النظام؟",
       
       // Contracts
       "contracts.title": "العقود",
@@ -264,6 +312,7 @@ const resources = {
       "contracts.contractEnabled": "تم تفعيل العقد بنجاح",
       "contracts.confirmDisableContract": "هل أنت متأكد أنك تريد تعطيل هذا العقد؟",
       "contracts.confirmEnableContract": "هل أنت متأكد أنك تريد تفعيل هذا العقد؟",
+      "contracts.activeContracts": "العقود النشطة",
       
       // Contract Form
       "form.customerInfo": "معلومات العميل",
@@ -325,6 +374,7 @@ const resources = {
       "users.disabledUsers": "المستخدمون المعطلون",
       "users.disabledBy": "تم التعطيل بواسطة",
       "users.disabledAt": "تاريخ التعطيل",
+      "users.activeUsers": "المستخدمون النشطون",
       
       // Roles
       "role.admin": "مدير",
@@ -343,6 +393,36 @@ const resources = {
       "audit.systemErrors": "أخطاء النظام",
       "audit.errorMessage": "رسالة الخطأ",
       "audit.severity": "الخطورة",
+      "audit.errorType": "نوع الخطأ",
+      "audit.endpoint": "نقطة النهاية",
+      "audit.stackTrace": "تتبع المكدس",
+      "audit.status": "الحالة",
+      "audit.acknowledge": "اعتماد",
+      "audit.acknowledgeError": "اعتماد الخطأ؟",
+      "audit.acknowledged": "معتمد",
+      "audit.pending": "قيد الانتظار",
+      "audit.acknowledgedBy": "تم الاعتماد بواسطة",
+      "audit.acknowledgedAt": "تاريخ الاعتماد",
+      "audit.confirmAcknowledge": "هل أنت متأكد أنك تريد اعتماد هذا الخطأ؟",
+      "audit.errorAcknowledged": "تم اعتماد الخطأ بنجاح",
+      "audit.allErrorsAcknowledged": "تم اعتماد جميع الأخطاء بنجاح",
+      
+      // Filters
+      "filter.byAction": "تصفية حسب الإجراء",
+      "filter.byUser": "تصفية حسب المستخدم",
+      "filter.byErrorType": "تصفية حسب نوع الخطأ",
+      "filter.byEndpoint": "تصفية حسب نقطة النهاية",
+      "filter.fromDate": "من تاريخ",
+      "filter.toDate": "إلى تاريخ",
+      "filter.clearFilters": "مسح التصفية",
+      "filter.allActions": "جميع الإجراءات",
+      "filter.allUsers": "جميع المستخدمين",
+      "filter.allErrorTypes": "جميع أنواع الأخطاء",
+      "filter.allEndpoints": "جميع نقاط النهاية",
+      
+      // Settings
+      "settings.changePassword": "تغيير كلمة المرور",
+      "settings.userProfile": "الملف الشخصي",
       
       // Actions
       "action.create": "إنشاء",

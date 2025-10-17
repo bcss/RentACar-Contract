@@ -110,16 +110,28 @@ Preferred communication style: Simple, everyday language.
 
 **Recent Changes (October 2025):**
 
-**Disable-Only Architecture Implementation (Latest):**
+**UI/UX Enhancements - Integrated Views & Navigation (Latest):**
+- **Dashboard Navigation:** Added Dashboard as primary menu item in sidebar
+- **Consolidated User Controls:** Moved user profile and logout to sidebar footer dropdown with password change option
+- **Tabbed Views:** Integrated disabled users and disabled contracts into main pages using tabs (Active/Disabled) instead of separate pages
+- **Enhanced Filtering:** Implemented comprehensive filter systems for:
+  - Audit Logs: Filter by action type, user, and date range
+  - System Errors: Filter by error type, endpoint, and date range
+- **Error Acknowledgment System:** 
+  - Added acknowledgment workflow for system errors (admin-only)
+  - Database fields: acknowledged, acknowledgedBy, acknowledgedAt
+  - Acknowledge individual errors in System Errors tab
+  - Dashboard displays unacknowledged errors with "Acknowledge All" functionality
+  - Links from dashboard to System Errors tab via query parameter
+- **Complete Translations:** All new features fully translated in English and Arabic including filters, acknowledgment dialogs, dashboard elements, and navigation
+
+**Disable-Only Architecture Implementation:**
 - **Strict No-Deletion Policy:** Replaced all delete operations with disable/enable functionality for both users and contracts
 - **Database Schema Updates:** Added `disabled`, `disabledBy`, and `disabledAt` fields to users and contracts tables
 - **System Error Logging:** Implemented SystemErrors table for tracking system-level errors with errorType, errorMessage, endpoint, and stack trace
-- **Separate Disabled Views:** Created dedicated pages for disabled users (/disabled-users) and disabled contracts (/disabled-contracts) with enable functionality
 - **Admin-Only Operations:** Disable/enable buttons are restricted to admin users only
 - **Enhanced Audit Logs:** Added tabbed interface with "Audit Trail" for user actions and "System Errors" for system-level error tracking
-- **Navigation Updates:** Added menu items for disabled users and disabled contracts in the sidebar (admin-only visibility)
 - **Cache Invalidation:** Implemented proper query cache invalidation to ensure both active and disabled lists update immediately after disable/enable operations
-- **Bilingual Support:** All new features include complete English and Arabic translations
 
 **Authentication System Overhaul:**
 - **Replaced OAuth with Internal Authentication:** Completely removed Replit OAuth, implemented username/password authentication using Passport.js with bcrypt password hashing
