@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { AuditLog, SystemError } from '@shared/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -23,12 +24,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 export default function AuditLogs() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading, isAdmin, isManager } = useAuth();
+
+  // Check for tab query parameter
+  const searchParams = new URLSearchParams(window.location.search);
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam === 'errors' && isAdmin ? 'errors' : 'audit');
 
   useEffect(() => {
     if (!authLoading && (!isAuthenticated || (!isAdmin && !isManager))) {
@@ -42,8 +59,6 @@ export default function AuditLogs() {
       }, 500);
     }
   }, [isAuthenticated, isAdmin, isManager, authLoading, toast]);
-
-  const [activeTab, setActiveTab] = useState('audit');
   
   // Audit log filters
   const [actionFilter, setActionFilter] = useState<string>('all');
@@ -57,6 +72,10 @@ export default function AuditLogs() {
   const [errorDateFromFilter, setErrorDateFromFilter] = useState<string>('');
   const [errorDateToFilter, setErrorDateToFilter] = useState<string>('');
 
+  // Acknowledge dialog
+  const [isAcknowledgeDialogOpen, setIsAcknowledgeDialogOpen] = useState(false);
+  const [selectedError, setSelectedError] = useState<SystemError | null>(null);
+
   const { data: logs = [], isLoading } = useQuery<AuditLog[]>({
     queryKey: ['/api/audit-logs'],
     enabled: isAuthenticated && (isAdmin || isManager),
@@ -66,6 +85,41 @@ export default function AuditLogs() {
     queryKey: ['/api/system-errors'],
     enabled: isAuthenticated && isAdmin,
   });
+
+  const acknowledgeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest('POST', `/api/system-errors/${id}/acknowledge`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/system-errors'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/system-errors', 'unacknowledged'] });
+      toast({
+        title: 'Error Acknowledged',
+        description: 'System error has been acknowledged successfully',
+      });
+      setIsAcknowledgeDialogOpen(false);
+      setSelectedError(null);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message || 'Failed to acknowledge error',
+      });
+    },
+  });
+
+  const handleAcknowledge = () => {
+    if (selectedError) {
+      acknowledgeMutation.mutate(selectedError.id);
+    }
+  };
+
+  const openAcknowledgeDialog = (error: SystemError) => {
+    setSelectedError(error);
+    setIsAcknowledgeDialogOpen(true);
+  };
 
   const getActionIcon = (action: string) => {
     const icons: Record<string, string> = {
@@ -375,7 +429,8 @@ export default function AuditLogs() {
                         <TableHead>{t('audit.errorMessage')}</TableHead>
                         <TableHead>Endpoint</TableHead>
                         <TableHead>{t('audit.timestamp')}</TableHead>
-                        <TableHead>{t('audit.details')}</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -399,8 +454,31 @@ export default function AuditLogs() {
                           <TableCell className="text-muted-foreground">
                             {error.createdAt && format(new Date(error.createdAt), 'PPp')}
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground" data-testid={`text-error-details-${error.id}`}>
-                            {error.errorStack || error.additionalData || '-'}
+                          <TableCell>
+                            {error.acknowledged ? (
+                              <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                                <span className="material-icons text-sm">check_circle</span>
+                                Acknowledged
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                                <span className="material-icons text-sm">pending</span>
+                                Pending
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {!error.acknowledged && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openAcknowledgeDialog(error)}
+                                data-testid={`button-acknowledge-${error.id}`}
+                              >
+                                <span className="material-icons text-sm">check</span>
+                                <span>Acknowledge</span>
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -412,6 +490,28 @@ export default function AuditLogs() {
           </TabsContent>
         )}
       </Tabs>
+
+      {/* Acknowledge Dialog */}
+      <AlertDialog open={isAcknowledgeDialogOpen} onOpenChange={setIsAcknowledgeDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Acknowledge System Error</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to acknowledge this system error? This will mark it as reviewed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-acknowledge">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleAcknowledge}
+              disabled={acknowledgeMutation.isPending}
+              data-testid="button-confirm-acknowledge"
+            >
+              {acknowledgeMutation.isPending ? 'Acknowledging...' : 'Acknowledge'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

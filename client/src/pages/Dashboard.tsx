@@ -1,19 +1,32 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'wouter';
-import { Contract, AuditLog } from '@shared/schema';
+import { Link, useLocation } from 'wouter';
+import { Contract, AuditLog, SystemError } from '@shared/schema';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 export default function Dashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const [, setLocation] = useLocation();
+  const [isAcknowledgeAllDialogOpen, setIsAcknowledgeAllDialogOpen] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -38,6 +51,37 @@ export default function Dashboard() {
   const { data: recentActivity = [] } = useQuery<AuditLog[]>({
     queryKey: ['/api/audit-logs', 'recent'],
     enabled: isAuthenticated,
+  });
+
+  const { data: unacknowledgedErrors = [] } = useQuery<SystemError[]>({
+    queryKey: ['/api/system-errors', 'unacknowledged'],
+    enabled: isAuthenticated && isAdmin,
+  });
+
+  const acknowledgeAllMutation = useMutation({
+    mutationFn: async () => {
+      // Acknowledge all unacknowledged errors
+      const promises = unacknowledgedErrors.map(error => 
+        apiRequest('POST', `/api/system-errors/${error.id}/acknowledge`)
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/system-errors'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/system-errors', 'unacknowledged'] });
+      toast({
+        title: 'All Errors Acknowledged',
+        description: 'All system errors have been acknowledged successfully',
+      });
+      setIsAcknowledgeAllDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message || 'Failed to acknowledge errors',
+      });
+    },
   });
 
   const draftContracts = contracts.filter(c => c.status === 'draft').length;
@@ -134,6 +178,67 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Unacknowledged System Errors (Admin only) */}
+      {isAdmin && unacknowledgedErrors.length > 0 && (
+        <Card className="border-destructive">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="flex items-center gap-2">
+              <span className="material-icons text-destructive">error</span>
+              Unacknowledged System Errors
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge variant="destructive" data-testid="badge-error-count">
+                {unacknowledgedErrors.length} Pending
+              </Badge>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsAcknowledgeAllDialogOpen(true)}
+                data-testid="button-acknowledge-all"
+              >
+                <span className="material-icons text-sm">done_all</span>
+                <span>Acknowledge All</span>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {unacknowledgedErrors.slice(0, 3).map((error) => (
+                <div key={error.id} className="flex items-start gap-3 p-3 rounded-md hover-elevate border border-destructive/30" data-testid={`error-item-${error.id}`}>
+                  <span className="material-icons text-destructive mt-0.5">dangerous</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="destructive" className="text-xs">
+                        {error.errorType}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {error.createdAt && format(new Date(error.createdAt), 'PPp')}
+                      </span>
+                    </div>
+                    <p className="text-sm font-mono truncate">{error.errorMessage}</p>
+                    {error.endpoint && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Endpoint: {error.endpoint}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {unacknowledgedErrors.length > 3 && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setLocation('/audit-logs?tab=errors')}
+                  data-testid="button-view-all-errors"
+                >
+                  View All {unacknowledgedErrors.length} Errors
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Recent Activity */}
       <Card>
         <CardHeader>
@@ -167,6 +272,28 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Acknowledge All Dialog */}
+      <AlertDialog open={isAcknowledgeAllDialogOpen} onOpenChange={setIsAcknowledgeAllDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Acknowledge All System Errors</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to acknowledge all {unacknowledgedErrors.length} unacknowledged system errors? This will mark them all as reviewed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-acknowledge-all">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => acknowledgeAllMutation.mutate()}
+              disabled={acknowledgeAllMutation.isPending}
+              data-testid="button-confirm-acknowledge-all"
+            >
+              {acknowledgeAllMutation.isPending ? 'Acknowledging...' : 'Acknowledge All'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

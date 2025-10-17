@@ -382,6 +382,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // System error routes (Admin only)
+  app.get('/api/system-errors', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const errors = await storage.getAllSystemErrors();
+      res.json(errors);
+    } catch (error) {
+      console.error("Error fetching system errors:", error);
+      res.status(500).json({ message: "Failed to fetch system errors" });
+    }
+  });
+
+  app.get('/api/system-errors/unacknowledged', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const errors = await storage.getUnacknowledgedSystemErrors();
+      res.json(errors);
+    } catch (error) {
+      console.error("Error fetching unacknowledged system errors:", error);
+      res.status(500).json({ message: "Failed to fetch unacknowledged system errors" });
+    }
+  });
+
+  app.post('/api/system-errors/:id/acknowledge', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const error = await storage.acknowledgeSystemError(req.params.id, userId);
+      res.json(error);
+    } catch (error: any) {
+      console.error("Error acknowledging system error:", error);
+      res.status(400).json({ message: error.message || "Failed to acknowledge system error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -3,12 +3,14 @@ import {
   contracts,
   auditLogs,
   contractCounter,
+  systemErrors,
   type User,
   type UpsertUser,
   type Contract,
   type InsertContract,
   type InsertAuditLog,
   type AuditLog,
+  type SystemError,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql } from "drizzle-orm";
@@ -45,6 +47,11 @@ export interface IStorage {
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
   getAllAuditLogs(): Promise<AuditLog[]>;
   getRecentAuditLogs(limit: number): Promise<AuditLog[]>;
+  
+  // System error operations
+  getAllSystemErrors(): Promise<SystemError[]>;
+  getUnacknowledgedSystemErrors(): Promise<SystemError[]>;
+  acknowledgeSystemError(id: string, acknowledgedBy: string): Promise<SystemError>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -286,6 +293,33 @@ export class DatabaseStorage implements IStorage {
       .from(auditLogs)
       .orderBy(desc(auditLogs.createdAt))
       .limit(limit);
+  }
+
+  // System error operations
+  async getAllSystemErrors(): Promise<SystemError[]> {
+    return await db.select().from(systemErrors).orderBy(desc(systemErrors.createdAt));
+  }
+
+  async getUnacknowledgedSystemErrors(): Promise<SystemError[]> {
+    return await db
+      .select()
+      .from(systemErrors)
+      .where(eq(systemErrors.acknowledged, false))
+      .orderBy(desc(systemErrors.createdAt));
+  }
+
+  async acknowledgeSystemError(id: string, acknowledgedBy: string): Promise<SystemError> {
+    const [acknowledged] = await db
+      .update(systemErrors)
+      .set({
+        acknowledged: true,
+        acknowledgedBy,
+        acknowledgedAt: new Date(),
+      })
+      .where(eq(systemErrors.id, id))
+      .returning();
+    
+    return acknowledged;
   }
 }
 
