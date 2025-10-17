@@ -1,14 +1,10 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
 import { User } from '@shared/schema';
-import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Table,
   TableBody,
@@ -16,172 +12,268 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { format } from 'date-fns';
-import { isUnauthorizedError } from '@/lib/authUtils';
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 export default function Users() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading: authLoading, isAdmin } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && (!isAuthenticated || !isAdmin)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-    }
-  }, [isAuthenticated, isAdmin, authLoading, toast]);
+  // Form state
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'staff',
+  });
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ['/api/users'],
-    enabled: isAuthenticated && isAdmin,
   });
 
-  const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
-      return await apiRequest('PATCH', `/api/users/${userId}/role`, { role });
+  const createUserMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await apiRequest('POST', '/api/users', data);
+      return res.json();
     },
     onSuccess: () => {
-      toast({
-        title: t('common.success'),
-        description: 'Role updated successfully',
-      });
       queryClient.invalidateQueries({ queryKey: ['/api/users'] });
-    },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
       toast({
+        title: t('users.userCreated'),
+      });
+      setIsCreateDialogOpen(false);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
         title: t('common.error'),
         description: error.message,
-        variant: "destructive",
       });
     },
   });
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'default';
-      case 'manager':
-        return 'secondary';
-      case 'staff':
-        return 'outline';
-      default:
-        return 'outline';
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const res = await apiRequest('PATCH', `/api/users/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      toast({
+        title: t('users.userUpdated'),
+      });
+      setIsEditDialogOpen(false);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message,
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest('DELETE', `/api/users/${id}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      toast({
+        title: t('users.userDeleted'),
+      });
+      setIsDeleteDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message,
+      });
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      username: '',
+      password: '',
+      confirmPassword: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      role: 'staff',
+    });
+    setSelectedUser(null);
+  };
+
+  const handleCreateUser = () => {
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        variant: 'destructive',
+        title: t('users.passwordMismatch'),
+      });
+      return;
+    }
+
+    const { confirmPassword, ...userData } = formData;
+    createUserMutation.mutate(userData);
+  };
+
+  const handleEditUser = () => {
+    if (!selectedUser) return;
+
+    const updateData: any = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      role: formData.role,
+    };
+
+    if (formData.password) {
+      if (formData.password !== formData.confirmPassword) {
+        toast({
+          variant: 'destructive',
+          title: t('users.passwordMismatch'),
+        });
+        return;
+      }
+      updateData.password = formData.password;
+    }
+
+    updateUserMutation.mutate({ id: selectedUser.id, data: updateData });
+  };
+
+  const handleDeleteUser = () => {
+    if (selectedUser) {
+      deleteUserMutation.mutate(selectedUser.id);
     }
   };
 
-  const getUserInitials = (user: User) => {
-    if (user.firstName && user.lastName) {
-      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
-    }
-    if (user.email) {
-      return user.email.substring(0, 2).toUpperCase();
-    }
-    return 'U';
+  const openEditDialog = (user: User) => {
+    setSelectedUser(user);
+    setFormData({
+      username: user.username,
+      password: '',
+      confirmPassword: '',
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      role: user.role,
+    });
+    setIsEditDialogOpen(true);
   };
 
-  if (authLoading || isLoading) {
+  const openDeleteDialog = (user: User) => {
+    setSelectedUser(user);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const filteredUsers = users.filter((user) => {
+    const search = searchQuery.toLowerCase();
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-muted-foreground">{t('common.loading')}</p>
-      </div>
+      user.username.toLowerCase().includes(search) ||
+      (user.firstName && user.firstName.toLowerCase().includes(search)) ||
+      (user.lastName && user.lastName.toLowerCase().includes(search))
     );
-  }
+  });
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-users-title">{t('users.title')}</h1>
-          <p className="text-muted-foreground">{users.length} {t('users.title')}</p>
-        </div>
-      </div>
-
+    <div className="flex-1 overflow-auto p-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span className="material-icons">people</span>
-            {t('users.title')}
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-4">
+          <CardTitle className="text-2xl font-bold">{t('users.title')}</CardTitle>
+          <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="button-add-user">
+            <span className="material-icons mr-2">add</span>
+            {t('users.addUser')}
+          </Button>
         </CardHeader>
-        <CardContent className="p-0">
-          {users.length === 0 ? (
-            <div className="p-12 text-center">
-              <span className="material-icons text-6xl text-muted-foreground">people</span>
-              <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
-            </div>
+        <CardContent className="space-y-4">
+          <Input
+            placeholder={t('users.searchPlaceholder')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            data-testid="input-search-users"
+          />
+
+          {isLoading ? (
+            <div className="text-center py-8">{t('common.loading')}</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>{t('users.username')}</TableHead>
                   <TableHead>{t('users.name')}</TableHead>
                   <TableHead>{t('users.email')}</TableHead>
                   <TableHead>{t('users.role')}</TableHead>
-                  <TableHead>{t('users.createdAt')}</TableHead>
+                  <TableHead className="text-right">{t('contracts.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id} className="hover-elevate" data-testid={`row-user-${user.id}`}>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
+                    <TableCell className="font-medium">{user.username}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={user.profileImageUrl || ''} alt={user.firstName || ''} style={{ objectFit: 'cover' }} />
-                          <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium" data-testid={`text-user-name-${user.id}`}>
-                          {user.firstName || user.lastName 
-                            ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-                            : 'User'}
-                        </span>
-                      </div>
+                      {user.firstName || user.lastName
+                        ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+                        : '-'}
                     </TableCell>
-                    <TableCell data-testid={`text-user-email-${user.id}`}>
-                      {user.email || 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={user.role}
-                        onValueChange={(role) => updateRoleMutation.mutate({ userId: user.id, role })}
-                        data-testid={`select-user-role-${user.id}`}
+                    <TableCell>{user.email || '-'}</TableCell>
+                    <TableCell>{t(`role.${user.role}`)}</TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDialog(user)}
+                        data-testid={`button-edit-user-${user.id}`}
                       >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">{t('role.admin')}</SelectItem>
-                          <SelectItem value="manager">{t('role.manager')}</SelectItem>
-                          <SelectItem value="staff">{t('role.staff')}</SelectItem>
-                          <SelectItem value="viewer">{t('role.viewer')}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {user.createdAt && format(new Date(user.createdAt), 'PP')}
+                        <span className="material-icons text-base">edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openDeleteDialog(user)}
+                        disabled={user.isImmutable}
+                        data-testid={`button-delete-user-${user.id}`}
+                      >
+                        <span className="material-icons text-base">delete</span>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -190,6 +282,235 @@ export default function Users() {
           )}
         </CardContent>
       </Card>
+
+      {/* Create User Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent data-testid="dialog-create-user">
+          <DialogHeader>
+            <DialogTitle>{t('users.addUser')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">{t('users.username')}</Label>
+              <Input
+                id="username"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                data-testid="input-create-username"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">{t('users.password')}</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                data-testid="input-create-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">{t('users.confirmPassword')}</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                data-testid="input-create-confirm-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">{t('users.firstName')}</Label>
+              <Input
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                data-testid="input-create-firstname"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">{t('users.lastName')}</Label>
+              <Input
+                id="lastName"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                data-testid="input-create-lastname"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">{t('users.email')}</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                data-testid="input-create-email"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">{t('users.role')}</Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value) => setFormData({ ...formData, role: value })}
+              >
+                <SelectTrigger data-testid="select-create-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">{t('role.admin')}</SelectItem>
+                  <SelectItem value="manager">{t('role.manager')}</SelectItem>
+                  <SelectItem value="staff">{t('role.staff')}</SelectItem>
+                  <SelectItem value="viewer">{t('role.viewer')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsCreateDialogOpen(false);
+                  resetForm();
+                }}
+                data-testid="button-cancel-create"
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                onClick={handleCreateUser}
+                disabled={createUserMutation.isPending}
+                data-testid="button-submit-create"
+              >
+                {t('common.create')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent data-testid="dialog-edit-user">
+          <DialogHeader>
+            <DialogTitle>{t('users.editUser')}</DialogTitle>
+            <DialogDescription>Username: {selectedUser?.username}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-firstName">{t('users.firstName')}</Label>
+              <Input
+                id="edit-firstName"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                data-testid="input-edit-firstname"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-lastName">{t('users.lastName')}</Label>
+              <Input
+                id="edit-lastName"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                data-testid="input-edit-lastname"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-email">{t('users.email')}</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                data-testid="input-edit-email"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-role">{t('users.role')}</Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value) => setFormData({ ...formData, role: value })}
+                disabled={selectedUser?.isImmutable}
+              >
+                <SelectTrigger data-testid="select-edit-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">{t('role.admin')}</SelectItem>
+                  <SelectItem value="manager">{t('role.manager')}</SelectItem>
+                  <SelectItem value="staff">{t('role.staff')}</SelectItem>
+                  <SelectItem value="viewer">{t('role.viewer')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-password">{t('users.password')} (optional)</Label>
+              <Input
+                id="edit-password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                data-testid="input-edit-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-confirmPassword">{t('users.confirmPassword')}</Label>
+              <Input
+                id="edit-confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                data-testid="input-edit-confirm-password"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  resetForm();
+                }}
+                data-testid="button-cancel-edit"
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                onClick={handleEditUser}
+                disabled={updateUserMutation.isPending}
+                data-testid="button-submit-edit"
+              >
+                {t('common.save')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent data-testid="dialog-delete-user">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('users.deleteUser')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedUser?.isImmutable
+                ? t('users.cannotDeleteSuperAdmin')
+                : t('users.confirmDeleteUser')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete">
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            {!selectedUser?.isImmutable && (
+              <AlertDialogAction
+                onClick={handleDeleteUser}
+                disabled={deleteUserMutation.isPending}
+                data-testid="button-confirm-delete"
+              >
+                {t('common.delete')}
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

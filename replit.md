@@ -43,7 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Runtime:** Node.js with TypeScript
 - **Framework:** Express.js
 - **Database ORM:** Drizzle ORM
-- **Authentication:** Replit Auth with OpenID Connect
+- **Authentication:** Internal username/password authentication with Passport.js (passport-local strategy)
 - **Session Management:** express-session with PostgreSQL store (connect-pg-simple)
 
 **API Design:**
@@ -54,7 +54,8 @@ Preferred communication style: Simple, everyday language.
 - Request/response logging for debugging
 
 **Key Architectural Decisions:**
-- Middleware-based authentication flow integrated with Replit's OAuth
+- Middleware-based authentication flow with Passport.js local strategy
+- Password security using bcrypt with 12+ rounds of hashing
 - Storage abstraction layer (IStorage interface) for database operations
 - Shared schema validation between client and server using Zod
 - Atomic contract number generation using database counter
@@ -65,8 +66,8 @@ Preferred communication style: Simple, everyday language.
 
 **Schema Design:**
 
-1. **Sessions Table** - Required for Replit Auth session persistence
-2. **Users Table** - Stores user profiles with role-based access (admin, manager, staff, viewer)
+1. **Sessions Table** - Required for session persistence
+2. **Users Table** - Stores user credentials (username, passwordHash) and profiles with role-based access (admin, manager, staff, viewer)
 3. **Contracts Table** - Core entity with bilingual fields, status tracking (draft/finalized), and comprehensive rental details
 4. **Audit Logs Table** - Immutable activity log for compliance and tracking
 5. **Contract Counter Table** - Ensures unique, sequential contract numbers
@@ -79,11 +80,20 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication & Authorization
 
+**Authentication System:**
+- **Type:** Internal username/password authentication (no external OAuth)
+- **Strategy:** Passport.js with passport-local strategy
+- **Password Security:** bcrypt hashing with 12+ rounds
+- **Session Storage:** PostgreSQL-backed sessions via connect-pg-simple
+- **Cookie Configuration:** httpOnly, secure, 1-week TTL
+- **Super Admin:** Immutable admin account created at startup (username: "superadmin", default password: "Admin@123456")
+
 **Authentication Flow:**
-- Replit OAuth integration using OpenID Connect
-- Automatic user creation/update on first login
-- Session-based authentication with PostgreSQL backing store
-- Secure cookie configuration (httpOnly, secure, 1-week TTL)
+1. User submits username/password via POST /api/login
+2. Passport verifies credentials against hashed passwords in database
+3. Session created and stored in PostgreSQL
+4. Session cookie set with httpOnly and secure flags
+5. Subsequent requests authenticated via session middleware
 
 **Authorization Model:**
 - **Admin:** Full access including user management, contract finalization, audit logs
@@ -98,8 +108,18 @@ Preferred communication style: Simple, everyday language.
 - CSRF protection through session middleware
 - Full proxy trust configuration for Replit environment (trust proxy: true)
 
-**Recent Fixes (October 2025):**
-- Fixed Google login infinite loop by configuring Express to trust full Replit proxy chain
+**Recent Changes (October 2025):**
+
+**Authentication System Overhaul:**
+- **Replaced OAuth with Internal Authentication:** Completely removed Replit OAuth, implemented username/password authentication using Passport.js with bcrypt password hashing
+- **Super Admin Account:** Created immutable super admin (username: "superadmin", default password: "Admin@123456") that cannot be deleted
+- **User Management UI:** Built comprehensive admin interface for creating, editing, and deleting users with role assignment
+- **Password Management:** Implemented secure password hashing, validation, and optional password changes during user edits
+- **Database Schema Updates:** Added username, passwordHash, isImmutable, and lastPasswordChange fields to users table
+- **Login Form:** Replaced OAuth button with username/password login form supporting both English and Arabic
+
+**Previous Fixes:**
+- Fixed Google login infinite loop by configuring Express to trust full Replit proxy chain (trust proxy: true)
 - Fixed application loading state bug in useAuth hook to handle 401 responses gracefully
 - Fixed date handling in contract forms to prevent "Invalid time value" errors
 - Corrected CSS @page rule placement for proper 1cm print margins
@@ -108,13 +128,12 @@ Preferred communication style: Simple, everyday language.
 
 **Third-Party Services:**
 - **Neon Database:** Serverless PostgreSQL hosting
-- **Replit Auth:** OAuth-based authentication provider
 - **Google Fonts:** Inter, Cairo, and JetBrains Mono font families
 - **Material Icons:** Icon library for UI elements
 
 **Key NPM Packages:**
 - **Database:** @neondatabase/serverless, drizzle-orm, drizzle-kit
-- **Authentication:** openid-client, passport, express-session, connect-pg-simple
+- **Authentication:** passport, passport-local, bcrypt, express-session, connect-pg-simple
 - **UI Components:** @radix-ui/* family, @tanstack/react-query
 - **Form Handling:** react-hook-form, @hookform/resolvers, zod
 - **Internationalization:** i18next, react-i18next
