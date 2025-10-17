@@ -47,7 +47,7 @@ export default function Users() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // Form state
@@ -109,17 +109,17 @@ export default function Users() {
     },
   });
 
-  const deleteUserMutation = useMutation({
+  const disableUserMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiRequest('DELETE', `/api/users/${id}`);
+      const res = await apiRequest('POST', `/api/users/${id}/disable`);
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: t('users.userDeleted'),
+        title: t('users.userDisabled'),
       });
-      setIsDeleteDialogOpen(false);
+      setIsDisableDialogOpen(false);
     },
     onError: (error: any) => {
       toast({
@@ -180,9 +180,9 @@ export default function Users() {
     updateUserMutation.mutate({ id: selectedUser.id, data: updateData });
   };
 
-  const handleDeleteUser = () => {
+  const handleDisableUser = () => {
     if (selectedUser) {
-      deleteUserMutation.mutate(selectedUser.id);
+      disableUserMutation.mutate(selectedUser.id);
     }
   };
 
@@ -200,9 +200,9 @@ export default function Users() {
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (user: User) => {
+  const openDisableDialog = (user: User) => {
     setSelectedUser(user);
-    setIsDeleteDialogOpen(true);
+    setIsDisableDialogOpen(true);
   };
 
   const filteredUsers = users.filter((user) => {
@@ -268,11 +268,11 @@ export default function Users() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => openDeleteDialog(user)}
+                        onClick={() => openDisableDialog(user)}
                         disabled={user.isImmutable}
-                        data-testid={`button-delete-user-${user.id}`}
+                        data-testid={`button-disable-user-${user.id}`}
                       >
-                        <span className="material-icons text-base">delete</span>
+                        <span className="material-icons text-base">block</span>
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -484,28 +484,28 @@ export default function Users() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete User Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent data-testid="dialog-delete-user">
+      {/* Disable User Dialog */}
+      <AlertDialog open={isDisableDialogOpen} onOpenChange={setIsDisableDialogOpen}>
+        <AlertDialogContent data-testid="dialog-disable-user">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('users.deleteUser')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('users.disableUser')}</AlertDialogTitle>
             <AlertDialogDescription>
               {selectedUser?.isImmutable
-                ? t('users.cannotDeleteSuperAdmin')
-                : t('users.confirmDeleteUser')}
+                ? t('users.cannotDisableSuperAdmin')
+                : t('users.confirmDisableUser')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">
+            <AlertDialogCancel data-testid="button-cancel-disable">
               {t('common.cancel')}
             </AlertDialogCancel>
             {!selectedUser?.isImmutable && (
               <AlertDialogAction
-                onClick={handleDeleteUser}
-                disabled={deleteUserMutation.isPending}
-                data-testid="button-confirm-delete"
+                onClick={handleDisableUser}
+                disabled={disableUserMutation.isPending}
+                data-testid="button-confirm-disable"
               >
-                {t('common.delete')}
+                {t('users.disableUser')}
               </AlertDialogAction>
             )}
           </AlertDialogFooter>
