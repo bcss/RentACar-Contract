@@ -72,6 +72,15 @@ const resources = {
       "contracts.draft": "Draft",
       "contracts.finalized": "Finalized",
       "contracts.searchPlaceholder": "Search by contract number or customer name...",
+      "contracts.disableContract": "Disable Contract",
+      "contracts.enableContract": "Enable Contract",
+      "contracts.disabledContracts": "Disabled Contracts",
+      "contracts.disabledBy": "Disabled By",
+      "contracts.disabledAt": "Disabled At",
+      "contracts.contractDisabled": "Contract disabled successfully",
+      "contracts.contractEnabled": "Contract enabled successfully",
+      "contracts.confirmDisableContract": "Are you sure you want to disable this contract?",
+      "contracts.confirmEnableContract": "Are you sure you want to enable this contract?",
       
       // Contract Form
       "form.customerInfo": "Customer Information",
@@ -238,6 +247,15 @@ const resources = {
       "contracts.draft": "مسودة",
       "contracts.finalized": "مكتمل",
       "contracts.searchPlaceholder": "البحث برقم العقد أو اسم العميل...",
+      "contracts.disableContract": "تعطيل العقد",
+      "contracts.enableContract": "تفعيل العقد",
+      "contracts.disabledContracts": "العقود المعطلة",
+      "contracts.disabledBy": "تم التعطيل بواسطة",
+      "contracts.disabledAt": "تاريخ التعطيل",
+      "contracts.contractDisabled": "تم تعطيل العقد بنجاح",
+      "contracts.contractEnabled": "تم تفعيل العقد بنجاح",
+      "contracts.confirmDisableContract": "هل أنت متأكد أنك تريد تعطيل هذا العقد؟",
+      "contracts.confirmEnableContract": "هل أنت متأكد أنك تريد تفعيل هذا العقد؟",
       
       // Contract Form
       "form.customerInfo": "معلومات العميل",
