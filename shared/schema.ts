@@ -35,6 +35,9 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role", { length: 20 }).notNull().default("staff"), // admin, manager, staff, viewer
   isImmutable: boolean("is_immutable").notNull().default(false), // Super admin cannot be deleted
+  disabled: boolean("disabled").notNull().default(false), // Disabled users cannot login
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
   lastPasswordChange: timestamp("last_password_change").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -93,6 +96,9 @@ export const contracts = pgTable("contracts", {
   createdBy: varchar("created_by").notNull().references(() => users.id),
   finalizedBy: varchar("finalized_by").references(() => users.id),
   finalizedAt: timestamp("finalized_at"),
+  disabled: boolean("disabled").notNull().default(false), // Disabled contracts are hidden
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -152,3 +158,21 @@ export const contractCounter = pgTable("contract_counter", {
 });
 
 export type ContractCounter = typeof contractCounter.$inferSelect;
+
+// System errors table for error logging
+export const systemErrors = pgTable("system_errors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  errorType: varchar("error_type", { length: 100 }).notNull(), // e.g., "DatabaseError", "AuthError", "ValidationError"
+  errorMessage: text("error_message").notNull(),
+  errorStack: text("error_stack"),
+  userId: varchar("user_id").references(() => users.id),
+  endpoint: varchar("endpoint"),
+  method: varchar("method", { length: 10 }),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  additionalData: text("additional_data"), // JSON string for extra context
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type InsertSystemError = typeof systemErrors.$inferInsert;
+export type SystemError = typeof systemErrors.$inferSelect;
