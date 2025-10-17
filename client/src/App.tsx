@@ -9,7 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
-import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Contracts from "@/pages/Contracts";
 import ContractForm from "@/pages/ContractForm";
@@ -32,7 +32,7 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={isAuthenticated ? Dashboard : Landing} />
+      <Route path="/" component={isAuthenticated ? Dashboard : Login} />
       <Route path="/contracts" component={Contracts} />
       <Route path="/contracts/new" component={ContractForm} />
       <Route path="/contracts/:id" component={ContractView} />

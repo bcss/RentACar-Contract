@@ -41,6 +41,19 @@ const resources = {
       "landing.subtitle": "Digital rental car contract lifecycle management with bilingual support",
       "landing.loginButton": "Log In to Continue",
       
+      // Login
+      "login.subtitle": "Sign in to manage rental contracts",
+      "login.username": "Username",
+      "login.password": "Password",
+      "login.usernamePlaceholder": "Enter your username",
+      "login.passwordPlaceholder": "Enter your password",
+      "login.loginButton": "Log In",
+      "login.loggingIn": "Logging in...",
+      "login.success": "Login successful",
+      "login.failed": "Login failed",
+      "login.invalidCredentials": "Invalid username or password",
+      "login.welcomeBack": "Welcome back, {{name}}!",
+      
       // Dashboard
       "dashboard.title": "Dashboard",
       "dashboard.totalContracts": "Total Contracts",
@@ -173,6 +186,19 @@ const resources = {
       "landing.title": "نظام إدارة العقود",
       "landing.subtitle": "إدارة دورة حياة عقود تأجير السيارات رقمياً مع دعم ثنائي اللغة",
       "landing.loginButton": "تسجيل الدخول للمتابعة",
+      
+      // Login
+      "login.subtitle": "سجل الدخول لإدارة عقود الإيجار",
+      "login.username": "اسم المستخدم",
+      "login.password": "كلمة المرور",
+      "login.usernamePlaceholder": "أدخل اسم المستخدم",
+      "login.passwordPlaceholder": "أدخل كلمة المرور",
+      "login.loginButton": "تسجيل الدخول",
+      "login.loggingIn": "جاري تسجيل الدخول...",
+      "login.success": "تم تسجيل الدخول بنجاح",
+      "login.failed": "فشل تسجيل الدخول",
+      "login.invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
+      "login.welcomeBack": "مرحباً بعودتك، {{name}}!",
       
       // Dashboard
       "dashboard.title": "لوحة التحكم",
