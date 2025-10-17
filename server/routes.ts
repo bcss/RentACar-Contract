@@ -1,12 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./replitAuth";
-import { insertContractSchema } from "@shared/schema";
+import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
+import { insertContractSchema, insertUserSchema } from "@shared/schema";
+import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
+import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  
+  // Seed super admin on startup
+  await seedSuperAdmin();
 
   // Helper function to create audit log
   async function createAuditLog(userId: string, action: string, contractId?: string, ipAddress?: string, details?: string) {
@@ -26,8 +31,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -61,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/contracts', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validatedData = insertContractSchema.parse({
         ...req.body,
         createdBy: userId,
@@ -81,7 +88,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/contracts/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
       
       if (!contract) {
@@ -112,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/contracts/:id/finalize', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
       
       if (!contract) {
@@ -149,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/users/:id/role', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
       const { role } = req.body;
-      const adminId = req.user.claims.sub;
+      const adminId = req.user.id;
       
       if (!['admin', 'manager', 'staff', 'viewer'].includes(role)) {
         return res.status(400).json({ message: "Invalid role" });
@@ -164,6 +171,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error updating user role:", error);
       res.status(400).json({ message: error.message || "Failed to update user role" });
+    }
+  });
+
+  // Create user (Admin only)
+  app.post('/api/users', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { username, password, email, firstName, lastName, role } = req.body;
+      const adminId = req.user.id;
+
+      // Validate password strength
+      const passwordValidation = validatePasswordStrength(password);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ message: passwordValidation.message });
+      }
+
+      // Hash password
+      const passwordHash = await hashPassword(password);
+
+      // Create user
+      const user = await storage.createUser({
+        username,
+        passwordHash,
+        email,
+        firstName,
+        lastName,
+        role: role || 'staff',
+        isImmutable: false,
+      });
+
+      // Create audit log
+      await createAuditLog(adminId, 'create', undefined, req.ip, `Created user ${username} with role ${role}`);
+
+      res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      });
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      res.status(400).json({ message: error.message || "Failed to create user" });
+    }
+  });
+
+  // Delete user (Admin only, cannot delete immutable users)
+  app.delete('/api/users/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const adminId = req.user.id;
+      await storage.deleteUser(req.params.id);
+      
+      // Create audit log
+      await createAuditLog(adminId, 'delete', undefined, req.ip, `Deleted user ${req.params.id}`);
+      
+      res.json({ message: "User deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      res.status(400).json({ message: error.message || "Failed to delete user" });
+    }
+  });
+
+  // Change password (authenticated users can change their own password)
+  app.post('/api/users/change-password', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+
+      // Get user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Verify current password
+      const isValid = await verifyPassword(currentPassword, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+
+      // Validate new password strength
+      const passwordValidation = validatePasswordStrength(newPassword);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ message: passwordValidation.message });
+      }
+
+      // Hash and update password
+      const passwordHash = await hashPassword(newPassword);
+      await storage.updateUserPassword(userId, passwordHash);
+
+      // Create audit log
+      await createAuditLog(userId, 'edit', undefined, req.ip, `Changed password`);
+
+      res.json({ message: "Password changed successfully" });
+    } catch (error: any) {
+      console.error("Error changing password:", error);
+      res.status(400).json({ message: error.message || "Failed to change password" });
+    }
+  });
+
+  // Print contract audit logging
+  app.post('/api/contracts/:id/print', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      // Create audit log
+      await createAuditLog(userId, 'print', contract.id, req.ip, `Printed contract #${contract.contractNumber}`);
+      
+      res.json({ message: "Print action logged" });
+    } catch (error: any) {
+      console.error("Error logging print action:", error);
+      res.status(400).json({ message: error.message || "Failed to log print action" });
     }
   });
 

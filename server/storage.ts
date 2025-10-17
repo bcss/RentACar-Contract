@@ -15,11 +15,15 @@ import { eq, desc, or, like, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
-  // User operations (Required for Replit Auth)
+  // User operations (Internal authentication)
   getUser(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: Omit<UpsertUser, 'id'>): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUserRole(userId: string, role: string): Promise<User>;
+  updateUserPassword(userId: string, passwordHash: string): Promise<User>;
+  deleteUser(userId: string): Promise<void>;
   
   // Contract operations
   getContract(id: string): Promise<Contract | undefined>;
@@ -64,6 +68,16 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(userData: Omit<UpsertUser, 'id'>): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
+    return user;
+  }
+
   async updateUserRole(userId: string, role: string): Promise<User> {
     const [user] = await db
       .update(users)
@@ -71,6 +85,28 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async updateUserPassword(userId: string, passwordHash: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        passwordHash, 
+        lastPasswordChange: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    // Check if user is immutable before deleting
+    const user = await this.getUser(userId);
+    if (user?.isImmutable) {
+      throw new Error("Cannot delete immutable user");
+    }
+    await db.delete(users).where(eq(users.id, userId));
   }
 
   // Contract operations
