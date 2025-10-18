@@ -50,14 +50,14 @@ const contractFormSchema = z.object({
   dailyRate: z.string().min(1, "Daily rate is required"),
   weeklyRate: z.string().optional(),
   monthlyRate: z.string().optional(),
-  totalDays: z.number().default(1),
+  totalDays: z.coerce.number().default(1),
   subtotal: z.string().optional(),
   vatAmount: z.string().optional(),
   totalAmount: z.string().min(1, "Total amount is required"),
-  mileageLimit: z.number().optional(),
+  mileageLimit: z.coerce.number().optional(),
   extraKmRate: z.string().optional(),
   securityDeposit: z.string().optional(),
-  odometerStart: z.number().optional(),
+  odometerStart: z.coerce.number().optional(),
   fuelLevelStart: z.string().optional(),
   vehicleCondition: z.string().optional(),
   notes: z.string().optional(),
@@ -117,12 +117,22 @@ export default function ContractForm() {
   const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: ['/api/customers/search', customerSearchQuery],
     enabled: isAuthenticated && customerSearchQuery.length > 0,
+    queryFn: async () => {
+      const res = await fetch(`/api/customers/search?q=${encodeURIComponent(customerSearchQuery)}`);
+      if (!res.ok) throw new Error('Failed to search customers');
+      return res.json();
+    },
   });
 
   // Search vehicles
   const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery<Vehicle[]>({
     queryKey: ['/api/vehicles/search', vehicleSearchQuery],
     enabled: isAuthenticated && vehicleSearchQuery.length > 0,
+    queryFn: async () => {
+      const res = await fetch(`/api/vehicles/search?q=${encodeURIComponent(vehicleSearchQuery)}`);
+      if (!res.ok) throw new Error('Failed to search vehicles');
+      return res.json();
+    },
   });
 
   const form = useForm<ContractFormData>({
