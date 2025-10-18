@@ -114,8 +114,47 @@ export default function Dashboard() {
     },
   });
 
+  // Phase 3.1: Enhanced dashboard metrics
   const draftContracts = contracts.filter(c => c.status === 'draft').length;
+  const confirmedContracts = contracts.filter(c => c.status === 'confirmed').length;
+  const activeContracts = contracts.filter(c => c.status === 'active').length;
+  const completedContracts = contracts.filter(c => c.status === 'completed').length;
+  const closedContracts = contracts.filter(c => c.status === 'closed').length;
   const finalizedContracts = contracts.filter(c => c.status === 'finalized').length;
+  
+  // Calculate overdue returns (active contracts past rental end date)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const overdueContracts = contracts.filter(c => {
+    if (c.status !== 'active') return false;
+    const endDate = new Date(c.rentalEndDate);
+    endDate.setHours(0, 0, 0, 0);
+    return endDate < today;
+  });
+  
+  // Calculate pending refunds (closed contracts with deposit paid but not refunded)
+  const pendingRefunds = contracts.filter(c => 
+    c.status === 'closed' && 
+    c.depositPaid === true && 
+    c.depositRefunded !== true
+  );
+  
+  // Calculate monthly revenue from active and completed contracts
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const monthlyRevenue = contracts
+    .filter(c => {
+      if (!c.createdAt) return false;
+      const contractDate = new Date(c.createdAt);
+      return contractDate.getMonth() === currentMonth && 
+             contractDate.getFullYear() === currentYear &&
+             (c.status === 'active' || c.status === 'completed' || c.status === 'closed');
+    })
+    .reduce((sum, c) => {
+      const total = parseFloat(c.totalAmount || '0');
+      const extras = parseFloat(c.totalExtraCharges || '0');
+      return sum + total + extras;
+    }, 0);
 
   const getStatusBadge = (status: string) => {
     return status === 'finalized' 
@@ -169,41 +208,120 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Phase 3.1: Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {t('dashboard.totalContracts')}
+              Active Rentals
             </CardTitle>
-            <span className="material-icons text-muted-foreground">description</span>
+            <span className="material-icons text-primary">directions_car</span>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold" data-testid="stat-total-contracts">{contracts.length}</div>
+            <div className="text-3xl font-bold text-primary" data-testid="stat-active-contracts">{activeContracts}</div>
+            <p className="text-xs text-muted-foreground mt-1">Currently rented out</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {t('dashboard.draftContracts')}
+              Monthly Revenue
             </CardTitle>
-            <span className="material-icons text-muted-foreground">edit_note</span>
+            <span className="material-icons text-chart-1">payments</span>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-chart-4" data-testid="stat-draft-contracts">{draftContracts}</div>
+            <div className="text-3xl font-bold text-chart-1" data-testid="stat-monthly-revenue">
+              {monthlyRevenue.toLocaleString('en-SA', { style: 'currency', currency: 'SAR' })}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">This month</p>
+          </CardContent>
+        </Card>
+
+        <Card className={overdueContracts.length > 0 ? "border-destructive" : ""}>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Overdue Returns
+            </CardTitle>
+            <span className={`material-icons ${overdueContracts.length > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+              warning
+            </span>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-3xl font-bold ${overdueContracts.length > 0 ? 'text-destructive' : ''}`} data-testid="stat-overdue-contracts">
+              {overdueContracts.length}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Needs attention</p>
+          </CardContent>
+        </Card>
+
+        <Card className={pendingRefunds.length > 0 ? "border-chart-3" : ""}>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Pending Refunds
+            </CardTitle>
+            <span className={`material-icons ${pendingRefunds.length > 0 ? 'text-chart-3' : 'text-muted-foreground'}`}>
+              account_balance_wallet
+            </span>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-3xl font-bold ${pendingRefunds.length > 0 ? 'text-chart-3' : ''}`} data-testid="stat-pending-refunds">
+              {pendingRefunds.length}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Deposits to refund</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional Status Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Draft</CardTitle>
+            <span className="material-icons text-muted-foreground text-sm">edit_note</span>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-chart-4" data-testid="stat-draft-contracts">{draftContracts}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('dashboard.finalizedContracts')}
-            </CardTitle>
-            <span className="material-icons text-muted-foreground">check_circle</span>
+            <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
+            <span className="material-icons text-muted-foreground text-sm">check</span>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-chart-2" data-testid="stat-finalized-contracts">{finalizedContracts}</div>
+            <div className="text-2xl font-bold" data-testid="stat-confirmed-contracts">{confirmedContracts}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <span className="material-icons text-muted-foreground text-sm">done_all</span>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" data-testid="stat-completed-contracts">{completedContracts}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Closed</CardTitle>
+            <span className="material-icons text-muted-foreground text-sm">archive</span>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-chart-2" data-testid="stat-closed-contracts">{closedContracts}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <span className="material-icons text-muted-foreground text-sm">description</span>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" data-testid="stat-total-contracts">{contracts.length}</div>
           </CardContent>
         </Card>
       </div>
