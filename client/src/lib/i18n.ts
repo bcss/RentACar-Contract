@@ -30,6 +30,7 @@ const resources = {
       "common.close": "Close",
       "common.loading": "Loading...",
       "common.noResults": "No results found",
+      "common.noData": "No data available",
       "common.error": "Error",
       "common.success": "Success",
       "common.active": "Active",
@@ -70,6 +71,22 @@ const resources = {
       "dashboard.viewAllErrors": "View All {{count}} Errors",
       "dashboard.pendingErrors": "{{count}} Pending",
       "dashboard.confirmAcknowledgeAll": "Are you sure you want to acknowledge all system errors?",
+      
+      // Analytics
+      "analytics.revenueMetrics": "Revenue Metrics",
+      "analytics.operationalMetrics": "Operational Metrics",
+      "analytics.customerInsights": "Customer Insights",
+      "analytics.totalRevenue": "Total Revenue",
+      "analytics.avgContractValue": "Avg. Contract Value",
+      "analytics.avgRentalDuration": "Avg. Rental Duration",
+      "analytics.contractsThisMonth": "Contracts This Month",
+      "analytics.totalCustomers": "Total Customers",
+      "analytics.repeatCustomerRate": "Repeat Customer Rate",
+      "analytics.newCustomers": "New Customers",
+      "analytics.vsLastMonth": "vs. Last Month",
+      "analytics.thisMonth": "This Month",
+      "analytics.days": "Days",
+      "analytics.contracts": "Contracts",
       
       // Contracts
       "contracts.title": "Contracts",
@@ -251,6 +268,7 @@ const resources = {
       "common.close": "إغلاق",
       "common.loading": "جاري التحميل...",
       "common.noResults": "لا توجد نتائج",
+      "common.noData": "لا توجد بيانات متاحة",
       "common.error": "خطأ",
       "common.success": "نجح",
       "common.active": "نشط",
@@ -291,6 +309,22 @@ const resources = {
       "dashboard.viewAllErrors": "عرض جميع الأخطاء ({{count}})",
       "dashboard.pendingErrors": "{{count}} قيد الانتظار",
       "dashboard.confirmAcknowledgeAll": "هل أنت متأكد أنك تريد اعتماد جميع أخطاء النظام؟",
+      
+      // Analytics
+      "analytics.revenueMetrics": "مقاييس الإيرادات",
+      "analytics.operationalMetrics": "مقاييس التشغيل",
+      "analytics.customerInsights": "رؤى العملاء",
+      "analytics.totalRevenue": "إجمالي الإيرادات",
+      "analytics.avgContractValue": "متوسط قيمة العقد",
+      "analytics.avgRentalDuration": "متوسط مدة الإيجار",
+      "analytics.contractsThisMonth": "عقود هذا الشهر",
+      "analytics.totalCustomers": "إجمالي العملاء",
+      "analytics.repeatCustomerRate": "نسبة العملاء المتكررين",
+      "analytics.newCustomers": "عملاء جدد",
+      "analytics.vsLastMonth": "مقارنة بالشهر الماضي",
+      "analytics.thisMonth": "هذا الشهر",
+      "analytics.days": "أيام",
+      "analytics.contracts": "عقود",
       
       // Contracts
       "contracts.title": "العقود",
