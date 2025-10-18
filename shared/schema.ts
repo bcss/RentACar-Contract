@@ -206,6 +206,18 @@ export const companySettings = pgTable("company_settings", {
   // Logo (optional, can be URL or base64)
   logoUrl: varchar("logo_url"),
   
+  // Currency and VAT
+  currency: varchar("currency", { length: 10 }).notNull().default("AED"),
+  vatPercentage: varchar("vat_percentage").notNull().default("5"),
+  
+  // Terms & Conditions Sections (bilingual)
+  termsSection1En: text("terms_section_1_en").notNull().default(""),
+  termsSection1Ar: text("terms_section_1_ar").notNull().default(""),
+  termsSection2En: text("terms_section_2_en").notNull().default(""),
+  termsSection2Ar: text("terms_section_2_ar").notNull().default(""),
+  termsSection3En: text("terms_section_3_en").notNull().default(""),
+  termsSection3Ar: text("terms_section_3_ar").notNull().default(""),
+  
   updatedAt: timestamp("updated_at").defaultNow(),
   updatedBy: varchar("updated_by").references(() => users.id),
 });
