@@ -113,7 +113,72 @@ Preferred communication style: Simple, everyday language.
 
 **Recent Changes (October 2025):**
 
-**Company Settings Management (Latest):**
+**Phase 1-3: Comprehensive Rental Lifecycle Management (Latest - October 18, 2025):**
+
+**Phase 1: Auto-Calculations & Validations**
+- **Auto-Calculate Total Days:** Real-time calculation from rentalStartDate to rentalEndDate (minimum 1 day)
+- **Auto-Calculate Financial Amounts:**
+  - Subtotal based on rentalType (daily/weekly/monthly) × totalDays
+  - VAT amount fetched from company settings (default 5%)
+  - Total amount = subtotal + VAT
+- **Enhanced Form Validations:**
+  - End date must be after start date
+  - License must be valid during entire rental period
+  - License number optional for 'from_company' hirer type
+- **Staff Permission Filtering:** Staff users can only view and edit their own contracts (filtered by createdBy)
+
+**Phase 2: Extended Contract Lifecycle & Workflows**
+- **Expanded Status Values:** draft → confirmed → active → completed → closed (5 states)
+- **State Transition Endpoints:**
+  - POST /api/contracts/:id/confirm - Confirm contract
+  - POST /api/contracts/:id/activate - Hand over vehicle
+  - POST /api/contracts/:id/complete - Complete rental with return data
+  - POST /api/contracts/:id/close - Close contract after final payment
+- **Vehicle Return Workflow:**
+  - Complete return inspection dialog capturing:
+    - Odometer end reading
+    - Fuel level at return
+    - Vehicle condition notes
+  - Auto-calculated extra charges:
+    - Extra KM Charge: (actual km - allowed km) × rate
+    - Fuel charge (manual entry)
+    - Damage charge (manual entry)
+    - Other charges (manual entry)
+    - Total extra charges = sum of all
+    - Outstanding balance = total + extras - deposit
+- **Payment Recording System:**
+  - Record deposit payment with method (cash/card/bank_transfer)
+  - Record final payment with method
+  - Record deposit refund
+  - Track payment status: pending → partial → paid → refunded
+- **Enhanced ContractView:**
+  - State transition buttons based on current status (Admin/Manager only)
+  - Payment recording dialogs for deposit, final payment, refund
+  - Payment status display showing dates and methods
+  - Extra charges breakdown for completed/closed contracts
+
+**Phase 3: Dashboard Enhancements**
+- **Critical Metrics Cards:**
+  - Active Rentals: Count of contracts currently in 'active' status
+  - Monthly Revenue: Total revenue from active/completed/closed contracts this month
+  - Overdue Returns: Active contracts past rental end date (highlighted in red)
+  - Pending Refunds: Closed contracts with deposit not refunded
+- **Status Breakdown:** Quick view of contracts by status (draft, confirmed, active, completed, closed)
+- **Visual Indicators:** Color-coded alerts for overdue returns and pending refunds
+
+**Database Schema Enhancements:**
+- Added 30+ fields to contracts table:
+  - State transition tracking: confirmedBy, confirmedAt, activatedBy, activatedAt, completedBy, completedAt, closedBy, closedAt
+  - Payment tracking: depositPaid, depositPaidDate, depositPaidMethod, finalPaymentReceived, finalPaymentDate, finalPaymentMethod, depositRefunded, depositRefundedDate, paymentStatus
+  - Extra charges: extraKmCharge, extraKmDriven, fuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance
+  - Auto-calculated: subtotal, vatAmount, totalDays
+
+**Authorization Updates:**
+- Staff users: Can only view/edit their own contracts
+- Admin/Manager users: Can confirm, activate, complete, and close contracts
+- Admin/Manager users: Can record all payments
+
+**Company Settings Management:**
 - **Settings Page:** Admin-only page for managing company information displayed on contracts
 - **Database Schema:** Added companySettings table (singleton pattern) with 14 bilingual fields
 - **Configurable Fields:**

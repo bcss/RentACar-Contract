@@ -134,8 +134,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
 
-      if (contract.status === 'finalized') {
-        return res.status(403).json({ message: "Cannot edit finalized contract" });
+      // Phase 1-2: Only allow editing draft contracts - protect lifecycle integrity
+      if (contract.status !== 'draft') {
+        return res.status(403).json({ 
+          message: `Cannot edit ${contract.status} contract. Only draft contracts can be edited. Use state transition endpoints to advance the contract.` 
+        });
       }
 
       // Check if user has permission to edit
@@ -156,30 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/contracts/:id/finalize', isAuthenticated, requireAdmin, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const contract = await storage.getContract(req.params.id);
-      
-      if (!contract) {
-        return res.status(404).json({ message: "Contract not found" });
-      }
-
-      if (contract.status === 'finalized') {
-        return res.status(400).json({ message: "Contract is already finalized" });
-      }
-
-      const finalized = await storage.finalizeContract(req.params.id, userId);
-      
-      // Create audit log
-      await createAuditLog(userId, 'finalize', finalized.id, req.ip, `Finalized contract #${finalized.contractNumber}`);
-      
-      res.json(finalized);
-    } catch (error: any) {
-      console.error("Error finalizing contract:", error);
-      res.status(400).json({ message: error.message || "Failed to finalize contract" });
-    }
-  });
+  // Legacy /finalize route removed - use new state machine (confirm → activate → complete → close)
 
   // Phase 2: State transition routes (Admin/Manager only)
   

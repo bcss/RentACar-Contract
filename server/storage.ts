@@ -39,7 +39,7 @@ export interface IStorage {
   searchContracts(query: string): Promise<Contract[]>;
   createContract(contract: InsertContract): Promise<Contract>;
   updateContract(id: string, contract: Partial<InsertContract>): Promise<Contract>;
-  finalizeContract(id: string, userId: string): Promise<Contract>;
+  // Legacy finalizeContract removed - use confirmContract instead
   disableContract(id: string, userId: string): Promise<Contract>;
   enableContract(id: string): Promise<Contract>;
   
@@ -234,20 +234,7 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async finalizeContract(id: string, userId: string): Promise<Contract> {
-    const [finalized] = await db
-      .update(contracts)
-      .set({
-        status: 'finalized',
-        finalizedBy: userId,
-        finalizedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(contracts.id, id))
-      .returning();
-    
-    return finalized;
-  }
+  // Legacy finalizeContract method removed - use new state machine methods below
 
   // Phase 2.1: State transition methods
   async confirmContract(id: string, userId: string): Promise<Contract> {

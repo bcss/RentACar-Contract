@@ -90,36 +90,7 @@ export default function ContractView() {
     enabled: isAuthenticated,
   });
 
-  const finalizeMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest('POST', `/api/contracts/${params.id}/finalize`, {});
-    },
-    onSuccess: () => {
-      toast({
-        title: t('common.success'),
-        description: t('msg.contractFinalized'),
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
-    },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: t('common.error'),
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  // Legacy finalize removed - use new state machine (confirm → activate → complete → close)
 
   // State transition mutations
   const confirmMutation = useMutation({
@@ -213,7 +184,7 @@ export default function ContractView() {
   // Payment mutations
   const depositMutation = useMutation({
     mutationFn: async (paymentMethod: string) => {
-      return await apiRequest('POST', `/api/contracts/${params.id}/deposit`, { paymentMethod });
+      return await apiRequest('POST', `/api/contracts/${params.id}/deposit`, { method: paymentMethod });
     },
     onSuccess: () => {
       toast({
@@ -235,7 +206,7 @@ export default function ContractView() {
 
   const finalPaymentMutation = useMutation({
     mutationFn: async (paymentMethod: string) => {
-      return await apiRequest('POST', `/api/contracts/${params.id}/final-payment`, { paymentMethod });
+      return await apiRequest('POST', `/api/contracts/${params.id}/final-payment`, { method: paymentMethod });
     },
     onSuccess: () => {
       toast({
@@ -526,30 +497,6 @@ export default function ContractView() {
                 <span className="material-icons">edit</span>
                 <span>{t('common.edit')}</span>
               </Button>
-              {isAdmin && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button data-testid="button-finalize">
-                      <span className="material-icons">lock</span>
-                      <span>{t('action.finalize')}</span>
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t('action.finalize')}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {t('msg.confirmFinalize')}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => finalizeMutation.mutate()}>
-                        {t('action.finalize')}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
               {canManageWorkflow && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
