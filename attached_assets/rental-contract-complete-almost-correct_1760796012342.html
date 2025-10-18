@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARMAR Rent A Car - Contract</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .arabic-text {
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+        }
+        
+        .section-card {
+            background: white;
+            border: 1px solid #000;
+            padding: 20px;
+        }
+
+        @media print {
+            body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+        }
+    </style>
+<style id="twocol-styles">
+/* INSERTED: two-column inspection + payment */
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.twocol .section{margin:0}
+.section{border:1px solid #000;margin:10px 0;background:#fff}
+.section>header{background:#f2f2f2;border-bottom:1px solid #000;padding:6px;text-align:center;font-weight:700}
+.content{padding:10px}
+.grid{display:grid;gap:10px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+fieldset{border:1px solid #000;padding:6px}
+legend{padding:0 4px;font-weight:600}
+.row{display:grid;grid-template-columns:1fr 110px;align-items:center}
+.row label{font-weight:600}
+.row .ar{display:block;font-size:10px;font-weight:400}
+.amt{width:100%;box-sizing:border-box;border:1px solid #000;padding:3px 6px;text-align:right}
+.pct{width:80px;box-sizing:border-box;border:1px solid #000;padding:3px 6px;text-align:center}
+.yn{display:flex;align-items:center;gap:8px;margin-top:6px}
+.pay-grid{display:grid;grid-template-columns:1fr 140px;border-top:1px solid #000;border-left:1px solid #000}
+.pay-grid>div{border-right:1px solid #000;border-bottom:1px solid #000;padding:6px}
+.pay-title{font-weight:600}
+.pay-ar{display:block;font-size:10px}
+.muted{background:#f2f2f2}
+.total input{font-weight:700}
+.note{font-size:11px;opacity:.85}
+@media (max-width: 800px){
+  .twocol{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr 100px}
+}
+@media print{
+  .twocol{grid-template-columns:1fr 1fr;gap:10px}
+}
+</style>
+</head>
+<body class="bg-white p-4 md:p-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Header Section -->
+        <div class="border-2 border-black p-4">
+            <div class="grid grid-cols-3 gap-4 items-start">
+                <!-- Left: Company Info -->
+                <div class="text-left">
+                    <h1 class="text-4xl font-bold text-red-600 mb-1">MARMAR</h1>
+                    <p class="text-xs font-semibold">CARS AND BUSES RENTAL LLC</p>
+                    <div class="text-[9px] mt-2 space-y-0.5">
+                        <p>Tel : 07 222 12 33</p>
+                        <p>Mob. : 050 50 33 786 / 050 648 24 24</p>
+                        <p>P.O. Box : 34088, Al Nakeel, RAK - UAE</p>
+                        <p>Email: marmarrac@gmail.com</p>
+                        <p>www.marmarcars.com</p>
+                    </div>
+                </div>
+
+                <!-- Center: Logo and Title -->
+                <div class="text-center">
+                    <div class="flex justify-center items-center gap-2 mb-2">
+                        <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                            <span class="text-xs">LOGO</span>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-red-600">MARMAR</p>
+                            <p class="text-xs font-semibold">RENT A CAR</p>
+                        </div>
+                    </div>
+                    <div class="border-2 border-red-600 rounded-full px-6 py-1 inline-block mt-2">
+                        <p class="text-sm font-bold">CAR HIRE CONTRACT <span class="arabic-text">عقــد تـأجـيــر الـسـيــارات</span></p>
+                    </div>
+                </div>
+
+                <!-- Right: Arabic Info -->
+                <div class="text-right arabic-text">
+                    <h1 class="text-3xl font-bold mb-1">مــرمــر</h1>
+                    <p class="text-xs font-semibold">لتأجير الحافلات والسيارات ش.ذ.م.م</p>
+                    <div class="text-[9px] mt-2 space-y-0.5">
+                        <p>هاتف: ٠٧ ٢٢٢ ١٢ ٣٣</p>
+                        <p>متحرك: ٠٥٠ ٥٠ ٣٣ ٧٨٦ / ٠٥٠ ٦٤٨ ٢٤ ٢٤</p>
+                        <p>ص.ب: ٣٤٠٨٨، النخيل، رأس الخيمة - الإمارات</p>
+                        <p>بريد الإلكتروني: marmarrac@gmail.com</p>
+                        <p>www.marmarcars.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contract Number -->
+            <div class="text-left mt-2">
+                <p class="text-sm font-semibold">Contract No. / <span class="arabic-text">رقم العقد</span>: ______________</p>
+            </div>
+        </div>
+
+        <!-- Sponsor and Hirer Details Form -->
+        <div class="border-2 border-black">
+            <div class="grid grid-cols-2 divide-x-2 divide-black">
+                <!-- Left Column: Sponsor -->
+                <div>
+                    <div class="grid grid-cols-[120px_1fr] border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Sponsor Name</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">اسم الكفيل</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[120px_1fr] border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Nationality</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">الجنسية</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[120px_1fr] border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Passport No./ID</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">رقم جواز السفر / الهوية</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[120px_1fr] border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Address</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">العنوان</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[120px_1fr] border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Mobile</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">متحرك</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 border-b border-black">
+                        <div class="border-r border-black">
+                            <div class="bg-gray-50 p-2 border-b border-black text-center">
+                                <p class="text-xs font-bold">ID</p>
+                            </div>
+                            <div class="p-2"></div>
+                        </div>
+                        <div>
+                            <div class="bg-gray-50 p-2 border-b border-black text-right arabic-text">
+                                <p class="text-xs font-bold">الموجودات</p>
+                            </div>
+                            <div class="p-2 text-right arabic-text">
+                                <p class="text-xs">هوية</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[120px_1fr] border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Credit Card</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">بطاقة الائتمان</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Reg. No.</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">رقم التسجيل</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Time In</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">ساعة الدخول</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 border-b border-black">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Advance Payment</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">المبلغ المدفوع مقدماً</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2">
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">KM Out</p>
+                        </div>
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">عداد الخروج</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Hirer -->
+                <div>
+                    <div class="grid grid-cols-[1fr_120px] border-b border-black">
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">اسم المستأجر</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-l border-black">
+                            <p class="text-xs font-bold text-red-600">Hirer Name</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[1fr_auto_120px] border-b border-black">
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">الجنسية</p>
+                        </div>
+                        <div class="flex items-center gap-2 px-2 border-l border-black">
+                            <div class="flex items-center gap-1">
+                                <input type="checkbox" id="male" class="w-4 h-4">
+                                <label for="male" class="text-xs">Male<br/><span class="arabic-text">ذكر</span></label>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <input type="checkbox" id="female" class="w-4 h-4">
+                                <label for="female" class="text-xs text-red-600">Female<br/><span class="arabic-text">أنثى</span></label>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-l border-black">
+                            <p class="text-xs font-bold text-red-600">Nationality</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[1fr_120px] border-b border-black">
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">رقم جواز السفر / الهوية</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-l border-black">
+                            <p class="text-xs font-bold text-red-600">Passport No./ID</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[1fr_120px] border-b border-black">
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">متحرك</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-l border-black">
+                            <p class="text-xs font-bold text-red-600">Mobile</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-[1fr_120px_1fr] border-b border-black">
+                        <div class="p-2 text-right arabic-text">
+                            <p class="text-xs">العنوان</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-x border-black">
+                            <p class="text-xs font-bold text-red-600">Address</p>
+                        </div>
+                        <div class="bg-gray-50 p-2">
+                            <p class="text-xs font-bold text-red-600">Date of Birth</p>
+                        </div>
+                        <div class="col-span-3 p-2 text-right arabic-text border-t border-black">
+                            <p class="text-xs">تاريخ الولادة</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 border-b border-black">
+                        <div>
+                            <div class="bg-gray-50 p-2 border-b border-r border-black text-right arabic-text">
+                                <p class="text-xs font-bold">رقم رخصة القيادة</p>
+                            </div>
+                            <div class="p-2 border-r border-black"></div>
+                        </div>
+                        <div>
+                            <div class="bg-gray-50 p-2 border-b border-black">
+                                <p class="text-xs font-bold text-red-600">Driving License Number</p>
+                            </div>
+                            <div class="grid grid-cols-2">
+                                <div class="bg-gray-50 p-2 border-r border-black text-right arabic-text">
+                                    <p class="text-xs">جواز سفر</p>
+                                </div>
+                                <div class="bg-gray-50 p-2">
+                                    <p class="text-xs font-bold">Pass</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 border-b border-black">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">تاريخ الإصدار</p>
+                        </div>
+                        <div class="bg-gray-50 p-2">
+                            <p class="text-xs font-bold text-red-600">Issued On</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 border-b border-black">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">صدر الرخصة</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Issued By</p>
+                        </div>
+                        <div class="bg-gray-50 p-2">
+                            <p class="text-xs font-bold text-red-600">Exp. Date</p>
+                        </div>
+                        <div class="col-span-3 p-2 text-right arabic-text border-t border-black">
+                            <p class="text-xs">تاريخ الانتهاء</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 border-b border-black">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">سنة الصنع</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Car Manufacturing Year</p>
+                        </div>
+                        <div class="bg-gray-50 p-2">
+                            <p class="text-xs font-bold text-red-600">Model of Car</p>
+                        </div>
+                        <div class="col-span-3 p-2 text-right arabic-text border-t border-black">
+                            <p class="text-xs">نوع السيارة</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 border-b border-black">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">اللون</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Color</p>
+                        </div>
+                        <div class="grid grid-cols-2 border-l border-black">
+                            <div class="bg-gray-50 p-2 border-r border-black">
+                                <p class="text-xs font-bold text-red-600">Return Date</p>
+                            </div>
+                            <div class="p-2 text-right arabic-text">
+                                <p class="text-xs">تاريخ العودة</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 border-b border-black">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">ساعة الخروج</p>
+                        </div>
+                        <div class="bg-gray-50 p-2">
+                            <p class="text-xs font-bold text-red-600">Time Out</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 border-b border-black">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">السعر الأسبوعي للإيجار</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Weekly Rent</p>
+                        </div>
+                        <div class="grid grid-cols-2 border-l border-black">
+                            <div class="bg-gray-50 p-2 border-r border-black">
+                                <p class="text-xs font-bold text-red-600">Monthly Rent</p>
+                            </div>
+                            <div class="p-2 text-right arabic-text">
+                                <p class="text-xs">السعر الشهري للإيجار</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 border-b border-black">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">تاريخ الإيجار</p>
+                        </div>
+                        <div class="bg-gray-50 p-2">
+                            <p class="text-xs font-bold text-red-600">Date of Rent</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 border-b border-black">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">السعر اليومي للإيجار</p>
+                        </div>
+                        <div class="bg-gray-50 p-2 border-r border-black">
+                            <p class="text-xs font-bold text-red-600">Daily Rent</p>
+                        </div>
+                        <div class="bg-gray-50 p-2">
+                            <p class="text-xs font-bold text-red-600">Total Days</p>
+                        </div>
+                        <div class="col-span-3 p-2 text-right arabic-text border-t border-black">
+                            <p class="text-xs">عدد الأيام</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2">
+                        <div class="p-2 text-right arabic-text border-r border-black">
+                            <p class="text-xs">التاريخ المتوقع للتسجيل</p>
+                        </div>
+                        <div class="bg-gray-50 p-2">
+                            <p class="text-xs font-bold text-red-600">KM In</p>
+                        </div>
+                        <div class="col-span-2 bg-red-100 p-2 border-t border-black">
+                            <p class="text-xs font-bold text-red-600 text-center">Expected Return Date</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+<!-- Two-Column Inspection + Payment (Inserted) -->
+<div class="twocol">
+
+      <!-- VEHICLE INSPECTION (compact) -->
+      <section class="section" id="vehicle-inspection">
+        <header>VEHICLE INSPECTION / <span class="ar">فحص المركبة</span></header>
+        <div class="content">
+          <div class="grid grid-3">
+            <fieldset>
+              <legend>Tools / <span class="ar">الأدوات</span></legend>
+              <label class="yn"><input type="radio" name="tools" value="no"> No</label>
+              <label class="yn"><input type="radio" name="tools" value="yes"> Yes</label>
+            </fieldset>
+            <fieldset>
+              <legend>Spare Tyre / <span class="ar">الإطار الاحتياطي</span></legend>
+              <label class="yn"><input type="radio" name="spare" value="no"> No</label>
+              <label class="yn"><input type="radio" name="spare" value="yes"> Yes</label>
+            </fieldset>
+            <fieldset>
+              <legend>GPS / <span class="ar">نظام تحديد المواقع</span></legend>
+              <label class="yn"><input type="radio" name="gps" value="no"> No</label>
+              <label class="yn"><input type="radio" name="gps" value="yes"> Yes</label>
+            </fieldset>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:10px">
+            <div class="row">
+              <label>Fuel Percentage <span class="ar">/ نسبة الوقود</span></label>
+              <input class="pct" type="number" min="0" max="100" placeholder="0–100">
+            </div>
+            <div class="row">
+              <label>Fuel Percentage <span class="ar">/ نسبة الوقود</span></label>
+              <input class="pct" type="number" min="0" max="100" placeholder="0–100">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAYMENT (compact, single AED amount) -->
+      <section class="section" id="payment">
+        <header>PAYMENT</header>
+        <div class="pay-grid">
+          <div><span class="pay-title">Rent</span><span class="pay-ar">الأجار</span></div>
+          <div><input type="number" step="0.01" class="amt" data-sum></div>
+
+          <div><span class="pay-title">VAT</span><span class="pay-ar">ضريبة القيمة المضافة</span></div>
+          <div><input type="number" step="0.01" class="amt" data-sum></div>
+
+          <div><span class="pay-title">SALIK</span><span class="pay-ar">سالك</span></div>
+          <div><input type="number" step="0.01" class="amt" data-sum></div>
+
+          <div><span class="pay-title">Traffic Fine</span><span class="pay-ar">غرامات مرورية</span></div>
+          <div><input type="number" step="0.01" class="amt" data-sum></div>
+
+          <div><span class="pay-title">Damage</span><span class="pay-ar">تلفيات</span></div>
+          <div><input type="number" step="0.01" class="amt" data-sum></div>
+
+          <div><span class="pay-title">Deposit</span><span class="pay-ar">الوديعة</span><div class="note">Use negative value to subtract from total if needed.</div></div>
+          <div><input type="number" step="0.01" class="amt" data-sum></div>
+
+          <div><span class="pay-title">Others</span><span class="pay-ar">أخرى</span></div>
+          <div><input type="number" step="0.01" class="amt" data-sum></div>
+
+          <div class="muted"><span class="pay-title">Total Amount</span><span class="pay-ar">المبلغ الإجمالي</span></div>
+          <div class="muted total"><input type="number" step="0.01" class="amt" id="total" readonly></div>
+        </div>
+      </section>
+
+    </div><!-- /.twocol -->
+<!-- Payment Terms Section -->
+        <div class="section-card">
+            <div class="grid grid-cols-2 gap-4">
+                <!-- LEFT COLUMN -->
+                <div class="space-y-2">
+                    <p class="text-[9px] leading-tight arabic-text">
+                        يدفع (المستأجر) مبلغ ٦٠ درهم عن كل غرامة، يسدد منها مبلغ ٣٠ درهم رسوم إدارية لحكومة دبي ومبلغ ٣٠ درهم رسوم غرامة.
+                    </p>
+                    <p class="text-[9px] leading-tight text-red-600 font-medium">
+                        The Hirer will pay AED 60/- for each fine, 20 dirhams for Dubai Govt. Knowledge Fee and 20 dirhams for paid charge
+                    </p>
+
+                    <p class="text-[9px] leading-tight arabic-text">
+                        عند إعادة السيارة على (المستأجر) سداد كافة الرصيد المطلوب منه خلال ٤٨ ساعة، والإيجارالمستأجر يسدد ٢٥ درهم عن كل يوم تأخير
+                    </p>
+                    <p class="text-[9px] leading-tight text-red-600 font-medium">
+                        When the Hirer return the car he/she had to clear whole balance within 48 hours if not the hirer will continuously be charged AED 25/- per day
+                    </p>
+
+                    <p class="text-[9px] leading-tight arabic-text">
+                        في حال وجود غرامة، على (المستأجر) سداد الغرامة خلال أسبوع واحد نعطي التقارير والإنذار بسداد مبلغ ٢٥ درهما غرامة تأخير
+                    </p>
+                    <p class="text-[9px] leading-tight text-red-600 font-medium">
+                        In case any fine the Hirer must to be cleared within one week maximum or the Hirer will be charged AED 25/- per week
+                    </p>
+
+                    <p class="text-[9px] leading-tight arabic-text">
+                        يتم الاحتفاظ بمبلغ ١٥٠٠ درهم من قيمة البطاقة الائتمانية من تاريخ إعادة السيارة لمدة ١٥ يوما من تاريخ إرجاع السيارة الإيجار
+                    </p>
+                    <p class="text-[9px] leading-tight text-red-600 font-medium">
+                        The Hirer agrees Marmar Rent A Car to retain AED 1500/- for fine security for 15 days from the date for return of vehicle.
+                    </p>
+
+                    <p class="text-[9px] leading-tight arabic-text">
+                        إقرار بأننا اعتمدنا على الشروط والأحكام أعلاه و كذلك الشروط المنبعة بعلامة وموافق على الالتزام بها.
+                    </p>
+                    <p class="text-[9px] leading-tight text-red-600 font-medium">
+                        Acknowledge the I/ we read above and reverse mentioned terms and conditions and agree to abide by them.
+                    </p>
+
+                    <!-- Signature boxes -->
+                    <div class="grid grid-cols-3 gap-2 pt-2">
+                        <div class="border border-black p-2 text-center">
+                            <div class="h-10 mb-1"></div>
+                            <p class="text-[8px] font-semibold arabic-text">مسؤول المكتب</p>
+                            <p class="text-[8px] font-semibold">Office In-charge</p>
+                        </div>
+                        <div class="border border-black p-2 text-center">
+                            <div class="h-10 mb-1"></div>
+                            <p class="text-[8px] font-semibold arabic-text">توقيع الكفيل</p>
+                            <p class="text-[8px] font-semibold">Sponsor Signature</p>
+                        </div>
+                        <div class="border border-black p-2 text-center">
+                            <div class="h-10 mb-1"></div>
+                            <p class="text-[8px] font-semibold arabic-text">توقيع المستأجر</p>
+                            <p class="text-[8px] font-semibold">Hirer Signature</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1 mt-2">
+                        <p class="text-[9px] leading-tight arabic-text">
+                            يتفق أن يستحصن السيارة فى فبل استلامها للقيام بفحص شامل للسيارة فى جميع أجزائها من جميع الجوانب ويتحمل المسؤولية الكاملة فعل العواقب في الأجهزة
+                        </p>
+                        <p class="text-[9px] leading-tight text-gray-700 italic">
+                            It is agreed that the vehicle shall be inspected before receiving it by conducting a comprehensive inspection of all its parts from all aspects, and the hirer bears full responsibility for the consequences on the equipment.
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            فى حالة إذا شكت أن الواقع مع دفع تجديد عقد إيجار السيارة في إطار وقوف السيارة في الكراج للصليح
+                        </p>
+                        <p class="text-[9px] leading-tight text-gray-700 italic">
+                            In case there is doubt about the situation, the rental contract renewal payment shall be made while the vehicle is parked in the garage for repair.
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            فى حالة حصول حادث وكان المستأجر يحمل رخصة قيادة ماضي على صدورها أقل من سنة وهو المسبب فى الحادث يتحمل ٪٢٠ من قيمة الحادث وإضافة إلى التحمل البالغ ٢٥٠٠ درهم الإيجار اليومي لعدد أيام وقوف السيارة في الكراج لغرض التصليح
+                        </p>
+                        <p class="text-[9px] leading-tight text-gray-700 italic">
+                            In case of an accident where the hirer holds a driving license issued less than one year ago and is the cause of the accident, they shall bear 20% of the accident value in addition to the liability amount of 2500 dirhams, plus daily rent for the number of days the vehicle is parked in the garage for repair.
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            فى حادث يتحمل ٪٩٠ من قيمة الحادث وإضافة إلى التحمل البالغ ٢٥٠٠ درهم الإيجار اليومي لمدة أيام وقوف السيارة في الكراج لغرض التصليح
+                        </p>
+                        <p class="text-[9px] leading-tight text-gray-700 italic">
+                            In case of an accident, they shall bear 90% of the accident value in addition to the liability amount of 2500 dirhams, plus daily rent for the period the vehicle is parked in the garage for repair.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="space-y-2">
+                    <p class="text-[9px] leading-tight arabic-text">
+                        في حالة تسقط السيارة من الجهات منعضة يقوم المستأجر بدفع مبلغ خمسة آلف درهم (٥٠٠٠) درهما تعويضا عن أي ضرر يلحق المطالبة الايجار الإجمالي المترتب بالإضافة إلى قيمة الإيجار حتى انتهاء كافة الإجراءات بالإضافة والمصروحي في حالة مصادرة السيارة من جهات معينة بسبب قد تسبب فيها المستاجريقوم المستاجر بتصليح كامل الضرر بالإضافة إلى قيمة الإيجار بالإضافة لقيمة الإيجار بالإضافة إلى منتهي
+                    </p>
+                    <p class="text-[9px] leading-tight text-red-600 font-medium">
+                        In case of writing off the car by the concerned parties. The person who rented the car shall pay 5000 Dirhams a compensation for the full damaged of the rented cars in addition to the rent, till all procedures are completed and insurance company give the compensation. If the car is cofiscated by concerned authorities for any reason caused by the person who rented the car He/She shall pay the full value of the car in addition the rent and the above mentioned.
+                    </p>
+
+                    <p class="text-[9px] leading-tight arabic-text">
+                        أنا الموقع أدناه أفوض المرمر لتأجرة السيارات بتقاضى قيمة الإيجار وأى مبالغ إضافية أو مخالفات و غرامات (سرعة و بلدية بمبلغ ٣٠ درهم على كل مخالفة) حتى بعد إعادة استيارة الشركة ضمن فترة استئجار السيارة وذلك من خلال بطاقة الائتمان الخاصة بـــ..........................درهم إضافية
+                    </p>
+                    <p class="text-[9px] leading-tight text-red-600 font-medium">
+                        I, the undersigned authorise Marmar Rent A Car to charge my credit card the rent value and any other additional amounts or offence and penalties (Police or Muncipality adding Dhs. 20 for each fine) even after the returned back of the vehicle to the Company within the hire period through the credit card belonging to .......................... Dhs. additional
+                    </p>
+
+                    <div class="border-2 border-black rounded p-3 text-center bg-white">
+                        <p class="text-sm font-bold mb-1 arabic-text">السيـــارة لايسمح للقيـــادة فــي منــطقة صحــراويــة</p>
+                        <p class="text-base font-bold text-red-600">Vehicle not allowed to drive in Desert Area</p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="text-[9px] leading-tight arabic-text">
+                            في حالة حدوث حادث وكان المستأجر متسبب يكون المستأجر ملزم بدفع مبلغ قدره ................درهم إضافية في إطار قدوم للإصلاح يتم تحصيل استيفاً
+                        </p>
+                        <p class="text-[9px] leading-tight text-red-600 font-medium">
+                            In Case of accident will occur to the vehicle and the mistake from the hirer the hirer has to pay basic lump sum of Dhs. __________ in addition to the daily rent till the vehicle complete repairing
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            في حالة حدوث حادث وكان المستأجر منضرر بالدفع لإيجار فترة وقوف السيارة في الكراج لحين اصلاحها
+                        </p>
+                        <p class="text-[9px] leading-tight text-red-600 font-medium">
+                            In case of any accident will occur to the vehicle and the mistake not from the hirer will pay daily rent, till the vehicle complete repairing.
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            في حالة الإيجار الشهري يقوم المستأجر بدفع الإيجار كل ١٠ أيام
+                        </p>
+                        <p class="text-[9px] leading-tight text-red-600 font-bold">
+                            In case monthly rent the hirer should pay amount from every 10 days in advance
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            عدد الكيلومترات المسموح بها (٣٠٠ كم) لليوم الواحد ومابزيد عن ذلك تحتسب ٥٠ إضافية لكيلومتر الواحد
+                        </p>
+                        <p class="text-[9px] leading-tight text-red-600 font-bold">
+                            PER DAY 300 KMS AND 50 FILS EXTRA FOR ONE K.M.
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            الحد الأقصى للشهري المسموح به هو ٥٠٠٠ كم و٤٠ فلس إضافية على كل كيلومتر
+                        </p>
+                        <p class="text-[9px] leading-tight text-red-600 font-medium">
+                            Monthly maximum 5000 km is allowed, 40 fils extra charged for each km
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            فى حالة تصليح السيارة قبل اصلاح المستأجر غير الاصلاح غرامة على المستأجر قدرها (وستجرهم) تكون موزعه للشركة
+                        </p>
+                        <p class="text-[9px] leading-tight">
+                            If any renter repaired the car by himself (incase of accident or other damage) will find Dhs. 5000/-
+                        </p>
+
+                        <p class="text-[9px] leading-tight arabic-text">
+                            اذاله يكن هناك اتفاق مسبق للإيجار الأسبوعي أو الشهري فسوف يحتسب بوافع السعر اليومى
+                        </p>
+                        <p class="text-[9px] leading-tight text-red-600 font-medium">
+                            If no previous arrangement has been made for the weekly / monthly rates then the hirer is liable to pay daily rate
+                        </p>
+
+                        <p class="text-[9px] font-bold text-center mt-2">
+                            <span class="arabic-text">يتبع خلف الصفحة ٢٦ فقرة</span>
+                            <span class="mx-2">Remaining 26 Terms on back page</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Terms & Conditions -->
+        <div class="section-card">
+            <div class="grid grid-cols-2 gap-6">
+                <!-- English Column -->
+                <div>
+                    <h2 class="text-lg font-bold text-gray-700 mb-3 text-center">Terms & Conditions</h2>
+                    <div class="space-y-2 text-[10px] text-gray-700 leading-tight">
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">1</span>
+                            <p>Hirer or Guarantor should follow and execute all the terms and conditions mentioned in this contract.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">2</span>
+                            <p>Motor means car or whatever is hired together with its accessories</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">3</span>
+                            <p>In case of accident from hirer side he must pay full accident value with 2500 Dhs. plus daily rent for all days which a car in garage for repairing.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">4</span>
+                            <p>Hire charges should be paid in advance unless there is previous agreement.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">5</span>
+                            <p>Vehicle should be delivered to the hirer in a good condition according to the attached check out list and the hirer undertakes to keep sufficient water & Oil in the vehicle.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">6</span>
+                            <p>The Hirer has to return the vehicle to the office for the periodical services</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">7</span>
+                            <p>The quantity of fuel & oil at the end of hire should be same with quantity when the hirer received the vehicle.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">8</span>
+                            <p>The Hirer shall in case of total loss of the car, pay the cost of insurance policy and any amount that the insurance company shall discount according to its conditions plus the daily time rate for the day spent at court if any.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">9</span>
+                            <p>In case of any mechanical damage that occurs to the vehicle, Hirer should stop the vehicle & inform the office directly.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">10</span>
+                            <p>Hirer is responsible to pay fine if he repairs the vehicle without a written permission from the office.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">11</span>
+                            <p>Hirer should return back the vehicle before 9pm. Any delay the office will take payment for full day hire.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">12</span>
+                            <p>Hirer is responsible about any complaint case or any obligations regarding the vehicle before the office or the official authorities, which occurs within the hire period. Also he will alone be responsible if he uses the vehicle to transport any forbidden items that are considered as illegal as per any of the Country's law. Hirer also should pay the full amount to the contract until some arrangement is reached between hirer and the office.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">13</span>
+                            <p>Hirer should return back the vehicle at the end of hiring period mentioned in the contract unless the vehicle should be in good condition as it was in the beginning and after checking with and obtaining the approval of MARMAR RENT A CAR to renew the hire period, otherwise each delay in day of hire will be accounted as double at the day hire value mentioned in the contract.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">14</span>
+                            <p>MARMAR RENT A CAR has the right to take the proper procedure against the hirer if he did not obey or execute the contract conditions.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">15</span>
+                            <p>Hirer is responsible for all damages and repairs that occur to the vehicle within the hire period and he will pay the full amount of the contract until repairing the damages</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">16</span>
+                            <p>One day hire means 24 hours and any extra will be calculated as full day's hire</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">17</span>
+                            <p>The vehicle is for use in U.A.E. only. The insurance coverage is also for U.A.E. only.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">18</span>
+                            <p>The hirer undertakes not to stick color or paper on the vehicle glass or any other stickers on the vehicle's "body" otherwise hirer should pay a compensation of Dhs. to MARMAR RENT A CAR and will alone bear the full responsibility in front of the concerned authorities.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">19</span>
+                            <p>Hirer should inform the police and MARMAR RENT A CAR immediately if any accident occurs to the vehicle, otherwise hirer will also alone bear the full responsibility in front of the concerned authorities.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">20</span>
+                            <p>The hirer is less than 25 years old and responsible for the vehicle damages he/she should pay 20% from the amount of repairing.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">21</span>
+                            <p>The hirer is allowed to drive 300 kms per day, for anything above 300 kms there is a charge of 50 fils per km.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">22</span>
+                            <p>If no previous arrangement has been made for weekly, monthly rates then the hirer is liable to pay the daily rate.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">23</span>
+                            <p>Third party insurance only.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">24</span>
+                            <p>In case of accident caused by the hirer, he will pay Dhs. 2500/- for his responsibility.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">25</span>
+                            <p>It is strictly prohibited the smoking inside the vehicle. If so the hirer will be charged AED 200/- as penalty.</p>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <span class="font-semibold min-w-[16px]">26</span>
+                            <p>VAT 5% will be charged</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arabic Column -->
+                <div class="arabic-text">
+                    <h2 class="text-lg font-bold text-gray-700 mb-3 text-center">شروط الاتفاقية والبنود والالتزام</h2>
+                    <div class="space-y-2 text-[10px] text-gray-700 leading-tight">
+                        <div class="flex gap-1.5">
+                            <p>المحترل يجب تركيته إليه دون النظر إلى الجسم أو القول</p>
+                            <span class="font-semibold min-w-[16px]">١</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>يلتزم المستأجر أو الكفيل بتنفيذ كافة البنود التالية</p>
+                            <span class="font-semibold min-w-[16px]">٢</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>في حالة حصول حادث وكان المستأجر يحمل رخصة قيادة ماضي على صدورها أقل من سنة وهو المسبب في الحادث يتحمل ٪٢٠ من قيمة الحادث وإضافة إلى التحمل البالغ ٢٥٠٠ درهم، والإيجار اليومي لعدد أيام وقوف السيارة في الكراج لغرض التصليح</p>
+                            <span class="font-semibold min-w-[16px]">٣</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>إذا وقع حادث والسائق تحت تأثير المشروبات الروحية أو أي مسكر آخر يترتب عليه دفع تعويض كامل عن كافة الأضرار التي تصيب السيارة بالإضافة لأجرة السيارة أثناء التصليح</p>
+                            <span class="font-semibold min-w-[16px]">٤</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>سلمت المركبة للمستأجر بحالة جيدة حسب ما موضح في الرسم التخطيطي وتتعهد بملئها بالماء والزيت الضروري</p>
+                            <span class="font-semibold min-w-[16px]">٥</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>على المستأجر إعادة المركبة للتأجير للخدمات الدورية</p>
+                            <span class="font-semibold min-w-[16px]">٦</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>عند إعادة المركبة للمكتب يجب أن تكون الزيت والمحروقات كما كانت عليه عند التسليم</p>
+                            <span class="font-semibold min-w-[16px]">٧</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>في حال سقوط السيارة يتحمل المستأجر قيمة بوليصة التأمين مع أي مبلغ تقوم الشركة بخصمه بناء على شروط التأمين ويحتسب الإيجار على المستأجر حتى انتهاء القضية</p>
+                            <span class="font-semibold min-w-[16px]">٨</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>في حالة نزع الورقة اللاصقة الموجودة بالسيارة باسم الشركة يتحمل المستأجر ثلاثين درهم</p>
+                            <span class="font-semibold min-w-[16px]">٩</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>في حالة حدوث أي عطل فني للمركبة على المستأجر أن يقوم بإبلاغ مكتب مرمر لاتخاذ الإجراءات المناسبة وليس له الحق في السير بها ويتحمل كافة الأضرار الناجمة عن ذلك</p>
+                            <span class="font-semibold min-w-[16px]">١٠</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>ينبغي توظيف عودة المركبة قبل الساعة ٩ مساء وأي تأخير المكتب سوف يستغرق يوم كامل من المستأجر</p>
+                            <span class="font-semibold min-w-[16px]">١١</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>يتحمل المستأجر أن يشترك المركبة في أي سباق للمركبات وخلاف ذلك يتحمل المسؤولية</p>
+                            <span class="font-semibold min-w-[16px]">١٢</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>المستأجر مسؤول مسؤولية كاملة عن أي شكاوى أو قضية أو التزامات أخرى تتعلق باستخدام المركبة أو ما تقع عليه أو ممنوعات بعد انتهاء الفترة المحددة للتأجير يجب عليه تحمل كافة المسؤوليات الناجمة عن ذلك أمام الجهات الرسمية ويلتزم المستأجر بتحمل سريان عقد الإيجار لغاية الانتهاء من تسوية الأمور بينه وبين المكتب من جميع النواحي</p>
+                            <span class="font-semibold min-w-[16px]">١٣</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>يلتزم المستأجر بإرجاع المركبة عند انتهاء مدة الإيجار المذكورة في العقد، على أن تكون في حالة جيدة كما استلمها. كما يجوز للمستأجر تجديد عقد الإيجار بعد أن يدفع كافة الرسوم والعمولة ويوافق مكتب مرمر على التجديد وتسديد مدة الإيجار اليومي المذكور في العقد</p>
+                            <span class="font-semibold min-w-[16px]">١٤</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>في حالة عدم التزام المستأجر ببنود هذا العقد يكون للمكتب الحق في أن ينصرف ويحتسب المستأجر على ذلك وفقا لما يتناسب مع مصلحة المؤسسة</p>
+                            <span class="font-semibold min-w-[16px]">١٥</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>يتحمل المستأجر كافة فواتير الإصلاحات والأعطال الفنية التي تحدث للسيارة خلال فترة التأجير ويتحمل سريان العقد حتى الانتهاء من الإصلاحات والأعطال الفنية للمركبة المؤجرة</p>
+                            <span class="font-semibold min-w-[16px]">١٦</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>التأجير لمدة يوم يعني ٢٤ ساعة وما زاد عن ذلك يحتسب يوم كامل</p>
+                            <span class="font-semibold min-w-[16px]">١٧</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>المركبة صالحة للاستعمال في دولة الإمارات المتحدة وبوليصة التأمين سارية في دولة الإمارات المتحدة فقط وخلاف ذلك يتحمل المستأجر كافة المسؤولية</p>
+                            <span class="font-semibold min-w-[16px]">١٨</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>يتحمل المستأجر عدم إضافة أوراق ملونة على زجاج المركبة أو أي ملصقات أخرى على شكل المركبة، وخلاف ذلك يلتزم المستأجر بدفع تعويض قيمته ٥٠٠ درهم للمكتب كما يتحمل المسؤولية القانونية كاملة أمام الجهات المختصة</p>
+                            <span class="font-semibold min-w-[16px]">١٩</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>في حالة حدوث حادث للمركبة على المستأجر أن يقوم بإبلاغ الشرطة ومكتب مرمر فورا وخلاف ذلك يتحمل المسؤولية</p>
+                            <span class="font-semibold min-w-[16px]">٢٠</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>المسافة المحددة للمستأجر ٣٠٠ كيلومتر في اليوم الواحد وما يزيد عن ذلك يدفع ٥٠ فلس للكيلومتر الواحد</p>
+                            <span class="font-semibold min-w-[16px]">٢١</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>إذا لم يكن هناك اتفاق مسبق للإيجار الأسبوعي أو الشهري فسوف يحتسب السعر اليومي</p>
+                            <span class="font-semibold min-w-[16px]">٢٢</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>تأمين الطرف الثالث فقط</p>
+                            <span class="font-semibold min-w-[16px]">٢٣</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>إذا وقع حادث وكان المستأجر متسببا يتحمل قيمة ٢٥٠٠ درهم</p>
+                            <span class="font-semibold min-w-[16px]">٢٤</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>يحظر بشدة التدخين داخل السيارة والمستأجر سيكون عرضة لسداد غرامة بمبلغ ٣٠٠ درهم</p>
+                            <span class="font-semibold min-w-[16px]">٢٥</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <p>سيتم فرض ضريبة القيمة المضافة بنسبة ٥٪</p>
+                            <span class="font-semibold min-w-[16px]">٢٦</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authorization -->
+            <div class="mt-6 text-center text-[11px] text-gray-700 space-y-1">
+                <p><span class="font-bold">MARMAR RENT A CAR</span> hereby authorized to receive from the above said identity holder Traffic Fines and Penalty for Parking the car or any penalty due the police presently</p>
+                <p class="arabic-text"><span class="font-bold">مرمر لتأجير السيارات</span> مخول بموجب هذا باستلام الغرامات المرورية وغرامات ركن السيارة من حامل الهوية المذكور أعلاه أو أي غرامة مستحقة للشرطة حالياً</p>
+            </div>
+        </div>
+
+        <!-- Vehicle Inspection Photos Section -->
+        <div class="border-2 border-black p-6 mt-6">
+            <h2 class="text-lg font-bold text-center text-red-600 mb-4">VEHICLE INSPECTION PHOTOS / <span class="arabic-text">صور فحص المركبة</span></h2>
+            
+            <!-- Pre-Delivery Section -->
+            <div class="mb-6">
+                <h3 class="text-md font-bold text-center bg-gray-100 py-2 border border-black mb-3">
+                    PRE-DELIVERY INSPECTION / <span class="arabic-text">الفحص قبل التسليم</span>
+                </h3>
+                
+                <div class="grid grid-cols-3 gap-4">
+                    <!-- Front View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">FRONT VIEW</p>
+                                <p class="text-xs arabic-text">المنظر الأمامي</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Back View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">BACK VIEW</p>
+                                <p class="text-xs arabic-text">المنظر الخلفي</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">TOP VIEW</p>
+                                <p class="text-xs arabic-text">المنظر العلوي</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Left Side View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">LEFT SIDE VIEW</p>
+                                <p class="text-xs arabic-text">المنظر الأيسر</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">RIGHT SIDE VIEW</p>
+                                <p class="text-xs arabic-text">المنظر الأيمن</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post-Return Section -->
+            <div>
+                <h3 class="text-md font-bold text-center bg-gray-100 py-2 border border-black mb-3">
+                    POST-RETURN INSPECTION / <span class="arabic-text">الفحص بعد الإرجاع</span>
+                </h3>
+                
+                <div class="grid grid-cols-3 gap-4">
+                    <!-- Front View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">FRONT VIEW</p>
+                                <p class="text-xs arabic-text">المنظر الأمامي</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Back View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">BACK VIEW</p>
+                                <p class="text-xs arabic-text">المنظر الخلفي</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">TOP VIEW</p>
+                                <p class="text-xs arabic-text">المنظر العلوي</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Left Side View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">LEFT SIDE VIEW</p>
+                                <p class="text-xs arabic-text">المنظر الأيسر</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side View -->
+                    <div class="border-2 border-gray-400 p-3">
+                        <div class="bg-gray-100 h-48 flex items-center justify-center mb-2">
+                            <div class="text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-xs font-semibold">RIGHT SIDE VIEW</p>
+                                <p class="text-xs arabic-text">المنظر الأيمن</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="mt-4 border-t-2 border-gray-300 pt-3">
+                <p class="text-xs text-gray-600 text-center">
+                    <span class="font-semibold">Note:</span> Attach clear photographs of the vehicle from all angles before delivery and after return.
+                </p>
+                <p class="text-xs text-gray-600 text-center arabic-text">
+                    <span class="font-semibold">ملاحظة:</span> يرجى إرفاق صور واضحة للمركبة من جميع الزوايا قبل التسليم وبعد الإرجاع.
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-[10px] text-gray-600 pb-6 space-y-0.5">
+            <p>© MARMAR RENT A CAR - All Rights Reserved</p>
+            <p class="arabic-text">© مرمر لتأجير السيارات - جميع الحقوق محفوظة</p>
+        </div>
+    </div>
+<script id="twocol-sum">
+// INSERTED: auto-sum for two-column payment
+document.addEventListener('DOMContentLoaded', function(){
+  const fields = Array.from(document.querySelectorAll('[data-sum]'));
+  const totalEl = document.getElementById('total');
+  if(fields.length && totalEl){
+    const calc = () => {
+      const sum = fields.reduce((acc, el) => acc + (parseFloat(el.value) || 0), 0);
+      totalEl.value = sum.toFixed(2);
+    };
+    fields.forEach(el => el.addEventListener('input', calc));
+    calc();
+  }
+});
+</script>
+</body>
+</html>
