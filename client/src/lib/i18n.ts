@@ -39,6 +39,7 @@ const resources = {
       "common.all": "All",
       "common.dateFrom": "Date From",
       "common.dateTo": "Date To",
+      "common.saving": "Saving...",
       
       // Auth
       "auth.login": "Log In",
@@ -177,6 +178,11 @@ const resources = {
       "users.disabledBy": "Disabled By",
       "users.disabledAt": "Disabled At",
       "users.activeUsers": "Active Users",
+      "users.changePassword": "Change Password",
+      "users.changePasswordDesc": "Update your account password",
+      "users.currentPassword": "Current Password",
+      "users.newPassword": "New Password",
+      "users.passwordChanged": "Password changed successfully",
       
       // Roles
       "role.admin": "Admin",
@@ -283,6 +289,7 @@ const resources = {
       "common.all": "الكل",
       "common.dateFrom": "من تاريخ",
       "common.dateTo": "إلى تاريخ",
+      "common.saving": "جاري الحفظ...",
       
       // Auth
       "auth.login": "تسجيل الدخول",
@@ -421,6 +428,11 @@ const resources = {
       "users.disabledBy": "تم التعطيل بواسطة",
       "users.disabledAt": "تاريخ التعطيل",
       "users.activeUsers": "المستخدمون النشطون",
+      "users.changePassword": "تغيير كلمة المرور",
+      "users.changePasswordDesc": "تحديث كلمة مرور حسابك",
+      "users.currentPassword": "كلمة المرور الحالية",
+      "users.newPassword": "كلمة المرور الجديدة",
+      "users.passwordChanged": "تم تغيير كلمة المرور بنجاح",
       
       // Roles
       "role.admin": "مدير",
