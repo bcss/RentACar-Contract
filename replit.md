@@ -71,12 +71,15 @@ Preferred communication style: Simple, everyday language.
 3. **Contracts Table** - Core entity with bilingual fields, status tracking (draft/finalized), and comprehensive rental details
 4. **Audit Logs Table** - Immutable activity log for compliance and tracking
 5. **Contract Counter Table** - Ensures unique, sequential contract numbers
+6. **System Errors Table** - Tracks system-level errors with acknowledgment workflow
+7. **Company Settings Table** - Singleton table storing configurable company information displayed on contracts (bilingual)
 
 **Key Design Decisions:**
 - Draft vs. finalized status with immutability enforcement at application level
 - Bilingual field storage (separate columns for English/Arabic content)
 - Auto-incrementing contract numbers independent of primary keys
 - Comprehensive audit trail including user ID, action type, IP address, and details
+- Singleton pattern for global settings (company info, contract counter)
 
 ### Authentication & Authorization
 
@@ -110,7 +113,24 @@ Preferred communication style: Simple, everyday language.
 
 **Recent Changes (October 2025):**
 
-**UI/UX Enhancements - Integrated Views & Navigation (Latest):**
+**Company Settings Management (Latest):**
+- **Settings Page:** Admin-only page for managing company information displayed on contracts
+- **Database Schema:** Added companySettings table (singleton pattern) with 14 bilingual fields
+- **Configurable Fields:**
+  - Company names (English/Arabic)
+  - Legal names (English/Arabic)
+  - Tagline (English)
+  - Contact: phone, mobile (English/Arabic numbers)
+  - Email and website
+  - Address (English/Arabic)
+  - Logo URL (optional)
+- **Dynamic Contract Printing:** ContractView now fetches company settings and displays them in printable header
+- **API Endpoints:** GET /api/settings (all authenticated users), PUT /api/settings (admin-only)
+- **Audit Logging:** All settings changes tracked in audit logs
+- **Translations:** Full English/Arabic support for all settings labels and messages
+- **Navigation:** Added Settings menu item to sidebar (visible only to admins)
+
+**UI/UX Enhancements - Integrated Views & Navigation:**
 - **Dashboard Navigation:** Added Dashboard as primary menu item in sidebar
 - **Consolidated User Controls:** Moved user profile and logout to sidebar footer dropdown with password change option
 - **Tabbed Views:** Integrated disabled users and disabled contracts into main pages using tabs (Active/Disabled) instead of separate pages

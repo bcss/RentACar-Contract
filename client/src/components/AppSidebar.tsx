@@ -74,6 +74,12 @@ export function AppSidebar() {
       url: '/audit-logs',
       show: isAdmin || isManager,
     },
+    {
+      title: t('nav.settings'),
+      icon: 'settings',
+      url: '/settings',
+      show: isAdmin,
+    },
   ];
 
   const getRoleBadgeVariant = (role: string) => {

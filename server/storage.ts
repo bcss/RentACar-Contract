@@ -4,6 +4,7 @@ import {
   auditLogs,
   contractCounter,
   systemErrors,
+  companySettings,
   type User,
   type UpsertUser,
   type Contract,
@@ -11,6 +12,8 @@ import {
   type InsertAuditLog,
   type AuditLog,
   type SystemError,
+  type CompanySettings,
+  type InsertCompanySettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql } from "drizzle-orm";
@@ -74,6 +77,10 @@ export interface IStorage {
     repeatCustomerRate: number;
     newCustomersThisMonth: number;
   }>;
+  
+  // Company settings operations
+  getCompanySettings(): Promise<CompanySettings>;
+  updateCompanySettings(settings: Partial<InsertCompanySettings>, updatedBy: string): Promise<CompanySettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -497,6 +504,36 @@ export class DatabaseStorage implements IStorage {
       repeatCustomerRate,
       newCustomersThisMonth,
     };
+  }
+
+  // Company settings operations
+  async getCompanySettings(): Promise<CompanySettings> {
+    const [settings] = await db.select().from(companySettings).where(eq(companySettings.id, "singleton"));
+    
+    // If no settings exist, create default ones
+    if (!settings) {
+      const [newSettings] = await db
+        .insert(companySettings)
+        .values({ id: "singleton" })
+        .returning();
+      return newSettings;
+    }
+    
+    return settings;
+  }
+
+  async updateCompanySettings(settingsData: Partial<InsertCompanySettings>, updatedBy: string): Promise<CompanySettings> {
+    const [updated] = await db
+      .update(companySettings)
+      .set({
+        ...settingsData,
+        updatedBy,
+        updatedAt: new Date(),
+      })
+      .where(eq(companySettings.id, "singleton"))
+      .returning();
+    
+    return updated;
   }
 }
 

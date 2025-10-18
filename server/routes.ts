@@ -2,9 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
+import { seedCompanySettings } from "./seedCompanySettings";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -12,6 +13,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Seed super admin on startup
   await seedSuperAdmin();
+  
+  // Seed company settings on startup
+  await seedCompanySettings();
 
   // Helper function to create audit log
   async function createAuditLog(userId: string, action: string, contractId?: string, ipAddress?: string, details?: string) {
@@ -442,6 +446,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching customer analytics:", error);
       res.status(500).json({ message: "Failed to fetch customer analytics" });
+    }
+  });
+
+  // Company settings routes (Admin only)
+  app.get('/api/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching company settings:", error);
+      res.status(500).json({ message: "Failed to fetch company settings" });
+    }
+  });
+
+  app.put('/api/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Validate request body
+      const validatedData = insertCompanySettingsSchema.parse(req.body);
+      
+      const settings = await storage.updateCompanySettings(validatedData, userId);
+      
+      // Create audit log
+      await createAuditLog(
+        userId,
+        'update_settings',
+        undefined,
+        req.ip,
+        'Updated company settings'
+      );
+      
+      res.json(settings);
+    } catch (error: any) {
+      console.error("Error updating company settings:", error);
+      res.status(400).json({ message: error.message || "Failed to update company settings" });
     }
   });
 

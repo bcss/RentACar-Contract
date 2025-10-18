@@ -340,7 +340,17 @@
   margin: 1cm;
 }
 
+/* Hide print-only content on screen */
+.print-only {
+  display: none;
+}
+
 @media print {
+  /* Show print-only content when printing */
+  .print-only {
+    display: block !important;
+  }
+
   /* Hide navigation, buttons, and UI elements */
   aside,
   header,

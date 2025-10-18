@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { Contract } from '@shared/schema';
+import { Contract, CompanySettings } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,6 +45,11 @@ export default function ContractView() {
 
   const { data: contract, isLoading } = useQuery<Contract>({
     queryKey: ['/api/contracts', params.id],
+    enabled: isAuthenticated,
+  });
+
+  const { data: companySettings } = useQuery<CompanySettings>({
+    queryKey: ['/api/settings'],
     enabled: isAuthenticated,
   });
 
@@ -139,7 +144,65 @@ export default function ContractView() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      {/* Company Header - Visible only when printing */}
+      {companySettings && (
+        <div className="print-only border-2 border-black p-4 mb-6">
+          <div className="grid grid-cols-3 gap-4 items-start">
+            {/* Left: English Company Info */}
+            <div className="text-left">
+              <h1 className="text-4xl font-bold text-red-600 mb-1">{companySettings.companyNameEn}</h1>
+              <p className="text-xs font-semibold">{companySettings.companyLegalNameEn}</p>
+              <div className="text-[9px] mt-2 space-y-0.5">
+                <p>Tel : {companySettings.phone}</p>
+                <p>Mob. : {companySettings.mobile}</p>
+                <p>{companySettings.addressEn}</p>
+                <p>Email: {companySettings.email}</p>
+                <p>{companySettings.website}</p>
+              </div>
+            </div>
+
+            {/* Center: Logo and Title */}
+            <div className="text-center">
+              <div className="flex justify-center items-center gap-2 mb-2">
+                {companySettings.logoUrl ? (
+                  <img src={companySettings.logoUrl} alt="Company Logo" className="w-16 h-16 object-contain" />
+                ) : (
+                  <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                    <span className="text-xs">LOGO</span>
+                  </div>
+                )}
+                <div>
+                  <p className="text-2xl font-bold text-red-600">{companySettings.companyNameEn}</p>
+                  <p className="text-xs font-semibold">{companySettings.taglineEn}</p>
+                </div>
+              </div>
+              <div className="border-2 border-red-600 rounded-full px-6 py-1 inline-block mt-2">
+                <p className="text-sm font-bold">CAR HIRE CONTRACT <span className="font-arabic">عقــد تـأجـيــر الـسـيــارات</span></p>
+              </div>
+            </div>
+
+            {/* Right: Arabic Company Info */}
+            <div className="text-right font-arabic">
+              <h1 className="text-3xl font-bold mb-1">{companySettings.companyNameAr}</h1>
+              <p className="text-xs font-semibold">{companySettings.companyLegalNameAr}</p>
+              <div className="text-[9px] mt-2 space-y-0.5">
+                <p>هاتف: {companySettings.phoneAr}</p>
+                <p>متحرك: {companySettings.mobileAr}</p>
+                <p>{companySettings.addressAr}</p>
+                <p>بريد الإلكتروني: {companySettings.email}</p>
+                <p>{companySettings.website}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contract Number */}
+          <div className="text-left mt-2">
+            <p className="text-sm font-semibold">Contract No. / <span className="font-arabic">رقم العقد</span>: {contract?.contractNumber}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between flex-wrap gap-4 no-print">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold font-mono" data-testid="text-contract-number">

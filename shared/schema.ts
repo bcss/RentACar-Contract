@@ -179,3 +179,41 @@ export const systemErrors = pgTable("system_errors", {
 
 export type InsertSystemError = typeof systemErrors.$inferInsert;
 export type SystemError = typeof systemErrors.$inferSelect;
+
+// Company settings table (singleton)
+export const companySettings = pgTable("company_settings", {
+  id: varchar("id").primaryKey().default("singleton"),
+  // Company Names
+  companyNameEn: varchar("company_name_en").notNull().default("MARMAR"),
+  companyNameAr: varchar("company_name_ar").notNull().default("مــرمــر"),
+  companyLegalNameEn: varchar("company_legal_name_en").notNull().default("CARS AND BUSES RENTAL LLC"),
+  companyLegalNameAr: varchar("company_legal_name_ar").notNull().default("لتأجير الحافلات والسيارات ش.ذ.م.م"),
+  taglineEn: varchar("tagline_en").notNull().default("RENT A CAR"),
+  taglineAr: varchar("tagline_ar").notNull().default("تأجير السيارات"),
+  
+  // Contact Information
+  phone: varchar("phone").notNull().default("07 222 12 33"),
+  phoneAr: varchar("phone_ar").notNull().default("٠٧ ٢٢٢ ١٢ ٣٣"),
+  mobile: varchar("mobile").notNull().default("050 50 33 786 / 050 648 24 24"),
+  mobileAr: varchar("mobile_ar").notNull().default("٠٥٠ ٥٠ ٣٣ ٧٨٦ / ٠٥٠ ٦٤٨ ٢٤ ٢٤"),
+  email: varchar("email").notNull().default("marmarrac@gmail.com"),
+  website: varchar("website").notNull().default("www.marmarcars.com"),
+  
+  // Address
+  addressEn: varchar("address_en").notNull().default("P.O. Box : 34088, Al Nakeel, RAK - UAE"),
+  addressAr: varchar("address_ar").notNull().default("ص.ب: ٣٤٠٨٨، النخيل، رأس الخيمة - الإمارات"),
+  
+  // Logo (optional, can be URL or base64)
+  logoUrl: varchar("logo_url"),
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by").references(() => users.id),
+});
+
+export const insertCompanySettingsSchema = createInsertSchema(companySettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertCompanySettings = z.infer<typeof insertCompanySettingsSchema>;
+export type CompanySettings = typeof companySettings.$inferSelect;

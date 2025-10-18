@@ -18,6 +18,7 @@ import Users from "@/pages/Users";
 import DisabledUsers from "@/pages/DisabledUsers";
 import DisabledContracts from "@/pages/DisabledContracts";
 import AuditLogs from "@/pages/AuditLogs";
+import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import "@/lib/i18n";
 
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/disabled-users" component={DisabledUsers} />
       <Route path="/disabled-contracts" component={DisabledContracts} />
       <Route path="/audit-logs" component={AuditLogs} />
+      <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );
