@@ -60,13 +60,33 @@ export const contracts = pgTable("contracts", {
   contractNumber: integer("contract_number").notNull().unique(),
   status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, finalized
   
-  // Customer Information
+  // Hirer Type - determines which fields are required
+  hirerType: varchar("hirer_type", { length: 20 }).notNull().default("direct"), // direct, with_sponsor, from_company
+  
+  // Customer/Hirer Information (for all types)
   customerNameEn: varchar("customer_name_en").notNull(),
   customerNameAr: varchar("customer_name_ar"),
+  gender: varchar("gender", { length: 10 }), // male, female
+  dateOfBirth: timestamp("date_of_birth"),
+  idNumber: varchar("id_number"), // National ID or Passport Number
   customerPhone: varchar("customer_phone").notNull(),
   customerEmail: varchar("customer_email"),
   customerAddress: text("customer_address"),
   licenseNumber: varchar("license_number").notNull(),
+  licenseIssueDate: timestamp("license_issue_date"),
+  licenseExpiryDate: timestamp("license_expiry_date"),
+  
+  // Sponsor Information (only for hirer_type = "with_sponsor")
+  sponsorNameEn: varchar("sponsor_name_en"),
+  sponsorNameAr: varchar("sponsor_name_ar"),
+  sponsorIdNumber: varchar("sponsor_id_number"),
+  sponsorPhone: varchar("sponsor_phone"),
+  
+  // Company Information (only for hirer_type = "from_company")
+  companyNameEn: varchar("company_name_en"),
+  companyNameAr: varchar("company_name_ar"),
+  companyContactPerson: varchar("company_contact_person"),
+  companyPhone: varchar("company_phone"),
   
   // Vehicle Information
   vehicleMake: varchar("vehicle_make").notNull(),
@@ -75,18 +95,31 @@ export const contracts = pgTable("contracts", {
   vehicleColor: varchar("vehicle_color").notNull(),
   vehiclePlate: varchar("vehicle_plate").notNull(),
   vehicleVin: varchar("vehicle_vin"),
+  vehicleCondition: text("vehicle_condition"), // JSON array of damaged areas/notes
+  fuelLevelStart: varchar("fuel_level_start"), // e.g., "Full", "3/4", "1/2", "1/4", "Empty"
+  fuelLevelEnd: varchar("fuel_level_end"),
+  odometerStart: integer("odometer_start"),
+  odometerEnd: integer("odometer_end"),
   
   // Rental Details
+  rentalType: varchar("rental_type", { length: 20 }).notNull().default("daily"), // daily, weekly, monthly
   rentalStartDate: timestamp("rental_start_date").notNull(),
   rentalEndDate: timestamp("rental_end_date").notNull(),
+  rentalStartTime: varchar("rental_start_time"), // e.g., "09:00"
+  rentalEndTime: varchar("rental_end_time"),
   pickupLocation: varchar("pickup_location").notNull(),
   dropoffLocation: varchar("dropoff_location").notNull(),
   
   // Pricing
   dailyRate: varchar("daily_rate").notNull(),
+  weeklyRate: varchar("weekly_rate"),
+  monthlyRate: varchar("monthly_rate"),
+  mileageLimit: integer("mileage_limit"), // e.g., 300 km per day
+  extraKmRate: varchar("extra_km_rate"), // e.g., "0.50" AED per km
   totalDays: integer("total_days").notNull(),
   totalAmount: varchar("total_amount").notNull(),
-  deposit: varchar("deposit"),
+  securityDeposit: varchar("security_deposit"), // Refundable deposit
+  accidentLiability: varchar("accident_liability"), // e.g., "2500" AED hirer responsibility
   
   // Additional Information
   notes: text("notes"),
