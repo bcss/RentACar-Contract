@@ -414,6 +414,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics routes (Admin and Manager)
+  app.get('/api/analytics/revenue', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const analytics = await storage.getRevenueAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching revenue analytics:", error);
+      res.status(500).json({ message: "Failed to fetch revenue analytics" });
+    }
+  });
+
+  app.get('/api/analytics/operations', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const analytics = await storage.getOperationalAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching operational analytics:", error);
+      res.status(500).json({ message: "Failed to fetch operational analytics" });
+    }
+  });
+
+  app.get('/api/analytics/customers', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const analytics = await storage.getCustomerAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching customer analytics:", error);
+      res.status(500).json({ message: "Failed to fetch customer analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
