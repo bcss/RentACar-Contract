@@ -36,6 +36,9 @@ const resources = {
       "common.success": "Success",
       "common.active": "Active",
       "common.disabled": "Disabled",
+      "common.all": "All",
+      "common.dateFrom": "Date From",
+      "common.dateTo": "Date To",
       
       // Auth
       "auth.login": "Log In",
@@ -277,6 +280,9 @@ const resources = {
       "common.success": "نجح",
       "common.active": "نشط",
       "common.disabled": "معطل",
+      "common.all": "الكل",
+      "common.dateFrom": "من تاريخ",
+      "common.dateTo": "إلى تاريخ",
       
       // Auth
       "auth.login": "تسجيل الدخول",
