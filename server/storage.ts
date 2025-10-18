@@ -249,6 +249,125 @@ export class DatabaseStorage implements IStorage {
     return finalized;
   }
 
+  // Phase 2.1: State transition methods
+  async confirmContract(id: string, userId: string): Promise<Contract> {
+    const [confirmed] = await db
+      .update(contracts)
+      .set({
+        status: 'confirmed',
+        confirmedBy: userId,
+        confirmedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return confirmed;
+  }
+
+  async activateContract(id: string, userId: string): Promise<Contract> {
+    const [activated] = await db
+      .update(contracts)
+      .set({
+        status: 'active',
+        activatedBy: userId,
+        activatedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return activated;
+  }
+
+  async completeContract(id: string, userId: string, chargeData: {
+    extraKmCharge?: string;
+    extraKmDriven?: number;
+    fuelCharge?: string;
+    damageCharge?: string;
+    otherCharges?: string;
+    totalExtraCharges?: string;
+    outstandingBalance?: string;
+  }): Promise<Contract> {
+    const [completed] = await db
+      .update(contracts)
+      .set({
+        status: 'completed',
+        completedBy: userId,
+        completedAt: new Date(),
+        ...chargeData,
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return completed;
+  }
+
+  async closeContract(id: string, userId: string): Promise<Contract> {
+    const [closed] = await db
+      .update(contracts)
+      .set({
+        status: 'closed',
+        closedBy: userId,
+        closedAt: new Date(),
+        paymentStatus: 'paid', // Mark as fully paid when closing
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return closed;
+  }
+
+  // Phase 2.4: Payment recording methods
+  async recordDepositPayment(id: string, method: string): Promise<Contract> {
+    const [updated] = await db
+      .update(contracts)
+      .set({
+        depositPaid: true,
+        depositPaidDate: new Date(),
+        depositPaidMethod: method,
+        paymentStatus: 'partial',
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async recordFinalPayment(id: string, method: string): Promise<Contract> {
+    const [updated] = await db
+      .update(contracts)
+      .set({
+        finalPaymentReceived: true,
+        finalPaymentDate: new Date(),
+        finalPaymentMethod: method,
+        paymentStatus: 'paid',
+        outstandingBalance: '0',
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async recordDepositRefund(id: string): Promise<Contract> {
+    const [updated] = await db
+      .update(contracts)
+      .set({
+        depositRefunded: true,
+        depositRefundedDate: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(contracts.id, id))
+      .returning();
+    
+    return updated;
+  }
+
   async disableContract(id: string, userId: string): Promise<Contract> {
     const [disabled] = await db
       .update(contracts)

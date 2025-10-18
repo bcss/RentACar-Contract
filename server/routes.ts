@@ -49,7 +49,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contract routes
   app.get('/api/contracts', isAuthenticated, async (req: any, res) => {
     try {
-      const contracts = await storage.getAllContracts();
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Phase 1.5: Filter contracts based on user role
+      // Admin, Manager, Viewer: See all contracts
+      // Staff: Only see their own contracts
+      let contracts = await storage.getAllContracts();
+      
+      if (user.role === 'staff') {
+        contracts = contracts.filter(contract => contract.createdBy === userId);
+      }
+      
       res.json(contracts);
     } catch (error) {
       console.error("Error fetching contracts:", error);
@@ -70,10 +85,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/contracts/:id', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
       const contract = await storage.getContract(req.params.id);
+      
       if (!contract) {
         return res.status(404).json({ message: "Contract not found" });
       }
+      
+      // Phase 1.5: Staff can only view their own contracts
+      if (user?.role === 'staff' && contract.createdBy !== userId) {
+        return res.status(403).json({ message: "Forbidden: You can only view your own contracts" });
+      }
+      
       res.json(contract);
     } catch (error) {
       console.error("Error fetching contract:", error);
@@ -154,6 +178,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error finalizing contract:", error);
       res.status(400).json({ message: error.message || "Failed to finalize contract" });
+    }
+  });
+
+  // Phase 2: State transition routes (Admin/Manager only)
+  
+  // Confirm contract (draft → confirmed)
+  app.post('/api/contracts/:id/confirm', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const confirmed = await storage.confirmContract(req.params.id, userId);
+      
+      // Create audit log
+      await createAuditLog(userId, 'confirm', confirmed.id, req.ip, `Confirmed contract #${confirmed.contractNumber}`);
+      
+      res.json(confirmed);
+    } catch (error: any) {
+      console.error("Error confirming contract:", error);
+      res.status(400).json({ message: error.message || "Failed to confirm contract" });
+    }
+  });
+
+  // Activate rental (confirmed → active)
+  app.post('/api/contracts/:id/activate', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const activated = await storage.activateContract(req.params.id, userId);
+      
+      // Create audit log
+      await createAuditLog(userId, 'activate', activated.id, req.ip, `Activated contract #${activated.contractNumber} - vehicle handed over`);
+      
+      res.json(activated);
+    } catch (error: any) {
+      console.error("Error activating contract:", error);
+      res.status(400).json({ message: error.message || "Failed to activate contract" });
+    }
+  });
+
+  // Complete rental with return data (active → completed)
+  app.post('/api/contracts/:id/complete', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const { odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven } = req.body;
+      
+      // Prepare charge data
+      const chargeData = {
+        extraKmCharge,
+        extraKmDriven,
+        fuelCharge,
+        damageCharge,
+        otherCharges,
+        totalExtraCharges,
+        outstandingBalance,
+      };
+
+      // Update contract with return inspection data
+      await storage.updateContract(req.params.id, {
+        odometerEnd,
+        fuelLevelEnd,
+        vehicleCondition,
+      });
+
+      // Complete the contract with charge data
+      const completed = await storage.completeContract(req.params.id, userId, chargeData);
+      
+      // Create audit log
+      await createAuditLog(userId, 'complete', completed.id, req.ip, `Completed contract #${completed.contractNumber} - vehicle returned`);
+      
+      res.json(completed);
+    } catch (error: any) {
+      console.error("Error completing contract:", error);
+      res.status(400).json({ message: error.message || "Failed to complete contract" });
+    }
+  });
+
+  // Close contract (completed → closed)
+  app.post('/api/contracts/:id/close', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const closed = await storage.closeContract(req.params.id, userId);
+      
+      // Create audit log
+      await createAuditLog(userId, 'close', closed.id, req.ip, `Closed contract #${closed.contractNumber} - all settled`);
+      
+      res.json(closed);
+    } catch (error: any) {
+      console.error("Error closing contract:", error);
+      res.status(400).json({ message: error.message || "Failed to close contract" });
+    }
+  });
+
+  // Phase 2: Payment recording routes (Admin/Manager only)
+  
+  // Record deposit payment
+  app.post('/api/contracts/:id/deposit', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const { method } = req.body;
+      
+      if (!method) {
+        return res.status(400).json({ message: "Payment method is required" });
+      }
+
+      const updated = await storage.recordDepositPayment(req.params.id, method);
+      
+      // Create audit log
+      await createAuditLog(userId, 'payment', updated.id, req.ip, `Recorded deposit payment for contract #${updated.contractNumber} via ${method}`);
+      
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error recording deposit payment:", error);
+      res.status(400).json({ message: error.message || "Failed to record deposit payment" });
+    }
+  });
+
+  // Record final payment
+  app.post('/api/contracts/:id/final-payment', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const { method } = req.body;
+      
+      if (!method) {
+        return res.status(400).json({ message: "Payment method is required" });
+      }
+
+      const updated = await storage.recordFinalPayment(req.params.id, method);
+      
+      // Create audit log
+      await createAuditLog(userId, 'payment', updated.id, req.ip, `Recorded final payment for contract #${updated.contractNumber} via ${method}`);
+      
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error recording final payment:", error);
+      res.status(400).json({ message: error.message || "Failed to record final payment" });
+    }
+  });
+
+  // Record deposit refund
+  app.post('/api/contracts/:id/refund', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const updated = await storage.recordDepositRefund(req.params.id);
+      
+      // Create audit log
+      await createAuditLog(userId, 'refund', updated.id, req.ip, `Refunded deposit for contract #${updated.contractNumber}`);
+      
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error recording deposit refund:", error);
+      res.status(400).json({ message: error.message || "Failed to record deposit refund" });
     }
   });
 
