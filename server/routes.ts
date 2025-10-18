@@ -57,6 +57,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get disabled contracts (Admin only) - MUST be before :id route
+  app.get('/api/contracts/disabled', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const contracts = await storage.getDisabledContracts();
+      res.json(contracts);
+    } catch (error: any) {
+      console.error("Error fetching disabled contracts:", error);
+      res.status(500).json({ message: "Failed to fetch disabled contracts" });
+    }
+  });
+
   app.get('/api/contracts/:id', isAuthenticated, async (req: any, res) => {
     try {
       const contract = await storage.getContract(req.params.id);
@@ -175,17 +186,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error enabling contract:", error);
       res.status(400).json({ message: error.message || "Failed to enable contract" });
-    }
-  });
-
-  // Get disabled contracts (Admin only)
-  app.get('/api/contracts/disabled', isAuthenticated, requireAdmin, async (req: any, res) => {
-    try {
-      const contracts = await storage.getDisabledContracts();
-      res.json(contracts);
-    } catch (error: any) {
-      console.error("Error fetching disabled contracts:", error);
-      res.status(500).json({ message: "Failed to fetch disabled contracts" });
     }
   });
 
