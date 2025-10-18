@@ -5,6 +5,7 @@ const resources = {
   en: {
     translation: {
       // Navigation
+      "nav.menu": "Menu",
       "nav.dashboard": "Dashboard",
       "nav.contracts": "Contracts",
       "nav.users": "Users",
@@ -39,6 +40,8 @@ const resources = {
       // Auth
       "auth.login": "Log In",
       "auth.logout": "Log Out",
+      "auth.myAccount": "My Account",
+      "auth.logoutFailed": "Failed to log out",
       "auth.welcome": "Welcome",
       "auth.welcomeBack": "Welcome back",
       
@@ -243,6 +246,7 @@ const resources = {
   ar: {
     translation: {
       // Navigation
+      "nav.menu": "القائمة",
       "nav.dashboard": "لوحة التحكم",
       "nav.contracts": "العقود",
       "nav.users": "المستخدمون",
@@ -277,6 +281,8 @@ const resources = {
       // Auth
       "auth.login": "تسجيل الدخول",
       "auth.logout": "تسجيل الخروج",
+      "auth.myAccount": "حسابي",
+      "auth.logoutFailed": "فشل تسجيل الخروج",
       "auth.welcome": "مرحباً",
       "auth.welcomeBack": "مرحباً بعودتك",
       
