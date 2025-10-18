@@ -6,7 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { insertContractSchema, type InsertContract, type Contract } from '@shared/schema';
+import { insertContractSchema, type InsertContract, type Contract, type CompanySettings } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,6 +57,11 @@ export default function ContractForm() {
     enabled: isEditing && isAuthenticated,
   });
 
+  const { data: settings } = useQuery<CompanySettings>({
+    queryKey: ['/api/settings'],
+    enabled: isAuthenticated,
+  });
+
   const form = useForm<InsertContract>({
     resolver: zodResolver(insertContractSchema),
     defaultValues: {
@@ -100,9 +105,108 @@ export default function ContractForm() {
         dateOfBirth: existingContract.dateOfBirth ? new Date(existingContract.dateOfBirth) : undefined,
         licenseIssueDate: existingContract.licenseIssueDate ? new Date(existingContract.licenseIssueDate) : undefined,
         licenseExpiryDate: existingContract.licenseExpiryDate ? new Date(existingContract.licenseExpiryDate) : undefined,
-      });
+        depositPaidDate: existingContract.depositPaidDate ? new Date(existingContract.depositPaidDate) : undefined,
+        depositRefundedDate: existingContract.depositRefundedDate ? new Date(existingContract.depositRefundedDate) : undefined,
+        finalPaymentDate: existingContract.finalPaymentDate ? new Date(existingContract.finalPaymentDate) : undefined,
+        confirmedAt: existingContract.confirmedAt ? new Date(existingContract.confirmedAt) : undefined,
+        activatedAt: existingContract.activatedAt ? new Date(existingContract.activatedAt) : undefined,
+        completedAt: existingContract.completedAt ? new Date(existingContract.completedAt) : undefined,
+        closedAt: existingContract.closedAt ? new Date(existingContract.closedAt) : undefined,
+      } as InsertContract);
     }
   }, [existingContract, form]);
+
+  // Auto-calculate totalDays from date range
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'rentalStartDate' || name === 'rentalEndDate') {
+        const startDate = value.rentalStartDate;
+        const endDate = value.rentalEndDate;
+        
+        if (startDate instanceof Date && !isNaN(startDate.getTime()) && 
+            endDate instanceof Date && !isNaN(endDate.getTime())) {
+          const diffTime = endDate.getTime() - startDate.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const totalDays = Math.max(1, diffDays); // Minimum 1 day
+          form.setValue('totalDays', totalDays);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Auto-calculate subtotal from rate and days
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'dailyRate' || name === 'weeklyRate' || name === 'monthlyRate' || 
+          name === 'rentalType' || name === 'totalDays') {
+        const rentalType = value.rentalType || 'daily';
+        const totalDays = value.totalDays || 1;
+        let subtotal = 0;
+
+        if (rentalType === 'daily' && value.dailyRate) {
+          const rate = parseFloat(value.dailyRate);
+          if (!isNaN(rate)) {
+            subtotal = rate * totalDays;
+          }
+        } else if (rentalType === 'weekly' && value.weeklyRate) {
+          const rate = parseFloat(value.weeklyRate);
+          if (!isNaN(rate)) {
+            const weeks = Math.ceil(totalDays / 7);
+            subtotal = rate * weeks;
+          }
+        } else if (rentalType === 'monthly' && value.monthlyRate) {
+          const rate = parseFloat(value.monthlyRate);
+          if (!isNaN(rate)) {
+            const months = Math.ceil(totalDays / 30);
+            subtotal = rate * months;
+          }
+        }
+
+        if (subtotal > 0) {
+          form.setValue('subtotal', subtotal.toFixed(2));
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Auto-calculate VAT amount from subtotal
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'subtotal') {
+        const subtotalValue = value.subtotal;
+        const vatPercentage = settings?.vatPercentage || '5';
+        
+        if (subtotalValue) {
+          const subtotalNum = parseFloat(subtotalValue);
+          const vatRate = parseFloat(vatPercentage);
+          
+          if (!isNaN(subtotalNum) && !isNaN(vatRate)) {
+            const vatAmount = subtotalNum * (vatRate / 100);
+            form.setValue('vatAmount', vatAmount.toFixed(2));
+          }
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, settings]);
+
+  // Auto-calculate totalAmount from subtotal and vatAmount
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'subtotal' || name === 'vatAmount') {
+        const subtotalValue = parseFloat(value.subtotal || '0');
+        const vatAmountValue = parseFloat(value.vatAmount || '0');
+        
+        if (!isNaN(subtotalValue) && !isNaN(vatAmountValue)) {
+          const total = subtotalValue + vatAmountValue;
+          form.setValue('totalAmount', total.toFixed(2));
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertContract) => {
@@ -457,21 +561,26 @@ export default function ContractForm() {
                 )}
               />
               
+              <FormField
+                control={form.control}
+                name="licenseNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t('form.licenseNumber')}
+                      {hirerType === 'from_company' && (
+                        <span className="text-muted-foreground text-sm ml-2">({t('common.optional')})</span>
+                      )}
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} data-testid="input-license-number" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {hirerType !== 'from_company' && (
                 <>
-                  <FormField
-                    control={form.control}
-                    name="licenseNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('form.licenseNumber')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} data-testid="input-license-number" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="licenseIssueDate"
@@ -957,6 +1066,47 @@ export default function ContractForm() {
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value))}
                         data-testid="input-total-days"
+                        readOnly
+                        className="bg-muted"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="subtotal"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.subtotal')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        value={field.value || ''} 
+                        data-testid="input-subtotal" 
+                        readOnly
+                        className="bg-muted"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="vatAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.vatAmount')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        value={field.value || ''} 
+                        data-testid="input-vat-amount" 
+                        readOnly
+                        className="bg-muted"
                       />
                     </FormControl>
                     <FormMessage />
@@ -1004,7 +1154,12 @@ export default function ContractForm() {
                   <FormItem>
                     <FormLabel>{t('form.totalAmount')}</FormLabel>
                     <FormControl>
-                      <Input {...field} data-testid="input-total-amount" />
+                      <Input 
+                        {...field} 
+                        data-testid="input-total-amount" 
+                        readOnly
+                        className="bg-muted font-bold"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

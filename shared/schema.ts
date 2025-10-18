@@ -25,7 +25,7 @@ export const sessions = pgTable(
 );
 
 // User storage table - Internal authentication with username/password
-export const users = pgTable("users", {
+export const users: ReturnType<typeof pgTable> = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: varchar("username").unique().notNull(),
   passwordHash: varchar("password_hash").notNull(),
@@ -36,7 +36,7 @@ export const users = pgTable("users", {
   role: varchar("role", { length: 20 }).notNull().default("staff"), // admin, manager, staff, viewer
   isImmutable: boolean("is_immutable").notNull().default(false), // Super admin cannot be deleted
   disabled: boolean("disabled").notNull().default(false), // Disabled users cannot login
-  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledBy: varchar("disabled_by"),
   disabledAt: timestamp("disabled_at"),
   lastPasswordChange: timestamp("last_password_change").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -58,7 +58,7 @@ export type User = typeof users.$inferSelect;
 export const contracts = pgTable("contracts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractNumber: integer("contract_number").notNull().unique(),
-  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, finalized
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, confirmed, active, completed, closed
   
   // Hirer Type - determines which fields are required
   hirerType: varchar("hirer_type", { length: 20 }).notNull().default("direct"), // direct, with_sponsor, from_company
@@ -72,7 +72,7 @@ export const contracts = pgTable("contracts", {
   customerPhone: varchar("customer_phone").notNull(),
   customerEmail: varchar("customer_email"),
   customerAddress: text("customer_address"),
-  licenseNumber: varchar("license_number").notNull(),
+  licenseNumber: varchar("license_number"), // Optional for company rentals
   licenseIssueDate: timestamp("license_issue_date"),
   licenseExpiryDate: timestamp("license_expiry_date"),
   
@@ -117,20 +117,54 @@ export const contracts = pgTable("contracts", {
   mileageLimit: integer("mileage_limit"), // e.g., 300 km per day
   extraKmRate: varchar("extra_km_rate"), // e.g., "0.50" AED per km
   totalDays: integer("total_days").notNull(),
-  totalAmount: varchar("total_amount").notNull(),
-  securityDeposit: varchar("security_deposit"), // Refundable deposit
+  
+  // Financial Breakdown (Phase 1 & 2)
+  subtotal: varchar("subtotal"), // Base rental amount before VAT
+  vatAmount: varchar("vat_amount"), // Calculated VAT
+  totalAmount: varchar("total_amount").notNull(), // Grand total including VAT
+  securityDeposit: varchar("security_deposit"), // Refundable deposit amount
   accidentLiability: varchar("accident_liability"), // e.g., "2500" AED hirer responsibility
+  
+  // Payment Tracking (Phase 1)
+  depositPaid: boolean("deposit_paid").notNull().default(false),
+  depositPaidDate: timestamp("deposit_paid_date"),
+  depositPaidMethod: varchar("deposit_paid_method", { length: 50 }), // cash, card, bank_transfer
+  depositRefunded: boolean("deposit_refunded").notNull().default(false),
+  depositRefundedDate: timestamp("deposit_refunded_date"),
+  finalPaymentReceived: boolean("final_payment_received").notNull().default(false),
+  finalPaymentDate: timestamp("final_payment_date"),
+  finalPaymentMethod: varchar("final_payment_method", { length: 50 }),
+  paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"), // pending, partial, paid, refunded
+  outstandingBalance: varchar("outstanding_balance"), // Remaining amount to be paid
+  
+  // Extra Charges (Phase 2)
+  extraKmCharge: varchar("extra_km_charge"), // Calculated overage charge
+  extraKmDriven: integer("extra_km_driven"), // Km over the limit
+  fuelCharge: varchar("fuel_charge"), // Fuel refill charge
+  damageCharge: varchar("damage_charge"), // Total damage repair cost
+  otherCharges: varchar("other_charges"), // Any additional charges
+  totalExtraCharges: varchar("total_extra_charges"), // Sum of all extra charges
   
   // Additional Information
   notes: text("notes"),
   termsAccepted: boolean("terms_accepted").notNull().default(false),
   
+  // State Transition Tracking (Phase 2)
+  confirmedBy: varchar("confirmed_by"),
+  confirmedAt: timestamp("confirmed_at"),
+  activatedBy: varchar("activated_by"),
+  activatedAt: timestamp("activated_at"),
+  completedBy: varchar("completed_by"),
+  completedAt: timestamp("completed_at"),
+  closedBy: varchar("closed_by"),
+  closedAt: timestamp("closed_at"),
+  
   // Audit fields
-  createdBy: varchar("created_by").notNull().references(() => users.id),
-  finalizedBy: varchar("finalized_by").references(() => users.id),
+  createdBy: varchar("created_by").notNull(),
+  finalizedBy: varchar("finalized_by"),
   finalizedAt: timestamp("finalized_at"),
   disabled: boolean("disabled").notNull().default(false), // Disabled contracts are hidden
-  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledBy: varchar("disabled_by"),
   disabledAt: timestamp("disabled_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -154,6 +188,18 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   createdAt: true,
   updatedAt: true,
   contractNumber: true,
+  confirmedBy: true,
+  confirmedAt: true,
+  activatedBy: true,
+  activatedAt: true,
+  completedBy: true,
+  completedAt: true,
+  closedBy: true,
+  closedAt: true,
+  finalizedBy: true,
+  finalizedAt: true,
+  disabledBy: true,
+  disabledAt: true,
 }).extend({
   // Coerce date strings to Date objects for all date fields
   rentalStartDate: z.coerce.date(),
@@ -161,8 +207,25 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   dateOfBirth: z.coerce.date().optional(),
   licenseIssueDate: z.coerce.date().optional(),
   licenseExpiryDate: z.coerce.date().optional(),
-  finalizedAt: z.coerce.date().optional(),
-  disabledAt: z.coerce.date().optional(),
+  depositPaidDate: z.coerce.date().optional(),
+  depositRefundedDate: z.coerce.date().optional(),
+  finalPaymentDate: z.coerce.date().optional(),
+}).refine((data) => {
+  // Phase 1: Date validations
+  // Rental end date must be after start date
+  return data.rentalEndDate >= data.rentalStartDate;
+}, {
+  message: "Rental end date must be on or after start date",
+  path: ["rentalEndDate"],
+}).refine((data) => {
+  // License must be valid during rental period if provided
+  if (data.licenseExpiryDate && data.rentalEndDate) {
+    return data.licenseExpiryDate >= data.rentalEndDate;
+  }
+  return true;
+}, {
+  message: "License expires before rental end date",
+  path: ["licenseExpiryDate"],
 });
 
 export type InsertContract = z.infer<typeof insertContractSchema>;
