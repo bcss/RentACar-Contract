@@ -2,10 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
+import { z } from "zod";
+import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -43,6 +45,210 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Customer routes
+  app.get("/api/customers", isAuthenticated, async (req: any, res) => {
+    try {
+      const includeDisabled = req.query.includeDisabled === 'true';
+      const customers = await storage.getCustomers(includeDisabled);
+      res.json(customers);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch customers" });
+    }
+  });
+
+  app.get("/api/customers/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const query = req.query.q as string || '';
+      const customers = await storage.searchCustomers(query);
+      res.json(customers);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to search customers" });
+    }
+  });
+
+  app.get("/api/customers/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const customer = await storage.getCustomerById(req.params.id);
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      res.json(customer);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch customer" });
+    }
+  });
+
+  app.post("/api/customers", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const customerData = insertCustomerSchema.parse(req.body);
+      const customer = await storage.createCustomer({
+        ...customerData,
+        createdBy: req.user!.id,
+      });
+      
+      await createAuditLog(req.user!.id, "create_customer", undefined, req.ip, `Created customer: ${customer.nameEn}`);
+      
+      res.status(201).json(customer);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create customer" });
+    }
+  });
+
+  app.patch("/api/customers/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const customerData = insertCustomerSchema.partial().parse(req.body);
+      const customer = await storage.updateCustomer(req.params.id, customerData);
+      
+      await createAuditLog(req.user!.id, "update_customer", undefined, req.ip, `Updated customer: ${customer.nameEn}`);
+      
+      res.json(customer);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update customer" });
+    }
+  });
+
+  app.post("/api/customers/:id/disable", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      await storage.disableCustomer(req.params.id, req.user!.id);
+      
+      await createAuditLog(req.user!.id, "disable_customer", undefined, req.ip, `Disabled customer: ${req.params.id}`);
+      
+      res.json({ message: "Customer disabled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to disable customer" });
+    }
+  });
+
+  app.post("/api/customers/:id/enable", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      await storage.enableCustomer(req.params.id);
+      
+      await createAuditLog(req.user!.id, "enable_customer", undefined, req.ip, `Enabled customer: ${req.params.id}`);
+      
+      res.json({ message: "Customer enabled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to enable customer" });
+    }
+  });
+
+  // Vehicle routes
+  app.get("/api/vehicles", isAuthenticated, async (req: any, res) => {
+    try {
+      const includeDisabled = req.query.includeDisabled === 'true';
+      const vehicles = await storage.getVehicles(includeDisabled);
+      res.json(vehicles);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch vehicles" });
+    }
+  });
+
+  app.get("/api/vehicles/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const query = req.query.q as string || '';
+      const vehicles = await storage.searchVehicles(query);
+      res.json(vehicles);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to search vehicles" });
+    }
+  });
+
+  app.get("/api/vehicles/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const vehicle = await storage.getVehicleById(req.params.id);
+      if (!vehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+      res.json(vehicle);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch vehicle" });
+    }
+  });
+
+  app.get("/api/vehicles/:id/availability", isAuthenticated, async (req: any, res) => {
+    try {
+      const { startDate, endDate, excludeContractId } = req.query;
+      if (!startDate || !endDate) {
+        return res.status(400).json({ message: "Start date and end date are required" });
+      }
+      
+      const isAvailable = await storage.checkVehicleAvailability(
+        req.params.id,
+        new Date(startDate as string),
+        new Date(endDate as string),
+        excludeContractId as string | undefined
+      );
+      
+      res.json({ available: isAvailable });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to check availability" });
+    }
+  });
+
+  app.post("/api/vehicles", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const vehicleData = insertVehicleSchema.parse(req.body);
+      const vehicle = await storage.createVehicle({
+        ...vehicleData,
+        createdBy: req.user!.id,
+      });
+      
+      await createAuditLog(req.user!.id, "create_vehicle", undefined, req.ip, `Created vehicle: ${vehicle.registration}`);
+      
+      res.status(201).json(vehicle);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create vehicle" });
+    }
+  });
+
+  app.patch("/api/vehicles/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const vehicleData = insertVehicleSchema.partial().parse(req.body);
+      const vehicle = await storage.updateVehicle(req.params.id, vehicleData);
+      
+      await createAuditLog(req.user!.id, "update_vehicle", undefined, req.ip, `Updated vehicle: ${vehicle.registration}`);
+      
+      res.json(vehicle);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update vehicle" });
+    }
+  });
+
+  app.post("/api/vehicles/:id/disable", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      await storage.disableVehicle(req.params.id, req.user!.id);
+      
+      await createAuditLog(req.user!.id, "disable_vehicle", undefined, req.ip, `Disabled vehicle: ${req.params.id}`);
+      
+      res.json({ message: "Vehicle disabled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to disable vehicle" });
+    }
+  });
+
+  app.post("/api/vehicles/:id/enable", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      await storage.enableVehicle(req.params.id);
+      
+      await createAuditLog(req.user!.id, "enable_vehicle", undefined, req.ip, `Enabled vehicle: ${req.params.id}`);
+      
+      res.json({ message: "Vehicle enabled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to enable vehicle" });
     }
   });
 

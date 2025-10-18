@@ -5,6 +5,8 @@ import {
   contractCounter,
   systemErrors,
   companySettings,
+  customers,
+  vehicles,
   type User,
   type UpsertUser,
   type Contract,
@@ -14,9 +16,13 @@ import {
   type SystemError,
   type CompanySettings,
   type InsertCompanySettings,
+  type Customer,
+  type Vehicle,
+  type InsertCustomer,
+  type InsertVehicle,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, or, like, sql } from "drizzle-orm";
+import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -45,6 +51,25 @@ export interface IStorage {
   
   // Contract counter
   getNextContractNumber(): Promise<number>;
+  
+  // Customer operations
+  getCustomers(includeDisabled?: boolean): Promise<Customer[]>;
+  getCustomerById(id: string): Promise<Customer | undefined>;
+  createCustomer(customer: InsertCustomer): Promise<Customer>;
+  updateCustomer(id: string, customer: Partial<InsertCustomer>): Promise<Customer>;
+  disableCustomer(id: string, disabledBy: string): Promise<void>;
+  enableCustomer(id: string): Promise<void>;
+  searchCustomers(query: string): Promise<Customer[]>;
+  
+  // Vehicle operations
+  getVehicles(includeDisabled?: boolean): Promise<Vehicle[]>;
+  getVehicleById(id: string): Promise<Vehicle | undefined>;
+  createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
+  updateVehicle(id: string, vehicle: Partial<InsertVehicle>): Promise<Vehicle>;
+  disableVehicle(id: string, disabledBy: string): Promise<void>;
+  enableVehicle(id: string): Promise<void>;
+  checkVehicleAvailability(vehicleId: string, startDate: Date, endDate: Date, excludeContractId?: string): Promise<boolean>;
+  searchVehicles(query: string): Promise<Vehicle[]>;
   
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
@@ -194,17 +219,24 @@ export class DatabaseStorage implements IStorage {
 
   async searchContracts(query: string): Promise<Contract[]> {
     const searchTerm = `%${query}%`;
-    return await db
-      .select()
+    const results = await db
+      .select({ contract: contracts })
       .from(contracts)
+      .leftJoin(customers, eq(contracts.customerId, customers.id))
+      .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .where(
         or(
           like(sql`CAST(${contracts.contractNumber} AS TEXT)`, searchTerm),
-          like(contracts.customerNameEn, searchTerm),
-          like(contracts.customerNameAr, searchTerm)
+          ilike(customers.nameEn, searchTerm),
+          ilike(customers.nameAr, searchTerm),
+          ilike(vehicles.registration, searchTerm),
+          ilike(vehicles.make, searchTerm),
+          ilike(vehicles.model, searchTerm)
         )
       )
       .orderBy(desc(contracts.createdAt));
+    
+    return results.map(r => r.contract);
   }
 
   async createContract(contract: InsertContract): Promise<Contract> {
@@ -408,6 +440,180 @@ export class DatabaseStorage implements IStorage {
     return updated.currentNumber;
   }
 
+  // Customer operations
+  async getCustomers(includeDisabled: boolean = false): Promise<Customer[]> {
+    if (includeDisabled) {
+      return await db.select().from(customers).orderBy(desc(customers.createdAt));
+    }
+    return await db.select().from(customers).where(eq(customers.disabled, false)).orderBy(desc(customers.createdAt));
+  }
+
+  async getCustomerById(id: string): Promise<Customer | undefined> {
+    const [customer] = await db.select().from(customers).where(eq(customers.id, id));
+    return customer;
+  }
+
+  async createCustomer(customer: InsertCustomer): Promise<Customer> {
+    const [newCustomer] = await db.insert(customers).values(customer).returning();
+    return newCustomer;
+  }
+
+  async updateCustomer(id: string, customerData: Partial<InsertCustomer>): Promise<Customer> {
+    const [updated] = await db
+      .update(customers)
+      .set({
+        ...customerData,
+        updatedAt: new Date(),
+      })
+      .where(eq(customers.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async disableCustomer(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(customers)
+      .set({
+        disabled: true,
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(customers.id, id));
+  }
+
+  async enableCustomer(id: string): Promise<void> {
+    await db
+      .update(customers)
+      .set({
+        disabled: false,
+        disabledBy: null,
+        disabledAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(customers.id, id));
+  }
+
+  async searchCustomers(query: string): Promise<Customer[]> {
+    const searchTerm = `%${query}%`;
+    return await db
+      .select()
+      .from(customers)
+      .where(
+        or(
+          ilike(customers.nameEn, searchTerm),
+          ilike(customers.nameAr, searchTerm),
+          ilike(customers.phone, searchTerm),
+          ilike(customers.nationalId, searchTerm)
+        )
+      )
+      .orderBy(desc(customers.createdAt));
+  }
+
+  // Vehicle operations
+  async getVehicles(includeDisabled: boolean = false): Promise<Vehicle[]> {
+    if (includeDisabled) {
+      return await db.select().from(vehicles).orderBy(desc(vehicles.createdAt));
+    }
+    return await db.select().from(vehicles).where(eq(vehicles.disabled, false)).orderBy(desc(vehicles.createdAt));
+  }
+
+  async getVehicleById(id: string): Promise<Vehicle | undefined> {
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, id));
+    return vehicle;
+  }
+
+  async createVehicle(vehicle: InsertVehicle): Promise<Vehicle> {
+    const [newVehicle] = await db.insert(vehicles).values(vehicle).returning();
+    return newVehicle;
+  }
+
+  async updateVehicle(id: string, vehicleData: Partial<InsertVehicle>): Promise<Vehicle> {
+    const [updated] = await db
+      .update(vehicles)
+      .set({
+        ...vehicleData,
+        updatedAt: new Date(),
+      })
+      .where(eq(vehicles.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async disableVehicle(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(vehicles)
+      .set({
+        disabled: true,
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(vehicles.id, id));
+  }
+
+  async enableVehicle(id: string): Promise<void> {
+    await db
+      .update(vehicles)
+      .set({
+        disabled: false,
+        disabledBy: null,
+        disabledAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(vehicles.id, id));
+  }
+
+  async checkVehicleAvailability(
+    vehicleId: string,
+    startDate: Date,
+    endDate: Date,
+    excludeContractId?: string
+  ): Promise<boolean> {
+    const baseConditions = and(
+      eq(contracts.vehicleId, vehicleId),
+      or(
+        eq(contracts.status, 'confirmed'),
+        eq(contracts.status, 'active'),
+        eq(contracts.status, 'completed')
+      ),
+      not(
+        or(
+          lt(contracts.rentalEndDate, startDate),
+          gt(contracts.rentalStartDate, endDate)
+        )!
+      )
+    );
+    
+    const finalCondition = excludeContractId
+      ? and(baseConditions!, ne(contracts.id, excludeContractId))
+      : baseConditions;
+    
+    const conflicts = await db
+      .select()
+      .from(contracts)
+      .where(finalCondition);
+    
+    return conflicts.length === 0;
+  }
+
+  async searchVehicles(query: string): Promise<Vehicle[]> {
+    const searchTerm = `%${query}%`;
+    return await db
+      .select()
+      .from(vehicles)
+      .where(
+        or(
+          ilike(vehicles.registration, searchTerm),
+          ilike(vehicles.make, searchTerm),
+          ilike(vehicles.model, searchTerm)
+        )
+      )
+      .orderBy(desc(vehicles.createdAt));
+  }
+
   // Audit log operations
   async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
     const [newLog] = await db
@@ -577,30 +783,30 @@ export class DatabaseStorage implements IStorage {
     // Get all contracts
     const allContracts = await db.select().from(contracts);
 
-    // Count unique customers
-    const customerNames = new Set(allContracts.map(c => c.customerNameEn.toLowerCase()));
-    const totalCustomers = customerNames.size;
+    // Count unique customers by customerId
+    const customerIds = new Set(allContracts.map(c => c.customerId));
+    const totalCustomers = customerIds.size;
 
     // Count repeat customers (customers with 2+ contracts)
     const customerContractCounts = new Map<string, number>();
     allContracts.forEach(contract => {
-      const name = contract.customerNameEn.toLowerCase();
-      customerContractCounts.set(name, (customerContractCounts.get(name) || 0) + 1);
+      const customerId = contract.customerId;
+      customerContractCounts.set(customerId, (customerContractCounts.get(customerId) || 0) + 1);
     });
 
     const repeatCustomers = Array.from(customerContractCounts.values()).filter(count => count >= 2).length;
     const repeatCustomerRate = totalCustomers > 0 ? (repeatCustomers / totalCustomers) * 100 : 0;
 
-    // Count new customers this month
+    // Count new customers this month (customers whose first contract was this month)
     const customersThisMonth = new Set(
       allContracts
         .filter(contract => contract.createdAt && new Date(contract.createdAt) >= startOfMonth)
-        .map(c => c.customerNameEn.toLowerCase())
+        .map(c => c.customerId)
     );
 
     // Find customers who only appear in contracts created this month
-    const newCustomersThisMonth = Array.from(customersThisMonth).filter(customer => {
-      const allCustomerContracts = allContracts.filter(c => c.customerNameEn.toLowerCase() === customer);
+    const newCustomersThisMonth = Array.from(customersThisMonth).filter(customerId => {
+      const allCustomerContracts = allContracts.filter(c => c.customerId === customerId);
       return allCustomerContracts.every(c => c.createdAt && new Date(c.createdAt) >= startOfMonth);
     }).length;
 

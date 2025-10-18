@@ -25,7 +25,7 @@ export const sessions = pgTable(
 );
 
 // User storage table - Internal authentication with username/password
-export const users: ReturnType<typeof pgTable> = pgTable("users", {
+export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: varchar("username").unique().notNull(),
   passwordHash: varchar("password_hash").notNull(),
@@ -54,47 +54,176 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Customers table - Master data for all customers/hirers
+export const customers = pgTable("customers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Basic Information (bilingual)
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  
+  // Identification
+  nationalId: varchar("national_id").unique(), // National ID or Passport Number
+  gender: varchar("gender", { length: 10 }), // male, female
+  dateOfBirth: timestamp("date_of_birth"),
+  
+  // Contact Information
+  phone: varchar("phone").notNull(),
+  email: varchar("email"),
+  address: text("address"),
+  
+  // License Information
+  licenseNumber: varchar("license_number"),
+  licenseIssueDate: timestamp("license_issue_date"),
+  licenseExpiryDate: timestamp("license_expiry_date"),
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const customersRelations = relations(customers, ({ one }) => ({
+  creator: one(users, {
+    fields: [customers.createdBy],
+    references: [users.id],
+    relationName: "customerCreator",
+  }),
+}));
+
+export const insertCustomerSchema = createInsertSchema(customers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  disabledBy: true,
+  disabledAt: true,
+}).extend({
+  dateOfBirth: z.coerce.date().optional(),
+  licenseIssueDate: z.coerce.date().optional(),
+  licenseExpiryDate: z.coerce.date().optional(),
+});
+
+export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
+export type Customer = typeof customers.$inferSelect;
+
+// Vehicles table - Master data for all rental vehicles
+export const vehicles = pgTable("vehicles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Vehicle Identification
+  registration: varchar("registration").notNull().unique(), // Plate number
+  vin: varchar("vin"), // Vehicle Identification Number
+  
+  // Vehicle Details
+  make: varchar("make").notNull(), // e.g., Toyota, Honda
+  model: varchar("model").notNull(), // e.g., Camry, Accord
+  year: varchar("year").notNull(),
+  color: varchar("color").notNull(),
+  fuelType: varchar("fuel_type"), // petrol, diesel, electric, hybrid
+  
+  // Tracking
+  odometer: integer("odometer"), // Current mileage
+  
+  // Pricing (default rates)
+  dailyRate: varchar("daily_rate").notNull(),
+  weeklyRate: varchar("weekly_rate"),
+  monthlyRate: varchar("monthly_rate"),
+  
+  // Availability Status
+  status: varchar("status", { length: 20 }).notNull().default("available"), // available, rented, maintenance, damaged
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const vehiclesRelations = relations(vehicles, ({ one }) => ({
+  creator: one(users, {
+    fields: [vehicles.createdBy],
+    references: [users.id],
+    relationName: "vehicleCreator",
+  }),
+}));
+
+export const insertVehicleSchema = createInsertSchema(vehicles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  disabledBy: true,
+  disabledAt: true,
+});
+
+export type InsertVehicle = z.infer<typeof insertVehicleSchema>;
+export type Vehicle = typeof vehicles.$inferSelect;
+
+// Damage Assessments table - Structured damage tracking for completed rentals
+export const damageAssessments = pgTable("damage_assessments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  
+  // Damage Details
+  location: varchar("location").notNull(), // e.g., "Front Bumper", "Left Door", "Windshield"
+  damageType: varchar("damage_type").notNull(), // scratch, dent, crack, broken, missing
+  severity: varchar("severity").notNull(), // minor, moderate, major
+  description: text("description"),
+  
+  // Cost Information
+  estimatedCost: varchar("estimated_cost"),
+  actualCost: varchar("actual_cost"),
+  
+  // Documentation
+  photos: text("photos").array(), // Array of photo URLs/paths
+  
+  // Audit fields
+  recordedBy: varchar("recorded_by").notNull().references(() => users.id),
+  recordedAt: timestamp("recorded_at").defaultNow(),
+});
+
+export const damageAssessmentsRelations = relations(damageAssessments, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [damageAssessments.contractId],
+    references: [contracts.id],
+  }),
+  recorder: one(users, {
+    fields: [damageAssessments.recordedBy],
+    references: [users.id],
+  }),
+}));
+
+export const insertDamageAssessmentSchema = createInsertSchema(damageAssessments).omit({
+  id: true,
+  recordedAt: true,
+});
+
+export type InsertDamageAssessment = z.infer<typeof insertDamageAssessmentSchema>;
+export type DamageAssessment = typeof damageAssessments.$inferSelect;
+
 // Contracts table
 export const contracts = pgTable("contracts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractNumber: integer("contract_number").notNull().unique(),
   status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, confirmed, active, completed, closed
   
+  // Foreign Keys to Master Data
+  customerId: varchar("customer_id").notNull().references(() => customers.id),
+  vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  
   // Hirer Type - determines which fields are required
   hirerType: varchar("hirer_type", { length: 20 }).notNull().default("direct"), // direct, with_sponsor, from_company
   
-  // Customer/Hirer Information (for all types)
-  customerNameEn: varchar("customer_name_en").notNull(),
-  customerNameAr: varchar("customer_name_ar"),
-  gender: varchar("gender", { length: 10 }), // male, female
-  dateOfBirth: timestamp("date_of_birth"),
-  idNumber: varchar("id_number"), // National ID or Passport Number
-  customerPhone: varchar("customer_phone").notNull(),
-  customerEmail: varchar("customer_email"),
-  customerAddress: text("customer_address"),
-  licenseNumber: varchar("license_number"), // Optional for company rentals
-  licenseIssueDate: timestamp("license_issue_date"),
-  licenseExpiryDate: timestamp("license_expiry_date"),
-  
-  // Sponsor Information (only for hirer_type = "with_sponsor")
-  sponsorNameEn: varchar("sponsor_name_en"),
-  sponsorNameAr: varchar("sponsor_name_ar"),
-  sponsorIdNumber: varchar("sponsor_id_number"),
-  sponsorPhone: varchar("sponsor_phone"),
-  
-  // Company Information (only for hirer_type = "from_company")
-  companyNameEn: varchar("company_name_en"),
-  companyNameAr: varchar("company_name_ar"),
-  companyContactPerson: varchar("company_contact_person"),
-  companyPhone: varchar("company_phone"),
-  
-  // Vehicle Information
-  vehicleMake: varchar("vehicle_make").notNull(),
-  vehicleModel: varchar("vehicle_model").notNull(),
-  vehicleYear: varchar("vehicle_year").notNull(),
-  vehicleColor: varchar("vehicle_color").notNull(),
-  vehiclePlate: varchar("vehicle_plate").notNull(),
-  vehicleVin: varchar("vehicle_vin"),
   vehicleCondition: text("vehicle_condition"), // JSON array of damaged areas/notes
   fuelLevelStart: varchar("fuel_level_start"), // e.g., "Full", "3/4", "1/2", "1/4", "Empty"
   fuelLevelEnd: varchar("fuel_level_end"),
@@ -171,6 +300,14 @@ export const contracts = pgTable("contracts", {
 });
 
 export const contractsRelations = relations(contracts, ({ one }) => ({
+  customer: one(customers, {
+    fields: [contracts.customerId],
+    references: [customers.id],
+  }),
+  vehicle: one(vehicles, {
+    fields: [contracts.vehicleId],
+    references: [vehicles.id],
+  }),
   creator: one(users, {
     fields: [contracts.createdBy],
     references: [users.id],
@@ -204,9 +341,6 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   // Coerce date strings to Date objects for all date fields
   rentalStartDate: z.coerce.date(),
   rentalEndDate: z.coerce.date(),
-  dateOfBirth: z.coerce.date().optional(),
-  licenseIssueDate: z.coerce.date().optional(),
-  licenseExpiryDate: z.coerce.date().optional(),
   depositPaidDate: z.coerce.date().optional(),
   depositRefundedDate: z.coerce.date().optional(),
   finalPaymentDate: z.coerce.date().optional(),
@@ -217,15 +351,6 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
 }, {
   message: "Rental end date must be on or after start date",
   path: ["rentalEndDate"],
-}).refine((data) => {
-  // License must be valid during rental period if provided
-  if (data.licenseExpiryDate && data.rentalEndDate) {
-    return data.licenseExpiryDate >= data.rentalEndDate;
-  }
-  return true;
-}, {
-  message: "License expires before rental end date",
-  path: ["licenseExpiryDate"],
 });
 
 export type InsertContract = z.infer<typeof insertContractSchema>;
