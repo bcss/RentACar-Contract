@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -53,6 +61,7 @@ export default function ContractForm() {
     resolver: zodResolver(insertContractSchema),
     defaultValues: {
       status: 'draft',
+      hirerType: 'direct',
       customerNameEn: '',
       customerNameAr: '',
       customerPhone: '',
@@ -67,17 +76,20 @@ export default function ContractForm() {
       vehicleVin: '',
       rentalStartDate: new Date(),
       rentalEndDate: new Date(),
+      rentalType: 'daily',
       pickupLocation: '',
       dropoffLocation: '',
       dailyRate: '',
       totalDays: 1,
       totalAmount: '',
-      deposit: '',
       notes: '',
       termsAccepted: false,
       createdBy: '',
     },
   });
+
+  // Watch the hirerType from form state
+  const hirerType = form.watch('hirerType') || 'direct';
 
   useEffect(() => {
     if (existingContract) {
@@ -85,6 +97,9 @@ export default function ContractForm() {
         ...existingContract,
         rentalStartDate: new Date(existingContract.rentalStartDate),
         rentalEndDate: new Date(existingContract.rentalEndDate),
+        dateOfBirth: existingContract.dateOfBirth ? new Date(existingContract.dateOfBirth) : undefined,
+        licenseIssueDate: existingContract.licenseIssueDate ? new Date(existingContract.licenseIssueDate) : undefined,
+        licenseExpiryDate: existingContract.licenseExpiryDate ? new Date(existingContract.licenseExpiryDate) : undefined,
       });
     }
   }, [existingContract, form]);
@@ -154,10 +169,43 @@ export default function ContractForm() {
   });
 
   const onSubmit = (data: InsertContract) => {
-    if (isEditing) {
-      updateMutation.mutate(data);
+    // Clear irrelevant fields based on hirer type
+    const cleanedData = { ...data };
+    
+    if (data.hirerType === 'from_company') {
+      // Clear individual hirer fields for company
+      cleanedData.gender = undefined;
+      cleanedData.dateOfBirth = undefined;
+      cleanedData.idNumber = undefined;
+      cleanedData.licenseNumber = '';
+      cleanedData.licenseIssueDate = undefined;
+      cleanedData.licenseExpiryDate = undefined;
+      cleanedData.sponsorNameEn = undefined;
+      cleanedData.sponsorNameAr = undefined;
+      cleanedData.sponsorIdNumber = undefined;
+      cleanedData.sponsorPhone = undefined;
+    } else if (data.hirerType === 'with_sponsor') {
+      // Clear company fields for individual with sponsor
+      cleanedData.companyNameEn = undefined;
+      cleanedData.companyNameAr = undefined;
+      cleanedData.companyContactPerson = undefined;
+      cleanedData.companyPhone = undefined;
     } else {
-      createMutation.mutate(data);
+      // Clear both sponsor and company fields for direct hirer
+      cleanedData.sponsorNameEn = undefined;
+      cleanedData.sponsorNameAr = undefined;
+      cleanedData.sponsorIdNumber = undefined;
+      cleanedData.sponsorPhone = undefined;
+      cleanedData.companyNameEn = undefined;
+      cleanedData.companyNameAr = undefined;
+      cleanedData.companyContactPerson = undefined;
+      cleanedData.companyPhone = undefined;
+    }
+    
+    if (isEditing) {
+      updateMutation.mutate(cleanedData);
+    } else {
+      createMutation.mutate(cleanedData);
     }
   };
 
@@ -188,41 +236,187 @@ export default function ContractForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Customer Information */}
+          {/* Hirer Type Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="material-icons">badge</span>
+                {t('form.hirerInfo')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={hirerType} onValueChange={(v) => form.setValue('hirerType', v as 'direct' | 'with_sponsor' | 'from_company')}>
+                <TabsList className="grid w-full grid-cols-3" data-testid="tabs-hirer-type">
+                  <TabsTrigger value="direct" data-testid="tab-hirer-direct">{t('form.hirerTypeDirect')}</TabsTrigger>
+                  <TabsTrigger value="with_sponsor" data-testid="tab-hirer-with-sponsor">{t('form.hirerTypeWithSponsor')}</TabsTrigger>
+                  <TabsTrigger value="from_company" data-testid="tab-hirer-from-company">{t('form.hirerTypeFromCompany')}</TabsTrigger>
+                </TabsList>
+
+                {/* Direct Hirer */}
+                <TabsContent value="direct" className="space-y-4 mt-4">
+                  <p className="text-sm text-muted-foreground">{t('form.hirerTypeDirect')}</p>
+                </TabsContent>
+
+                {/* With Sponsor */}
+                <TabsContent value="with_sponsor" className="space-y-4 mt-4">
+                  <p className="text-sm text-muted-foreground">{t('form.hirerTypeWithSponsor')}</p>
+                </TabsContent>
+
+                {/* From Company */}
+                <TabsContent value="from_company" className="space-y-4 mt-4">
+                  <p className="text-sm text-muted-foreground">{t('form.hirerTypeFromCompany')}</p>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* Customer/Hirer Information */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span className="material-icons">person</span>
-                {t('form.customerInfo')}
+                {hirerType === 'from_company' ? t('form.companyInfo') : t('form.customerInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="customerNameEn"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.customerNameEn')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} data-testid="input-customer-name-en" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="customerNameAr"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.customerNameAr')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ''} data-testid="input-customer-name-ar" className="font-arabic" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {hirerType === 'from_company' ? (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="companyNameEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.companyNameEn')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ''} data-testid="input-company-name-en" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="companyNameAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.companyNameAr')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ''} data-testid="input-company-name-ar" className="font-arabic" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="companyContactPerson"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.companyContactPerson')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ''} data-testid="input-company-contact" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="companyPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.companyPhone')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ''} data-testid="input-company-phone" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              ) : (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="customerNameEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.customerNameEn')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} data-testid="input-customer-name-en" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="customerNameAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.customerNameAr')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ''} data-testid="input-customer-name-ar" className="font-arabic" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.gender')}</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-gender">
+                              <SelectValue placeholder={t('form.gender')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="male">{t('form.genderMale')}</SelectItem>
+                            <SelectItem value="female">{t('form.genderFemale')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dateOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.dateOfBirth')}</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            value={field.value instanceof Date && !isNaN(field.value.getTime()) ? field.value.toISOString().split('T')[0] : ''}
+                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                            data-testid="input-date-of-birth"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="idNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.idNumber')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ''} data-testid="input-id-number" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+              
               <FormField
                 control={form.control}
                 name="customerPhone"
@@ -262,21 +456,128 @@ export default function ContractForm() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="licenseNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.licenseNumber')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} data-testid="input-license-number" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              
+              {hirerType !== 'from_company' && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="licenseNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.licenseNumber')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} data-testid="input-license-number" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="licenseIssueDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.licenseIssueDate')}</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            value={field.value instanceof Date && !isNaN(field.value.getTime()) ? field.value.toISOString().split('T')[0] : ''}
+                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                            data-testid="input-license-issue-date"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="licenseExpiryDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('form.licenseExpiryDate')}</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            value={field.value instanceof Date && !isNaN(field.value.getTime()) ? field.value.toISOString().split('T')[0] : ''}
+                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                            data-testid="input-license-expiry-date"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             </CardContent>
           </Card>
+
+          {/* Sponsor Information (only for with_sponsor) */}
+          {hirerType === 'with_sponsor' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="material-icons">supervised_user_circle</span>
+                  {t('form.sponsorInfo')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="sponsorNameEn"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.sponsorNameEn')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-name-en" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sponsorNameAr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.sponsorNameAr')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-name-ar" className="font-arabic" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sponsorIdNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.sponsorIdNumber')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-id" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sponsorPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.sponsorPhone')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-phone" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Vehicle Information */}
           <Card>
@@ -365,6 +666,108 @@ export default function ContractForm() {
                   </FormItem>
                 )}
               />
+              
+              <FormField
+                control={form.control}
+                name="fuelLevelStart"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.fuelLevelStart')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-fuel-start">
+                          <SelectValue placeholder={t('form.fuelLevel')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="full">{t('form.fuelFull')}</SelectItem>
+                        <SelectItem value="3/4">{t('form.fuel3Quarter')}</SelectItem>
+                        <SelectItem value="1/2">{t('form.fuelHalf')}</SelectItem>
+                        <SelectItem value="1/4">{t('form.fuelQuarter')}</SelectItem>
+                        <SelectItem value="empty">{t('form.fuelEmpty')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="fuelLevelEnd"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.fuelLevelEnd')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-fuel-end">
+                          <SelectValue placeholder={t('form.fuelLevel')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="full">{t('form.fuelFull')}</SelectItem>
+                        <SelectItem value="3/4">{t('form.fuel3Quarter')}</SelectItem>
+                        <SelectItem value="1/2">{t('form.fuelHalf')}</SelectItem>
+                        <SelectItem value="1/4">{t('form.fuelQuarter')}</SelectItem>
+                        <SelectItem value="empty">{t('form.fuelEmpty')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="odometerStart"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.odometerStart')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                        data-testid="input-odometer-start"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="odometerEnd"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.odometerEnd')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                        data-testid="input-odometer-end"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="vehicleCondition"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>{t('form.vehicleCondition')}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} value={field.value || ''} rows={3} data-testid="input-vehicle-condition" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </CardContent>
           </Card>
 
@@ -377,6 +780,30 @@ export default function ContractForm() {
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="rentalType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.rentalType')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-rental-type">
+                          <SelectValue placeholder={t('form.rentalType')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="daily">{t('form.rentalTypeDaily')}</SelectItem>
+                        <SelectItem value="weekly">{t('form.rentalTypeWeekly')}</SelectItem>
+                        <SelectItem value="monthly">{t('form.rentalTypeMonthly')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div></div>
+              
               <FormField
                 control={form.control}
                 name="rentalStartDate"
@@ -397,6 +824,20 @@ export default function ContractForm() {
               />
               <FormField
                 control={form.control}
+                name="rentalStartTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.rentalStartTime')}</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} value={field.value || ''} data-testid="input-rental-start-time" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
                 name="rentalEndDate"
                 render={({ field }) => (
                   <FormItem>
@@ -413,6 +854,20 @@ export default function ContractForm() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="rentalEndTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.rentalEndTime')}</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} value={field.value || ''} data-testid="input-rental-end-time" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="pickupLocation"
@@ -466,6 +921,32 @@ export default function ContractForm() {
               />
               <FormField
                 control={form.control}
+                name="weeklyRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.weeklyRate')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} data-testid="input-weekly-rate" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="monthlyRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.monthlyRate')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} data-testid="input-monthly-rate" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="totalDays"
                 render={({ field }) => (
                   <FormItem>
@@ -482,6 +963,40 @@ export default function ContractForm() {
                   </FormItem>
                 )}
               />
+              
+              <FormField
+                control={form.control}
+                name="mileageLimit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.mileageLimit')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                        data-testid="input-mileage-limit"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="extraKmRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.extraKmRate')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} data-testid="input-extra-km-rate" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="totalAmount"
@@ -497,12 +1012,25 @@ export default function ContractForm() {
               />
               <FormField
                 control={form.control}
-                name="deposit"
+                name="securityDeposit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('form.deposit')}</FormLabel>
+                    <FormLabel>{t('form.securityDeposit')}</FormLabel>
                     <FormControl>
-                      <Input {...field} value={field.value || ''} data-testid="input-deposit" />
+                      <Input {...field} value={field.value || ''} data-testid="input-security-deposit" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="accidentLiability"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.accidentLiability')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} data-testid="input-accident-liability" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

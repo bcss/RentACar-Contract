@@ -24,11 +24,12 @@ import { format } from 'date-fns';
 import { isUnauthorizedError } from '@/lib/authUtils';
 
 export default function ContractView() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading, isAdmin } = useAuth();
   const [, navigate] = useLocation();
   const params = useParams<{ id: string }>();
+  const isArabic = i18n.language === 'ar';
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -106,14 +107,12 @@ export default function ContractView() {
 
   const handlePrint = async () => {
     try {
-      // Log print action
       await apiRequest('POST', '/api/audit-logs', {
         action: 'print',
         contractId: contract?.id,
         details: `Printed contract #${contract?.contractNumber}`,
       });
       
-      // Trigger browser print
       window.print();
       
       toast({
@@ -141,6 +140,8 @@ export default function ContractView() {
       </Badge>
     );
   };
+
+  const hirerType = contract.hirerType || 'direct';
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -259,24 +260,76 @@ export default function ContractView() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Customer Information */}
+        {/* Hirer/Customer Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">person</span>
-              {t('form.customerInfo')}
+              <span className="material-icons">{hirerType === 'from_company' ? 'business' : 'person'}</span>
+              {hirerType === 'from_company' ? t('form.companyInfo') : t('form.customerInfo')}
+              <Badge variant="outline" className="ml-2">
+                {t(`form.hirerType${hirerType === 'direct' ? 'Direct' : hirerType === 'with_sponsor' ? 'WithSponsor' : 'FromCompany'}`)}
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div>
-              <p className="text-sm text-muted-foreground">{t('form.customerNameEn')}</p>
-              <p className="font-medium" data-testid="text-customer-name-en">{contract.customerNameEn}</p>
-            </div>
-            {contract.customerNameAr && (
-              <div>
-                <p className="text-sm text-muted-foreground">{t('form.customerNameAr')}</p>
-                <p className="font-medium font-arabic" data-testid="text-customer-name-ar">{contract.customerNameAr}</p>
-              </div>
+            {hirerType === 'from_company' ? (
+              <>
+                {contract.companyNameEn && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.companyNameEn')}</p>
+                    <p className="font-medium" data-testid="text-company-name-en">{contract.companyNameEn}</p>
+                  </div>
+                )}
+                {contract.companyNameAr && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.companyNameAr')}</p>
+                    <p className="font-medium font-arabic" data-testid="text-company-name-ar">{contract.companyNameAr}</p>
+                  </div>
+                )}
+                {contract.companyContactPerson && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.companyContactPerson')}</p>
+                    <p className="font-medium" data-testid="text-company-contact">{contract.companyContactPerson}</p>
+                  </div>
+                )}
+                {contract.companyPhone && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.companyPhone')}</p>
+                    <p className="font-medium" data-testid="text-company-phone">{contract.companyPhone}</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.customerNameEn')}</p>
+                  <p className="font-medium" data-testid="text-customer-name-en">{contract.customerNameEn}</p>
+                </div>
+                {contract.customerNameAr && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.customerNameAr')}</p>
+                    <p className="font-medium font-arabic" data-testid="text-customer-name-ar">{contract.customerNameAr}</p>
+                  </div>
+                )}
+                {contract.gender && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.gender')}</p>
+                    <p className="font-medium" data-testid="text-gender">{t(`form.gender${contract.gender === 'male' ? 'Male' : 'Female'}`)}</p>
+                  </div>
+                )}
+                {contract.dateOfBirth && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.dateOfBirth')}</p>
+                    <p className="font-medium" data-testid="text-date-of-birth">{format(new Date(contract.dateOfBirth), 'PP')}</p>
+                  </div>
+                )}
+                {contract.idNumber && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.idNumber')}</p>
+                    <p className="font-medium font-mono" data-testid="text-id-number">{contract.idNumber}</p>
+                  </div>
+                )}
+              </>
             )}
             <div>
               <p className="text-sm text-muted-foreground">{t('form.customerPhone')}</p>
@@ -294,12 +347,66 @@ export default function ContractView() {
                 <p className="font-medium" data-testid="text-customer-address">{contract.customerAddress}</p>
               </div>
             )}
-            <div>
-              <p className="text-sm text-muted-foreground">{t('form.licenseNumber')}</p>
-              <p className="font-medium font-mono" data-testid="text-license-number">{contract.licenseNumber}</p>
-            </div>
+            {hirerType !== 'from_company' && (
+              <>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.licenseNumber')}</p>
+                  <p className="font-medium font-mono" data-testid="text-license-number">{contract.licenseNumber}</p>
+                </div>
+                {contract.licenseIssueDate && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.licenseIssueDate')}</p>
+                    <p className="font-medium" data-testid="text-license-issue-date">{format(new Date(contract.licenseIssueDate), 'PP')}</p>
+                  </div>
+                )}
+                {contract.licenseExpiryDate && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.licenseExpiryDate')}</p>
+                    <p className="font-medium" data-testid="text-license-expiry-date">{format(new Date(contract.licenseExpiryDate), 'PP')}</p>
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
+
+        {/* Sponsor Information (only for with_sponsor) */}
+        {hirerType === 'with_sponsor' && (contract.sponsorNameEn || contract.sponsorNameAr) && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="material-icons">supervised_user_circle</span>
+                {t('form.sponsorInfo')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {contract.sponsorNameEn && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.sponsorNameEn')}</p>
+                  <p className="font-medium" data-testid="text-sponsor-name-en">{contract.sponsorNameEn}</p>
+                </div>
+              )}
+              {contract.sponsorNameAr && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.sponsorNameAr')}</p>
+                  <p className="font-medium font-arabic" data-testid="text-sponsor-name-ar">{contract.sponsorNameAr}</p>
+                </div>
+              )}
+              {contract.sponsorIdNumber && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.sponsorIdNumber')}</p>
+                  <p className="font-medium font-mono" data-testid="text-sponsor-id">{contract.sponsorIdNumber}</p>
+                </div>
+              )}
+              {contract.sponsorPhone && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.sponsorPhone')}</p>
+                  <p className="font-medium" data-testid="text-sponsor-phone">{contract.sponsorPhone}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Vehicle Information */}
         <Card>
@@ -338,6 +445,44 @@ export default function ContractView() {
                 <p className="font-medium font-mono" data-testid="text-vehicle-vin">{contract.vehicleVin}</p>
               </div>
             )}
+            {(contract.fuelLevelStart || contract.fuelLevelEnd) && (
+              <div className="grid grid-cols-2 gap-4">
+                {contract.fuelLevelStart && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.fuelLevelStart')}</p>
+                    <p className="font-medium" data-testid="text-fuel-start">{contract.fuelLevelStart}</p>
+                  </div>
+                )}
+                {contract.fuelLevelEnd && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.fuelLevelEnd')}</p>
+                    <p className="font-medium" data-testid="text-fuel-end">{contract.fuelLevelEnd}</p>
+                  </div>
+                )}
+              </div>
+            )}
+            {(contract.odometerStart !== null && contract.odometerStart !== undefined) || (contract.odometerEnd !== null && contract.odometerEnd !== undefined) ? (
+              <div className="grid grid-cols-2 gap-4">
+                {contract.odometerStart !== null && contract.odometerStart !== undefined && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.odometerStart')}</p>
+                    <p className="font-medium font-mono" data-testid="text-odometer-start">{contract.odometerStart.toLocaleString()} km</p>
+                  </div>
+                )}
+                {contract.odometerEnd !== null && contract.odometerEnd !== undefined && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.odometerEnd')}</p>
+                    <p className="font-medium font-mono" data-testid="text-odometer-end">{contract.odometerEnd.toLocaleString()} km</p>
+                  </div>
+                )}
+              </div>
+            ) : null}
+            {contract.vehicleCondition && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.vehicleCondition')}</p>
+                <p className="font-medium whitespace-pre-wrap" data-testid="text-vehicle-condition">{contract.vehicleCondition}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -350,17 +495,27 @@ export default function ContractView() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {contract.rentalType && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.rentalType')}</p>
+                <p className="font-medium" data-testid="text-rental-type">
+                  {t(`form.rentalType${contract.rentalType === 'daily' ? 'Daily' : contract.rentalType === 'weekly' ? 'Weekly' : 'Monthly'}`)}
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">{t('form.rentalStartDate')}</p>
                 <p className="font-medium" data-testid="text-rental-start-date">
                   {format(new Date(contract.rentalStartDate), 'PP')}
+                  {contract.rentalStartTime && <span className="ml-2">{contract.rentalStartTime}</span>}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t('form.rentalEndDate')}</p>
                 <p className="font-medium" data-testid="text-rental-end-date">
                   {format(new Date(contract.rentalEndDate), 'PP')}
+                  {contract.rentalEndTime && <span className="ml-2">{contract.rentalEndTime}</span>}
                 </p>
               </div>
             </div>
@@ -385,23 +540,59 @@ export default function ContractView() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">{t('form.dailyRate')}</p>
-                <p className="font-medium font-mono" data-testid="text-daily-rate">{contract.dailyRate}</p>
-              </div>
+              {contract.dailyRate && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.dailyRate')}</p>
+                  <p className="font-medium font-mono" data-testid="text-daily-rate">{contract.dailyRate}</p>
+                </div>
+              )}
+              {contract.weeklyRate && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.weeklyRate')}</p>
+                  <p className="font-medium font-mono" data-testid="text-weekly-rate">{contract.weeklyRate}</p>
+                </div>
+              )}
+              {contract.monthlyRate && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('form.monthlyRate')}</p>
+                  <p className="font-medium font-mono" data-testid="text-monthly-rate">{contract.monthlyRate}</p>
+                </div>
+              )}
               <div>
                 <p className="text-sm text-muted-foreground">{t('form.totalDays')}</p>
                 <p className="font-medium" data-testid="text-total-days">{contract.totalDays}</p>
               </div>
             </div>
+            {((contract.mileageLimit !== null && contract.mileageLimit !== undefined) || contract.extraKmRate) && (
+              <div className="grid grid-cols-2 gap-4">
+                {contract.mileageLimit !== null && contract.mileageLimit !== undefined && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.mileageLimit')}</p>
+                    <p className="font-medium" data-testid="text-mileage-limit">{contract.mileageLimit} km/day</p>
+                  </div>
+                )}
+                {contract.extraKmRate && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('form.extraKmRate')}</p>
+                    <p className="font-medium font-mono" data-testid="text-extra-km-rate">{contract.extraKmRate}</p>
+                  </div>
+                )}
+              </div>
+            )}
             <div>
               <p className="text-sm text-muted-foreground">{t('form.totalAmount')}</p>
               <p className="text-2xl font-bold font-mono" data-testid="text-total-amount">{contract.totalAmount}</p>
             </div>
-            {contract.deposit && (
+            {contract.securityDeposit && (
               <div>
-                <p className="text-sm text-muted-foreground">{t('form.deposit')}</p>
-                <p className="font-medium font-mono" data-testid="text-deposit">{contract.deposit}</p>
+                <p className="text-sm text-muted-foreground">{t('form.securityDeposit')}</p>
+                <p className="font-medium font-mono" data-testid="text-security-deposit">{contract.securityDeposit}</p>
+              </div>
+            )}
+            {contract.accidentLiability && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.accidentLiability')}</p>
+                <p className="font-medium font-mono" data-testid="text-accident-liability">{contract.accidentLiability}</p>
               </div>
             )}
           </CardContent>
@@ -421,6 +612,56 @@ export default function ContractView() {
             <p className="whitespace-pre-wrap" data-testid="text-notes">{contract.notes}</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Terms & Conditions - Print Only */}
+      {companySettings && (
+        <div className="print-only border-t-2 border-black pt-4 mt-8">
+          <h2 className="text-lg font-bold mb-4 text-center">
+            TERMS & CONDITIONS / <span className="font-arabic">الشروط والأحكام</span>
+          </h2>
+          
+          {companySettings.termsSection1En && companySettings.termsSection1En.trim() && (
+            <div className="mb-4">
+              <div className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: companySettings.termsSection1En }} />
+              {companySettings.termsSection1Ar && companySettings.termsSection1Ar.trim() && (
+                <div className="text-sm whitespace-pre-wrap font-arabic mt-2 text-right" dangerouslySetInnerHTML={{ __html: companySettings.termsSection1Ar }} />
+              )}
+            </div>
+          )}
+          
+          {companySettings.termsSection2En && companySettings.termsSection2En.trim() && (
+            <div className="mb-4">
+              <div className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: companySettings.termsSection2En }} />
+              {companySettings.termsSection2Ar && companySettings.termsSection2Ar.trim() && (
+                <div className="text-sm whitespace-pre-wrap font-arabic mt-2 text-right" dangerouslySetInnerHTML={{ __html: companySettings.termsSection2Ar }} />
+              )}
+            </div>
+          )}
+          
+          {companySettings.termsSection3En && companySettings.termsSection3En.trim() && (
+            <div className="mb-4">
+              <div className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: companySettings.termsSection3En }} />
+              {companySettings.termsSection3Ar && companySettings.termsSection3Ar.trim() && (
+                <div className="text-sm whitespace-pre-wrap font-arabic mt-2 text-right" dangerouslySetInnerHTML={{ __html: companySettings.termsSection3Ar }} />
+              )}
+            </div>
+          )}
+
+          {/* Signature Section */}
+          <div className="grid grid-cols-2 gap-8 mt-8 border-t pt-4">
+            <div>
+              <p className="font-semibold mb-2">Hirer's Signature / <span className="font-arabic">توقيع المستأجر</span></p>
+              <div className="border-b-2 border-black h-16"></div>
+              <p className="text-sm mt-2">Date: ________________</p>
+            </div>
+            <div>
+              <p className="font-semibold mb-2">Company Representative / <span className="font-arabic">ممثل الشركة</span></p>
+              <div className="border-b-2 border-black h-16"></div>
+              <p className="text-sm mt-2">Date: ________________</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
