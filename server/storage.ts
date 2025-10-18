@@ -52,6 +52,28 @@ export interface IStorage {
   getAllSystemErrors(): Promise<SystemError[]>;
   getUnacknowledgedSystemErrors(): Promise<SystemError[]>;
   acknowledgeSystemError(id: string, acknowledgedBy: string): Promise<SystemError>;
+  
+  // Analytics operations
+  getRevenueAnalytics(): Promise<{
+    totalRevenue: number;
+    averageContractValue: number;
+    monthlyRevenue: number;
+    lastMonthRevenue: number;
+    revenueGrowth: number;
+  }>;
+  getOperationalAnalytics(): Promise<{
+    averageRentalDuration: number;
+    contractsThisMonth: number;
+    contractsLastMonth: number;
+    contractGrowth: number;
+    mostActiveUser: { name: string; count: number } | null;
+  }>;
+  getCustomerAnalytics(): Promise<{
+    totalCustomers: number;
+    repeatCustomers: number;
+    repeatCustomerRate: number;
+    newCustomersThisMonth: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -320,6 +342,161 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return acknowledged;
+  }
+
+  // Analytics operations
+  async getRevenueAnalytics() {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+    // Get all finalized contracts
+    const finalizedContracts = await db
+      .select()
+      .from(contracts)
+      .where(eq(contracts.status, 'finalized'));
+
+    // Calculate total revenue
+    const totalRevenue = finalizedContracts.reduce((sum, contract) => {
+      const amount = parseFloat(contract.totalAmount) || 0;
+      return sum + amount;
+    }, 0);
+
+    // Calculate average contract value
+    const averageContractValue = finalizedContracts.length > 0 
+      ? totalRevenue / finalizedContracts.length 
+      : 0;
+
+    // Calculate monthly revenue (this month)
+    const monthlyRevenue = finalizedContracts
+      .filter(contract => contract.finalizedAt && new Date(contract.finalizedAt) >= startOfMonth)
+      .reduce((sum, contract) => sum + (parseFloat(contract.totalAmount) || 0), 0);
+
+    // Calculate last month revenue
+    const lastMonthRevenue = finalizedContracts
+      .filter(contract => {
+        if (!contract.finalizedAt) return false;
+        const date = new Date(contract.finalizedAt);
+        return date >= startOfLastMonth && date <= endOfLastMonth;
+      })
+      .reduce((sum, contract) => sum + (parseFloat(contract.totalAmount) || 0), 0);
+
+    // Calculate growth percentage
+    const revenueGrowth = lastMonthRevenue > 0 
+      ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
+      : 0;
+
+    return {
+      totalRevenue,
+      averageContractValue,
+      monthlyRevenue,
+      lastMonthRevenue,
+      revenueGrowth,
+    };
+  }
+
+  async getOperationalAnalytics() {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+    // Get all contracts
+    const allContracts = await db.select().from(contracts);
+
+    // Calculate average rental duration
+    const totalDays = allContracts.reduce((sum, contract) => sum + (contract.totalDays || 0), 0);
+    const averageRentalDuration = allContracts.length > 0 ? totalDays / allContracts.length : 0;
+
+    // Count contracts this month
+    const contractsThisMonth = allContracts.filter(
+      contract => contract.createdAt && new Date(contract.createdAt) >= startOfMonth
+    ).length;
+
+    // Count contracts last month
+    const contractsLastMonth = allContracts.filter(contract => {
+      if (!contract.createdAt) return false;
+      const date = new Date(contract.createdAt);
+      return date >= startOfLastMonth && date <= endOfLastMonth;
+    }).length;
+
+    // Calculate growth
+    const contractGrowth = contractsLastMonth > 0 
+      ? ((contractsThisMonth - contractsLastMonth) / contractsLastMonth) * 100 
+      : 0;
+
+    // Find most active user
+    const userCounts = new Map<string, number>();
+    allContracts.forEach(contract => {
+      const count = userCounts.get(contract.createdBy) || 0;
+      userCounts.set(contract.createdBy, count + 1);
+    });
+
+    let mostActiveUser: { name: string; count: number } | null = null;
+    let maxCount = 0;
+    for (const [userId, count] of Array.from(userCounts.entries())) {
+      if (count > maxCount) {
+        const user = await this.getUser(userId);
+        if (user) {
+          mostActiveUser = {
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
+            count
+          };
+          maxCount = count;
+        }
+      }
+    }
+
+    return {
+      averageRentalDuration,
+      contractsThisMonth,
+      contractsLastMonth,
+      contractGrowth,
+      mostActiveUser,
+    };
+  }
+
+  async getCustomerAnalytics() {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Get all contracts
+    const allContracts = await db.select().from(contracts);
+
+    // Count unique customers
+    const customerNames = new Set(allContracts.map(c => c.customerNameEn.toLowerCase()));
+    const totalCustomers = customerNames.size;
+
+    // Count repeat customers (customers with 2+ contracts)
+    const customerContractCounts = new Map<string, number>();
+    allContracts.forEach(contract => {
+      const name = contract.customerNameEn.toLowerCase();
+      customerContractCounts.set(name, (customerContractCounts.get(name) || 0) + 1);
+    });
+
+    const repeatCustomers = Array.from(customerContractCounts.values()).filter(count => count >= 2).length;
+    const repeatCustomerRate = totalCustomers > 0 ? (repeatCustomers / totalCustomers) * 100 : 0;
+
+    // Count new customers this month
+    const customersThisMonth = new Set(
+      allContracts
+        .filter(contract => contract.createdAt && new Date(contract.createdAt) >= startOfMonth)
+        .map(c => c.customerNameEn.toLowerCase())
+    );
+
+    // Find customers who only appear in contracts created this month
+    const newCustomersThisMonth = Array.from(customersThisMonth).filter(customer => {
+      const allCustomerContracts = allContracts.filter(c => c.customerNameEn.toLowerCase() === customer);
+      return allCustomerContracts.every(c => c.createdAt && new Date(c.createdAt) >= startOfMonth);
+    }).length;
+
+    return {
+      totalCustomers,
+      repeatCustomers,
+      repeatCustomerRate,
+      newCustomersThisMonth,
+    };
   }
 }
 
