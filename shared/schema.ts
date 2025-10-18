@@ -154,6 +154,15 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   createdAt: true,
   updatedAt: true,
   contractNumber: true,
+}).extend({
+  // Coerce date strings to Date objects for all date fields
+  rentalStartDate: z.coerce.date(),
+  rentalEndDate: z.coerce.date(),
+  dateOfBirth: z.coerce.date().optional(),
+  licenseIssueDate: z.coerce.date().optional(),
+  licenseExpiryDate: z.coerce.date().optional(),
+  finalizedAt: z.coerce.date().optional(),
+  disabledAt: z.coerce.date().optional(),
 });
 
 export type InsertContract = z.infer<typeof insertContractSchema>;
