@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, type Customer, type Vehicle } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -51,8 +51,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Customer routes
   app.get("/api/customers", isAuthenticated, async (req: any, res) => {
     try {
-      const includeDisabled = req.query.includeDisabled === 'true';
-      const customers = await storage.getCustomers(includeDisabled);
+      const disabledParam = req.query.disabled;
+      let customers: Customer[];
+      
+      if (disabledParam === 'true') {
+        // Get only disabled customers
+        customers = await storage.getCustomers(true);
+        customers = customers.filter(c => c.disabled);
+      } else if (disabledParam === 'false') {
+        // Get only active customers
+        customers = await storage.getCustomers(false);
+      } else {
+        // Get all customers (for backward compatibility)
+        customers = await storage.getCustomers(true);
+      }
+      
       res.json(customers);
     } catch (error) {
       res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch customers" });
@@ -87,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customer = await storage.createCustomer({
         ...customerData,
         createdBy: req.user!.id,
-      });
+      } as any);
       
       await createAuditLog(req.user!.id, "create_customer", undefined, req.ip, `Created customer: ${customer.nameEn}`);
       
@@ -143,8 +156,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Vehicle routes
   app.get("/api/vehicles", isAuthenticated, async (req: any, res) => {
     try {
-      const includeDisabled = req.query.includeDisabled === 'true';
-      const vehicles = await storage.getVehicles(includeDisabled);
+      const disabledParam = req.query.disabled;
+      let vehicles: Vehicle[];
+      
+      if (disabledParam === 'true') {
+        // Get only disabled vehicles
+        vehicles = await storage.getVehicles(true);
+        vehicles = vehicles.filter(v => v.disabled);
+      } else if (disabledParam === 'false') {
+        // Get only active vehicles
+        vehicles = await storage.getVehicles(false);
+      } else {
+        // Get all vehicles (for backward compatibility)
+        vehicles = await storage.getVehicles(true);
+      }
+      
       res.json(vehicles);
     } catch (error) {
       res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch vehicles" });
@@ -199,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const vehicle = await storage.createVehicle({
         ...vehicleData,
         createdBy: req.user!.id,
-      });
+      } as any);
       
       await createAuditLog(req.user!.id, "create_vehicle", undefined, req.ip, `Created vehicle: ${vehicle.registration}`);
       

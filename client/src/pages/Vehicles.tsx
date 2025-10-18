@@ -61,12 +61,12 @@ const vehicleSchema = z.object({
   registration: z.string().min(1, 'Registration is required'),
   make: z.string().min(1, 'Make is required'),
   model: z.string().min(1, 'Model is required'),
-  year: z.coerce.number().min(1900).max(new Date().getFullYear() + 1, 'Invalid year'),
+  year: z.string().min(1, 'Year is required'),
   color: z.string().optional(),
   fuelType: z.string().optional(),
-  dailyRate: z.coerce.number().min(0, 'Daily rate must be positive'),
-  weeklyRate: z.coerce.number().min(0, 'Weekly rate must be positive'),
-  monthlyRate: z.coerce.number().min(0, 'Monthly rate must be positive'),
+  dailyRate: z.string().min(1, 'Daily rate is required'),
+  weeklyRate: z.string().optional(),
+  monthlyRate: z.string().optional(),
   status: z.string().default('available'),
 });
 
@@ -90,12 +90,12 @@ export default function Vehicles() {
       registration: '',
       make: '',
       model: '',
-      year: new Date().getFullYear(),
+      year: new Date().getFullYear().toString(),
       color: '',
       fuelType: 'petrol',
-      dailyRate: 0,
-      weeklyRate: 0,
-      monthlyRate: 0,
+      dailyRate: '',
+      weeklyRate: '',
+      monthlyRate: '',
       status: 'available',
     },
   });
@@ -145,7 +145,7 @@ export default function Vehicles() {
   const updateMutation = useMutation({
     mutationFn: async (data: VehicleFormData) => {
       if (!selectedVehicle) throw new Error('No vehicle selected');
-      return apiRequest('PUT', `/api/vehicles/${selectedVehicle.id}`, data);
+      return apiRequest('PATCH', `/api/vehicles/${selectedVehicle.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
@@ -220,12 +220,12 @@ export default function Vehicles() {
       registration: vehicle.registration ?? '',
       make: vehicle.make ?? '',
       model: vehicle.model ?? '',
-      year: Number(vehicle.year) || new Date().getFullYear(),
+      year: vehicle.year ?? new Date().getFullYear().toString(),
       color: vehicle.color || '',
       fuelType: vehicle.fuelType || 'petrol',
-      dailyRate: Number(vehicle.dailyRate) || 0,
-      weeklyRate: Number(vehicle.weeklyRate) || 0,
-      monthlyRate: Number(vehicle.monthlyRate) || 0,
+      dailyRate: vehicle.dailyRate ?? '',
+      weeklyRate: vehicle.weeklyRate || '',
+      monthlyRate: vehicle.monthlyRate || '',
       status: vehicle.status ?? 'available',
     });
     setEditOpen(true);
@@ -338,7 +338,7 @@ export default function Vehicles() {
               <FormItem>
                 <FormLabel>{t('vehicles.year')}</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} data-testid="input-vehicle-year" />
+                  <Input type="text" {...field} data-testid="input-vehicle-year" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -389,7 +389,7 @@ export default function Vehicles() {
               <FormItem>
                 <FormLabel>{t('vehicles.dailyRate')}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} data-testid="input-vehicle-daily-rate" />
+                  <Input type="text" {...field} data-testid="input-vehicle-daily-rate" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -402,7 +402,7 @@ export default function Vehicles() {
               <FormItem>
                 <FormLabel>{t('vehicles.weeklyRate')}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} data-testid="input-vehicle-weekly-rate" />
+                  <Input type="text" {...field} data-testid="input-vehicle-weekly-rate" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -415,7 +415,7 @@ export default function Vehicles() {
               <FormItem>
                 <FormLabel>{t('vehicles.monthlyRate')}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} data-testid="input-vehicle-monthly-rate" />
+                  <Input type="text" {...field} data-testid="input-vehicle-monthly-rate" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

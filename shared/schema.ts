@@ -101,8 +101,10 @@ export const insertCustomerSchema = createInsertSchema(customers).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  createdBy: true,
   disabledBy: true,
   disabledAt: true,
+  disabled: true,
 }).extend({
   dateOfBirth: z.coerce.date().optional(),
   licenseIssueDate: z.coerce.date().optional(),
@@ -162,8 +164,10 @@ export const insertVehicleSchema = createInsertSchema(vehicles).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  createdBy: true,
   disabledBy: true,
   disabledAt: true,
+  disabled: true,
 });
 
 export type InsertVehicle = z.infer<typeof insertVehicleSchema>;

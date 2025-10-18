@@ -454,7 +454,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCustomer(customer: InsertCustomer): Promise<Customer> {
-    const [newCustomer] = await db.insert(customers).values(customer).returning();
+    const [newCustomer] = await db.insert(customers).values(customer as any).returning();
     return newCustomer;
   }
 
@@ -525,7 +525,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createVehicle(vehicle: InsertVehicle): Promise<Vehicle> {
-    const [newVehicle] = await db.insert(vehicles).values(vehicle).returning();
+    const [newVehicle] = await db.insert(vehicles).values(vehicle as any).returning();
     return newVehicle;
   }
 

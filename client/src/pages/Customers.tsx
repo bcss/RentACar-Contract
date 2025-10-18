@@ -137,7 +137,7 @@ export default function Customers() {
   const updateMutation = useMutation({
     mutationFn: async (data: CustomerFormData) => {
       if (!selectedCustomer) throw new Error('No customer selected');
-      return apiRequest('PUT', `/api/customers/${selectedCustomer.id}`, {
+      return apiRequest('PATCH', `/api/customers/${selectedCustomer.id}`, {
         ...data,
         licenseExpiryDate: data.licenseExpiryDate || null,
       });
