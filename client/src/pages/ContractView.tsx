@@ -93,11 +93,21 @@ export default function ContractView() {
   const { data: customer, isLoading: isLoadingCustomer } = useQuery<Customer>({
     queryKey: ['/api/customers', contract?.customerId],
     enabled: !!contract?.customerId,
+    queryFn: async () => {
+      const res = await fetch(`/api/customers/${contract?.customerId}`);
+      if (!res.ok) throw new Error('Failed to fetch customer');
+      return res.json();
+    },
   });
 
   const { data: vehicle, isLoading: isLoadingVehicle } = useQuery<Vehicle>({
     queryKey: ['/api/vehicles', contract?.vehicleId],
     enabled: !!contract?.vehicleId,
+    queryFn: async () => {
+      const res = await fetch(`/api/vehicles/${contract?.vehicleId}`);
+      if (!res.ok) throw new Error('Failed to fetch vehicle');
+      return res.json();
+    },
   });
 
   // Legacy finalize removed - use new state machine (confirm → activate → complete → close)
