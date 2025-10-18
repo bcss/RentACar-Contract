@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'wouter';
-import { Contract, AuditLog, SystemError } from '@shared/schema';
+import { Contract, SystemError } from '@shared/schema';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
@@ -24,7 +24,7 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 export default function Dashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin, isManager } = useAuth();
   const [, setLocation] = useLocation();
   const [isAcknowledgeAllDialogOpen, setIsAcknowledgeAllDialogOpen] = useState(false);
 
@@ -48,12 +48,9 @@ export default function Dashboard() {
     enabled: isAuthenticated,
   });
 
-  const { data: recentActivity = [] } = useQuery<AuditLog[]>({
-    queryKey: ['/api/audit-logs', 'recent'],
-    enabled: isAuthenticated,
-  });
-
-  // Analytics queries
+  // Analytics queries (Admin and Manager only)
+  const canViewAnalytics = isAdmin || isManager;
+  
   const { data: revenueAnalytics, isLoading: revenueLoading } = useQuery<{
     totalRevenue: number;
     averageContractValue: number;
@@ -62,7 +59,7 @@ export default function Dashboard() {
     revenueGrowth: number;
   }>({
     queryKey: ['/api/analytics', 'revenue'],
-    enabled: isAuthenticated && (isAdmin || false),
+    enabled: isAuthenticated && canViewAnalytics,
   });
 
   const { data: operationalAnalytics, isLoading: operationalLoading } = useQuery<{
@@ -73,7 +70,7 @@ export default function Dashboard() {
     mostActiveUser: { name: string; count: number } | null;
   }>({
     queryKey: ['/api/analytics', 'operations'],
-    enabled: isAuthenticated && (isAdmin || false),
+    enabled: isAuthenticated && canViewAnalytics,
   });
 
   const { data: customerAnalytics, isLoading: customerLoading } = useQuery<{
@@ -83,7 +80,7 @@ export default function Dashboard() {
     newCustomersThisMonth: number;
   }>({
     queryKey: ['/api/analytics', 'customers'],
-    enabled: isAuthenticated && (isAdmin || false),
+    enabled: isAuthenticated && canViewAnalytics,
   });
 
   const { data: unacknowledgedErrors = [] } = useQuery<SystemError[]>({
@@ -272,8 +269,9 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* Business Analytics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Business Analytics (Admin and Manager only) */}
+      {canViewAnalytics && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Revenue Metrics */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
@@ -394,7 +392,8 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
+        </div>
+      )}
 
       {/* Acknowledge All Dialog */}
       <AlertDialog open={isAcknowledgeAllDialogOpen} onOpenChange={setIsAcknowledgeAllDialogOpen}>
