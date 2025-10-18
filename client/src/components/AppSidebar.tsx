@@ -57,6 +57,18 @@ export function AppSidebar() {
       show: true,
     },
     {
+      title: t('nav.customers'),
+      icon: 'person',
+      url: '/customers',
+      show: true,
+    },
+    {
+      title: t('nav.vehicles'),
+      icon: 'directions_car',
+      url: '/vehicles',
+      show: true,
+    },
+    {
       title: t('nav.contracts'),
       icon: 'description',
       url: '/contracts',

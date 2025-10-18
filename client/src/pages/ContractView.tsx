@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { Contract, CompanySettings } from '@shared/schema';
+import { Contract, CompanySettings, Customer, Vehicle } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -88,6 +88,16 @@ export default function ContractView() {
   const { data: companySettings } = useQuery<CompanySettings>({
     queryKey: ['/api/settings'],
     enabled: isAuthenticated,
+  });
+
+  const { data: customer, isLoading: isLoadingCustomer } = useQuery<Customer>({
+    queryKey: ['/api/customers', contract?.customerId],
+    enabled: !!contract?.customerId,
+  });
+
+  const { data: vehicle, isLoading: isLoadingVehicle } = useQuery<Vehicle>({
+    queryKey: ['/api/vehicles', contract?.vehicleId],
+    enabled: !!contract?.vehicleId,
   });
 
   // Legacy finalize removed - use new state machine (confirm → activate → complete → close)
@@ -247,7 +257,7 @@ export default function ContractView() {
     },
   });
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || isLoadingCustomer || isLoadingVehicle) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">{t('common.loading')}</p>
@@ -585,7 +595,7 @@ export default function ContractView() {
       </div>
 
       {/* Payment Recording Section */}
-      {(contract.status === 'confirmed' || contract.status === 'active' || contract.status === 'completed') && canManageWorkflow && (
+      {(contract.status === 'confirmed' || contract.status === 'active' || contract.status === 'completed' || contract.status === 'closed') && canManageWorkflow && (
         <Card className="no-print">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -594,13 +604,13 @@ export default function ContractView() {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            {!contract.depositPaid && (
+            {!contract.depositPaid && contract.status !== 'closed' && (
               <Button onClick={() => setShowDepositDialog(true)} variant="outline" data-testid="button-record-deposit">
                 <span className="material-icons">account_balance_wallet</span>
                 <span>Record Deposit Payment</span>
               </Button>
             )}
-            {!contract.finalPaymentReceived && (
+            {!contract.finalPaymentReceived && contract.status !== 'closed' && (
               <Button onClick={() => setShowFinalPaymentDialog(true)} variant="outline" data-testid="button-record-final-payment">
                 <span className="material-icons">payments</span>
                 <span>Record Final Payment</span>
@@ -788,153 +798,79 @@ export default function ContractView() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Hirer/Customer Information */}
+        {/* Customer Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">{hirerType === 'from_company' ? 'business' : 'person'}</span>
-              {hirerType === 'from_company' ? t('form.companyInfo') : t('form.customerInfo')}
-              <Badge variant="outline" className="ml-2">
-                {t(`form.hirerType${hirerType === 'direct' ? 'Direct' : hirerType === 'with_sponsor' ? 'WithSponsor' : 'FromCompany'}`)}
-              </Badge>
+              <span className="material-icons">person</span>
+              {t('form.customerInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {hirerType === 'from_company' ? (
-              <>
-                {contract.companyNameEn && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.companyNameEn')}</p>
-                    <p className="font-medium" data-testid="text-company-name-en">{contract.companyNameEn}</p>
-                  </div>
-                )}
-                {contract.companyNameAr && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.companyNameAr')}</p>
-                    <p className="font-medium font-arabic" data-testid="text-company-name-ar">{contract.companyNameAr}</p>
-                  </div>
-                )}
-                {contract.companyContactPerson && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.companyContactPerson')}</p>
-                    <p className="font-medium" data-testid="text-company-contact">{contract.companyContactPerson}</p>
-                  </div>
-                )}
-                {contract.companyPhone && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.companyPhone')}</p>
-                    <p className="font-medium" data-testid="text-company-phone">{contract.companyPhone}</p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('form.customerNameEn')}</p>
-                  <p className="font-medium" data-testid="text-customer-name-en">{contract.customerNameEn}</p>
-                </div>
-                {contract.customerNameAr && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.customerNameAr')}</p>
-                    <p className="font-medium font-arabic" data-testid="text-customer-name-ar">{contract.customerNameAr}</p>
-                  </div>
-                )}
-                {contract.gender && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.gender')}</p>
-                    <p className="font-medium" data-testid="text-gender">{t(`form.gender${contract.gender === 'male' ? 'Male' : 'Female'}`)}</p>
-                  </div>
-                )}
-                {contract.dateOfBirth && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.dateOfBirth')}</p>
-                    <p className="font-medium" data-testid="text-date-of-birth">{format(new Date(contract.dateOfBirth), 'PP')}</p>
-                  </div>
-                )}
-                {contract.idNumber && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.idNumber')}</p>
-                    <p className="font-medium font-mono" data-testid="text-id-number">{contract.idNumber}</p>
-                  </div>
-                )}
-              </>
+            <div>
+              <p className="text-sm text-muted-foreground">{t('form.customerNameEn')}</p>
+              <p className="font-medium" data-testid="text-customer-name-en">{customer?.nameEn}</p>
+            </div>
+            {customer?.nameAr && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.customerNameAr')}</p>
+                <p className="font-medium font-arabic" data-testid="text-customer-name-ar">{customer?.nameAr}</p>
+              </div>
+            )}
+            {customer?.gender && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.gender')}</p>
+                <p className="font-medium" data-testid="text-gender">{t(`form.gender${customer?.gender === 'male' ? 'Male' : 'Female'}`)}</p>
+              </div>
+            )}
+            {customer?.dateOfBirth && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.dateOfBirth')}</p>
+                <p className="font-medium" data-testid="text-date-of-birth">{format(new Date(customer.dateOfBirth), 'PP')}</p>
+              </div>
+            )}
+            {customer?.nationalId && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.idNumber')}</p>
+                <p className="font-medium font-mono" data-testid="text-id-number">{customer?.nationalId}</p>
+              </div>
             )}
             <div>
               <p className="text-sm text-muted-foreground">{t('form.customerPhone')}</p>
-              <p className="font-medium" data-testid="text-customer-phone">{contract.customerPhone}</p>
+              <p className="font-medium" data-testid="text-customer-phone">{customer?.phone}</p>
             </div>
-            {contract.customerEmail && (
+            {customer?.email && (
               <div>
                 <p className="text-sm text-muted-foreground">{t('form.customerEmail')}</p>
-                <p className="font-medium" data-testid="text-customer-email">{contract.customerEmail}</p>
+                <p className="font-medium" data-testid="text-customer-email">{customer?.email}</p>
               </div>
             )}
-            {contract.customerAddress && (
+            {customer?.address && (
               <div>
                 <p className="text-sm text-muted-foreground">{t('form.customerAddress')}</p>
-                <p className="font-medium" data-testid="text-customer-address">{contract.customerAddress}</p>
+                <p className="font-medium" data-testid="text-customer-address">{customer?.address}</p>
               </div>
             )}
-            {hirerType !== 'from_company' && (
-              <>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('form.licenseNumber')}</p>
-                  <p className="font-medium font-mono" data-testid="text-license-number">{contract.licenseNumber}</p>
-                </div>
-                {contract.licenseIssueDate && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.licenseIssueDate')}</p>
-                    <p className="font-medium" data-testid="text-license-issue-date">{format(new Date(contract.licenseIssueDate), 'PP')}</p>
-                  </div>
-                )}
-                {contract.licenseExpiryDate && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('form.licenseExpiryDate')}</p>
-                    <p className="font-medium" data-testid="text-license-expiry-date">{format(new Date(contract.licenseExpiryDate), 'PP')}</p>
-                  </div>
-                )}
-              </>
+            {customer?.licenseNumber && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.licenseNumber')}</p>
+                <p className="font-medium font-mono" data-testid="text-license-number">{customer?.licenseNumber}</p>
+              </div>
+            )}
+            {customer?.licenseIssueDate && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.licenseIssueDate')}</p>
+                <p className="font-medium" data-testid="text-license-issue-date">{format(new Date(customer.licenseIssueDate), 'PP')}</p>
+              </div>
+            )}
+            {customer?.licenseExpiryDate && (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('form.licenseExpiryDate')}</p>
+                <p className="font-medium" data-testid="text-license-expiry-date">{format(new Date(customer.licenseExpiryDate), 'PP')}</p>
+              </div>
             )}
           </CardContent>
         </Card>
-
-        {/* Sponsor Information (only for with_sponsor) */}
-        {hirerType === 'with_sponsor' && (contract.sponsorNameEn || contract.sponsorNameAr) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">supervised_user_circle</span>
-                {t('form.sponsorInfo')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {contract.sponsorNameEn && (
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('form.sponsorNameEn')}</p>
-                  <p className="font-medium" data-testid="text-sponsor-name-en">{contract.sponsorNameEn}</p>
-                </div>
-              )}
-              {contract.sponsorNameAr && (
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('form.sponsorNameAr')}</p>
-                  <p className="font-medium font-arabic" data-testid="text-sponsor-name-ar">{contract.sponsorNameAr}</p>
-                </div>
-              )}
-              {contract.sponsorIdNumber && (
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('form.sponsorIdNumber')}</p>
-                  <p className="font-medium font-mono" data-testid="text-sponsor-id">{contract.sponsorIdNumber}</p>
-                </div>
-              )}
-              {contract.sponsorPhone && (
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('form.sponsorPhone')}</p>
-                  <p className="font-medium" data-testid="text-sponsor-phone">{contract.sponsorPhone}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
         {/* Vehicle Information */}
         <Card>
@@ -947,30 +883,30 @@ export default function ContractView() {
           <CardContent className="space-y-3">
             <div>
               <p className="text-sm text-muted-foreground">{t('form.vehicleMake')}</p>
-              <p className="font-medium" data-testid="text-vehicle-make">{contract.vehicleMake}</p>
+              <p className="font-medium" data-testid="text-vehicle-make">{vehicle?.make}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('form.vehicleModel')}</p>
-              <p className="font-medium" data-testid="text-vehicle-model">{contract.vehicleModel}</p>
+              <p className="font-medium" data-testid="text-vehicle-model">{vehicle?.model}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">{t('form.vehicleYear')}</p>
-                <p className="font-medium" data-testid="text-vehicle-year">{contract.vehicleYear}</p>
+                <p className="font-medium" data-testid="text-vehicle-year">{vehicle?.year}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t('form.vehicleColor')}</p>
-                <p className="font-medium" data-testid="text-vehicle-color">{contract.vehicleColor}</p>
+                <p className="font-medium" data-testid="text-vehicle-color">{vehicle?.color}</p>
               </div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('form.vehiclePlate')}</p>
-              <p className="font-medium font-mono" data-testid="text-vehicle-plate">{contract.vehiclePlate}</p>
+              <p className="font-medium font-mono" data-testid="text-vehicle-plate">{vehicle?.registration}</p>
             </div>
-            {contract.vehicleVin && (
+            {vehicle?.vin && (
               <div>
                 <p className="text-sm text-muted-foreground">{t('form.vehicleVin')}</p>
-                <p className="font-medium font-mono" data-testid="text-vehicle-vin">{contract.vehicleVin}</p>
+                <p className="font-medium font-mono" data-testid="text-vehicle-vin">{vehicle?.vin}</p>
               </div>
             )}
             {(contract.fuelLevelStart || contract.fuelLevelEnd) && (
