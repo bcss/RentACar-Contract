@@ -6,8 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { insertCompanySettingsSchema, type CompanySettings } from "@shared/schema";
@@ -48,6 +50,14 @@ export default function Settings() {
       addressEn: "",
       addressAr: "",
       logoUrl: "",
+      currency: "AED",
+      vatPercentage: "5",
+      termsSection1En: "",
+      termsSection1Ar: "",
+      termsSection2En: "",
+      termsSection2Ar: "",
+      termsSection3En: "",
+      termsSection3Ar: "",
     },
   });
 
@@ -70,6 +80,14 @@ export default function Settings() {
         addressEn: settings.addressEn,
         addressAr: settings.addressAr,
         logoUrl: settings.logoUrl || "",
+        currency: settings.currency || "AED",
+        vatPercentage: settings.vatPercentage || "5",
+        termsSection1En: settings.termsSection1En || "",
+        termsSection1Ar: settings.termsSection1Ar || "",
+        termsSection2En: settings.termsSection2En || "",
+        termsSection2Ar: settings.termsSection2Ar || "",
+        termsSection3En: settings.termsSection3En || "",
+        termsSection3Ar: settings.termsSection3Ar || "",
       });
     }
   }, [settings, form]);
@@ -362,6 +380,189 @@ export default function Settings() {
                     </FormItem>
                   )}
                 />
+              </CardContent>
+            </Card>
+
+            {/* Financial Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('settings.financialSettings')}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="currency"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('settings.currency')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="AED" data-testid="input-currency" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="vatPercentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('settings.vatPercentage')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="5" data-testid="input-vat-percentage" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Terms & Conditions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('settings.termsConditions')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="section1" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="section1" data-testid="tab-terms-section1">
+                      {t('settings.additionalTerms')}
+                    </TabsTrigger>
+                    <TabsTrigger value="section2" data-testid="tab-terms-section2">
+                      {t('settings.mainTerms')}
+                    </TabsTrigger>
+                    <TabsTrigger value="section3" data-testid="tab-terms-section3">
+                      {t('settings.authorizationText')}
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="section1" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="termsSection1En"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('settings.additionalTermsEn')}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              rows={10}
+                              className="font-mono text-sm"
+                              data-testid="textarea-terms-section1-en"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="termsSection1Ar"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('settings.additionalTermsAr')}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              rows={10}
+                              className="font-mono text-sm text-right"
+                              dir="rtl"
+                              data-testid="textarea-terms-section1-ar"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="section2" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="termsSection2En"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('settings.mainTermsEn')}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              rows={20}
+                              className="font-mono text-sm"
+                              data-testid="textarea-terms-section2-en"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="termsSection2Ar"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('settings.mainTermsAr')}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              rows={20}
+                              className="font-mono text-sm text-right"
+                              dir="rtl"
+                              data-testid="textarea-terms-section2-ar"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="section3" className="space-y-4 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="termsSection3En"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('settings.authorizationTextEn')}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              rows={4}
+                              className="font-mono text-sm"
+                              data-testid="textarea-terms-section3-en"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="termsSection3Ar"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('settings.authorizationTextAr')}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              rows={4}
+                              className="font-mono text-sm text-right"
+                              dir="rtl"
+                              data-testid="textarea-terms-section3-ar"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
 
