@@ -53,6 +53,39 @@ export default function Dashboard() {
     enabled: isAuthenticated,
   });
 
+  // Analytics queries
+  const { data: revenueAnalytics, isLoading: revenueLoading } = useQuery<{
+    totalRevenue: number;
+    averageContractValue: number;
+    monthlyRevenue: number;
+    lastMonthRevenue: number;
+    revenueGrowth: number;
+  }>({
+    queryKey: ['/api/analytics', 'revenue'],
+    enabled: isAuthenticated && (isAdmin || false),
+  });
+
+  const { data: operationalAnalytics, isLoading: operationalLoading } = useQuery<{
+    averageRentalDuration: number;
+    contractsThisMonth: number;
+    contractsLastMonth: number;
+    contractGrowth: number;
+    mostActiveUser: { name: string; count: number } | null;
+  }>({
+    queryKey: ['/api/analytics', 'operations'],
+    enabled: isAuthenticated && (isAdmin || false),
+  });
+
+  const { data: customerAnalytics, isLoading: customerLoading } = useQuery<{
+    totalCustomers: number;
+    repeatCustomers: number;
+    repeatCustomerRate: number;
+    newCustomersThisMonth: number;
+  }>({
+    queryKey: ['/api/analytics', 'customers'],
+    enabled: isAuthenticated && (isAdmin || false),
+  });
+
   const { data: unacknowledgedErrors = [] } = useQuery<SystemError[]>({
     queryKey: ['/api/system-errors', 'unacknowledged'],
     enabled: isAuthenticated && isAdmin,
@@ -239,39 +272,129 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span className="material-icons">history</span>
-            {t('dashboard.recentActivity')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentActivity.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">{t('common.noResults')}</p>
-          ) : (
-            <div className="space-y-4">
-              {recentActivity.slice(0, 5).map((log) => (
-                <div key={log.id} className="flex items-center gap-4 p-3 rounded-md hover-elevate border">
-                  <span className="material-icons text-muted-foreground">
-                    {getActionIcon(log.action)}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {t(`action.${log.action}`)}
-                      {log.contractId && ` - ${t('contracts.contractNumber')} ${log.contractId}`}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {log.createdAt && format(new Date(log.createdAt), 'PPp')}
-                    </p>
+      {/* Business Analytics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Revenue Metrics */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t('analytics.revenueMetrics')}
+            </CardTitle>
+            <span className="material-icons text-muted-foreground">monetization_on</span>
+          </CardHeader>
+          <CardContent>
+            {revenueLoading ? (
+              <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+            ) : revenueAnalytics ? (
+              <div className="space-y-3">
+                <div>
+                  <div className="text-2xl font-bold" data-testid="stat-total-revenue">
+                    ${revenueAnalytics.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
+                  <p className="text-xs text-muted-foreground">{t('analytics.totalRevenue')}</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <div>
+                  <div className="text-lg font-medium" data-testid="stat-avg-contract">
+                    ${revenueAnalytics.averageContractValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('analytics.avgContractValue')}</p>
+                </div>
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <span className={`material-icons text-sm ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+                    {revenueAnalytics.revenueGrowth >= 0 ? 'trending_up' : 'trending_down'}
+                  </span>
+                  <span className={`text-sm font-medium ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`} data-testid="stat-revenue-growth">
+                    {revenueAnalytics.revenueGrowth >= 0 ? '+' : ''}{revenueAnalytics.revenueGrowth.toFixed(1)}%
+                  </span>
+                  <span className="text-xs text-muted-foreground">{t('analytics.vsLastMonth')}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Operational Metrics */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t('analytics.operationalMetrics')}
+            </CardTitle>
+            <span className="material-icons text-muted-foreground">assessment</span>
+          </CardHeader>
+          <CardContent>
+            {operationalLoading ? (
+              <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+            ) : operationalAnalytics ? (
+              <div className="space-y-3">
+                <div>
+                  <div className="text-2xl font-bold" data-testid="stat-avg-duration">
+                    {operationalAnalytics.averageRentalDuration.toFixed(1)} {t('analytics.days')}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('analytics.avgRentalDuration')}</p>
+                </div>
+                <div>
+                  <div className="text-lg font-medium" data-testid="stat-contracts-this-month">
+                    {operationalAnalytics.contractsThisMonth} {t('analytics.contracts')}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('analytics.contractsThisMonth')}</p>
+                </div>
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <span className={`material-icons text-sm ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+                    {operationalAnalytics.contractGrowth >= 0 ? 'trending_up' : 'trending_down'}
+                  </span>
+                  <span className={`text-sm font-medium ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`} data-testid="stat-contract-growth">
+                    {operationalAnalytics.contractGrowth >= 0 ? '+' : ''}{operationalAnalytics.contractGrowth.toFixed(1)}%
+                  </span>
+                  <span className="text-xs text-muted-foreground">{t('analytics.vsLastMonth')}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Customer Insights */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t('analytics.customerInsights')}
+            </CardTitle>
+            <span className="material-icons text-muted-foreground">people</span>
+          </CardHeader>
+          <CardContent>
+            {customerLoading ? (
+              <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+            ) : customerAnalytics ? (
+              <div className="space-y-3">
+                <div>
+                  <div className="text-2xl font-bold" data-testid="stat-total-customers">
+                    {customerAnalytics.totalCustomers}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('analytics.totalCustomers')}</p>
+                </div>
+                <div>
+                  <div className="text-lg font-medium" data-testid="stat-repeat-rate">
+                    {customerAnalytics.repeatCustomerRate.toFixed(1)}%
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('analytics.repeatCustomerRate')}</p>
+                </div>
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <span className="material-icons text-sm text-chart-2">person_add</span>
+                  <span className="text-sm font-medium" data-testid="stat-new-customers">
+                    {customerAnalytics.newCustomersThisMonth} {t('analytics.newCustomers')}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{t('analytics.thisMonth')}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Acknowledge All Dialog */}
       <AlertDialog open={isAcknowledgeAllDialogOpen} onOpenChange={setIsAcknowledgeAllDialogOpen}>
