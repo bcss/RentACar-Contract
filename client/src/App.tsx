@@ -11,6 +11,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Header } from "@/components/Header";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import Customers from "@/pages/Customers";
+import Vehicles from "@/pages/Vehicles";
 import Contracts from "@/pages/Contracts";
 import ContractForm from "@/pages/ContractForm";
 import ContractView from "@/pages/ContractView";
@@ -36,6 +38,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={isAuthenticated ? Dashboard : Login} />
+      <Route path="/customers" component={Customers} />
+      <Route path="/vehicles" component={Vehicles} />
       <Route path="/contracts" component={Contracts} />
       <Route path="/contracts/new" component={ContractForm} />
       <Route path="/contracts/:id" component={ContractView} />
