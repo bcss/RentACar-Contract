@@ -387,4 +387,51 @@
     print-color-adjust: exact !important;
     -webkit-print-color-adjust: exact !important;
   }
+
+  /* MARMAR Template Print Optimizations */
+  .print-only.border-2 {
+    border-width: 2px !important;
+  }
+
+  .print-only.border {
+    border-width: 1px !important;
+  }
+
+  /* Ensure grid layouts work in print */
+  .print-only .grid {
+    display: grid !important;
+  }
+
+  /* Prevent page breaks in signature section */
+  .print-only > div:last-child {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure proper spacing for sponsor/hirer section */
+  .print-only .divide-x-2 > div {
+    border-right-width: 2px !important;
+  }
+
+  /* Ensure gray backgrounds print correctly */
+  .print-only .bg-gray-50 {
+    background-color: #f9fafb !important;
+  }
+
+  .print-only .bg-red-100 {
+    background-color: #fee2e2 !important;
+  }
+
+  /* Ensure text colors print correctly */
+  .print-only .text-red-600 {
+    color: #dc2626 !important;
+  }
+
+  /* Ensure proper font sizing in print */
+  .print-only .text-xs {
+    font-size: 0.75rem !important;
+  }
+
+  .print-only .text-sm {
+    font-size: 0.875rem !important;
+  }
 }
