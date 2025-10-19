@@ -272,6 +272,34 @@ export default function Settings() {
     updateMutation.mutate(data);
   };
 
+  const saveContractClauses = () => {
+    const data = {
+      clauseWriteoffEn: form.getValues('clauseWriteoffEn'),
+      clauseWriteoffAr: form.getValues('clauseWriteoffAr'),
+      clauseCreditAuthEn: form.getValues('clauseCreditAuthEn'),
+      clauseCreditAuthAr: form.getValues('clauseCreditAuthAr'),
+      clauseDesertProhibitionEn: form.getValues('clauseDesertProhibitionEn'),
+      clauseDesertProhibitionAr: form.getValues('clauseDesertProhibitionAr'),
+      clauseAccidentHirerFaultEn: form.getValues('clauseAccidentHirerFaultEn'),
+      clauseAccidentHirerFaultAr: form.getValues('clauseAccidentHirerFaultAr'),
+      clauseAccidentNotFaultEn: form.getValues('clauseAccidentNotFaultEn'),
+      clauseAccidentNotFaultAr: form.getValues('clauseAccidentNotFaultAr'),
+      clauseMonthlyPaymentEn: form.getValues('clauseMonthlyPaymentEn'),
+      clauseMonthlyPaymentAr: form.getValues('clauseMonthlyPaymentAr'),
+      clauseDailyKmLimitEn: form.getValues('clauseDailyKmLimitEn'),
+      clauseDailyKmLimitAr: form.getValues('clauseDailyKmLimitAr'),
+      clauseMonthlyKmLimitEn: form.getValues('clauseMonthlyKmLimitEn'),
+      clauseMonthlyKmLimitAr: form.getValues('clauseMonthlyKmLimitAr'),
+      clauseSelfRepairPenaltyEn: form.getValues('clauseSelfRepairPenaltyEn'),
+      clauseSelfRepairPenaltyAr: form.getValues('clauseSelfRepairPenaltyAr'),
+      clauseDailyRateDefaultEn: form.getValues('clauseDailyRateDefaultEn'),
+      clauseDailyRateDefaultAr: form.getValues('clauseDailyRateDefaultAr'),
+      clauseBackpageReferenceEn: form.getValues('clauseBackpageReferenceEn'),
+      clauseBackpageReferenceAr: form.getValues('clauseBackpageReferenceAr'),
+    };
+    updateMutation.mutate(data);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -1003,6 +1031,476 @@ export default function Settings() {
                   onClick={savePaymentTerms}
                   disabled={updateMutation.isPending}
                   data-testid="button-save-payment-terms"
+                >
+                  {updateMutation.isPending ? t('common.saving') : t('common.save')}
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {/* Additional Contract Clauses */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Additional Contract Clauses / البنود التعاقدية الإضافية</CardTitle>
+                <CardDescription>Configure additional contract terms including write-off, authorization, restrictions, and liability clauses</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Write-Off & Confiscation */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseWriteoffEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Write-Off & Confiscation Compensation (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={5}
+                            className="text-sm"
+                            data-testid="textarea-clause-writeoff-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseWriteoffAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تعويض الإطفاء والمصادرة (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={5}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-writeoff-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Credit Card Authorization */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseCreditAuthEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Credit Card Authorization (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={4}
+                            className="text-sm"
+                            data-testid="textarea-clause-credit-auth-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseCreditAuthAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تفويض البطاقة الائتمانية (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={4}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-credit-auth-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Desert Area Prohibition */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseDesertProhibitionEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Desert Area Prohibition (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-clause-desert-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseDesertProhibitionAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>حظر المنطقة الصحراوية (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-desert-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Accident - Hirer at Fault */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseAccidentHirerFaultEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Accident Liability - Hirer at Fault (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm"
+                            data-testid="textarea-clause-accident-hirer-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseAccidentHirerFaultAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>مسؤولية الحادث - خطأ المستأجر (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-accident-hirer-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Accident - Not Hirer's Fault */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseAccidentNotFaultEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Accident Liability - Not Hirer's Fault (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm"
+                            data-testid="textarea-clause-accident-not-fault-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseAccidentNotFaultAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>مسؤولية الحادث - ليس خطأ المستأجر (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-accident-not-fault-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Monthly Payment Schedule */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseMonthlyPaymentEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Monthly Payment Schedule (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-clause-monthly-payment-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseMonthlyPaymentAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>جدول الدفع الشهري (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-monthly-payment-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Daily KM Limit */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseDailyKmLimitEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Daily KM Limit (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-clause-daily-km-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseDailyKmLimitAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>حد الكيلومترات اليومي (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-daily-km-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Monthly KM Limit */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseMonthlyKmLimitEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Monthly KM Limit (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-clause-monthly-km-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseMonthlyKmLimitAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>حد الكيلومترات الشهري (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-monthly-km-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Self-Repair Penalty */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseSelfRepairPenaltyEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Self-Repair Penalty (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-clause-self-repair-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseSelfRepairPenaltyAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>غرامة الإصلاح الذاتي (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-self-repair-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Daily Rate Default */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseDailyRateDefaultEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Daily Rate Default Clause (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-clause-daily-rate-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseDailyRateDefaultAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>بند السعر اليومي الافتراضي (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-daily-rate-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Back Page Reference */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clauseBackpageReferenceEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Back Page Reference (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={1}
+                            className="text-sm"
+                            data-testid="textarea-clause-backpage-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clauseBackpageReferenceAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>إشارة الصفحة الخلفية (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={1}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-clause-backpage-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={saveContractClauses}
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save-contract-clauses"
                 >
                   {updateMutation.isPending ? t('common.saving') : t('common.save')}
                 </Button>
