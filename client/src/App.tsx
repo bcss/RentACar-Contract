@@ -24,6 +24,25 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import "@/lib/i18n";
 
+// Protected route wrapper
+function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+  
+  return <Component />;
+}
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -38,17 +57,35 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={isAuthenticated ? Dashboard : Login} />
-      <Route path="/customers" component={Customers} />
-      <Route path="/vehicles" component={Vehicles} />
-      <Route path="/contracts" component={Contracts} />
-      <Route path="/contracts/new" component={ContractForm} />
-      <Route path="/contracts/:id" component={ContractView} />
-      <Route path="/contracts/:id/edit" component={ContractForm} />
-      <Route path="/users" component={Users} />
-      <Route path="/disabled-users" component={DisabledUsers} />
-      <Route path="/disabled-contracts" component={DisabledContracts} />
-      <Route path="/audit-logs" component={AuditLogs} />
-      <Route path="/settings" component={Settings} />
+      <Route path="/login" component={Login} />
+      <Route path="/dashboard">
+        {() => <ProtectedRoute component={Dashboard} />}
+      </Route>
+      <Route path="/customers">
+        {() => <ProtectedRoute component={Customers} />}
+      </Route>
+      <Route path="/vehicles">
+        {() => <ProtectedRoute component={Vehicles} />}
+      </Route>
+      <Route path="/contracts" component={() => <ProtectedRoute component={Contracts} />} />
+      <Route path="/contracts/new" component={() => <ProtectedRoute component={ContractForm} />} />
+      <Route path="/contracts/:id/edit" component={() => <ProtectedRoute component={ContractForm} />} />
+      <Route path="/contracts/:id" component={() => <ProtectedRoute component={ContractView} />} />
+      <Route path="/users">
+        {() => <ProtectedRoute component={Users} />}
+      </Route>
+      <Route path="/disabled-users">
+        {() => <ProtectedRoute component={DisabledUsers} />}
+      </Route>
+      <Route path="/disabled-contracts">
+        {() => <ProtectedRoute component={DisabledContracts} />}
+      </Route>
+      <Route path="/audit-logs">
+        {() => <ProtectedRoute component={AuditLogs} />}
+      </Route>
+      <Route path="/settings">
+        {() => <ProtectedRoute component={Settings} />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

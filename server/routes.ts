@@ -361,6 +361,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get contract audit logs (lifecycle events for timeline)
+  app.get('/api/contracts/:id/audit-logs', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      // Staff can only view audit logs for their own contracts
+      if (user?.role === 'staff' && contract.createdBy !== userId) {
+        return res.status(403).json({ message: "Forbidden: You can only view your own contracts" });
+      }
+      
+      const logs = await storage.getContractAuditLogs(req.params.id);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching contract audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch contract audit logs" });
+    }
+  });
+
   app.post('/api/contracts', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;

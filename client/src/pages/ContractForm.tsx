@@ -431,7 +431,13 @@ export default function ContractForm() {
         title: t('common.success'),
         description: 'Vehicle created successfully',
       });
+      // Invalidate both general and search queries to refresh vehicle selectors
       queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          Array.isArray(query.queryKey) && 
+          query.queryKey[0] === '/api/vehicles/search'
+      });
       form.setValue('vehicleId', vehicle.id);
       setSelectedVehicle(vehicle);
       // Auto-populate pricing
@@ -865,7 +871,7 @@ export default function ContractForm() {
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-[400px] p-0">
-                        <Command>
+                        <Command shouldFilter={false}>
                           <CommandInput
                             placeholder="Search vehicles..."
                             value={vehicleSearchQuery}

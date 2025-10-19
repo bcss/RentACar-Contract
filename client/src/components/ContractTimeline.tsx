@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Edit, User, Clock, AlertCircle } from 'lucide-react';
+import { FileText, Edit, User, Clock, CheckCircle, PlayCircle, XCircle, Lock, Printer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Contract } from '@shared/schema';
 
@@ -22,9 +22,22 @@ interface ContractEdit {
   editorLastName: string | null;
 }
 
+interface ContractAuditLog {
+  id: string;
+  userId: string;
+  action: string;
+  contractId: string | null;
+  details: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+  username: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
 interface TimelineEvent {
   id: string;
-  type: 'created' | 'edited' | 'status_change';
+  type: 'created' | 'edited' | 'confirm' | 'activate' | 'complete' | 'close' | 'print' | 'other';
   timestamp: Date;
   user: string;
   username: string;
@@ -41,10 +54,17 @@ interface ContractTimelineProps {
 export function ContractTimeline({ contract, creatorUsername, creatorName }: ContractTimelineProps) {
   const { t } = useTranslation();
 
-  const { data: edits, isLoading } = useQuery<ContractEdit[]>({
+  const { data: edits, isLoading: editsLoading } = useQuery<ContractEdit[]>({
     queryKey: ['/api/contracts', contract.id, 'edits'],
     enabled: !!contract.id,
   });
+
+  const { data: auditLogs, isLoading: logsLoading } = useQuery<ContractAuditLog[]>({
+    queryKey: ['/api/contracts', contract.id, 'audit-logs'],
+    enabled: !!contract.id,
+  });
+
+  const isLoading = editsLoading || logsLoading;
 
   if (isLoading) {
     return (
@@ -73,8 +93,22 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
   // Build timeline events
   const events: TimelineEvent[] = [];
 
-  // Add creation event
-  if (contract.createdAt) {
+  // Add creation event from audit logs (if available) or contract.createdAt
+  const creationLog = auditLogs?.find((log) => log.action === 'create');
+  if (creationLog) {
+    const displayName = creationLog.firstName && creationLog.lastName
+      ? `${creationLog.firstName} ${creationLog.lastName}`
+      : creationLog.username;
+    events.push({
+      id: creationLog.id,
+      type: 'created',
+      timestamp: new Date(creationLog.createdAt),
+      user: displayName,
+      username: creationLog.username,
+      description: t('Contract Created'),
+      details: creationLog.details,
+    });
+  } else if (contract.createdAt) {
     const displayName = creatorName || creatorUsername || 'Unknown User';
     events.push({
       id: `created-${contract.id}`,
@@ -87,7 +121,64 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
     });
   }
 
-  // Add edit events
+  // Add lifecycle events from audit logs
+  if (auditLogs && auditLogs.length > 0) {
+    auditLogs.forEach((log) => {
+      // Skip create action as it's already handled above
+      if (log.action === 'create') return;
+
+      const userName = log.firstName && log.lastName
+        ? `${log.firstName} ${log.lastName}`
+        : log.username;
+
+      let eventType: TimelineEvent['type'] = 'other';
+      let description = '';
+
+      // Map audit log actions to timeline event types
+      switch (log.action) {
+        case 'confirm':
+          eventType = 'confirm';
+          description = t('Contract Confirmed');
+          break;
+        case 'activate':
+          eventType = 'activate';
+          description = t('Contract Activated');
+          break;
+        case 'complete':
+          eventType = 'complete';
+          description = t('Contract Completed');
+          break;
+        case 'close':
+          eventType = 'close';
+          description = t('Contract Closed');
+          break;
+        case 'print':
+          eventType = 'print';
+          description = t('Contract Printed');
+          break;
+        case 'edit':
+          // Edit actions are handled separately from contract_edits table
+          eventType = 'other';
+          description = t('Contract Activity');
+          break;
+        default:
+          eventType = 'other';
+          description = log.action.charAt(0).toUpperCase() + log.action.slice(1);
+      }
+
+      events.push({
+        id: log.id,
+        type: eventType,
+        timestamp: new Date(log.createdAt),
+        user: userName,
+        username: log.username,
+        description,
+        details: log.details,
+      });
+    });
+  }
+
+  // Add edit events from contract_edits table
   if (edits && edits.length > 0) {
     edits.forEach((edit) => {
       const editorName = edit.editorFirstName && edit.editorLastName
@@ -95,7 +186,7 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
         : edit.editorUsername;
       
       events.push({
-        id: edit.id,
+        id: `edit-${edit.id}`,
         type: 'edited',
         timestamp: new Date(edit.editedAt),
         user: editorName,
@@ -115,8 +206,16 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
         return <FileText className="w-5 h-5 text-primary" />;
       case 'edited':
         return <Edit className="w-5 h-5 text-amber-600" />;
-      case 'status_change':
-        return <AlertCircle className="w-5 h-5 text-blue-600" />;
+      case 'confirm':
+        return <CheckCircle className="w-5 h-5 text-blue-600" />;
+      case 'activate':
+        return <PlayCircle className="w-5 h-5 text-green-600" />;
+      case 'complete':
+        return <CheckCircle className="w-5 h-5 text-gray-600" />;
+      case 'close':
+        return <Lock className="w-5 h-5 text-slate-600" />;
+      case 'print':
+        return <Printer className="w-5 h-5 text-purple-600" />;
       default:
         return <Clock className="w-5 h-5 text-muted-foreground" />;
     }
@@ -125,6 +224,8 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
   const getEventBadgeVariant = (type: TimelineEvent['type']): 'default' | 'secondary' | 'outline' => {
     switch (type) {
       case 'created':
+      case 'confirm':
+      case 'activate':
         return 'default';
       case 'edited':
         return 'secondary';

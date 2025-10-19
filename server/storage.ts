@@ -83,6 +83,9 @@ export interface IStorage {
   createContractEdit(edit: InsertContractEdit): Promise<ContractEdit>;
   getContractEdits(contractId: string): Promise<ContractEdit[]>;
   
+  // Contract audit logs (lifecycle events)
+  getContractAuditLogs(contractId: string): Promise<any[]>;
+  
   // System error operations
   getAllSystemErrors(): Promise<SystemError[]>;
   getUnacknowledgedSystemErrors(): Promise<SystemError[]>;
@@ -675,6 +678,28 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(contractEdits.editedAt));
     
     return edits;
+  }
+
+  async getContractAuditLogs(contractId: string): Promise<any[]> {
+    const logs = await db
+      .select({
+        id: auditLogs.id,
+        userId: auditLogs.userId,
+        action: auditLogs.action,
+        contractId: auditLogs.contractId,
+        details: auditLogs.details,
+        ipAddress: auditLogs.ipAddress,
+        createdAt: auditLogs.createdAt,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      })
+      .from(auditLogs)
+      .leftJoin(users, eq(auditLogs.userId, users.id))
+      .where(eq(auditLogs.contractId, contractId))
+      .orderBy(desc(auditLogs.createdAt));
+    
+    return logs;
   }
 
   // System error operations
