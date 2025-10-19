@@ -96,18 +96,45 @@ export default function Settings() {
 
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<z.infer<typeof insertCompanySettingsSchema>>) => {
-      // Merge with current settings to avoid overwriting other fields
+      if (!settings) {
+        throw new Error('Settings not loaded');
+      }
+      // Merge with persisted server data (not current form state) to avoid saving unsaved changes from other sections
       const fullData = {
-        ...form.getValues(),
-        ...data,
+        companyNameEn: settings.companyNameEn,
+        companyNameAr: settings.companyNameAr,
+        companyLegalNameEn: settings.companyLegalNameEn,
+        companyLegalNameAr: settings.companyLegalNameAr,
+        taglineEn: settings.taglineEn,
+        taglineAr: settings.taglineAr,
+        phone: settings.phone,
+        phoneAr: settings.phoneAr,
+        mobile: settings.mobile,
+        mobileAr: settings.mobileAr,
+        email: settings.email,
+        website: settings.website,
+        addressEn: settings.addressEn,
+        addressAr: settings.addressAr,
+        logoUrl: settings.logoUrl || "",
+        currencyEn: settings.currencyEn || "AED",
+        currencyAr: settings.currencyAr || "د.إ",
+        vatPercentage: settings.vatPercentage || "5",
+        termsSection1En: settings.termsSection1En || "",
+        termsSection1Ar: settings.termsSection1Ar || "",
+        termsSection2En: settings.termsSection2En || "",
+        termsSection2Ar: settings.termsSection2Ar || "",
+        termsSection3En: settings.termsSection3En || "",
+        termsSection3Ar: settings.termsSection3Ar || "",
+        ...data, // Override only the fields being saved
       };
       return await apiRequest('PUT', '/api/settings', fullData);
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast({
         title: t('common.success'),
         description: t('settings.saved'),
       });
+      // Invalidate and refetch to get the latest server data
       queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
     },
     onError: (error: Error) => {
