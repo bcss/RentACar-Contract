@@ -59,6 +59,24 @@ export default function Settings() {
       termsSection2Ar: "",
       termsSection3En: "",
       termsSection3Ar: "",
+      paymentTermsFineEn: "",
+      paymentTermsFineAr: "",
+      paymentTermsBalanceEn: "",
+      paymentTermsBalanceAr: "",
+      paymentTermsFineWeekEn: "",
+      paymentTermsFineWeekAr: "",
+      paymentTermsSecurityEn: "",
+      paymentTermsSecurityAr: "",
+      paymentTermsAcknowledgeEn: "",
+      paymentTermsAcknowledgeAr: "",
+      paymentTermsInspectionEn: "",
+      paymentTermsInspectionAr: "",
+      paymentTermsRepairEn: "",
+      paymentTermsRepairAr: "",
+      paymentTermsAccidentNewLicenseEn: "",
+      paymentTermsAccidentNewLicenseAr: "",
+      paymentTermsAccidentGeneralEn: "",
+      paymentTermsAccidentGeneralAr: "",
     },
   });
 
@@ -90,6 +108,24 @@ export default function Settings() {
         termsSection2Ar: settings.termsSection2Ar || "",
         termsSection3En: settings.termsSection3En || "",
         termsSection3Ar: settings.termsSection3Ar || "",
+        paymentTermsFineEn: settings.paymentTermsFineEn || "",
+        paymentTermsFineAr: settings.paymentTermsFineAr || "",
+        paymentTermsBalanceEn: settings.paymentTermsBalanceEn || "",
+        paymentTermsBalanceAr: settings.paymentTermsBalanceAr || "",
+        paymentTermsFineWeekEn: settings.paymentTermsFineWeekEn || "",
+        paymentTermsFineWeekAr: settings.paymentTermsFineWeekAr || "",
+        paymentTermsSecurityEn: settings.paymentTermsSecurityEn || "",
+        paymentTermsSecurityAr: settings.paymentTermsSecurityAr || "",
+        paymentTermsAcknowledgeEn: settings.paymentTermsAcknowledgeEn || "",
+        paymentTermsAcknowledgeAr: settings.paymentTermsAcknowledgeAr || "",
+        paymentTermsInspectionEn: settings.paymentTermsInspectionEn || "",
+        paymentTermsInspectionAr: settings.paymentTermsInspectionAr || "",
+        paymentTermsRepairEn: settings.paymentTermsRepairEn || "",
+        paymentTermsRepairAr: settings.paymentTermsRepairAr || "",
+        paymentTermsAccidentNewLicenseEn: settings.paymentTermsAccidentNewLicenseEn || "",
+        paymentTermsAccidentNewLicenseAr: settings.paymentTermsAccidentNewLicenseAr || "",
+        paymentTermsAccidentGeneralEn: settings.paymentTermsAccidentGeneralEn || "",
+        paymentTermsAccidentGeneralAr: settings.paymentTermsAccidentGeneralAr || "",
       });
     }
   }, [settings, form]);
@@ -125,6 +161,24 @@ export default function Settings() {
         termsSection2Ar: settings.termsSection2Ar || "",
         termsSection3En: settings.termsSection3En || "",
         termsSection3Ar: settings.termsSection3Ar || "",
+        paymentTermsFineEn: settings.paymentTermsFineEn || "",
+        paymentTermsFineAr: settings.paymentTermsFineAr || "",
+        paymentTermsBalanceEn: settings.paymentTermsBalanceEn || "",
+        paymentTermsBalanceAr: settings.paymentTermsBalanceAr || "",
+        paymentTermsFineWeekEn: settings.paymentTermsFineWeekEn || "",
+        paymentTermsFineWeekAr: settings.paymentTermsFineWeekAr || "",
+        paymentTermsSecurityEn: settings.paymentTermsSecurityEn || "",
+        paymentTermsSecurityAr: settings.paymentTermsSecurityAr || "",
+        paymentTermsAcknowledgeEn: settings.paymentTermsAcknowledgeEn || "",
+        paymentTermsAcknowledgeAr: settings.paymentTermsAcknowledgeAr || "",
+        paymentTermsInspectionEn: settings.paymentTermsInspectionEn || "",
+        paymentTermsInspectionAr: settings.paymentTermsInspectionAr || "",
+        paymentTermsRepairEn: settings.paymentTermsRepairEn || "",
+        paymentTermsRepairAr: settings.paymentTermsRepairAr || "",
+        paymentTermsAccidentNewLicenseEn: settings.paymentTermsAccidentNewLicenseEn || "",
+        paymentTermsAccidentNewLicenseAr: settings.paymentTermsAccidentNewLicenseAr || "",
+        paymentTermsAccidentGeneralEn: settings.paymentTermsAccidentGeneralEn || "",
+        paymentTermsAccidentGeneralAr: settings.paymentTermsAccidentGeneralAr || "",
         ...data, // Override only the fields being saved
       };
       return await apiRequest('PUT', '/api/settings', fullData);
@@ -190,6 +244,30 @@ export default function Settings() {
       termsSection2Ar: form.getValues('termsSection2Ar'),
       termsSection3En: form.getValues('termsSection3En'),
       termsSection3Ar: form.getValues('termsSection3Ar'),
+    };
+    updateMutation.mutate(data);
+  };
+
+  const savePaymentTerms = () => {
+    const data = {
+      paymentTermsFineEn: form.getValues('paymentTermsFineEn'),
+      paymentTermsFineAr: form.getValues('paymentTermsFineAr'),
+      paymentTermsBalanceEn: form.getValues('paymentTermsBalanceEn'),
+      paymentTermsBalanceAr: form.getValues('paymentTermsBalanceAr'),
+      paymentTermsFineWeekEn: form.getValues('paymentTermsFineWeekEn'),
+      paymentTermsFineWeekAr: form.getValues('paymentTermsFineWeekAr'),
+      paymentTermsSecurityEn: form.getValues('paymentTermsSecurityEn'),
+      paymentTermsSecurityAr: form.getValues('paymentTermsSecurityAr'),
+      paymentTermsAcknowledgeEn: form.getValues('paymentTermsAcknowledgeEn'),
+      paymentTermsAcknowledgeAr: form.getValues('paymentTermsAcknowledgeAr'),
+      paymentTermsInspectionEn: form.getValues('paymentTermsInspectionEn'),
+      paymentTermsInspectionAr: form.getValues('paymentTermsInspectionAr'),
+      paymentTermsRepairEn: form.getValues('paymentTermsRepairEn'),
+      paymentTermsRepairAr: form.getValues('paymentTermsRepairAr'),
+      paymentTermsAccidentNewLicenseEn: form.getValues('paymentTermsAccidentNewLicenseEn'),
+      paymentTermsAccidentNewLicenseAr: form.getValues('paymentTermsAccidentNewLicenseAr'),
+      paymentTermsAccidentGeneralEn: form.getValues('paymentTermsAccidentGeneralEn'),
+      paymentTermsAccidentGeneralAr: form.getValues('paymentTermsAccidentGeneralAr'),
     };
     updateMutation.mutate(data);
   };
@@ -537,6 +615,394 @@ export default function Settings() {
                   onClick={saveFinancialSettings}
                   disabled={updateMutation.isPending}
                   data-testid="button-save-financial-settings"
+                >
+                  {updateMutation.isPending ? t('common.saving') : t('common.save')}
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {/* Payment Terms & Fine Conditions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Terms & Fine Conditions / شروط الدفع والغرامات</CardTitle>
+                <CardDescription>Configure payment terms, fine conditions, and liability clauses for rental contracts</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Fine Per Item */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsFineEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fine Per Item (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm"
+                            data-testid="textarea-payment-fine-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsFineAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>غرامة لكل عنصر (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-fine-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Balance Clearance */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsBalanceEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Balance Clearance (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm"
+                            data-testid="textarea-payment-balance-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsBalanceAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تصفية الرصيد (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-balance-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Fine Clearance Week */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsFineWeekEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fine Clearance Within Week (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm"
+                            data-testid="textarea-payment-fine-week-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsFineWeekAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تصفية الغرامة خلال أسبوع (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-fine-week-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Security Deposit Retention */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsSecurityEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Security Deposit Retention (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm"
+                            data-testid="textarea-payment-security-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsSecurityAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>الاحتفاظ بالوديعة (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-security-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Acknowledgement */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsAcknowledgeEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Acknowledgement (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-payment-acknowledge-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsAcknowledgeAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>إقرار (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-acknowledge-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Vehicle Inspection */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsInspectionEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vehicle Inspection Clause (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={4}
+                            className="text-sm"
+                            data-testid="textarea-payment-inspection-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsInspectionAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>بند فحص المركبة (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={4}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-inspection-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Repair Clause */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsRepairEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Repair & Renewal Clause (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm"
+                            data-testid="textarea-payment-repair-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsRepairAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>بند الإصلاح والتجديد (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-repair-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Accident - New License */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsAccidentNewLicenseEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Accident Liability - New License (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={5}
+                            className="text-sm"
+                            data-testid="textarea-payment-accident-new-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsAccidentNewLicenseAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>مسؤولية الحادث - رخصة جديدة (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={5}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-accident-new-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Accident - General */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsAccidentGeneralEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Accident Liability - General (English)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={4}
+                            className="text-sm"
+                            data-testid="textarea-payment-accident-general-en"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentTermsAccidentGeneralAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>مسؤولية الحادث - عامة (عربي)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={4}
+                            className="text-sm text-right"
+                            dir="rtl"
+                            data-testid="textarea-payment-accident-general-ar"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={savePaymentTerms}
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save-payment-terms"
                 >
                   {updateMutation.isPending ? t('common.saving') : t('common.save')}
                 </Button>
