@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -95,8 +95,13 @@ export default function Settings() {
   }, [settings, form]);
 
   const updateMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof insertCompanySettingsSchema>) => {
-      return await apiRequest('PUT', '/api/settings', data);
+    mutationFn: async (data: Partial<z.infer<typeof insertCompanySettingsSchema>>) => {
+      // Merge with current settings to avoid overwriting other fields
+      const fullData = {
+        ...form.getValues(),
+        ...data,
+      };
+      return await apiRequest('PUT', '/api/settings', fullData);
     },
     onSuccess: () => {
       toast({
@@ -114,7 +119,51 @@ export default function Settings() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof insertCompanySettingsSchema>) => {
+  const saveCompanyInfo = () => {
+    const data = {
+      companyNameEn: form.getValues('companyNameEn'),
+      companyNameAr: form.getValues('companyNameAr'),
+      companyLegalNameEn: form.getValues('companyLegalNameEn'),
+      companyLegalNameAr: form.getValues('companyLegalNameAr'),
+      taglineEn: form.getValues('taglineEn'),
+      taglineAr: form.getValues('taglineAr'),
+    };
+    updateMutation.mutate(data);
+  };
+
+  const saveContactInfo = () => {
+    const data = {
+      phone: form.getValues('phone'),
+      phoneAr: form.getValues('phoneAr'),
+      mobile: form.getValues('mobile'),
+      mobileAr: form.getValues('mobileAr'),
+      email: form.getValues('email'),
+      website: form.getValues('website'),
+      addressEn: form.getValues('addressEn'),
+      addressAr: form.getValues('addressAr'),
+      logoUrl: form.getValues('logoUrl'),
+    };
+    updateMutation.mutate(data);
+  };
+
+  const saveFinancialSettings = () => {
+    const data = {
+      currencyEn: form.getValues('currencyEn'),
+      currencyAr: form.getValues('currencyAr'),
+      vatPercentage: form.getValues('vatPercentage'),
+    };
+    updateMutation.mutate(data);
+  };
+
+  const saveTermsConditions = () => {
+    const data = {
+      termsSection1En: form.getValues('termsSection1En'),
+      termsSection1Ar: form.getValues('termsSection1Ar'),
+      termsSection2En: form.getValues('termsSection2En'),
+      termsSection2Ar: form.getValues('termsSection2Ar'),
+      termsSection3En: form.getValues('termsSection3En'),
+      termsSection3Ar: form.getValues('termsSection3Ar'),
+    };
     updateMutation.mutate(data);
   };
 
@@ -144,7 +193,7 @@ export default function Settings() {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Company Information */}
             <Card>
               <CardHeader>
@@ -241,6 +290,16 @@ export default function Settings() {
                   />
                 </div>
               </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={saveCompanyInfo}
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save-company-info"
+                >
+                  {updateMutation.isPending ? t('common.saving') : t('common.save')}
+                </Button>
+              </CardFooter>
             </Card>
 
             {/* Contact Information */}
@@ -383,6 +442,16 @@ export default function Settings() {
                   )}
                 />
               </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={saveContactInfo}
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save-contact-info"
+                >
+                  {updateMutation.isPending ? t('common.saving') : t('common.save')}
+                </Button>
+              </CardFooter>
             </Card>
 
             {/* Financial Settings */}
@@ -435,6 +504,16 @@ export default function Settings() {
                   )}
                 />
               </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={saveFinancialSettings}
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save-financial-settings"
+                >
+                  {updateMutation.isPending ? t('common.saving') : t('common.save')}
+                </Button>
+              </CardFooter>
             </Card>
 
             {/* Terms & Conditions */}
@@ -580,18 +659,18 @@ export default function Settings() {
                   </TabsContent>
                 </Tabs>
               </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={saveTermsConditions}
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save-terms"
+                >
+                  {updateMutation.isPending ? t('common.saving') : t('common.save')}
+                </Button>
+              </CardFooter>
             </Card>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="submit"
-                disabled={updateMutation.isPending}
-                data-testid="button-save-settings"
-              >
-                {updateMutation.isPending ? t('common.saving') : t('common.save')}
-              </Button>
-            </div>
-          </form>
+          </div>
         </Form>
       </div>
     </div>
