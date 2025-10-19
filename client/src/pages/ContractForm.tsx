@@ -48,24 +48,24 @@ const contractFormSchema = z.object({
   pickupLocation: z.string().min(1, "Pickup location is required"),
   dropoffLocation: z.string().min(1, "Dropoff location is required"),
   dailyRate: z.string().min(1, "Daily rate is required"),
-  weeklyRate: z.string().optional(),
-  monthlyRate: z.string().optional(),
+  weeklyRate: z.string().nullable().optional(),
+  monthlyRate: z.string().nullable().optional(),
   totalDays: z.coerce.number().default(1),
-  subtotal: z.string().optional(),
-  vatAmount: z.string().optional(),
+  subtotal: z.string().nullable().optional(),
+  vatAmount: z.string().nullable().optional(),
   totalAmount: z.string().min(1, "Total amount is required"),
-  mileageLimit: z.coerce.number().optional(),
-  extraKmRate: z.string().optional(),
-  securityDeposit: z.string().optional(),
-  odometerStart: z.coerce.number().optional(),
-  fuelLevelStart: z.string().optional(),
-  vehicleCondition: z.string().optional(),
-  notes: z.string().optional(),
+  mileageLimit: z.coerce.number().nullable().optional(),
+  extraKmRate: z.string().nullable().optional(),
+  securityDeposit: z.string().nullable().optional(),
+  odometerStart: z.coerce.number().nullable().optional(),
+  fuelLevelStart: z.string().nullable().optional(),
+  vehicleCondition: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
   termsAccepted: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and conditions",
   }),
   createdBy: z.string(),
-  status: z.string().optional(),
+  status: z.string().nullable().optional(),
 });
 
 type ContractFormData = z.infer<typeof contractFormSchema>;
@@ -102,6 +102,21 @@ export default function ContractForm() {
       }, 500);
     }
   }, [isAuthenticated, authLoading, toast, t]);
+
+  // Guard: Check for edit reason when loading edit form
+  useEffect(() => {
+    if (isEditing && params.id) {
+      const editReason = sessionStorage.getItem(`editReason_${params.id}`);
+      if (!editReason) {
+        toast({
+          title: t('common.error'),
+          description: 'Please provide an edit reason before modifying this contract.',
+          variant: "destructive",
+        });
+        navigate('/contracts');
+      }
+    }
+  }, [isEditing, params.id, navigate, toast, t]);
 
   const { data: existingContract, isLoading: contractLoading } = useQuery<Contract>({
     queryKey: ['/api/contracts', params.id],
