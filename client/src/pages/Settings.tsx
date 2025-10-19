@@ -50,7 +50,8 @@ export default function Settings() {
       addressEn: "",
       addressAr: "",
       logoUrl: "",
-      currency: "AED",
+      currencyEn: "AED",
+      currencyAr: "د.إ",
       vatPercentage: "5",
       termsSection1En: "",
       termsSection1Ar: "",
@@ -80,7 +81,8 @@ export default function Settings() {
         addressEn: settings.addressEn,
         addressAr: settings.addressAr,
         logoUrl: settings.logoUrl || "",
-        currency: settings.currency || "AED",
+        currencyEn: settings.currencyEn || "AED",
+        currencyAr: settings.currencyAr || "د.إ",
         vatPercentage: settings.vatPercentage || "5",
         termsSection1En: settings.termsSection1En || "",
         termsSection1Ar: settings.termsSection1Ar || "",
@@ -392,12 +394,12 @@ export default function Settings() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="currency"
+                    name="currencyEn"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('settings.currency')}</FormLabel>
+                        <FormLabel>{t('settings.currencyEn')}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="AED" data-testid="input-currency" />
+                          <Input {...field} placeholder="AED" data-testid="input-currency-en" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -406,18 +408,32 @@ export default function Settings() {
 
                   <FormField
                     control={form.control}
-                    name="vatPercentage"
+                    name="currencyAr"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('settings.vatPercentage')}</FormLabel>
+                        <FormLabel>{t('settings.currencyAr')}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="5" data-testid="input-vat-percentage" />
+                          <Input {...field} placeholder="د.إ" data-testid="input-currency-ar" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="vatPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('settings.vatPercentage')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="5" data-testid="input-vat-percentage" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </CardContent>
             </Card>
 
