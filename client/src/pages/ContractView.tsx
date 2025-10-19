@@ -1616,16 +1616,28 @@ export default function ContractView() {
           )}
 
           {/* Signature Section */}
-          <div className="grid grid-cols-2 gap-8 mt-8 border-t pt-4">
-            <div>
-              <p className="font-semibold mb-2">Hirer's Signature / <span className="font-arabic">توقيع المستأجر</span></p>
-              <div className="border-b-2 border-black h-16"></div>
-              <p className="text-sm mt-2">Date: ________________</p>
+          <div className={`mt-8 border-t pt-4 grid gap-4 ${hirerType === 'sponsored' ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <div className="border-2 border-black p-3 text-center">
+              <div className="h-12 mb-2"></div>
+              <p className="text-xs font-semibold font-arabic mb-1">مسؤول المكتب</p>
+              <p className="text-xs font-semibold">Office In-charge</p>
+              <p className="text-xs mt-2">Date: ________________</p>
             </div>
-            <div>
-              <p className="font-semibold mb-2">Company Representative / <span className="font-arabic">ممثل الشركة</span></p>
-              <div className="border-b-2 border-black h-16"></div>
-              <p className="text-sm mt-2">Date: ________________</p>
+            
+            {hirerType === 'sponsored' && (
+              <div className="border-2 border-black p-3 text-center">
+                <div className="h-12 mb-2"></div>
+                <p className="text-xs font-semibold font-arabic mb-1">توقيع الكفيل</p>
+                <p className="text-xs font-semibold">Sponsor Signature</p>
+                <p className="text-xs mt-2">Date: ________________</p>
+              </div>
+            )}
+            
+            <div className="border-2 border-black p-3 text-center">
+              <div className="h-12 mb-2"></div>
+              <p className="text-xs font-semibold font-arabic mb-1">توقيع المستأجر</p>
+              <p className="text-xs font-semibold">Hirer Signature</p>
+              <p className="text-xs mt-2">Date: ________________</p>
             </div>
           </div>
         </div>
