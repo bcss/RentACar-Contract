@@ -493,6 +493,348 @@ export default function ContractView() {
         </div>
       )}
 
+      {/* Sponsor and Hirer Details - Print Only */}
+      {companySettings && customer && vehicle && (
+        <div className="print-only border-2 border-black mb-6">
+          <div className="grid grid-cols-2 divide-x-2 divide-black">
+            {/* Left Column: Sponsor (only if hirerType is 'sponsored') */}
+            <div>
+              {hirerType === 'sponsored' && (
+                <>
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Sponsor Name</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">اسم الكفيل</p>
+                      <p className="text-xs">{contract.sponsorName || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Nationality</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">الجنسية</p>
+                      <p className="text-xs">{contract.sponsorNationality || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Passport No./ID</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">رقم جواز السفر / الهوية</p>
+                      <p className="text-xs">{contract.sponsorPassport || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Address</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">العنوان</p>
+                      <p className="text-xs">{contract.sponsorAddress || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Mobile</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">متحرك</p>
+                      <p className="text-xs">{contract.sponsorMobile || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Credit Card</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">بطاقة الائتمان</p>
+                      <p className="text-xs">{contract.sponsorCreditCard || ''}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Left column fields for all hirer types */}
+              <div className="grid grid-cols-2 border-b border-black">
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">Reg. No.</p>
+                </div>
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">رقم التسجيل</p>
+                  <p className="text-xs">{vehicle.registration}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 border-b border-black">
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">Time In</p>
+                </div>
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">ساعة الدخول</p>
+                  <p className="text-xs">{contract.rentalStartTime || ''}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 border-b border-black">
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">Advance Payment</p>
+                </div>
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">المبلغ المدفوع مقدماً</p>
+                  <p className="text-xs">{contract.depositPaid ? contract.securityDeposit : '0'} {currency}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2">
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">KM Out</p>
+                </div>
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">عداد الخروج</p>
+                  <p className="text-xs">{contract.odometerStart?.toLocaleString() || ''}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Hirer */}
+            <div>
+              <div className="grid grid-cols-[1fr_120px] border-b border-black">
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">اسم المستأجر</p>
+                  <p className="text-xs">{customer.nameAr || ''}</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-l border-black">
+                  <p className="text-xs font-bold text-red-600">Hirer Name</p>
+                  <p className="text-xs">{customer.nameEn}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[1fr_auto_120px] border-b border-black">
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">الجنسية</p>
+                  <p className="text-xs">{customer.nationality || ''}</p>
+                </div>
+                <div className="flex items-center gap-2 px-2 border-l border-black">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px]">{customer.gender === 'male' ? '☑' : '☐'}</span>
+                    <label className="text-[9px]">Male<br/><span className="font-arabic">ذكر</span></label>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px]">{customer.gender === 'female' ? '☑' : '☐'}</span>
+                    <label className="text-[9px] text-red-600">Female<br/><span className="font-arabic">أنثى</span></label>
+                  </div>
+                </div>
+                <div className="bg-gray-50 p-2 border-l border-black">
+                  <p className="text-xs font-bold text-red-600">Nationality</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[1fr_120px] border-b border-black">
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">رقم جواز السفر / الهوية</p>
+                  <p className="text-xs">{customer.nationalId || ''}</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-l border-black">
+                  <p className="text-xs font-bold text-red-600">Passport No./ID</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[1fr_120px] border-b border-black">
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">متحرك</p>
+                  <p className="text-xs">{customer.phone}</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-l border-black">
+                  <p className="text-xs font-bold text-red-600">Mobile</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[1fr_120px_1fr] border-b border-black">
+                <div className="p-2 text-right font-arabic">
+                  <p className="text-xs">العنوان</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-x border-black">
+                  <p className="text-xs font-bold text-red-600">Address</p>
+                </div>
+                <div className="bg-gray-50 p-2">
+                  <p className="text-xs font-bold text-red-600">Date of Birth</p>
+                </div>
+                <div className="col-span-3 p-2 text-right font-arabic border-t border-black">
+                  <p className="text-xs">{customer.address || ''}</p>
+                  <p className="text-xs">تاريخ الولادة</p>
+                  <p className="text-xs">{customer.dateOfBirth ? format(new Date(customer.dateOfBirth), 'PP') : ''}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 border-b border-black">
+                <div>
+                  <div className="bg-gray-50 p-2 border-b border-r border-black text-right font-arabic">
+                    <p className="text-xs font-bold">رقم رخصة القيادة</p>
+                  </div>
+                  <div className="p-2 border-r border-black">
+                    <p className="text-xs">{customer.licenseNumber || ''}</p>
+                  </div>
+                </div>
+                <div>
+                  <div className="bg-gray-50 p-2 border-b border-black">
+                    <p className="text-xs font-bold text-red-600">Driving License Number</p>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <div className="bg-gray-50 p-2 border-r border-black text-right font-arabic">
+                      <p className="text-[9px]">جواز سفر</p>
+                    </div>
+                    <div className="bg-gray-50 p-2">
+                      <p className="text-[9px] font-bold">Pass</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 border-b border-black">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">تاريخ الإصدار</p>
+                  <p className="text-xs">{customer.licenseIssueDate ? format(new Date(customer.licenseIssueDate), 'PP') : ''}</p>
+                </div>
+                <div className="bg-gray-50 p-2">
+                  <p className="text-xs font-bold text-red-600">Issued On</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 border-b border-black">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">صدر الرخصة</p>
+                  <p className="text-xs">{customer.licenseIssuer || ''}</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">Issued By</p>
+                </div>
+                <div className="bg-gray-50 p-2">
+                  <p className="text-xs font-bold text-red-600">Exp. Date</p>
+                  <p className="text-xs">{customer.licenseExpiryDate ? format(new Date(customer.licenseExpiryDate), 'PP') : ''}</p>
+                </div>
+                <div className="col-span-3 p-2 text-right font-arabic border-t border-black">
+                  <p className="text-xs">تاريخ الانتهاء</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 border-b border-black">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">سنة الصنع</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">Car Manufacturing Year</p>
+                  <p className="text-xs">{vehicle.year}</p>
+                </div>
+                <div className="bg-gray-50 p-2">
+                  <p className="text-xs font-bold text-red-600">Model of Car</p>
+                  <p className="text-xs">{vehicle.model}</p>
+                </div>
+                <div className="col-span-3 p-2 text-right font-arabic border-t border-black">
+                  <p className="text-xs">نوع السيارة</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 border-b border-black">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">اللون</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">Color</p>
+                  <p className="text-xs">{vehicle.color}</p>
+                </div>
+                <div className="grid grid-cols-2 border-l border-black">
+                  <div className="bg-gray-50 p-2 border-r border-black">
+                    <p className="text-xs font-bold text-red-600">Return Date</p>
+                    <p className="text-xs">{format(new Date(contract.rentalEndDate), 'PP')}</p>
+                  </div>
+                  <div className="p-2 text-right font-arabic">
+                    <p className="text-xs">تاريخ العودة</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 border-b border-black">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">ساعة الخروج</p>
+                </div>
+                <div className="bg-gray-50 p-2">
+                  <p className="text-xs font-bold text-red-600">Time Out</p>
+                  <p className="text-xs">{contract.rentalEndTime || ''}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 border-b border-black">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">السعر الأسبوعي للإيجار</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">Weekly Rent</p>
+                  <p className="text-xs">{contract.weeklyRate || ''} {currency}</p>
+                </div>
+                <div className="grid grid-cols-2 border-l border-black">
+                  <div className="bg-gray-50 p-2 border-r border-black">
+                    <p className="text-xs font-bold text-red-600">Monthly Rent</p>
+                    <p className="text-xs">{contract.monthlyRate || ''} {currency}</p>
+                  </div>
+                  <div className="p-2 text-right font-arabic">
+                    <p className="text-xs">السعر الشهري للإيجار</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 border-b border-black">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">تاريخ الإيجار</p>
+                </div>
+                <div className="bg-gray-50 p-2">
+                  <p className="text-xs font-bold text-red-600">Date of Rent</p>
+                  <p className="text-xs">{format(new Date(contract.rentalStartDate), 'PP')}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 border-b border-black">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">السعر اليومي للإيجار</p>
+                </div>
+                <div className="bg-gray-50 p-2 border-r border-black">
+                  <p className="text-xs font-bold text-red-600">Daily Rent</p>
+                  <p className="text-xs">{contract.dailyRate || ''} {currency}</p>
+                </div>
+                <div className="bg-gray-50 p-2">
+                  <p className="text-xs font-bold text-red-600">Total Days</p>
+                  <p className="text-xs">{contract.totalDays || ''}</p>
+                </div>
+                <div className="col-span-3 p-2 text-right font-arabic border-t border-black">
+                  <p className="text-xs">عدد الأيام</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2">
+                <div className="p-2 text-right font-arabic border-r border-black">
+                  <p className="text-xs">التاريخ المتوقع للتسجيل</p>
+                </div>
+                <div className="bg-gray-50 p-2">
+                  <p className="text-xs font-bold text-red-600">KM In</p>
+                  <p className="text-xs">{contract.odometerEnd?.toLocaleString() || ''}</p>
+                </div>
+                <div className="col-span-2 bg-red-100 p-2 border-t border-black">
+                  <p className="text-xs font-bold text-red-600 text-center">Expected Return Date: {format(new Date(contract.rentalEndDate), 'PP')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between flex-wrap gap-4 no-print">
         <div>
           <div className="flex items-center gap-3 mb-2">
