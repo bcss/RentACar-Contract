@@ -8,6 +8,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates (October 19, 2025)
 
+### MARMAR Template PDF Integration
+- **Print-Only Sections:** Integrated official MARMAR rental contract template for professional PDF generation
+  - **Sponsor/Hirer Section:** Two-column layout with sponsor on left (conditional on hirerType), hirer on right with complete customer/license/vehicle details
+  - **Vehicle Inspection Section:** Displays tools, spare tyre, GPS checkboxes, fuel percentage start/end, and damage notes using static Unicode symbols (☑/☐)
+  - **Payment Breakdown Section:** Complete payment grid with Rent, VAT, SALIK, Traffic Fines, Damage, Extra KM, Fuel Charge, Deposit, Others, and Total Amount
+  - **Signature Section:** Dynamic layout with 2 boxes (Office In-charge, Hirer) or 3 boxes (Office In-charge, Sponsor, Hirer) based on hirerType
+- **Print CSS Optimizations:** Enhanced print stylesheet to ensure proper PDF layout
+  - Valid selector sequence for hiding/showing buttons in print
+  - Ensured borders, backgrounds, colors, and grid layouts print correctly
+  - Prevented page breaks in signature section
+  - Optimized font sizing and spacing for professional appearance
+
 ### Contract Timeline Feature
 - **Dual Data Source Architecture:** Timeline now displays complete contract history by merging field edits and lifecycle events
   - `/api/contracts/:id/edits` endpoint for field-level changes from `contract_edits` table
