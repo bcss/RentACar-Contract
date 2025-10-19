@@ -630,7 +630,7 @@ export default function ContractForm() {
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-[400px] p-0">
-                        <Command>
+                        <Command shouldFilter={false}>
                           <CommandInput
                             placeholder="Search customers..."
                             value={customerSearchQuery}
