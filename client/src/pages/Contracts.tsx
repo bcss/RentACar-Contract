@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { EditReasonDialog } from '@/components/EditReasonDialog';
 import {
   Table,
   TableBody,
@@ -48,6 +49,8 @@ export default function Contracts() {
   const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
   const [isEnableDialogOpen, setIsEnableDialogOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [isEditReasonDialogOpen, setIsEditReasonDialogOpen] = useState(false);
+  const [contractToEdit, setContractToEdit] = useState<Contract | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -298,12 +301,13 @@ export default function Contracts() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                asChild
+                                onClick={() => {
+                                  setContractToEdit(contract);
+                                  setIsEditReasonDialogOpen(true);
+                                }}
                                 data-testid={`button-edit-${contract.id}`}
                               >
-                                <Link href={`/contracts/${contract.id}/edit`}>
-                                  <span className="material-icons">edit</span>
-                                </Link>
+                                <span className="material-icons">edit</span>
                               </Button>
                             )}
                             <Button
@@ -440,6 +444,16 @@ export default function Contracts() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Reason Dialog */}
+      {contractToEdit && (
+        <EditReasonDialog
+          open={isEditReasonDialogOpen}
+          onOpenChange={setIsEditReasonDialogOpen}
+          contractId={contractToEdit.id}
+          contractNumber={contractToEdit.contractNumber}
+        />
+      )}
     </div>
   );
 }

@@ -469,9 +469,25 @@ export default function ContractForm() {
 
   const updateMutation = useMutation({
     mutationFn: async (data: ContractFormData) => {
-      return await apiRequest('PATCH', `/api/contracts/${params.id}`, data);
+      // Retrieve edit reason from sessionStorage
+      const editReason = sessionStorage.getItem(`editReason_${params.id}`);
+      
+      if (!editReason) {
+        throw new Error('Edit reason is required. Please start editing from the contracts list.');
+      }
+      
+      // Include editReason in the request
+      return await apiRequest('PATCH', `/api/contracts/${params.id}`, {
+        ...data,
+        editReason,
+      });
     },
     onSuccess: () => {
+      // Clear the edit reason from sessionStorage after successful update
+      if (params.id) {
+        sessionStorage.removeItem(`editReason_${params.id}`);
+      }
+      
       toast({
         title: t('common.success'),
         description: t('msg.contractUpdated'),
