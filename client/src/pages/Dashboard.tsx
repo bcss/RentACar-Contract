@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { isAuthenticated, isLoading, isAdmin, isManager } = useAuth();
+  const { currency } = useCurrency();
   const [, setLocation] = useLocation();
   const [isAcknowledgeAllDialogOpen, setIsAcknowledgeAllDialogOpen] = useState(false);
 
@@ -232,7 +234,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-chart-1" data-testid="stat-monthly-revenue">
-              {monthlyRevenue.toLocaleString('en-SA', { style: 'currency', currency: 'SAR' })}
+              {currency} {monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground mt-1">This month</p>
           </CardContent>
@@ -405,13 +407,13 @@ export default function Dashboard() {
               <div className="space-y-3">
                 <div>
                   <div className="text-2xl font-bold" data-testid="stat-total-revenue">
-                    ${revenueAnalytics.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {currency} {revenueAnalytics.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <p className="text-xs text-muted-foreground">{t('analytics.totalRevenue')}</p>
                 </div>
                 <div>
                   <div className="text-lg font-medium" data-testid="stat-avg-contract">
-                    ${revenueAnalytics.averageContractValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {currency} {revenueAnalytics.averageContractValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <p className="text-xs text-muted-foreground">{t('analytics.avgContractValue')}</p>
                 </div>
