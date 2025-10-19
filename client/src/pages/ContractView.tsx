@@ -835,6 +835,149 @@ export default function ContractView() {
         </div>
       )}
 
+      {/* Vehicle Inspection and Payment Breakdown - Print Only */}
+      {companySettings && (
+        <div className="print-only grid grid-cols-2 gap-3 mb-6">
+          {/* Vehicle Inspection Section */}
+          <div className="border border-black">
+            <div className="bg-gray-50 border-b border-black p-2 text-center">
+              <p className="text-xs font-bold">VEHICLE INSPECTION / <span className="font-arabic">فحص المركبة</span></p>
+            </div>
+            <div className="p-3">
+              {/* Tools, Spare Tyre, GPS */}
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <div className="border border-black p-2">
+                  <p className="text-[9px] font-semibold mb-1">Tools / <span className="font-arabic">الأدوات</span></p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs">{contract.hasTools ? '☑ Yes' : '☐ No'}</span>
+                  </div>
+                </div>
+                <div className="border border-black p-2">
+                  <p className="text-[9px] font-semibold mb-1">Spare Tyre / <span className="font-arabic">الإطار الاحتياطي</span></p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs">{contract.hasSpareTyre ? '☑ Yes' : '☐ No'}</span>
+                  </div>
+                </div>
+                <div className="border border-black p-2">
+                  <p className="text-[9px] font-semibold mb-1">GPS / <span className="font-arabic">نظام تحديد المواقع</span></p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs">{contract.hasGps ? '☑ Yes' : '☐ No'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fuel Percentage */}
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="flex justify-between items-center">
+                  <p className="text-[9px] font-semibold">Fuel % Start <span className="font-arabic">/ نسبة الوقود</span></p>
+                  <span className="border border-black px-2 py-1 text-xs font-mono">{contract.fuelPercentageStart || '0'}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-[9px] font-semibold">Fuel % End <span className="font-arabic">/ نسبة الوقود</span></p>
+                  <span className="border border-black px-2 py-1 text-xs font-mono">{contract.fuelPercentageEnd || '0'}%</span>
+                </div>
+              </div>
+
+              {/* Damage Notes */}
+              {contract.damageNotes && (
+                <div className="mt-2 border-t border-black pt-2">
+                  <p className="text-[9px] font-semibold mb-1">Damage Notes / <span className="font-arabic">ملاحظات الأضرار</span></p>
+                  <p className="text-[9px] whitespace-pre-wrap">{contract.damageNotes}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Payment Section */}
+          <div className="border border-black">
+            <div className="bg-gray-50 border-b border-black p-2 text-center">
+              <p className="text-xs font-bold">PAYMENT</p>
+            </div>
+            <div className="grid grid-cols-[1fr_110px]">
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">Rent</span>
+                <span className="text-[9px] font-arabic block">الأجار</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.totalAmount || '0'} {currency}</span>
+              </div>
+
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">VAT</span>
+                <span className="text-[9px] font-arabic block">ضريبة القيمة المضافة</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.vatAmount || '0'} {currency}</span>
+              </div>
+
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">SALIK</span>
+                <span className="text-[9px] font-arabic block">سالك</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.salikCharges || '0'} {currency}</span>
+              </div>
+
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">Traffic Fine</span>
+                <span className="text-[9px] font-arabic block">غرامات مرورية</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.trafficFines || '0'} {currency}</span>
+              </div>
+
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">Damage</span>
+                <span className="text-[9px] font-arabic block">تلفيات</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.damageCharge || '0'} {currency}</span>
+              </div>
+
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">Extra KM</span>
+                <span className="text-[9px] font-arabic block">كيلومترات إضافية</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.extraKmCharge || '0'} {currency}</span>
+              </div>
+
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">Fuel Charge</span>
+                <span className="text-[9px] font-arabic block">رسوم الوقود</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.fuelCharge || '0'} {currency}</span>
+              </div>
+
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">Deposit</span>
+                <span className="text-[9px] font-arabic block">الوديعة</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.depositPaid ? `-${contract.securityDeposit}` : '0'} {currency}</span>
+              </div>
+
+              <div className="border-r border-b border-black p-1.5">
+                <span className="text-[10px] font-semibold">Others</span>
+                <span className="text-[9px] font-arabic block">أخرى</span>
+              </div>
+              <div className="border-b border-black p-1.5 text-right">
+                <span className="text-[10px] font-mono">{contract.otherCharges || '0'} {currency}</span>
+              </div>
+
+              <div className="bg-gray-50 border-r border-black p-1.5">
+                <span className="text-[10px] font-bold">Total Amount</span>
+                <span className="text-[9px] font-arabic block">المبلغ الإجمالي</span>
+              </div>
+              <div className="bg-gray-50 p-1.5 text-right">
+                <span className="text-[11px] font-mono font-bold">{contract.outstandingBalance || contract.totalAmount || '0'} {currency}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between flex-wrap gap-4 no-print">
         <div>
           <div className="flex items-center gap-3 mb-2">
