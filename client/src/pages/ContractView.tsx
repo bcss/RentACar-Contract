@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
 import { Contract, CompanySettings, Customer, Vehicle } from '@shared/schema';
@@ -45,6 +46,7 @@ export default function ContractView() {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading, isAdmin, isManager } = useAuth();
+  const { currency } = useCurrency();
   const [, navigate] = useLocation();
   const params = useParams<{ id: string }>();
   const isArabic = i18n.language === 'ar';
@@ -709,7 +711,7 @@ export default function ContractView() {
                 <div>
                   <p className="text-sm text-muted-foreground">Outstanding Balance</p>
                   <p className="text-xl font-bold font-mono text-red-600" data-testid="text-outstanding-balance">
-                    {contract.outstandingBalance} AED
+                    {contract.outstandingBalance} {currency}
                   </p>
                 </div>
               )}
@@ -740,7 +742,7 @@ export default function ContractView() {
                   <div>
                     <p className="text-sm text-muted-foreground">Extra KM Charge</p>
                     <p className="font-medium font-mono" data-testid="text-extra-km-charge">
-                      {contract.extraKmCharge} AED
+                      {contract.extraKmCharge} {currency}
                     </p>
                   </div>
                 </>
@@ -749,7 +751,7 @@ export default function ContractView() {
                 <div>
                   <p className="text-sm text-muted-foreground">Fuel Charge</p>
                   <p className="font-medium font-mono" data-testid="text-fuel-charge">
-                    {contract.fuelCharge} AED
+                    {contract.fuelCharge} {currency}
                   </p>
                 </div>
               )}
@@ -757,7 +759,7 @@ export default function ContractView() {
                 <div>
                   <p className="text-sm text-muted-foreground">Damage Charge</p>
                   <p className="font-medium font-mono" data-testid="text-damage-charge">
-                    {contract.damageCharge} AED
+                    {contract.damageCharge} {currency}
                   </p>
                 </div>
               )}
@@ -765,7 +767,7 @@ export default function ContractView() {
                 <div>
                   <p className="text-sm text-muted-foreground">Other Charges</p>
                   <p className="font-medium font-mono" data-testid="text-other-charges">
-                    {contract.otherCharges} AED
+                    {contract.otherCharges} {currency}
                   </p>
                 </div>
               )}
@@ -773,7 +775,7 @@ export default function ContractView() {
                 <div>
                   <p className="text-sm text-muted-foreground">Total Extra Charges</p>
                   <p className="text-xl font-bold font-mono text-red-600" data-testid="text-total-extra-charges">
-                    {contract.totalExtraCharges} AED
+                    {contract.totalExtraCharges} {currency}
                   </p>
                 </div>
               )}
@@ -783,23 +785,23 @@ export default function ContractView() {
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span>Base Rental Amount:</span>
-                  <span className="font-mono">{contract.totalAmount} AED</span>
+                  <span className="font-mono">{contract.totalAmount} {currency}</span>
                 </div>
                 {contract.totalExtraCharges && parseFloat(contract.totalExtraCharges) > 0 && (
                   <div className="flex justify-between">
                     <span>Total Extra Charges:</span>
-                    <span className="font-mono text-red-600">+ {contract.totalExtraCharges} AED</span>
+                    <span className="font-mono text-red-600">+ {contract.totalExtraCharges} {currency}</span>
                   </div>
                 )}
                 {contract.depositPaid && contract.securityDeposit && (
                   <div className="flex justify-between">
                     <span>Security Deposit (Paid):</span>
-                    <span className="font-mono text-green-600">- {contract.securityDeposit} AED</span>
+                    <span className="font-mono text-green-600">- {contract.securityDeposit} {currency}</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold border-t pt-1 mt-1">
                   <span>Final Balance:</span>
-                  <span className="font-mono">{contract.outstandingBalance || '0.00'} AED</span>
+                  <span className="font-mono">{contract.outstandingBalance || '0.00'} {currency}</span>
                 </div>
               </div>
             </div>
@@ -1200,12 +1202,12 @@ export default function ContractView() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Extra KM Charge:</p>
-                    <p className="font-mono" data-testid="text-calc-extra-km-charge">{extraCharges.extraKmChargeAmount.toFixed(2)} AED</p>
+                    <p className="font-mono" data-testid="text-calc-extra-km-charge">{extraCharges.extraKmChargeAmount.toFixed(2)} {currency}</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="fuel-charge">Fuel Charge (AED)</Label>
+                  <Label htmlFor="fuel-charge">Fuel Charge ({currency})</Label>
                   <Input
                     id="fuel-charge"
                     type="number"
@@ -1218,7 +1220,7 @@ export default function ContractView() {
                 </div>
 
                 <div>
-                  <Label htmlFor="damage-charge">Damage Charge (AED)</Label>
+                  <Label htmlFor="damage-charge">Damage Charge ({currency})</Label>
                   <Input
                     id="damage-charge"
                     type="number"
@@ -1231,7 +1233,7 @@ export default function ContractView() {
                 </div>
 
                 <div>
-                  <Label htmlFor="other-charges">Other Charges (AED)</Label>
+                  <Label htmlFor="other-charges">Other Charges ({currency})</Label>
                   <Input
                     id="other-charges"
                     type="number"
@@ -1246,11 +1248,11 @@ export default function ContractView() {
                 <div className="border-t pt-3 space-y-2">
                   <div className="flex justify-between font-semibold">
                     <span>Total Extra Charges:</span>
-                    <span className="font-mono" data-testid="text-calc-total-extra">{extraCharges.totalExtraCharges.toFixed(2)} AED</span>
+                    <span className="font-mono" data-testid="text-calc-total-extra">{extraCharges.totalExtraCharges.toFixed(2)} {currency}</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg">
                     <span>Outstanding Balance:</span>
-                    <span className="font-mono" data-testid="text-calc-outstanding">{extraCharges.outstandingBalance.toFixed(2)} AED</span>
+                    <span className="font-mono" data-testid="text-calc-outstanding">{extraCharges.outstandingBalance.toFixed(2)} {currency}</span>
                   </div>
                 </div>
               </div>
