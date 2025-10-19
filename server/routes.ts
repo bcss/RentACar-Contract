@@ -360,6 +360,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/contracts/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      const { editReason, ...contractData } = req.body;
+      
+      // Require edit reason for all contract edits
+      if (!editReason || editReason.trim() === '') {
+        return res.status(400).json({ message: "Edit reason is required" });
+      }
+      
       const contract = await storage.getContract(req.params.id);
       
       if (!contract) {
@@ -379,10 +386,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden: You can only edit your own contracts" });
       }
 
-      const updated = await storage.updateContract(req.params.id, req.body);
+      // Capture state before edit
+      const fieldsBefore = { ...contract };
+      
+      // Update the contract
+      const updated = await storage.updateContract(req.params.id, contractData);
+      
+      // Capture state after edit
+      const fieldsAfter = { ...updated };
+      
+      // Generate human-readable summary of changes
+      const changedFields: string[] = [];
+      Object.keys(contractData).forEach(key => {
+        const beforeValue = (fieldsBefore as any)[key];
+        const afterValue = (fieldsAfter as any)[key];
+        if (beforeValue !== afterValue) {
+          changedFields.push(`${key}: ${beforeValue} → ${afterValue}`);
+        }
+      });
+      const changesSummary = changedFields.length > 0 
+        ? `Changed ${changedFields.length} field(s): ${changedFields.join(', ')}`
+        : 'No changes detected';
+      
+      // Create contract edit record
+      await storage.createContractEdit({
+        contractId: updated.id,
+        editedBy: userId,
+        editReason: editReason.trim(),
+        changesSummary,
+        fieldsBefore,
+        fieldsAfter,
+        ipAddress: req.ip,
+      });
       
       // Create audit log
-      await createAuditLog(userId, 'edit', updated.id, req.ip, `Updated contract #${updated.contractNumber}`);
+      await createAuditLog(userId, 'edit', updated.id, req.ip, `Updated contract #${updated.contractNumber} - Reason: ${editReason.trim()}`);
       
       res.json(updated);
     } catch (error: any) {

@@ -385,6 +385,38 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
 
+// Contract edits table - Detailed tracking of all contract modifications
+export const contractEdits = pgTable("contract_edits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  editedBy: varchar("edited_by").notNull().references(() => users.id),
+  editedAt: timestamp("edited_at").defaultNow(),
+  editReason: text("edit_reason").notNull(), // User-provided reason for the edit
+  changesSummary: text("changes_summary"), // Human-readable summary of changes
+  fieldsBefore: jsonb("fields_before"), // JSON snapshot of contract state before edit
+  fieldsAfter: jsonb("fields_after"), // JSON snapshot of contract state after edit
+  ipAddress: varchar("ip_address"),
+});
+
+export const contractEditsRelations = relations(contractEdits, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [contractEdits.contractId],
+    references: [contracts.id],
+  }),
+  editor: one(users, {
+    fields: [contractEdits.editedBy],
+    references: [users.id],
+  }),
+}));
+
+export const insertContractEditSchema = createInsertSchema(contractEdits).omit({
+  id: true,
+  editedAt: true,
+});
+
+export type InsertContractEdit = z.infer<typeof insertContractEditSchema>;
+export type ContractEdit = typeof contractEdits.$inferSelect;
+
 // Contract counter table for sequential numbering
 export const contractCounter = pgTable("contract_counter", {
   id: varchar("id").primaryKey().default("singleton"),

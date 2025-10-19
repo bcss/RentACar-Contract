@@ -1,166 +1,212 @@
 # Design Guidelines: Rental Car Contract Management System
 
-## Design Approach: Material Design System
-**Rationale**: Material Design provides robust support for RTL/LTR layouts, comprehensive form components, data tables, and role-based UI patterns essential for this productivity-focused contract management system.
+## Design Approach: Material Design 3
+**Rationale**: Material Design 3 provides comprehensive support for RTL/LTR layouts, data-dense interfaces, and enterprise-grade components essential for this bilingual contract management platform. The system's focus on operational efficiency and data clarity makes Material's structured approach ideal.
 
 ## Core Design Principles
-- **Data Clarity**: Information hierarchy prioritizes contract data visibility and quick scanning
-- **Operational Efficiency**: Minimize clicks and cognitive load for repetitive contract creation tasks
-- **Bilingual Consistency**: Seamless English/Arabic switching with proper RTL/LTR layouts
-- **Role-Based UI**: Visual differentiation between Admin, Manager, Staff, and Viewer permissions
-- **Status Transparency**: Clear visual indicators for Draft vs Finalized contracts
+- **Data Transparency**: Quick-scan information hierarchy for multi-entity management (customers, vehicles, contracts)
+- **Operational Speed**: Streamlined workflows for high-volume contract processing
+- **Bilingual Excellence**: Seamless English/Arabic switching with flawless RTL/LTR implementations
+- **Role Clarity**: Visual differentiation across Admin/Manager/Staff/Viewer permissions
+- **Status Precision**: Instant recognition of contract lifecycle and payment states
 
 ---
 
 ## Color Palette
 
 ### Light Mode
-- **Primary**: 25 65% 47% (Professional teal-blue for contract actions)
-- **Primary Variant**: 25 70% 37% (Darker shade for hover states)
-- **Secondary**: 200 18% 46% (Neutral slate for secondary actions)
-- **Success**: 142 76% 36% (Contract finalized, actions completed)
-- **Warning**: 38 92% 50% (Pending actions, draft status)
-- **Error**: 0 84% 60% (Permission errors, validation issues)
-- **Background**: 0 0% 98% (Clean canvas for dense information)
-- **Surface**: 0 0% 100% (Cards, modals, elevated elements)
-- **Surface Variant**: 220 14% 96% (Table headers, inactive sections)
+- **Primary**: 199 89% 48% (Professional cyan-blue - trust and stability)
+- **Primary Container**: 199 85% 92% (Subtle backgrounds for active states)
+- **Secondary**: 260 8% 40% (Neutral slate for secondary actions)
+- **Tertiary**: 45 100% 51% (Accent for CTAs and highlights)
+- **Success**: 142 71% 45% (Payments received, contracts completed)
+- **Warning**: 38 92% 50% (Pending payments, draft contracts)
+- **Error**: 0 72% 51% (Overdue payments, validation errors)
+- **Background**: 0 0% 99%
+- **Surface**: 0 0% 100%
+- **Surface Variant**: 220 13% 95% (Table headers, disabled fields)
+- **Outline**: 220 9% 46% (Borders, dividers)
 
 ### Dark Mode
-- **Primary**: 25 80% 55% (Brighter for visibility on dark)
-- **Background**: 220 13% 13% (Deep neutral for extended use)
-- **Surface**: 220 13% 18% (Card elevation on dark)
-- **Surface Variant**: 220 12% 24% (Subtle differentiation)
+- **Primary**: 199 84% 65%
+- **Background**: 220 15% 11%
+- **Surface**: 220 14% 16%
+- **Surface Variant**: 220 12% 22%
+- **Outline**: 220 10% 40%
 
-### Semantic Colors
-- **Draft Status**: 45 93% 47% (Amber - work in progress)
-- **Finalized Status**: 142 76% 36% (Green - locked/complete)
-- **Admin Badge**: 271 81% 56% (Purple - highest privilege)
-- **Manager Badge**: 25 65% 47% (Primary - mid-level access)
-- **Audit Log**: 200 18% 46% (Slate - historical records)
+### Status Semantics
+- **Contract Draft**: 38 92% 50% (Amber)
+- **Contract Confirmed**: 207 90% 54% (Blue)
+- **Contract Active**: 142 71% 45% (Green)
+- **Contract Completed**: 260 8% 40% (Gray)
+- **Contract Closed**: 220 9% 46% (Muted slate)
+- **Payment Pending**: 38 92% 50% (Amber)
+- **Payment Partial**: 45 100% 51% (Orange)
+- **Payment Completed**: 142 71% 45% (Green)
+- **Payment Overdue**: 0 72% 51% (Red)
 
 ---
 
 ## Typography
 
-**Font Families**:
-- **Primary (Latin)**: Inter (Google Fonts) - clean, highly legible for forms and data
-- **Arabic**: Cairo (Google Fonts) - excellent readability, pairs well with Inter
-- **Monospace**: JetBrains Mono (for contract numbers, IDs, timestamps)
+**Font Stack**:
+- **Latin**: Inter (400, 500, 600, 700) - exceptional clarity for data tables
+- **Arabic**: Cairo (400, 500, 600, 700) - professional pairing with Inter
+- **Monospace**: Roboto Mono - contract IDs, license plates, VINs
 
-**Type Scale**:
-- **Display**: 2.5rem / 600 weight (Dashboard headers, page titles)
-- **Heading 1**: 2rem / 600 (Section titles, modal headers)
-- **Heading 2**: 1.5rem / 600 (Card titles, sub-sections)
-- **Heading 3**: 1.25rem / 500 (Table headers, form section labels)
-- **Body Large**: 1rem / 400 (Primary content, form inputs)
-- **Body**: 0.875rem / 400 (Table data, secondary text)
-- **Caption**: 0.75rem / 400 (Helper text, timestamps, metadata)
-- **Label**: 0.875rem / 500 (Form labels, button text)
+**Hierarchy**:
+- **Display**: 2.75rem/700 (Page headers, empty states)
+- **Headline Large**: 2rem/600 (Dashboard sections, modal titles)
+- **Headline Medium**: 1.75rem/600 (Card headers)
+- **Title Large**: 1.375rem/500 (Table titles, section headers)
+- **Body Large**: 1rem/400 (Form inputs, primary content)
+- **Body Medium**: 0.875rem/400 (Table cells, descriptions)
+- **Label Large**: 0.875rem/500 (Form labels, button text)
+- **Label Small**: 0.75rem/500 (Helper text, badges, timestamps)
 
 ---
 
 ## Layout System
 
-**Spacing Primitives**: Use Tailwind units of **2, 3, 4, 6, 8, 12, 16** for consistent rhythm
-- Form spacing: gap-4, p-6 for cards
-- Section spacing: py-8, px-6 for main content areas
-- Table spacing: px-4, py-3 for cells
-- Modal spacing: p-8 for dialogs
+**Spacing Scale**: Tailwind units **2, 3, 4, 6, 8, 12, 16, 20** for consistent rhythm
+- Cards: p-6, gap-4
+- Sections: py-12, px-8
+- Tables: px-4 py-3
+- Modals: p-8
+- Dashboard grid: gap-6
 
-**Grid Structure**:
-- **Dashboard Layout**: 12-column grid (sidebar: col-span-2, main: col-span-10)
-- **Contract Form**: 6-column grid for bilingual alignment (3 cols per language)
-- **Table Views**: Full-width responsive tables with horizontal scroll on mobile
-- **Max Widths**: max-w-7xl for main content, max-w-4xl for forms
+**Page Structure**:
+- **Navigation**: Fixed top bar (h-16) + collapsible sidebar (w-64)
+- **Main Content**: max-w-7xl mx-auto px-6 py-8
+- **Dashboard Grid**: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+- **Data Tables**: Full-width with horizontal scroll on mobile
+- **Forms**: max-w-4xl, 2-column layout (lg:grid-cols-2 gap-6)
 
-**Responsive Breakpoints**:
-- Mobile: Single column, stacked forms, bottom navigation
-- Tablet (md:): 2-column forms, persistent sidebar
-- Desktop (lg:): Full layout with fixed sidebar, 2-3 column forms
+**Responsive Strategy**:
+- Mobile: Bottom navigation, stacked cards, simplified tables
+- Tablet (md:): Persistent sidebar, 2-column forms
+- Desktop (lg:): Full layout with data density optimization
 
 ---
 
 ## Component Library
 
 ### Navigation
-- **Top Bar**: Logo, language toggle (EN/AR with flag icons), user profile with role badge, notifications bell
-- **Sidebar**: Persistent left navigation with icons + labels, role-based menu items (Contracts, Users [Admin], Logs [Admin], Settings)
-- **Breadcrumbs**: Below top bar showing navigation path (Home > Contracts > Contract #15523)
+- **App Bar**: Logo, breadcrumbs, global search, language toggle (EN/AR flags), notification bell, user menu with role badge
+- **Sidebar**: Collapsible with icons + labels (Dashboard, Customers, Vehicles, Contracts, Users, Settings, Audit Logs), active state highlighting
+- **Tab Navigation**: Secondary navigation within pages (Contract Details: Overview, Timeline, Documents, Payments)
+
+### Data Tables
+- **Standard Table**: Striped rows, sticky headers, sortable columns, row selection checkboxes, inline actions menu
+- **Column Types**: Text, numeric (right-aligned), date, status badge, avatar+name, action buttons
+- **Pagination**: Bottom bar with rows-per-page selector (10/25/50/100)
+- **Filters**: Top bar with quick filters (date range, status chips, search), advanced filter drawer
+- **Empty States**: Centered illustration + helpful message + primary action
 
 ### Forms & Inputs
-- **Text Inputs**: Outlined style with floating labels, proper RTL/LTR text alignment
-- **Select Dropdowns**: Material-style with search for long lists (customer selection)
-- **Date Pickers**: Calendar widget with hijri/gregorian support for Arabic users
-- **Number Inputs**: Right-aligned for contract numbers with monospace font
-- **Textarea**: Auto-expanding for notes/comments sections
-- **File Upload**: Drag-drop zone for contract attachments
+- **Text Fields**: Outlined Material style, floating labels, inline validation, helper text, required indicators
+- **Selects**: Searchable dropdowns for customers/vehicles, multi-select for features
+- **Date Inputs**: Material date picker with Hijri calendar support for Arabic
+- **Number Fields**: Right-aligned, formatted (currency, mileage), increment/decrement buttons
+- **File Upload**: Drag-drop zone with preview thumbnails, progress indicators
+- **Rich Text**: Contract notes with basic formatting toolbar
 
-### Data Display
-- **Contract Table**: Striped rows, sticky header, sortable columns (ID, Customer, Date, Status, Actions)
-- **Status Badges**: Pill-shaped with icon (Draft: amber with edit icon, Finalized: green with lock icon)
-- **Contract Cards**: Alternative view with thumbnail preview, key details, action buttons
-- **Audit Log Timeline**: Vertical timeline with user avatar, action type, timestamp, contract reference
-- **Stats Cards**: Dashboard KPIs (Total Contracts, Active Rentals, Drafts Pending) with trend indicators
+### Status & Indicators
+- **Contract Status Chips**: Rounded pills with icon prefix (Draft: edit, Confirmed: check_circle, Active: directions_car, Completed: task_alt, Closed: archive)
+- **Payment Badges**: Distinctive shapes (Pending: warning triangle, Partial: info circle, Completed: success checkmark, Overdue: error exclamation)
+- **Progress Bars**: Linear indicators for payment completion percentage
+- **Avatars**: User profile images with role color borders (Admin: purple, Manager: cyan, Staff: blue)
 
-### Actions & Feedback
-- **Primary Button**: Filled with primary color (Create Contract, Finalize, Save)
-- **Secondary Button**: Outlined style (Cancel, Back, View Details)
-- **Icon Buttons**: For table actions (Edit, Print, Delete) with tooltips
-- **FAB (Floating Action Button)**: Bottom-right for "New Contract" on mobile
-- **Snackbar Notifications**: Bottom-center for success/error messages with undo option
-- **Loading States**: Skeleton screens for tables, spinner for actions, progress bar for PDF generation
+### Cards & Widgets
+- **Dashboard Stats**: Large metric, trend arrow, comparison text, mini sparkline graph
+- **Entity Cards**: Customer/Vehicle cards with thumbnail, key details, quick actions
+- **Timeline Items**: Vertical audit log with avatar, action description, timestamp, contract link
+- **Quick Action Cards**: Icon, title, description, primary button (Create Contract, Add Customer)
 
 ### Modals & Overlays
-- **Contract Preview Modal**: Full-screen overlay showing print layout before generation
-- **Confirmation Dialogs**: Center modal for critical actions (Finalize Contract, Delete)
-- **User Management Drawer**: Right slide-in panel for editing user roles
-- **Search Overlay**: Full-width dropdown from top bar with filters (date range, status, user)
+- **Sheet Dialogs**: Side drawer for entity details (customer profile, vehicle info)
+- **Confirmation Modals**: Centered dialog for critical actions (delete, finalize)
+- **Full-Screen Modals**: Contract PDF preview, bulk import interface
+- **Snackbars**: Bottom notification bar with undo option, 6-second auto-dismiss
 
-### Contract-Specific Components
-- **Contract Number Display**: Large, monospace, with copy-to-clipboard icon
-- **Bilingual Field Display**: Side-by-side English/Arabic fields with clear visual separation
-- **Print Template Preview**: Exact PDF replica with data overlay visualization
-- **Signature Pad**: Canvas element for digital signatures (future enhancement)
-- **Lock Icon Overlay**: Watermark-style indicator on finalized contracts
-
----
-
-## Interactions & States
-
-- **Hover States**: Subtle elevation increase (shadow-md to shadow-lg), primary color tint on interactive elements
-- **Focus States**: 2px outline in primary color for keyboard navigation accessibility
-- **Disabled States**: 40% opacity, cursor-not-allowed for finalized contract edit buttons
-- **Active States**: Slight scale down (scale-98) for button press feedback
-- **Loading States**: Indeterminate progress indicators, skeleton screens for data tables
+### Specialized Components
+- **Contract Number Badge**: Large, prominent, monospace with copy button
+- **Bilingual Display**: Side-by-side fields with language labels, proper text direction
+- **Payment Timeline**: Visual timeline showing payment schedule, received amounts, outstanding balance
+- **Vehicle Availability Calendar**: Monthly grid showing rental periods, availability gaps
+- **Customer Credit Indicator**: Gauge widget showing credit limit, utilization
 
 ---
 
-## RTL/LTR Support
+## Dashboard Layout
 
-- **Layout Mirroring**: Automatic flip for sidebar, form alignment, table actions using dir="rtl" attribute
-- **Text Alignment**: text-right for Arabic, text-left for English
-- **Icon Positioning**: Mirror directional icons (arrows, chevrons) in RTL mode
-- **Form Flow**: Right-to-left tab order in Arabic forms
-- **Number Display**: Keep contract numbers LTR even in Arabic mode (15523 not 32551)
+**Top Section** (3-column grid):
+- Active Contracts (count, +/- change)
+- Revenue This Month (amount, trend chart)
+- Vehicles Available (count, utilization %)
+
+**Middle Section** (2-column):
+- Recent Contracts (mini table: 5 rows, compact view)
+- Pending Actions (list: payment follow-ups, expiring contracts)
+
+**Bottom Section** (full-width):
+- Revenue Chart (line graph, 12-month comparison)
+- Top Customers/Vehicles (ranked lists with avatars/images)
+
+---
+
+## RTL/LTR Implementation
+
+- **Automatic Flipping**: dir="rtl" triggers full layout mirror (sidebar right, icons reversed)
+- **Text Alignment**: Arabic right-aligned, English left-aligned within same field
+- **Preserved Elements**: Contract numbers, VINs, license plates remain LTR
+- **Icon Mirroring**: Directional icons flip (chevrons, arrows), symbolic icons stay consistent (car, person)
+- **Form Flow**: Tab order respects language direction
 
 ---
 
 ## Accessibility
 
-- **WCAG AA Compliance**: Minimum 4.5:1 contrast for text, 3:1 for UI components
-- **Keyboard Navigation**: Full tab order, Enter/Space for actions, Esc to close modals
-- **Screen Reader**: ARIA labels for all actions, role announcements for status changes
-- **Form Validation**: Inline error messages, required field indicators, helpful error text
-- **Dark Mode**: Consistent implementation across all views including forms and tables
+- **Contrast**: WCAG AAA compliance (7:1 for text, 4.5:1 for UI elements)
+- **Keyboard**: Full navigation, visible focus rings (2px primary outline), Esc to close
+- **Screen Readers**: Descriptive ARIA labels, status announcements, table headers
+- **Form Validation**: Real-time inline errors, required field markers, helpful suggestions
+- **Dark Mode**: Consistent across all views, user preference respected
 
 ---
 
 ## Images & Assets
 
-**Icons**: Material Icons via CDN for consistency with design system
-- Contract: description icon
-- User roles: admin_panel_settings, supervisor_account, person
-- Actions: edit, lock, print, delete, save, search
-- Status: check_circle, schedule, warning
+**Icons**: Material Symbols (Rounded variant) via CDN
+- Navigation: dashboard, people, directions_car, description, admin_panel_settings, settings, history
+- Actions: add, edit, delete, print, download, search, filter_list, more_vert
+- Status: check_circle, schedule, warning, error, lock, visibility
 
-**No Hero Images**: This is a productivity application focused on functionality over visual appeal. Dashboard uses data cards and quick actions instead of hero imagery.
+**No Hero Images**: Productivity-first application. Dashboard uses data visualization and action cards. Entity pages lead with data tables and metrics.
+
+**Entity Thumbnails**:
+- Customer profiles: Avatar placeholder or uploaded photo
+- Vehicle listings: Car photos (side profile, front-angle shots)
+- Document previews: PDF/image thumbnails in attachment lists
+
+---
+
+## Interaction States
+
+- **Hover**: Elevation increase (shadow-sm to shadow-md), slight background tint
+- **Focus**: 2px solid primary outline, no background change
+- **Active/Pressed**: Scale down (scale-98), deeper shadow
+- **Disabled**: 38% opacity, cursor-not-allowed
+- **Loading**: Skeleton screens (tables, cards), indeterminate progress (actions)
+- **Success**: Brief green pulse on saves, checkmark animation
+- **Error Shake**: Horizontal vibration on validation failure
+
+---
+
+## Performance & Polish
+
+- **Skeleton Loading**: Show content structure before data loads
+- **Optimistic Updates**: Instant UI feedback, rollback on error
+- **Debounced Search**: 300ms delay on keystroke filtering
+- **Virtual Scrolling**: For tables exceeding 100 rows
+- **Lazy Loading**: Images and secondary data on viewport entry

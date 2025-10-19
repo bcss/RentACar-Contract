@@ -2,6 +2,7 @@ import {
   users,
   contracts,
   auditLogs,
+  contractEdits,
   contractCounter,
   systemErrors,
   companySettings,
@@ -13,6 +14,8 @@ import {
   type InsertContract,
   type InsertAuditLog,
   type AuditLog,
+  type InsertContractEdit,
+  type ContractEdit,
   type SystemError,
   type CompanySettings,
   type InsertCompanySettings,
@@ -75,6 +78,10 @@ export interface IStorage {
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
   getAllAuditLogs(): Promise<AuditLog[]>;
   getRecentAuditLogs(limit: number): Promise<AuditLog[]>;
+  
+  // Contract edit operations
+  createContractEdit(edit: InsertContractEdit): Promise<ContractEdit>;
+  getContractEdits(contractId: string): Promise<ContractEdit[]>;
   
   // System error operations
   getAllSystemErrors(): Promise<SystemError[]>;
@@ -634,6 +641,24 @@ export class DatabaseStorage implements IStorage {
       .from(auditLogs)
       .orderBy(desc(auditLogs.createdAt))
       .limit(limit);
+  }
+
+  // Contract edit operations
+  async createContractEdit(edit: InsertContractEdit): Promise<ContractEdit> {
+    const [newEdit] = await db
+      .insert(contractEdits)
+      .values(edit)
+      .returning();
+    
+    return newEdit;
+  }
+
+  async getContractEdits(contractId: string): Promise<ContractEdit[]> {
+    return await db
+      .select()
+      .from(contractEdits)
+      .where(eq(contractEdits.contractId, contractId))
+      .orderBy(desc(contractEdits.editedAt));
   }
 
   // System error operations
