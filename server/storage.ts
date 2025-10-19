@@ -11,6 +11,7 @@ import {
   type User,
   type UpsertUser,
   type Contract,
+  type ContractWithDetails,
   type InsertContract,
   type InsertAuditLog,
   type AuditLog,
@@ -43,8 +44,8 @@ export interface IStorage {
   
   // Contract operations
   getContract(id: string): Promise<Contract | undefined>;
-  getAllContracts(): Promise<Contract[]>;
-  getDisabledContracts(): Promise<Contract[]>;
+  getAllContracts(): Promise<ContractWithDetails[]>;
+  getDisabledContracts(): Promise<ContractWithDetails[]>;
   searchContracts(query: string): Promise<Contract[]>;
   createContract(contract: InsertContract): Promise<Contract>;
   updateContract(id: string, contract: Partial<InsertContract>): Promise<Contract>;
@@ -219,7 +220,7 @@ export class DatabaseStorage implements IStorage {
     return contract;
   }
 
-  async getAllContracts(): Promise<any[]> {
+  async getAllContracts(): Promise<ContractWithDetails[]> {
     const results = await db
       .select({
         ...contracts,
@@ -234,10 +235,10 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .where(eq(contracts.disabled, false))
       .orderBy(desc(contracts.createdAt));
-    return results;
+    return results as ContractWithDetails[];
   }
 
-  async getDisabledContracts(): Promise<any[]> {
+  async getDisabledContracts(): Promise<ContractWithDetails[]> {
     const results = await db
       .select({
         ...contracts,
@@ -252,7 +253,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .where(eq(contracts.disabled, true))
       .orderBy(desc(contracts.disabledAt));
-    return results;
+    return results as ContractWithDetails[];
   }
 
   async searchContracts(query: string): Promise<Contract[]> {

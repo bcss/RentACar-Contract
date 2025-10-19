@@ -4,21 +4,12 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
-import { Contract } from '@shared/schema';
+import { Contract, ContractWithDetails } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EditReasonDialog } from '@/components/EditReasonDialog';
-
-// Extended contract type with joined customer/vehicle data
-type ContractWithDetails = Contract & {
-  customerNameEn: string;
-  customerNameAr: string;
-  vehicleRegistration: string;
-  vehicleMake: string;
-  vehicleModel: string;
-};
 import {
   Table,
   TableBody,
@@ -153,7 +144,7 @@ export default function Contracts() {
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = 
       contract.contractNumber.toString().includes(searchTerm) ||
-      contract.customerNameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contract.customerNameEn && contract.customerNameEn.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (contract.customerNameAr && contract.customerNameAr.includes(searchTerm));
     
     const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
@@ -164,7 +155,7 @@ export default function Contracts() {
   const filteredDisabledContracts = disabledContracts.filter(contract => {
     const matchesSearch = 
       contract.contractNumber.toString().includes(searchTerm) ||
-      contract.customerNameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contract.customerNameEn && contract.customerNameEn.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (contract.customerNameAr && contract.customerNameAr.includes(searchTerm));
     
     const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;

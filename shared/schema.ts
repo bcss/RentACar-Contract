@@ -381,6 +381,15 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
 export type InsertContract = z.infer<typeof insertContractSchema>;
 export type Contract = typeof contracts.$inferSelect;
 
+// Extended contract type with joined customer and vehicle data for list views
+export type ContractWithDetails = Contract & {
+  customerNameEn: string | null;
+  customerNameAr: string | null;
+  vehicleRegistration: string | null;
+  vehicleMake: string | null;
+  vehicleModel: string | null;
+};
+
 // Audit logs table
 export const auditLogs = pgTable("audit_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
