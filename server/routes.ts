@@ -544,8 +544,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Close contract (completed → closed)
-  app.post('/api/contracts/:id/close', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  // Close contract (completed → closed) - ADMIN ONLY with payment verification
+  app.post('/api/contracts/:id/close', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
@@ -554,10 +554,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
 
+      // Verify contract is in completed status
+      if (contract.status !== 'completed') {
+        return res.status(400).json({ 
+          message: "Contract must be in 'completed' status before closing" 
+        });
+      }
+
+      // Verify all payments are settled
+      const outstandingBalance = parseFloat(contract.outstandingBalance || '0');
+      if (outstandingBalance > 0 && !contract.finalPaymentReceived) {
+        return res.status(400).json({ 
+          message: `Cannot close contract with outstanding balance of ${outstandingBalance}. Please record final payment first.` 
+        });
+      }
+
+      // Note: Deposit handling (refund or retention) is at admin discretion
+      // Admins may retain deposit for damages, extra charges, or other valid business reasons
+      // The system trusts admin judgment on deposit resolution before closing
+
       const closed = await storage.closeContract(req.params.id, userId);
       
       // Create audit log
-      await createAuditLog(userId, 'close', closed.id, req.ip, `Closed contract #${closed.contractNumber} - all settled`);
+      await createAuditLog(userId, 'close', closed.id, req.ip, `Closed contract #${closed.contractNumber} - all payments settled and verified`);
       
       res.json(closed);
     } catch (error: any) {

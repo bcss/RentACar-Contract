@@ -428,9 +428,10 @@ export default function ContractView() {
   const hirerType = contract.hirerType || 'direct';
   const canManageWorkflow = isAdmin || isManager;
 
-  // Check if close button should be shown
+  // Check if close button should be shown (Admin only with payment verification)
   const canCloseContract = contract.status === 'completed' && 
-    (parseFloat(contract.outstandingBalance || '0') === 0 || contract.finalPaymentReceived);
+    (parseFloat(contract.outstandingBalance || '0') === 0 || contract.finalPaymentReceived) &&
+    isAdmin; // Only admins can close contracts
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -571,7 +572,7 @@ export default function ContractView() {
               <span>Complete Rental (Vehicle Returned)</span>
             </Button>
           )}
-          {canCloseContract && canManageWorkflow && (
+          {canCloseContract && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button data-testid="button-close-contract">
@@ -581,15 +582,15 @@ export default function ContractView() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Close Contract</AlertDialogTitle>
+                  <AlertDialogTitle>Close Contract (Admin Only)</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to close this contract? This action finalizes the contract.
+                    Are you sure you want to close this contract? This action finalizes the contract and can only be performed by administrators after verifying all payments are settled.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => closeMutation.mutate()}>
-                    Close
+                  <AlertDialogAction onClick={() => closeMutation.mutate()} data-testid="button-confirm-close">
+                    Close Contract
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
