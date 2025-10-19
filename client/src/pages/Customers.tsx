@@ -9,6 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -54,11 +61,16 @@ const customerSchema = z.object({
   nameEn: z.string().min(1, 'English name is required'),
   nameAr: z.string().min(1, 'Arabic name is required'),
   nationalId: z.string().min(1, 'National ID is required'),
+  nationality: z.string().optional(),
+  gender: z.string().optional(),
+  dateOfBirth: z.coerce.date().optional().nullable(),
   phone: z.string().min(1, 'Phone is required'),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
-  licenseNumber: z.string().optional(),
-  licenseExpiryDate: z.coerce.date().optional().nullable(),
   address: z.string().optional(),
+  licenseNumber: z.string().optional(),
+  licenseIssuedBy: z.string().optional(),
+  licenseIssueDate: z.coerce.date().optional().nullable(),
+  licenseExpiryDate: z.coerce.date().optional().nullable(),
 });
 
 type CustomerFormData = z.infer<typeof customerSchema>;
@@ -81,11 +93,16 @@ export default function Customers() {
       nameEn: '',
       nameAr: '',
       nationalId: '',
+      nationality: '',
+      gender: '',
+      dateOfBirth: null,
       phone: '',
       email: '',
-      licenseNumber: '',
-      licenseExpiryDate: null,
       address: '',
+      licenseNumber: '',
+      licenseIssuedBy: '',
+      licenseIssueDate: null,
+      licenseExpiryDate: null,
     },
   });
 
@@ -113,6 +130,8 @@ export default function Customers() {
     mutationFn: async (data: CustomerFormData) => {
       return apiRequest('POST', '/api/customers', {
         ...data,
+        dateOfBirth: data.dateOfBirth || null,
+        licenseIssueDate: data.licenseIssueDate || null,
         licenseExpiryDate: data.licenseExpiryDate || null,
       });
     },
@@ -215,11 +234,16 @@ export default function Customers() {
       nameEn: customer.nameEn ?? '',
       nameAr: customer.nameAr ?? '',
       nationalId: customer.nationalId ?? '',
+      nationality: customer.nationality || '',
+      gender: customer.gender || '',
+      dateOfBirth: customer.dateOfBirth ? new Date(customer.dateOfBirth) : undefined,
       phone: customer.phone ?? '',
       email: customer.email || '',
-      licenseNumber: customer.licenseNumber || '',
-      licenseExpiryDate: customer.licenseExpiryDate ? new Date(customer.licenseExpiryDate) : undefined,
       address: customer.address || '',
+      licenseNumber: customer.licenseNumber || '',
+      licenseIssuedBy: customer.licenseIssuedBy || '',
+      licenseIssueDate: customer.licenseIssueDate ? new Date(customer.licenseIssueDate) : undefined,
+      licenseExpiryDate: customer.licenseExpiryDate ? new Date(customer.licenseExpiryDate) : undefined,
     });
     setEditOpen(true);
   };
@@ -311,19 +335,75 @@ export default function Customers() {
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="nationalId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('customers.nationalId')}</FormLabel>
-              <FormControl>
-                <Input {...field} data-testid="input-customer-national-id" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="nationalId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('customers.nationalId')}</FormLabel>
+                <FormControl>
+                  <Input {...field} data-testid="input-customer-national-id" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="nationality"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nationality / الجنسية</FormLabel>
+                <FormControl>
+                  <Input {...field} data-testid="input-customer-nationality" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="gender"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gender / الجنس</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger data-testid="select-customer-gender">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male / ذكر</SelectItem>
+                      <SelectItem value="female">Female / أنثى</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="dateOfBirth"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date of Birth / تاريخ الولادة</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                    data-testid="input-customer-dob"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -352,15 +432,28 @@ export default function Customers() {
             )}
           />
         </div>
+        <FormField
+          control={form.control}
+          name="licenseNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('customers.licenseNumber')}</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-customer-license-number" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="licenseNumber"
+            name="licenseIssuedBy"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('customers.licenseNumber')}</FormLabel>
+                <FormLabel>License Issued By / صدر الرخصة</FormLabel>
                 <FormControl>
-                  <Input {...field} data-testid="input-customer-license-number" />
+                  <Input {...field} data-testid="input-customer-license-issued-by" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -368,16 +461,16 @@ export default function Customers() {
           />
           <FormField
             control={form.control}
-            name="licenseExpiryDate"
+            name="licenseIssueDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('customers.licenseExpiry')}</FormLabel>
+                <FormLabel>License Issue Date / تاريخ الإصدار</FormLabel>
                 <FormControl>
                   <Input
                     type="date"
                     value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
                     onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
-                    data-testid="input-customer-license-expiry"
+                    data-testid="input-customer-license-issue-date"
                   />
                 </FormControl>
                 <FormMessage />
@@ -385,6 +478,24 @@ export default function Customers() {
             )}
           />
         </div>
+        <FormField
+          control={form.control}
+          name="licenseExpiryDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('customers.licenseExpiry')}</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                  data-testid="input-customer-license-expiry"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="address"

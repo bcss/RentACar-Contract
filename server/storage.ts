@@ -634,8 +634,24 @@ export class DatabaseStorage implements IStorage {
     return newLog;
   }
 
-  async getAllAuditLogs(): Promise<AuditLog[]> {
-    return await db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt));
+  async getAllAuditLogs(): Promise<any[]> {
+    return await db
+      .select({
+        id: auditLogs.id,
+        userId: auditLogs.userId,
+        action: auditLogs.action,
+        contractId: auditLogs.contractId,
+        ipAddress: auditLogs.ipAddress,
+        details: auditLogs.details,
+        createdAt: auditLogs.createdAt,
+        // Include user info
+        userName: users.username,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+      })
+      .from(auditLogs)
+      .leftJoin(users, eq(auditLogs.userId, users.id))
+      .orderBy(desc(auditLogs.createdAt));
   }
 
   async getRecentAuditLogs(limit: number): Promise<AuditLog[]> {

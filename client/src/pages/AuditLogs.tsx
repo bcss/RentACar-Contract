@@ -326,7 +326,9 @@ export default function AuditLogs() {
                           {log.contractId || 'N/A'}
                         </TableCell>
                         <TableCell data-testid={`text-log-user-${log.id}`}>
-                          {log.userId}
+                          {(log as any).userFirstName && (log as any).userLastName
+                            ? `${(log as any).userFirstName} ${(log as any).userLastName}`
+                            : (log as any).userName || log.userId}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {log.createdAt && format(new Date(log.createdAt), 'PPp')}

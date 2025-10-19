@@ -74,8 +74,10 @@ export const customers = pgTable("customers", {
   
   // License Information
   licenseNumber: varchar("license_number"),
+  licenseIssuedBy: varchar("license_issued_by"), // Issuing authority/country
   licenseIssueDate: timestamp("license_issue_date"),
   licenseExpiryDate: timestamp("license_expiry_date"),
+  nationality: varchar("nationality"),
   
   // Additional Information
   notes: text("notes"),
@@ -228,8 +230,23 @@ export const contracts = pgTable("contracts", {
   // Hirer Type - determines which fields are required
   hirerType: varchar("hirer_type", { length: 20 }).notNull().default("direct"), // direct, with_sponsor, from_company
   
-  vehicleCondition: text("vehicle_condition"), // JSON array of damaged areas/notes
-  fuelLevelStart: varchar("fuel_level_start"), // e.g., "Full", "3/4", "1/2", "1/4", "Empty"
+  // Sponsor Information (when hirerType is 'with_sponsor')
+  sponsorName: varchar("sponsor_name"),
+  sponsorNationality: varchar("sponsor_nationality"),
+  sponsorPassportId: varchar("sponsor_passport_id"),
+  sponsorAddress: text("sponsor_address"),
+  sponsorMobile: varchar("sponsor_mobile"),
+  sponsorCreditCard: varchar("sponsor_credit_card"),
+  
+  // Vehicle Inspection Checklist
+  inspectionTools: boolean("inspection_tools"), // Tools present Y/N
+  inspectionSpareTyre: boolean("inspection_spare_tyre"), // Spare tyre present Y/N
+  inspectionGps: boolean("inspection_gps"), // GPS present Y/N
+  inspectionFuelPercentage: integer("inspection_fuel_percentage"), // Fuel % at start
+  inspectionDamageNotes: text("inspection_damage_notes"), // Any damage notes
+  
+  vehicleCondition: text("vehicle_condition"), // JSON array of damaged areas/notes (legacy)
+  fuelLevelStart: varchar("fuel_level_start"), // e.g., "Full", "3/4", "1/2", "1/4", "Empty" (legacy)
   fuelLevelEnd: varchar("fuel_level_end"),
   odometerStart: integer("odometer_start"),
   odometerEnd: integer("odometer_end"),
@@ -238,8 +255,10 @@ export const contracts = pgTable("contracts", {
   rentalType: varchar("rental_type", { length: 20 }).notNull().default("daily"), // daily, weekly, monthly
   rentalStartDate: timestamp("rental_start_date").notNull(),
   rentalEndDate: timestamp("rental_end_date").notNull(),
-  rentalStartTime: varchar("rental_start_time"), // e.g., "09:00"
-  rentalEndTime: varchar("rental_end_time"),
+  timeIn: varchar("time_in"), // Time In (e.g., "09:00")
+  timeOut: varchar("time_out"), // Time Out (e.g., "17:00")
+  rentalStartTime: varchar("rental_start_time"), // e.g., "09:00" (legacy)
+  rentalEndTime: varchar("rental_end_time"), // (legacy)
   pickupLocation: varchar("pickup_location").notNull(),
   dropoffLocation: varchar("dropoff_location").notNull(),
   
@@ -270,10 +289,12 @@ export const contracts = pgTable("contracts", {
   paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"), // pending, partial, paid, refunded
   outstandingBalance: varchar("outstanding_balance"), // Remaining amount to be paid
   
-  // Extra Charges (Phase 2)
+  // Extra Charges (Phase 2) - Detailed breakdown matching MARMAR template
   extraKmCharge: varchar("extra_km_charge"), // Calculated overage charge
   extraKmDriven: integer("extra_km_driven"), // Km over the limit
   fuelCharge: varchar("fuel_charge"), // Fuel refill charge
+  salikCharge: varchar("salik_charge"), // SALIK toll charges
+  trafficFineCharge: varchar("traffic_fine_charge"), // Traffic fines
   damageCharge: varchar("damage_charge"), // Total damage repair cost
   otherCharges: varchar("other_charges"), // Any additional charges
   totalExtraCharges: varchar("total_extra_charges"), // Sum of all extra charges

@@ -10,25 +10,12 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="flex items-center justify-between p-4 border-b bg-background">
+    <header className="flex items-center justify-between p-4 border-b bg-background" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex items-center gap-4">
         <SidebarTrigger data-testid="button-sidebar-toggle" />
       </div>
       
       <div className="flex items-center gap-2">
-        {/* Language Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleLanguage}
-          data-testid="button-language-toggle"
-          className="hover-elevate active-elevate-2"
-        >
-          <span className="font-mono text-sm font-semibold">
-            {language === 'en' ? 'ع' : 'EN'}
-          </span>
-        </Button>
-
         {/* Theme Toggle */}
         <Button
           variant="ghost"
@@ -39,6 +26,19 @@ export function Header() {
         >
           <span className="material-icons">
             {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+          </span>
+        </Button>
+
+        {/* Language Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleLanguage}
+          data-testid="button-language-toggle"
+          className="hover-elevate active-elevate-2"
+        >
+          <span className="font-mono text-sm font-semibold">
+            {language === 'en' ? 'ع' : 'EN'}
           </span>
         </Button>
       </div>

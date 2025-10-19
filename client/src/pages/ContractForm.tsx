@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -42,9 +43,23 @@ const contractFormSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
   vehicleId: z.string().min(1, "Vehicle is required"),
   hirerType: z.string().default('direct'),
+  
+  // Sponsor fields - conditional validation based on hirerType
+  sponsorName: z.string().nullable().optional(),
+  sponsorNationality: z.string().nullable().optional(),
+  sponsorPassportId: z.string().nullable().optional(),
+  sponsorAddress: z.string().nullable().optional(),
+  sponsorMobile: z.string().nullable().optional(),
+  sponsorCreditCard: z.string().nullable().optional(),
+  
   rentalStartDate: z.coerce.date(),
   rentalEndDate: z.coerce.date(),
   rentalType: z.string().default('daily'),
+  
+  // Time fields
+  timeIn: z.string().nullable().optional(),
+  timeOut: z.string().nullable().optional(),
+  
   pickupLocation: z.string().min(1, "Pickup location is required"),
   dropoffLocation: z.string().min(1, "Dropoff location is required"),
   dailyRate: z.string().min(1, "Daily rate is required"),
@@ -58,12 +73,23 @@ const contractFormSchema = z.object({
   extraKmRate: z.string().nullable().optional(),
   securityDeposit: z.string().nullable().optional(),
   odometerStart: z.coerce.number().nullable().optional(),
+  
+  // Structured inspection fields
+  inspectionTools: z.boolean().nullable().optional(),
+  inspectionSpareTyre: z.boolean().nullable().optional(),
+  inspectionGps: z.boolean().nullable().optional(),
+  inspectionFuelPercentage: z.coerce.number().min(0).max(100).nullable().optional(),
+  inspectionDamageNotes: z.string().nullable().optional(),
+  
+  // Legacy fields (keep for backwards compatibility)
   fuelLevelStart: z.string().nullable().optional(),
   vehicleCondition: z.string().nullable().optional(),
+  
+  // Extra charges
+  salikCharge: z.string().nullable().optional(),
+  trafficFineCharge: z.string().nullable().optional(),
+  
   notes: z.string().nullable().optional(),
-  termsAccepted: z.boolean().refine((val) => val === true, {
-    message: "You must accept the terms and conditions",
-  }),
   createdBy: z.string(),
   status: z.string().nullable().optional(),
 });
@@ -160,13 +186,27 @@ export default function ContractForm() {
       rentalStartDate: new Date(),
       rentalEndDate: new Date(),
       rentalType: 'daily',
+      timeIn: '',
+      timeOut: '',
       pickupLocation: '',
       dropoffLocation: '',
       dailyRate: '',
       totalDays: 1,
       totalAmount: '',
+      sponsorName: '',
+      sponsorNationality: '',
+      sponsorPassportId: '',
+      sponsorAddress: '',
+      sponsorMobile: '',
+      sponsorCreditCard: '',
+      inspectionTools: false,
+      inspectionSpareTyre: false,
+      inspectionGps: false,
+      inspectionFuelPercentage: 100,
+      inspectionDamageNotes: '',
+      salikCharge: '',
+      trafficFineCharge: '',
       notes: '',
-      termsAccepted: false,
       createdBy: '',
     },
   });
@@ -175,6 +215,7 @@ export default function ContractForm() {
   const watchedVehicleId = form.watch('vehicleId');
   const watchedStartDate = form.watch('rentalStartDate');
   const watchedEndDate = form.watch('rentalEndDate');
+  const watchedHirerType = form.watch('hirerType');
 
   // Load selected customer details
   useEffect(() => {
@@ -836,6 +877,132 @@ export default function ContractForm() {
             </CardContent>
           </Card>
 
+          {/* Hirer Type Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="material-icons">person</span>
+                Hirer Type / نوع المستأجر
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="hirerType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Hirer Type / اختر نوع المستأجر *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-hirer-type">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="direct">Direct / مباشر</SelectItem>
+                        <SelectItem value="with_sponsor">With Sponsor / مع كفيل</SelectItem>
+                        <SelectItem value="from_company">From Company / من شركة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Conditional Sponsor Information Section */}
+          {watchedHirerType === 'with_sponsor' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="material-icons">badge</span>
+                  Sponsor Information / معلومات الكفيل
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="sponsorName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sponsor Name / اسم الكفيل *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sponsorNationality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sponsor Nationality / جنسية الكفيل *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-nationality" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sponsorPassportId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sponsor Passport ID / رقم جواز السفر *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-passport" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sponsorMobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sponsor Mobile / جوال الكفيل *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-mobile" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sponsorCreditCard"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sponsor Credit Card / بطاقة ائتمان الكفيل</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-credit-card" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sponsorAddress"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Sponsor Address / عنوان الكفيل *</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} value={field.value || ''} data-testid="input-sponsor-address" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Vehicle Selection */}
           <Card>
             <CardHeader>
@@ -1207,6 +1374,32 @@ export default function ContractForm() {
               />
               <FormField
                 control={form.control}
+                name="timeIn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time In / وقت الدخول</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} type="time" placeholder="09:00" data-testid="input-time-in" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="timeOut"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time Out / وقت الخروج</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} type="time" placeholder="17:00" data-testid="input-time-out" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="pickupLocation"
                 render={({ field }) => (
                   <FormItem>
@@ -1363,60 +1556,115 @@ export default function ContractForm() {
             </CardContent>
           </Card>
 
-          {/* Contract Snapshot */}
+          {/* Vehicle Inspection */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">description</span>
-                Contract Snapshot
+                <span className="material-icons">checklist</span>
+                Vehicle Inspection / فحص المركبة
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="odometerStart"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Odometer Start (km) / عداد الكيلومترات</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} type="number" data-testid="input-odometer-start" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="space-y-4">
+                  <FormLabel>Checklist / قائمة الفحص</FormLabel>
+                  <div className="space-y-3">
+                    <FormField
+                      control={form.control}
+                      name="inspectionTools"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value || false}
+                              onCheckedChange={field.onChange}
+                              data-testid="checkbox-inspection-tools"
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">Tools Present / الأدوات موجودة</FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="inspectionSpareTyre"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value || false}
+                              onCheckedChange={field.onChange}
+                              data-testid="checkbox-inspection-spare-tyre"
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">Spare Tyre Present / الإطار الاحتياطي موجود</FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="inspectionGps"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value || false}
+                              onCheckedChange={field.onChange}
+                              data-testid="checkbox-inspection-gps"
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">GPS Present / جهاز GPS موجود</FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <FormField
                 control={form.control}
-                name="odometerStart"
+                name="inspectionFuelPercentage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Odometer Start (km)</FormLabel>
+                    <div className="flex items-center justify-between mb-2">
+                      <FormLabel>Fuel Level / مستوى الوقود: {field.value || 100}%</FormLabel>
+                    </div>
                     <FormControl>
-                      <Input {...field} value={field.value || ''} type="number" data-testid="input-odometer-start" />
+                      <Slider
+                        min={0}
+                        max={100}
+                        step={5}
+                        value={[field.value || 100]}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                        data-testid="slider-fuel-percentage"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
-                name="fuelLevelStart"
+                name="inspectionDamageNotes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fuel Level Start</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
-                      <FormControl>
-                        <SelectTrigger data-testid="select-fuel-start">
-                          <SelectValue placeholder="Select fuel level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Full">Full</SelectItem>
-                        <SelectItem value="3/4">3/4</SelectItem>
-                        <SelectItem value="1/2">1/2</SelectItem>
-                        <SelectItem value="1/4">1/4</SelectItem>
-                        <SelectItem value="Empty">Empty</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="vehicleCondition"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Vehicle Condition Notes</FormLabel>
+                    <FormLabel>Damage Notes / ملاحظات الأضرار</FormLabel>
                     <FormControl>
-                      <Textarea {...field} value={field.value || ''} data-testid="input-vehicle-condition" />
+                      <Textarea {...field} value={field.value || ''} placeholder="Note any existing damage..." data-testid="input-damage-notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1425,20 +1673,23 @@ export default function ContractForm() {
             </CardContent>
           </Card>
 
-          {/* Notes and Terms */}
+          {/* Extra Charges */}
           <Card>
             <CardHeader>
-              <CardTitle>Notes & Terms</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <span className="material-icons">receipt_long</span>
+                Extra Charges / الرسوم الإضافية
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="notes"
+                name="salikCharge"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Notes</FormLabel>
+                    <FormLabel>SALIK Charge / رسوم سالك</FormLabel>
                     <FormControl>
-                      <Textarea {...field} value={field.value || ''} data-testid="input-notes" />
+                      <Input {...field} value={field.value || ''} type="number" step="0.01" placeholder="0.00" data-testid="input-salik-charge" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1446,21 +1697,36 @@ export default function ContractForm() {
               />
               <FormField
                 control={form.control}
-                name="termsAccepted"
+                name="trafficFineCharge"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem>
+                    <FormLabel>Traffic Fine / المخالفات المرورية</FormLabel>
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        data-testid="checkbox-terms"
-                      />
+                      <Input {...field} value={field.value || ''} type="number" step="0.01" placeholder="0.00" data-testid="input-traffic-fine-charge" />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        I accept the terms and conditions *
-                      </FormLabel>
-                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Notes */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Additional Notes / ملاحظات إضافية</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} value={field.value || ''} placeholder="Enter any additional notes..." data-testid="input-notes" />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
