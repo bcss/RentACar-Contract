@@ -360,6 +360,13 @@
     display: none !important;
   }
 
+  /* Override: Show buttons within print-only sections */
+  .print-only button,
+  .print-only input[type="checkbox"],
+  .print-only input[type="radio"] {
+    display: inline-block !important;
+  }
+
   /* Optimize page for printing */
   body {
     background: white !important;
