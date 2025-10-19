@@ -164,18 +164,21 @@ export default function Contracts() {
   });
 
   const getStatusBadge = (status: string) => {
-    if (status === 'finalized') {
-      return (
-        <Badge variant="default" className="bg-chart-2 hover:bg-chart-2 flex items-center gap-1 w-fit" data-testid={`badge-status-finalized`}>
-          <span className="material-icons text-sm">lock</span>
-          {t('contracts.finalized')}
-        </Badge>
-      );
-    }
+    const statusMap: Record<string, { color: string; icon: string; label: string }> = {
+      draft: { color: 'bg-chart-4 hover:bg-chart-4 text-white', icon: 'edit', label: t('contracts.draft') },
+      finalized: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'lock', label: t('contracts.finalized') },
+      confirmed: { color: 'bg-chart-3 hover:bg-chart-3 text-white', icon: 'check_circle', label: 'Confirmed' },
+      active: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'local_shipping', label: 'Active' },
+      completed: { color: 'bg-chart-5 hover:bg-chart-5 text-white', icon: 'assignment_turned_in', label: 'Completed' },
+      closed: { color: 'bg-secondary hover:bg-secondary text-secondary-foreground', icon: 'lock', label: 'Closed' },
+    };
+
+    const statusInfo = statusMap[status] || statusMap.draft;
+
     return (
-      <Badge variant="secondary" className="bg-chart-4 hover:bg-chart-4 flex items-center gap-1 w-fit" data-testid={`badge-status-draft`}>
-        <span className="material-icons text-sm">edit</span>
-        {t('contracts.draft')}
+      <Badge variant="default" className={`${statusInfo.color} flex items-center gap-1 w-fit`} data-testid={`badge-status-${status}`}>
+        <span className="material-icons text-sm">{statusInfo.icon}</span>
+        {statusInfo.label}
       </Badge>
     );
   };

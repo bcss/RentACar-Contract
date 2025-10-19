@@ -390,12 +390,12 @@ export default function ContractView() {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { color: string; icon: string; label: string }> = {
-      draft: { color: 'bg-chart-4 hover:bg-chart-4', icon: 'edit', label: t('contracts.draft') },
-      finalized: { color: 'bg-chart-2 hover:bg-chart-2', icon: 'lock', label: t('contracts.finalized') },
-      confirmed: { color: 'bg-blue-600 hover:bg-blue-600', icon: 'check_circle', label: 'Confirmed' },
-      active: { color: 'bg-green-600 hover:bg-green-600', icon: 'local_shipping', label: 'Active' },
-      completed: { color: 'bg-orange-600 hover:bg-orange-600', icon: 'assignment_turned_in', label: 'Completed' },
-      closed: { color: 'bg-gray-600 hover:bg-gray-600', icon: 'lock', label: 'Closed' },
+      draft: { color: 'bg-chart-4 hover:bg-chart-4 text-white', icon: 'edit', label: t('contracts.draft') },
+      finalized: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'lock', label: t('contracts.finalized') },
+      confirmed: { color: 'bg-chart-3 hover:bg-chart-3 text-white', icon: 'check_circle', label: 'Confirmed' },
+      active: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'local_shipping', label: 'Active' },
+      completed: { color: 'bg-chart-5 hover:bg-chart-5 text-white', icon: 'assignment_turned_in', label: 'Completed' },
+      closed: { color: 'bg-secondary hover:bg-secondary text-secondary-foreground', icon: 'lock', label: 'Closed' },
     };
 
     const statusInfo = statusMap[status] || statusMap.draft;
@@ -410,16 +410,16 @@ export default function ContractView() {
 
   const getPaymentStatusBadge = (paymentStatus: string) => {
     const statusMap: Record<string, { color: string; label: string }> = {
-      pending: { color: 'bg-yellow-600 hover:bg-yellow-600', label: 'Pending' },
-      partial: { color: 'bg-orange-600 hover:bg-orange-600', label: 'Partial' },
-      paid: { color: 'bg-green-600 hover:bg-green-600', label: 'Paid' },
-      refunded: { color: 'bg-blue-600 hover:bg-blue-600', label: 'Refunded' },
+      pending: { color: 'bg-chart-4 hover:bg-chart-4 text-white', label: 'Pending' },
+      partial: { color: 'bg-accent hover:bg-accent text-accent-foreground', label: 'Partial' },
+      paid: { color: 'bg-chart-2 hover:bg-chart-2 text-white', label: 'Paid' },
+      refunded: { color: 'bg-chart-3 hover:bg-chart-3 text-white', label: 'Refunded' },
     };
 
     const statusInfo = statusMap[paymentStatus] || statusMap.pending;
 
     return (
-      <Badge variant="default" className={`${statusInfo.color} text-white`}>
+      <Badge variant="default" className={`${statusInfo.color}`}>
         {statusInfo.label}
       </Badge>
     );
