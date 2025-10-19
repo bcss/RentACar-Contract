@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { Contract, CompanySettings, Customer, Vehicle } from '@shared/schema';
+import { Contract, CompanySettings, Customer, Vehicle, User } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { ContractTimeline } from '@/components/ContractTimeline';
 import {
   Select,
   SelectContent,
@@ -95,21 +96,16 @@ export default function ContractView() {
   const { data: customer, isLoading: isLoadingCustomer } = useQuery<Customer>({
     queryKey: ['/api/customers', contract?.customerId],
     enabled: !!contract?.customerId,
-    queryFn: async () => {
-      const res = await fetch(`/api/customers/${contract?.customerId}`);
-      if (!res.ok) throw new Error('Failed to fetch customer');
-      return res.json();
-    },
   });
 
   const { data: vehicle, isLoading: isLoadingVehicle } = useQuery<Vehicle>({
     queryKey: ['/api/vehicles', contract?.vehicleId],
     enabled: !!contract?.vehicleId,
-    queryFn: async () => {
-      const res = await fetch(`/api/vehicles/${contract?.vehicleId}`);
-      if (!res.ok) throw new Error('Failed to fetch vehicle');
-      return res.json();
-    },
+  });
+
+  const { data: creator } = useQuery<User>({
+    queryKey: ['/api/users', contract?.createdBy],
+    enabled: !!contract?.createdBy,
   });
 
   // Legacy finalize removed - use new state machine (confirm → activate → complete → close)
@@ -1089,6 +1085,15 @@ export default function ContractView() {
           </CardContent>
         </Card>
       )}
+
+      {/* Contract Timeline - Not visible when printing */}
+      <div className="print-hidden">
+        <ContractTimeline 
+          contract={contract}
+          creatorUsername={creator?.username}
+          creatorName={creator?.firstName && creator?.lastName ? `${creator.firstName} ${creator.lastName}` : undefined}
+        />
+      </div>
 
       {/* Terms & Conditions - Print Only */}
       {companySettings && (

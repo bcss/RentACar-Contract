@@ -653,12 +653,28 @@ export class DatabaseStorage implements IStorage {
     return newEdit;
   }
 
-  async getContractEdits(contractId: string): Promise<ContractEdit[]> {
-    return await db
-      .select()
+  async getContractEdits(contractId: string): Promise<any[]> {
+    const edits = await db
+      .select({
+        id: contractEdits.id,
+        contractId: contractEdits.contractId,
+        editedBy: contractEdits.editedBy,
+        editedAt: contractEdits.editedAt,
+        editReason: contractEdits.editReason,
+        changesSummary: contractEdits.changesSummary,
+        fieldsBefore: contractEdits.fieldsBefore,
+        fieldsAfter: contractEdits.fieldsAfter,
+        ipAddress: contractEdits.ipAddress,
+        editorUsername: users.username,
+        editorFirstName: users.firstName,
+        editorLastName: users.lastName,
+      })
       .from(contractEdits)
+      .leftJoin(users, eq(contractEdits.editedBy, users.id))
       .where(eq(contractEdits.contractId, contractId))
       .orderBy(desc(contractEdits.editedAt));
+    
+    return edits;
   }
 
   // System error operations

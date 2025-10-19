@@ -337,6 +337,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get contract edit history/timeline
+  app.get('/api/contracts/:id/edits', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      // Staff can only view edit history for their own contracts
+      if (user?.role === 'staff' && contract.createdBy !== userId) {
+        return res.status(403).json({ message: "Forbidden: You can only view your own contracts" });
+      }
+      
+      const edits = await storage.getContractEdits(req.params.id);
+      res.json(edits);
+    } catch (error) {
+      console.error("Error fetching contract edits:", error);
+      res.status(500).json({ message: "Failed to fetch contract edit history" });
+    }
+  });
+
   app.post('/api/contracts', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
@@ -662,6 +686,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Get single user by ID (any authenticated user can view user info for timeline/audit display)
+  app.get('/api/users/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      // Return user info without sensitive data
+      const { passwordHash, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
