@@ -219,12 +219,40 @@ export class DatabaseStorage implements IStorage {
     return contract;
   }
 
-  async getAllContracts(): Promise<Contract[]> {
-    return await db.select().from(contracts).where(eq(contracts.disabled, false)).orderBy(desc(contracts.createdAt));
+  async getAllContracts(): Promise<any[]> {
+    const results = await db
+      .select({
+        ...contracts,
+        customerNameEn: customers.nameEn,
+        customerNameAr: customers.nameAr,
+        vehicleRegistration: vehicles.registration,
+        vehicleMake: vehicles.make,
+        vehicleModel: vehicles.model,
+      })
+      .from(contracts)
+      .leftJoin(customers, eq(contracts.customerId, customers.id))
+      .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
+      .where(eq(contracts.disabled, false))
+      .orderBy(desc(contracts.createdAt));
+    return results;
   }
 
-  async getDisabledContracts(): Promise<Contract[]> {
-    return await db.select().from(contracts).where(eq(contracts.disabled, true)).orderBy(desc(contracts.disabledAt));
+  async getDisabledContracts(): Promise<any[]> {
+    const results = await db
+      .select({
+        ...contracts,
+        customerNameEn: customers.nameEn,
+        customerNameAr: customers.nameAr,
+        vehicleRegistration: vehicles.registration,
+        vehicleMake: vehicles.make,
+        vehicleModel: vehicles.model,
+      })
+      .from(contracts)
+      .leftJoin(customers, eq(contracts.customerId, customers.id))
+      .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
+      .where(eq(contracts.disabled, true))
+      .orderBy(desc(contracts.disabledAt));
+    return results;
   }
 
   async searchContracts(query: string): Promise<Contract[]> {

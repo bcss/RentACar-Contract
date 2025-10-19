@@ -10,6 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EditReasonDialog } from '@/components/EditReasonDialog';
+
+// Extended contract type with joined customer/vehicle data
+type ContractWithDetails = Contract & {
+  customerNameEn: string;
+  customerNameAr: string;
+  vehicleRegistration: string;
+  vehicleMake: string;
+  vehicleModel: string;
+};
 import {
   Table,
   TableBody,
@@ -65,12 +74,12 @@ export default function Contracts() {
     }
   }, [isAuthenticated, isLoading, toast, t]);
 
-  const { data: contracts = [], isLoading: contractsLoading } = useQuery<Contract[]>({
+  const { data: contracts = [], isLoading: contractsLoading } = useQuery<ContractWithDetails[]>({
     queryKey: ['/api/contracts'],
     enabled: isAuthenticated,
   });
 
-  const { data: disabledContracts = [], isLoading: disabledContractsLoading } = useQuery<Contract[]>({
+  const { data: disabledContracts = [], isLoading: disabledContractsLoading } = useQuery<ContractWithDetails[]>({
     queryKey: ['/api/contracts/disabled'],
     enabled: isAuthenticated,
   });
