@@ -441,7 +441,8 @@ export const companySettings = pgTable("company_settings", {
   logoUrl: varchar("logo_url"),
   
   // Currency and VAT
-  currency: varchar("currency", { length: 10 }).notNull().default("AED"),
+  currencyEn: varchar("currency_en", { length: 10 }).notNull().default("AED"),
+  currencyAr: varchar("currency_ar", { length: 10 }).notNull().default("د.إ"),
   vatPercentage: varchar("vat_percentage").notNull().default("5"),
   
   // Terms & Conditions Sections (bilingual)
