@@ -226,6 +226,62 @@ export const insertPersonSchema = createInsertSchema(persons).omit({
 export type InsertPerson = z.infer<typeof insertPersonSchema>;
 export type Person = typeof persons.$inferSelect;
 
+// Companies table - Master data for corporate sponsors
+export const companies = pgTable("companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Basic Information (bilingual)
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  
+  // Registration Information
+  registrationNumber: varchar("registration_number"),
+  registrationValidity: timestamp("registration_validity"),
+  taxId: varchar("tax_id"),
+  taxValidity: timestamp("tax_validity"),
+  
+  // Contact Information
+  contactPerson: varchar("contact_person"),
+  phone: varchar("phone"),
+  email: varchar("email"),
+  address: text("address"),
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const companiesRelations = relations(companies, ({ one }) => ({
+  creator: one(users, {
+    fields: [companies.createdBy],
+    references: [users.id],
+    relationName: "companyCreator",
+  }),
+}));
+
+export const insertCompanySchema = createInsertSchema(companies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  disabledBy: true,
+  disabledAt: true,
+  disabled: true,
+}).extend({
+  registrationValidity: z.coerce.date().optional(),
+  taxValidity: z.coerce.date().optional(),
+});
+
+export type InsertCompany = z.infer<typeof insertCompanySchema>;
+export type Company = typeof companies.$inferSelect;
+
 // Damage Assessments table - Structured damage tracking for completed rentals
 export const damageAssessments = pgTable("damage_assessments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -281,9 +337,9 @@ export const contracts = pgTable("contracts", {
   // Hirer Type - determines which fields are required
   hirerType: varchar("hirer_type", { length: 20 }).notNull().default("direct"), // direct, with_sponsor, from_company
   
-  // Foreign Keys to Persons (Master Data) - Preferred approach for new contracts
-  sponsorId: varchar("sponsor_id").references(() => persons.id), // Reference to sponsor person
-  driverId: varchar("driver_id").references(() => persons.id), // Reference to driver person (for from_company)
+  // Foreign Keys to Persons and Companies (Master Data) - Preferred approach for new contracts
+  sponsorId: varchar("sponsor_id").references(() => persons.id), // Reference to individual sponsor person
+  companySponsorId: varchar("company_sponsor_id").references(() => companies.id), // Reference to company sponsor (for from_company)
   
   // Sponsor Information (when hirerType is 'with_sponsor') - Legacy inline fields for backward compatibility
   sponsorName: varchar("sponsor_name"),
@@ -403,10 +459,10 @@ export const contractsRelations = relations(contracts, ({ one }) => ({
     references: [persons.id],
     relationName: "contractSponsor",
   }),
-  driver: one(persons, {
-    fields: [contracts.driverId],
-    references: [persons.id],
-    relationName: "contractDriver",
+  companySponsor: one(companies, {
+    fields: [contracts.companySponsorId],
+    references: [companies.id],
+    relationName: "contractCompanySponsor",
   }),
   creator: one(users, {
     fields: [contracts.createdBy],
