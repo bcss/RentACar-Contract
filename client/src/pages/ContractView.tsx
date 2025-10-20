@@ -553,7 +553,7 @@ export default function ContractView() {
           <div className="grid grid-cols-2 divide-x-2 divide-black">
             {/* Left Column: Sponsor (if with_sponsor) OR Company (if from_company) */}
             <div>
-              {hirerType === 'with_sponsor' && (
+              {hirerType === 'with_sponsor' && contract.sponsorPerson && (
                 <>
                   <div className="grid grid-cols-[120px_1fr] border-b border-black">
                     <div className="bg-gray-50 p-2 border-r border-black">
@@ -618,7 +618,7 @@ export default function ContractView() {
               )}
 
               {/* Company Sponsor Information when hirerType is from_company */}
-              {hirerType === 'from_company' && (
+              {hirerType === 'from_company' && contract.companySponsor && (
                 <>
                   <div className="grid grid-cols-[120px_1fr] border-b border-black">
                     <div className="bg-gray-50 p-2 border-r border-black">
@@ -1749,7 +1749,7 @@ export default function ContractView() {
               <p className="text-xs mt-2">Date: ________________</p>
             </div>
             
-            {hirerType === 'with_sponsor' && (
+            {hirerType === 'with_sponsor' && contract.sponsorPerson && (
               <div className="border-2 border-black p-3 text-center">
                 <div className="h-12 mb-2"></div>
                 <p className="text-xs font-semibold font-arabic mb-1">توقيع الكفيل</p>
@@ -1758,7 +1758,7 @@ export default function ContractView() {
               </div>
             )}
             
-            {hirerType === 'from_company' && (
+            {hirerType === 'from_company' && contract.companySponsor && (
               <div className="border-2 border-black p-3 text-center">
                 <div className="h-12 mb-2"></div>
                 <p className="text-xs font-semibold font-arabic mb-1">توقيع ممثل الشركة</p>

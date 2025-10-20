@@ -127,7 +127,7 @@ const contractFormSchema = z.object({
   }
   return true;
 }, {
-  message: "Company information is required when hirer type is 'From Company'",
+  message: "Company sponsor is required when hirer type is 'From Company'",
   path: ["companySponsorId"],
 });
 

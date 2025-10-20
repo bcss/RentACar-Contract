@@ -49,6 +49,11 @@ export function CompanySelector({
     if (value) {
       queryClient.fetchQuery({
         queryKey: ['/api/companies', value],
+        queryFn: async () => {
+          const res = await fetch(`/api/companies/${value}`);
+          if (!res.ok) throw new Error('Failed to fetch company');
+          return res.json();
+        }
       }).then((company) => {
         setSelectedCompany(company as Company);
       });
