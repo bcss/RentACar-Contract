@@ -497,9 +497,9 @@ export default function ContractView() {
       {companySettings && customer && vehicle && (
         <div className="print-only border-2 border-black mb-6">
           <div className="grid grid-cols-2 divide-x-2 divide-black">
-            {/* Left Column: Sponsor (only if hirerType is 'sponsored') */}
+            {/* Left Column: Sponsor (if with_sponsor) OR Company (if from_company) */}
             <div>
-              {hirerType === 'sponsored' && (
+              {hirerType === 'with_sponsor' && (
                 <>
                   <div className="grid grid-cols-[120px_1fr] border-b border-black">
                     <div className="bg-gray-50 p-2 border-r border-black">
@@ -527,7 +527,7 @@ export default function ContractView() {
                     </div>
                     <div className="p-2 text-right font-arabic">
                       <p className="text-xs">رقم جواز السفر / الهوية</p>
-                      <p className="text-xs">{contract.sponsorPassport || ''}</p>
+                      <p className="text-xs">{contract.sponsorPassportId || ''}</p>
                     </div>
                   </div>
 
@@ -561,6 +561,19 @@ export default function ContractView() {
                     </div>
                   </div>
                 </>
+              )}
+
+              {/* Company Name when hirerType is from_company */}
+              {hirerType === 'from_company' && (
+                <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                  <div className="bg-gray-50 p-2 border-r border-black">
+                    <p className="text-xs font-bold text-red-600">Company Name</p>
+                  </div>
+                  <div className="p-2 text-right font-arabic">
+                    <p className="text-xs">اسم الشركة</p>
+                    <p className="text-xs">{customer.nameAr || customer.nameEn}</p>
+                  </div>
+                </div>
               )}
 
               {/* Left column fields for all hirer types */}
@@ -610,18 +623,18 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">اسم المستأجر</p>
-                  <p className="text-xs">{customer.nameAr || ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerNameAr : customer.nameAr || ''}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Hirer Name</p>
-                  <p className="text-xs">{customer.nameEn}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerNameEn : customer.nameEn}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-[1fr_auto_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">الجنسية</p>
-                  <p className="text-xs">{customer.nationality || ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerNationality : customer.nationality || ''}</p>
                 </div>
                 <div className="flex items-center gap-2 px-2 border-l border-black">
                   <div className="flex items-center gap-1">
@@ -641,7 +654,7 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">رقم جواز السفر / الهوية</p>
-                  <p className="text-xs">{customer.nationalId || ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerPassportId : customer.nationalId || ''}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Passport No./ID</p>
@@ -651,7 +664,7 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">متحرك</p>
-                  <p className="text-xs">{customer.phone}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerMobile : customer.phone}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Mobile</p>
@@ -669,9 +682,9 @@ export default function ContractView() {
                   <p className="text-xs font-bold text-red-600">Date of Birth</p>
                 </div>
                 <div className="col-span-3 p-2 text-right font-arabic border-t border-black">
-                  <p className="text-xs">{customer.address || ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerAddress : customer.address || ''}</p>
                   <p className="text-xs">تاريخ الولادة</p>
-                  <p className="text-xs">{customer.dateOfBirth ? format(new Date(customer.dateOfBirth), 'PP') : ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? '' : (customer.dateOfBirth ? format(new Date(customer.dateOfBirth), 'PP') : '')}</p>
                 </div>
               </div>
 
@@ -681,7 +694,7 @@ export default function ContractView() {
                     <p className="text-xs font-bold">رقم رخصة القيادة</p>
                   </div>
                   <div className="p-2 border-r border-black">
-                    <p className="text-xs">{customer.licenseNumber || ''}</p>
+                    <p className="text-xs">{hirerType === 'from_company' ? contract.hirerLicenseNumber : customer.licenseNumber || ''}</p>
                   </div>
                 </div>
                 <div>
@@ -712,7 +725,7 @@ export default function ContractView() {
               <div className="grid grid-cols-3 border-b border-black">
                 <div className="p-2 text-right font-arabic border-r border-black">
                   <p className="text-xs">صدر الرخصة</p>
-                  <p className="text-xs">{customer.licenseIssuer || ''}</p>
+                  <p className="text-xs">{customer.licenseIssuedBy || ''}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-r border-black">
                   <p className="text-xs font-bold text-red-600">Issued By</p>
@@ -1616,7 +1629,7 @@ export default function ContractView() {
           )}
 
           {/* Signature Section */}
-          <div className={`mt-8 border-t pt-4 grid gap-4 ${hirerType === 'sponsored' ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <div className={`mt-8 border-t pt-4 grid gap-4 ${(hirerType === 'with_sponsor' || hirerType === 'from_company') ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <div className="border-2 border-black p-3 text-center">
               <div className="h-12 mb-2"></div>
               <p className="text-xs font-semibold font-arabic mb-1">مسؤول المكتب</p>
@@ -1624,11 +1637,20 @@ export default function ContractView() {
               <p className="text-xs mt-2">Date: ________________</p>
             </div>
             
-            {hirerType === 'sponsored' && (
+            {hirerType === 'with_sponsor' && (
               <div className="border-2 border-black p-3 text-center">
                 <div className="h-12 mb-2"></div>
                 <p className="text-xs font-semibold font-arabic mb-1">توقيع الكفيل</p>
                 <p className="text-xs font-semibold">Sponsor Signature</p>
+                <p className="text-xs mt-2">Date: ________________</p>
+              </div>
+            )}
+            
+            {hirerType === 'from_company' && (
+              <div className="border-2 border-black p-3 text-center">
+                <div className="h-12 mb-2"></div>
+                <p className="text-xs font-semibold font-arabic mb-1">توقيع الشركة</p>
+                <p className="text-xs font-semibold">Company Signature</p>
                 <p className="text-xs mt-2">Date: ________________</p>
               </div>
             )}
