@@ -6,8 +6,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { insertContractSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, type InsertContract, type Contract, type CompanySettings, type Customer, type Vehicle, type Person } from '@shared/schema';
+import { insertContractSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, insertCompanySchema, type InsertContract, type Contract, type CompanySettings, type Customer, type Vehicle, type Person, type Company } from '@shared/schema';
 import { PersonSelector } from '@/components/PersonSelector';
+import { CompanySelector } from '@/components/CompanySelector';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,7 +48,7 @@ const contractFormSchema = z.object({
   
   // New person reference fields
   sponsorId: z.string().nullable().optional(),
-  driverId: z.string().nullable().optional(),
+  companySponsorId: z.string().nullable().optional(),
   
   // Legacy sponsor fields - keep for backwards compatibility
   sponsorName: z.string().nullable().optional(),
@@ -118,16 +119,16 @@ const contractFormSchema = z.object({
   message: "Sponsor information is required when hirer type is 'With Sponsor'",
   path: ["sponsorName"],
 }).refine((data) => {
-  // If hirerType is 'from_company', require EITHER driverId OR at least hirerNameEn (for legacy contracts)
+  // If hirerType is 'from_company', require EITHER companySponsorId OR at least hirerNameEn (for legacy contracts)
   if (data.hirerType === 'from_company') {
-    const hasDriverId = !!data.driverId;
-    const hasLegacyDriver = !!data.hirerNameEn; // Accept any legacy contract with at least driver name
-    return hasDriverId || hasLegacyDriver;
+    const hasCompanySponsorId = !!data.companySponsorId;
+    const hasLegacyCompany = !!data.hirerNameEn; // Accept any legacy contract with at least company name
+    return hasCompanySponsorId || hasLegacyCompany;
   }
   return true;
 }, {
-  message: "Driver information is required when hirer type is 'From Company'",
-  path: ["hirerNameEn"],
+  message: "Company information is required when hirer type is 'From Company'",
+  path: ["companySponsorId"],
 });
 
 type ContractFormData = z.infer<typeof contractFormSchema>;
@@ -146,13 +147,13 @@ export default function ContractForm() {
   const [createCustomerOpen, setCreateCustomerOpen] = useState(false);
   const [createVehicleOpen, setCreateVehicleOpen] = useState(false);
   const [createSponsorOpen, setCreateSponsorOpen] = useState(false);
-  const [createDriverOpen, setCreateDriverOpen] = useState(false);
+  const [createCompanyOpen, setCreateCompanyOpen] = useState(false);
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [vehicleSearchQuery, setVehicleSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [selectedSponsor, setSelectedSponsor] = useState<Person | null>(null);
-  const [selectedDriver, setSelectedDriver] = useState<Person | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [vehicleAvailable, setVehicleAvailable] = useState<boolean | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
@@ -257,7 +258,7 @@ export default function ContractForm() {
   const watchedEndDate = form.watch('rentalEndDate');
   const watchedHirerType = form.watch('hirerType');
   const watchedSponsorId = form.watch('sponsorId');
-  const watchedDriverId = form.watch('driverId');
+  const watchedCompanySponsorId = form.watch('companySponsorId');
 
   // Load selected customer details
   useEffect(() => {
@@ -283,18 +284,18 @@ export default function ContractForm() {
     }
   }, [watchedSponsorId, isAuthenticated]);
 
-  // Load selected driver details
+  // Load selected company details
   useEffect(() => {
-    if (watchedDriverId && isAuthenticated) {
+    if (watchedCompanySponsorId && isAuthenticated) {
       queryClient.fetchQuery({
-        queryKey: ['/api/persons', watchedDriverId],
-      }).then((person) => {
-        setSelectedDriver(person as Person);
+        queryKey: ['/api/companies', watchedCompanySponsorId],
+      }).then((company) => {
+        setSelectedCompany(company as Company);
       });
     } else {
-      setSelectedDriver(null);
+      setSelectedCompany(null);
     }
-  }, [watchedDriverId, isAuthenticated]);
+  }, [watchedCompanySponsorId, isAuthenticated]);
 
   // Load selected vehicle details and auto-populate pricing
   useEffect(() => {
@@ -505,7 +506,7 @@ export default function ContractForm() {
     },
   });
 
-  // Person form for inline creation (sponsors and drivers)
+  // Person form for inline creation (sponsors)
   const personForm = useForm({
     resolver: zodResolver(insertPersonSchema),
     defaultValues: {
@@ -517,6 +518,23 @@ export default function ContractForm() {
       mobile: '',
       address: '',
       relation: '',
+      notes: '',
+      createdBy: '',
+    },
+  });
+
+  // Company form for inline creation
+  const companyForm = useForm({
+    resolver: zodResolver(insertCompanySchema),
+    defaultValues: {
+      nameEn: '',
+      nameAr: '',
+      registrationNumber: '',
+      taxId: '',
+      contactPerson: '',
+      phone: '',
+      email: '',
+      address: '',
       notes: '',
       createdBy: '',
     },
@@ -583,14 +601,14 @@ export default function ContractForm() {
   });
 
   const createPersonMutation = useMutation({
-    mutationFn: async (data: { type: 'sponsor' | 'driver'; personData: any }): Promise<Person> => {
-      const response = await apiRequest('POST', '/api/persons', data.personData);
+    mutationFn: async (data: any): Promise<Person> => {
+      const response = await apiRequest('POST', '/api/persons', data);
       return response as unknown as Person;
     },
-    onSuccess: (person: Person, variables) => {
+    onSuccess: (person: Person) => {
       toast({
         title: t('common.success'),
-        description: `${variables.type === 'sponsor' ? 'Sponsor' : 'Driver'} created successfully`,
+        description: 'Sponsor created successfully',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       queryClient.invalidateQueries({ 
@@ -599,17 +617,41 @@ export default function ContractForm() {
           query.queryKey[0] === '/api/persons/search'
       });
       
-      if (variables.type === 'sponsor') {
-        form.setValue('sponsorId', person.id);
-        setSelectedSponsor(person);
-        setCreateSponsorOpen(false);
-      } else {
-        form.setValue('driverId', person.id);
-        setSelectedDriver(person);
-        setCreateDriverOpen(false);
-      }
-      
+      form.setValue('sponsorId', person.id);
+      setSelectedSponsor(person);
+      setCreateSponsorOpen(false);
       personForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createCompanyMutation = useMutation({
+    mutationFn: async (data: any): Promise<Company> => {
+      const response = await apiRequest('POST', '/api/companies', data);
+      return response as unknown as Company;
+    },
+    onSuccess: (company: Company) => {
+      toast({
+        title: t('common.success'),
+        description: 'Company created successfully',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          Array.isArray(query.queryKey) && 
+          query.queryKey[0] === '/api/companies/search'
+      });
+      
+      form.setValue('companySponsorId', company.id);
+      setSelectedCompany(company);
+      setCreateCompanyOpen(false);
+      companyForm.reset();
     },
     onError: (error: Error) => {
       toast({
@@ -732,13 +774,17 @@ export default function ContractForm() {
     });
   };
 
-  const handleCreatePerson = (type: 'sponsor' | 'driver') => (data: any) => {
+  const handleCreatePerson = (data: any) => {
     createPersonMutation.mutate({
-      type,
-      personData: {
-        ...data,
-        createdBy: 'current-user-id',
-      },
+      ...data,
+      createdBy: 'current-user-id',
+    });
+  };
+
+  const handleCreateCompany = (data: any) => {
+    createCompanyMutation.mutate({
+      ...data,
+      createdBy: 'current-user-id',
     });
   };
 
@@ -1029,7 +1075,7 @@ export default function ContractForm() {
                 name="hirerType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Select Hirer Type / اختر نوع المستأجر *</FormLabel>
+                    <FormLabel>{t('form.selectHirerType')} *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-hirer-type">
@@ -1055,7 +1101,7 @@ export default function ContractForm() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <span className="material-icons">badge</span>
-                  Sponsor Information / معلومات الكفيل
+                  {t('form.sponsorInfo')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1064,7 +1110,7 @@ export default function ContractForm() {
                   name="sponsorId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Select Sponsor / اختر الكفيل *</FormLabel>
+                      <FormLabel>{t('form.selectSponsor')} *</FormLabel>
                       <FormControl>
                         <PersonSelector
                           value={field.value}
@@ -1083,39 +1129,73 @@ export default function ContractForm() {
             </Card>
           )}
 
-          {/* Conditional Company Hirer Information Section */}
+          {/* Conditional Company Sponsor Information Section */}
           {watchedHirerType === 'from_company' && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="material-icons">person</span>
-                  Driver/Hirer Information / معلومات السائق/المستأجر
+                  <span className="material-icons">business</span>
+                  {t('companies.companySponsor')}
                 </CardTitle>
                 <CardDescription>
-                  Individual driver details (company information in customer section)
+                  {t('companies.companySponsorDescription')}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="driverId"
+                  name="companySponsorId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Select Driver / اختر السائق *</FormLabel>
+                      <FormLabel>{t('companies.selectCompany')} *</FormLabel>
                       <FormControl>
-                        <PersonSelector
+                        <CompanySelector
                           value={field.value}
                           onChange={field.onChange}
-                          onCreateNew={() => setCreateDriverOpen(true)}
-                          type="driver"
-                          placeholder="Select driver..."
-                          data-testid="button-driver-select"
+                          onCreateNew={() => setCreateCompanyOpen(true)}
+                          placeholder={t('companies.selectCompany')}
+                          data-testid="button-company-select"
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {/* Display selected company details */}
+                {selectedCompany && (
+                  <div className="p-4 bg-muted rounded-md space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="material-icons text-muted-foreground">business</span>
+                      <div>
+                        <p className="font-medium">{selectedCompany.nameEn}</p>
+                        {selectedCompany.nameAr && (
+                          <p className="text-sm text-muted-foreground font-arabic">{selectedCompany.nameAr}</p>
+                        )}
+                      </div>
+                    </div>
+                    {selectedCompany.registrationNumber && (
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">{t('companies.registrationNumber')}:</span> {selectedCompany.registrationNumber}
+                      </p>
+                    )}
+                    {selectedCompany.contactPerson && (
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">{t('companies.contactPerson')}:</span> {selectedCompany.contactPerson}
+                      </p>
+                    )}
+                    {selectedCompany.phone && (
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">{t('form.phone')}:</span> {selectedCompany.phone}
+                      </p>
+                    )}
+                    {selectedCompany.email && (
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">{t('form.email')}:</span> {selectedCompany.email}
+                      </p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -1887,7 +1967,7 @@ export default function ContractForm() {
             <DialogTitle>Create New Sponsor</DialogTitle>
           </DialogHeader>
           <Form {...personForm}>
-            <form onSubmit={personForm.handleSubmit(handleCreatePerson('sponsor'))} className="space-y-4">
+            <form onSubmit={personForm.handleSubmit(handleCreatePerson)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={personForm.control}
@@ -2003,88 +2083,101 @@ export default function ContractForm() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Driver Dialog */}
-      <Dialog open={createDriverOpen} onOpenChange={setCreateDriverOpen}>
+      {/* Create Company Dialog */}
+      <Dialog open={createCompanyOpen} onOpenChange={setCreateCompanyOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Driver</DialogTitle>
+            <DialogTitle>{t('companies.addCompany')}</DialogTitle>
           </DialogHeader>
-          <Form {...personForm}>
-            <form onSubmit={personForm.handleSubmit(handleCreatePerson('driver'))} className="space-y-4">
+          <Form {...companyForm}>
+            <form onSubmit={companyForm.handleSubmit(handleCreateCompany)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  control={personForm.control}
+                  control={companyForm.control}
                   name="nameEn"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name (English) *</FormLabel>
+                      <FormLabel>{t('form.nameEn')} *</FormLabel>
                       <FormControl>
-                        <Input {...field} data-testid="input-new-driver-name-en" />
+                        <Input {...field} data-testid="input-new-company-name-en" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={personForm.control}
+                  control={companyForm.control}
                   name="nameAr"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name (Arabic)</FormLabel>
+                      <FormLabel>{t('form.nameAr')}</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-name-ar" />
+                        <Input {...field} value={field.value || ''} data-testid="input-new-company-name-ar" className="font-arabic" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={personForm.control}
-                  name="nationality"
+                  control={companyForm.control}
+                  name="registrationNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nationality</FormLabel>
+                      <FormLabel>{t('companies.registrationNumber')}</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-nationality" />
+                        <Input {...field} value={field.value || ''} data-testid="input-new-company-registration" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={personForm.control}
-                  name="passportId"
+                  control={companyForm.control}
+                  name="taxId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Passport/ID Number</FormLabel>
+                      <FormLabel>{t('companies.taxId')}</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-passport" />
+                        <Input {...field} value={field.value || ''} data-testid="input-new-company-tax-id" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={personForm.control}
-                  name="licenseNumber"
+                  control={companyForm.control}
+                  name="contactPerson"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>License Number</FormLabel>
+                      <FormLabel>{t('companies.contactPerson')}</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-license" />
+                        <Input {...field} value={field.value || ''} data-testid="input-new-company-contact-person" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={personForm.control}
-                  name="mobile"
+                  control={companyForm.control}
+                  name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mobile</FormLabel>
+                      <FormLabel>{t('form.phone')}</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-mobile" />
+                        <Input {...field} value={field.value || ''} data-testid="input-new-company-phone" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={companyForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.email')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} type="email" data-testid="input-new-company-email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -2092,13 +2185,26 @@ export default function ContractForm() {
                 />
               </div>
               <FormField
-                control={personForm.control}
+                control={companyForm.control}
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>{t('form.address')}</FormLabel>
                     <FormControl>
-                      <Textarea {...field} value={field.value || ''} data-testid="input-new-driver-address" />
+                      <Textarea {...field} value={field.value || ''} data-testid="input-new-company-address" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={companyForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.notes')}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} value={field.value || ''} data-testid="input-new-company-notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -2108,17 +2214,17 @@ export default function ContractForm() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setCreateDriverOpen(false)}
-                  data-testid="button-cancel-driver"
+                  onClick={() => setCreateCompanyOpen(false)}
+                  data-testid="button-cancel-company"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   type="submit"
-                  disabled={createPersonMutation.isPending}
-                  data-testid="button-save-driver"
+                  disabled={createCompanyMutation.isPending}
+                  data-testid="button-save-company"
                 >
-                  {createPersonMutation.isPending ? "Creating..." : "Create Driver"}
+                  {createCompanyMutation.isPending ? t('common.creating') : t('companies.createCompany')}
                 </Button>
               </div>
             </form>

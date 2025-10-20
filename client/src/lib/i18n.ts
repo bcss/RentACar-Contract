@@ -24,6 +24,7 @@ const resources = {
       "common.print": "Print",
       "common.save": "Save",
       "common.cancel": "Cancel",
+      "common.creating": "Creating...",
       "common.delete": "Delete",
       "common.edit": "Edit",
       "common.view": "View",
@@ -281,6 +282,9 @@ const resources = {
       "companies.details": "Company Details",
       "companies.actions": "Actions",
       "companies.selectCompany": "Select company...",
+      "companies.createCompany": "Create Company",
+      "companies.companySponsor": "Company Sponsor",
+      "companies.companySponsorDescription": "The company sponsoring the customer for this rental",
       
       // Contract Form
       "form.hirerInfo": "Hirer Information",
@@ -303,6 +307,8 @@ const resources = {
       "form.licenseIssueDate": "License Issue Date",
       "form.licenseExpiryDate": "License Expiry Date",
       "form.sponsorInfo": "Sponsor Information",
+      "form.selectSponsor": "Select Sponsor",
+      "form.selectHirerType": "Select Hirer Type",
       "form.sponsorNameEn": "Sponsor Name (English)",
       "form.sponsorNameAr": "Sponsor Name (Arabic)",
       "form.sponsorIdNumber": "Sponsor ID Number",
@@ -520,6 +526,7 @@ const resources = {
       "common.print": "طباعة",
       "common.save": "حفظ",
       "common.cancel": "إلغاء",
+      "common.creating": "جاري الإنشاء...",
       "common.delete": "حذف",
       "common.edit": "تعديل",
       "common.view": "عرض",
@@ -777,6 +784,9 @@ const resources = {
       "companies.details": "تفاصيل الشركة",
       "companies.actions": "الإجراءات",
       "companies.selectCompany": "اختر شركة...",
+      "companies.createCompany": "إنشاء شركة",
+      "companies.companySponsor": "راعي الشركة",
+      "companies.companySponsorDescription": "الشركة الراعية للعميل لهذا الإيجار",
       
       // Contract Form
       "form.hirerInfo": "معلومات المستأجر",
@@ -799,6 +809,8 @@ const resources = {
       "form.licenseIssueDate": "تاريخ إصدار الرخصة",
       "form.licenseExpiryDate": "تاريخ انتهاء الرخصة",
       "form.sponsorInfo": "معلومات الكفيل",
+      "form.selectSponsor": "اختر الكفيل",
+      "form.selectHirerType": "اختر نوع المستأجر",
       "form.sponsorNameEn": "اسم الكفيل (إنجليزي)",
       "form.sponsorNameAr": "اسم الكفيل (عربي)",
       "form.sponsorIdNumber": "رقم هوية الكفيل",
