@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -51,6 +51,15 @@ const contractFormSchema = z.object({
   sponsorAddress: z.string().nullable().optional(),
   sponsorMobile: z.string().nullable().optional(),
   sponsorCreditCard: z.string().nullable().optional(),
+  
+  // Company hirer fields - conditional validation based on hirerType (from_company)
+  hirerNameEn: z.string().nullable().optional(),
+  hirerNameAr: z.string().nullable().optional(),
+  hirerNationality: z.string().nullable().optional(),
+  hirerPassportId: z.string().nullable().optional(),
+  hirerLicenseNumber: z.string().nullable().optional(),
+  hirerMobile: z.string().nullable().optional(),
+  hirerAddress: z.string().nullable().optional(),
   
   rentalStartDate: z.coerce.date(),
   rentalEndDate: z.coerce.date(),
@@ -92,6 +101,26 @@ const contractFormSchema = z.object({
   notes: z.string().nullable().optional(),
   createdBy: z.string(),
   status: z.string().nullable().optional(),
+}).refine((data) => {
+  // If hirerType is 'with_sponsor', require sponsor fields
+  if (data.hirerType === 'with_sponsor') {
+    return !!(data.sponsorName && data.sponsorNationality && data.sponsorPassportId && 
+              data.sponsorMobile && data.sponsorAddress);
+  }
+  return true;
+}, {
+  message: "All sponsor fields are required when hirer type is 'With Sponsor'",
+  path: ["sponsorName"],
+}).refine((data) => {
+  // If hirerType is 'from_company', require company hirer fields
+  if (data.hirerType === 'from_company') {
+    return !!(data.hirerNameEn && data.hirerNationality && data.hirerPassportId && 
+              data.hirerLicenseNumber && data.hirerMobile && data.hirerAddress);
+  }
+  return true;
+}, {
+  message: "All driver/hirer fields are required when hirer type is 'From Company'",
+  path: ["hirerNameEn"],
 });
 
 type ContractFormData = z.infer<typeof contractFormSchema>;
