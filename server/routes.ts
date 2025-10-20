@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, type Customer, type Vehicle } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, type Customer, type Vehicle, type Person } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -275,6 +275,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Vehicle enabled successfully" });
     } catch (error) {
       res.status(500).json({ message: error instanceof Error ? error.message : "Failed to enable vehicle" });
+    }
+  });
+
+  // Person routes (sponsors/drivers)
+  app.get("/api/persons", isAuthenticated, async (req: any, res) => {
+    try {
+      const disabledParam = req.query.disabled;
+      let persons: Person[];
+      
+      if (disabledParam === 'true') {
+        // Get only disabled persons
+        persons = await storage.getPersons(true);
+        persons = persons.filter(p => p.disabled);
+      } else if (disabledParam === 'false') {
+        // Get only active persons
+        persons = await storage.getPersons(false);
+      } else {
+        // Get all persons (for backward compatibility)
+        persons = await storage.getPersons(true);
+      }
+      
+      res.json(persons);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch persons" });
+    }
+  });
+
+  app.get("/api/persons/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const query = req.query.q as string || '';
+      const persons = await storage.searchPersons(query);
+      res.json(persons);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to search persons" });
+    }
+  });
+
+  app.get("/api/persons/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const person = await storage.getPersonById(req.params.id);
+      if (!person) {
+        return res.status(404).json({ message: "Person not found" });
+      }
+      res.json(person);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch person" });
+    }
+  });
+
+  app.post("/api/persons", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const personData = insertPersonSchema.parse(req.body);
+      const person = await storage.createPerson({
+        ...personData,
+        createdBy: req.user!.id,
+      } as any);
+      
+      await createAuditLog(req.user!.id, "create_person", undefined, req.ip, `Created person: ${person.nameEn}`);
+      
+      res.status(201).json(person);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create person" });
+    }
+  });
+
+  app.patch("/api/persons/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const personData = insertPersonSchema.partial().parse(req.body);
+      const person = await storage.updatePerson(req.params.id, personData);
+      
+      await createAuditLog(req.user!.id, "update_person", undefined, req.ip, `Updated person: ${person.nameEn}`);
+      
+      res.json(person);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update person" });
+    }
+  });
+
+  app.post("/api/persons/:id/disable", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      await storage.disablePerson(req.params.id, req.user!.id);
+      
+      await createAuditLog(req.user!.id, "disable_person", undefined, req.ip, `Disabled person: ${req.params.id}`);
+      
+      res.json({ message: "Person disabled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to disable person" });
+    }
+  });
+
+  app.post("/api/persons/:id/enable", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      await storage.enablePerson(req.params.id);
+      
+      await createAuditLog(req.user!.id, "enable_person", undefined, req.ip, `Enabled person: ${req.params.id}`);
+      
+      res.json({ message: "Person enabled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to enable person" });
     }
   });
 
