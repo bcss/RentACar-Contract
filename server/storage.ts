@@ -951,36 +951,45 @@ export class DatabaseStorage implements IStorage {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-    // Get all finalized contracts
-    const finalizedContracts = await db
-      .select()
-      .from(contracts)
-      .where(eq(contracts.status, 'finalized'));
+    // Get all contracts with revenue (confirmed, active, completed, closed - not draft)
+    const allContracts = await db.select().from(contracts);
+    const revenueContracts = allContracts.filter(c => 
+      c.status === 'confirmed' || c.status === 'active' || c.status === 'completed' || c.status === 'closed'
+    );
 
-    // Calculate total revenue
-    const totalRevenue = finalizedContracts.reduce((sum, contract) => {
+    // Calculate total revenue including extra charges
+    const totalRevenue = revenueContracts.reduce((sum, contract) => {
       const amount = parseFloat(contract.totalAmount) || 0;
-      return sum + amount;
+      const extras = parseFloat(contract.totalExtraCharges || '0') || 0;
+      return sum + amount + extras;
     }, 0);
 
     // Calculate average contract value
-    const averageContractValue = finalizedContracts.length > 0 
-      ? totalRevenue / finalizedContracts.length 
+    const averageContractValue = revenueContracts.length > 0 
+      ? totalRevenue / revenueContracts.length 
       : 0;
 
-    // Calculate monthly revenue (this month)
-    const monthlyRevenue = finalizedContracts
-      .filter(contract => contract.finalizedAt && new Date(contract.finalizedAt) >= startOfMonth)
-      .reduce((sum, contract) => sum + (parseFloat(contract.totalAmount) || 0), 0);
+    // Calculate monthly revenue (based on createdAt for this month)
+    const monthlyRevenue = revenueContracts
+      .filter(contract => contract.createdAt && new Date(contract.createdAt) >= startOfMonth)
+      .reduce((sum, contract) => {
+        const amount = parseFloat(contract.totalAmount) || 0;
+        const extras = parseFloat(contract.totalExtraCharges || '0') || 0;
+        return sum + amount + extras;
+      }, 0);
 
     // Calculate last month revenue
-    const lastMonthRevenue = finalizedContracts
+    const lastMonthRevenue = revenueContracts
       .filter(contract => {
-        if (!contract.finalizedAt) return false;
-        const date = new Date(contract.finalizedAt);
+        if (!contract.createdAt) return false;
+        const date = new Date(contract.createdAt);
         return date >= startOfLastMonth && date <= endOfLastMonth;
       })
-      .reduce((sum, contract) => sum + (parseFloat(contract.totalAmount) || 0), 0);
+      .reduce((sum, contract) => {
+        const amount = parseFloat(contract.totalAmount) || 0;
+        const extras = parseFloat(contract.totalExtraCharges || '0') || 0;
+        return sum + amount + extras;
+      }, 0);
 
     // Calculate growth percentage
     const revenueGrowth = lastMonthRevenue > 0 
