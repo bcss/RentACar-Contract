@@ -281,7 +281,11 @@ export const contracts = pgTable("contracts", {
   // Hirer Type - determines which fields are required
   hirerType: varchar("hirer_type", { length: 20 }).notNull().default("direct"), // direct, with_sponsor, from_company
   
-  // Sponsor Information (when hirerType is 'with_sponsor')
+  // Foreign Keys to Persons (Master Data) - Preferred approach for new contracts
+  sponsorId: varchar("sponsor_id").references(() => persons.id), // Reference to sponsor person
+  driverId: varchar("driver_id").references(() => persons.id), // Reference to driver person (for from_company)
+  
+  // Sponsor Information (when hirerType is 'with_sponsor') - Legacy inline fields for backward compatibility
   sponsorName: varchar("sponsor_name"),
   sponsorNationality: varchar("sponsor_nationality"),
   sponsorPassportId: varchar("sponsor_passport_id"),
@@ -393,6 +397,16 @@ export const contractsRelations = relations(contracts, ({ one }) => ({
   vehicle: one(vehicles, {
     fields: [contracts.vehicleId],
     references: [vehicles.id],
+  }),
+  sponsor: one(persons, {
+    fields: [contracts.sponsorId],
+    references: [persons.id],
+    relationName: "contractSponsor",
+  }),
+  driver: one(persons, {
+    fields: [contracts.driverId],
+    references: [persons.id],
+    relationName: "contractDriver",
   }),
   creator: one(users, {
     fields: [contracts.createdBy],
