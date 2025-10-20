@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { Contract, ContractWithDetails, Person, CompanySettings, Customer, Vehicle, User } from '@shared/schema';
+import { Contract, ContractWithDetails, Person, Company, CompanySettings, Customer, Vehicle, User } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -308,28 +308,30 @@ export default function ContractView() {
     };
   };
 
-  // Helper function to get driver display data with fallback to legacy fields
-  const getDriverDisplay = (contract: Contract & Partial<ContractWithDetails>) => {
-    if (contract.driverPerson) {
+  // Helper function to get company sponsor display data
+  const getCompanySponsorDisplay = (contract: Contract & Partial<ContractWithDetails>) => {
+    if (contract.companySponsor) {
       return {
-        nameEn: contract.driverPerson.nameEn || '',
-        nameAr: contract.driverPerson.nameAr || '',
-        nationality: contract.driverPerson.nationality || '',
-        passportId: contract.driverPerson.passportId || '',
-        licenseNumber: contract.driverPerson.licenseNumber || '',
-        mobile: contract.driverPerson.mobile || '',
-        address: contract.driverPerson.address || '',
+        nameEn: contract.companySponsor.nameEn || '',
+        nameAr: contract.companySponsor.nameAr || '',
+        registrationNumber: contract.companySponsor.registrationNumber || '',
+        taxId: contract.companySponsor.taxId || '',
+        contactPerson: contract.companySponsor.contactPerson || '',
+        phone: contract.companySponsor.phone || '',
+        email: contract.companySponsor.email || '',
+        address: contract.companySponsor.address || '',
       };
     }
-    // Fallback to legacy inline fields
+    // Fallback to empty values if no company sponsor
     return {
-      nameEn: contract.hirerNameEn || '',
-      nameAr: contract.hirerNameAr || '',
-      nationality: contract.hirerNationality || '',
-      passportId: contract.hirerPassportId || '',
-      licenseNumber: contract.hirerLicenseNumber || '',
-      mobile: contract.hirerMobile || '',
-      address: contract.hirerAddress || '',
+      nameEn: '',
+      nameAr: '',
+      registrationNumber: '',
+      taxId: '',
+      contactPerson: '',
+      phone: '',
+      email: '',
+      address: '',
     };
   };
 
@@ -481,9 +483,9 @@ export default function ContractView() {
     (parseFloat(contract.outstandingBalance || '0') === 0 || contract.finalPaymentReceived) &&
     isAdmin; // Only admins can close contracts
 
-  // Get sponsor and driver display data using helper functions
+  // Get sponsor and company sponsor display data using helper functions
   const sponsorData = getSponsorDisplay(contract);
-  const driverData = getDriverDisplay(contract);
+  const companySponsorData = getCompanySponsorDisplay(contract);
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -615,17 +617,79 @@ export default function ContractView() {
                 </>
               )}
 
-              {/* Company Name when hirerType is from_company */}
+              {/* Company Sponsor Information when hirerType is from_company */}
               {hirerType === 'from_company' && (
-                <div className="grid grid-cols-[120px_1fr] border-b border-black">
-                  <div className="bg-gray-50 p-2 border-r border-black">
-                    <p className="text-xs font-bold text-red-600">Company Name</p>
+                <>
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Company Name</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">اسم الشركة</p>
+                      <p className="text-xs">{companySponsorData.nameAr || companySponsorData.nameEn}</p>
+                    </div>
                   </div>
-                  <div className="p-2 text-right font-arabic">
-                    <p className="text-xs">اسم الشركة</p>
-                    <p className="text-xs">{customer.nameAr || customer.nameEn}</p>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Registration No.</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">رقم التسجيل</p>
+                      <p className="text-xs">{companySponsorData.registrationNumber || ''}</p>
+                    </div>
                   </div>
-                </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Tax ID</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">الرقم الضريبي</p>
+                      <p className="text-xs">{companySponsorData.taxId || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Contact Person</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">الشخص المسؤول</p>
+                      <p className="text-xs">{companySponsorData.contactPerson || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Phone</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">الهاتف</p>
+                      <p className="text-xs">{companySponsorData.phone || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Email</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">البريد الإلكتروني</p>
+                      <p className="text-xs">{companySponsorData.email || ''}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-[120px_1fr] border-b border-black">
+                    <div className="bg-gray-50 p-2 border-r border-black">
+                      <p className="text-xs font-bold text-red-600">Address</p>
+                    </div>
+                    <div className="p-2 text-right font-arabic">
+                      <p className="text-xs">العنوان</p>
+                      <p className="text-xs">{companySponsorData.address || ''}</p>
+                    </div>
+                  </div>
+                </>
               )}
 
               {/* Left column fields for all hirer types */}
@@ -675,18 +739,18 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">اسم المستأجر</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? driverData.nameAr || driverData.nameEn || '' : customer.nameAr || ''}</p>
+                  <p className="text-xs">{customer.nameAr || ''}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Hirer Name</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? driverData.nameEn || '' : customer.nameEn}</p>
+                  <p className="text-xs">{customer.nameEn}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-[1fr_auto_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">الجنسية</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? driverData.nationality || '' : customer.nationality || ''}</p>
+                  <p className="text-xs">{customer.nationality || ''}</p>
                 </div>
                 <div className="flex items-center gap-2 px-2 border-l border-black">
                   <div className="flex items-center gap-1">
@@ -706,7 +770,7 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">رقم جواز السفر / الهوية</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? driverData.passportId || '' : customer.nationalId || ''}</p>
+                  <p className="text-xs">{customer.nationalId || ''}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Passport No./ID</p>
@@ -716,7 +780,7 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">متحرك</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? driverData.mobile || '' : customer.phone}</p>
+                  <p className="text-xs">{customer.phone}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Mobile</p>
@@ -734,9 +798,9 @@ export default function ContractView() {
                   <p className="text-xs font-bold text-red-600">Date of Birth</p>
                 </div>
                 <div className="col-span-3 p-2 text-right font-arabic border-t border-black">
-                  <p className="text-xs">{hirerType === 'from_company' ? driverData.address || '' : customer.address || ''}</p>
+                  <p className="text-xs">{customer.address || ''}</p>
                   <p className="text-xs">تاريخ الولادة</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? '' : (customer.dateOfBirth ? format(new Date(customer.dateOfBirth), 'PP') : '')}</p>
+                  <p className="text-xs">{customer.dateOfBirth ? format(new Date(customer.dateOfBirth), 'PP') : ''}</p>
                 </div>
               </div>
 
@@ -746,7 +810,7 @@ export default function ContractView() {
                     <p className="text-xs font-bold">رقم رخصة القيادة</p>
                   </div>
                   <div className="p-2 border-r border-black">
-                    <p className="text-xs">{hirerType === 'from_company' ? driverData.licenseNumber || '' : customer.licenseNumber || ''}</p>
+                    <p className="text-xs">{customer.licenseNumber || ''}</p>
                   </div>
                 </div>
                 <div>
@@ -1697,8 +1761,8 @@ export default function ContractView() {
             {hirerType === 'from_company' && (
               <div className="border-2 border-black p-3 text-center">
                 <div className="h-12 mb-2"></div>
-                <p className="text-xs font-semibold font-arabic mb-1">توقيع الشركة</p>
-                <p className="text-xs font-semibold">Company Signature</p>
+                <p className="text-xs font-semibold font-arabic mb-1">توقيع ممثل الشركة</p>
+                <p className="text-xs font-semibold">Company Representative Signature</p>
                 <p className="text-xs mt-2">Date: ________________</p>
               </div>
             )}
