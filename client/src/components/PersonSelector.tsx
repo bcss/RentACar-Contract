@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -33,14 +34,17 @@ export function PersonSelector({
   value,
   onChange,
   onCreateNew,
-  placeholder = "Select person...",
+  placeholder,
   type,
   disabled = false,
   "data-testid": testId,
 }: PersonSelectorProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  
+  const defaultPlaceholder = placeholder || t('persons.selectPerson');
 
   // Load selected person details
   useEffect(() => {
@@ -63,7 +67,7 @@ export function PersonSelector({
 
   const displayText = selectedPerson
     ? `${selectedPerson.nameEn}${selectedPerson.nameAr ? ` / ${selectedPerson.nameAr}` : ''} ${selectedPerson.mobile ? `- ${selectedPerson.mobile}` : ''}`
-    : placeholder;
+    : defaultPlaceholder;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -86,14 +90,14 @@ export function PersonSelector({
       <PopoverContent className="w-[400px] p-0">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder={`Search ${type || 'person'}...`}
+            placeholder={t('persons.searchPlaceholder')}
             value={searchQuery}
             onValueChange={setSearchQuery}
             data-testid={`input-search-${type || 'person'}`}
           />
           <CommandList>
             <CommandEmpty>
-              {searchQuery.length > 0 ? 'No results found.' : `Type to search ${type || 'persons'}...`}
+              {searchQuery.length > 0 ? t('common.noResults') : t('persons.searchPlaceholder')}
             </CommandEmpty>
             {searchResults.length > 0 && (
               <CommandGroup>
@@ -143,7 +147,7 @@ export function PersonSelector({
                 data-testid={`button-create-${type || 'person'}`}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Create New {type === 'sponsor' ? 'Sponsor' : type === 'driver' ? 'Driver' : 'Person'}
+                {t('persons.addPerson')}
               </Button>
             </div>
           )}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +55,7 @@ type PersonFormData = z.infer<typeof insertPersonSchema>;
 export default function Persons() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -104,15 +106,15 @@ export default function Persons() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       toast({
-        title: 'Success',
-        description: 'Person created successfully',
+        title: t('common.success'),
+        description: t('persons.personCreated'),
       });
       setCreateOpen(false);
       form.reset();
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: t('common.error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -127,8 +129,8 @@ export default function Persons() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       toast({
-        title: 'Success',
-        description: 'Person updated successfully',
+        title: t('common.success'),
+        description: t('persons.personUpdated'),
       });
       setEditOpen(false);
       setSelectedPerson(null);
@@ -136,7 +138,7 @@ export default function Persons() {
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: t('common.error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -150,15 +152,15 @@ export default function Persons() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       toast({
-        title: 'Success',
-        description: 'Person disabled successfully',
+        title: t('common.success'),
+        description: t('persons.personDisabled'),
       });
       setDisableDialogOpen(false);
       setPersonToToggle(null);
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: t('common.error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -172,15 +174,15 @@ export default function Persons() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       toast({
-        title: 'Success',
-        description: 'Person enabled successfully',
+        title: t('common.success'),
+        description: t('persons.personEnabled'),
       });
       setEnableDialogOpen(false);
       setPersonToToggle(null);
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: t('common.error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -272,7 +274,7 @@ export default function Persons() {
             name="nameEn"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name (English) / الاسم (إنجليزي)</FormLabel>
+                <FormLabel>{t('persons.nameEn')}</FormLabel>
                 <FormControl>
                   <Input {...field} data-testid="input-person-name-en" />
                 </FormControl>
@@ -285,7 +287,7 @@ export default function Persons() {
             name="nameAr"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name (Arabic) / الاسم (عربي)</FormLabel>
+                <FormLabel>{t('persons.nameAr')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-name-ar" />
                 </FormControl>
@@ -300,7 +302,7 @@ export default function Persons() {
             name="nationality"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nationality / الجنسية</FormLabel>
+                <FormLabel>{t('persons.nationality')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-nationality" />
                 </FormControl>
@@ -313,7 +315,7 @@ export default function Persons() {
             name="passportId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Passport ID / رقم الجواز</FormLabel>
+                <FormLabel>{t('persons.passportId')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-passport-id" />
                 </FormControl>
@@ -328,7 +330,7 @@ export default function Persons() {
             name="licenseNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>License Number / رقم الرخصة</FormLabel>
+                <FormLabel>{t('persons.licenseNumber')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-license-number" />
                 </FormControl>
@@ -341,7 +343,7 @@ export default function Persons() {
             name="mobile"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mobile / الجوال</FormLabel>
+                <FormLabel>{t('persons.mobile')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-mobile" />
                 </FormControl>
@@ -355,7 +357,7 @@ export default function Persons() {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address / العنوان</FormLabel>
+              <FormLabel>{t('persons.address')}</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value || ''} data-testid="input-person-address" />
               </FormControl>
@@ -368,9 +370,9 @@ export default function Persons() {
           name="relation"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Relation / العلاقة</FormLabel>
+              <FormLabel>{t('persons.relation')}</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} placeholder="e.g., Employer, Family Member" data-testid="input-person-relation" />
+                <Input {...field} value={field.value || ''} placeholder={t('persons.relationPlaceholder')} data-testid="input-person-relation" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -381,7 +383,7 @@ export default function Persons() {
           name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes / ملاحظات</FormLabel>
+              <FormLabel>{t('form.notes')}</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value || ''} data-testid="input-person-notes" />
               </FormControl>
@@ -391,7 +393,7 @@ export default function Persons() {
         />
         <DialogFooter>
           <Button type="submit" disabled={isPending} data-testid="button-submit-person">
-            {isPending ? 'Saving...' : 'Save'}
+            {isPending ? t('common.saving') : t('common.save')}
           </Button>
         </DialogFooter>
       </form>
@@ -402,21 +404,21 @@ export default function Persons() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name (En) / الاسم (إنجليزي)</TableHead>
-          <TableHead>Name (Ar) / الاسم (عربي)</TableHead>
-          <TableHead>Nationality / الجنسية</TableHead>
-          <TableHead>Passport ID / رقم الجواز</TableHead>
-          <TableHead>License / الرخصة</TableHead>
-          <TableHead>Mobile / الجوال</TableHead>
-          <TableHead>Relation / العلاقة</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead>{t('persons.nameEn')}</TableHead>
+          <TableHead>{t('persons.nameAr')}</TableHead>
+          <TableHead>{t('persons.nationality')}</TableHead>
+          <TableHead>{t('persons.passportId')}</TableHead>
+          <TableHead>{t('persons.licenseNumber')}</TableHead>
+          <TableHead>{t('persons.mobile')}</TableHead>
+          <TableHead>{t('persons.relation')}</TableHead>
+          <TableHead>{t('persons.actions')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {persons.length === 0 ? (
           <TableRow>
             <TableCell colSpan={8} className="text-center text-muted-foreground">
-              No persons found
+              {t('persons.noPersons')}
             </TableCell>
           </TableRow>
         ) : (
@@ -489,20 +491,20 @@ export default function Persons() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Persons Management / إدارة الأشخاص</CardTitle>
+            <CardTitle>{t('persons.title')}</CardTitle>
             {canManage && (
               <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                 <DialogTrigger asChild>
                   <Button data-testid="button-create-person">
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Person / إضافة شخص
+                    {t('persons.addPerson')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>New Person / شخص جديد</DialogTitle>
+                    <DialogTitle>{t('persons.newPerson')}</DialogTitle>
                     <DialogDescription>
-                      Add a new person (sponsor or driver) / إضافة شخص جديد (كفيل أو سائق)
+                      {t('persons.addPerson')}
                     </DialogDescription>
                   </DialogHeader>
                   <PersonForm onSubmit={handleCreate} isPending={createMutation.isPending} />
@@ -516,7 +518,7 @@ export default function Persons() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search persons... / البحث عن أشخاص..."
+                placeholder={t('persons.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -528,10 +530,10 @@ export default function Persons() {
           <Tabs defaultValue="active">
             <TabsList className="mb-4">
               <TabsTrigger value="active" data-testid="tab-active-persons">
-                Active / نشط ({activePersons.length})
+                {t('persons.activePersons')} ({activePersons.length})
               </TabsTrigger>
               <TabsTrigger value="disabled" data-testid="tab-disabled-persons">
-                Disabled / معطل ({disabledPersons.length})
+                {t('persons.disabledPersons')} ({disabledPersons.length})
               </TabsTrigger>
             </TabsList>
 
@@ -561,9 +563,9 @@ export default function Persons() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Person / تحرير شخص</DialogTitle>
+            <DialogTitle>{t('persons.editPerson')}</DialogTitle>
             <DialogDescription>
-              Update person information / تحديث معلومات الشخص
+              {t('persons.personUpdated')}
             </DialogDescription>
           </DialogHeader>
           <PersonForm onSubmit={handleUpdate} isPending={updateMutation.isPending} />
@@ -573,20 +575,18 @@ export default function Persons() {
       <AlertDialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Disable Person / تعطيل شخص</AlertDialogTitle>
+            <AlertDialogTitle>{t('persons.disablePerson')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to disable this person? They will be moved to the disabled tab.
-              <br />
-              هل أنت متأكد من تعطيل هذا الشخص؟ سيتم نقله إلى علامة التبويب المعطلة.
+              {t('persons.confirmDisablePerson')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-disable">Cancel / إلغاء</AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-disable">{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDisableConfirm}
               data-testid="button-confirm-disable"
             >
-              Disable / تعطيل
+              {t('persons.disablePerson')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -595,20 +595,18 @@ export default function Persons() {
       <AlertDialog open={enableDialogOpen} onOpenChange={setEnableDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Enable Person / تفعيل شخص</AlertDialogTitle>
+            <AlertDialogTitle>{t('persons.enablePerson')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to enable this person? They will be moved to the active tab.
-              <br />
-              هل أنت متأكد من تفعيل هذا الشخص؟ سيتم نقله إلى علامة التبويب النشطة.
+              {t('persons.confirmEnablePerson')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-enable">Cancel / إلغاء</AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-enable">{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleEnableConfirm}
               data-testid="button-confirm-enable"
             >
-              Enable / تفعيل
+              {t('persons.enablePerson')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
