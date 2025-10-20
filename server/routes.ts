@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, type Customer, type Vehicle, type Person } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, insertCompanySchema, type Customer, type Vehicle, type Person, type Company } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -380,6 +380,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Person enabled successfully" });
     } catch (error) {
       res.status(500).json({ message: error instanceof Error ? error.message : "Failed to enable person" });
+    }
+  });
+
+  // Company routes (corporate sponsors)
+  app.get("/api/companies", isAuthenticated, async (req: any, res) => {
+    try {
+      const disabledParam = req.query.disabled;
+      let companies: Company[];
+      
+      if (disabledParam === 'true') {
+        // Get only disabled companies
+        companies = await storage.getCompanies(true);
+        companies = companies.filter(c => c.disabled);
+      } else if (disabledParam === 'false') {
+        // Get only active companies
+        companies = await storage.getCompanies(false);
+      } else {
+        // Get all companies (for backward compatibility)
+        companies = await storage.getCompanies(true);
+      }
+      
+      res.json(companies);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch companies" });
+    }
+  });
+
+  app.get("/api/companies/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const query = req.query.q as string || '';
+      const companies = await storage.searchCompanies(query);
+      res.json(companies);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to search companies" });
+    }
+  });
+
+  app.get("/api/companies/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const company = await storage.getCompanyById(req.params.id);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      res.json(company);
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch company" });
+    }
+  });
+
+  app.post("/api/companies", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const companyData = insertCompanySchema.parse(req.body);
+      const company = await storage.createCompany({
+        ...companyData,
+        createdBy: req.user!.id,
+      } as any);
+      
+      await createAuditLog(req.user!.id, "create_company", undefined, req.ip, `Created company: ${company.nameEn}`);
+      
+      res.status(201).json(company);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create company" });
+    }
+  });
+
+  app.patch("/api/companies/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const companyData = insertCompanySchema.partial().parse(req.body);
+      const company = await storage.updateCompany(req.params.id, companyData);
+      
+      await createAuditLog(req.user!.id, "update_company", undefined, req.ip, `Updated company: ${company.nameEn}`);
+      
+      res.json(company);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update company" });
+    }
+  });
+
+  app.patch("/api/companies/:id/disable", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      await storage.disableCompany(req.params.id, req.user!.id);
+      
+      await createAuditLog(req.user!.id, "disable_company", undefined, req.ip, `Disabled company: ${req.params.id}`);
+      
+      res.json({ message: "Company disabled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to disable company" });
+    }
+  });
+
+  app.patch("/api/companies/:id/enable", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      await storage.enableCompany(req.params.id);
+      
+      await createAuditLog(req.user!.id, "enable_company", undefined, req.ip, `Enabled company: ${req.params.id}`);
+      
+      res.json({ message: "Company enabled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to enable company" });
     }
   });
 

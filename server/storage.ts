@@ -27,6 +27,9 @@ import {
   type InsertVehicle,
   type Person,
   type InsertPerson,
+  type Company,
+  type InsertCompany,
+  companies,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike } from "drizzle-orm";
@@ -78,7 +81,7 @@ export interface IStorage {
   checkVehicleAvailability(vehicleId: string, startDate: Date, endDate: Date, excludeContractId?: string): Promise<boolean>;
   searchVehicles(query: string): Promise<Vehicle[]>;
   
-  // Person operations (sponsors/drivers)
+  // Person operations (individual sponsors)
   getPersons(includeDisabled?: boolean): Promise<Person[]>;
   getPersonById(id: string): Promise<Person | undefined>;
   createPerson(person: InsertPerson): Promise<Person>;
@@ -86,6 +89,15 @@ export interface IStorage {
   disablePerson(id: string, disabledBy: string): Promise<void>;
   enablePerson(id: string): Promise<void>;
   searchPersons(query: string): Promise<Person[]>;
+  
+  // Company operations (corporate sponsors)
+  getCompanies(includeDisabled?: boolean): Promise<Company[]>;
+  getCompanyById(id: string): Promise<Company | undefined>;
+  createCompany(company: InsertCompany): Promise<Company>;
+  updateCompany(id: string, company: Partial<InsertCompany>): Promise<Company>;
+  disableCompany(id: string, disabledBy: string): Promise<void>;
+  enableCompany(id: string): Promise<void>;
+  searchCompanies(query: string): Promise<Company[]>;
   
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
@@ -242,30 +254,17 @@ export class DatabaseStorage implements IStorage {
         vehicleMake: vehicles.make,
         vehicleModel: vehicles.model,
         sponsorPerson: persons,
-        driverPerson: sql<Person | null>`NULL`.as('driverPerson'),
+        companySponsor: companies,
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .leftJoin(persons, eq(contracts.sponsorId, persons.id))
+      .leftJoin(companies, eq(contracts.companySponsorId, companies.id))
       .where(eq(contracts.disabled, false))
       .orderBy(desc(contracts.createdAt));
     
-    // Fetch driver person separately if needed
-    const withDrivers = await Promise.all(
-      results.map(async (contract) => {
-        if (contract.driverId) {
-          const [driverPerson] = await db
-            .select()
-            .from(persons)
-            .where(eq(persons.id, contract.driverId));
-          return { ...contract, driverPerson: driverPerson || null };
-        }
-        return { ...contract, driverPerson: null };
-      })
-    );
-    
-    return withDrivers as ContractWithDetails[];
+    return results as ContractWithDetails[];
   }
 
   async getDisabledContracts(): Promise<ContractWithDetails[]> {
@@ -278,30 +277,17 @@ export class DatabaseStorage implements IStorage {
         vehicleMake: vehicles.make,
         vehicleModel: vehicles.model,
         sponsorPerson: persons,
-        driverPerson: sql<Person | null>`NULL`.as('driverPerson'),
+        companySponsor: companies,
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .leftJoin(persons, eq(contracts.sponsorId, persons.id))
+      .leftJoin(companies, eq(contracts.companySponsorId, companies.id))
       .where(eq(contracts.disabled, true))
       .orderBy(desc(contracts.disabledAt));
     
-    // Fetch driver person separately if needed
-    const withDrivers = await Promise.all(
-      results.map(async (contract) => {
-        if (contract.driverId) {
-          const [driverPerson] = await db
-            .select()
-            .from(persons)
-            .where(eq(persons.id, contract.driverId));
-          return { ...contract, driverPerson: driverPerson || null };
-        }
-        return { ...contract, driverPerson: null };
-      })
-    );
-    
-    return withDrivers as ContractWithDetails[];
+    return results as ContractWithDetails[];
   }
 
   async searchContracts(query: string): Promise<Contract[]> {
@@ -766,6 +752,75 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(persons.createdAt));
+  }
+
+  // Company operations (corporate sponsors)
+  async getCompanies(includeDisabled = false): Promise<Company[]> {
+    if (includeDisabled) {
+      return await db.select().from(companies).orderBy(desc(companies.createdAt));
+    }
+    return await db.select().from(companies).where(eq(companies.disabled, false)).orderBy(desc(companies.createdAt));
+  }
+
+  async getCompanyById(id: string): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.id, id));
+    return company;
+  }
+
+  async createCompany(companyData: InsertCompany): Promise<Company> {
+    const [company] = await db.insert(companies).values(companyData).returning();
+    return company;
+  }
+
+  async updateCompany(id: string, companyData: Partial<InsertCompany>): Promise<Company> {
+    const [company] = await db
+      .update(companies)
+      .set({ ...companyData, updatedAt: new Date() })
+      .where(eq(companies.id, id))
+      .returning();
+    return company;
+  }
+
+  async disableCompany(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(companies)
+      .set({
+        disabled: true,
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(companies.id, id));
+  }
+
+  async enableCompany(id: string): Promise<void> {
+    await db
+      .update(companies)
+      .set({
+        disabled: false,
+        disabledBy: null,
+        disabledAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(companies.id, id));
+  }
+
+  async searchCompanies(query: string): Promise<Company[]> {
+    const searchTerm = `%${query}%`;
+    return await db
+      .select()
+      .from(companies)
+      .where(
+        or(
+          ilike(companies.nameEn, searchTerm),
+          ilike(companies.nameAr, searchTerm),
+          ilike(companies.registrationNumber, searchTerm),
+          ilike(companies.taxId, searchTerm),
+          ilike(companies.contactPerson, searchTerm),
+          ilike(companies.phone, searchTerm)
+        )
+      )
+      .orderBy(desc(companies.createdAt));
   }
 
   // Audit log operations

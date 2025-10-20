@@ -520,7 +520,7 @@ export type ContractWithDetails = Contract & {
   vehicleMake: string | null;
   vehicleModel: string | null;
   sponsorPerson?: Person | null;
-  driverPerson?: Person | null;
+  companySponsor?: Company | null;
 };
 
 // Audit logs table
