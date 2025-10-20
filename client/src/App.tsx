@@ -14,6 +14,7 @@ import Dashboard from "@/pages/Dashboard";
 import Customers from "@/pages/Customers";
 import Vehicles from "@/pages/Vehicles";
 import Persons from "@/pages/Persons";
+import Companies from "@/pages/Companies";
 import Contracts from "@/pages/Contracts";
 import ContractForm from "@/pages/ContractForm";
 import ContractView from "@/pages/ContractView";
@@ -78,6 +79,9 @@ function Router() {
       </Route>
       <Route path="/persons">
         {() => <ProtectedRoute component={Persons} />}
+      </Route>
+      <Route path="/companies">
+        {() => <ProtectedRoute component={Companies} />}
       </Route>
       <Route path="/contracts" component={() => <ProtectedRoute component={Contracts} />} />
       <Route path="/contracts/new" component={() => <ProtectedRoute component={ContractForm} />} />
