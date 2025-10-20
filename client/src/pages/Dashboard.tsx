@@ -122,7 +122,6 @@ export default function Dashboard() {
   const activeContracts = contracts.filter(c => c.status === 'active').length;
   const completedContracts = contracts.filter(c => c.status === 'completed').length;
   const closedContracts = contracts.filter(c => c.status === 'closed').length;
-  const finalizedContracts = contracts.filter(c => c.status === 'finalized').length;
   
   // Calculate overdue returns (active contracts past rental end date)
   const today = new Date();
@@ -159,9 +158,9 @@ export default function Dashboard() {
     }, 0);
 
   const getStatusBadge = (status: string) => {
-    return status === 'finalized' 
-      ? <Badge variant="default" className="bg-chart-2 hover:bg-chart-2">{t('contracts.finalized')}</Badge>
-      : <Badge variant="secondary" className="bg-chart-4 hover:bg-chart-4">{t('contracts.draft')}</Badge>;
+    return status === 'draft' 
+      ? <Badge variant="secondary" className="bg-chart-4 hover:bg-chart-4">{t('contracts.draft')}</Badge>
+      : <Badge variant="default" className="bg-chart-2 hover:bg-chart-2">{status}</Badge>;
   };
 
   const getActionIcon = (action: string) => {
