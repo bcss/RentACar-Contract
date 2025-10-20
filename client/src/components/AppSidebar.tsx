@@ -69,6 +69,12 @@ export function AppSidebar() {
       show: true,
     },
     {
+      title: t('nav.persons'),
+      icon: 'badge',
+      url: '/persons',
+      show: isAdmin || isManager,
+    },
+    {
       title: t('nav.contracts'),
       icon: 'description',
       url: '/contracts',

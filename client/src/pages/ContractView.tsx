@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { Contract, CompanySettings, Customer, Vehicle, User } from '@shared/schema';
+import { Contract, ContractWithDetails, Person, CompanySettings, Customer, Vehicle, User } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -83,7 +83,7 @@ export default function ContractView() {
     }
   }, [isAuthenticated, authLoading, toast, t]);
 
-  const { data: contract, isLoading } = useQuery<Contract>({
+  const { data: contract, isLoading } = useQuery<ContractWithDetails>({
     queryKey: ['/api/contracts', params.id],
     enabled: isAuthenticated,
   });
@@ -285,6 +285,54 @@ export default function ContractView() {
     );
   }
 
+  // Helper function to get sponsor display data with fallback to legacy fields
+  const getSponsorDisplay = (contract: Contract & Partial<ContractWithDetails>) => {
+    if (contract.sponsorPerson) {
+      return {
+        nameEn: contract.sponsorPerson.nameEn || '',
+        nameAr: contract.sponsorPerson.nameAr || '',
+        nationality: contract.sponsorPerson.nationality || '',
+        passportId: contract.sponsorPerson.passportId || '',
+        mobile: contract.sponsorPerson.mobile || '',
+        address: contract.sponsorPerson.address || '',
+      };
+    }
+    // Fallback to legacy inline fields
+    return {
+      nameEn: contract.sponsorName || '',
+      nameAr: contract.sponsorName || '',
+      nationality: contract.sponsorNationality || '',
+      passportId: contract.sponsorPassportId || '',
+      mobile: contract.sponsorMobile || '',
+      address: contract.sponsorAddress || '',
+    };
+  };
+
+  // Helper function to get driver display data with fallback to legacy fields
+  const getDriverDisplay = (contract: Contract & Partial<ContractWithDetails>) => {
+    if (contract.driverPerson) {
+      return {
+        nameEn: contract.driverPerson.nameEn || '',
+        nameAr: contract.driverPerson.nameAr || '',
+        nationality: contract.driverPerson.nationality || '',
+        passportId: contract.driverPerson.passportId || '',
+        licenseNumber: contract.driverPerson.licenseNumber || '',
+        mobile: contract.driverPerson.mobile || '',
+        address: contract.driverPerson.address || '',
+      };
+    }
+    // Fallback to legacy inline fields
+    return {
+      nameEn: contract.hirerNameEn || '',
+      nameAr: contract.hirerNameAr || '',
+      nationality: contract.hirerNationality || '',
+      passportId: contract.hirerPassportId || '',
+      licenseNumber: contract.hirerLicenseNumber || '',
+      mobile: contract.hirerMobile || '',
+      address: contract.hirerAddress || '',
+    };
+  };
+
   const handlePrint = async () => {
     try {
       await apiRequest('POST', '/api/audit-logs', {
@@ -433,6 +481,10 @@ export default function ContractView() {
     (parseFloat(contract.outstandingBalance || '0') === 0 || contract.finalPaymentReceived) &&
     isAdmin; // Only admins can close contracts
 
+  // Get sponsor and driver display data using helper functions
+  const sponsorData = getSponsorDisplay(contract);
+  const driverData = getDriverDisplay(contract);
+
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Company Header - Visible only when printing */}
@@ -507,7 +559,7 @@ export default function ContractView() {
                     </div>
                     <div className="p-2 text-right font-arabic">
                       <p className="text-xs">اسم الكفيل</p>
-                      <p className="text-xs">{contract.sponsorName || ''}</p>
+                      <p className="text-xs">{sponsorData.nameAr || sponsorData.nameEn || ''}</p>
                     </div>
                   </div>
 
@@ -517,7 +569,7 @@ export default function ContractView() {
                     </div>
                     <div className="p-2 text-right font-arabic">
                       <p className="text-xs">الجنسية</p>
-                      <p className="text-xs">{contract.sponsorNationality || ''}</p>
+                      <p className="text-xs">{sponsorData.nationality || ''}</p>
                     </div>
                   </div>
 
@@ -527,7 +579,7 @@ export default function ContractView() {
                     </div>
                     <div className="p-2 text-right font-arabic">
                       <p className="text-xs">رقم جواز السفر / الهوية</p>
-                      <p className="text-xs">{contract.sponsorPassportId || ''}</p>
+                      <p className="text-xs">{sponsorData.passportId || ''}</p>
                     </div>
                   </div>
 
@@ -537,7 +589,7 @@ export default function ContractView() {
                     </div>
                     <div className="p-2 text-right font-arabic">
                       <p className="text-xs">العنوان</p>
-                      <p className="text-xs">{contract.sponsorAddress || ''}</p>
+                      <p className="text-xs">{sponsorData.address || ''}</p>
                     </div>
                   </div>
 
@@ -547,7 +599,7 @@ export default function ContractView() {
                     </div>
                     <div className="p-2 text-right font-arabic">
                       <p className="text-xs">متحرك</p>
-                      <p className="text-xs">{contract.sponsorMobile || ''}</p>
+                      <p className="text-xs">{sponsorData.mobile || ''}</p>
                     </div>
                   </div>
 
@@ -623,18 +675,18 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">اسم المستأجر</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerNameAr : customer.nameAr || ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? driverData.nameAr || driverData.nameEn || '' : customer.nameAr || ''}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Hirer Name</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerNameEn : customer.nameEn}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? driverData.nameEn || '' : customer.nameEn}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-[1fr_auto_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">الجنسية</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerNationality : customer.nationality || ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? driverData.nationality || '' : customer.nationality || ''}</p>
                 </div>
                 <div className="flex items-center gap-2 px-2 border-l border-black">
                   <div className="flex items-center gap-1">
@@ -654,7 +706,7 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">رقم جواز السفر / الهوية</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerPassportId : customer.nationalId || ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? driverData.passportId || '' : customer.nationalId || ''}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Passport No./ID</p>
@@ -664,7 +716,7 @@ export default function ContractView() {
               <div className="grid grid-cols-[1fr_120px] border-b border-black">
                 <div className="p-2 text-right font-arabic">
                   <p className="text-xs">متحرك</p>
-                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerMobile : customer.phone}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? driverData.mobile || '' : customer.phone}</p>
                 </div>
                 <div className="bg-gray-50 p-2 border-l border-black">
                   <p className="text-xs font-bold text-red-600">Mobile</p>
@@ -682,7 +734,7 @@ export default function ContractView() {
                   <p className="text-xs font-bold text-red-600">Date of Birth</p>
                 </div>
                 <div className="col-span-3 p-2 text-right font-arabic border-t border-black">
-                  <p className="text-xs">{hirerType === 'from_company' ? contract.hirerAddress : customer.address || ''}</p>
+                  <p className="text-xs">{hirerType === 'from_company' ? driverData.address || '' : customer.address || ''}</p>
                   <p className="text-xs">تاريخ الولادة</p>
                   <p className="text-xs">{hirerType === 'from_company' ? '' : (customer.dateOfBirth ? format(new Date(customer.dateOfBirth), 'PP') : '')}</p>
                 </div>
@@ -694,7 +746,7 @@ export default function ContractView() {
                     <p className="text-xs font-bold">رقم رخصة القيادة</p>
                   </div>
                   <div className="p-2 border-r border-black">
-                    <p className="text-xs">{hirerType === 'from_company' ? contract.hirerLicenseNumber : customer.licenseNumber || ''}</p>
+                    <p className="text-xs">{hirerType === 'from_company' ? driverData.licenseNumber || '' : customer.licenseNumber || ''}</p>
                   </div>
                 </div>
                 <div>
@@ -862,40 +914,36 @@ export default function ContractView() {
                 <div className="border border-black p-2">
                   <p className="text-[9px] font-semibold mb-1">Tools / <span className="font-arabic">الأدوات</span></p>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs">{contract.hasTools ? '☑ Yes' : '☐ No'}</span>
+                    <span className="text-xs">{contract.inspectionTools ? '☑ Yes' : '☐ No'}</span>
                   </div>
                 </div>
                 <div className="border border-black p-2">
                   <p className="text-[9px] font-semibold mb-1">Spare Tyre / <span className="font-arabic">الإطار الاحتياطي</span></p>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs">{contract.hasSpareTyre ? '☑ Yes' : '☐ No'}</span>
+                    <span className="text-xs">{contract.inspectionSpareTyre ? '☑ Yes' : '☐ No'}</span>
                   </div>
                 </div>
                 <div className="border border-black p-2">
                   <p className="text-[9px] font-semibold mb-1">GPS / <span className="font-arabic">نظام تحديد المواقع</span></p>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs">{contract.hasGps ? '☑ Yes' : '☐ No'}</span>
+                    <span className="text-xs">{contract.inspectionGps ? '☑ Yes' : '☐ No'}</span>
                   </div>
                 </div>
               </div>
 
               {/* Fuel Percentage */}
-              <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="mb-2">
                 <div className="flex justify-between items-center">
-                  <p className="text-[9px] font-semibold">Fuel % Start <span className="font-arabic">/ نسبة الوقود</span></p>
-                  <span className="border border-black px-2 py-1 text-xs font-mono">{contract.fuelPercentageStart || '0'}%</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-[9px] font-semibold">Fuel % End <span className="font-arabic">/ نسبة الوقود</span></p>
-                  <span className="border border-black px-2 py-1 text-xs font-mono">{contract.fuelPercentageEnd || '0'}%</span>
+                  <p className="text-[9px] font-semibold">Fuel % <span className="font-arabic">/ نسبة الوقود</span></p>
+                  <span className="border border-black px-2 py-1 text-xs font-mono">{contract.inspectionFuelPercentage || '0'}%</span>
                 </div>
               </div>
 
               {/* Damage Notes */}
-              {contract.damageNotes && (
+              {contract.inspectionDamageNotes && (
                 <div className="mt-2 border-t border-black pt-2">
                   <p className="text-[9px] font-semibold mb-1">Damage Notes / <span className="font-arabic">ملاحظات الأضرار</span></p>
-                  <p className="text-[9px] whitespace-pre-wrap">{contract.damageNotes}</p>
+                  <p className="text-[9px] whitespace-pre-wrap">{contract.inspectionDamageNotes}</p>
                 </div>
               )}
             </div>
@@ -928,7 +976,7 @@ export default function ContractView() {
                 <span className="text-[9px] font-arabic block">سالك</span>
               </div>
               <div className="border-b border-black p-1.5 text-right">
-                <span className="text-[10px] font-mono">{contract.salikCharges || '0'} {currency}</span>
+                <span className="text-[10px] font-mono">{contract.salikCharge || '0'} {currency}</span>
               </div>
 
               <div className="border-r border-b border-black p-1.5">
@@ -936,7 +984,7 @@ export default function ContractView() {
                 <span className="text-[9px] font-arabic block">غرامات مرورية</span>
               </div>
               <div className="border-b border-black p-1.5 text-right">
-                <span className="text-[10px] font-mono">{contract.trafficFines || '0'} {currency}</span>
+                <span className="text-[10px] font-mono">{contract.trafficFineCharge || '0'} {currency}</span>
               </div>
 
               <div className="border-r border-b border-black p-1.5">

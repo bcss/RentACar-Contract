@@ -6,6 +6,36 @@ This bilingual (English/Arabic) rental car contract management system, built wit
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Updates (October 20, 2025)
+
+### Persons Master Data Architecture
+- **Reusable Person Records:** Converted inline sponsor/driver fields to master data architecture with `persons` table for sponsors and drivers across contracts
+  - Eliminates repetitive data entry for frequent sponsors/drivers
+  - Bilingual person records with nameEn, nameAr, nationality, passportId, licenseNumber, mobile, address, relation
+  - Disable/enable functionality for person records (admin/manager only)
+- **Database Design:**
+  - `persons` table with comprehensive person information
+  - Foreign keys `sponsorId` and `driverId` on contracts table linking to persons
+  - Legacy inline sponsor*/hirer* fields retained for backward compatibility with existing contracts
+- **Contract Form Integration:**
+  - PersonSelector component with search and create-new functionality
+  - Replace sponsor inline fields with PersonSelector when hirerType='with_sponsor'
+  - Replace driver inline fields with PersonSelector when hirerType='from_company'
+  - Form validation requires sponsorId for with_sponsor contracts, driverId for from_company contracts
+- **Contract Display:**
+  - Helper functions getSponsorDisplay() and getDriverDisplay() provide fallback logic
+  - Person data from joined persons table displayed in contract view with graceful fallback to legacy inline fields
+  - MARMAR PDF template supports both new person data and legacy inline fields
+- **Persons Management Page:**
+  - Admin/manager exclusive page at /persons route
+  - Full CRUD operations: create, edit, disable, enable persons
+  - Tabbed views for active/disabled persons with search functionality
+  - Following Customers/Vehicles pattern for consistency
+- **Storage & API:**
+  - Storage layer joins persons table with contracts, returns sponsorPerson/driverPerson in ContractWithDetails
+  - Complete REST API: GET /api/persons, POST /api/persons, GET /api/persons/search, PATCH /api/persons/:id, PATCH /api/persons/:id/disable, PATCH /api/persons/:id/enable
+  - Role-based access: admin/manager can manage persons, staff/viewer can view (via PersonSelector in contract form)
+
 ## Recent Updates (October 19, 2025)
 
 ### MARMAR Template PDF Integration
@@ -65,9 +95,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **Database:** PostgreSQL (via Neon serverless).
-- **Schema Design:** Tables for `Sessions`, `Users` (with role-based access), `Contracts` (core entity with bilingual fields, status tracking, payment, and extra charges), `Audit Logs` (immutable lifecycle activity log), `Contract Edits` (detailed field change tracking), `Contract Counter`, `System Errors` (with acknowledgment workflow), and `Company Settings` (singleton table for configurable company info).
-- **Key Design Decisions:** Draft vs. finalized status with immutability, bilingual field storage, auto-incrementing contract numbers, comprehensive dual-layer audit trail (edits + lifecycle), and singleton pattern for global settings.
-- **Disable-Only Architecture:** Replaced all delete operations with disable/enable functionality for users and contracts, tracking `disabled`, `disabledBy`, `disabledAt` fields.
+- **Schema Design:** Tables for `Sessions`, `Users` (with role-based access), `Customers` (master data for hirers/renters), `Vehicles` (master data for rental fleet), `Persons` (master data for sponsors/drivers), `Contracts` (core entity with bilingual fields, status tracking, payment, extra charges, and foreign keys to customers/vehicles/persons), `Audit Logs` (immutable lifecycle activity log), `Contract Edits` (detailed field change tracking), `Contract Counter`, `System Errors` (with acknowledgment workflow), and `Company Settings` (singleton table for configurable company info).
+- **Master Data Architecture:** Persons table enables reusing sponsor/driver records across contracts with sponsorId/driverId foreign keys. Legacy inline sponsor*/hirer* fields maintained for backward compatibility.
+- **Key Design Decisions:** Draft vs. finalized status with immutability, bilingual field storage, auto-incrementing contract numbers, comprehensive dual-layer audit trail (edits + lifecycle), singleton pattern for global settings, and master data pattern for customers/vehicles/persons.
+- **Disable-Only Architecture:** Replaced all delete operations with disable/enable functionality for users, customers, vehicles, persons, and contracts, tracking `disabled`, `disabledBy`, `disabledAt` fields.
 
 ### Features
 - **Comprehensive Rental Lifecycle:** Five states: `draft` → `confirmed` → `active` → `completed` → `closed`.

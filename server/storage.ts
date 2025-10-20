@@ -241,13 +241,31 @@ export class DatabaseStorage implements IStorage {
         vehicleRegistration: vehicles.registration,
         vehicleMake: vehicles.make,
         vehicleModel: vehicles.model,
+        sponsorPerson: persons,
+        driverPerson: sql<Person | null>`NULL`.as('driverPerson'),
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
+      .leftJoin(persons, eq(contracts.sponsorId, persons.id))
       .where(eq(contracts.disabled, false))
       .orderBy(desc(contracts.createdAt));
-    return results as ContractWithDetails[];
+    
+    // Fetch driver person separately if needed
+    const withDrivers = await Promise.all(
+      results.map(async (contract) => {
+        if (contract.driverId) {
+          const [driverPerson] = await db
+            .select()
+            .from(persons)
+            .where(eq(persons.id, contract.driverId));
+          return { ...contract, driverPerson: driverPerson || null };
+        }
+        return { ...contract, driverPerson: null };
+      })
+    );
+    
+    return withDrivers as ContractWithDetails[];
   }
 
   async getDisabledContracts(): Promise<ContractWithDetails[]> {
@@ -259,13 +277,31 @@ export class DatabaseStorage implements IStorage {
         vehicleRegistration: vehicles.registration,
         vehicleMake: vehicles.make,
         vehicleModel: vehicles.model,
+        sponsorPerson: persons,
+        driverPerson: sql<Person | null>`NULL`.as('driverPerson'),
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
+      .leftJoin(persons, eq(contracts.sponsorId, persons.id))
       .where(eq(contracts.disabled, true))
       .orderBy(desc(contracts.disabledAt));
-    return results as ContractWithDetails[];
+    
+    // Fetch driver person separately if needed
+    const withDrivers = await Promise.all(
+      results.map(async (contract) => {
+        if (contract.driverId) {
+          const [driverPerson] = await db
+            .select()
+            .from(persons)
+            .where(eq(persons.id, contract.driverId));
+          return { ...contract, driverPerson: driverPerson || null };
+        }
+        return { ...contract, driverPerson: null };
+      })
+    );
+    
+    return withDrivers as ContractWithDetails[];
   }
 
   async searchContracts(query: string): Promise<Contract[]> {

@@ -6,7 +6,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { insertContractSchema, insertCustomerSchema, insertVehicleSchema, type InsertContract, type Contract, type CompanySettings, type Customer, type Vehicle } from '@shared/schema';
+import { insertContractSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, type InsertContract, type Contract, type CompanySettings, type Customer, type Vehicle, type Person } from '@shared/schema';
+import { PersonSelector } from '@/components/PersonSelector';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +45,11 @@ const contractFormSchema = z.object({
   vehicleId: z.string().min(1, "Vehicle is required"),
   hirerType: z.string().default('direct'),
   
-  // Sponsor fields - conditional validation based on hirerType
+  // New person reference fields
+  sponsorId: z.string().nullable().optional(),
+  driverId: z.string().nullable().optional(),
+  
+  // Legacy sponsor fields - keep for backwards compatibility
   sponsorName: z.string().nullable().optional(),
   sponsorNationality: z.string().nullable().optional(),
   sponsorPassportId: z.string().nullable().optional(),
@@ -52,7 +57,7 @@ const contractFormSchema = z.object({
   sponsorMobile: z.string().nullable().optional(),
   sponsorCreditCard: z.string().nullable().optional(),
   
-  // Company hirer fields - conditional validation based on hirerType (from_company)
+  // Legacy company hirer fields - keep for backwards compatibility
   hirerNameEn: z.string().nullable().optional(),
   hirerNameAr: z.string().nullable().optional(),
   hirerNationality: z.string().nullable().optional(),
@@ -102,24 +107,26 @@ const contractFormSchema = z.object({
   createdBy: z.string(),
   status: z.string().nullable().optional(),
 }).refine((data) => {
-  // If hirerType is 'with_sponsor', require sponsor fields
+  // If hirerType is 'with_sponsor', require EITHER sponsorId OR at least sponsorName (for legacy contracts)
   if (data.hirerType === 'with_sponsor') {
-    return !!(data.sponsorName && data.sponsorNationality && data.sponsorPassportId && 
-              data.sponsorMobile && data.sponsorAddress);
+    const hasSponsorId = !!data.sponsorId;
+    const hasLegacySponsor = !!data.sponsorName; // Accept any legacy contract with at least sponsor name
+    return hasSponsorId || hasLegacySponsor;
   }
   return true;
 }, {
-  message: "All sponsor fields are required when hirer type is 'With Sponsor'",
+  message: "Sponsor information is required when hirer type is 'With Sponsor'",
   path: ["sponsorName"],
 }).refine((data) => {
-  // If hirerType is 'from_company', require company hirer fields
+  // If hirerType is 'from_company', require EITHER driverId OR at least hirerNameEn (for legacy contracts)
   if (data.hirerType === 'from_company') {
-    return !!(data.hirerNameEn && data.hirerNationality && data.hirerPassportId && 
-              data.hirerLicenseNumber && data.hirerMobile && data.hirerAddress);
+    const hasDriverId = !!data.driverId;
+    const hasLegacyDriver = !!data.hirerNameEn; // Accept any legacy contract with at least driver name
+    return hasDriverId || hasLegacyDriver;
   }
   return true;
 }, {
-  message: "All driver/hirer fields are required when hirer type is 'From Company'",
+  message: "Driver information is required when hirer type is 'From Company'",
   path: ["hirerNameEn"],
 });
 
@@ -138,10 +145,14 @@ export default function ContractForm() {
   const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
   const [createCustomerOpen, setCreateCustomerOpen] = useState(false);
   const [createVehicleOpen, setCreateVehicleOpen] = useState(false);
+  const [createSponsorOpen, setCreateSponsorOpen] = useState(false);
+  const [createDriverOpen, setCreateDriverOpen] = useState(false);
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [vehicleSearchQuery, setVehicleSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [selectedSponsor, setSelectedSponsor] = useState<Person | null>(null);
+  const [selectedDriver, setSelectedDriver] = useState<Person | null>(null);
   const [vehicleAvailable, setVehicleAvailable] = useState<boolean | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
@@ -245,6 +256,8 @@ export default function ContractForm() {
   const watchedStartDate = form.watch('rentalStartDate');
   const watchedEndDate = form.watch('rentalEndDate');
   const watchedHirerType = form.watch('hirerType');
+  const watchedSponsorId = form.watch('sponsorId');
+  const watchedDriverId = form.watch('driverId');
 
   // Load selected customer details
   useEffect(() => {
@@ -256,6 +269,32 @@ export default function ContractForm() {
       });
     }
   }, [watchedCustomerId, isAuthenticated]);
+
+  // Load selected sponsor details
+  useEffect(() => {
+    if (watchedSponsorId && isAuthenticated) {
+      queryClient.fetchQuery({
+        queryKey: ['/api/persons', watchedSponsorId],
+      }).then((person) => {
+        setSelectedSponsor(person as Person);
+      });
+    } else {
+      setSelectedSponsor(null);
+    }
+  }, [watchedSponsorId, isAuthenticated]);
+
+  // Load selected driver details
+  useEffect(() => {
+    if (watchedDriverId && isAuthenticated) {
+      queryClient.fetchQuery({
+        queryKey: ['/api/persons', watchedDriverId],
+      }).then((person) => {
+        setSelectedDriver(person as Person);
+      });
+    } else {
+      setSelectedDriver(null);
+    }
+  }, [watchedDriverId, isAuthenticated]);
 
   // Load selected vehicle details and auto-populate pricing
   useEffect(() => {
@@ -466,6 +505,23 @@ export default function ContractForm() {
     },
   });
 
+  // Person form for inline creation (sponsors and drivers)
+  const personForm = useForm({
+    resolver: zodResolver(insertPersonSchema),
+    defaultValues: {
+      nameEn: '',
+      nameAr: '',
+      nationality: '',
+      passportId: '',
+      licenseNumber: '',
+      mobile: '',
+      address: '',
+      relation: '',
+      notes: '',
+      createdBy: '',
+    },
+  });
+
   const createCustomerMutation = useMutation({
     mutationFn: async (data: any): Promise<Customer> => {
       const response = await apiRequest('POST', '/api/customers', data);
@@ -516,6 +572,44 @@ export default function ContractForm() {
       if (vehicle.monthlyRate) form.setValue('monthlyRate', vehicle.monthlyRate);
       setCreateVehicleOpen(false);
       vehicleForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createPersonMutation = useMutation({
+    mutationFn: async (data: { type: 'sponsor' | 'driver'; personData: any }): Promise<Person> => {
+      const response = await apiRequest('POST', '/api/persons', data.personData);
+      return response as unknown as Person;
+    },
+    onSuccess: (person: Person, variables) => {
+      toast({
+        title: t('common.success'),
+        description: `${variables.type === 'sponsor' ? 'Sponsor' : 'Driver'} created successfully`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          Array.isArray(query.queryKey) && 
+          query.queryKey[0] === '/api/persons/search'
+      });
+      
+      if (variables.type === 'sponsor') {
+        form.setValue('sponsorId', person.id);
+        setSelectedSponsor(person);
+        setCreateSponsorOpen(false);
+      } else {
+        form.setValue('driverId', person.id);
+        setSelectedDriver(person);
+        setCreateDriverOpen(false);
+      }
+      
+      personForm.reset();
     },
     onError: (error: Error) => {
       toast({
@@ -635,6 +729,16 @@ export default function ContractForm() {
     createVehicleMutation.mutate({
       ...data,
       createdBy: 'current-user-id',
+    });
+  };
+
+  const handleCreatePerson = (type: 'sponsor' | 'driver') => (data: any) => {
+    createPersonMutation.mutate({
+      type,
+      personData: {
+        ...data,
+        createdBy: 'current-user-id',
+      },
     });
   };
 
@@ -949,80 +1053,22 @@ export default function ContractForm() {
                   Sponsor Information / معلومات الكفيل
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent>
                 <FormField
                   control={form.control}
-                  name="sponsorName"
+                  name="sponsorId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Sponsor Name / اسم الكفيل *</FormLabel>
+                      <FormLabel>Select Sponsor / اختر الكفيل *</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-name" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="sponsorNationality"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sponsor Nationality / جنسية الكفيل *</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-nationality" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="sponsorPassportId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sponsor Passport ID / رقم جواز السفر *</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-passport" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="sponsorMobile"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sponsor Mobile / جوال الكفيل *</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-mobile" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="sponsorCreditCard"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sponsor Credit Card / بطاقة ائتمان الكفيل</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-sponsor-credit-card" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="sponsorAddress"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel>Sponsor Address / عنوان الكفيل *</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} value={field.value || ''} data-testid="input-sponsor-address" />
+                        <PersonSelector
+                          value={field.value}
+                          onChange={field.onChange}
+                          onCreateNew={() => setCreateSponsorOpen(true)}
+                          type="sponsor"
+                          placeholder="Select sponsor..."
+                          data-testid="button-sponsor-select"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1044,93 +1090,22 @@ export default function ContractForm() {
                   Individual driver details (company information in customer section)
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent>
                 <FormField
                   control={form.control}
-                  name="hirerNameEn"
+                  name="driverId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Driver Name (English) / اسم السائق (إنجليزي) *</FormLabel>
+                      <FormLabel>Select Driver / اختر السائق *</FormLabel>
                       <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-hirer-name-en" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="hirerNameAr"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Driver Name (Arabic) / اسم السائق (عربي)</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} dir="rtl" className="text-right" data-testid="input-hirer-name-ar" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="hirerNationality"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nationality / الجنسية *</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-hirer-nationality" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="hirerPassportId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Passport/ID Number / رقم الجواز/الهوية *</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-hirer-passport" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="hirerLicenseNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>License Number / رقم الرخصة *</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-hirer-license" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="hirerMobile"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mobile / الجوال *</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-hirer-mobile" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="hirerAddress"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel>Address / العنوان *</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} value={field.value || ''} data-testid="input-hirer-address" />
+                        <PersonSelector
+                          value={field.value}
+                          onChange={field.onChange}
+                          onCreateNew={() => setCreateDriverOpen(true)}
+                          type="driver"
+                          placeholder="Select driver..."
+                          data-testid="button-driver-select"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1894,6 +1869,252 @@ export default function ContractForm() {
           </div>
         </form>
       </Form>
+
+      {/* Create Sponsor Dialog */}
+      <Dialog open={createSponsorOpen} onOpenChange={setCreateSponsorOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Sponsor</DialogTitle>
+          </DialogHeader>
+          <Form {...personForm}>
+            <form onSubmit={personForm.handleSubmit(handleCreatePerson('sponsor'))} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={personForm.control}
+                  name="nameEn"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name (English) *</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-new-sponsor-name-en" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="nameAr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name (Arabic)</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-sponsor-name-ar" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="nationality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nationality</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-sponsor-nationality" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="passportId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Passport/ID Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-sponsor-passport" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="mobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mobile</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-sponsor-mobile" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="relation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Relation</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} placeholder="e.g., Employer" data-testid="input-new-sponsor-relation" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={personForm.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} value={field.value || ''} data-testid="input-new-sponsor-address" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setCreateSponsorOpen(false)}
+                  data-testid="button-cancel-sponsor"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createPersonMutation.isPending}
+                  data-testid="button-save-sponsor"
+                >
+                  {createPersonMutation.isPending ? "Creating..." : "Create Sponsor"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Driver Dialog */}
+      <Dialog open={createDriverOpen} onOpenChange={setCreateDriverOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Driver</DialogTitle>
+          </DialogHeader>
+          <Form {...personForm}>
+            <form onSubmit={personForm.handleSubmit(handleCreatePerson('driver'))} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={personForm.control}
+                  name="nameEn"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name (English) *</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-new-driver-name-en" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="nameAr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name (Arabic)</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-name-ar" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="nationality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nationality</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-nationality" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="passportId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Passport/ID Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-passport" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="licenseNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>License Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-license" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personForm.control}
+                  name="mobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mobile</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-new-driver-mobile" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={personForm.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} value={field.value || ''} data-testid="input-new-driver-address" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setCreateDriverOpen(false)}
+                  data-testid="button-cancel-driver"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createPersonMutation.isPending}
+                  data-testid="button-save-driver"
+                >
+                  {createPersonMutation.isPending ? "Creating..." : "Create Driver"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

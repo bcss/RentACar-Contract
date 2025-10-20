@@ -463,6 +463,8 @@ export type ContractWithDetails = Contract & {
   vehicleRegistration: string | null;
   vehicleMake: string | null;
   vehicleModel: string | null;
+  sponsorPerson?: Person | null;
+  driverPerson?: Person | null;
 };
 
 // Audit logs table
