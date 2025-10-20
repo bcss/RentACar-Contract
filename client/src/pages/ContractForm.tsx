@@ -846,13 +846,18 @@ export default function ContractForm() {
                 )}
               />
 
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => setCreateCustomerOpen(true)}
+                data-testid="button-create-customer"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create New Customer
+              </Button>
+
               <Dialog open={createCustomerOpen} onOpenChange={setCreateCustomerOpen}>
-                <DialogTrigger asChild>
-                  <Button type="button" variant="outline" className="w-full" data-testid="button-create-customer">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create New Customer
-                  </Button>
-                </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Create New Customer</DialogTitle>
@@ -1212,13 +1217,18 @@ export default function ContractForm() {
                 </Badge>
               )}
 
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => setCreateVehicleOpen(true)}
+                data-testid="button-create-vehicle"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create New Vehicle
+              </Button>
+
               <Dialog open={createVehicleOpen} onOpenChange={setCreateVehicleOpen}>
-                <DialogTrigger asChild>
-                  <Button type="button" variant="outline" className="w-full" data-testid="button-create-vehicle">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create New Vehicle
-                  </Button>
-                </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Create New Vehicle</DialogTitle>
