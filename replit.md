@@ -8,7 +8,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates (October 20, 2025)
 
-### Persons Master Data Architecture
+### Persons Master Data Architecture - COMPLETED
 - **Reusable Person Records:** Converted inline sponsor/driver fields to master data architecture with `persons` table for sponsors and drivers across contracts
   - Eliminates repetitive data entry for frequent sponsors/drivers
   - Bilingual person records with nameEn, nameAr, nationality, passportId, licenseNumber, mobile, address, relation
@@ -21,7 +21,9 @@ Preferred communication style: Simple, everyday language.
   - PersonSelector component with search and create-new functionality
   - Replace sponsor inline fields with PersonSelector when hirerType='with_sponsor'
   - Replace driver inline fields with PersonSelector when hirerType='from_company'
-  - Form validation requires sponsorId for with_sponsor contracts, driverId for from_company contracts
+  - Flexible validation: accepts EITHER person IDs (new workflow) OR legacy inline fields (backward compatibility)
+    - For with_sponsor: accepts sponsorId OR sponsorName (minimal requirement for legacy contracts)
+    - For from_company: accepts driverId OR hirerNameEn (minimal requirement for legacy contracts)
 - **Contract Display:**
   - Helper functions getSponsorDisplay() and getDriverDisplay() provide fallback logic
   - Person data from joined persons table displayed in contract view with graceful fallback to legacy inline fields
@@ -33,8 +35,13 @@ Preferred communication style: Simple, everyday language.
   - Following Customers/Vehicles pattern for consistency
 - **Storage & API:**
   - Storage layer joins persons table with contracts, returns sponsorPerson/driverPerson in ContractWithDetails
-  - Complete REST API: GET /api/persons, POST /api/persons, GET /api/persons/search, PATCH /api/persons/:id, PATCH /api/persons/:id/disable, PATCH /api/persons/:id/enable
+  - Complete REST API: GET /api/persons, POST /api/persons, GET /api/persons/search?q={query}, PATCH /api/persons/:id, PATCH /api/persons/:id/disable, PATCH /api/persons/:id/enable
   - Role-based access: admin/manager can manage persons, staff/viewer can view (via PersonSelector in contract form)
+
+### Bug Fixes - October 20, 2025
+1. **PersonSelector Search API Fix:** Fixed query parameter format from `/api/persons/search/${query}` to `/api/persons/search?q=${query}` to match backend endpoint expectations. TanStack Query default fetcher was joining query key segments with slashes instead of using proper query parameters.
+2. **Contract Form Dialog Trigger Fix:** Replaced DialogTrigger components with regular onClick buttons for Create Customer and Create Vehicle dialogs to prevent form submission event conflicts. Person dialogs were already correctly structured outside main form.
+3. **Backward Compatibility Validation:** Made form validation lenient to accept legacy contracts with minimal inline data (just name field) while encouraging PersonSelector use for new contracts via insertPersonSchema validation.
 
 ## Recent Updates (October 19, 2025)
 
