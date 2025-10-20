@@ -52,17 +52,17 @@ import {
 
 type PersonFormData = z.infer<typeof insertPersonSchema>;
 
-export default function Persons() {
+export default function Sponsors() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [selectedSponsor, setSelectedSponsor] = useState<Person | null>(null);
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const [enableDialogOpen, setEnableDialogOpen] = useState(false);
-  const [personToToggle, setPersonToToggle] = useState<Person | null>(null);
+  const [sponsorToToggle, setSponsorToToggle] = useState<Person | null>(null);
 
   const form = useForm<PersonFormData>({
     resolver: zodResolver(insertPersonSchema),
@@ -107,7 +107,7 @@ export default function Persons() {
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       toast({
         title: t('common.success'),
-        description: t('persons.personCreated'),
+        description: t('sponsors.sponsorCreated'),
       });
       setCreateOpen(false);
       form.reset();
@@ -123,17 +123,17 @@ export default function Persons() {
 
   const updateMutation = useMutation({
     mutationFn: async (data: PersonFormData) => {
-      if (!selectedPerson) throw new Error('No person selected');
-      return apiRequest('PATCH', `/api/persons/${selectedPerson.id}`, data);
+      if (!selectedSponsor) throw new Error('No person selected');
+      return apiRequest('PATCH', `/api/persons/${selectedSponsor.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       toast({
         title: t('common.success'),
-        description: t('persons.personUpdated'),
+        description: t('sponsors.sponsorUpdated'),
       });
       setEditOpen(false);
-      setSelectedPerson(null);
+      setSelectedSponsor(null);
       form.reset();
     },
     onError: (error: Error) => {
@@ -153,10 +153,10 @@ export default function Persons() {
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       toast({
         title: t('common.success'),
-        description: t('persons.personDisabled'),
+        description: t('sponsors.sponsorDisabled'),
       });
       setDisableDialogOpen(false);
-      setPersonToToggle(null);
+      setSponsorToToggle(null);
     },
     onError: (error: Error) => {
       toast({
@@ -175,10 +175,10 @@ export default function Persons() {
       queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
       toast({
         title: t('common.success'),
-        description: t('persons.personEnabled'),
+        description: t('sponsors.sponsorEnabled'),
       });
       setEnableDialogOpen(false);
-      setPersonToToggle(null);
+      setSponsorToToggle(null);
     },
     onError: (error: Error) => {
       toast({
@@ -194,7 +194,7 @@ export default function Persons() {
   };
 
   const handleEdit = (person: Person) => {
-    setSelectedPerson(person);
+    setSelectedSponsor(person);
     form.reset({
       nameEn: person.nameEn ?? '',
       nameAr: person.nameAr || '',
@@ -214,24 +214,24 @@ export default function Persons() {
   };
 
   const handleDisableClick = (person: Person) => {
-    setPersonToToggle(person);
+    setSponsorToToggle(person);
     setDisableDialogOpen(true);
   };
 
   const handleEnableClick = (person: Person) => {
-    setPersonToToggle(person);
+    setSponsorToToggle(person);
     setEnableDialogOpen(true);
   };
 
   const handleDisableConfirm = () => {
-    if (personToToggle) {
-      disableMutation.mutate(personToToggle.id);
+    if (sponsorToToggle) {
+      disableMutation.mutate(sponsorToToggle.id);
     }
   };
 
   const handleEnableConfirm = () => {
-    if (personToToggle) {
-      enableMutation.mutate(personToToggle.id);
+    if (sponsorToToggle) {
+      enableMutation.mutate(sponsorToToggle.id);
     }
   };
 
@@ -274,7 +274,7 @@ export default function Persons() {
             name="nameEn"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('persons.nameEn')}</FormLabel>
+                <FormLabel>{t('sponsors.nameEn')}</FormLabel>
                 <FormControl>
                   <Input {...field} data-testid="input-person-name-en" />
                 </FormControl>
@@ -287,7 +287,7 @@ export default function Persons() {
             name="nameAr"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('persons.nameAr')}</FormLabel>
+                <FormLabel>{t('sponsors.nameAr')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-name-ar" />
                 </FormControl>
@@ -302,7 +302,7 @@ export default function Persons() {
             name="nationality"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('persons.nationality')}</FormLabel>
+                <FormLabel>{t('sponsors.nationality')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-nationality" />
                 </FormControl>
@@ -315,7 +315,7 @@ export default function Persons() {
             name="passportId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('persons.passportId')}</FormLabel>
+                <FormLabel>{t('sponsors.passportId')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-passport-id" />
                 </FormControl>
@@ -330,7 +330,7 @@ export default function Persons() {
             name="licenseNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('persons.licenseNumber')}</FormLabel>
+                <FormLabel>{t('sponsors.licenseNumber')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-license-number" />
                 </FormControl>
@@ -343,7 +343,7 @@ export default function Persons() {
             name="mobile"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('persons.mobile')}</FormLabel>
+                <FormLabel>{t('sponsors.mobile')}</FormLabel>
                 <FormControl>
                   <Input {...field} value={field.value || ''} data-testid="input-person-mobile" />
                 </FormControl>
@@ -357,7 +357,7 @@ export default function Persons() {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('persons.address')}</FormLabel>
+              <FormLabel>{t('sponsors.address')}</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value || ''} data-testid="input-person-address" />
               </FormControl>
@@ -370,9 +370,9 @@ export default function Persons() {
           name="relation"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('persons.relation')}</FormLabel>
+              <FormLabel>{t('sponsors.relation')}</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} placeholder={t('persons.relationPlaceholder')} data-testid="input-person-relation" />
+                <Input {...field} value={field.value || ''} placeholder={t('sponsors.relationPlaceholder')} data-testid="input-person-relation" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -404,21 +404,21 @@ export default function Persons() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>{t('persons.nameEn')}</TableHead>
-          <TableHead>{t('persons.nameAr')}</TableHead>
-          <TableHead>{t('persons.nationality')}</TableHead>
-          <TableHead>{t('persons.passportId')}</TableHead>
-          <TableHead>{t('persons.licenseNumber')}</TableHead>
-          <TableHead>{t('persons.mobile')}</TableHead>
-          <TableHead>{t('persons.relation')}</TableHead>
-          <TableHead>{t('persons.actions')}</TableHead>
+          <TableHead>{t('sponsors.nameEn')}</TableHead>
+          <TableHead>{t('sponsors.nameAr')}</TableHead>
+          <TableHead>{t('sponsors.nationality')}</TableHead>
+          <TableHead>{t('sponsors.passportId')}</TableHead>
+          <TableHead>{t('sponsors.licenseNumber')}</TableHead>
+          <TableHead>{t('sponsors.mobile')}</TableHead>
+          <TableHead>{t('sponsors.relation')}</TableHead>
+          <TableHead>{t('sponsors.actions')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {persons.length === 0 ? (
           <TableRow>
             <TableCell colSpan={8} className="text-center text-muted-foreground">
-              {t('persons.noPersons')}
+              {t('sponsors.noSponsors')}
             </TableCell>
           </TableRow>
         ) : (
@@ -491,20 +491,20 @@ export default function Persons() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>{t('persons.title')}</CardTitle>
+            <CardTitle>{t('sponsors.title')}</CardTitle>
             {canManage && (
               <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                 <DialogTrigger asChild>
                   <Button data-testid="button-create-person">
                     <Plus className="h-4 w-4 mr-2" />
-                    {t('persons.addPerson')}
+                    {t('sponsors.addSponsor')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>{t('persons.newPerson')}</DialogTitle>
+                    <DialogTitle>{t('sponsors.newSponsor')}</DialogTitle>
                     <DialogDescription>
-                      {t('persons.addPerson')}
+                      {t('sponsors.addSponsor')}
                     </DialogDescription>
                   </DialogHeader>
                   <PersonForm onSubmit={handleCreate} isPending={createMutation.isPending} />
@@ -518,7 +518,7 @@ export default function Persons() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('persons.searchPlaceholder')}
+                placeholder={t('sponsors.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -530,10 +530,10 @@ export default function Persons() {
           <Tabs defaultValue="active">
             <TabsList className="mb-4">
               <TabsTrigger value="active" data-testid="tab-active-persons">
-                {t('persons.activePersons')} ({activePersons.length})
+                {t('sponsors.activeSponsors')} ({activePersons.length})
               </TabsTrigger>
               <TabsTrigger value="disabled" data-testid="tab-disabled-persons">
-                {t('persons.disabledPersons')} ({disabledPersons.length})
+                {t('sponsors.disabledSponsors')} ({disabledPersons.length})
               </TabsTrigger>
             </TabsList>
 
@@ -563,9 +563,9 @@ export default function Persons() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{t('persons.editPerson')}</DialogTitle>
+            <DialogTitle>{t('sponsors.editSponsor')}</DialogTitle>
             <DialogDescription>
-              {t('persons.personUpdated')}
+              {t('sponsors.sponsorUpdated')}
             </DialogDescription>
           </DialogHeader>
           <PersonForm onSubmit={handleUpdate} isPending={updateMutation.isPending} />
@@ -575,9 +575,9 @@ export default function Persons() {
       <AlertDialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('persons.disablePerson')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('sponsors.disableSponsor')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('persons.confirmDisablePerson')}
+              {t('sponsors.confirmDisableSponsor')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -586,7 +586,7 @@ export default function Persons() {
               onClick={handleDisableConfirm}
               data-testid="button-confirm-disable"
             >
-              {t('persons.disablePerson')}
+              {t('sponsors.disableSponsor')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -595,9 +595,9 @@ export default function Persons() {
       <AlertDialog open={enableDialogOpen} onOpenChange={setEnableDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('persons.enablePerson')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('sponsors.enableSponsor')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('persons.confirmEnablePerson')}
+              {t('sponsors.confirmEnableSponsor')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -606,7 +606,7 @@ export default function Persons() {
               onClick={handleEnableConfirm}
               data-testid="button-confirm-enable"
             >
-              {t('persons.enablePerson')}
+              {t('sponsors.enableSponsor')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

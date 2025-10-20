@@ -192,14 +192,6 @@ export default function Dashboard() {
           <p className="text-muted-foreground">{t('auth.welcomeBack')}</p>
         </div>
         <div className="flex items-center gap-2">
-          {isAdmin && (
-            <Button asChild variant="outline" data-testid="button-add-user">
-              <Link href="/users?action=add">
-                <span className="material-icons">person_add</span>
-                <span>{t('users.addUser')}</span>
-              </Link>
-            </Button>
-          )}
           <Button asChild data-testid="button-new-contract">
             <Link href="/contracts/new">
               <span className="material-icons">add</span>

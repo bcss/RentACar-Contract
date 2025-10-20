@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
 import { insertContractSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, insertCompanySchema, type InsertContract, type Contract, type CompanySettings, type Customer, type Vehicle, type Person, type Company } from '@shared/schema';
-import { PersonSelector } from '@/components/PersonSelector';
+import { SponsorSelector } from '@/components/SponsorSelector';
 import { CompanySelector } from '@/components/CompanySelector';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
@@ -1112,7 +1112,7 @@ export default function ContractForm() {
                     <FormItem>
                       <FormLabel>{t('form.selectSponsor')} *</FormLabel>
                       <FormControl>
-                        <PersonSelector
+                        <SponsorSelector
                           value={field.value}
                           onChange={field.onChange}
                           onCreateNew={() => setCreateSponsorOpen(true)}

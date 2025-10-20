@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { queryClient } from "@/lib/queryClient";
 import type { Person } from "@shared/schema";
 
-interface PersonSelectorProps {
+interface SponsorSelectorProps {
   value?: string | null;
   onChange: (value: string) => void;
   onCreateNew?: () => void;
@@ -30,7 +30,7 @@ interface PersonSelectorProps {
   "data-testid"?: string;
 }
 
-export function PersonSelector({
+export function SponsorSelector({
   value,
   onChange,
   onCreateNew,
@@ -38,35 +38,35 @@ export function PersonSelector({
   type,
   disabled = false,
   "data-testid": testId,
-}: PersonSelectorProps) {
+}: SponsorSelectorProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [selectedSponsor, setSelectedSponsor] = useState<Person | null>(null);
   
-  const defaultPlaceholder = placeholder || t('persons.selectPerson');
+  const defaultPlaceholder = placeholder || t('sponsors.selectSponsor');
 
-  // Load selected person details
+  // Load selected sponsor details
   useEffect(() => {
     if (value) {
       queryClient.fetchQuery({
         queryKey: ['/api/persons', value],
-      }).then((person) => {
-        setSelectedPerson(person as Person);
+      }).then((sponsor) => {
+        setSelectedSponsor(sponsor as Person);
       });
     } else {
-      setSelectedPerson(null);
+      setSelectedSponsor(null);
     }
   }, [value]);
 
-  // Search persons query
+  // Search sponsors query
   const { data: searchResults = [] } = useQuery<Person[]>({
     queryKey: [`/api/persons/search?q=${searchQuery}`],
     enabled: open && searchQuery.length > 0,
   });
 
-  const displayText = selectedPerson
-    ? `${selectedPerson.nameEn}${selectedPerson.nameAr ? ` / ${selectedPerson.nameAr}` : ''} ${selectedPerson.mobile ? `- ${selectedPerson.mobile}` : ''}`
+  const displayText = selectedSponsor
+    ? `${selectedSponsor.nameEn}${selectedSponsor.nameAr ? ` / ${selectedSponsor.nameAr}` : ''} ${selectedSponsor.mobile ? `- ${selectedSponsor.mobile}` : ''}`
     : defaultPlaceholder;
 
   return (
@@ -90,14 +90,14 @@ export function PersonSelector({
       <PopoverContent className="w-[400px] p-0">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder={t('persons.searchPlaceholder')}
+            placeholder={t('sponsors.searchPlaceholder')}
             value={searchQuery}
             onValueChange={setSearchQuery}
-            data-testid={`input-search-${type || 'person'}`}
+            data-testid={`input-search-${type || 'sponsor'}`}
           />
           <CommandList>
             <CommandEmpty>
-              {searchQuery.length > 0 ? t('common.noResults') : t('persons.searchPlaceholder')}
+              {searchQuery.length > 0 ? t('common.noResults') : t('sponsors.searchPlaceholder')}
             </CommandEmpty>
             {searchResults.length > 0 && (
               <CommandGroup>
@@ -107,10 +107,10 @@ export function PersonSelector({
                     value={person.id}
                     onSelect={() => {
                       onChange(person.id);
-                      setSelectedPerson(person);
+                      setSelectedSponsor(person);
                       setOpen(false);
                     }}
-                    data-testid={`item-${type || 'person'}-${person.id}`}
+                    data-testid={`item-${type || 'sponsor'}-${person.id}`}
                   >
                     <Check
                       className={cn(
@@ -144,10 +144,10 @@ export function PersonSelector({
                   onCreateNew();
                   setOpen(false);
                 }}
-                data-testid={`button-create-${type || 'person'}`}
+                data-testid={`button-create-${type || 'sponsor'}`}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                {t('persons.addPerson')}
+                {t('sponsors.addSponsor')}
               </Button>
             </div>
           )}

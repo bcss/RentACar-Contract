@@ -3,6 +3,14 @@
 ## Overview
 This bilingual (English/Arabic) rental car contract management system, built with React, Express, and PostgreSQL, enables users to create, manage, and finalize rental contracts. It features role-based access control, immutability for finalized contracts, comprehensive audit logging, and Material Design principles with RTL/LTR layouts. The system supports a full rental lifecycle, from draft to closed, including payment tracking, vehicle return workflows, detailed company settings management, and complete contract timeline visualization.
 
+## Recent Changes (October 20, 2025)
+- **Navigation Reorganization:** Implemented hierarchical sidebar with collapsible parent menus:
+  - **Masters menu:** Groups Customers, Vehicles, Sponsors, and Companies
+  - **Settings menu:** Groups Company Settings and Users (admin only)
+- **Terminology Update:** Renamed "Persons" to "Sponsors" throughout the application (UI labels, translations, component names). Database schema remains unchanged (persons table).
+- **Dashboard Simplification:** Removed "Add User" button, now shows only "New Contract" button.
+- **Component Renaming:** PersonSelector → SponsorSelector component.
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
@@ -11,6 +19,7 @@ Preferred communication style: Simple, everyday language.
 ### Frontend
 - **Technology Stack:** React with TypeScript, Wouter for routing, TanStack Query for state management, React Hook Form with Zod validation, Radix UI/shadcn/ui for components, Tailwind CSS for styling, and Vite for building.
 - **Design System:** Material Design 3 with cyan-blue primary, dual theme (light/dark), i18next for bilingual support (English/Arabic) with RTL/LTR switching, and specific font families (Inter, Cairo, JetBrains Mono).
+- **Navigation:** Hierarchical sidebar with collapsible sections (Masters, Settings), using Shadcn's Collapsible components for clean organization.
 - **UI/UX:** Tabbed views for active/disabled lists, enhanced filtering, system error acknowledgment, full English/Arabic translations, and Material Design 3 styling. Semantic chart colors for status badges (dark/light mode compatible).
 - **Features:** Context-based theme/language, custom hooks for auth, shared Zod schemas, responsive design, print functionality, contract lifecycle management, and comprehensive timeline visualization.
 - **Route Protection:** ProtectedRoute wrapper ensures authentication before accessing protected pages.
@@ -35,11 +44,11 @@ Preferred communication style: Simple, everyday language.
 - **Payment Recording:** Tracks deposit, final payment, and refunds with methods and dates.
 - **Company Settings Management:** Admin-only page to configure bilingual company information and additional contract clauses.
 - **Dashboard:** Displays critical metrics like active rentals, monthly revenue, overdue returns, and pending refunds (based on 5 valid contract statuses).
-- **Persons Master Data:** Reusable person records for individual sponsors across contracts, reducing repetitive data entry. Full CRUD operations with search and disable/enable functionality.
+- **Sponsors Master Data:** Reusable sponsor records (individual) for sponsoring customers across contracts. Full CRUD operations with search and disable/enable functionality. Displayed as "Sponsors" in UI but stored in `persons` database table.
 - **Companies Master Data:** Reusable company records for corporate sponsors with registration details, tax info, and contact information. Full CRUD operations with role-based access (admin/manager only).
 - **Three Hirer Types:** 
   - `direct`: Customer rents directly without sponsor
-  - `with_sponsor`: Customer rents with individual sponsor (from Persons table)
+  - `with_sponsor`: Customer rents with individual sponsor (from Sponsors/Persons table)
   - `from_company`: Customer rents with company sponsor (from Companies table)
 - **MARMAR PDF Integration:** Professional PDF generation using an integrated MARMAR rental contract template, including dynamic sections for sponsor/hirer (supporting both individual and company sponsors), vehicle inspection, payment breakdown, and signatures.
 

@@ -11,9 +11,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -49,13 +57,7 @@ export function AppSidebar() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const menuItems = [
-    {
-      title: t('nav.dashboard'),
-      icon: 'dashboard',
-      url: '/',
-      show: true,
-    },
+  const masterItems = [
     {
       title: t('nav.customers'),
       icon: 'person',
@@ -69,9 +71,9 @@ export function AppSidebar() {
       show: true,
     },
     {
-      title: t('nav.persons'),
+      title: t('nav.sponsors'),
       icon: 'badge',
-      url: '/persons',
+      url: '/sponsors',
       show: isAdmin || isManager,
     },
     {
@@ -80,28 +82,19 @@ export function AppSidebar() {
       url: '/companies',
       show: isAdmin || isManager,
     },
+  ];
+
+  const settingsItems = [
     {
-      title: t('nav.contracts'),
-      icon: 'description',
-      url: '/contracts',
-      show: true,
+      title: t('nav.companySettings'),
+      icon: 'business_center',
+      url: '/settings',
+      show: isAdmin,
     },
     {
       title: t('nav.users'),
       icon: 'people',
       url: '/users',
-      show: isAdmin,
-    },
-    {
-      title: t('nav.auditLogs'),
-      icon: 'history',
-      url: '/audit-logs',
-      show: isAdmin || isManager,
-    },
-    {
-      title: t('nav.settings'),
-      icon: 'settings',
-      url: '/settings',
       show: isAdmin,
     },
   ];
@@ -198,16 +191,97 @@ export function AppSidebar() {
           <SidebarGroupLabel>{t('nav.menu')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.filter(item => item.show).map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '') || 'dashboard'}`}>
-                    <Link href={item.url}>
-                      <span className="material-icons">{item.icon}</span>
-                      <span>{item.title}</span>
+              {/* Dashboard */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location === '/'} data-testid="nav-dashboard">
+                  <Link href="/">
+                    <span className="material-icons">dashboard</span>
+                    <span>{t('nav.dashboard')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Masters - Collapsible */}
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton data-testid="nav-masters">
+                      <span className="material-icons">folder</span>
+                      <span>{t('nav.masters')}</span>
+                      <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                        chevron_right
+                      </span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {masterItems.filter(item => item.show).map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                            <Link href={item.url}>
+                              <span className="material-icons">{item.icon}</span>
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Contracts */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location === '/contracts'} data-testid="nav-contracts">
+                  <Link href="/contracts">
+                    <span className="material-icons">description</span>
+                    <span>{t('nav.contracts')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Audit Logs (Admin/Manager only) */}
+              {(isAdmin || isManager) && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={location === '/audit-logs'} data-testid="nav-audit-logs">
+                    <Link href="/audit-logs">
+                      <span className="material-icons">history</span>
+                      <span>{t('nav.auditLogs')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )}
+
+              {/* Settings - Collapsible (Admin only) */}
+              {isAdmin && (
+                <Collapsible defaultOpen className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton data-testid="nav-settings">
+                        <span className="material-icons">settings</span>
+                        <span>{t('nav.settings')}</span>
+                        <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                          chevron_right
+                        </span>
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {settingsItems.filter(item => item.show).map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                              <Link href={item.url}>
+                                <span className="material-icons">{item.icon}</span>
+                                <span>{item.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

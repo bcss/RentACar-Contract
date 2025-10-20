@@ -13,7 +13,7 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Customers from "@/pages/Customers";
 import Vehicles from "@/pages/Vehicles";
-import Persons from "@/pages/Persons";
+import Sponsors from "@/pages/Sponsors";
 import Companies from "@/pages/Companies";
 import Contracts from "@/pages/Contracts";
 import ContractForm from "@/pages/ContractForm";
@@ -77,8 +77,8 @@ function Router() {
       <Route path="/vehicles">
         {() => <ProtectedRoute component={Vehicles} />}
       </Route>
-      <Route path="/persons">
-        {() => <ProtectedRoute component={Persons} />}
+      <Route path="/sponsors">
+        {() => <ProtectedRoute component={Sponsors} />}
       </Route>
       <Route path="/companies">
         {() => <ProtectedRoute component={Companies} />}
