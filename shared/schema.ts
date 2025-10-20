@@ -175,6 +175,57 @@ export const insertVehicleSchema = createInsertSchema(vehicles).omit({
 export type InsertVehicle = z.infer<typeof insertVehicleSchema>;
 export type Vehicle = typeof vehicles.$inferSelect;
 
+// Persons table - Master data for sponsors and drivers
+export const persons = pgTable("persons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Basic Information (bilingual)
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  
+  // Identification
+  nationality: varchar("nationality"),
+  passportId: varchar("passport_id"), // Passport or National ID
+  licenseNumber: varchar("license_number"),
+  
+  // Contact Information
+  mobile: varchar("mobile"),
+  address: text("address"),
+  
+  // Additional Information
+  relation: varchar("relation"), // For sponsors: relationship to hirer (e.g., "Employer", "Family Member")
+  notes: text("notes"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const personsRelations = relations(persons, ({ one }) => ({
+  creator: one(users, {
+    fields: [persons.createdBy],
+    references: [users.id],
+    relationName: "personCreator",
+  }),
+}));
+
+export const insertPersonSchema = createInsertSchema(persons).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  disabledBy: true,
+  disabledAt: true,
+  disabled: true,
+});
+
+export type InsertPerson = z.infer<typeof insertPersonSchema>;
+export type Person = typeof persons.$inferSelect;
+
 // Damage Assessments table - Structured damage tracking for completed rentals
 export const damageAssessments = pgTable("damage_assessments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
