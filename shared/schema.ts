@@ -238,6 +238,16 @@ export const contracts = pgTable("contracts", {
   sponsorMobile: varchar("sponsor_mobile"),
   sponsorCreditCard: varchar("sponsor_credit_card"),
   
+  // Company Hirer Information (when hirerType is 'from_company')
+  // When a company rents, customer record = company, these fields = individual driver
+  hirerNameEn: varchar("hirer_name_en"),
+  hirerNameAr: varchar("hirer_name_ar"),
+  hirerNationality: varchar("hirer_nationality"),
+  hirerPassportId: varchar("hirer_passport_id"),
+  hirerLicenseNumber: varchar("hirer_license_number"),
+  hirerMobile: varchar("hirer_mobile"),
+  hirerAddress: text("hirer_address"),
+  
   // Vehicle Inspection Checklist
   inspectionTools: boolean("inspection_tools"), // Tools present Y/N
   inspectionSpareTyre: boolean("inspection_spare_tyre"), // Spare tyre present Y/N
