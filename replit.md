@@ -38,6 +38,21 @@ Preferred communication style: Simple, everyday language.
   - Complete REST API: GET /api/persons, POST /api/persons, GET /api/persons/search?q={query}, PATCH /api/persons/:id, PATCH /api/persons/:id/disable, PATCH /api/persons/:id/enable
   - Role-based access: admin/manager can manage persons, staff/viewer can view (via PersonSelector in contract form)
 
+### Additional Contract Clauses Population - October 20, 2025
+- **MARMAR Template Integration:** Populated all 11 Additional Contract Clauses in company settings from official MARMAR rental contract template
+  - **Write-Off & Confiscation:** Total loss compensation including insurance policy cost and court time
+  - **Credit Card Authorization:** Authorization text for traffic fines and parking penalties
+  - **Desert/UAE Prohibition:** Vehicle usage and insurance limited to UAE only
+  - **Accident Liability - Hirer Fault:** AED 2500 responsibility clause for hirer-caused accidents
+  - **Accident Liability - Police Reporting:** Immediate notification requirement for all accidents
+  - **Monthly Payment Schedule:** Default to daily rate if no weekly/monthly arrangement
+  - **Daily KM Limit:** 300 km/day limit with 50 fils/km overage charge
+  - **Monthly KM Limit:** 24-hour day definition for rental calculations
+  - **Self-Repair Penalty:** Prohibition on unauthorized vehicle repairs
+  - **Daily Rate Default:** 9pm return deadline to avoid full-day charges
+  - **Back Page Reference:** Damage and repair responsibility during hire period
+- All clauses available in both English and Arabic, fully editable via Settings page
+
 ### Bug Fixes - October 20, 2025
 1. **PersonSelector Search API Fix:** Fixed query parameter format from `/api/persons/search/${query}` to `/api/persons/search?q=${query}` to match backend endpoint expectations. TanStack Query default fetcher was joining query key segments with slashes instead of using proper query parameters.
 2. **Contract Form Dialog Trigger Fix:** Replaced DialogTrigger components with regular onClick buttons for Create Customer and Create Vehicle dialogs to prevent form submission event conflicts. Person dialogs were already correctly structured outside main form.
