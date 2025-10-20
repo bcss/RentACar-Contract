@@ -57,7 +57,7 @@ export function PersonSelector({
 
   // Search persons query
   const { data: searchResults = [] } = useQuery<Person[]>({
-    queryKey: ['/api/persons/search', searchQuery],
+    queryKey: [`/api/persons/search?q=${searchQuery}`],
     enabled: open && searchQuery.length > 0,
   });
 
