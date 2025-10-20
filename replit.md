@@ -24,8 +24,8 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **Database:** PostgreSQL (via Neon serverless).
-- **Schema Design:** Tables for `Sessions`, `Users`, `Customers`, `Vehicles`, `Persons` (master data for sponsors/drivers), `Contracts` (core entity with bilingual fields, status, payments, charges), `Audit Logs`, `Contract Edits`, `Contract Counter`, `System Errors`, and `Company Settings`.
-- **Key Design Decisions:** Draft vs. finalized status with immutability, bilingual field storage, auto-incrementing contract numbers, comprehensive dual-layer audit trail, singleton pattern for global settings, and master data pattern for customers/vehicles/persons.
+- **Schema Design:** Tables for `Sessions`, `Users`, `Customers`, `Vehicles`, `Persons` (master data for individual sponsors), `Companies` (master data for corporate sponsors), `Contracts` (core entity with bilingual fields, status, payments, charges, companySponsorId), `Audit Logs`, `Contract Edits`, `Contract Counter`, `System Errors`, and `Company Settings`.
+- **Key Design Decisions:** Draft vs. finalized status with immutability, bilingual field storage, auto-incrementing contract numbers, comprehensive dual-layer audit trail, singleton pattern for global settings, and master data pattern for customers/vehicles/persons/companies.
 - **Disable-Only Architecture:** Replaced all delete operations with disable/enable functionality for key entities, tracking `disabled`, `disabledBy`, `disabledAt` fields.
 
 ### Features
@@ -34,9 +34,14 @@ Preferred communication style: Simple, everyday language.
 - **Vehicle Return Workflow:** Captures odometer, fuel, condition notes, and calculates extra charges.
 - **Payment Recording:** Tracks deposit, final payment, and refunds with methods and dates.
 - **Company Settings Management:** Admin-only page to configure bilingual company information and additional contract clauses.
-- **Dashboard:** Displays critical metrics like active rentals, monthly revenue, overdue returns, and pending refunds.
-- **Persons Master Data:** Reusable person records for sponsors and drivers across contracts, reducing repetitive data entry. Full CRUD operations with search and disable/enable functionality.
-- **MARMAR PDF Integration:** Professional PDF generation using an integrated MARMAR rental contract template, including dynamic sections for sponsor/hirer, vehicle inspection, payment breakdown, and signatures.
+- **Dashboard:** Displays critical metrics like active rentals, monthly revenue, overdue returns, and pending refunds (based on 5 valid contract statuses).
+- **Persons Master Data:** Reusable person records for individual sponsors across contracts, reducing repetitive data entry. Full CRUD operations with search and disable/enable functionality.
+- **Companies Master Data:** Reusable company records for corporate sponsors with registration details, tax info, and contact information. Full CRUD operations with role-based access (admin/manager only).
+- **Three Hirer Types:** 
+  - `direct`: Customer rents directly without sponsor
+  - `with_sponsor`: Customer rents with individual sponsor (from Persons table)
+  - `from_company`: Customer rents with company sponsor (from Companies table)
+- **MARMAR PDF Integration:** Professional PDF generation using an integrated MARMAR rental contract template, including dynamic sections for sponsor/hirer (supporting both individual and company sponsors), vehicle inspection, payment breakdown, and signatures.
 
 ## External Dependencies
 
