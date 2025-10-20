@@ -1003,6 +1003,114 @@ export default function ContractForm() {
             </Card>
           )}
 
+          {/* Conditional Company Hirer Information Section */}
+          {watchedHirerType === 'from_company' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="material-icons">person</span>
+                  Driver/Hirer Information / معلومات السائق/المستأجر
+                </CardTitle>
+                <CardDescription>
+                  Individual driver details (company information in customer section)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="hirerNameEn"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Driver Name (English) / اسم السائق (إنجليزي) *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-hirer-name-en" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hirerNameAr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Driver Name (Arabic) / اسم السائق (عربي)</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} dir="rtl" className="text-right" data-testid="input-hirer-name-ar" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hirerNationality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nationality / الجنسية *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-hirer-nationality" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hirerPassportId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Passport/ID Number / رقم الجواز/الهوية *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-hirer-passport" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hirerLicenseNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>License Number / رقم الرخصة *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-hirer-license" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hirerMobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mobile / الجوال *</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-hirer-mobile" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hirerAddress"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Address / العنوان *</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} value={field.value || ''} data-testid="input-hirer-address" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Vehicle Selection */}
           <Card>
             <CardHeader>
