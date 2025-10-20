@@ -8,6 +8,7 @@ import {
   companySettings,
   customers,
   vehicles,
+  persons,
   type User,
   type UpsertUser,
   type Contract,
@@ -24,6 +25,8 @@ import {
   type Vehicle,
   type InsertCustomer,
   type InsertVehicle,
+  type Person,
+  type InsertPerson,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike } from "drizzle-orm";
@@ -74,6 +77,15 @@ export interface IStorage {
   enableVehicle(id: string): Promise<void>;
   checkVehicleAvailability(vehicleId: string, startDate: Date, endDate: Date, excludeContractId?: string): Promise<boolean>;
   searchVehicles(query: string): Promise<Vehicle[]>;
+  
+  // Person operations (sponsors/drivers)
+  getPersons(includeDisabled?: boolean): Promise<Person[]>;
+  getPersonById(id: string): Promise<Person | undefined>;
+  createPerson(person: InsertPerson): Promise<Person>;
+  updatePerson(id: string, person: Partial<InsertPerson>): Promise<Person>;
+  disablePerson(id: string, disabledBy: string): Promise<void>;
+  enablePerson(id: string): Promise<void>;
+  searchPersons(query: string): Promise<Person[]>;
   
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
@@ -651,6 +663,73 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(vehicles.createdAt));
+  }
+
+  // Person operations (sponsors/drivers)
+  async getPersons(includeDisabled = false): Promise<Person[]> {
+    if (includeDisabled) {
+      return await db.select().from(persons).orderBy(desc(persons.createdAt));
+    }
+    return await db.select().from(persons).where(eq(persons.disabled, false)).orderBy(desc(persons.createdAt));
+  }
+
+  async getPersonById(id: string): Promise<Person | undefined> {
+    const [person] = await db.select().from(persons).where(eq(persons.id, id));
+    return person;
+  }
+
+  async createPerson(personData: InsertPerson): Promise<Person> {
+    const [person] = await db.insert(persons).values(personData).returning();
+    return person;
+  }
+
+  async updatePerson(id: string, personData: Partial<InsertPerson>): Promise<Person> {
+    const [person] = await db
+      .update(persons)
+      .set({ ...personData, updatedAt: new Date() })
+      .where(eq(persons.id, id))
+      .returning();
+    return person;
+  }
+
+  async disablePerson(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(persons)
+      .set({
+        disabled: true,
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(persons.id, id));
+  }
+
+  async enablePerson(id: string): Promise<void> {
+    await db
+      .update(persons)
+      .set({
+        disabled: false,
+        disabledBy: null,
+        disabledAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(persons.id, id));
+  }
+
+  async searchPersons(query: string): Promise<Person[]> {
+    const searchTerm = `%${query}%`;
+    return await db
+      .select()
+      .from(persons)
+      .where(
+        or(
+          ilike(persons.nameEn, searchTerm),
+          ilike(persons.nameAr, searchTerm),
+          ilike(persons.passportId, searchTerm),
+          ilike(persons.mobile, searchTerm)
+        )
+      )
+      .orderBy(desc(persons.createdAt));
   }
 
   // Audit log operations
