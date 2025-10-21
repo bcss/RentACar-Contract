@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,11 +28,21 @@ export default function Settings() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const [location] = useLocation();
   
   // Get tab from URL query parameter
   const searchParams = new URLSearchParams(window.location.search);
   const tabParam = searchParams.get('tab');
-  const defaultTab = tabParam === 'financial' ? 'financial' : tabParam === 'terms' ? 'terms' : 'company';
+  const initialTab = tabParam === 'financial' ? 'financial' : tabParam === 'terms' ? 'terms' : 'company';
+  const [activeTab, setActiveTab] = useState(initialTab);
+  
+  // Update tab when URL changes
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams(window.location.search);
+    const newTabParam = newSearchParams.get('tab');
+    const newTab = newTabParam === 'financial' ? 'financial' : newTabParam === 'terms' ? 'terms' : 'company';
+    setActiveTab(newTab);
+  }, [location]);
 
   const { data: settings, isLoading } = useQuery<CompanySettings>({
     queryKey: ['/api/settings'],
@@ -397,7 +408,7 @@ export default function Settings() {
         </div>
 
         <Form {...form}>
-          <Tabs defaultValue={defaultTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="company" data-testid="tab-company">
                 {t('nav.companySettings')}
