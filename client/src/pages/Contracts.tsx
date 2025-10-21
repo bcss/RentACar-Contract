@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DateSelector } from '@/components/ui/date-selector';
+import { DatePicker } from '@/components/ui/date-picker';
 import { EditReasonDialog } from '@/components/EditReasonDialog';
 import {
   Table,
@@ -273,20 +273,18 @@ export default function Contracts() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.dateFrom')}</label>
-              <DateSelector
-                value={fromDate}
-                onChange={setFromDate}
+              <DatePicker
+                date={fromDate}
+                onDateChange={setFromDate}
                 placeholder={t('common.dateFrom')}
-                data-testid="date-from"
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.dateTo')}</label>
-              <DateSelector
-                value={toDate}
-                onChange={setToDate}
+              <DatePicker
+                date={toDate}
+                onDateChange={setToDate}
                 placeholder={t('common.dateTo')}
-                data-testid="date-to"
               />
             </div>
           </div>

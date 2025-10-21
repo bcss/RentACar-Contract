@@ -55,6 +55,9 @@ export function DatePicker({
           }}
           fromYear={2000}
           toYear={2050}
+          classNames={{
+            caption_label: "hidden",
+          }}
         />
       </PopoverContent>
     </Popover>
