@@ -130,9 +130,9 @@ export default function AuditLogs() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('audit.action')}</label>
+              <label className="text-sm font-medium block">{t('audit.action')}</label>
               <Select value={actionFilter} onValueChange={setActionFilter}>
                 <SelectTrigger data-testid="select-action-filter">
                   <SelectValue />
@@ -146,7 +146,7 @@ export default function AuditLogs() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('audit.user')}</label>
+              <label className="text-sm font-medium block">{t('audit.user')}</label>
               <Select value={userFilter} onValueChange={setUserFilter}>
                 <SelectTrigger data-testid="select-user-filter">
                   <SelectValue />
@@ -160,7 +160,7 @@ export default function AuditLogs() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.dateFrom')}</label>
+              <label className="text-sm font-medium block">{t('common.dateFrom')}</label>
               <Input
                 type="date"
                 value={dateFromFilter}
@@ -169,7 +169,7 @@ export default function AuditLogs() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.dateTo')}</label>
+              <label className="text-sm font-medium block">{t('common.dateTo')}</label>
               <Input
                 type="date"
                 value={dateToFilter}
