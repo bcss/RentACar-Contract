@@ -25,6 +25,7 @@ This bilingual (English/Arabic) rental car contract management system, built wit
   - Companies page tabs renamed to "Active Companies" and "Disabled Companies" for clarity
   - Removed redundant subtitle text from sidebar
   - Dashboard now displays all 6 contract status cards (Draft, Confirmed, Active, Completed, Closed, Total) fixing count inconsistency
+  - **Filter Field Alignment Standardization:** Standardized filter field alignment across all pages with grid-based filter layouts. Added `items-end` class to filter grid containers and `block` class to labels in Contracts, AuditLogs, and SystemErrors pages for consistent vertical alignment of Input, Select, and DatePicker components
 - **Bug Fixes:** 
   - Fixed server error handler crash bug (removed throw after response sent)
   - Fixed ContractForm.tsx sponsor form reference (personForm → sponsorForm)
