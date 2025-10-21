@@ -7,7 +7,16 @@ This bilingual (English/Arabic) rental car contract management system, built wit
 - **Database Schema Update:** Renamed `persons` table to `sponsors` throughout the entire stack (database table, API routes, storage interface, frontend components, type definitions).
 - **Payments System:** Implemented comprehensive payment tracking with dedicated `payments` table, full CRUD API endpoints with RBAC and audit logging, and payment management UI in ContractView for recording deposits, final payments, and refunds.
 - **Type Safety Improvements:** Created shared `UserRole` enum in schema.ts for consistent role management across frontend and backend, replacing hardcoded role strings.
-- **Navigation Reorganization:** Hierarchical sidebar with collapsible parent menus (Masters: Customers/Vehicles/Sponsors/Companies; Settings: Company Settings/Users).
+- **Navigation Reorganization:** 
+  - Enhanced hierarchical sidebar with better organization
+  - Settings submenu: Company, Financial Settings, Terms & Conditions, System Users
+  - Audit Logs & System Errors parent menu with two submenus (Audit Logs, System Errors)
+  - Masters menu: Customers, Vehicles, Sponsors, Companies
+- **UI/UX Improvements:**
+  - Dynamic company name display in sidebar header and browser title
+  - Title format: "<Company Name> Contract Management System"
+  - Settings page reorganized into three tabs (Company, Financial Settings, Terms & Conditions) with query parameter support
+  - Removed redundant subtitle text from sidebar
 - **Bug Fixes:** 
   - Fixed server error handler crash bug (removed throw after response sent)
   - Fixed ContractForm.tsx sponsor form reference (personForm → sponsorForm)

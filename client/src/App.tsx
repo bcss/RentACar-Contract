@@ -26,6 +26,9 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import "@/lib/i18n";
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { CompanySettings } from "@shared/schema";
 
 // Protected route wrapper with proper redirect
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -109,6 +112,27 @@ function Router() {
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { t, i18n } = useTranslation();
+  
+  // Fetch company settings for dynamic title
+  const { data: settings } = useQuery<CompanySettings>({
+    queryKey: ['/api/settings'],
+    enabled: isAuthenticated,
+  });
+
+  // Update document title with company name
+  useEffect(() => {
+    if (settings) {
+      const companyName = i18n.language === 'ar' 
+        ? settings.companyNameAr || settings.companyNameEn
+        : settings.companyNameEn || settings.companyNameAr;
+      document.title = companyName 
+        ? `${companyName} ${t('landing.title')}`
+        : t('landing.title');
+    } else {
+      document.title = t('landing.title');
+    }
+  }, [settings, i18n.language, t]);
 
   // Custom sidebar width for contract application
   const style = {

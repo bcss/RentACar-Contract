@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { CompanySettings } from '@shared/schema';
 import {
   Sidebar,
   SidebarContent,
@@ -48,7 +50,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 export function AppSidebar() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [location] = useLocation();
   const { user, isAdmin, isManager } = useAuth();
   const { toast } = useToast();
@@ -56,6 +58,10 @@ export function AppSidebar() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  const { data: settings } = useQuery<CompanySettings>({
+    queryKey: ['/api/settings'],
+  });
 
   const masterItems = [
     {
@@ -205,9 +211,16 @@ export function AppSidebar() {
             directions_car
           </span>
           <div>
-            <h2 className="text-lg font-semibold">{t('landing.title')}</h2>
+            <h2 className="text-lg font-semibold">
+              {settings 
+                ? i18n.language === 'ar' 
+                  ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
+                  : settings.companyNameEn || settings.companyNameAr || t('landing.title')
+                : t('landing.title')
+              }
+            </h2>
             <p className="text-xs text-muted-foreground">
-              {t('landing.subtitle').split(' ').slice(0, 4).join(' ')}
+              {t('landing.title')}
             </p>
           </div>
         </div>
