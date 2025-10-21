@@ -1,0 +1,903 @@
+# User Guide
+## MARMAR Rental Car Contract Management System
+
+**Version 1.0** | **For Daily Users (Manager, Staff, Viewer)**
+
+---
+
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Getting Started](#getting-started)
+3. [Dashboard Overview](#dashboard-overview)
+4. [Managing Customers](#managing-customers)
+5. [Managing Vehicles](#managing-vehicles)
+6. [Creating Contracts](#creating-contracts)
+7. [Contract Lifecycle](#contract-lifecycle)
+8. [Payment Management](#payment-management)
+9. [Reports](#reports)
+10. [Tips & Best Practices](#tips--best-practices)
+
+---
+
+## Introduction
+
+### Welcome
+Welcome to the MARMAR Rental Car Contract Management System. This guide will help you navigate daily operations, create contracts, manage customers and vehicles, and process payments efficiently.
+
+### User Roles
+
+Your access level depends on your assigned role:
+
+**Manager**
+- ✅ View and manage all contracts
+- ✅ Create customers, vehicles, sponsors, companies
+- ✅ Record and view payments
+- ✅ Access all reports
+- ✅ View audit logs
+
+**Staff**
+- ✅ Create contracts (your own)
+- ✅ Edit your contracts (draft status only)
+- ✅ Create customers and vehicles
+- ✅ View basic reports
+
+**Viewer**
+- ✅ View all contracts (read-only)
+- ✅ View reports
+- ✅ View customers and vehicles
+- ❌ Cannot create or edit anything
+
+**Note**: If you need different permissions, contact your system administrator.
+
+### Language Selection
+
+The system supports English and Arabic:
+
+1. Look for the language toggle in the top navigation
+2. Click to switch between **EN** and **AR**
+3. The entire interface switches languages instantly
+4. Your preference is saved for future sessions
+
+**Arabic Mode Features:**
+- Right-to-left (RTL) layout
+- Arabic font (Cairo)
+- All menus, buttons, and labels in Arabic
+- Arabic data display
+
+---
+
+## Getting Started
+
+### Logging In
+
+1. Open the application URL in your web browser
+2. Enter your **Username**
+3. Enter your **Password**
+4. Click **"Login"** (or **"تسجيل الدخول"** in Arabic)
+
+**Forgot Password?** Contact your system administrator.
+
+### First Login
+
+If this is your first time logging in:
+
+1. You'll receive temporary credentials from your administrator
+2. Log in with provided username and password
+3. **Change your password immediately**:
+   - Click your profile in sidebar
+   - Select "Change Password"
+   - Enter current password
+   - Enter new strong password
+   - Confirm and save
+
+### Interface Overview
+
+**Sidebar Navigation (Left Side)**
+- **Dashboard**: Overview and quick stats
+- **Masters**: Customers, Vehicles, Sponsors, Companies
+- **Contracts**: All rental contracts
+- **Reports**: Financial, Operational, Customer, Audit
+- **Settings**: Company info, Financial settings, Terms (Admin only)
+- **Logs & Errors**: Audit logs, System errors (Admin/Manager only)
+
+**Top Bar**
+- **Sidebar Toggle**: Show/hide sidebar
+- **Language Toggle**: Switch EN/AR
+- **Theme Toggle**: Switch light/dark mode
+- **User Profile**: Your account, logout
+
+**Main Content Area**
+- Pages display here based on sidebar selection
+- Tables, forms, and reports appear in this area
+
+---
+
+## Dashboard Overview
+
+### Quick Stats Cards
+
+**Six Key Metrics:**
+
+1. **Draft Contracts**
+   - Contracts in draft status
+   - Click to view all drafts
+
+2. **Confirmed Contracts**
+   - Verified contracts awaiting vehicle handover
+   - Click to filter confirmed contracts
+
+3. **Active Rentals**
+   - Currently rented vehicles
+   - Most important metric
+   - Click to view active contracts
+
+4. **Completed Rentals**
+   - Vehicles returned, pending final payment
+   - Click to view completed contracts
+
+5. **Closed Contracts**
+   - Fully paid and archived
+   - Click to view closed contracts
+
+6. **Total Contracts**
+   - All contracts in system
+   - Click to view all
+
+**Navigation**: Click any card to filter the contracts page to that status.
+
+---
+
+## Managing Customers
+
+### Viewing Customers
+
+**Location**: Masters → Customers
+
+**Features:**
+- **Search**: Find customers by name, email, or phone
+- **Filter**: View Active or Disabled customers
+- **Sort**: Click column headers to sort
+
+### Adding a New Customer
+
+1. Click **"Add Customer"** button
+2. Fill in the customer form:
+
+**Required Fields:**
+- **Name (English)**: Full legal name in English
+- **Name (Arabic)**: Full name in Arabic script
+- **Email**: Valid email address
+- **Phone**: Contact number (include country code: +966...)
+- **ID Number**: National ID or passport number
+- **ID Type**: Select type (National ID, Passport, Other)
+- **License Number**: Driver's license number
+- **License Expiry**: License expiration date
+
+**Optional Fields:**
+- **Address**: Physical address
+
+3. Click **"Create Customer"**
+4. Success message appears
+5. Customer now available for contracts
+
+**Tips:**
+- ✅ Double-check ID and license numbers for accuracy
+- ✅ Verify license not expired before rental
+- ✅ Use consistent name format
+- ✅ Include country code in phone numbers
+
+### Editing Customers
+
+1. Find the customer in the list
+2. Click the **Edit** icon (pencil)
+3. Modify any field
+4. Click **"Update Customer"**
+5. Changes saved immediately
+
+**Common Edits:**
+- Phone number changes
+- Email updates
+- Address corrections
+- License renewal (update expiry date)
+
+### Customer Status
+
+**Active Customers:**
+- Can create new contracts
+- Displayed by default
+
+**Disabled Customers:**
+- Cannot create new contracts
+- Toggle filter to view
+- Can be re-enabled by Admin/Manager
+
+---
+
+## Managing Vehicles
+
+### Viewing Vehicles
+
+**Location**: Masters → Vehicles
+
+**Features:**
+- **Search**: Find by registration, make, or model
+- **Filter**: Active or Disabled vehicles
+- **Sort**: Click columns to sort
+- **Availability**: Real-time status indicators
+
+### Adding a New Vehicle
+
+1. Click **"Add Vehicle"** button
+2. Complete the vehicle form:
+
+**Required Fields:**
+- **Registration Number**: License plate number
+- **Make**: Manufacturer (Toyota, Honda, BMW, etc.)
+- **Model**: Specific model (Camry, Accord, X5, etc.)
+- **Year**: Manufacturing year (2020, 2021, etc.)
+- **Color**: Vehicle color
+- **VIN**: Vehicle Identification Number
+- **Current Odometer**: Current mileage reading
+- **Fuel Level**: Current fuel status (Full, 3/4, 1/2, 1/4, Empty)
+
+**Optional Fields:**
+- **Features**: GPS, Bluetooth, Sunroof, Leather Seats, etc.
+
+3. Click **"Create Vehicle"**
+4. Vehicle ready for rental
+
+**Tips:**
+- ✅ Verify VIN accuracy (17 characters)
+- ✅ Record exact odometer reading
+- ✅ Update fuel level after each rental
+- ✅ List all features for customer clarity
+
+### Editing Vehicles
+
+1. Find vehicle in the list
+2. Click **Edit** icon
+3. Update fields:
+   - Current odometer (after each rental)
+   - Fuel level (after returns)
+   - Features (after upgrades)
+4. Click **"Update Vehicle"**
+
+**When to Update:**
+- After every rental return
+- After maintenance
+- After feature additions
+- Regular odometer updates
+
+### Vehicle Availability
+
+**Status Indicators:**
+- 🟢 **Available**: Ready for new rental
+- 🟡 **Reserved**: In draft/confirmed contract
+- 🔴 **Rented**: Currently active rental
+- ⚪ **Disabled**: Out of service
+
+**Availability Checking:**
+- System automatically checks when creating contracts
+- Prevents double-booking
+- Shows conflicts if dates overlap
+- Suggests alternative vehicles if unavailable
+
+---
+
+## Creating Contracts
+
+### Contract Creation Workflow
+
+**Location**: Contracts page → "New Contract" button
+
+### Step 1: Basic Information
+
+**Contract Details:**
+- **Contract Number**: Auto-generated (read-only)
+- **Start Date**: Rental start date and time
+- **End Date**: Expected return date and time
+- **Status**: Defaults to "Draft"
+
+**Duration Calculation:**
+- Automatically calculated from start/end dates
+- Displayed in days
+- Used for rate calculations
+
+### Step 2: Customer Selection
+
+**Choose Customer:**
+1. Click "Select Customer" dropdown
+2. Search or scroll to find customer
+3. Select customer
+4. Details populated automatically
+
+**Or Create New Customer:**
+1. Click "Add New Customer" link
+2. Fill quick customer form
+3. Save and auto-select
+
+### Step 3: Vehicle Selection
+
+**Choose Vehicle:**
+1. Click "Select Vehicle" dropdown
+2. View available vehicles
+3. System shows availability status
+4. Select vehicle
+5. Details populated automatically
+
+**Availability Validation:**
+- Green badge = Available
+- Yellow/Red badge = Unavailable for selected dates
+- System prevents unavailable selection
+- Adjust dates if needed
+
+### Step 4: Hirer Type Selection
+
+**Three Options:**
+
+#### 1. Direct Hirer
+- Customer rents directly
+- No sponsor required
+- Customer details used
+
+#### 2. With Sponsor (Individual)
+- Select existing sponsor from dropdown
+- Or add new sponsor
+- Sponsor guarantees customer
+- Sponsor details printed on contract
+
+#### 3. From Company (Corporate)
+- Select company sponsor
+- Corporate rental
+- Company details on contract
+- Company pays (typically)
+
+### Step 5: Financial Information
+
+**Automatic Calculations:**
+- **Daily Rate**: From financial settings or custom
+- **Total Days**: Auto-calculated from dates
+- **Subtotal**: Rate × Days
+- **Insurance**: Daily insurance × Days
+- **GPS Fee**: If selected, daily fee × Days
+- **Other Charges**: Manual entry
+- **Total**: Sum of all charges
+- **Tax**: Applied to total (if configured)
+- **Grand Total**: Final amount
+
+**Payment Details:**
+- **Deposit Amount**: Upfront payment
+- **Remaining Balance**: Auto-calculated
+- **Payment Method**: Cash, Card, Bank, Check
+- **Payment Status**: Paid, Pending, Partial
+
+**Manual Overrides:**
+- Can override daily rate
+- Can add custom other charges
+- Can adjust deposit amount
+- Tax applied automatically
+
+### Step 6: Additional Information
+
+**Optional Fields:**
+- **Notes (English)**: Internal notes, special requests
+- **Notes (Arabic)**: Arabic notes
+- **Special Conditions**: Any special terms
+
+### Step 7: Save Draft
+
+1. Review all information
+2. Click **"Save Draft"**
+3. Contract saved with Draft status
+4. Can edit later before confirming
+
+**Draft Benefits:**
+- Reserves vehicle
+- Can modify freely
+- No commitment
+- Can delete if needed
+
+---
+
+## Contract Lifecycle
+
+### Understanding Contract States
+
+**Five States Flow:**
+
+```
+DRAFT → CONFIRMED → ACTIVE → COMPLETED → CLOSED
+```
+
+### 1. Draft Status
+
+**What It Means:**
+- Initial contract creation
+- Fully editable
+- Vehicle reserved but not handed over
+- No commitment
+
+**Available Actions:**
+- Edit any field
+- Change customer, vehicle, dates
+- Modify charges
+- Delete contract
+- Confirm when ready
+
+**Next Step:** Click **"Confirm Contract"** when ready
+
+### 2. Confirmed Status
+
+**What It Means:**
+- Contract verified and approved
+- Vehicle ready for handover
+- Customer notified
+- Awaiting pickup
+
+**What Changes:**
+- **Immutable**: Cannot edit contract details
+- Vehicle reserved firmly
+- If edit needed, requires reason
+
+**Available Actions:**
+- Print contract PDF
+- Activate (hand over vehicle)
+- View details
+
+**Next Step:** Click **"Activate Contract"** when customer picks up
+
+### 3. Active Status
+
+**What It Means:**
+- Vehicle handed over to customer
+- Rental period started
+- Customer driving
+- Payment deposit collected
+
+**What Changes:**
+- **Immutable**: Cannot edit
+- Vehicle marked as rented
+- Appears in active rentals dashboard
+
+**Available Actions:**
+- Print contract
+- View details
+- Wait for return
+- Mark as completed when returned
+
+**Next Step:** Click **"Complete Contract"** when vehicle returned
+
+### 4. Completed Status
+
+**What It Means:**
+- Vehicle returned by customer
+- Inspection completed
+- Extra charges calculated
+- Awaiting final payment
+
+**Return Process:**
+1. Click **"Complete Contract"** button
+2. Enter return information:
+   - **Return Odometer**: Exact reading
+   - **Return Fuel Level**: Actual fuel level
+   - **Condition Notes**: Any damage or issues
+   - **Extra Charges**: Additional costs
+   - **Charge Reason**: Why extra charged
+3. Click **"Complete"**
+4. System calculates final amount
+
+**Extra Charges Examples:**
+- Extra mileage beyond limit
+- Fuel level difference
+- Late return fees
+- Damage costs
+- Traffic fines
+
+**Available Actions:**
+- Record payments
+- View final invoice
+- Print receipt
+- Close when fully paid
+
+**Next Step:** Click **"Close Contract"** when all payments received
+
+### 5. Closed Status
+
+**What It Means:**
+- All payments settled
+- Contract archived
+- Rental complete
+- Historical record
+
+**What Changes:**
+- **Read-Only**: No further actions
+- Vehicle available for new rentals
+- Final status
+
+**Available Actions:**
+- View only
+- Print historical contract
+- Reference for future rentals
+
+---
+
+## Payment Management
+
+### Overview
+
+**Location**: Open any contract → Payments tab
+
+**Access Levels:**
+- **Admin/Manager**: Add and delete payments
+- **Staff/Viewer**: View only
+
+### Recording Payments
+
+**When to Record:**
+- Deposit collection (at contract start)
+- Partial payments (during rental)
+- Final payment (at completion)
+- Refunds (if applicable)
+
+**How to Add Payment:**
+
+1. Open contract
+2. Go to Payments section
+3. Click **"Add Payment"** button
+4. Fill payment form:
+   - **Amount**: Payment amount
+   - **Payment Method**: Cash, Credit Card, Bank Transfer, Check
+   - **Currency**: SAR, USD, EUR, etc.
+   - **Payment Date**: When received
+   - **Paid By**: Customer name or reference
+   - **Notes**: Check number, transaction ID, etc.
+5. Click **"Record Payment"**
+6. Payment added to history
+
+**Tips:**
+- ✅ Record payments immediately
+- ✅ Include transaction references in notes
+- ✅ Verify amount before submitting
+- ✅ Use correct payment date
+- ✅ Update payment method accurately
+
+### Payment History
+
+**What You See:**
+- All payments for contract
+- Date, amount, method
+- Who paid
+- Running balance
+- Total paid vs. total due
+
+**Information Displayed:**
+- Payment ID
+- Amount paid
+- Payment method
+- Currency
+- Date paid
+- Payer name
+- Notes
+- Created by (user)
+- Created at (timestamp)
+
+### Deleting Payments
+
+**Who Can Delete:** Admin only
+
+**When to Delete:**
+- Payment recorded in error
+- Duplicate entry
+- Payment refunded
+
+**How to Delete:**
+1. Find payment in list
+2. Click **Delete** button
+3. Confirm deletion
+4. Payment removed
+5. Balance recalculated
+
+**Warning**: Deletion is permanent and logged in audit trail.
+
+### Payment Scenarios
+
+**Scenario 1: Full Deposit**
+- Customer pays full amount upfront
+- Record one payment for total amount
+- Remaining balance = 0
+
+**Scenario 2: Deposit + Final Payment**
+- Collect deposit at start
+- Record deposit payment
+- Collect remaining at completion
+- Record final payment
+
+**Scenario 3: Multiple Payments**
+- Customer pays in installments
+- Record each payment separately
+- System tracks total paid
+- Shows remaining balance
+
+**Scenario 4: Refund**
+- Overpayment or cancellation
+- Record negative amount
+- Or note in payment notes
+- Track refund separately
+
+---
+
+## Reports
+
+### Available Reports
+
+**Location**: Reports menu in sidebar
+
+### 1. Financial Report
+
+**What It Shows:**
+- Total revenue by period
+- Payment method breakdown
+- Outstanding balances
+- Pending refunds
+- Contract values
+
+**How to Use:**
+1. Navigate to Reports → Financial
+2. Select date range
+3. View summary cards
+4. Review detailed tables
+5. Print to PDF if needed
+
+**Key Metrics:**
+- Total revenue
+- Average contract value
+- Payment distribution
+- Cash vs. card ratio
+- Pending amounts
+
+### 2. Operational Report
+
+**What It Shows:**
+- Average rental duration
+- Fleet utilization rates
+- Popular vehicles
+- Rental trends
+- Seasonal patterns
+
+**How to Use:**
+1. Go to Reports → Operational
+2. Select analysis period
+3. View charts and graphs
+4. Identify trends
+5. Export if needed
+
+**Insights:**
+- Busiest periods
+- Most rented vehicles
+- Average rental days
+- Fleet performance
+- Capacity planning
+
+### 3. Customer Analytics
+
+**What It Shows:**
+- Repeat customer rate
+- Customer lifetime value
+- New vs. returning customers
+- Customer demographics
+- Rental frequency
+
+**How to Use:**
+1. Navigate to Reports → Customer Analytics
+2. Select time frame
+3. Review customer segments
+4. Identify VIP customers
+5. Plan retention strategies
+
+**Value:**
+- Identify loyal customers
+- Target marketing
+- Improve retention
+- Understand customer base
+
+### 4. Audit Report
+
+**What It Shows:** (Admin/Manager only)
+- User activity summary
+- Contract modifications
+- System access logs
+- Action frequency
+- Compliance data
+
+**How to Use:**
+1. Go to Reports → Audit Report
+2. Filter by user, action, date
+3. Review activity
+4. Export for compliance
+5. Investigate anomalies
+
+---
+
+## Tips & Best Practices
+
+### Daily Operations
+
+**Morning Routine:**
+1. ✅ Check dashboard for active rentals
+2. ✅ Review contracts due today
+3. ✅ Check vehicles scheduled for return
+4. ✅ Review confirmed contracts for pickup
+
+**During the Day:**
+1. ✅ Create new contracts as customers arrive
+2. ✅ Confirm contracts for next day
+3. ✅ Activate contracts on vehicle pickup
+4. ✅ Complete contracts on vehicle return
+5. ✅ Record all payments immediately
+
+**End of Day:**
+1. ✅ Complete any returned vehicles
+2. ✅ Record all payments received
+3. ✅ Update vehicle odometers and fuel
+4. ✅ Save any draft contracts
+
+### Contract Best Practices
+
+**Before Creating:**
+- ✅ Verify customer license validity
+- ✅ Check vehicle availability
+- ✅ Confirm rental dates
+- ✅ Discuss all charges upfront
+
+**During Creation:**
+- ✅ Double-check all dates and times
+- ✅ Verify customer and vehicle details
+- ✅ Calculate charges accurately
+- ✅ Record deposit amount
+- ✅ Add relevant notes
+
+**Before Confirming:**
+- ✅ Review all contract details
+- ✅ Verify financial calculations
+- ✅ Ensure customer understands terms
+- ✅ Confirm vehicle availability
+
+**At Vehicle Handover:**
+- ✅ Inspect vehicle with customer
+- ✅ Record exact odometer
+- ✅ Verify fuel level
+- ✅ Note any existing damage
+- ✅ Activate contract immediately
+
+**At Vehicle Return:**
+- ✅ Inspect with customer present
+- ✅ Record return odometer
+- ✅ Check fuel level
+- ✅ Note any new damage
+- ✅ Calculate extra charges if any
+- ✅ Complete contract immediately
+
+### Data Entry Tips
+
+**Accuracy:**
+- ✅ Type carefully to avoid errors
+- ✅ Double-check ID and license numbers
+- ✅ Verify phone numbers
+- ✅ Confirm email addresses
+
+**Consistency:**
+- ✅ Use standard formats
+- ✅ Consistent naming conventions
+- ✅ Uniform abbreviations
+- ✅ Standard date formats
+
+**Bilingual Entry:**
+- ✅ Enter both English and Arabic names
+- ✅ Use proper Arabic script
+- ✅ Verify Arabic spelling
+- ✅ Match English and Arabic data
+
+### Vehicle Management
+
+**Regular Updates:**
+- ✅ Update odometer after each rental
+- ✅ Update fuel level after returns
+- ✅ Note maintenance needs
+- ✅ Record damage immediately
+
+**Availability:**
+- ✅ Check calendar before quoting dates
+- ✅ Use system availability checker
+- ✅ Don't override availability warnings
+- ✅ Schedule maintenance in advance
+
+### Customer Service
+
+**Communication:**
+- ✅ Explain all charges clearly
+- ✅ Review contract terms
+- ✅ Provide copies of contract
+- ✅ Remind of return date and time
+
+**Follow-Up:**
+- ✅ Confirm pickup appointments
+- ✅ Remind of upcoming returns
+- ✅ Thank repeat customers
+- ✅ Request feedback
+
+### Common Mistakes to Avoid
+
+**❌ Don't:**
+- Skip vehicle inspection at handover/return
+- Forget to record payments
+- Override availability warnings
+- Edit confirmed contracts without reason
+- Delete contracts (disable instead)
+- Share login credentials
+- Leave drafts unsaved
+- Forget to activate after handover
+- Delay completing returned vehicles
+- Enter wrong dates or times
+
+### Keyboard Shortcuts
+
+- **Toggle Sidebar**: Press `b` key
+- **Search**: Press `/` key (on list pages)
+- **Navigate Tables**: Use arrow keys
+
+### Getting Help
+
+**If You Encounter Issues:**
+1. Check this user guide
+2. Ask your supervisor or manager
+3. Contact system administrator
+4. Check system for error messages
+5. Document the issue for IT support
+
+**Common Questions:**
+- How to reset password? → Contact administrator
+- Can't find customer? → Use search box or check "Disabled" filter
+- Vehicle unavailable? → Check date range or select different vehicle
+- Contract won't save? → Check for validation errors (red fields)
+- Payment not showing? → Refresh page or check filters
+
+---
+
+## Appendix
+
+### Field Descriptions
+
+**Contract Fields:**
+- **Contract Number**: Unique auto-generated ID
+- **Start Date**: Rental begins
+- **End Date**: Expected return
+- **Daily Rate**: Cost per day
+- **Deposit**: Upfront payment
+- **Grand Total**: Final amount due
+
+**Customer Fields:**
+- **ID Number**: National ID or passport
+- **License Number**: Driver's license
+- **License Expiry**: Must be valid during rental
+
+**Vehicle Fields:**
+- **Registration Number**: License plate
+- **VIN**: Vehicle Identification Number
+- **Odometer**: Current mileage
+- **Fuel Level**: Current fuel status
+
+### Status Badges
+
+- 🟦 **Draft**: Blue - Editable
+- 🟧 **Confirmed**: Orange - Verified
+- 🟩 **Active**: Green - In progress
+- 🟪 **Completed**: Purple - Returned
+- ⬛ **Closed**: Gray - Archived
+
+---
+
+**End of User Guide**
+
+For administrative functions, refer to the **Administrator Guide**.  
+For technical issues, refer to the **Maintenance Guide**.
