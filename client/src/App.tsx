@@ -19,8 +19,6 @@ import Contracts from "@/pages/Contracts";
 import ContractForm from "@/pages/ContractForm";
 import ContractView from "@/pages/ContractView";
 import Users from "@/pages/Users";
-import DisabledUsers from "@/pages/DisabledUsers";
-import DisabledContracts from "@/pages/DisabledContracts";
 import AuditLogs from "@/pages/AuditLogs";
 import SystemErrors from "@/pages/SystemErrors";
 import Settings from "@/pages/Settings";
@@ -96,12 +94,6 @@ function Router() {
       <Route path="/contracts/:id" component={() => <ProtectedRoute component={ContractView} />} />
       <Route path="/users">
         {() => <ProtectedRoute component={Users} />}
-      </Route>
-      <Route path="/disabled-users">
-        {() => <ProtectedRoute component={DisabledUsers} />}
-      </Route>
-      <Route path="/disabled-contracts">
-        {() => <ProtectedRoute component={DisabledContracts} />}
       </Route>
       <Route path="/audit-logs">
         {() => <ProtectedRoute component={AuditLogs} />}

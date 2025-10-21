@@ -5,7 +5,7 @@ import { User } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -45,7 +45,7 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 export default function Users() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('active');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -246,23 +246,29 @@ export default function Users() {
     }
   };
 
-  const filteredUsers = users.filter((user) => {
+  // Merge active and disabled users
+  const allUsers = [...users, ...disabledUsers];
+
+  // Apply status filter
+  const filteredByStatus = allUsers.filter((user) => {
+    if (statusFilter === 'active') return !user.disabledAt;
+    if (statusFilter === 'disabled') return user.disabledAt;
+    return true; // 'all'
+  });
+
+  // Apply search filter across username, name, email, and role
+  const filteredUsers = filteredByStatus.filter((user) => {
     const search = searchQuery.toLowerCase();
     return (
       user.username.toLowerCase().includes(search) ||
       (user.firstName && user.firstName.toLowerCase().includes(search)) ||
-      (user.lastName && user.lastName.toLowerCase().includes(search))
+      (user.lastName && user.lastName.toLowerCase().includes(search)) ||
+      (user.email && user.email.toLowerCase().includes(search)) ||
+      t(`role.${user.role}`).toLowerCase().includes(search)
     );
   });
 
-  const filteredDisabledUsers = disabledUsers.filter((user) => {
-    const search = searchQuery.toLowerCase();
-    return (
-      user.username.toLowerCase().includes(search) ||
-      (user.firstName && user.firstName.toLowerCase().includes(search)) ||
-      (user.lastName && user.lastName.toLowerCase().includes(search))
-    );
-  });
+  const isDisabledUser = (user: User) => !!user.disabledAt;
 
   return (
     <div className="flex-1 overflow-auto p-6">
@@ -275,51 +281,72 @@ export default function Users() {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input
-            placeholder={t('users.searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            data-testid="input-search-users"
-          />
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Input
+                placeholder={t('users.searchPlaceholder')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                data-testid="input-search-users"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]" data-testid="select-filter-status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('users.filterAll')} ({allUsers.length})</SelectItem>
+                <SelectItem value="active">{t('users.filterActive')} ({users.length})</SelectItem>
+                <SelectItem value="disabled">{t('users.filterDisabled')} ({disabledUsers.length})</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="active" data-testid="tab-active-users">
-                {t('users.activeUsers')} ({users.length})
-              </TabsTrigger>
-              <TabsTrigger value="disabled" data-testid="tab-disabled-users">
-                {t('users.disabledUsers')} ({disabledUsers.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="active" className="mt-4">
-              {isLoading ? (
-                <div className="text-center py-8">{t('common.loading')}</div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">{t('common.noResults')}</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t('users.username')}</TableHead>
-                      <TableHead>{t('users.name')}</TableHead>
-                      <TableHead>{t('users.email')}</TableHead>
-                      <TableHead>{t('users.role')}</TableHead>
-                      <TableHead className="text-right">{t('contracts.actions')}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
-                        <TableCell className="font-medium">{user.username}</TableCell>
-                        <TableCell>
-                          {user.firstName || user.lastName
-                            ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-                            : '-'}
-                        </TableCell>
-                        <TableCell>{user.email || '-'}</TableCell>
-                        <TableCell>{t(`role.${user.role}`)}</TableCell>
-                        <TableCell className="text-right space-x-2">
+          {isLoading || isLoadingDisabled ? (
+            <div className="text-center py-8">{t('common.loading')}</div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">{t('common.noResults')}</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('users.username')}</TableHead>
+                  <TableHead>{t('users.name')}</TableHead>
+                  <TableHead>{t('users.email')}</TableHead>
+                  <TableHead>{t('users.role')}</TableHead>
+                  <TableHead>{t('common.status')}</TableHead>
+                  <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow 
+                    key={user.id} 
+                    data-testid={`row-user-${user.id}`}
+                    className={isDisabledUser(user) ? 'opacity-60' : ''}
+                  >
+                    <TableCell className="font-medium">{user.username}</TableCell>
+                    <TableCell>
+                      {user.firstName || user.lastName
+                        ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+                        : '-'}
+                    </TableCell>
+                    <TableCell>{user.email || '-'}</TableCell>
+                    <TableCell>{t(`role.${user.role}`)}</TableCell>
+                    <TableCell>
+                      {isDisabledUser(user) ? (
+                        <Badge variant="secondary" data-testid={`badge-disabled-${user.id}`}>
+                          {t('common.disabled')}
+                        </Badge>
+                      ) : (
+                        <Badge variant="default" data-testid={`badge-active-${user.id}`}>
+                          {t('common.active')}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      {!isDisabledUser(user) ? (
+                        <>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -337,62 +364,23 @@ export default function Users() {
                           >
                             <span className="material-icons text-base">block</span>
                           </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </TabsContent>
-
-            <TabsContent value="disabled" className="mt-4">
-              {isLoadingDisabled ? (
-                <div className="text-center py-8">{t('common.loading')}</div>
-              ) : filteredDisabledUsers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">{t('common.noResults')}</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t('users.username')}</TableHead>
-                      <TableHead>{t('users.name')}</TableHead>
-                      <TableHead>{t('users.email')}</TableHead>
-                      <TableHead>{t('users.role')}</TableHead>
-                      <TableHead>{t('users.disabledAt')}</TableHead>
-                      <TableHead className="text-right">{t('contracts.actions')}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredDisabledUsers.map((user) => (
-                      <TableRow key={user.id} data-testid={`row-disabled-user-${user.id}`}>
-                        <TableCell className="font-medium">{user.username}</TableCell>
-                        <TableCell>
-                          {user.firstName || user.lastName
-                            ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-                            : '-'}
-                        </TableCell>
-                        <TableCell>{user.email || '-'}</TableCell>
-                        <TableCell>{t(`role.${user.role}`)}</TableCell>
-                        <TableCell>
-                          {user.disabledAt ? new Date(user.disabledAt).toLocaleString() : '-'}
-                        </TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEnableDialog(user)}
-                            data-testid={`button-enable-user-${user.id}`}
-                          >
-                            <span className="material-icons text-base">check_circle</span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </TabsContent>
-          </Tabs>
+                        </>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEnableDialog(user)}
+                          data-testid={`button-enable-user-${user.id}`}
+                        >
+                          <span className="material-icons text-base">check_circle</span>
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 

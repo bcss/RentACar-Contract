@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { EditReasonDialog } from '@/components/EditReasonDialog';
 import {
   Table,
@@ -35,9 +37,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function Contracts() {
   const { t } = useTranslation();
@@ -49,14 +52,14 @@ export default function Contracts() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>(statusFromUrl);
-  const [activeTab, setActiveTab] = useState('active');
+  const [fromDate, setFromDate] = useState<Date | undefined>();
+  const [toDate, setToDate] = useState<Date | undefined>();
   const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
   const [isEnableDialogOpen, setIsEnableDialogOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [isEditReasonDialogOpen, setIsEditReasonDialogOpen] = useState(false);
   const [contractToEdit, setContractToEdit] = useState<Contract | null>(null);
 
-  // Update status filter when URL changes
   useEffect(() => {
     const params = new URLSearchParams(location.split('?')[1] || '');
     const status = params.get('status') || 'all';
@@ -152,29 +155,47 @@ export default function Contracts() {
     setIsEnableDialogOpen(true);
   };
 
-  const filteredContracts = contracts.filter(contract => {
+  const clearDateFilters = () => {
+    setFromDate(undefined);
+    setToDate(undefined);
+  };
+
+  const allContracts = statusFilter === 'disabled' ? disabledContracts : contracts;
+
+  const filteredContracts = allContracts.filter(contract => {
     const matchesSearch = 
       contract.contractNumber.toString().includes(searchTerm) ||
       (contract.customerNameEn && contract.customerNameEn.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (contract.customerNameAr && contract.customerNameAr.includes(searchTerm));
     
-    const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || statusFilter === 'disabled' || contract.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    let matchesDateRange = true;
+    if (fromDate || toDate) {
+      const rentalStart = contract.rentalStartDate ? new Date(contract.rentalStartDate) : null;
+      const rentalEnd = contract.rentalEndDate ? new Date(contract.rentalEndDate) : null;
+      
+      if (fromDate && rentalStart && rentalStart < fromDate) {
+        matchesDateRange = false;
+      }
+      if (toDate && rentalEnd && rentalEnd > toDate) {
+        matchesDateRange = false;
+      }
+    }
+    
+    return matchesSearch && matchesStatus && matchesDateRange;
   });
 
-  const filteredDisabledContracts = disabledContracts.filter(contract => {
-    const matchesSearch = 
-      contract.contractNumber.toString().includes(searchTerm) ||
-      (contract.customerNameEn && contract.customerNameEn.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (contract.customerNameAr && contract.customerNameAr.includes(searchTerm));
-    
-    const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const getStatusBadge = (status: string, disabled?: boolean) => {
+    if (disabled) {
+      return (
+        <Badge variant="default" className="bg-secondary hover:bg-secondary text-secondary-foreground flex items-center gap-1 w-fit" data-testid="badge-status-disabled">
+          <span className="material-icons text-sm">block</span>
+          {t('common.disabled')}
+        </Badge>
+      );
+    }
 
-  const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { color: string; icon: string; label: string }> = {
       draft: { color: 'bg-chart-4 hover:bg-chart-4 text-white', icon: 'edit', label: t('contracts.draft') },
       finalized: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'lock', label: t('contracts.finalized') },
@@ -225,7 +246,7 @@ export default function Contracts() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.search')}</label>
               <Input
@@ -243,178 +264,200 @@ export default function Contracts() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="all">{t('common.all')}</SelectItem>
+                  <SelectItem value="draft">{t('contracts.draft')}</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="disabled">{t('common.disabled')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('common.dateFrom')}</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !fromDate && "text-muted-foreground"
+                    )}
+                    data-testid="button-from-date"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {fromDate ? format(fromDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={fromDate}
+                    onSelect={setFromDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('common.dateTo')}</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !toDate && "text-muted-foreground"
+                    )}
+                    data-testid="button-to-date"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {toDate ? format(toDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={toDate}
+                    onSelect={setToDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
+          {(fromDate || toDate) && (
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearDateFilters}
+                data-testid="button-clear-dates"
+              >
+                <span className="material-icons text-sm mr-1">clear</span>
+                {t('contracts.clearDateFilter')}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       <Card>
-        <CardContent className="space-y-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="active" data-testid="tab-active-contracts">
-                {t('contracts.activeContracts')} ({contracts.length})
-              </TabsTrigger>
-              <TabsTrigger value="disabled" data-testid="tab-disabled-contracts">
-                {t('contracts.disabledContracts')} ({disabledContracts.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="active" className="mt-4">
-              {contractsLoading ? (
-                <div className="text-center py-8">{t('common.loading')}</div>
-              ) : filteredContracts.length === 0 ? (
-                <div className="p-12 text-center">
-                  <span className="material-icons text-6xl text-muted-foreground">description</span>
-                  <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t('contracts.contractNumber')}</TableHead>
-                      <TableHead>{t('contracts.customerName')}</TableHead>
-                      <TableHead>{t('contracts.status')}</TableHead>
-                      <TableHead>{t('contracts.createdDate')}</TableHead>
-                      <TableHead className="text-right">{t('contracts.actions')}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredContracts.map((contract) => (
-                      <TableRow key={contract.id} className="hover-elevate" data-testid={`row-contract-${contract.id}`}>
-                        <TableCell className="font-mono font-medium" data-testid={`text-contract-number-${contract.id}`}>
-                          #{contract.contractNumber}
-                        </TableCell>
-                        <TableCell data-testid={`text-customer-name-${contract.id}`}>
-                          {contract.customerNameEn}
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(contract.status)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {contract.createdAt && format(new Date(contract.createdAt), 'PP')}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
+        <CardContent className="p-6">
+          {contractsLoading || disabledContractsLoading ? (
+            <div className="text-center py-8">{t('common.loading')}</div>
+          ) : filteredContracts.length === 0 ? (
+            <div className="p-12 text-center">
+              <span className="material-icons text-6xl text-muted-foreground">description</span>
+              <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('contracts.contractNumber')}</TableHead>
+                  <TableHead>{t('contracts.customerName')}</TableHead>
+                  <TableHead>{t('contracts.status')}</TableHead>
+                  <TableHead>{t('contracts.rentalStartDate')}</TableHead>
+                  <TableHead>{t('contracts.rentalEndDate')}</TableHead>
+                  <TableHead>{t('contracts.createdDate')}</TableHead>
+                  <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredContracts.map((contract) => {
+                  const isDisabled = statusFilter === 'disabled';
+                  return (
+                    <TableRow key={contract.id} className="hover-elevate" data-testid={`row-contract-${contract.id}`}>
+                      <TableCell className="font-mono font-medium" data-testid={`text-contract-number-${contract.id}`}>
+                        #{contract.contractNumber}
+                      </TableCell>
+                      <TableCell data-testid={`text-customer-name-${contract.id}`}>
+                        {contract.customerNameEn}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(contract.status, isDisabled)}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {contract.rentalStartDate ? format(new Date(contract.rentalStartDate), 'PP') : '-'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {contract.rentalEndDate ? format(new Date(contract.rentalEndDate), 'PP') : '-'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {contract.createdAt && format(new Date(contract.createdAt), 'PP')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {!isDisabled && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                asChild
+                                data-testid={`button-view-${contract.id}`}
+                              >
+                                <Link href={`/contracts/${contract.id}`}>
+                                  <span className="material-icons">visibility</span>
+                                </Link>
+                              </Button>
+                              {contract.status === 'draft' && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    setContractToEdit(contract);
+                                    setIsEditReasonDialogOpen(true);
+                                  }}
+                                  data-testid={`button-edit-${contract.id}`}
+                                >
+                                  <span className="material-icons">edit</span>
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                asChild
+                                data-testid={`button-print-${contract.id}`}
+                              >
+                                <Link href={`/contracts/${contract.id}`}>
+                                  <span className="material-icons">print</span>
+                                </Link>
+                              </Button>
+                              {isAdmin && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => openDisableDialog(contract)}
+                                  data-testid={`button-disable-contract-${contract.id}`}
+                                >
+                                  <span className="material-icons">block</span>
+                                </Button>
+                              )}
+                            </>
+                          )}
+                          {isDisabled && isAdmin && (
                             <Button
                               variant="ghost"
                               size="icon"
-                              asChild
-                              data-testid={`button-view-${contract.id}`}
+                              onClick={() => openEnableDialog(contract)}
+                              data-testid={`button-enable-contract-${contract.id}`}
                             >
-                              <Link href={`/contracts/${contract.id}`}>
-                                <span className="material-icons">visibility</span>
-                              </Link>
+                              <span className="material-icons">check_circle</span>
                             </Button>
-                            {contract.status === 'draft' && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  setContractToEdit(contract);
-                                  setIsEditReasonDialogOpen(true);
-                                }}
-                                data-testid={`button-edit-${contract.id}`}
-                              >
-                                <span className="material-icons">edit</span>
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              asChild
-                              data-testid={`button-print-${contract.id}`}
-                            >
-                              <Link href={`/contracts/${contract.id}`}>
-                                <span className="material-icons">print</span>
-                              </Link>
-                            </Button>
-                            {isAdmin && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => openDisableDialog(contract)}
-                                data-testid={`button-disable-contract-${contract.id}`}
-                              >
-                                <span className="material-icons">block</span>
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </TabsContent>
-
-            <TabsContent value="disabled" className="mt-4">
-              {disabledContractsLoading ? (
-                <div className="text-center py-8">{t('common.loading')}</div>
-              ) : filteredDisabledContracts.length === 0 ? (
-                <div className="p-12 text-center">
-                  <span className="material-icons text-6xl text-muted-foreground">description</span>
-                  <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t('contracts.contractNumber')}</TableHead>
-                      <TableHead>{t('contracts.customerName')}</TableHead>
-                      <TableHead>{t('contracts.status')}</TableHead>
-                      <TableHead>{t('contracts.disabledDate')}</TableHead>
-                      <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                          )}
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredDisabledContracts.map((contract) => (
-                      <TableRow key={contract.id} className="hover-elevate" data-testid={`row-disabled-contract-${contract.id}`}>
-                        <TableCell className="font-mono font-medium" data-testid={`text-contract-number-${contract.id}`}>
-                          #{contract.contractNumber}
-                        </TableCell>
-                        <TableCell data-testid={`text-customer-name-${contract.id}`}>
-                          {contract.customerNameEn}
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(contract.status)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {contract.disabledAt ? format(new Date(contract.disabledAt), 'PP p') : '-'}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {isAdmin && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => openEnableDialog(contract)}
-                                data-testid={`button-enable-contract-${contract.id}`}
-                              >
-                                <span className="material-icons">check_circle</span>
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </TabsContent>
-          </Tabs>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
-      {/* Disable Contract Dialog */}
       <AlertDialog open={isDisableDialogOpen} onOpenChange={setIsDisableDialogOpen}>
         <AlertDialogContent data-testid="dialog-disable-contract">
           <AlertDialogHeader>
@@ -438,7 +481,6 @@ export default function Contracts() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Enable Contract Dialog */}
       <AlertDialog open={isEnableDialogOpen} onOpenChange={setIsEnableDialogOpen}>
         <AlertDialogContent data-testid="dialog-enable-contract">
           <AlertDialogHeader>
@@ -462,7 +504,6 @@ export default function Contracts() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Edit Reason Dialog */}
       {contractToEdit && (
         <EditReasonDialog
           open={isEditReasonDialogOpen}
