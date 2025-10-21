@@ -151,6 +151,23 @@ const resources = {
       "common.dateTo": "Date To",
       "common.saving": "Saving...",
       
+      // Date Selector
+      "date.day": "DD",
+      "date.month": "Month",
+      "date.year": "YYYY",
+      "date.months.1": "January",
+      "date.months.2": "February",
+      "date.months.3": "March",
+      "date.months.4": "April",
+      "date.months.5": "May",
+      "date.months.6": "June",
+      "date.months.7": "July",
+      "date.months.8": "August",
+      "date.months.9": "September",
+      "date.months.10": "October",
+      "date.months.11": "November",
+      "date.months.12": "December",
+      
       // Auth
       "auth.login": "Log In",
       "auth.logout": "Log Out",
@@ -791,6 +808,23 @@ const resources = {
       "common.dateFrom": "من تاريخ",
       "common.dateTo": "إلى تاريخ",
       "common.saving": "جاري الحفظ...",
+      
+      // Date Selector
+      "date.day": "يوم",
+      "date.month": "شهر",
+      "date.year": "سنة",
+      "date.months.1": "يناير",
+      "date.months.2": "فبراير",
+      "date.months.3": "مارس",
+      "date.months.4": "أبريل",
+      "date.months.5": "مايو",
+      "date.months.6": "يونيو",
+      "date.months.7": "يوليو",
+      "date.months.8": "أغسطس",
+      "date.months.9": "سبتمبر",
+      "date.months.10": "أكتوبر",
+      "date.months.11": "نوفمبر",
+      "date.months.12": "ديسمبر",
       
       // Auth
       "auth.login": "تسجيل الدخول",

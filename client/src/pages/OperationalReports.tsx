@@ -6,8 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { DateSelector } from '@/components/ui/date-selector';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -250,43 +249,22 @@ export default function OperationalReports() {
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
               <label className="text-sm font-medium mb-2 block">{t('common.dateFrom')}</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start" data-testid="button-date-from">
-                    <span className="material-icons mr-2">calendar_today</span>
-                    {startDate ? format(startDate, 'PPP') : t('common.dateFrom')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DateSelector
+                value={startDate}
+                onChange={setStartDate}
+                placeholder={t('common.dateFrom')}
+                data-testid="date-from"
+              />
             </div>
 
             <div className="flex-1 min-w-[200px]">
               <label className="text-sm font-medium mb-2 block">{t('common.dateTo')}</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start" data-testid="button-date-to">
-                    <span className="material-icons mr-2">calendar_today</span>
-                    {endDate ? format(endDate, 'PPP') : t('common.dateTo')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    initialFocus
-                    disabled={(date) => startDate ? date < startDate : false}
-                  />
-                </PopoverContent>
-              </Popover>
+              <DateSelector
+                value={endDate}
+                onChange={setEndDate}
+                placeholder={t('common.dateTo')}
+                data-testid="date-to"
+              />
             </div>
 
             <Button 

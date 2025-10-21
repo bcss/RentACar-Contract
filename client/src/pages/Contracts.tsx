@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { DateSelector } from '@/components/ui/date-selector';
 import { EditReasonDialog } from '@/components/EditReasonDialog';
 import {
   Table,
@@ -39,8 +38,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default function Contracts() {
   const { t } = useTranslation();
@@ -276,55 +273,21 @@ export default function Contracts() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.dateFrom')}</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !fromDate && "text-muted-foreground"
-                    )}
-                    data-testid="button-from-date"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {fromDate ? format(fromDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={fromDate}
-                    onSelect={setFromDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DateSelector
+                value={fromDate}
+                onChange={setFromDate}
+                placeholder={t('common.dateFrom')}
+                data-testid="date-from"
+              />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('common.dateTo')}</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !toDate && "text-muted-foreground"
-                    )}
-                    data-testid="button-to-date"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {toDate ? format(toDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={toDate}
-                    onSelect={setToDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DateSelector
+                value={toDate}
+                onChange={setToDate}
+                placeholder={t('common.dateTo')}
+                data-testid="date-to"
+              />
             </div>
           </div>
           {(fromDate || toDate) && (
