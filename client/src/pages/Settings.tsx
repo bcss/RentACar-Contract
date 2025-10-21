@@ -27,6 +27,11 @@ export default function Settings() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  
+  // Get tab from URL query parameter
+  const searchParams = new URLSearchParams(window.location.search);
+  const tabParam = searchParams.get('tab');
+  const defaultTab = tabParam === 'financial' ? 'financial' : tabParam === 'terms' ? 'terms' : 'company';
 
   const { data: settings, isLoading } = useQuery<CompanySettings>({
     queryKey: ['/api/settings'],
@@ -392,9 +397,22 @@ export default function Settings() {
         </div>
 
         <Form {...form}>
-          <div className="space-y-6">
-            {/* Company Information */}
-            <Card>
+          <Tabs defaultValue={defaultTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="company" data-testid="tab-company">
+                {t('nav.companySettings')}
+              </TabsTrigger>
+              <TabsTrigger value="financial" data-testid="tab-financial">
+                {t('nav.financialSettings')}
+              </TabsTrigger>
+              <TabsTrigger value="terms" data-testid="tab-terms">
+                {t('nav.termsConditions')}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="company" className="space-y-6">
+              {/* Company Information */}
+              <Card>
               <CardHeader>
                 <CardTitle>{t('settings.companyInfo')}</CardTitle>
               </CardHeader>
@@ -652,7 +670,9 @@ export default function Settings() {
                 </Button>
               </CardFooter>
             </Card>
+            </TabsContent>
 
+            <TabsContent value="financial" className="space-y-6">
             {/* Financial Settings */}
             <Card>
               <CardHeader>
@@ -1572,7 +1592,9 @@ export default function Settings() {
                 </Button>
               </CardFooter>
             </Card>
+            </TabsContent>
 
+            <TabsContent value="terms" className="space-y-6">
             {/* Terms & Conditions */}
             <Card>
               <CardHeader>
@@ -1727,7 +1749,8 @@ export default function Settings() {
                 </Button>
               </CardFooter>
             </Card>
-          </div>
+            </TabsContent>
+          </Tabs>
         </Form>
       </div>
     </div>
