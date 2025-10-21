@@ -94,19 +94,19 @@ export function AppSidebar() {
     {
       title: t('nav.companySettings'),
       icon: 'business_center',
-      url: '/settings?tab=company',
+      url: '/company-settings',
       show: isAdmin,
     },
     {
       title: t('nav.financialSettings'),
       icon: 'account_balance',
-      url: '/settings?tab=financial',
+      url: '/financial-settings',
       show: isAdmin,
     },
     {
       title: t('nav.termsConditions'),
       icon: 'description',
-      url: '/settings?tab=terms',
+      url: '/terms-conditions',
       show: isAdmin,
     },
     {
@@ -121,13 +121,13 @@ export function AppSidebar() {
     {
       title: t('nav.auditLogs'),
       icon: 'history',
-      url: '/audit-logs?tab=audit',
+      url: '/audit-logs',
       show: isAdmin || isManager,
     },
     {
       title: t('nav.systemErrors'),
       icon: 'error_outline',
-      url: '/audit-logs?tab=errors',
+      url: '/system-errors',
       show: isAdmin,
     },
   ];
@@ -326,24 +326,16 @@ export function AppSidebar() {
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {settingsItems.filter(item => item.show).map((item) => {
-                          const isActive = item.url.includes('?') 
-                            ? location.startsWith(item.url.split('?')[0]) && window.location.search.includes(item.url.split('=')[1])
-                            : location === item.url;
-                          const testId = item.url.includes('?')
-                            ? `nav-${item.url.split('?')[0].replace('/', '')}-${item.url.split('=')[1]}`
-                            : `nav-${item.url.replace('/', '')}`;
-                          return (
-                            <SidebarMenuSubItem key={item.title}>
-                              <SidebarMenuSubButton asChild isActive={isActive} data-testid={testId}>
-                                <Link href={item.url}>
-                                  <span className="material-icons">{item.icon}</span>
-                                  <span>{item.title}</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
+                        {settingsItems.filter(item => item.show).map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                              <Link href={item.url}>
+                                <span className="material-icons">{item.icon}</span>
+                                <span>{item.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>

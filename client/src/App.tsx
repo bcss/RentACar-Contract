@@ -23,12 +23,15 @@ import DisabledUsers from "@/pages/DisabledUsers";
 import DisabledContracts from "@/pages/DisabledContracts";
 import AuditLogs from "@/pages/AuditLogs";
 import Settings from "@/pages/Settings";
+import CompanySettings from "@/pages/CompanySettings";
+import FinancialSettings from "@/pages/FinancialSettings";
+import TermsConditions from "@/pages/TermsConditions";
 import NotFound from "@/pages/not-found";
 import "@/lib/i18n";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { CompanySettings } from "@shared/schema";
+import { CompanySettings as CompanySettingsType } from "@shared/schema";
 
 // Protected route wrapper with proper redirect
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -105,6 +108,15 @@ function Router() {
       <Route path="/settings">
         {() => <ProtectedRoute component={Settings} />}
       </Route>
+      <Route path="/company-settings">
+        {() => <ProtectedRoute component={CompanySettings} />}
+      </Route>
+      <Route path="/financial-settings">
+        {() => <ProtectedRoute component={FinancialSettings} />}
+      </Route>
+      <Route path="/terms-conditions">
+        {() => <ProtectedRoute component={TermsConditions} />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
@@ -115,7 +127,7 @@ function AppContent() {
   const { t, i18n } = useTranslation();
   
   // Fetch company settings for dynamic title
-  const { data: settings } = useQuery<CompanySettings>({
+  const { data: settings } = useQuery<CompanySettingsType>({
     queryKey: ['/api/settings'],
     enabled: isAuthenticated,
   });
