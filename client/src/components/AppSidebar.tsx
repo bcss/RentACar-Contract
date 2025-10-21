@@ -94,19 +94,19 @@ export function AppSidebar() {
     {
       title: t('nav.companySettings'),
       icon: 'business_center',
-      url: '/company-settings',
+      url: '/settings/company',
       show: isAdmin,
     },
     {
       title: t('nav.financialSettings'),
       icon: 'account_balance',
-      url: '/financial-settings',
+      url: '/settings/financials',
       show: isAdmin,
     },
     {
       title: t('nav.termsConditions'),
       icon: 'description',
-      url: '/terms-conditions',
+      url: '/settings/terms',
       show: isAdmin,
     },
     {

@@ -10,27 +10,31 @@ This bilingual (English/Arabic) rental car contract management system, built wit
 - **Navigation Reorganization:** 
   - Enhanced hierarchical sidebar with better organization
   - Renamed "Audit Logs & System Errors" parent menu to "Logs & Errors"
-  - Settings submenu: Company, Financial Settings, Terms & Conditions, System Users
-  - Logs & Errors parent menu with two submenus (Audit Logs, System Errors)
+  - Renamed "Financial Settings" to "Financials" throughout
+  - Settings submenu: Company, Financials, Terms & Conditions, System Users
+  - Logs & Errors parent menu with two separate pages (Audit Logs, System Errors)
   - Masters menu: Customers, Vehicles, Sponsors, Companies
+  - **Page-Based Architecture**: Moved from tab-based to separate page-based navigation:
+    - Audit Logs: Standalone page at /audit-logs (removed System Errors tab)
+    - System Errors: Separate page at /system-errors (admin-only)
+    - Settings pages: Separate routes at /settings/company, /settings/financials, /settings/terms (no tabs)
 - **UI/UX Improvements:**
   - Dynamic company name display in sidebar header and browser title
   - Title format: "<Company Name> Contract Management System"
-  - Settings page reorganized into three tabs (Company, Financial Settings, Terms & Conditions) with query parameter support
+  - Settings split into three separate pages (Company, Financials, Terms & Conditions) for cleaner navigation
+  - Companies page tabs renamed to "Active Companies" and "Disabled Companies" for clarity
   - Removed redundant subtitle text from sidebar
   - Dashboard now displays all 6 contract status cards (Draft, Confirmed, Active, Completed, Closed, Total) fixing count inconsistency
 - **Bug Fixes:** 
   - Fixed server error handler crash bug (removed throw after response sent)
   - Fixed ContractForm.tsx sponsor form reference (personForm → sponsorForm)
   - Fixed payment creation endpoint to properly validate and coerce paidAt date using insertPaymentSchema
-  - Fixed AuditLogs page tab switching: Added controlled state with useEffect watching wouter location to handle URL-based navigation
-  - Fixed Settings page tab switching: Added controlled state with useEffect watching wouter location to handle URL-based navigation
   - Fixed Dashboard missing Active status card (was showing 5 cards when 6 statuses exist)
 - **Form Enhancements:** Updated Customers.tsx and Vehicles.tsx to use shared insert schemas from @shared/schema for better type consistency and code quality.
 - **Audit Logging Verification:** Completed comprehensive audit of all mutation endpoints to ensure consistent audit logging coverage across create, update, delete operations. Added audit logging to system error acknowledgment endpoint.
 - **RBAC Verification:** Verified all sensitive endpoints have appropriate role-based access controls with proper admin/manager/staff/viewer permissions.
 - **Vehicle Availability Validation:** Verified full implementation of vehicle availability checking system - backend endpoint checks overlapping contracts, frontend automatically validates dates and vehicle selection, prevents submission if unavailable, shows real-time status badges.
-- **Navigation Fixes:** Fixed tab switching in AuditLogs and Settings pages to properly respond to sidebar navigation with query parameters using controlled tab state and wouter's useLocation hook.
+- **Navigation Architecture Update:** Transitioned from tab-based to page-based navigation for Settings and Logs sections. Created separate pages (SystemErrors.tsx, CompanySettings.tsx, FinancialSettings.tsx, TermsConditions.tsx) with dedicated routes for clearer navigation and better user experience.
 - **End-to-End Testing:** Completed comprehensive E2E testing covering authentication, customer/vehicle creation, contract workflow, payment recording, vehicle availability validation, data persistence, and navigation (including tab switching via sidebar). All features verified working correctly.
 
 ## User Preferences

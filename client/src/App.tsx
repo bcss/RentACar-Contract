@@ -22,6 +22,7 @@ import Users from "@/pages/Users";
 import DisabledUsers from "@/pages/DisabledUsers";
 import DisabledContracts from "@/pages/DisabledContracts";
 import AuditLogs from "@/pages/AuditLogs";
+import SystemErrors from "@/pages/SystemErrors";
 import Settings from "@/pages/Settings";
 import CompanySettings from "@/pages/CompanySettings";
 import FinancialSettings from "@/pages/FinancialSettings";
@@ -105,16 +106,19 @@ function Router() {
       <Route path="/audit-logs">
         {() => <ProtectedRoute component={AuditLogs} />}
       </Route>
+      <Route path="/system-errors">
+        {() => <ProtectedRoute component={SystemErrors} />}
+      </Route>
       <Route path="/settings">
         {() => <ProtectedRoute component={Settings} />}
       </Route>
-      <Route path="/company-settings">
+      <Route path="/settings/company">
         {() => <ProtectedRoute component={CompanySettings} />}
       </Route>
-      <Route path="/financial-settings">
+      <Route path="/settings/financials">
         {() => <ProtectedRoute component={FinancialSettings} />}
       </Route>
-      <Route path="/terms-conditions">
+      <Route path="/settings/terms">
         {() => <ProtectedRoute component={TermsConditions} />}
       </Route>
       <Route component={NotFound} />
