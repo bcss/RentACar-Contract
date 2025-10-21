@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Contract, ContractWithDetails } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,14 +43,25 @@ export default function Contracts() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const [location] = useLocation();
+  const searchParams = new URLSearchParams(location.split('?')[1] || '');
+  const statusFromUrl = searchParams.get('status') || 'all';
+  
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>(statusFromUrl);
   const [activeTab, setActiveTab] = useState('active');
   const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
   const [isEnableDialogOpen, setIsEnableDialogOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [isEditReasonDialogOpen, setIsEditReasonDialogOpen] = useState(false);
   const [contractToEdit, setContractToEdit] = useState<Contract | null>(null);
+
+  // Update status filter when URL changes
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    const status = params.get('status') || 'all';
+    setStatusFilter(status);
+  }, [location]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -233,8 +244,11 @@ export default function Contracts() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="draft">{t('contracts.draft')}</SelectItem>
-                  <SelectItem value="finalized">{t('contracts.finalized')}</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
                 </SelectContent>
               </Select>
             </div>

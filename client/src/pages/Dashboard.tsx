@@ -7,8 +7,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'wouter';
-import { Contract, SystemError } from '@shared/schema';
+import { Contract, SystemError, Vehicle } from '@shared/schema';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,8 +47,13 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, isLoading, toast, t]);
 
-  const { data: contracts = [] } = useQuery<Contract[]>({
+  const { data: contracts = [], isLoading: contractsLoading } = useQuery<Contract[]>({
     queryKey: ['/api/contracts'],
+    enabled: isAuthenticated,
+  });
+
+  const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery<Vehicle[]>({
+    queryKey: ['/api/vehicles'],
     enabled: isAuthenticated,
   });
 
@@ -157,6 +164,37 @@ export default function Dashboard() {
       return sum + total + extras;
     }, 0);
 
+  // Calculate Vehicle Utilization (% of vehicles currently rented)
+  const totalVehicles = vehicles.filter(v => !v.disabled).length;
+  const vehicleUtilization = totalVehicles > 0 ? (activeContracts / totalVehicles) * 100 : 0;
+
+  // Calculate Payment Collection Rate (% collected vs total due)
+  const totalDue = contracts
+    .filter(c => ['active', 'completed', 'closed'].includes(c.status))
+    .reduce((sum, c) => {
+      const total = parseFloat(c.totalAmount || '0');
+      const extras = parseFloat(c.totalExtraCharges || '0');
+      return sum + total + extras;
+    }, 0);
+
+  const totalCollected = contracts
+    .filter(c => ['active', 'completed', 'closed'].includes(c.status))
+    .reduce((sum, c) => {
+      const payments = parseFloat(c.amountPaid || '0');
+      return sum + payments;
+    }, 0);
+
+  const paymentCollectionRate = totalDue > 0 ? (totalCollected / totalDue) * 100 : 0;
+
+  // Calculate Average Extra Charges from completed contracts
+  const completedWithExtras = contracts.filter(c => 
+    c.status === 'completed' && parseFloat(c.totalExtraCharges || '0') > 0
+  );
+  const totalExtraCharges = completedWithExtras.reduce((sum, c) => 
+    sum + parseFloat(c.totalExtraCharges || '0'), 0
+  );
+  const avgExtraCharges = completedContracts > 0 ? totalExtraCharges / completedContracts : 0;
+
   const getStatusBadge = (status: string) => {
     return status === 'draft' 
       ? <Badge variant="secondary" className="bg-chart-4 hover:bg-chart-4">{t('contracts.draft')}</Badge>
@@ -203,130 +241,335 @@ export default function Dashboard() {
 
       {/* Phase 3.1: Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Rentals
-            </CardTitle>
-            <span className="material-icons text-primary">directions_car</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-primary" data-testid="stat-active-contracts">{activeContracts}</div>
-            <p className="text-xs text-muted-foreground mt-1">Currently rented out</p>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card data-testid="card-active-rentals">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Active Rentals
+                </CardTitle>
+                <span className="material-icons text-primary">directions_car</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-10 w-20" />
+                ) : (
+                  <div className="text-3xl font-bold text-primary" data-testid="stat-active-contracts">{activeContracts}</div>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">Currently rented out</p>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Number of vehicles currently on rent</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Monthly Revenue
-            </CardTitle>
-            <span className="material-icons text-chart-1">payments</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-chart-1" data-testid="stat-monthly-revenue">
-              {currency} {monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">This month</p>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card data-testid="card-monthly-revenue">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Monthly Revenue
+                </CardTitle>
+                <span className="material-icons text-chart-1">payments</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-10 w-32" />
+                ) : (
+                  <div className="text-3xl font-bold text-chart-1" data-testid="stat-monthly-revenue">
+                    {currency} {monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">This month</p>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total revenue generated this month</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className={overdueContracts.length > 0 ? "border-destructive" : ""}>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Overdue Returns
-            </CardTitle>
-            <span className={`material-icons ${overdueContracts.length > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-              warning
-            </span>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-3xl font-bold ${overdueContracts.length > 0 ? 'text-destructive' : ''}`} data-testid="stat-overdue-contracts">
-              {overdueContracts.length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Needs attention</p>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className={overdueContracts.length > 0 ? "border-destructive" : ""} data-testid="card-overdue-returns">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Overdue Returns
+                </CardTitle>
+                <span className={`material-icons ${overdueContracts.length > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  warning
+                </span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-10 w-16" />
+                ) : (
+                  <div className={`text-3xl font-bold ${overdueContracts.length > 0 ? 'text-destructive' : ''}`} data-testid="stat-overdue-contracts">
+                    {overdueContracts.length}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">Needs attention</p>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Contracts past their return date</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className={pendingRefunds.length > 0 ? "border-chart-3" : ""}>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Refunds
-            </CardTitle>
-            <span className={`material-icons ${pendingRefunds.length > 0 ? 'text-chart-3' : 'text-muted-foreground'}`}>
-              account_balance_wallet
-            </span>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-3xl font-bold ${pendingRefunds.length > 0 ? 'text-chart-3' : ''}`} data-testid="stat-pending-refunds">
-              {pendingRefunds.length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Deposits to refund</p>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className={pendingRefunds.length > 0 ? "border-chart-3" : ""} data-testid="card-pending-refunds">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Pending Refunds
+                </CardTitle>
+                <span className={`material-icons ${pendingRefunds.length > 0 ? 'text-chart-3' : 'text-muted-foreground'}`}>
+                  account_balance_wallet
+                </span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-10 w-16" />
+                ) : (
+                  <div className={`text-3xl font-bold ${pendingRefunds.length > 0 ? 'text-chart-3' : ''}`} data-testid="stat-pending-refunds">
+                    {pendingRefunds.length}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">Deposits to refund</p>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Number of security deposits awaiting refund</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
-      {/* Additional Status Cards */}
+      {/* New Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card data-testid="card-vehicle-utilization">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Vehicle Utilization
+                </CardTitle>
+                <span className="material-icons text-chart-2">local_shipping</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading || vehiclesLoading ? (
+                  <Skeleton className="h-10 w-24" />
+                ) : (
+                  <>
+                    <div className="text-3xl font-bold text-chart-2" data-testid="stat-vehicle-utilization">
+                      {vehicleUtilization.toFixed(1)}%
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {activeContracts} of {totalVehicles} vehicles in use
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Percentage of fleet currently rented out</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card data-testid="card-payment-collection">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Payment Collection Rate
+                </CardTitle>
+                <span className={`material-icons ${paymentCollectionRate >= 90 ? 'text-chart-2' : paymentCollectionRate >= 70 ? 'text-chart-3' : 'text-destructive'}`}>
+                  account_balance
+                </span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-10 w-24" />
+                ) : (
+                  <>
+                    <div className={`text-3xl font-bold ${paymentCollectionRate >= 90 ? 'text-chart-2' : paymentCollectionRate >= 70 ? 'text-chart-3' : 'text-destructive'}`} data-testid="stat-payment-collection-rate">
+                      {paymentCollectionRate.toFixed(1)}%
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {currency} {totalCollected.toFixed(2)} of {currency} {totalDue.toFixed(2)} collected
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Percentage of total payments collected</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card data-testid="card-avg-extra-charges">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Avg. Extra Charges
+                </CardTitle>
+                <span className="material-icons text-chart-5">receipt_long</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-10 w-28" />
+                ) : (
+                  <>
+                    <div className="text-3xl font-bold text-chart-5" data-testid="stat-avg-extra-charges">
+                      {currency} {avgExtraCharges.toFixed(2)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Per completed contract
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Average additional charges per completed rental</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      {/* Additional Status Cards - Clickable */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Draft</CardTitle>
-            <span className="material-icons text-muted-foreground text-sm">edit_note</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-chart-4" data-testid="stat-draft-contracts">{draftContracts}</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=draft')} data-testid="card-status-draft">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Draft</CardTitle>
+                <span className="material-icons text-muted-foreground text-sm">edit_note</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold text-chart-4" data-testid="stat-draft-contracts">{draftContracts}</div>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view draft contracts</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
-            <span className="material-icons text-muted-foreground text-sm">check</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="stat-confirmed-contracts">{confirmedContracts}</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=confirmed')} data-testid="card-status-confirmed">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
+                <span className="material-icons text-muted-foreground text-sm">check</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold" data-testid="stat-confirmed-contracts">{confirmedContracts}</div>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view confirmed contracts</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active</CardTitle>
-            <span className="material-icons text-muted-foreground text-sm">directions_car</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary" data-testid="stat-active-status-contracts">{activeContracts}</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=active')} data-testid="card-status-active">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active</CardTitle>
+                <span className="material-icons text-muted-foreground text-sm">directions_car</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold text-primary" data-testid="stat-active-status-contracts">{activeContracts}</div>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view active contracts</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <span className="material-icons text-muted-foreground text-sm">done_all</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="stat-completed-contracts">{completedContracts}</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=completed')} data-testid="card-status-completed">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Completed</CardTitle>
+                <span className="material-icons text-muted-foreground text-sm">done_all</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold" data-testid="stat-completed-contracts">{completedContracts}</div>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view completed contracts</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Closed</CardTitle>
-            <span className="material-icons text-muted-foreground text-sm">archive</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-chart-2" data-testid="stat-closed-contracts">{closedContracts}</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=closed')} data-testid="card-status-closed">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Closed</CardTitle>
+                <span className="material-icons text-muted-foreground text-sm">archive</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold text-chart-2" data-testid="stat-closed-contracts">{closedContracts}</div>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view closed contracts</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
-            <span className="material-icons text-muted-foreground text-sm">description</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="stat-total-contracts">{contracts.length}</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=all')} data-testid="card-status-total">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total</CardTitle>
+                <span className="material-icons text-muted-foreground text-sm">description</span>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold" data-testid="stat-total-contracts">{contracts.length}</div>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view all contracts</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Unacknowledged System Errors (Admin only) */}
