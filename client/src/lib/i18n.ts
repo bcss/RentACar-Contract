@@ -24,6 +24,11 @@ const resources = {
       "nav.disabledUsers": "Disabled Users",
       "nav.disabledContracts": "Disabled Contracts",
       "nav.settings": "Settings",
+      "nav.reports": "Reports",
+      "nav.financialReports": "Financial Reports",
+      "nav.operationalReports": "Operational Reports",
+      "nav.customerReports": "Customer Reports",
+      "nav.auditReports": "Audit Reports",
       
       // Common
       "common.search": "Search",
@@ -568,6 +573,11 @@ const resources = {
       "nav.disabledUsers": "المستخدمون المعطلون",
       "nav.disabledContracts": "العقود المعطلة",
       "nav.settings": "الإعدادات",
+      "nav.reports": "التقارير",
+      "nav.financialReports": "التقارير المالية",
+      "nav.operationalReports": "التقارير التشغيلية",
+      "nav.customerReports": "تقارير العملاء",
+      "nav.auditReports": "تقارير التدقيق",
       
       // Common
       "common.search": "بحث",

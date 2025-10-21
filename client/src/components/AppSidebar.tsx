@@ -117,6 +117,33 @@ export function AppSidebar() {
     },
   ];
 
+  const reportItems = [
+    {
+      title: t('nav.financialReports'),
+      icon: 'account_balance',
+      url: '/reports/financial',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.operationalReports'),
+      icon: 'bar_chart',
+      url: '/reports/operational',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.customerReports'),
+      icon: 'people_outline',
+      url: '/reports/customers',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.auditReports'),
+      icon: 'timeline',
+      url: '/reports/audit',
+      show: isAdmin || isManager,
+    },
+  ];
+
   const auditItems = [
     {
       title: t('nav.auditLogs'),
@@ -279,6 +306,37 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              {/* Reports - Collapsible (Admin/Manager only) */}
+              {(isAdmin || isManager) && (
+                <Collapsible defaultOpen className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton data-testid="nav-reports">
+                        <span className="material-icons">assessment</span>
+                        <span>{t('nav.reports')}</span>
+                        <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                          chevron_right
+                        </span>
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {reportItems.filter(item => item.show).map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/reports/', '')}-reports`}>
+                              <Link href={item.url}>
+                                <span className="material-icons">{item.icon}</span>
+                                <span>{item.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
 
               {/* Audit Logs & System Errors - Collapsible (Admin/Manager only) */}
               {(isAdmin || isManager) && (
