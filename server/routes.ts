@@ -1234,6 +1234,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const error = await storage.acknowledgeSystemError(req.params.id, userId);
+      
+      await createAuditLog(
+        userId,
+        'acknowledge_error',
+        undefined,
+        req.ip,
+        `Acknowledged system error ${error.id} (${error.errorType})`
+      );
+      
       res.json(error);
     } catch (error: any) {
       console.error("Error acknowledging system error:", error);
