@@ -1172,6 +1172,11 @@ export class DatabaseStorage implements IStorage {
     const totalRevenue = revenueContracts.reduce((sum, c) => {
       return sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0');
     }, 0);
+    
+    // All-time revenue (no date filter)
+    const allTimeRevenue = allContracts
+      .filter(c => c.status !== 'draft')
+      .reduce((sum, c) => sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0'), 0);
 
     // Total payments collected
     const totalCollected = allPayments
@@ -1186,6 +1191,85 @@ export class DatabaseStorage implements IStorage {
 
     // Payment collection rate
     const collectionRate = totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0;
+
+    // Monthly revenue breakdown
+    const monthlyRevenue = new Map<string, { revenue: number; count: number }>();
+    revenueContracts.forEach(contract => {
+      if (contract.createdAt) {
+        const date = new Date(contract.createdAt);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const revenue = parseFloat(contract.totalAmount) + parseFloat(contract.totalExtraCharges || '0');
+        const existing = monthlyRevenue.get(monthKey) || { revenue: 0, count: 0 };
+        monthlyRevenue.set(monthKey, {
+          revenue: existing.revenue + revenue,
+          count: existing.count + 1,
+        });
+      }
+    });
+
+    const monthlyBreakdown = Array.from(monthlyRevenue.entries())
+      .map(([month, data]) => ({
+        month,
+        revenue: data.revenue,
+        contractCount: data.count,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    // Revenue by contract status
+    const revenueByStatus = {
+      confirmed: 0,
+      active: 0,
+      completed: 0,
+      closed: 0,
+    };
+    revenueContracts.forEach(contract => {
+      const revenue = parseFloat(contract.totalAmount) + parseFloat(contract.totalExtraCharges || '0');
+      if (contract.status in revenueByStatus) {
+        revenueByStatus[contract.status as keyof typeof revenueByStatus] += revenue;
+      }
+    });
+
+    // Payment method breakdown
+    const paymentMethods = new Map<string, number>();
+    allPayments
+      .filter(p => {
+        const contract = filteredContracts.find(c => c.id === p.contractId);
+        return contract !== undefined;
+      })
+      .forEach(payment => {
+        const method = payment.method || 'unknown';
+        paymentMethods.set(method, (paymentMethods.get(method) || 0) + parseFloat(payment.amount));
+      });
+
+    const methodBreakdown = Array.from(paymentMethods.entries())
+      .map(([method, amount]) => ({
+        method,
+        amount,
+      }));
+
+    // Recent payments (last 10)
+    const recentPayments = allPayments
+      .filter(p => {
+        const contract = filteredContracts.find(c => c.id === p.contractId);
+        return contract !== undefined;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.paidAt || a.createdAt || 0);
+        const dateB = new Date(b.paidAt || b.createdAt || 0);
+        return dateB.getTime() - dateA.getTime();
+      })
+      .slice(0, 10)
+      .map(payment => {
+        const contract = allContracts.find(c => c.id === payment.contractId);
+        return {
+          id: payment.id,
+          amount: parseFloat(payment.amount),
+          method: payment.method || 'unknown',
+          date: payment.paidAt || payment.createdAt,
+          contractNumber: contract?.contractNumber || 0,
+          contractId: payment.contractId,
+        };
+      });
 
     // Outstanding payments list
     const outstandingPayments = revenueContracts.map(contract => {
@@ -1205,16 +1289,24 @@ export class DatabaseStorage implements IStorage {
         collected: contractPayments,
         outstanding: outstanding,
         status: contract.status,
+        dueDate: contract.rentalEndDate,
       };
-    }).filter(p => p.outstanding > 0);
+    })
+    .filter(p => p.outstanding > 0)
+    .sort((a, b) => b.outstanding - a.outstanding); // Sort by outstanding amount (highest first)
 
     return {
       summary: {
         totalRevenue,
+        allTimeRevenue,
         totalCollected,
         totalOutstanding,
         collectionRate,
       },
+      monthlyBreakdown,
+      revenueByStatus,
+      methodBreakdown,
+      recentPayments,
       outstandingPayments,
     };
   }
