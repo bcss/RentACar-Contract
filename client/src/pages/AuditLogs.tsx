@@ -201,6 +201,7 @@ export default function AuditLogs() {
                   <TableHead>{t('audit.action')}</TableHead>
                   <TableHead>{t('audit.contract')}</TableHead>
                   <TableHead>{t('audit.user')}</TableHead>
+                  <TableHead>{t('audit.location')}</TableHead>
                   <TableHead>{t('audit.timestamp')}</TableHead>
                   <TableHead>{t('audit.details')}</TableHead>
                 </TableRow>
@@ -222,11 +223,30 @@ export default function AuditLogs() {
                         ? `${(log as any).userFirstName} ${(log as any).userLastName}`
                         : (log as any).userName || log.userId}
                     </TableCell>
+                    <TableCell className="text-sm">
+                      {log.city || log.country ? (
+                        <div className="flex items-center gap-1" data-testid={`text-log-location-${log.id}`}>
+                          <span className="material-icons text-xs text-muted-foreground">location_on</span>
+                          <span>
+                            {[log.city, log.region, log.country].filter(Boolean).join(', ') || 'N/A'}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">N/A</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {log.createdAt && format(new Date(log.createdAt), 'PPp')}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground" data-testid={`text-log-details-${log.id}`}>
-                      {log.details || '-'}
+                      <div className="space-y-1">
+                        <div>{log.details || '-'}</div>
+                        {log.userAgent && (
+                          <div className="text-xs text-muted-foreground truncate max-w-xs" title={log.userAgent}>
+                            {log.userAgent}
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
