@@ -267,7 +267,7 @@ export default function Dashboard() {
       </div>
 
       {/* Additional Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Draft</CardTitle>
@@ -285,6 +285,16 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold" data-testid="stat-confirmed-contracts">{confirmedContracts}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active</CardTitle>
+            <span className="material-icons text-muted-foreground text-sm">directions_car</span>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary" data-testid="stat-active-status-contracts">{activeContracts}</div>
           </CardContent>
         </Card>
 

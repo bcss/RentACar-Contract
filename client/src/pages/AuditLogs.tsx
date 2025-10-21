@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 import { AuditLog, SystemError } from '@shared/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -41,11 +42,23 @@ export default function AuditLogs() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading, isAdmin, isManager } = useAuth();
+  const [location] = useLocation();
 
   // Check for tab query parameter
   const searchParams = new URLSearchParams(window.location.search);
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam === 'errors' && isAdmin ? 'errors' : 'audit');
+
+  // Update tab when URL changes
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams(window.location.search);
+    const newTabParam = newSearchParams.get('tab');
+    if (newTabParam === 'errors' && isAdmin) {
+      setActiveTab('errors');
+    } else if (newTabParam === 'audit' || !newTabParam) {
+      setActiveTab('audit');
+    }
+  }, [location, isAdmin]);
 
   useEffect(() => {
     if (!authLoading && (!isAuthenticated || (!isAdmin && !isManager))) {
