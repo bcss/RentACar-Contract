@@ -243,19 +243,18 @@ export default function Contracts() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.search')}</label>
+              <label className="text-sm font-medium block">{t('common.search')}</label>
               <Input
                 placeholder={t('contracts.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 data-testid="input-search"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('contracts.status')}</label>
+              <label className="text-sm font-medium block">{t('contracts.status')}</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger data-testid="select-status-filter">
                   <SelectValue />
@@ -272,7 +271,7 @@ export default function Contracts() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.dateFrom')}</label>
+              <label className="text-sm font-medium block">{t('common.dateFrom')}</label>
               <DatePicker
                 date={fromDate}
                 onDateChange={setFromDate}
@@ -280,7 +279,7 @@ export default function Contracts() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.dateTo')}</label>
+              <label className="text-sm font-medium block">{t('common.dateTo')}</label>
               <DatePicker
                 date={toDate}
                 onDateChange={setToDate}
