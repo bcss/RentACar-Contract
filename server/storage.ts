@@ -1144,6 +1144,295 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Reports - Financial
+  async getFinancialReport(startDate?: Date, endDate?: Date) {
+    const allContracts = await db.select().from(contracts);
+    const allPayments = await db.select().from(payments);
+    const allCustomers = await db.select().from(customers);
+    
+    // Create customer lookup map
+    const customerMap = new Map(allCustomers.map(c => [c.id, c]));
+    
+    // Filter by date range if provided
+    const filteredContracts = allContracts.filter(c => {
+      if (!startDate && !endDate) return true;
+      if (!c.createdAt) return false;
+      const contractDate = new Date(c.createdAt);
+      if (startDate && contractDate < startDate) return false;
+      if (endDate && contractDate > endDate) return false;
+      return true;
+    });
+
+    // Revenue contracts (not draft)
+    const revenueContracts = filteredContracts.filter(c => 
+      c.status !== 'draft'
+    );
+
+    // Total revenue (contract amount + extra charges)
+    const totalRevenue = revenueContracts.reduce((sum, c) => {
+      return sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0');
+    }, 0);
+
+    // Total payments collected
+    const totalCollected = allPayments
+      .filter(p => {
+        const contract = filteredContracts.find(c => c.id === p.contractId);
+        return contract !== undefined;
+      })
+      .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+    // Outstanding amount
+    const totalOutstanding = totalRevenue - totalCollected;
+
+    // Payment collection rate
+    const collectionRate = totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0;
+
+    // Outstanding payments list
+    const outstandingPayments = revenueContracts.map(contract => {
+      const contractRevenue = parseFloat(contract.totalAmount) + parseFloat(contract.totalExtraCharges || '0');
+      const contractPayments = allPayments
+        .filter(p => p.contractId === contract.id)
+        .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+      const outstanding = contractRevenue - contractPayments;
+      
+      const customer = customerMap.get(contract.customerId);
+
+      return {
+        contractId: contract.id,
+        contractNumber: contract.contractNumber,
+        customerName: customer?.nameEn || 'Unknown',
+        totalAmount: contractRevenue,
+        collected: contractPayments,
+        outstanding: outstanding,
+        status: contract.status,
+      };
+    }).filter(p => p.outstanding > 0);
+
+    return {
+      summary: {
+        totalRevenue,
+        totalCollected,
+        totalOutstanding,
+        collectionRate,
+      },
+      outstandingPayments,
+    };
+  }
+
+  // Reports - Operational
+  async getOperationalReport(startDate?: Date, endDate?: Date) {
+    const allContracts = await db.select().from(contracts);
+    const allVehicles = await db.select().from(vehicles);
+    const allCustomers = await db.select().from(customers);
+    
+    // Create customer lookup map
+    const customerMap = new Map(allCustomers.map(c => [c.id, c]));
+    
+    // Filter by date range if provided
+    const filteredContracts = allContracts.filter(c => {
+      if (!startDate && !endDate) return true;
+      if (!c.createdAt) return false;
+      const contractDate = new Date(c.createdAt);
+      if (startDate && contractDate < startDate) return false;
+      if (endDate && contractDate > endDate) return false;
+      return true;
+    });
+
+    // Vehicle utilization
+    const activeContracts = allContracts.filter(c => c.status === 'active');
+    const activeVehicleIds = new Set(activeContracts.map(c => c.vehicleId));
+    const utilizationRate = allVehicles.length > 0 
+      ? (activeVehicleIds.size / allVehicles.length) * 100 
+      : 0;
+
+    // Vehicle usage stats
+    const vehicleStats = allVehicles.map(vehicle => {
+      const vehicleContracts = filteredContracts.filter(c => c.vehicleId === vehicle.id);
+      const totalRevenue = vehicleContracts
+        .filter(c => c.status !== 'draft')
+        .reduce((sum, c) => sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0'), 0);
+      const totalDays = vehicleContracts.reduce((sum, c) => sum + (c.totalDays || 0), 0);
+      const isActive = activeContracts.some(c => c.vehicleId === vehicle.id);
+
+      return {
+        vehicleId: vehicle.id,
+        registration: vehicle.registration,
+        make: vehicle.make,
+        model: vehicle.model,
+        contractCount: vehicleContracts.length,
+        totalRevenue,
+        totalDays,
+        isActive,
+      };
+    });
+
+    // Contract status summary
+    const statusSummary = {
+      draft: filteredContracts.filter(c => c.status === 'draft').length,
+      confirmed: filteredContracts.filter(c => c.status === 'confirmed').length,
+      active: filteredContracts.filter(c => c.status === 'active').length,
+      completed: filteredContracts.filter(c => c.status === 'completed').length,
+      closed: filteredContracts.filter(c => c.status === 'closed').length,
+    };
+
+    // Extra charges analysis
+    const extraCharges = filteredContracts
+      .filter(c => c.totalExtraCharges && parseFloat(c.totalExtraCharges) > 0)
+      .map(c => {
+        const customer = customerMap.get(c.customerId);
+        return {
+          contractId: c.id,
+          contractNumber: c.contractNumber,
+          customerName: customer?.nameEn || 'Unknown',
+          extraCharges: parseFloat(c.totalExtraCharges || '0'),
+          status: c.status,
+        };
+      });
+
+    const totalExtraCharges = extraCharges.reduce((sum, e) => sum + e.extraCharges, 0);
+    const avgExtraCharges = extraCharges.length > 0 ? totalExtraCharges / extraCharges.length : 0;
+
+    return {
+      utilization: {
+        utilizationRate,
+        activeVehicles: activeVehicleIds.size,
+        totalVehicles: allVehicles.length,
+      },
+      vehicleStats,
+      statusSummary,
+      extraCharges: {
+        total: totalExtraCharges,
+        average: avgExtraCharges,
+        contracts: extraCharges,
+      },
+    };
+  }
+
+  // Reports - Customer
+  async getCustomerReport(startDate?: Date, endDate?: Date) {
+    const allContracts = await db.select().from(contracts);
+    const allCustomers = await db.select().from(customers);
+    
+    // Filter by date range if provided
+    const filteredContracts = allContracts.filter(c => {
+      if (!startDate && !endDate) return true;
+      if (!c.createdAt) return false;
+      const contractDate = new Date(c.createdAt);
+      if (startDate && contractDate < startDate) return false;
+      if (endDate && contractDate > endDate) return false;
+      return true;
+    });
+
+    // Customer activity
+    const customerActivity = allCustomers.map(customer => {
+      const customerContracts = filteredContracts.filter(c => c.customerId === customer.id);
+      const totalRevenue = customerContracts
+        .filter(c => c.status !== 'draft')
+        .reduce((sum, c) => sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0'), 0);
+      const totalDays = customerContracts.reduce((sum, c) => sum + (c.totalDays || 0), 0);
+
+      // Calculate last rental date safely
+      const contractDates = customerContracts
+        .filter(c => c.createdAt)
+        .map(c => new Date(c.createdAt!).getTime());
+      const lastRental = contractDates.length > 0 
+        ? new Date(Math.max(...contractDates))
+        : null;
+
+      return {
+        customerId: customer.id,
+        nameEn: customer.nameEn,
+        nameAr: customer.nameAr,
+        contractCount: customerContracts.length,
+        totalRevenue,
+        totalDays,
+        lastRental,
+      };
+    }).filter(c => c.contractCount > 0);
+
+    // Repeat customers (2+ contracts)
+    const repeatCustomers = customerActivity.filter(c => c.contractCount >= 2);
+
+    // New customers in period
+    const newCustomers = customerActivity.filter(customer => {
+      const allCustomerContracts = allContracts.filter(c => c.customerId === customer.customerId);
+      if (allCustomerContracts.length === 0) return false;
+      
+      // Get first contract date safely
+      const contractDates = allCustomerContracts
+        .filter(c => c.createdAt)
+        .map(c => new Date(c.createdAt!).getTime());
+      
+      if (contractDates.length === 0) return false;
+      
+      const firstContractDate = new Date(Math.min(...contractDates));
+      
+      if (startDate && firstContractDate < startDate) return false;
+      if (endDate && firstContractDate > endDate) return false;
+      
+      return true;
+    });
+
+    return {
+      customerActivity: customerActivity.sort((a, b) => b.totalRevenue - a.totalRevenue),
+      repeatCustomers: repeatCustomers.sort((a, b) => b.contractCount - a.contractCount),
+      newCustomers: newCustomers.sort((a, b) => {
+        const aDate = a.lastRental ? a.lastRental.getTime() : 0;
+        const bDate = b.lastRental ? b.lastRental.getTime() : 0;
+        return bDate - aDate;
+      }),
+    };
+  }
+
+  // Reports - Audit
+  async getAuditReport(startDate?: Date, endDate?: Date) {
+    // Contract modifications
+    const modifications = await db.select().from(contractEdits);
+    const filteredModifications = modifications.filter(m => {
+      if (!startDate && !endDate) return true;
+      if (!m.editedAt) return false;
+      const modDate = new Date(m.editedAt);
+      if (startDate && modDate < startDate) return false;
+      if (endDate && modDate > endDate) return false;
+      return true;
+    });
+
+    // Get user names for modifications
+    const userIds = new Set(filteredModifications.map(m => m.editedBy));
+    const users = await Promise.all(
+      Array.from(userIds).map(id => this.getUser(id))
+    );
+    const userMap = new Map(users.filter(u => u).map(u => [u!.id, `${u!.firstName || ''} ${u!.lastName || ''}`.trim() || u!.username]));
+
+    const modificationsWithUser = filteredModifications.map(m => ({
+      ...m,
+      userName: userMap.get(m.editedBy) || 'Unknown',
+    }));
+
+    // User activity summary
+    const userActivity = Array.from(userIds).map(userId => {
+      const userName = userMap.get(userId) || 'Unknown';
+      const userMods = filteredModifications.filter(m => m.editedBy === userId);
+      const contracts = new Set(userMods.map(m => m.contractId));
+
+      return {
+        userId,
+        userName,
+        modificationCount: userMods.length,
+        contractsModified: contracts.size,
+      };
+    }).sort((a, b) => b.modificationCount - a.modificationCount);
+
+    return {
+      modifications: modificationsWithUser.sort((a, b) => {
+        const aTime = a.editedAt ? new Date(a.editedAt).getTime() : 0;
+        const bTime = b.editedAt ? new Date(b.editedAt).getTime() : 0;
+        return bTime - aTime;
+      }),
+      userActivity,
+    };
+  }
+
   // Company settings operations
   async getCompanySettings(): Promise<CompanySettings> {
     const [settings] = await db.select().from(companySettings).where(eq(companySettings.id, "singleton"));

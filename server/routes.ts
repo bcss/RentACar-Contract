@@ -1288,6 +1288,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reports routes (Admin and Manager) with date range support
+  app.get('/api/reports/financial', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const report = await storage.getFinancialReport(startDate, endDate);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching financial report:", error);
+      res.status(500).json({ message: "Failed to fetch financial report" });
+    }
+  });
+
+  app.get('/api/reports/operational', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const report = await storage.getOperationalReport(startDate, endDate);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching operational report:", error);
+      res.status(500).json({ message: "Failed to fetch operational report" });
+    }
+  });
+
+  app.get('/api/reports/customers', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const report = await storage.getCustomerReport(startDate, endDate);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching customer report:", error);
+      res.status(500).json({ message: "Failed to fetch customer report" });
+    }
+  });
+
+  app.get('/api/reports/audit', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const report = await storage.getAuditReport(startDate, endDate);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching audit report:", error);
+      res.status(500).json({ message: "Failed to fetch audit report" });
+    }
+  });
+
   // Company settings routes (Admin only)
   app.get('/api/settings', isAuthenticated, async (req: any, res) => {
     try {
