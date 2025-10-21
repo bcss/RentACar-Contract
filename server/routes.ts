@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -1128,7 +1128,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const { contractId } = req.params;
-      const paymentData = req.body;
 
       // Verify contract exists
       const contract = await storage.getContract(contractId);
@@ -1136,10 +1135,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
 
+      // Validate and transform payment data using schema
+      const validatedData = insertPaymentSchema.parse({
+        ...req.body,
+        contractId,
+      });
+
       // Create payment
       const payment = await storage.createPayment({
-        ...paymentData,
-        contractId,
+        ...validatedData,
         createdBy: userId,
       });
 
@@ -1148,6 +1152,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(payment);
     } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
       console.error("Error creating payment:", error);
       res.status(400).json({ message: error.message || "Failed to create payment" });
     }

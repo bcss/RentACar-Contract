@@ -2049,7 +2049,7 @@ export default function ContractForm() {
                 />
               </div>
               <FormField
-                control={personForm.control}
+                control={sponsorForm.control}
                 name="address"
                 render={({ field }) => (
                   <FormItem>
