@@ -1163,9 +1163,10 @@ export class DatabaseStorage implements IStorage {
       return true;
     });
 
-    // Revenue contracts (not draft)
+    // Revenue contracts (only active, completed, and closed - these have earned revenue)
+    // CRITICAL FIX: Exclude 'confirmed' status - those haven't started yet
     const revenueContracts = filteredContracts.filter(c => 
-      c.status !== 'draft'
+      c.status === 'active' || c.status === 'completed' || c.status === 'closed'
     );
 
     // Total revenue (contract amount + extra charges)
@@ -1173,9 +1174,9 @@ export class DatabaseStorage implements IStorage {
       return sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0');
     }, 0);
     
-    // All-time revenue (no date filter)
+    // All-time revenue (no date filter) - only active, completed, closed
     const allTimeRevenue = allContracts
-      .filter(c => c.status !== 'draft')
+      .filter(c => c.status === 'active' || c.status === 'completed' || c.status === 'closed')
       .reduce((sum, c) => sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0'), 0);
 
     // Total payments collected
@@ -1186,11 +1187,21 @@ export class DatabaseStorage implements IStorage {
       })
       .reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
-    // Outstanding amount
+    // Finalized contracts (completed + closed) - these are the only ones with final amounts due
+    const finalizedContracts = filteredContracts.filter(c => 
+      c.status === 'completed' || c.status === 'closed'
+    );
+    
+    const finalizedRevenue = finalizedContracts.reduce((sum, c) => {
+      return sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0');
+    }, 0);
+
+    // Outstanding amount (total revenue - total collected across all revenue-earning contracts)
     const totalOutstanding = totalRevenue - totalCollected;
 
-    // Payment collection rate
-    const collectionRate = totalRevenue > 0 ? (totalCollected / totalRevenue) * 100 : 0;
+    // Payment collection rate - CRITICAL FIX: Compare against finalized contracts only
+    // This shows what % of finalized amounts have been collected
+    const collectionRate = finalizedRevenue > 0 ? (totalCollected / finalizedRevenue) * 100 : 0;
 
     // Monthly revenue breakdown
     const monthlyRevenue = new Map<string, { revenue: number; count: number }>();
@@ -1271,8 +1282,9 @@ export class DatabaseStorage implements IStorage {
         };
       });
 
-    // Outstanding payments list
-    const outstandingPayments = revenueContracts.map(contract => {
+    // Outstanding payments list - CRITICAL FIX: Only show completed and closed contracts
+    // Active contracts are still ongoing, confirmed haven't started yet
+    const outstandingPayments = finalizedContracts.map(contract => {
       const contractRevenue = parseFloat(contract.totalAmount) + parseFloat(contract.totalExtraCharges || '0');
       const contractPayments = allPayments
         .filter(p => p.contractId === contract.id)
@@ -1330,12 +1342,32 @@ export class DatabaseStorage implements IStorage {
       return true;
     });
 
-    // Vehicle utilization
+    // Vehicle utilization - CRITICAL FIX: Calculate based on date range
+    // Formula: (total rental days in period / total available vehicle-days in period) * 100
+    let utilizationRate = 0;
+    let totalRentalDays = 0;
+    
+    if (startDate && endDate && allVehicles.length > 0) {
+      // Calculate period length in days
+      const periodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      const totalAvailableDays = allVehicles.length * periodDays;
+      
+      // Sum up rental days for all contracts in the period
+      totalRentalDays = filteredContracts
+        .filter(c => c.status !== 'draft') // Only count actual rentals
+        .reduce((sum, c) => sum + (c.totalDays || 0), 0);
+      
+      utilizationRate = totalAvailableDays > 0 ? (totalRentalDays / totalAvailableDays) * 100 : 0;
+    } else {
+      // If no date range, show current instant utilization (currently active vehicles)
+      const activeContracts = allContracts.filter(c => c.status === 'active');
+      const activeVehicleIds = new Set(activeContracts.map(c => c.vehicleId));
+      utilizationRate = allVehicles.length > 0 ? (activeVehicleIds.size / allVehicles.length) * 100 : 0;
+    }
+    
+    // Get currently active vehicles for display
     const activeContracts = allContracts.filter(c => c.status === 'active');
     const activeVehicleIds = new Set(activeContracts.map(c => c.vehicleId));
-    const utilizationRate = allVehicles.length > 0 
-      ? (activeVehicleIds.size / allVehicles.length) * 100 
-      : 0;
 
     // Vehicle usage stats
     const vehicleStats = allVehicles.map(vehicle => {
@@ -1442,25 +1474,27 @@ export class DatabaseStorage implements IStorage {
       };
     }).filter(c => c.contractCount > 0);
 
-    // Repeat customers (2+ contracts)
+    // Repeat customers - CRITICAL FIX: Customers who had 2+ contracts in the period (returned during period)
+    // This shows true retention WITHIN the selected timeframe
     const repeatCustomers = customerActivity.filter(c => c.contractCount >= 2);
 
-    // New customers in period
+    // New customers in period - CRITICAL FIX: Customers whose FIRST EVER contract was in this period
     const newCustomers = customerActivity.filter(customer => {
       const allCustomerContracts = allContracts.filter(c => c.customerId === customer.customerId);
       if (allCustomerContracts.length === 0) return false;
       
-      // Get first contract date safely
-      const contractDates = allCustomerContracts
+      // Get first contract date across ALL time (not just filtered period)
+      const allContractDates = allCustomerContracts
         .filter(c => c.createdAt)
         .map(c => new Date(c.createdAt!).getTime());
       
-      if (contractDates.length === 0) return false;
+      if (allContractDates.length === 0) return false;
       
-      const firstContractDate = new Date(Math.min(...contractDates));
+      const firstEverContractDate = new Date(Math.min(...allContractDates));
       
-      if (startDate && firstContractDate < startDate) return false;
-      if (endDate && firstContractDate > endDate) return false;
+      // Customer is "new" if their first ever contract falls within the selected period
+      if (startDate && firstEverContractDate < startDate) return false;
+      if (endDate && firstEverContractDate > endDate) return false;
       
       return true;
     });
@@ -1515,13 +1549,50 @@ export class DatabaseStorage implements IStorage {
       };
     }).sort((a, b) => b.modificationCount - a.modificationCount);
 
+    // CRITICAL FIX: Add summary statistics for audit report
+    const uniqueContracts = new Set(filteredModifications.map(m => m.contractId));
+    const totalModifications = filteredModifications.length;
+    const avgModificationsPerContract = uniqueContracts.size > 0 
+      ? totalModifications / uniqueContracts.size 
+      : 0;
+    
+    // Most frequently modified contracts
+    const contractModCounts = new Map<number, number>();
+    filteredModifications.forEach(m => {
+      contractModCounts.set(m.contractId, (contractModCounts.get(m.contractId) || 0) + 1);
+    });
+    
+    const mostModifiedContracts = Array.from(contractModCounts.entries())
+      .map(([contractId, count]) => ({ contractId, modificationCount: count }))
+      .sort((a, b) => b.modificationCount - a.modificationCount)
+      .slice(0, 10); // Top 10
+    
+    // Modification field breakdown
+    const fieldCounts = new Map<string, number>();
+    filteredModifications.forEach(m => {
+      const field = m.fieldName || 'unknown';
+      fieldCounts.set(field, (fieldCounts.get(field) || 0) + 1);
+    });
+    
+    const fieldBreakdown = Array.from(fieldCounts.entries())
+      .map(([field, count]) => ({ field, count }))
+      .sort((a, b) => b.count - a.count);
+
     return {
+      summary: {
+        totalModifications,
+        uniqueContracts: uniqueContracts.size,
+        avgModificationsPerContract,
+        activeUsers: userIds.size,
+      },
       modifications: modificationsWithUser.sort((a, b) => {
         const aTime = a.editedAt ? new Date(a.editedAt).getTime() : 0;
         const bTime = b.editedAt ? new Date(b.editedAt).getTime() : 0;
         return bTime - aTime;
       }),
       userActivity,
+      mostModifiedContracts,
+      fieldBreakdown,
     };
   }
 

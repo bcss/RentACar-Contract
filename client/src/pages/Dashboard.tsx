@@ -637,125 +637,146 @@ export default function Dashboard() {
       {canViewAnalytics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Revenue Metrics */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('analytics.revenueMetrics')}
-            </CardTitle>
-            <span className="material-icons text-muted-foreground">monetization_on</span>
-          </CardHeader>
-          <CardContent>
-            {revenueLoading ? (
-              <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-            ) : revenueAnalytics ? (
-              <div className="space-y-3">
-                <div>
-                  <div className="text-2xl font-bold" data-testid="stat-total-revenue">
-                    {currency} {revenueAnalytics.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/reports/financial')} data-testid="card-revenue-metrics">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t('analytics.revenueMetrics')}
+                </CardTitle>
+                <span className="material-icons text-muted-foreground">monetization_on</span>
+              </CardHeader>
+              <CardContent>
+                {revenueLoading ? (
+                  <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+                ) : revenueAnalytics ? (
+                  <div className="space-y-3">
+                    <div>
+                      <div className="text-2xl font-bold" data-testid="stat-total-revenue">
+                        {currency} {revenueAnalytics.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t('analytics.totalRevenue')}</p>
+                    </div>
+                    <div>
+                      <div className="text-lg font-medium" data-testid="stat-avg-contract">
+                        {currency} {revenueAnalytics.averageContractValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t('analytics.avgContractValue')}</p>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <span className={`material-icons text-sm ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+                        {revenueAnalytics.revenueGrowth >= 0 ? 'trending_up' : 'trending_down'}
+                      </span>
+                      <span className={`text-sm font-medium ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`} data-testid="stat-revenue-growth">
+                        {revenueAnalytics.revenueGrowth >= 0 ? '+' : ''}{revenueAnalytics.revenueGrowth.toFixed(1)}%
+                      </span>
+                      <span className="text-xs text-muted-foreground">{t('analytics.vsLastMonth')}</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">{t('analytics.totalRevenue')}</p>
-                </div>
-                <div>
-                  <div className="text-lg font-medium" data-testid="stat-avg-contract">
-                    {currency} {revenueAnalytics.averageContractValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{t('analytics.avgContractValue')}</p>
-                </div>
-                <div className="flex items-center gap-2 pt-2 border-t">
-                  <span className={`material-icons text-sm ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-                    {revenueAnalytics.revenueGrowth >= 0 ? 'trending_up' : 'trending_down'}
-                  </span>
-                  <span className={`text-sm font-medium ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`} data-testid="stat-revenue-growth">
-                    {revenueAnalytics.revenueGrowth >= 0 ? '+' : ''}{revenueAnalytics.revenueGrowth.toFixed(1)}%
-                  </span>
-                  <span className="text-xs text-muted-foreground">{t('analytics.vsLastMonth')}</span>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
-            )}
-          </CardContent>
-        </Card>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view financial reports</p>
+          </TooltipContent>
+        </Tooltip>
 
         {/* Operational Metrics */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('analytics.operationalMetrics')}
-            </CardTitle>
-            <span className="material-icons text-muted-foreground">assessment</span>
-          </CardHeader>
-          <CardContent>
-            {operationalLoading ? (
-              <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-            ) : operationalAnalytics ? (
-              <div className="space-y-3">
-                <div>
-                  <div className="text-2xl font-bold" data-testid="stat-avg-duration">
-                    {operationalAnalytics.averageRentalDuration.toFixed(1)} {t('analytics.days')}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/reports/operational')} data-testid="card-operational-metrics">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t('analytics.operationalMetrics')}
+                </CardTitle>
+                <span className="material-icons text-muted-foreground">assessment</span>
+              </CardHeader>
+              <CardContent>
+                {operationalLoading ? (
+                  <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+                ) : operationalAnalytics ? (
+                  <div className="space-y-3">
+                    <div>
+                      <div className="text-2xl font-bold" data-testid="stat-avg-duration">
+                        {operationalAnalytics.averageRentalDuration.toFixed(1)} {t('analytics.days')}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t('analytics.avgRentalDuration')}</p>
+                    </div>
+                    <div>
+                      <div className="text-lg font-medium" data-testid="stat-contracts-this-month">
+                        {operationalAnalytics.contractsThisMonth} {t('analytics.contracts')}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t('analytics.contractsThisMonth')}</p>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <span className={`material-icons text-sm ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
+                        {operationalAnalytics.contractGrowth >= 0 ? 'trending_up' : 'trending_down'}
+                      </span>
+                      <span className={`text-sm font-medium ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`} data-testid="stat-contract-growth">
+                        {operationalAnalytics.contractGrowth >= 0 ? '+' : ''}{operationalAnalytics.contractGrowth.toFixed(1)}%
+                      </span>
+                      <span className="text-xs text-muted-foreground">{t('analytics.vsLastMonth')}</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">{t('analytics.avgRentalDuration')}</p>
-                </div>
-                <div>
-                  <div className="text-lg font-medium" data-testid="stat-contracts-this-month">
-                    {operationalAnalytics.contractsThisMonth} {t('analytics.contracts')}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{t('analytics.contractsThisMonth')}</p>
-                </div>
-                <div className="flex items-center gap-2 pt-2 border-t">
-                  <span className={`material-icons text-sm ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-                    {operationalAnalytics.contractGrowth >= 0 ? 'trending_up' : 'trending_down'}
-                  </span>
-                  <span className={`text-sm font-medium ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`} data-testid="stat-contract-growth">
-                    {operationalAnalytics.contractGrowth >= 0 ? '+' : ''}{operationalAnalytics.contractGrowth.toFixed(1)}%
-                  </span>
-                  <span className="text-xs text-muted-foreground">{t('analytics.vsLastMonth')}</span>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
-            )}
-          </CardContent>
-        </Card>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view operational reports</p>
+          </TooltipContent>
+        </Tooltip>
 
         {/* Customer Insights */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('analytics.customerInsights')}
-            </CardTitle>
-            <span className="material-icons text-muted-foreground">people</span>
-          </CardHeader>
-          <CardContent>
-            {customerLoading ? (
-              <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-            ) : customerAnalytics ? (
-              <div className="space-y-3">
-                <div>
-                  <div className="text-2xl font-bold" data-testid="stat-total-customers">
-                    {customerAnalytics.totalCustomers}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/reports/customers')} data-testid="card-customer-insights">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t('analytics.customerInsights')}
+                </CardTitle>
+                <span className="material-icons text-muted-foreground">people</span>
+              </CardHeader>
+              <CardContent>
+                {customerLoading ? (
+                  <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+                ) : customerAnalytics ? (
+                  <div className="space-y-3">
+                    <div>
+                      <div className="text-2xl font-bold" data-testid="stat-total-customers">
+                        {customerAnalytics.totalCustomers}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t('analytics.totalCustomers')}</p>
+                    </div>
+                    <div>
+                      <div className="text-lg font-medium" data-testid="stat-repeat-rate">
+                        {customerAnalytics.repeatCustomerRate.toFixed(1)}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t('analytics.repeatCustomerRate')}</p>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <span className="material-icons text-sm text-chart-2">person_add</span>
+                      <span className="text-sm font-medium" data-testid="stat-new-customers">
+                        {customerAnalytics.newCustomersThisMonth} {t('analytics.newCustomers')}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{t('analytics.thisMonth')}</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">{t('analytics.totalCustomers')}</p>
-                </div>
-                <div>
-                  <div className="text-lg font-medium" data-testid="stat-repeat-rate">
-                    {customerAnalytics.repeatCustomerRate.toFixed(1)}%
-                  </div>
-                  <p className="text-xs text-muted-foreground">{t('analytics.repeatCustomerRate')}</p>
-                </div>
-                <div className="flex items-center gap-2 pt-2 border-t">
-                  <span className="material-icons text-sm text-chart-2">person_add</span>
-                  <span className="text-sm font-medium" data-testid="stat-new-customers">
-                    {customerAnalytics.newCustomersThisMonth} {t('analytics.newCustomers')}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{t('analytics.thisMonth')}</span>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
-            )}
-          </CardContent>
-        </Card>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{t('common.noData')}</p>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to view customer reports</p>
+          </TooltipContent>
+        </Tooltip>
         </div>
       )}
 
