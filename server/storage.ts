@@ -105,6 +105,7 @@ export interface IStorage {
   // Payment operations
   createPayment(payment: InsertPayment): Promise<Payment>;
   getPaymentsByContract(contractId: string): Promise<Payment[]>;
+  getPaymentById(id: string): Promise<Payment | undefined>;
   deletePayment(id: string): Promise<void>;
   
   // Audit log operations
@@ -843,6 +844,15 @@ export class DatabaseStorage implements IStorage {
       .from(payments)
       .where(eq(payments.contractId, contractId))
       .orderBy(desc(payments.paidAt));
+  }
+
+  async getPaymentById(id: string): Promise<Payment | undefined> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.id, id))
+      .limit(1);
+    return payment;
   }
 
   async deletePayment(id: string): Promise<void> {

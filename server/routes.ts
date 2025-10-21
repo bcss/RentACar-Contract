@@ -1169,14 +1169,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { id } = req.params;
 
-      // Get payment info before deletion for audit log
-      const payments = await storage.getPaymentsByContract(''); // We need to get the payment first
-      // TODO: Add getPaymentById method to storage for better audit logging
+      // Get payment info before deletion for audit log and verification
+      const payment = await storage.getPaymentById(id);
+      if (!payment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
 
+      // Delete the payment
       await storage.deletePayment(id);
 
-      // Create audit log
-      await createAuditLog(userId, 'delete', undefined, req.ip, `Deleted payment ${id}`);
+      // Create audit log with payment details
+      await createAuditLog(userId, 'delete', payment.contractId, req.ip, `Deleted payment of ${payment.amount} ${payment.currency} for contract`);
 
       res.json({ message: "Payment deleted successfully" });
     } catch (error: any) {
