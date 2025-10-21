@@ -588,6 +588,11 @@ export const auditLogs = pgTable("audit_logs", {
   action: varchar("action", { length: 50 }).notNull(), // create, edit, finalize, print, delete, login, logout
   contractId: varchar("contract_id").references(() => contracts.id),
   ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  sessionId: varchar("session_id"),
+  country: varchar("country", { length: 100 }),
+  city: varchar("city", { length: 100 }),
+  region: varchar("region", { length: 100 }),
   details: text("details"),
   createdAt: timestamp("created_at").defaultNow(),
 });

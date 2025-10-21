@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
@@ -8,6 +8,7 @@ import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { getGeolocation } from "./services/geolocation";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -19,14 +20,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed company settings on startup
   await seedCompanySettings();
 
-  // Helper function to create audit log
-  async function createAuditLog(userId: string, action: string, contractId?: string, ipAddress?: string, details?: string) {
+  // Helper function to create audit log with enhanced tracking
+  async function createAuditLog(userId: string, action: string, contractId: string | undefined, req: Request, details?: string) {
     try {
+      const ipAddress = req.ip;
+      const userAgent = req.get('user-agent');
+      const sessionId = req.session?.id;
+      
+      const geolocation = ipAddress ? await getGeolocation(ipAddress) : {};
+      
       await storage.createAuditLog({
         userId,
         action,
         contractId,
         ipAddress,
+        userAgent,
+        sessionId,
+        country: geolocation.country,
+        city: geolocation.city,
+        region: geolocation.region,
         details,
       });
     } catch (error) {
@@ -102,7 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user!.id,
       } as any);
       
-      await createAuditLog(req.user!.id, "create_customer", undefined, req.ip, `Created customer: ${customer.nameEn}`);
+      await createAuditLog(req.user!.id, "create_customer", undefined, req, `Created customer: ${customer.nameEn}`);
       
       res.status(201).json(customer);
     } catch (error) {
@@ -118,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerData = insertCustomerSchema.partial().parse(req.body);
       const customer = await storage.updateCustomer(req.params.id, customerData);
       
-      await createAuditLog(req.user!.id, "update_customer", undefined, req.ip, `Updated customer: ${customer.nameEn}`);
+      await createAuditLog(req.user!.id, "update_customer", undefined, req, `Updated customer: ${customer.nameEn}`);
       
       res.json(customer);
     } catch (error) {
@@ -133,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.disableCustomer(req.params.id, req.user!.id);
       
-      await createAuditLog(req.user!.id, "disable_customer", undefined, req.ip, `Disabled customer: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "disable_customer", undefined, req, `Disabled customer: ${req.params.id}`);
       
       res.json({ message: "Customer disabled successfully" });
     } catch (error) {
@@ -145,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.enableCustomer(req.params.id);
       
-      await createAuditLog(req.user!.id, "enable_customer", undefined, req.ip, `Enabled customer: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "enable_customer", undefined, req, `Enabled customer: ${req.params.id}`);
       
       res.json({ message: "Customer enabled successfully" });
     } catch (error) {
@@ -227,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user!.id,
       } as any);
       
-      await createAuditLog(req.user!.id, "create_vehicle", undefined, req.ip, `Created vehicle: ${vehicle.registration}`);
+      await createAuditLog(req.user!.id, "create_vehicle", undefined, req, `Created vehicle: ${vehicle.registration}`);
       
       res.status(201).json(vehicle);
     } catch (error) {
@@ -243,7 +255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const vehicleData = insertVehicleSchema.partial().parse(req.body);
       const vehicle = await storage.updateVehicle(req.params.id, vehicleData);
       
-      await createAuditLog(req.user!.id, "update_vehicle", undefined, req.ip, `Updated vehicle: ${vehicle.registration}`);
+      await createAuditLog(req.user!.id, "update_vehicle", undefined, req, `Updated vehicle: ${vehicle.registration}`);
       
       res.json(vehicle);
     } catch (error) {
@@ -258,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.disableVehicle(req.params.id, req.user!.id);
       
-      await createAuditLog(req.user!.id, "disable_vehicle", undefined, req.ip, `Disabled vehicle: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "disable_vehicle", undefined, req, `Disabled vehicle: ${req.params.id}`);
       
       res.json({ message: "Vehicle disabled successfully" });
     } catch (error) {
@@ -270,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.enableVehicle(req.params.id);
       
-      await createAuditLog(req.user!.id, "enable_vehicle", undefined, req.ip, `Enabled vehicle: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "enable_vehicle", undefined, req, `Enabled vehicle: ${req.params.id}`);
       
       res.json({ message: "Vehicle enabled successfully" });
     } catch (error) {
@@ -332,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user!.id,
       } as any);
       
-      await createAuditLog(req.user!.id, "create_sponsor", undefined, req.ip, `Created sponsor: ${sponsor.nameEn}`);
+      await createAuditLog(req.user!.id, "create_sponsor", undefined, req, `Created sponsor: ${sponsor.nameEn}`);
       
       res.status(201).json(sponsor);
     } catch (error) {
@@ -348,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sponsorData = insertSponsorSchema.partial().parse(req.body);
       const sponsor = await storage.updateSponsor(req.params.id, sponsorData);
       
-      await createAuditLog(req.user!.id, "update_sponsor", undefined, req.ip, `Updated sponsor: ${sponsor.nameEn}`);
+      await createAuditLog(req.user!.id, "update_sponsor", undefined, req, `Updated sponsor: ${sponsor.nameEn}`);
       
       res.json(sponsor);
     } catch (error) {
@@ -363,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.disableSponsor(req.params.id, req.user!.id);
       
-      await createAuditLog(req.user!.id, "disable_sponsor", undefined, req.ip, `Disabled sponsor: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "disable_sponsor", undefined, req, `Disabled sponsor: ${req.params.id}`);
       
       res.json({ message: "Sponsor disabled successfully" });
     } catch (error) {
@@ -375,7 +387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.enableSponsor(req.params.id);
       
-      await createAuditLog(req.user!.id, "enable_sponsor", undefined, req.ip, `Enabled sponsor: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "enable_sponsor", undefined, req, `Enabled sponsor: ${req.params.id}`);
       
       res.json({ message: "Sponsor enabled successfully" });
     } catch (error) {
@@ -437,7 +449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user!.id,
       } as any);
       
-      await createAuditLog(req.user!.id, "create_company", undefined, req.ip, `Created company: ${company.nameEn}`);
+      await createAuditLog(req.user!.id, "create_company", undefined, req, `Created company: ${company.nameEn}`);
       
       res.status(201).json(company);
     } catch (error) {
@@ -453,7 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const companyData = insertCompanySchema.partial().parse(req.body);
       const company = await storage.updateCompany(req.params.id, companyData);
       
-      await createAuditLog(req.user!.id, "update_company", undefined, req.ip, `Updated company: ${company.nameEn}`);
+      await createAuditLog(req.user!.id, "update_company", undefined, req, `Updated company: ${company.nameEn}`);
       
       res.json(company);
     } catch (error) {
@@ -468,7 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.disableCompany(req.params.id, req.user!.id);
       
-      await createAuditLog(req.user!.id, "disable_company", undefined, req.ip, `Disabled company: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "disable_company", undefined, req, `Disabled company: ${req.params.id}`);
       
       res.json({ message: "Company disabled successfully" });
     } catch (error) {
@@ -480,7 +492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.enableCompany(req.params.id);
       
-      await createAuditLog(req.user!.id, "enable_company", undefined, req.ip, `Enabled company: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "enable_company", undefined, req, `Enabled company: ${req.params.id}`);
       
       res.json({ message: "Company enabled successfully" });
     } catch (error) {
@@ -606,7 +618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contract = await storage.createContract(validatedData);
       
       // Create audit log
-      await createAuditLog(userId, 'create', contract.id, req.ip, `Created contract #${contract.contractNumber}`);
+      await createAuditLog(userId, 'create', contract.id, req, `Created contract #${contract.contractNumber}`);
       
       res.json(contract);
     } catch (error: any) {
@@ -678,7 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Create audit log
-      await createAuditLog(userId, 'edit', updated.id, req.ip, `Updated contract #${updated.contractNumber} - Reason: ${editReason.trim()}`);
+      await createAuditLog(userId, 'edit', updated.id, req, `Updated contract #${updated.contractNumber} - Reason: ${editReason.trim()}`);
       
       res.json(updated);
     } catch (error: any) {
@@ -704,7 +716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const confirmed = await storage.confirmContract(req.params.id, userId);
       
       // Create audit log
-      await createAuditLog(userId, 'confirm', confirmed.id, req.ip, `Confirmed contract #${confirmed.contractNumber}`);
+      await createAuditLog(userId, 'confirm', confirmed.id, req, `Confirmed contract #${confirmed.contractNumber}`);
       
       res.json(confirmed);
     } catch (error: any) {
@@ -726,7 +738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const activated = await storage.activateContract(req.params.id, userId);
       
       // Create audit log
-      await createAuditLog(userId, 'activate', activated.id, req.ip, `Activated contract #${activated.contractNumber} - vehicle handed over`);
+      await createAuditLog(userId, 'activate', activated.id, req, `Activated contract #${activated.contractNumber} - vehicle handed over`);
       
       res.json(activated);
     } catch (error: any) {
@@ -769,7 +781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const completed = await storage.completeContract(req.params.id, userId, chargeData);
       
       // Create audit log
-      await createAuditLog(userId, 'complete', completed.id, req.ip, `Completed contract #${completed.contractNumber} - vehicle returned`);
+      await createAuditLog(userId, 'complete', completed.id, req, `Completed contract #${completed.contractNumber} - vehicle returned`);
       
       res.json(completed);
     } catch (error: any) {
@@ -810,7 +822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const closed = await storage.closeContract(req.params.id, userId);
       
       // Create audit log
-      await createAuditLog(userId, 'close', closed.id, req.ip, `Closed contract #${closed.contractNumber} - all payments settled and verified`);
+      await createAuditLog(userId, 'close', closed.id, req, `Closed contract #${closed.contractNumber} - all payments settled and verified`);
       
       res.json(closed);
     } catch (error: any) {
@@ -840,7 +852,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updated = await storage.recordDepositPayment(req.params.id, method);
       
       // Create audit log
-      await createAuditLog(userId, 'payment', updated.id, req.ip, `Recorded deposit payment for contract #${updated.contractNumber} via ${method}`);
+      await createAuditLog(userId, 'payment', updated.id, req, `Recorded deposit payment for contract #${updated.contractNumber} via ${method}`);
       
       res.json(updated);
     } catch (error: any) {
@@ -868,7 +880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updated = await storage.recordFinalPayment(req.params.id, method);
       
       // Create audit log
-      await createAuditLog(userId, 'payment', updated.id, req.ip, `Recorded final payment for contract #${updated.contractNumber} via ${method}`);
+      await createAuditLog(userId, 'payment', updated.id, req, `Recorded final payment for contract #${updated.contractNumber} via ${method}`);
       
       res.json(updated);
     } catch (error: any) {
@@ -890,7 +902,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updated = await storage.recordDepositRefund(req.params.id);
       
       // Create audit log
-      await createAuditLog(userId, 'refund', updated.id, req.ip, `Refunded deposit for contract #${updated.contractNumber}`);
+      await createAuditLog(userId, 'refund', updated.id, req, `Refunded deposit for contract #${updated.contractNumber}`);
       
       res.json(updated);
     } catch (error: any) {
@@ -906,7 +918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contract = await storage.disableContract(req.params.id, userId);
       
       // Create audit log
-      await createAuditLog(userId, 'disable', contract.id, req.ip, `Disabled contract #${contract.contractNumber}`);
+      await createAuditLog(userId, 'disable', contract.id, req, `Disabled contract #${contract.contractNumber}`);
       
       res.json(contract);
     } catch (error: any) {
@@ -922,7 +934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contract = await storage.enableContract(req.params.id);
       
       // Create audit log
-      await createAuditLog(userId, 'enable', contract.id, req.ip, `Enabled contract #${contract.contractNumber}`);
+      await createAuditLog(userId, 'enable', contract.id, req, `Enabled contract #${contract.contractNumber}`);
       
       res.json(contract);
     } catch (error: any) {
@@ -970,7 +982,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updated = await storage.updateUserRole(req.params.id, role);
       
       // Create audit log
-      await createAuditLog(adminId, 'edit', undefined, req.ip, `Changed user ${req.params.id} role to ${role}`);
+      await createAuditLog(adminId, 'edit', undefined, req, `Changed user ${req.params.id} role to ${role}`);
       
       res.json(updated);
     } catch (error: any) {
@@ -1006,7 +1018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create audit log
-      await createAuditLog(adminId, 'create', undefined, req.ip, `Created user ${username} with role ${role}`);
+      await createAuditLog(adminId, 'create', undefined, req, `Created user ${username} with role ${role}`);
 
       res.json({
         id: user.id,
@@ -1029,7 +1041,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.disableUser(req.params.id, adminId);
       
       // Create audit log
-      await createAuditLog(adminId, 'disable', undefined, req.ip, `Disabled user ${user.username}`);
+      await createAuditLog(adminId, 'disable', undefined, req, `Disabled user ${user.username}`);
       
       res.json(user);
     } catch (error: any) {
@@ -1045,7 +1057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.enableUser(req.params.id);
       
       // Create audit log
-      await createAuditLog(adminId, 'enable', undefined, req.ip, `Enabled user ${user.username}`);
+      await createAuditLog(adminId, 'enable', undefined, req, `Enabled user ${user.username}`);
       
       res.json(user);
     } catch (error: any) {
@@ -1094,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUserPassword(userId, passwordHash);
 
       // Create audit log
-      await createAuditLog(userId, 'edit', undefined, req.ip, `Changed password`);
+      await createAuditLog(userId, 'edit', undefined, req, `Changed password`);
 
       res.json({ message: "Password changed successfully" });
     } catch (error: any) {
@@ -1114,7 +1126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create audit log
-      await createAuditLog(userId, 'print', contract.id, req.ip, `Printed contract #${contract.contractNumber}`);
+      await createAuditLog(userId, 'print', contract.id, req, `Printed contract #${contract.contractNumber}`);
       
       res.json({ message: "Print action logged" });
     } catch (error: any) {
@@ -1148,7 +1160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create audit log
-      await createAuditLog(userId, 'create', contractId, req.ip, `Added payment of ${payment.amount} ${payment.currency} via ${payment.paymentMethod}`);
+      await createAuditLog(userId, 'create', contractId, req, `Added payment of ${payment.amount} ${payment.currency} via ${payment.paymentMethod}`);
 
       res.json(payment);
     } catch (error: any) {
@@ -1186,7 +1198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deletePayment(id);
 
       // Create audit log with payment details
-      await createAuditLog(userId, 'delete', payment.contractId, req.ip, `Deleted payment of ${payment.amount} ${payment.currency} for contract`);
+      await createAuditLog(userId, 'delete', payment.contractId, req, `Deleted payment of ${payment.amount} ${payment.currency} for contract`);
 
       res.json({ message: "Payment deleted successfully" });
     } catch (error: any) {

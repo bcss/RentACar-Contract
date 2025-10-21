@@ -5,6 +5,7 @@ import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "../storage";
 import { verifyPassword } from "./passwordUtils";
+import { getGeolocation } from "../services/geolocation";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -86,10 +87,20 @@ export async function setupAuth(app: Express) {
 
         // Create audit log for login
         try {
+          const ipAddress = req.ip;
+          const userAgent = req.get('user-agent');
+          const sessionId = req.session?.id;
+          const geolocation = ipAddress ? await getGeolocation(ipAddress) : {};
+          
           await storage.createAuditLog({
             userId: user.id,
             action: 'login',
-            ipAddress: req.ip,
+            ipAddress,
+            userAgent,
+            sessionId,
+            country: geolocation.country,
+            city: geolocation.city,
+            region: geolocation.region,
             details: `User ${user.username} logged in`,
           });
         } catch (error) {
@@ -115,10 +126,20 @@ export async function setupAuth(app: Express) {
     
     if (user) {
       try {
+        const ipAddress = req.ip;
+        const userAgent = req.get('user-agent');
+        const sessionId = req.session?.id;
+        const geolocation = ipAddress ? await getGeolocation(ipAddress) : {};
+        
         await storage.createAuditLog({
           userId: user.id,
           action: 'logout',
-          ipAddress: req.ip,
+          ipAddress,
+          userAgent,
+          sessionId,
+          country: geolocation.country,
+          city: geolocation.city,
+          region: geolocation.region,
           details: `User ${user.username} logged out`,
         });
       } catch (error) {
