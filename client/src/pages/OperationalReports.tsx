@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { DateSelector } from '@/components/ui/date-selector';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -249,21 +249,19 @@ export default function OperationalReports() {
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
               <label className="text-sm font-medium mb-2 block">{t('common.dateFrom')}</label>
-              <DateSelector
-                value={startDate}
-                onChange={setStartDate}
+              <DatePicker
+                date={startDate}
+                onDateChange={setStartDate}
                 placeholder={t('common.dateFrom')}
-                data-testid="date-from"
               />
             </div>
 
             <div className="flex-1 min-w-[200px]">
               <label className="text-sm font-medium mb-2 block">{t('common.dateTo')}</label>
-              <DateSelector
-                value={endDate}
-                onChange={setEndDate}
+              <DatePicker
+                date={endDate}
+                onDateChange={setEndDate}
                 placeholder={t('common.dateTo')}
-                data-testid="date-to"
               />
             </div>
 
