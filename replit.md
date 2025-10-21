@@ -3,13 +3,12 @@
 ## Overview
 This bilingual (English/Arabic) rental car contract management system, built with React, Express, and PostgreSQL, enables users to create, manage, and finalize rental contracts. It features role-based access control, immutability for finalized contracts, comprehensive audit logging, and Material Design principles with RTL/LTR layouts. The system supports a full rental lifecycle, from draft to closed, including payment tracking, vehicle return workflows, detailed company settings management, and complete contract timeline visualization.
 
-## Recent Changes (October 20, 2025)
-- **Navigation Reorganization:** Implemented hierarchical sidebar with collapsible parent menus:
-  - **Masters menu:** Groups Customers, Vehicles, Sponsors, and Companies
-  - **Settings menu:** Groups Company Settings and Users (admin only)
-- **Terminology Update:** Renamed "Persons" to "Sponsors" throughout the application (UI labels, translations, component names). Database schema remains unchanged (persons table).
-- **Dashboard Simplification:** Removed "Add User" button, now shows only "New Contract" button.
-- **Component Renaming:** PersonSelector → SponsorSelector component.
+## Recent Changes (October 21, 2025)
+- **Database Schema Update:** Renamed `persons` table to `sponsors` throughout the entire stack (database table, API routes, storage interface, frontend components, type definitions).
+- **Payments System:** Implemented comprehensive payment tracking with dedicated `payments` table, full CRUD API endpoints with RBAC and audit logging, and payment management UI in ContractView for recording deposits, final payments, and refunds.
+- **Type Safety Improvements:** Created shared `UserRole` enum in schema.ts for consistent role management across frontend and backend, replacing hardcoded role strings.
+- **Navigation Reorganization:** Hierarchical sidebar with collapsible parent menus (Masters: Customers/Vehicles/Sponsors/Companies; Settings: Company Settings/Users).
+- **Bug Fixes:** Fixed server error handler crash bug (removed throw after response sent); improved error handling consistency.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -33,22 +32,23 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **Database:** PostgreSQL (via Neon serverless).
-- **Schema Design:** Tables for `Sessions`, `Users`, `Customers`, `Vehicles`, `Persons` (master data for individual sponsors), `Companies` (master data for corporate sponsors), `Contracts` (core entity with bilingual fields, status, payments, charges, companySponsorId), `Audit Logs`, `Contract Edits`, `Contract Counter`, `System Errors`, and `Company Settings`.
-- **Key Design Decisions:** Draft vs. finalized status with immutability, bilingual field storage, auto-incrementing contract numbers, comprehensive dual-layer audit trail, singleton pattern for global settings, and master data pattern for customers/vehicles/persons/companies.
+- **Schema Design:** Tables for `Sessions`, `Users`, `Customers`, `Vehicles`, `Sponsors` (master data for individual sponsors, renamed from persons), `Companies` (master data for corporate sponsors), `Contracts` (core entity with bilingual fields, status, charges, companySponsorId), `Payments` (separate payment history tracking), `Audit Logs`, `Contract Edits`, `Contract Counter`, `System Errors`, and `Company Settings`.
+- **Key Design Decisions:** Draft vs. finalized status with immutability, bilingual field storage, auto-incrementing contract numbers, comprehensive dual-layer audit trail, singleton pattern for global settings, master data pattern for customers/vehicles/sponsors/companies, and separate payment tracking for full financial history.
 - **Disable-Only Architecture:** Replaced all delete operations with disable/enable functionality for key entities, tracking `disabled`, `disabledBy`, `disabledAt` fields.
+- **Payment Architecture:** Separate `payments` table stores complete payment history (id, contractId, amount, paymentMethod, currency, paidAt, paidBy, notes) with RBAC-protected endpoints and full audit logging.
 
 ### Features
 - **Comprehensive Rental Lifecycle:** Five states: `draft` → `confirmed` → `active` → `completed` → `closed`.
 - **Contract Timeline:** Displays complete history with field edits and lifecycle events in chronological order.
 - **Vehicle Return Workflow:** Captures odometer, fuel, condition notes, and calculates extra charges.
-- **Payment Recording:** Tracks deposit, final payment, and refunds with methods and dates.
+- **Payment Tracking System:** Comprehensive payment history with separate `payments` table. Records deposits, final payments, and refunds with full details (amount, method, currency, date, payer, notes). Payment management UI integrated into ContractView with add/delete capabilities and payment history display.
 - **Company Settings Management:** Admin-only page to configure bilingual company information and additional contract clauses.
 - **Dashboard:** Displays critical metrics like active rentals, monthly revenue, overdue returns, and pending refunds (based on 5 valid contract statuses).
-- **Sponsors Master Data:** Reusable sponsor records (individual) for sponsoring customers across contracts. Full CRUD operations with search and disable/enable functionality. Displayed as "Sponsors" in UI but stored in `persons` database table.
+- **Sponsors Master Data:** Reusable sponsor records (individual) for sponsoring customers across contracts. Full CRUD operations with search and disable/enable functionality. Stored in `sponsors` database table and displayed as "Sponsors" throughout the UI.
 - **Companies Master Data:** Reusable company records for corporate sponsors with registration details, tax info, and contact information. Full CRUD operations with role-based access (admin/manager only).
 - **Three Hirer Types:** 
   - `direct`: Customer rents directly without sponsor
-  - `with_sponsor`: Customer rents with individual sponsor (from Sponsors/Persons table)
+  - `with_sponsor`: Customer rents with individual sponsor (from Sponsors table)
   - `from_company`: Customer rents with company sponsor (from Companies table)
 - **MARMAR PDF Integration:** Professional PDF generation using an integrated MARMAR rental contract template, including dynamic sections for sponsor/hirer (supporting both individual and company sponsors), vehicle inspection, payment breakdown, and signatures.
 
