@@ -243,7 +243,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card data-testid="card-active-rentals">
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=active')} data-testid="card-active-rentals">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Active Rentals
@@ -261,13 +261,13 @@ export default function Dashboard() {
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Number of vehicles currently on rent</p>
+            <p>Click to view active contracts</p>
           </TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card data-testid="card-monthly-revenue">
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/reports/financial?tab=revenue')} data-testid="card-monthly-revenue">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Monthly Revenue
@@ -287,13 +287,13 @@ export default function Dashboard() {
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Total revenue generated this month</p>
+            <p>Click to view revenue details</p>
           </TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className={overdueContracts.length > 0 ? "border-destructive" : ""} data-testid="card-overdue-returns">
+            <Card className={`cursor-pointer hover-elevate active-elevate-2 ${overdueContracts.length > 0 ? "border-destructive" : ""}`} onClick={() => setLocation('/contracts?overdue=true')} data-testid="card-overdue-returns">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Overdue Returns
@@ -315,13 +315,13 @@ export default function Dashboard() {
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Contracts past their return date</p>
+            <p>Click to view overdue contracts</p>
           </TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className={pendingRefunds.length > 0 ? "border-chart-3" : ""} data-testid="card-pending-refunds">
+            <Card className={`cursor-pointer hover-elevate active-elevate-2 ${pendingRefunds.length > 0 ? "border-chart-3" : ""}`} onClick={() => setLocation('/contracts?pendingRefunds=true')} data-testid="card-pending-refunds">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Pending Refunds
@@ -343,7 +343,7 @@ export default function Dashboard() {
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Number of security deposits awaiting refund</p>
+            <p>Click to view contracts with pending refunds</p>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -352,7 +352,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card data-testid="card-vehicle-utilization">
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/vehicles')} data-testid="card-vehicle-utilization">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Vehicle Utilization
@@ -376,13 +376,13 @@ export default function Dashboard() {
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Percentage of fleet currently rented out</p>
+            <p>Click to view vehicle fleet</p>
           </TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card data-testid="card-payment-collection">
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/reports/financial?tab=collection')} data-testid="card-payment-collection">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Payment Collection Rate
@@ -408,13 +408,13 @@ export default function Dashboard() {
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Percentage of total payments collected</p>
+            <p>Click to view payment collection details</p>
           </TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card data-testid="card-avg-extra-charges">
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/reports/operational?tab=extra-charges')} data-testid="card-avg-extra-charges">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Avg. Extra Charges
@@ -438,7 +438,7 @@ export default function Dashboard() {
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Average additional charges per completed rental</p>
+            <p>Click to view extra charges details</p>
           </TooltipContent>
         </Tooltip>
       </div>

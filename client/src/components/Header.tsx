@@ -10,13 +10,16 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="flex items-center justify-between p-4 border-b bg-background">
+    <header className="flex items-center p-4 border-b bg-background relative">
       <div className="flex items-center gap-4">
         <SidebarTrigger data-testid="button-sidebar-toggle" />
       </div>
       
-      {/* Force LTR direction for buttons so they always stay in the same position */}
-      <div className="flex items-center gap-2" dir="ltr">
+      {/* 
+        CRITICAL FIX: Use absolute positioning to always place buttons in top-right corner
+        This prevents RTL/LTR document direction from affecting button placement
+      */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
         {/* Theme Toggle */}
         <Button
           variant="ghost"

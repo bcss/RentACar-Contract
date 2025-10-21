@@ -79,7 +79,7 @@ export default function FinancialReports() {
   const { data: report, isLoading } = useQuery<FinancialReport>({
     queryKey: ['/api/reports/financial', startDate, endDate],
     queryFn: async () => {
-      const response = await fetch(getQueryUrl());
+      const response = await fetch(getQueryUrl(), { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch financial report');
       return response.json();
     },

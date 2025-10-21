@@ -1,0 +1,361 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { DateSelector } from '@/components/ui/date-selector';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import { Link } from 'wouter';
+
+interface Modification {
+  id: string;
+  contractId: string;
+  editedBy: string;
+  editedAt: string;
+  fieldChanged: string;
+  oldValue: string | null;
+  newValue: string | null;
+  reason: string | null;
+  userName: string;
+}
+
+interface UserActivity {
+  userId: string;
+  userName: string;
+  modificationCount: number;
+  contractsModified: number;
+}
+
+interface AuditReport {
+  modifications: Modification[];
+  userActivity: UserActivity[];
+}
+
+export default function AuditReports() {
+  const { t } = useTranslation();
+  const { isAdmin, isManager } = useAuth();
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState('modifications');
+
+  // Build query URL with date filters
+  const getQueryUrl = () => {
+    const params = new URLSearchParams();
+    if (startDate) {
+      params.append('startDate', startDate.toISOString());
+    }
+    if (endDate) {
+      params.append('endDate', endDate.toISOString());
+    }
+    return `/api/reports/audit${params.toString() ? `?${params.toString()}` : ''}`;
+  };
+
+  const { data: report, isLoading } = useQuery<AuditReport>({
+    queryKey: ['/api/reports/audit', startDate, endDate],
+    queryFn: async () => {
+      const response = await fetch(getQueryUrl(), { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch audit report');
+      return response.json();
+    },
+    enabled: isAdmin || isManager,
+  });
+
+  const clearFilters = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+  };
+
+  const getFieldLabel = (field: string) => {
+    const labels: Record<string, string> = {
+      status: 'Status',
+      totalAmount: 'Total Amount',
+      totalDays: 'Total Days',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      vehicleId: 'Vehicle',
+      customerId: 'Customer',
+      totalExtraCharges: 'Extra Charges',
+      kmAllowed: 'KM Allowed',
+      kmStart: 'KM Start',
+      kmEnd: 'KM End',
+      notes: 'Notes',
+    };
+    return labels[field] || field;
+  };
+
+  if (!isAdmin && !isManager) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('common.error')}</CardTitle>
+            <CardDescription>You don't have permission to view this page.</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold" data-testid="text-page-title">
+            Audit Reports
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Contract modifications and user activity tracking
+          </p>
+        </div>
+        <Button variant="outline" disabled data-testid="button-export">
+          <span className="material-icons mr-2">download</span>
+          Export (Coming Soon)
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Date Range</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-sm font-medium mb-2 block">{t('common.dateFrom')}</label>
+              <DateSelector
+                value={startDate}
+                onChange={setStartDate}
+                placeholder={t('common.dateFrom')}
+                data-testid="date-from"
+              />
+            </div>
+
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-sm font-medium mb-2 block">{t('common.dateTo')}</label>
+              <DateSelector
+                value={endDate}
+                onChange={setEndDate}
+                placeholder={t('common.dateTo')}
+                data-testid="date-to"
+              />
+            </div>
+
+            <Button 
+              variant="outline" 
+              onClick={clearFilters}
+              disabled={!startDate && !endDate}
+              data-testid="button-clear-filters"
+            >
+              <span className="material-icons mr-2">clear</span>
+              Clear Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2" data-testid="tabs-audit-reports">
+          <TabsTrigger value="modifications" data-testid="tab-modifications">
+            Contract Modifications
+          </TabsTrigger>
+          <TabsTrigger value="users" data-testid="tab-users">
+            User Activity
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="modifications" className="space-y-6 mt-6">
+          {isLoading ? (
+            <Skeleton className="h-96 w-full" />
+          ) : !report ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <p className="text-muted-foreground">No data available</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Contract Modifications</CardTitle>
+                <CardDescription>
+                  Most recent modifications first
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {report.modifications.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-12">
+                    No contract modifications in this period
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {report.modifications.slice(0, 100).map((mod) => (
+                      <div 
+                        key={mod.id} 
+                        className="border rounded-lg p-4 hover-elevate"
+                        data-testid={`modification-${mod.id}`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Link href={`/contracts/${mod.contractId}`}>
+                              <span className="text-primary hover:underline font-medium">
+                                Contract {mod.contractId.slice(0, 8)}
+                              </span>
+                            </Link>
+                            <Badge variant="outline">{getFieldLabel(mod.fieldChanged)}</Badge>
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            {format(new Date(mod.editedAt), 'MMM d, yyyy HH:mm')}
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 mb-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Old Value</p>
+                            <p className="text-sm font-mono bg-muted p-2 rounded">
+                              {mod.oldValue || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">New Value</p>
+                            <p className="text-sm font-mono bg-muted p-2 rounded">
+                              {mod.newValue || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Modified by: <span className="font-medium">{mod.userName}</span>
+                          </span>
+                          {mod.reason && (
+                            <span className="text-muted-foreground">
+                              Reason: <span className="font-medium">{mod.reason}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {report.modifications.length > 100 && (
+                      <p className="text-sm text-muted-foreground text-center pt-4">
+                        Showing first 100 modifications. Use date filters to narrow results.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6 mt-6">
+          {isLoading ? (
+            <Skeleton className="h-96 w-full" />
+          ) : !report ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <p className="text-muted-foreground">No data available</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Active Users
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-active-users">
+                      {report.userActivity.length}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Made modifications
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Total Modifications
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-total-modifications">
+                      {report.modifications.length}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      In selected period
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Avg. per User
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-avg-modifications">
+                      {report.userActivity.length > 0
+                        ? (report.modifications.length / report.userActivity.length).toFixed(1)
+                        : '0.0'}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Modifications
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Activity Summary</CardTitle>
+                  <CardDescription>
+                    Sorted by modification count (highest first)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {report.userActivity.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-12">
+                      No user activity in this period
+                    </p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead data-testid="table-header-user">User</TableHead>
+                          <TableHead className="text-right" data-testid="table-header-modifications">
+                            Modifications
+                          </TableHead>
+                          <TableHead className="text-right" data-testid="table-header-contracts-modified">
+                            Contracts Modified
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {report.userActivity.map((user) => (
+                          <TableRow key={user.userId} data-testid={`row-user-${user.userId}`}>
+                            <TableCell className="font-medium">{user.userName}</TableCell>
+                            <TableCell className="text-right">{user.modificationCount}</TableCell>
+                            <TableCell className="text-right">{user.contractsModified}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

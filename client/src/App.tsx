@@ -27,6 +27,8 @@ import FinancialSettings from "@/pages/FinancialSettings";
 import TermsConditions from "@/pages/TermsConditions";
 import FinancialReports from "@/pages/FinancialReports";
 import OperationalReports from "@/pages/OperationalReports";
+import CustomerReports from "@/pages/CustomerReports";
+import AuditReports from "@/pages/AuditReports";
 import NotFound from "@/pages/not-found";
 import "@/lib/i18n";
 import { useEffect } from "react";
@@ -120,6 +122,12 @@ function Router() {
       </Route>
       <Route path="/reports/operational">
         {() => <ProtectedRoute component={OperationalReports} />}
+      </Route>
+      <Route path="/reports/customers">
+        {() => <ProtectedRoute component={CustomerReports} />}
+      </Route>
+      <Route path="/reports/audit">
+        {() => <ProtectedRoute component={AuditReports} />}
       </Route>
       <Route component={NotFound} />
     </Switch>
