@@ -1157,7 +1157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payment = await storage.createPayment({
         ...validatedData,
         createdBy: userId,
-      });
+      } as any);
 
       // Create audit log
       await createAuditLog(userId, 'create', contractId, req, `Added payment of ${payment.amount} ${payment.currency} via ${payment.paymentMethod}`);
