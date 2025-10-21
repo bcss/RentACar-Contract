@@ -48,6 +48,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Search, Edit, Ban, CheckCircle } from 'lucide-react';
 import type { Customer } from '@shared/schema';
+import { insertCustomerSchema } from '@shared/schema';
 import {
   Form,
   FormControl,
@@ -57,23 +58,20 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-const customerSchema = z.object({
-  nameEn: z.string().min(1, 'English name is required'),
-  nameAr: z.string().min(1, 'Arabic name is required'),
-  nationalId: z.string().min(1, 'National ID is required'),
-  nationality: z.string().optional(),
-  gender: z.string().optional(),
-  dateOfBirth: z.coerce.date().optional().nullable(),
-  phone: z.string().min(1, 'Phone is required'),
+// Extend the shared schema to handle nullable fields for forms
+const customerFormSchema = insertCustomerSchema.extend({
   email: z.string().email('Invalid email').optional().or(z.literal('')),
-  address: z.string().optional(),
-  licenseNumber: z.string().optional(),
-  licenseIssuedBy: z.string().optional(),
-  licenseIssueDate: z.coerce.date().optional().nullable(),
-  licenseExpiryDate: z.coerce.date().optional().nullable(),
+  nameAr: z.string().optional().transform(val => val || undefined),
+  nationalId: z.string().optional().transform(val => val || undefined),
+  nationality: z.string().optional().transform(val => val || undefined),
+  gender: z.string().optional().transform(val => val || undefined),
+  address: z.string().optional().transform(val => val || undefined),
+  licenseNumber: z.string().optional().transform(val => val || undefined),
+  licenseIssuedBy: z.string().optional().transform(val => val || undefined),
+  notes: z.string().optional().transform(val => val || undefined),
 });
 
-type CustomerFormData = z.infer<typeof customerSchema>;
+type CustomerFormData = z.infer<typeof customerFormSchema>;
 
 export default function Customers() {
   const { t } = useTranslation();
@@ -88,21 +86,21 @@ export default function Customers() {
   const [customerToToggle, setCustomerToToggle] = useState<Customer | null>(null);
 
   const form = useForm<CustomerFormData>({
-    resolver: zodResolver(customerSchema),
+    resolver: zodResolver(customerFormSchema),
     defaultValues: {
       nameEn: '',
       nameAr: '',
       nationalId: '',
       nationality: '',
       gender: '',
-      dateOfBirth: null,
+      dateOfBirth: undefined,
       phone: '',
       email: '',
       address: '',
       licenseNumber: '',
       licenseIssuedBy: '',
-      licenseIssueDate: null,
-      licenseExpiryDate: null,
+      licenseIssueDate: undefined,
+      licenseExpiryDate: undefined,
     },
   });
 

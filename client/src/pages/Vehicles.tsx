@@ -48,6 +48,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Search, Edit, Ban, CheckCircle } from 'lucide-react';
 import type { Vehicle } from '@shared/schema';
+import { insertVehicleSchema } from '@shared/schema';
 import {
   Form,
   FormControl,
@@ -57,20 +58,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-const vehicleSchema = z.object({
-  registration: z.string().min(1, 'Registration is required'),
-  make: z.string().min(1, 'Make is required'),
-  model: z.string().min(1, 'Model is required'),
-  year: z.string().min(1, 'Year is required'),
-  color: z.string().optional(),
-  fuelType: z.string().optional(),
-  dailyRate: z.string().min(1, 'Daily rate is required'),
-  weeklyRate: z.string().optional(),
-  monthlyRate: z.string().optional(),
-  status: z.string().default('available'),
+// Extend the shared schema to handle nullable fields for forms
+const vehicleFormSchema = insertVehicleSchema.extend({
+  weeklyRate: z.string().optional().transform(val => val || undefined),
+  monthlyRate: z.string().optional().transform(val => val || undefined),
+  color: z.string().optional().transform(val => val || undefined),
+  fuelType: z.string().optional().transform(val => val || undefined),
 });
 
-type VehicleFormData = z.infer<typeof vehicleSchema>;
+type VehicleFormData = z.infer<typeof vehicleFormSchema>;
 
 export default function Vehicles() {
   const { t } = useTranslation();
@@ -85,7 +81,7 @@ export default function Vehicles() {
   const [vehicleToToggle, setVehicleToToggle] = useState<Vehicle | null>(null);
 
   const form = useForm<VehicleFormData>({
-    resolver: zodResolver(vehicleSchema),
+    resolver: zodResolver(vehicleFormSchema),
     defaultValues: {
       registration: '',
       make: '',
