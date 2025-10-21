@@ -6,7 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { insertContractSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, insertCompanySchema, type InsertContract, type Contract, type CompanySettings, type Customer, type Vehicle, type Person, type Company } from '@shared/schema';
+import { insertContractSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, type InsertContract, type Contract, type CompanySettings, type Customer, type Vehicle, type Sponsor, type Company } from '@shared/schema';
 import { SponsorSelector } from '@/components/SponsorSelector';
 import { CompanySelector } from '@/components/CompanySelector';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -152,7 +152,7 @@ export default function ContractForm() {
   const [vehicleSearchQuery, setVehicleSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-  const [selectedSponsor, setSelectedSponsor] = useState<Person | null>(null);
+  const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | null>(null);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [vehicleAvailable, setVehicleAvailable] = useState<boolean | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -275,9 +275,9 @@ export default function ContractForm() {
   useEffect(() => {
     if (watchedSponsorId && isAuthenticated) {
       queryClient.fetchQuery({
-        queryKey: ['/api/persons', watchedSponsorId],
-      }).then((person) => {
-        setSelectedSponsor(person as Person);
+        queryKey: ['/api/sponsors', watchedSponsorId],
+      }).then((sponsor) => {
+        setSelectedSponsor(sponsor as Sponsor);
       });
     } else {
       setSelectedSponsor(null);
@@ -506,9 +506,9 @@ export default function ContractForm() {
     },
   });
 
-  // Person form for inline creation (sponsors)
-  const personForm = useForm({
-    resolver: zodResolver(insertPersonSchema),
+  // Sponsor form for inline creation
+  const sponsorForm = useForm({
+    resolver: zodResolver(insertSponsorSchema),
     defaultValues: {
       nameEn: '',
       nameAr: '',
@@ -600,27 +600,27 @@ export default function ContractForm() {
     },
   });
 
-  const createPersonMutation = useMutation({
-    mutationFn: async (data: any): Promise<Person> => {
-      const response = await apiRequest('POST', '/api/persons', data);
-      return response as unknown as Person;
+  const createSponsorMutation = useMutation({
+    mutationFn: async (data: any): Promise<Sponsor> => {
+      const response = await apiRequest('POST', '/api/sponsors', data);
+      return response as unknown as Sponsor;
     },
-    onSuccess: (person: Person) => {
+    onSuccess: (sponsor: Sponsor) => {
       toast({
         title: t('common.success'),
         description: 'Sponsor created successfully',
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sponsors'] });
       queryClient.invalidateQueries({ 
         predicate: (query) => 
           Array.isArray(query.queryKey) && 
-          query.queryKey[0] === '/api/persons/search'
+          query.queryKey[0] === '/api/sponsors/search'
       });
       
-      form.setValue('sponsorId', person.id);
-      setSelectedSponsor(person);
+      form.setValue('sponsorId', sponsor.id);
+      setSelectedSponsor(sponsor);
       setCreateSponsorOpen(false);
-      personForm.reset();
+      sponsorForm.reset();
     },
     onError: (error: Error) => {
       toast({
@@ -774,8 +774,8 @@ export default function ContractForm() {
     });
   };
 
-  const handleCreatePerson = (data: any) => {
-    createPersonMutation.mutate({
+  const handleCreateSponsor = (data: any) => {
+    createSponsorMutation.mutate({
       ...data,
       createdBy: 'current-user-id',
     });
@@ -1966,11 +1966,11 @@ export default function ContractForm() {
           <DialogHeader>
             <DialogTitle>Create New Sponsor</DialogTitle>
           </DialogHeader>
-          <Form {...personForm}>
-            <form onSubmit={personForm.handleSubmit(handleCreatePerson)} className="space-y-4">
+          <Form {...sponsorForm}>
+            <form onSubmit={sponsorForm.handleSubmit(handleCreateSponsor)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  control={personForm.control}
+                  control={sponsorForm.control}
                   name="nameEn"
                   render={({ field }) => (
                     <FormItem>
@@ -1983,7 +1983,7 @@ export default function ContractForm() {
                   )}
                 />
                 <FormField
-                  control={personForm.control}
+                  control={sponsorForm.control}
                   name="nameAr"
                   render={({ field }) => (
                     <FormItem>
@@ -1996,7 +1996,7 @@ export default function ContractForm() {
                   )}
                 />
                 <FormField
-                  control={personForm.control}
+                  control={sponsorForm.control}
                   name="nationality"
                   render={({ field }) => (
                     <FormItem>
@@ -2009,7 +2009,7 @@ export default function ContractForm() {
                   )}
                 />
                 <FormField
-                  control={personForm.control}
+                  control={sponsorForm.control}
                   name="passportId"
                   render={({ field }) => (
                     <FormItem>
@@ -2022,7 +2022,7 @@ export default function ContractForm() {
                   )}
                 />
                 <FormField
-                  control={personForm.control}
+                  control={sponsorForm.control}
                   name="mobile"
                   render={({ field }) => (
                     <FormItem>
@@ -2035,7 +2035,7 @@ export default function ContractForm() {
                   )}
                 />
                 <FormField
-                  control={personForm.control}
+                  control={sponsorForm.control}
                   name="relation"
                   render={({ field }) => (
                     <FormItem>
@@ -2072,10 +2072,10 @@ export default function ContractForm() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={createPersonMutation.isPending}
+                  disabled={createSponsorMutation.isPending}
                   data-testid="button-save-sponsor"
                 >
-                  {createPersonMutation.isPending ? "Creating..." : "Create Sponsor"}
+                  {createSponsorMutation.isPending ? "Creating..." : "Create Sponsor"}
                 </Button>
               </div>
             </form>

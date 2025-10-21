@@ -13,6 +13,19 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
+// User roles enum
+export const UserRole = {
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  STAFF: 'staff',
+  VIEWER: 'viewer',
+} as const;
+
+export type UserRoleType = typeof UserRole[keyof typeof UserRole];
+
+// Zod enum for validation
+export const userRoleEnum = z.enum([UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF, UserRole.VIEWER]);
+
 // Session storage table - Required for Replit Auth
 export const sessions = pgTable(
   "sessions",
@@ -175,8 +188,8 @@ export const insertVehicleSchema = createInsertSchema(vehicles).omit({
 export type InsertVehicle = z.infer<typeof insertVehicleSchema>;
 export type Vehicle = typeof vehicles.$inferSelect;
 
-// Persons table - Master data for sponsors and drivers
-export const persons = pgTable("persons", {
+// Sponsors table - Master data for sponsors and drivers
+export const sponsors = pgTable("sponsors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   
   // Basic Information (bilingual)
@@ -205,15 +218,15 @@ export const persons = pgTable("persons", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const personsRelations = relations(persons, ({ one }) => ({
+export const sponsorsRelations = relations(sponsors, ({ one }) => ({
   creator: one(users, {
-    fields: [persons.createdBy],
+    fields: [sponsors.createdBy],
     references: [users.id],
-    relationName: "personCreator",
+    relationName: "sponsorCreator",
   }),
 }));
 
-export const insertPersonSchema = createInsertSchema(persons).omit({
+export const insertSponsorSchema = createInsertSchema(sponsors).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -223,8 +236,8 @@ export const insertPersonSchema = createInsertSchema(persons).omit({
   disabled: true,
 });
 
-export type InsertPerson = z.infer<typeof insertPersonSchema>;
-export type Person = typeof persons.$inferSelect;
+export type InsertSponsor = z.infer<typeof insertSponsorSchema>;
+export type Sponsor = typeof sponsors.$inferSelect;
 
 // Companies table - Master data for corporate sponsors
 export const companies = pgTable("companies", {
@@ -337,8 +350,8 @@ export const contracts = pgTable("contracts", {
   // Hirer Type - determines which fields are required
   hirerType: varchar("hirer_type", { length: 20 }).notNull().default("direct"), // direct, with_sponsor, from_company
   
-  // Foreign Keys to Persons and Companies (Master Data) - Preferred approach for new contracts
-  sponsorId: varchar("sponsor_id").references(() => persons.id), // Reference to individual sponsor person
+  // Foreign Keys to Sponsors and Companies (Master Data) - Preferred approach for new contracts
+  sponsorId: varchar("sponsor_id").references(() => sponsors.id), // Reference to individual sponsor
   companySponsorId: varchar("company_sponsor_id").references(() => companies.id), // Reference to company sponsor (for from_company)
   
   // Sponsor Information (when hirerType is 'with_sponsor') - Legacy inline fields for backward compatibility
@@ -454,9 +467,9 @@ export const contractsRelations = relations(contracts, ({ one }) => ({
     fields: [contracts.vehicleId],
     references: [vehicles.id],
   }),
-  sponsor: one(persons, {
+  sponsor: one(sponsors, {
     fields: [contracts.sponsorId],
-    references: [persons.id],
+    references: [sponsors.id],
     relationName: "contractSponsor",
   }),
   companySponsor: one(companies, {
@@ -519,9 +532,54 @@ export type ContractWithDetails = Contract & {
   vehicleRegistration: string | null;
   vehicleMake: string | null;
   vehicleModel: string | null;
-  sponsorPerson?: Person | null;
+  sponsor?: Sponsor | null;
   companySponsor?: Company | null;
 };
+
+// Payments table - Track all payments received for contracts
+export const payments = pgTable("payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  
+  // Payment Details
+  amount: varchar("amount").notNull(), // Payment amount (stored as string for precision)
+  paymentMethod: varchar("payment_method", { length: 50 }).notNull(), // cash, card, bank_transfer, check, etc.
+  currency: varchar("currency", { length: 10 }).notNull().default("SAR"), // SAR, USD, EUR, etc.
+  
+  // Payment Metadata
+  paidAt: timestamp("paid_at").notNull().defaultNow(), // When payment was received
+  notes: text("notes"), // Optional notes about the payment
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [payments.contractId],
+    references: [contracts.id],
+  }),
+  creator: one(users, {
+    fields: [payments.createdBy],
+    references: [users.id],
+    relationName: "paymentCreator",
+  }),
+}));
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+}).extend({
+  paidAt: z.coerce.date(),
+  amount: z.string().min(1, "Amount is required"),
+});
+
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
 
 // Audit logs table
 export const auditLogs = pgTable("audit_logs", {

@@ -18,7 +18,7 @@ import {
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { queryClient } from "@/lib/queryClient";
-import type { Person } from "@shared/schema";
+import type { Sponsor } from "@shared/schema";
 
 interface SponsorSelectorProps {
   value?: string | null;
@@ -42,7 +42,7 @@ export function SponsorSelector({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSponsor, setSelectedSponsor] = useState<Person | null>(null);
+  const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | null>(null);
   
   const defaultPlaceholder = placeholder || t('sponsors.selectSponsor');
 
@@ -50,9 +50,9 @@ export function SponsorSelector({
   useEffect(() => {
     if (value) {
       queryClient.fetchQuery({
-        queryKey: ['/api/persons', value],
+        queryKey: ['/api/sponsors', value],
       }).then((sponsor) => {
-        setSelectedSponsor(sponsor as Person);
+        setSelectedSponsor(sponsor as Sponsor);
       });
     } else {
       setSelectedSponsor(null);
@@ -60,8 +60,8 @@ export function SponsorSelector({
   }, [value]);
 
   // Search sponsors query
-  const { data: searchResults = [] } = useQuery<Person[]>({
-    queryKey: [`/api/persons/search?q=${searchQuery}`],
+  const { data: searchResults = [] } = useQuery<Sponsor[]>({
+    queryKey: [`/api/sponsors/search?q=${searchQuery}`],
     enabled: open && searchQuery.length > 0,
   });
 

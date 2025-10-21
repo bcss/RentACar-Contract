@@ -8,7 +8,9 @@ import {
   companySettings,
   customers,
   vehicles,
-  persons,
+  sponsors,
+  companies,
+  payments,
   type User,
   type UpsertUser,
   type Contract,
@@ -25,11 +27,12 @@ import {
   type Vehicle,
   type InsertCustomer,
   type InsertVehicle,
-  type Person,
-  type InsertPerson,
+  type Sponsor,
+  type InsertSponsor,
   type Company,
   type InsertCompany,
-  companies,
+  type Payment,
+  type InsertPayment,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike } from "drizzle-orm";
@@ -81,14 +84,14 @@ export interface IStorage {
   checkVehicleAvailability(vehicleId: string, startDate: Date, endDate: Date, excludeContractId?: string): Promise<boolean>;
   searchVehicles(query: string): Promise<Vehicle[]>;
   
-  // Person operations (individual sponsors)
-  getPersons(includeDisabled?: boolean): Promise<Person[]>;
-  getPersonById(id: string): Promise<Person | undefined>;
-  createPerson(person: InsertPerson): Promise<Person>;
-  updatePerson(id: string, person: Partial<InsertPerson>): Promise<Person>;
-  disablePerson(id: string, disabledBy: string): Promise<void>;
-  enablePerson(id: string): Promise<void>;
-  searchPersons(query: string): Promise<Person[]>;
+  // Sponsor operations (individual sponsors)
+  getSponsors(includeDisabled?: boolean): Promise<Sponsor[]>;
+  getSponsorById(id: string): Promise<Sponsor | undefined>;
+  createSponsor(sponsor: InsertSponsor): Promise<Sponsor>;
+  updateSponsor(id: string, sponsor: Partial<InsertSponsor>): Promise<Sponsor>;
+  disableSponsor(id: string, disabledBy: string): Promise<void>;
+  enableSponsor(id: string): Promise<void>;
+  searchSponsors(query: string): Promise<Sponsor[]>;
   
   // Company operations (corporate sponsors)
   getCompanies(includeDisabled?: boolean): Promise<Company[]>;
@@ -98,6 +101,11 @@ export interface IStorage {
   disableCompany(id: string, disabledBy: string): Promise<void>;
   enableCompany(id: string): Promise<void>;
   searchCompanies(query: string): Promise<Company[]>;
+  
+  // Payment operations
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  getPaymentsByContract(contractId: string): Promise<Payment[]>;
+  deletePayment(id: string): Promise<void>;
   
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
@@ -253,13 +261,13 @@ export class DatabaseStorage implements IStorage {
         vehicleRegistration: vehicles.registration,
         vehicleMake: vehicles.make,
         vehicleModel: vehicles.model,
-        sponsorPerson: persons,
+        sponsor: sponsors,
         companySponsor: companies,
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
-      .leftJoin(persons, eq(contracts.sponsorId, persons.id))
+      .leftJoin(sponsors, eq(contracts.sponsorId, sponsors.id))
       .leftJoin(companies, eq(contracts.companySponsorId, companies.id))
       .where(eq(contracts.disabled, false))
       .orderBy(desc(contracts.createdAt));
@@ -276,13 +284,13 @@ export class DatabaseStorage implements IStorage {
         vehicleRegistration: vehicles.registration,
         vehicleMake: vehicles.make,
         vehicleModel: vehicles.model,
-        sponsorPerson: persons,
+        sponsor: sponsors,
         companySponsor: companies,
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
-      .leftJoin(persons, eq(contracts.sponsorId, persons.id))
+      .leftJoin(sponsors, eq(contracts.sponsorId, sponsors.id))
       .leftJoin(companies, eq(contracts.companySponsorId, companies.id))
       .where(eq(contracts.disabled, true))
       .orderBy(desc(contracts.disabledAt));
@@ -687,71 +695,71 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(vehicles.createdAt));
   }
 
-  // Person operations (sponsors/drivers)
-  async getPersons(includeDisabled = false): Promise<Person[]> {
+  // Sponsor operations (individual sponsors)
+  async getSponsors(includeDisabled = false): Promise<Sponsor[]> {
     if (includeDisabled) {
-      return await db.select().from(persons).orderBy(desc(persons.createdAt));
+      return await db.select().from(sponsors).orderBy(desc(sponsors.createdAt));
     }
-    return await db.select().from(persons).where(eq(persons.disabled, false)).orderBy(desc(persons.createdAt));
+    return await db.select().from(sponsors).where(eq(sponsors.disabled, false)).orderBy(desc(sponsors.createdAt));
   }
 
-  async getPersonById(id: string): Promise<Person | undefined> {
-    const [person] = await db.select().from(persons).where(eq(persons.id, id));
-    return person;
+  async getSponsorById(id: string): Promise<Sponsor | undefined> {
+    const [sponsor] = await db.select().from(sponsors).where(eq(sponsors.id, id));
+    return sponsor;
   }
 
-  async createPerson(personData: InsertPerson): Promise<Person> {
-    const [person] = await db.insert(persons).values(personData).returning();
-    return person;
+  async createSponsor(sponsorData: InsertSponsor): Promise<Sponsor> {
+    const [sponsor] = await db.insert(sponsors).values(sponsorData).returning();
+    return sponsor;
   }
 
-  async updatePerson(id: string, personData: Partial<InsertPerson>): Promise<Person> {
-    const [person] = await db
-      .update(persons)
-      .set({ ...personData, updatedAt: new Date() })
-      .where(eq(persons.id, id))
+  async updateSponsor(id: string, sponsorData: Partial<InsertSponsor>): Promise<Sponsor> {
+    const [sponsor] = await db
+      .update(sponsors)
+      .set({ ...sponsorData, updatedAt: new Date() })
+      .where(eq(sponsors.id, id))
       .returning();
-    return person;
+    return sponsor;
   }
 
-  async disablePerson(id: string, disabledBy: string): Promise<void> {
+  async disableSponsor(id: string, disabledBy: string): Promise<void> {
     await db
-      .update(persons)
+      .update(sponsors)
       .set({
         disabled: true,
         disabledBy,
         disabledAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(persons.id, id));
+      .where(eq(sponsors.id, id));
   }
 
-  async enablePerson(id: string): Promise<void> {
+  async enableSponsor(id: string): Promise<void> {
     await db
-      .update(persons)
+      .update(sponsors)
       .set({
         disabled: false,
         disabledBy: null,
         disabledAt: null,
         updatedAt: new Date(),
       })
-      .where(eq(persons.id, id));
+      .where(eq(sponsors.id, id));
   }
 
-  async searchPersons(query: string): Promise<Person[]> {
+  async searchSponsors(query: string): Promise<Sponsor[]> {
     const searchTerm = `%${query}%`;
     return await db
       .select()
-      .from(persons)
+      .from(sponsors)
       .where(
         or(
-          ilike(persons.nameEn, searchTerm),
-          ilike(persons.nameAr, searchTerm),
-          ilike(persons.passportId, searchTerm),
-          ilike(persons.mobile, searchTerm)
+          ilike(sponsors.nameEn, searchTerm),
+          ilike(sponsors.nameAr, searchTerm),
+          ilike(sponsors.passportId, searchTerm),
+          ilike(sponsors.mobile, searchTerm)
         )
       )
-      .orderBy(desc(persons.createdAt));
+      .orderBy(desc(sponsors.createdAt));
   }
 
   // Company operations (corporate sponsors)
@@ -821,6 +829,24 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(companies.createdAt));
+  }
+
+  // Payment operations
+  async createPayment(paymentData: InsertPayment): Promise<Payment> {
+    const [payment] = await db.insert(payments).values(paymentData).returning();
+    return payment;
+  }
+
+  async getPaymentsByContract(contractId: string): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .where(eq(payments.contractId, contractId))
+      .orderBy(desc(payments.paidAt));
+  }
+
+  async deletePayment(id: string): Promise<void> {
+    await db.delete(payments).where(eq(payments.id, id));
   }
 
   // Audit log operations

@@ -39,8 +39,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Search, Edit, Ban, CheckCircle } from 'lucide-react';
-import type { Person } from '@shared/schema';
-import { insertPersonSchema } from '@shared/schema';
+import type { Sponsor } from '@shared/schema';
+import { insertSponsorSchema } from '@shared/schema';
 import {
   Form,
   FormControl,
@@ -50,7 +50,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-type PersonFormData = z.infer<typeof insertPersonSchema>;
+type SponsorFormData = z.infer<typeof insertSponsorSchema>;
 
 export default function Sponsors() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -59,13 +59,13 @@ export default function Sponsors() {
   const [searchQuery, setSearchQuery] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [selectedSponsor, setSelectedSponsor] = useState<Person | null>(null);
+  const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | null>(null);
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const [enableDialogOpen, setEnableDialogOpen] = useState(false);
-  const [sponsorToToggle, setSponsorToToggle] = useState<Person | null>(null);
+  const [sponsorToToggle, setSponsorToToggle] = useState<Sponsor | null>(null);
 
-  const form = useForm<PersonFormData>({
-    resolver: zodResolver(insertPersonSchema),
+  const form = useForm<SponsorFormData>({
+    resolver: zodResolver(insertSponsorSchema),
     defaultValues: {
       nameEn: '',
       nameAr: '',
@@ -79,32 +79,32 @@ export default function Sponsors() {
     },
   });
 
-  const { data: activePersons = [], isLoading: activeLoading } = useQuery<Person[]>({
-    queryKey: ['/api/persons', 'active'],
+  const { data: activeSponsors = [], isLoading: activeLoading } = useQuery<Sponsor[]>({
+    queryKey: ['/api/sponsors', 'active'],
     enabled: isAuthenticated,
     queryFn: async () => {
-      const res = await fetch('/api/persons?disabled=false');
-      if (!res.ok) throw new Error('Failed to fetch persons');
+      const res = await fetch('/api/sponsors?disabled=false');
+      if (!res.ok) throw new Error('Failed to fetch sponsors');
       return res.json();
     },
   });
 
-  const { data: disabledPersons = [], isLoading: disabledLoading } = useQuery<Person[]>({
-    queryKey: ['/api/persons', 'disabled'],
+  const { data: disabledSponsors = [], isLoading: disabledLoading } = useQuery<Sponsor[]>({
+    queryKey: ['/api/sponsors', 'disabled'],
     enabled: isAuthenticated,
     queryFn: async () => {
-      const res = await fetch('/api/persons?disabled=true');
-      if (!res.ok) throw new Error('Failed to fetch persons');
+      const res = await fetch('/api/sponsors?disabled=true');
+      if (!res.ok) throw new Error('Failed to fetch sponsors');
       return res.json();
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: PersonFormData) => {
-      return apiRequest('POST', '/api/persons', data);
+    mutationFn: async (data: SponsorFormData) => {
+      return apiRequest('POST', '/api/sponsors', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sponsors'] });
       toast({
         title: t('common.success'),
         description: t('sponsors.sponsorCreated'),
@@ -122,12 +122,12 @@ export default function Sponsors() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: PersonFormData) => {
-      if (!selectedSponsor) throw new Error('No person selected');
-      return apiRequest('PATCH', `/api/persons/${selectedSponsor.id}`, data);
+    mutationFn: async (data: SponsorFormData) => {
+      if (!selectedSponsor) throw new Error('No sponsor selected');
+      return apiRequest('PATCH', `/api/sponsors/${selectedSponsor.id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sponsors'] });
       toast({
         title: t('common.success'),
         description: t('sponsors.sponsorUpdated'),
@@ -147,10 +147,10 @@ export default function Sponsors() {
 
   const disableMutation = useMutation({
     mutationFn: async (personId: string) => {
-      return apiRequest('PATCH', `/api/persons/${personId}/disable`, {});
+      return apiRequest('POST', `/api/sponsors/${personId}/disable`, {});
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sponsors'] });
       toast({
         title: t('common.success'),
         description: t('sponsors.sponsorDisabled'),
@@ -169,10 +169,10 @@ export default function Sponsors() {
 
   const enableMutation = useMutation({
     mutationFn: async (personId: string) => {
-      return apiRequest('PATCH', `/api/persons/${personId}/enable`, {});
+      return apiRequest('POST', `/api/sponsors/${personId}/enable`, {});
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/persons'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sponsors'] });
       toast({
         title: t('common.success'),
         description: t('sponsors.sponsorEnabled'),
@@ -189,37 +189,37 @@ export default function Sponsors() {
     },
   });
 
-  const handleCreate = (data: PersonFormData) => {
+  const handleCreate = (data: SponsorFormData) => {
     createMutation.mutate(data);
   };
 
-  const handleEdit = (person: Person) => {
-    setSelectedSponsor(person);
+  const handleEdit = (sponsor: Sponsor) => {
+    setSelectedSponsor(sponsor);
     form.reset({
-      nameEn: person.nameEn ?? '',
-      nameAr: person.nameAr || '',
-      nationality: person.nationality || '',
-      passportId: person.passportId || '',
-      licenseNumber: person.licenseNumber || '',
-      mobile: person.mobile || '',
-      address: person.address || '',
-      relation: person.relation || '',
-      notes: person.notes || '',
+      nameEn: sponsor.nameEn ?? '',
+      nameAr: sponsor.nameAr || '',
+      nationality: sponsor.nationality || '',
+      passportId: sponsor.passportId || '',
+      licenseNumber: sponsor.licenseNumber || '',
+      mobile: sponsor.mobile || '',
+      address: sponsor.address || '',
+      relation: sponsor.relation || '',
+      notes: sponsor.notes || '',
     });
     setEditOpen(true);
   };
 
-  const handleUpdate = (data: PersonFormData) => {
+  const handleUpdate = (data: SponsorFormData) => {
     updateMutation.mutate(data);
   };
 
-  const handleDisableClick = (person: Person) => {
-    setSponsorToToggle(person);
+  const handleDisableClick = (sponsor: Sponsor) => {
+    setSponsorToToggle(sponsor);
     setDisableDialogOpen(true);
   };
 
-  const handleEnableClick = (person: Person) => {
-    setSponsorToToggle(person);
+  const handleEnableClick = (sponsor: Sponsor) => {
+    setSponsorToToggle(sponsor);
     setEnableDialogOpen(true);
   };
 
@@ -235,10 +235,10 @@ export default function Sponsors() {
     }
   };
 
-  const filterPersons = (persons: Person[]) => {
-    if (!searchQuery.trim()) return persons;
+  const filterSponsors = (sponsors: Sponsor[]) => {
+    if (!searchQuery.trim()) return sponsors;
     const query = searchQuery.toLowerCase();
-    return persons.filter(
+    return sponsors.filter(
       (p) =>
         p.nameEn?.toLowerCase().includes(query) ||
         p.nameAr?.toLowerCase().includes(query) ||
@@ -248,8 +248,8 @@ export default function Sponsors() {
     );
   };
 
-  const filteredActivePersons = filterPersons(activePersons);
-  const filteredDisabledPersons = filterPersons(disabledPersons);
+  const filteredActiveSponsors = filterSponsors(activeSponsors);
+  const filteredDisabledSponsors = filterSponsors(disabledSponsors);
 
   if (isLoading) {
     return (
@@ -265,7 +265,7 @@ export default function Sponsors() {
 
   const canManage = user?.role === 'admin' || user?.role === 'manager';
 
-  const PersonForm = ({ onSubmit, isPending }: { onSubmit: (data: PersonFormData) => void; isPending: boolean }) => (
+  const SponsorForm = ({ onSubmit, isPending }: { onSubmit: (data: SponsorFormData) => void; isPending: boolean }) => (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -400,7 +400,7 @@ export default function Sponsors() {
     </Form>
   );
 
-  const PersonTable = ({ persons, showActions }: { persons: Person[]; showActions: 'disable' | 'enable' }) => (
+  const SponsorTable = ({ sponsors, showActions }: { sponsors: Sponsor[]; showActions: 'disable' | 'enable' }) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -415,35 +415,35 @@ export default function Sponsors() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {persons.length === 0 ? (
+        {sponsors.length === 0 ? (
           <TableRow>
             <TableCell colSpan={8} className="text-center text-muted-foreground">
               {t('sponsors.noSponsors')}
             </TableCell>
           </TableRow>
         ) : (
-          persons.map((person) => (
-            <TableRow key={person.id} data-testid={`row-person-${person.id}`}>
-              <TableCell className="font-medium" data-testid={`text-person-name-en-${person.id}`}>
-                {person.nameEn}
+          sponsors.map((sponsor) => (
+            <TableRow key={sponsor.id} data-testid={`row-person-${sponsor.id}`}>
+              <TableCell className="font-medium" data-testid={`text-person-name-en-${sponsor.id}`}>
+                {sponsor.nameEn}
               </TableCell>
-              <TableCell data-testid={`text-person-name-ar-${person.id}`}>
-                {person.nameAr || '-'}
+              <TableCell data-testid={`text-person-name-ar-${sponsor.id}`}>
+                {sponsor.nameAr || '-'}
               </TableCell>
-              <TableCell data-testid={`text-person-nationality-${person.id}`}>
-                {person.nationality || '-'}
+              <TableCell data-testid={`text-person-nationality-${sponsor.id}`}>
+                {sponsor.nationality || '-'}
               </TableCell>
-              <TableCell data-testid={`text-person-passport-id-${person.id}`}>
-                {person.passportId || '-'}
+              <TableCell data-testid={`text-person-passport-id-${sponsor.id}`}>
+                {sponsor.passportId || '-'}
               </TableCell>
-              <TableCell data-testid={`text-person-license-${person.id}`}>
-                {person.licenseNumber || '-'}
+              <TableCell data-testid={`text-person-license-${sponsor.id}`}>
+                {sponsor.licenseNumber || '-'}
               </TableCell>
-              <TableCell data-testid={`text-person-mobile-${person.id}`}>
-                {person.mobile || '-'}
+              <TableCell data-testid={`text-person-mobile-${sponsor.id}`}>
+                {sponsor.mobile || '-'}
               </TableCell>
-              <TableCell data-testid={`text-person-relation-${person.id}`}>
-                {person.relation || '-'}
+              <TableCell data-testid={`text-person-relation-${sponsor.id}`}>
+                {sponsor.relation || '-'}
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
@@ -451,8 +451,8 @@ export default function Sponsors() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleEdit(person)}
-                      data-testid={`button-edit-person-${person.id}`}
+                      onClick={() => handleEdit(sponsor)}
+                      data-testid={`button-edit-person-${sponsor.id}`}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -461,8 +461,8 @@ export default function Sponsors() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDisableClick(person)}
-                      data-testid={`button-disable-person-${person.id}`}
+                      onClick={() => handleDisableClick(sponsor)}
+                      data-testid={`button-disable-person-${sponsor.id}`}
                     >
                       <Ban className="h-4 w-4" />
                     </Button>
@@ -471,8 +471,8 @@ export default function Sponsors() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleEnableClick(person)}
-                      data-testid={`button-enable-person-${person.id}`}
+                      onClick={() => handleEnableClick(sponsor)}
+                      data-testid={`button-enable-person-${sponsor.id}`}
                     >
                       <CheckCircle className="h-4 w-4" />
                     </Button>
@@ -507,7 +507,7 @@ export default function Sponsors() {
                       {t('sponsors.addSponsor')}
                     </DialogDescription>
                   </DialogHeader>
-                  <PersonForm onSubmit={handleCreate} isPending={createMutation.isPending} />
+                  <SponsorForm onSubmit={handleCreate} isPending={createMutation.isPending} />
                 </DialogContent>
               </Dialog>
             )}
@@ -530,10 +530,10 @@ export default function Sponsors() {
           <Tabs defaultValue="active">
             <TabsList className="mb-4">
               <TabsTrigger value="active" data-testid="tab-active-persons">
-                {t('sponsors.activeSponsors')} ({activePersons.length})
+                {t('sponsors.activeSponsors')} ({activeSponsors.length})
               </TabsTrigger>
               <TabsTrigger value="disabled" data-testid="tab-disabled-persons">
-                {t('sponsors.disabledSponsors')} ({disabledPersons.length})
+                {t('sponsors.disabledSponsors')} ({disabledSponsors.length})
               </TabsTrigger>
             </TabsList>
 
@@ -543,7 +543,7 @@ export default function Sponsors() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               ) : (
-                <PersonTable persons={filteredActivePersons} showActions="disable" />
+                <SponsorTable sponsors={filteredActiveSponsors} showActions="disable" />
               )}
             </TabsContent>
 
@@ -553,7 +553,7 @@ export default function Sponsors() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               ) : (
-                <PersonTable persons={filteredDisabledPersons} showActions="enable" />
+                <SponsorTable sponsors={filteredDisabledSponsors} showActions="enable" />
               )}
             </TabsContent>
           </Tabs>
@@ -568,7 +568,7 @@ export default function Sponsors() {
               {t('sponsors.sponsorUpdated')}
             </DialogDescription>
           </DialogHeader>
-          <PersonForm onSubmit={handleUpdate} isPending={updateMutation.isPending} />
+          <SponsorForm onSubmit={handleUpdate} isPending={updateMutation.isPending} />
         </DialogContent>
       </Dialog>
 

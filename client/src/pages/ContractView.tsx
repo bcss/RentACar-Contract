@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { Contract, ContractWithDetails, Person, Company, CompanySettings, Customer, Vehicle, User } from '@shared/schema';
+import { Contract, ContractWithDetails, Sponsor, Company, CompanySettings, Customer, Vehicle, User, Payment, insertPaymentSchema } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -70,6 +70,13 @@ export default function ContractView() {
   const [depositPaymentMethod, setDepositPaymentMethod] = useState('');
   const [finalPaymentMethod, setFinalPaymentMethod] = useState('');
 
+  // New payment system states
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [paymentCurrency, setPaymentCurrency] = useState('SAR');
+  const [paymentNotes, setPaymentNotes] = useState('');
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       toast({
@@ -106,6 +113,59 @@ export default function ContractView() {
   const { data: creator } = useQuery<User>({
     queryKey: ['/api/users', contract?.createdBy],
     enabled: !!contract?.createdBy,
+  });
+
+  // Fetch payments for this contract
+  const { data: payments = [], isLoading: isLoadingPayments } = useQuery<Payment[]>({
+    queryKey: ['/api/contracts', params.id, 'payments'],
+    enabled: isAuthenticated && !!params.id,
+  });
+
+  // Payment mutations
+  const createPaymentMutation = useMutation({
+    mutationFn: async (data: { amount: string; paymentMethod: string; currency: string; notes?: string; paidAt: Date }) => {
+      return await apiRequest('POST', `/api/contracts/${params.id}/payments`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: t('common.success'),
+        description: 'Payment recorded successfully',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id, 'payments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id] });
+      setShowPaymentDialog(false);
+      setPaymentAmount('');
+      setPaymentMethod('cash');
+      setPaymentNotes('');
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deletePaymentMutation = useMutation({
+    mutationFn: async (paymentId: string) => {
+      return await apiRequest('DELETE', `/api/payments/${paymentId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: t('common.success'),
+        description: 'Payment deleted successfully',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id, 'payments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   // Legacy finalize removed - use new state machine (confirm → activate → complete → close)
@@ -287,14 +347,14 @@ export default function ContractView() {
 
   // Helper function to get sponsor display data with fallback to legacy fields
   const getSponsorDisplay = (contract: Contract & Partial<ContractWithDetails>) => {
-    if (contract.sponsorPerson) {
+    if (contract.sponsor) {
       return {
-        nameEn: contract.sponsorPerson.nameEn || '',
-        nameAr: contract.sponsorPerson.nameAr || '',
-        nationality: contract.sponsorPerson.nationality || '',
-        passportId: contract.sponsorPerson.passportId || '',
-        mobile: contract.sponsorPerson.mobile || '',
-        address: contract.sponsorPerson.address || '',
+        nameEn: contract.sponsor.nameEn || '',
+        nameAr: contract.sponsor.nameAr || '',
+        nationality: contract.sponsor.nationality || '',
+        passportId: contract.sponsor.passportId || '',
+        mobile: contract.sponsor.mobile || '',
+        address: contract.sponsor.address || '',
       };
     }
     // Fallback to legacy inline fields
@@ -553,7 +613,7 @@ export default function ContractView() {
           <div className="grid grid-cols-2 divide-x-2 divide-black">
             {/* Left Column: Sponsor (if with_sponsor) OR Company (if from_company) */}
             <div>
-              {hirerType === 'with_sponsor' && contract.sponsorPerson && (
+              {hirerType === 'with_sponsor' && contract.sponsor && (
                 <>
                   <div className="grid grid-cols-[120px_1fr] border-b border-black">
                     <div className="bg-gray-50 p-2 border-r border-black">
@@ -1327,6 +1387,73 @@ export default function ContractView() {
         </Card>
       )}
 
+      {/* Payment History Card */}
+      {(contract.status === 'confirmed' || contract.status === 'active' || contract.status === 'completed' || contract.status === 'closed') && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-icons">history</span>
+                Payment History
+              </div>
+              {canManageWorkflow && contract.status !== 'closed' && (
+                <Button onClick={() => setShowPaymentDialog(true)} size="sm" data-testid="button-add-payment">
+                  <span className="material-icons text-sm">add</span>
+                  <span>Add Payment</span>
+                </Button>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingPayments ? (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : payments.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">No payments recorded yet</p>
+            ) : (
+              <div className="space-y-2">
+                {payments.map((payment) => (
+                  <div key={payment.id} className="flex items-center justify-between p-3 border rounded-md hover-elevate" data-testid={`payment-${payment.id}`}>
+                    <div className="flex-1">
+                      <p className="font-medium font-mono">
+                        {payment.amount} {payment.currency}
+                        <span className="text-sm text-muted-foreground ml-2">via {payment.paymentMethod}</span>
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(payment.paidAt), 'PPp')}
+                      </p>
+                      {payment.notes && (
+                        <p className="text-sm text-muted-foreground mt-1">{payment.notes}</p>
+                      )}
+                    </div>
+                    {canManageWorkflow && isAdmin && contract.status !== 'closed' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to delete this payment?')) {
+                            deletePaymentMutation.mutate(payment.id);
+                          }
+                        }}
+                        data-testid={`button-delete-payment-${payment.id}`}
+                      >
+                        <span className="material-icons text-sm">delete</span>
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <div className="pt-3 border-t mt-3">
+                  <p className="font-bold font-mono">
+                    Total Payments: {payments.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0).toFixed(2)} {paymentCurrency}
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Extra Charges Card */}
       {(contract.status === 'completed' || contract.status === 'closed') && (
         <Card>
@@ -1749,7 +1876,7 @@ export default function ContractView() {
               <p className="text-xs mt-2">Date: ________________</p>
             </div>
             
-            {hirerType === 'with_sponsor' && contract.sponsorPerson && (
+            {hirerType === 'with_sponsor' && contract.sponsor && (
               <div className="border-2 border-black p-3 text-center">
                 <div className="h-12 mb-2"></div>
                 <p className="text-xs font-semibold font-arabic mb-1">توقيع الكفيل</p>
@@ -2009,6 +2136,96 @@ export default function ContractView() {
               data-testid="button-submit-refund"
             >
               {refundMutation.isPending ? 'Recording...' : 'Record Refund'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Payment</DialogTitle>
+            <DialogDescription>
+              Record a payment received for this contract
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="payment-amount">Amount *</Label>
+              <Input
+                id="payment-amount"
+                type="number"
+                step="0.01"
+                placeholder="Enter amount"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                data-testid="input-payment-amount"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="payment-currency">Currency</Label>
+              <Select value={paymentCurrency} onValueChange={setPaymentCurrency}>
+                <SelectTrigger id="payment-currency" data-testid="select-payment-currency">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SAR">SAR</SelectItem>
+                  <SelectItem value="USD">USD</SelectItem>
+                  <SelectItem value="EUR">EUR</SelectItem>
+                  <SelectItem value="AED">AED</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="payment-method">Payment Method *</Label>
+              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <SelectTrigger id="payment-method" data-testid="select-payment-method">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="card">Card</SelectItem>
+                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                  <SelectItem value="check">Check</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="payment-notes">Notes (Optional)</Label>
+              <Textarea
+                id="payment-notes"
+                placeholder="Add any notes about this payment"
+                value={paymentNotes}
+                onChange={(e) => setPaymentNotes(e.target.value)}
+                data-testid="textarea-payment-notes"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                createPaymentMutation.mutate({
+                  amount: paymentAmount,
+                  paymentMethod,
+                  currency: paymentCurrency,
+                  notes: paymentNotes || undefined,
+                  paidAt: new Date(),
+                });
+              }}
+              disabled={!paymentAmount || !paymentMethod || createPaymentMutation.isPending}
+              data-testid="button-submit-payment"
+            >
+              {createPaymentMutation.isPending ? 'Recording...' : 'Record Payment'}
             </Button>
           </DialogFooter>
         </DialogContent>

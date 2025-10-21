@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertPersonSchema, insertCompanySchema, type Customer, type Vehicle, type Person, type Company } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -278,108 +278,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Person routes (sponsors/drivers)
-  app.get("/api/persons", isAuthenticated, async (req: any, res) => {
+  // Sponsor routes (individual sponsors)
+  app.get("/api/sponsors", isAuthenticated, async (req: any, res) => {
     try {
       const disabledParam = req.query.disabled;
-      let persons: Person[];
+      let sponsors: Sponsor[];
       
       if (disabledParam === 'true') {
-        // Get only disabled persons
-        persons = await storage.getPersons(true);
-        persons = persons.filter(p => p.disabled);
+        // Get only disabled sponsors
+        sponsors = await storage.getSponsors(true);
+        sponsors = sponsors.filter(p => p.disabled);
       } else if (disabledParam === 'false') {
-        // Get only active persons
-        persons = await storage.getPersons(false);
+        // Get only active sponsors
+        sponsors = await storage.getSponsors(false);
       } else {
-        // Get all persons (for backward compatibility)
-        persons = await storage.getPersons(true);
+        // Get all sponsors
+        sponsors = await storage.getSponsors(true);
       }
       
-      res.json(persons);
+      res.json(sponsors);
     } catch (error) {
-      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch persons" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch sponsors" });
     }
   });
 
-  app.get("/api/persons/search", isAuthenticated, async (req: any, res) => {
+  app.get("/api/sponsors/search", isAuthenticated, async (req: any, res) => {
     try {
       const query = req.query.q as string || '';
-      const persons = await storage.searchPersons(query);
-      res.json(persons);
+      const sponsors = await storage.searchSponsors(query);
+      res.json(sponsors);
     } catch (error) {
-      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to search persons" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to search sponsors" });
     }
   });
 
-  app.get("/api/persons/:id", isAuthenticated, async (req: any, res) => {
+  app.get("/api/sponsors/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const person = await storage.getPersonById(req.params.id);
-      if (!person) {
-        return res.status(404).json({ message: "Person not found" });
+      const sponsor = await storage.getSponsorById(req.params.id);
+      if (!sponsor) {
+        return res.status(404).json({ message: "Sponsor not found" });
       }
-      res.json(person);
+      res.json(sponsor);
     } catch (error) {
-      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch person" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch sponsor" });
     }
   });
 
-  app.post("/api/persons", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post("/api/sponsors", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
     try {
-      const personData = insertPersonSchema.parse(req.body);
-      const person = await storage.createPerson({
-        ...personData,
+      const sponsorData = insertSponsorSchema.parse(req.body);
+      const sponsor = await storage.createSponsor({
+        ...sponsorData,
         createdBy: req.user!.id,
       } as any);
       
-      await createAuditLog(req.user!.id, "create_person", undefined, req.ip, `Created person: ${person.nameEn}`);
+      await createAuditLog(req.user!.id, "create_sponsor", undefined, req.ip, `Created sponsor: ${sponsor.nameEn}`);
       
-      res.status(201).json(person);
+      res.status(201).json(sponsor);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: fromZodError(error).message });
       }
-      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create person" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create sponsor" });
     }
   });
 
-  app.patch("/api/persons/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.patch("/api/sponsors/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
     try {
-      const personData = insertPersonSchema.partial().parse(req.body);
-      const person = await storage.updatePerson(req.params.id, personData);
+      const sponsorData = insertSponsorSchema.partial().parse(req.body);
+      const sponsor = await storage.updateSponsor(req.params.id, sponsorData);
       
-      await createAuditLog(req.user!.id, "update_person", undefined, req.ip, `Updated person: ${person.nameEn}`);
+      await createAuditLog(req.user!.id, "update_sponsor", undefined, req.ip, `Updated sponsor: ${sponsor.nameEn}`);
       
-      res.json(person);
+      res.json(sponsor);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: fromZodError(error).message });
       }
-      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update person" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update sponsor" });
     }
   });
 
-  app.post("/api/persons/:id/disable", isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post("/api/sponsors/:id/disable", isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      await storage.disablePerson(req.params.id, req.user!.id);
+      await storage.disableSponsor(req.params.id, req.user!.id);
       
-      await createAuditLog(req.user!.id, "disable_person", undefined, req.ip, `Disabled person: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "disable_sponsor", undefined, req.ip, `Disabled sponsor: ${req.params.id}`);
       
-      res.json({ message: "Person disabled successfully" });
+      res.json({ message: "Sponsor disabled successfully" });
     } catch (error) {
-      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to disable person" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to disable sponsor" });
     }
   });
 
-  app.post("/api/persons/:id/enable", isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post("/api/sponsors/:id/enable", isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      await storage.enablePerson(req.params.id);
+      await storage.enableSponsor(req.params.id);
       
-      await createAuditLog(req.user!.id, "enable_person", undefined, req.ip, `Enabled person: ${req.params.id}`);
+      await createAuditLog(req.user!.id, "enable_sponsor", undefined, req.ip, `Enabled sponsor: ${req.params.id}`);
       
-      res.json({ message: "Person enabled successfully" });
+      res.json({ message: "Sponsor enabled successfully" });
     } catch (error) {
-      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to enable person" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to enable sponsor" });
     }
   });
 
@@ -1120,6 +1120,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error logging print action:", error);
       res.status(400).json({ message: error.message || "Failed to log print action" });
+    }
+  });
+
+  // Payment routes
+  app.post('/api/contracts/:contractId/payments', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { contractId } = req.params;
+      const paymentData = req.body;
+
+      // Verify contract exists
+      const contract = await storage.getContract(contractId);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      // Create payment
+      const payment = await storage.createPayment({
+        ...paymentData,
+        contractId,
+        createdBy: userId,
+      });
+
+      // Create audit log
+      await createAuditLog(userId, 'create', contractId, req.ip, `Added payment of ${payment.amount} ${payment.currency} via ${payment.paymentMethod}`);
+
+      res.json(payment);
+    } catch (error: any) {
+      console.error("Error creating payment:", error);
+      res.status(400).json({ message: error.message || "Failed to create payment" });
+    }
+  });
+
+  app.get('/api/contracts/:contractId/payments', isAuthenticated, async (req: any, res) => {
+    try {
+      const { contractId } = req.params;
+      const payments = await storage.getPaymentsByContract(contractId);
+      res.json(payments);
+    } catch (error: any) {
+      console.error("Error fetching payments:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch payments" });
+    }
+  });
+
+  app.delete('/api/payments/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { id } = req.params;
+
+      // Get payment info before deletion for audit log
+      const payments = await storage.getPaymentsByContract(''); // We need to get the payment first
+      // TODO: Add getPaymentById method to storage for better audit logging
+
+      await storage.deletePayment(id);
+
+      // Create audit log
+      await createAuditLog(userId, 'delete', undefined, req.ip, `Deleted payment ${id}`);
+
+      res.json({ message: "Payment deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting payment:", error);
+      res.status(400).json({ message: error.message || "Failed to delete payment" });
     }
   });
 
