@@ -9,6 +9,7 @@ import { seedCompanySettings } from "./seedCompanySettings";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGeolocation } from "./services/geolocation";
+import { format } from "date-fns";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -1383,6 +1384,430 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching audit report:", error);
       res.status(500).json({ message: "Failed to fetch audit report" });
+    }
+  });
+
+  // Export endpoints
+  app.get('/api/reports/financial/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
+      const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
+      const isRTL = lang === 'ar';
+      
+      const report = await storage.getFinancialReport(startDate, endDate);
+      const settings = await storage.getCompanySettings();
+      const currency = isRTL ? settings.currencyAr : settings.currencyEn;
+      
+      const { 
+        createPDF, 
+        addPDFSummarySection, 
+        addPDFTable, 
+        createExcelWorkbook, 
+        addExcelSheet, 
+        exportExcelToBuffer,
+        formatCurrency,
+        formatDate 
+      } = await import('./utils/exportHelpers');
+
+      if (exportFormat === 'pdf') {
+        const doc = createPDF(
+          'Financial Report',
+          {
+            nameEn: settings.companyNameEn,
+            nameAr: settings.companyNameAr,
+            phone: settings.phone || undefined,
+            email: settings.email || undefined,
+          },
+          isRTL
+        );
+
+        // Add summary section
+        let currentY = addPDFSummarySection(doc, 'Summary', [
+          { label: 'Total Revenue', value: formatCurrency(report.summary.totalRevenue, currency) },
+          { label: 'All-Time Revenue', value: formatCurrency(report.summary.allTimeRevenue, currency) },
+          { label: 'Collection Rate', value: `${report.summary.collectionRate.toFixed(1)}%` },
+          { label: 'Total Collected', value: formatCurrency(report.summary.totalCollected, currency) },
+          { label: 'Outstanding', value: formatCurrency(report.summary.totalOutstanding, currency) },
+        ], 55);
+
+        // Add monthly breakdown table
+        if (report.monthlyBreakdown.length > 0) {
+          currentY += 5;
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Monthly Breakdown', 14, currentY);
+          
+          const monthlyData = report.monthlyBreakdown.map(item => [
+            item.month,
+            formatCurrency(item.revenue, currency),
+            item.contractCount.toString()
+          ]);
+          
+          addPDFTable(doc, ['Month', 'Revenue', 'Contracts'], monthlyData, currentY + 5);
+        }
+
+        // Send PDF
+        const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="financial-report-${format(new Date(), 'yyyy-MM-dd')}.pdf"`);
+        res.send(pdfBuffer);
+      } else if (exportFormat === 'excel') {
+        const wb = createExcelWorkbook();
+        
+        // Summary sheet
+        const summaryData = [
+          { Metric: 'Total Revenue', Value: report.summary.totalRevenue },
+          { Metric: 'All-Time Revenue', Value: report.summary.allTimeRevenue },
+          { Metric: 'Collection Rate (%)', Value: report.summary.collectionRate },
+          { Metric: 'Total Collected', Value: report.summary.totalCollected },
+          { Metric: 'Total Outstanding', Value: report.summary.totalOutstanding },
+        ];
+        addExcelSheet(wb, 'Summary', summaryData);
+        
+        // Monthly breakdown sheet
+        const monthlyData = report.monthlyBreakdown.map(item => ({
+          Month: item.month,
+          Revenue: item.revenue,
+          'Contract Count': item.contractCount
+        }));
+        addExcelSheet(wb, 'Monthly Breakdown', monthlyData);
+        
+        // Recent payments sheet
+        const paymentsData = report.recentPayments.map(p => ({
+          'Contract Number': p.contractNumber,
+          Amount: p.amount,
+          Method: p.method,
+          Date: formatDate(p.date)
+        }));
+        addExcelSheet(wb, 'Recent Payments', paymentsData);
+        
+        // Outstanding payments sheet
+        const outstandingData = report.outstandingPayments.map(p => ({
+          'Contract Number': p.contractNumber,
+          Customer: p.customerName,
+          'Total Amount': p.totalAmount,
+          Collected: p.collected,
+          Outstanding: p.outstanding,
+          Status: p.status,
+          'Due Date': formatDate(p.dueDate)
+        }));
+        addExcelSheet(wb, 'Outstanding Payments', outstandingData);
+        
+        const buffer = exportExcelToBuffer(wb);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="financial-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx"`);
+        res.send(buffer);
+      } else {
+        res.status(400).json({ message: 'Invalid export format. Use "pdf" or "excel".' });
+      }
+    } catch (error) {
+      console.error("Error exporting financial report:", error);
+      res.status(500).json({ message: "Failed to export financial report" });
+    }
+  });
+
+  app.get('/api/reports/operational/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
+      const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
+      const isRTL = lang === 'ar';
+      
+      const report = await storage.getOperationalReport(startDate, endDate);
+      const settings = await storage.getCompanySettings();
+      
+      const { 
+        createPDF, 
+        addPDFSummarySection, 
+        addPDFTable, 
+        createExcelWorkbook, 
+        addExcelSheet, 
+        exportExcelToBuffer,
+        formatPercentage
+      } = await import('./utils/exportHelpers');
+
+      if (exportFormat === 'pdf') {
+        const doc = createPDF(
+          'Operational Report',
+          {
+            nameEn: settings.companyNameEn,
+            nameAr: settings.companyNameAr,
+            phone: settings.phone || undefined,
+            email: settings.email || undefined,
+          },
+          isRTL
+        );
+
+        // Add summary section
+        let currentY = addPDFSummarySection(doc, 'Summary', [
+          { label: 'Total Vehicles', value: report.utilization.totalVehicles.toString() },
+          { label: 'Active Vehicles', value: report.utilization.activeVehicles.toString() },
+          { label: 'Utilization Rate', value: formatPercentage(report.utilization.utilizationRate) },
+        ], 55);
+
+        // Add vehicle stats table
+        if (report.vehicleStats.length > 0) {
+          currentY += 5;
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Vehicle Statistics', 14, currentY);
+          
+          const statsData = report.vehicleStats.slice(0, 15).map((item: any) => [
+            item.registration || 'N/A',
+            `${item.make} ${item.model}`,
+            item.contractCount.toString(),
+            item.totalDays.toString(),
+            item.isActive ? 'Rented' : 'Available'
+          ]);
+          
+          addPDFTable(doc, ['Registration', 'Vehicle', 'Contracts', 'Total Days', 'Status'], statsData, currentY + 5);
+        }
+
+        // Send PDF
+        const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="operational-report-${format(new Date(), 'yyyy-MM-dd')}.pdf"`);
+        res.send(pdfBuffer);
+      } else if (exportFormat === 'excel') {
+        const wb = createExcelWorkbook();
+        
+        // Summary sheet
+        const summaryData = [
+          { Metric: 'Total Vehicles', Value: report.utilization.totalVehicles },
+          { Metric: 'Active Vehicles', Value: report.utilization.activeVehicles },
+          { Metric: 'Utilization Rate (%)', Value: report.utilization.utilizationRate },
+        ];
+        addExcelSheet(wb, 'Summary', summaryData);
+        
+        // Vehicle stats sheet
+        const statsData = report.vehicleStats.map((item: any) => ({
+          Registration: item.registration || 'N/A',
+          Make: item.make,
+          Model: item.model,
+          'Contract Count': item.contractCount,
+          'Total Revenue': item.totalRevenue,
+          'Total Days': item.totalDays,
+          Status: item.isActive ? 'Rented' : 'Available'
+        }));
+        addExcelSheet(wb, 'Vehicle Statistics', statsData);
+        
+        // Contract status sheet
+        const statusData = [
+          { Status: 'Draft', Count: report.statusSummary.draft },
+          { Status: 'Confirmed', Count: report.statusSummary.confirmed },
+          { Status: 'Active', Count: report.statusSummary.active },
+          { Status: 'Completed', Count: report.statusSummary.completed },
+          { Status: 'Closed', Count: report.statusSummary.closed },
+        ];
+        addExcelSheet(wb, 'Contract Status', statusData);
+        
+        const buffer = exportExcelToBuffer(wb);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="operational-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx"`);
+        res.send(buffer);
+      } else {
+        res.status(400).json({ message: 'Invalid export format. Use "pdf" or "excel".' });
+      }
+    } catch (error) {
+      console.error("Error exporting operational report:", error);
+      res.status(500).json({ message: "Failed to export operational report" });
+    }
+  });
+
+  app.get('/api/reports/customers/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
+      const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
+      const isRTL = lang === 'ar';
+      
+      const report = await storage.getCustomerReport(startDate, endDate);
+      const settings = await storage.getCompanySettings();
+      const currency = isRTL ? settings.currencyAr : settings.currencyEn;
+      
+      const { 
+        createPDF, 
+        addPDFTable, 
+        createExcelWorkbook, 
+        addExcelSheet, 
+        exportExcelToBuffer,
+        formatCurrency,
+        formatDate
+      } = await import('./utils/exportHelpers');
+
+      if (exportFormat === 'pdf') {
+        const doc = createPDF(
+          'Customer Report',
+          {
+            nameEn: settings.companyNameEn,
+            nameAr: settings.companyNameAr,
+            phone: settings.phone || undefined,
+            email: settings.email || undefined,
+          },
+          isRTL
+        );
+
+        let currentY = 55;
+
+        // Top customers table
+        if (report.customerActivity.length > 0) {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Top Customers by Revenue', 14, currentY);
+          
+          const topCustomers = report.customerActivity.slice(0, 10);
+          const customerData = topCustomers.map(item => [
+            item.nameEn || item.nameAr || 'N/A',
+            item.contractCount.toString(),
+            formatCurrency(item.totalRevenue, currency),
+            item.totalDays.toString(),
+            formatDate(item.lastRental)
+          ]);
+          
+          addPDFTable(doc, ['Customer', 'Contracts', 'Revenue', 'Days', 'Last Rental'], customerData, currentY + 5);
+        }
+
+        // Send PDF
+        const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="customer-report-${format(new Date(), 'yyyy-MM-dd')}.pdf"`);
+        res.send(pdfBuffer);
+      } else if (exportFormat === 'excel') {
+        const wb = createExcelWorkbook();
+        
+        // Customer activity sheet
+        const activityData = report.customerActivity.map(item => ({
+          Customer: item.nameEn || item.nameAr || 'N/A',
+          'Contract Count': item.contractCount,
+          'Total Revenue': item.totalRevenue,
+          'Total Days': item.totalDays,
+          'Last Rental': formatDate(item.lastRental)
+        }));
+        addExcelSheet(wb, 'Customer Activity', activityData);
+        
+        // Repeat customers sheet
+        const repeatData = report.repeatCustomers.map(item => ({
+          Customer: item.nameEn || item.nameAr || 'N/A',
+          'Contract Count': item.contractCount,
+          'Total Revenue': item.totalRevenue,
+          'Total Days': item.totalDays,
+          'Last Rental': formatDate(item.lastRental)
+        }));
+        addExcelSheet(wb, 'Repeat Customers', repeatData);
+        
+        // New customers sheet
+        const newData = report.newCustomers.map(item => ({
+          Customer: item.nameEn || item.nameAr || 'N/A',
+          'Contract Count': item.contractCount,
+          'Total Revenue': item.totalRevenue,
+          'Total Days': item.totalDays,
+          'First Rental': formatDate(item.lastRental)
+        }));
+        addExcelSheet(wb, 'New Customers', newData);
+        
+        const buffer = exportExcelToBuffer(wb);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="customer-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx"`);
+        res.send(buffer);
+      } else {
+        res.status(400).json({ message: 'Invalid export format. Use "pdf" or "excel".' });
+      }
+    } catch (error) {
+      console.error("Error exporting customer report:", error);
+      res.status(500).json({ message: "Failed to export customer report" });
+    }
+  });
+
+  app.get('/api/reports/audit/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
+      const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
+      const isRTL = lang === 'ar';
+      
+      const report = await storage.getAuditReport(startDate, endDate);
+      const settings = await storage.getCompanySettings();
+      
+      const { 
+        createPDF, 
+        addPDFTable, 
+        createExcelWorkbook, 
+        addExcelSheet, 
+        exportExcelToBuffer,
+        formatDate
+      } = await import('./utils/exportHelpers');
+
+      if (exportFormat === 'pdf') {
+        const doc = createPDF(
+          'Audit Report',
+          {
+            nameEn: settings.companyNameEn,
+            nameAr: settings.companyNameAr,
+            phone: settings.phone || undefined,
+            email: settings.email || undefined,
+          },
+          isRTL
+        );
+
+        let currentY = 55;
+
+        // Audit modifications table
+        if (report.modifications.length > 0) {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Contract Modifications', 14, currentY);
+          
+          const topModifications = report.modifications.slice(0, 30); // Limit to 30 for PDF
+          const modificationsData = topModifications.map((item: any) => [
+            formatDate(item.editedAt),
+            item.editorUsername || 'Unknown',
+            item.fieldName || '',
+            item.reason?.substring(0, 30) || ''
+          ]);
+          
+          addPDFTable(doc, ['Date', 'User', 'Field', 'Reason'], modificationsData, currentY + 5);
+        }
+
+        // Send PDF
+        const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="audit-report-${format(new Date(), 'yyyy-MM-dd')}.pdf"`);
+        res.send(pdfBuffer);
+      } else if (exportFormat === 'excel') {
+        const wb = createExcelWorkbook();
+        
+        // Modifications sheet
+        const modificationsData = report.modifications.map((item: any) => ({
+          Date: formatDate(item.editedAt),
+          User: item.editorUsername || 'Unknown',
+          'Contract ID': item.contractId,
+          Field: item.fieldName || '',
+          'Old Value': item.oldValue?.substring(0, 50) || '',
+          'New Value': item.newValue?.substring(0, 50) || '',
+          Reason: item.reason || '',
+          'IP Address': item.ipAddress || 'N/A'
+        }));
+        addExcelSheet(wb, 'Modifications', modificationsData);
+        
+        // User activity sheet
+        const userActivityData = report.userActivity.map((item: any) => ({
+          User: item.userName,
+          'Modifications': item.modificationCount,
+          'Contracts Modified': item.contractsModified
+        }));
+        addExcelSheet(wb, 'User Activity', userActivityData);
+        
+        const buffer = exportExcelToBuffer(wb);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="audit-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx"`);
+        res.send(buffer);
+      } else {
+        res.status(400).json({ message: 'Invalid export format. Use "pdf" or "excel".' });
+      }
+    } catch (error) {
+      console.error("Error exporting audit report:", error);
+      res.status(500).json({ message: "Failed to export audit report" });
     }
   });
 
