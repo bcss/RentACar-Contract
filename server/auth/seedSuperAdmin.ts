@@ -10,7 +10,14 @@ export async function seedSuperAdmin() {
     const existing = await storage.getUserByUsername(username);
     
     if (existing) {
-      console.log("Super admin already exists");
+      // Update password for existing super admin
+      const passwordHash = await hashPassword(password);
+      await storage.updateUserPassword(existing.id, passwordHash);
+      console.log("✓ Super admin password updated");
+      console.log(`  Username: ${username}`);
+      if (!process.env.SUPER_ADMIN_PASSWORD) {
+        console.log(`  Password: ${password} (default - please change immediately)`);
+      }
       return;
     }
 
