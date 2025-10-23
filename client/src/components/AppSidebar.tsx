@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
@@ -58,6 +58,46 @@ export function AppSidebar() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Collapsible menu state management with localStorage persistence
+  const [mastersOpen, setMastersOpen] = useState(true);
+  const [reportsOpen, setReportsOpen] = useState(true);
+  const [auditOpen, setAuditOpen] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(true);
+
+  // Load collapsible state from localStorage on mount
+  useEffect(() => {
+    const savedMasters = localStorage.getItem('sidebar_masters_open');
+    const savedReports = localStorage.getItem('sidebar_reports_open');
+    const savedAudit = localStorage.getItem('sidebar_audit_open');
+    const savedSettings = localStorage.getItem('sidebar_settings_open');
+
+    if (savedMasters !== null) setMastersOpen(savedMasters === 'true');
+    if (savedReports !== null) setReportsOpen(savedReports === 'true');
+    if (savedAudit !== null) setAuditOpen(savedAudit === 'true');
+    if (savedSettings !== null) setSettingsOpen(savedSettings === 'true');
+  }, []);
+
+  // Save collapsible state to localStorage when changed
+  const handleMastersToggle = (open: boolean) => {
+    setMastersOpen(open);
+    localStorage.setItem('sidebar_masters_open', String(open));
+  };
+
+  const handleReportsToggle = (open: boolean) => {
+    setReportsOpen(open);
+    localStorage.setItem('sidebar_reports_open', String(open));
+  };
+
+  const handleAuditToggle = (open: boolean) => {
+    setAuditOpen(open);
+    localStorage.setItem('sidebar_audit_open', String(open));
+  };
+
+  const handleSettingsToggle = (open: boolean) => {
+    setSettingsOpen(open);
+    localStorage.setItem('sidebar_settings_open', String(open));
+  };
   
   const { data: settings } = useQuery<CompanySettings>({
     queryKey: ['/api/settings'],
@@ -269,7 +309,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
 
               {/* Masters - Collapsible */}
-              <Collapsible defaultOpen className="group/collapsible">
+              <Collapsible open={mastersOpen} onOpenChange={handleMastersToggle} className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton data-testid="nav-masters">
@@ -309,7 +349,7 @@ export function AppSidebar() {
 
               {/* Reports - Collapsible (Admin/Manager only) */}
               {(isAdmin || isManager) && (
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible open={reportsOpen} onOpenChange={handleReportsToggle} className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton data-testid="nav-reports">
@@ -340,7 +380,7 @@ export function AppSidebar() {
 
               {/* Audit Logs & System Errors - Collapsible (Admin/Manager only) */}
               {(isAdmin || isManager) && (
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible open={auditOpen} onOpenChange={handleAuditToggle} className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton data-testid="nav-audit-parent">
@@ -371,7 +411,7 @@ export function AppSidebar() {
 
               {/* Settings - Collapsible (Admin only) */}
               {isAdmin && (
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible open={settingsOpen} onOpenChange={handleSettingsToggle} className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton data-testid="nav-settings">
