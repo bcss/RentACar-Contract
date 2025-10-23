@@ -60,10 +60,11 @@ export function AppSidebar() {
   const [confirmPassword, setConfirmPassword] = useState('');
   
   // Collapsible menu state management with localStorage persistence
-  const [mastersOpen, setMastersOpen] = useState(true);
-  const [reportsOpen, setReportsOpen] = useState(true);
-  const [auditOpen, setAuditOpen] = useState(true);
-  const [settingsOpen, setSettingsOpen] = useState(true);
+  // Default to collapsed (false) on first login
+  const [mastersOpen, setMastersOpen] = useState(false);
+  const [reportsOpen, setReportsOpen] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Load collapsible state from localStorage on mount
   useEffect(() => {
