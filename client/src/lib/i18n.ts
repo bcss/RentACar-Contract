@@ -30,6 +30,11 @@ const resources = {
       "nav.customerReports": "Customer Reports",
       "nav.auditReports": "Audit Reports",
       
+      // Header Tooltips
+      "header.toggleSidebar": "Toggle sidebar",
+      "header.switchTheme": "Switch theme",
+      "header.switchLanguage": "Switch language",
+      
       // Financial Reports
       "financialReports.title": "Financial Reports",
       "financialReports.revenueSummary": "Revenue Summary",
@@ -687,6 +692,11 @@ const resources = {
       "nav.operationalReports": "التقارير التشغيلية",
       "nav.customerReports": "تقارير العملاء",
       "nav.auditReports": "تقارير التدقيق",
+      
+      // Header Tooltips
+      "header.toggleSidebar": "إظهار/إخفاء الشريط الجانبي",
+      "header.switchTheme": "تغيير المظهر",
+      "header.switchLanguage": "تغيير اللغة",
       
       // Financial Reports
       "financialReports.title": "التقارير المالية",
