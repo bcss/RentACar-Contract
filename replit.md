@@ -3,40 +3,23 @@
 ## Overview
 This bilingual (English/Arabic) rental car contract management system, built with React, Express, and PostgreSQL, enables users to create, manage, and finalize rental contracts. It features role-based access control, immutability for finalized contracts, comprehensive audit logging, and Material Design principles with RTL/LTR layouts. The system supports a full rental lifecycle, from draft to closed, including payment tracking, vehicle return workflows, detailed company settings management, and complete contract timeline visualization.
 
-## Recent Changes (October 21, 2025)
-- **Database Schema Update:** Renamed `persons` table to `sponsors` throughout the entire stack (database table, API routes, storage interface, frontend components, type definitions).
-- **Payments System:** Implemented comprehensive payment tracking with dedicated `payments` table, full CRUD API endpoints with RBAC and audit logging, and payment management UI in ContractView for recording deposits, final payments, and refunds.
-- **Type Safety Improvements:** Created shared `UserRole` enum in schema.ts for consistent role management across frontend and backend, replacing hardcoded role strings.
-- **Navigation Reorganization:** 
-  - Enhanced hierarchical sidebar with better organization
-  - Renamed "Audit Logs & System Errors" parent menu to "Logs & Errors"
-  - Renamed "Financial Settings" to "Financials" throughout
-  - Settings submenu: Company, Financials, Terms & Conditions, System Users
-  - Logs & Errors parent menu with two separate pages (Audit Logs, System Errors)
-  - Masters menu: Customers, Vehicles, Sponsors, Companies
-  - **Page-Based Architecture**: Moved from tab-based to separate page-based navigation:
-    - Audit Logs: Standalone page at /audit-logs (removed System Errors tab)
-    - System Errors: Separate page at /system-errors (admin-only)
-    - Settings pages: Separate routes at /settings/company, /settings/financials, /settings/terms (no tabs)
-- **UI/UX Improvements:**
-  - Dynamic company name display in sidebar header and browser title
-  - Title format: "<Company Name> Contract Management System"
-  - Settings split into three separate pages (Company, Financials, Terms & Conditions) for cleaner navigation
-  - Companies page tabs renamed to "Active Companies" and "Disabled Companies" for clarity
-  - Removed redundant subtitle text from sidebar
-  - Dashboard now displays all 6 contract status cards (Draft, Confirmed, Active, Completed, Closed, Total) fixing count inconsistency
-  - **Filter Field Alignment Standardization:** Standardized filter field alignment across all pages with grid-based filter layouts. Added `items-end` class to filter grid containers and `block` class to labels in Contracts, AuditLogs, and SystemErrors pages for consistent vertical alignment of Input, Select, and DatePicker components
-- **Bug Fixes:** 
-  - Fixed server error handler crash bug (removed throw after response sent)
-  - Fixed ContractForm.tsx sponsor form reference (personForm → sponsorForm)
-  - Fixed payment creation endpoint to properly validate and coerce paidAt date using insertPaymentSchema
-  - Fixed Dashboard missing Active status card (was showing 5 cards when 6 statuses exist)
-- **Form Enhancements:** Updated Customers.tsx and Vehicles.tsx to use shared insert schemas from @shared/schema for better type consistency and code quality.
-- **Audit Logging Verification:** Completed comprehensive audit of all mutation endpoints to ensure consistent audit logging coverage across create, update, delete operations. Added audit logging to system error acknowledgment endpoint.
-- **RBAC Verification:** Verified all sensitive endpoints have appropriate role-based access controls with proper admin/manager/staff/viewer permissions.
-- **Vehicle Availability Validation:** Verified full implementation of vehicle availability checking system - backend endpoint checks overlapping contracts, frontend automatically validates dates and vehicle selection, prevents submission if unavailable, shows real-time status badges.
-- **Navigation Architecture Update:** Transitioned from tab-based to page-based navigation for Settings and Logs sections. Created separate pages (SystemErrors.tsx, CompanySettings.tsx, FinancialSettings.tsx, TermsConditions.tsx) with dedicated routes for clearer navigation and better user experience.
-- **End-to-End Testing:** Completed comprehensive E2E testing covering authentication, customer/vehicle creation, contract workflow, payment recording, vehicle availability validation, data persistence, and navigation (including tab switching via sidebar). All features verified working correctly.
+## Recent Changes (October 23, 2025)
+- **Automatic Fuel Charge Calculation System:** Implemented comprehensive fuel management with automatic charge calculation. Added `tankCapacity` field to vehicles table (in liters), petrol/diesel pricing in Financial Settings (via new `/api/settings/financial` endpoints), and automatic calculation on vehicle return using formula: `fuelCharge = tankCapacity × (startFuelLevel% - endFuelLevel%) / 100 × pricePerLiter`. Supports manual override and displays detailed breakdown in contract completion workflow.
+- **Comprehensive Financial Settings System:** Created dedicated Financial Settings page at `/settings/financials` (admin-only) with 11 configurable defaults: defaultDailyRate, defaultWeeklyRate, defaultMonthlyRate, insurancePerDay, gpsPerDay, babySeatPerDay, additionalDriverFee, defaultExtraKmRate, defaultSecurityDeposit, petrolPricePerLiter, dieselPricePerLiter. New contracts automatically populate all rates from financial settings with per-contract manual override capability. Backend API endpoints: GET/PUT `/api/settings/financial`.
+- **Automatic Vehicle Status Synchronization:** Implemented automatic vehicle status updates integrated with contract lifecycle. Contract confirm/activate → vehicle status changes to "rented"; contract complete/close → vehicle status changes to "available". Prevents double-booking and maintains accurate real-time vehicle availability.
+- **Customer Phone Uniqueness Validation:** Added non-blocking phone duplicate detection with real-time validation (500ms debounce). Shows warning when duplicate phone number detected, displays names of customers with same phone, allows user to proceed if intentional (e.g., family members). API endpoint: GET `/api/customers/check-phone/:phone`.
+- **Complete UPDATE Audit Logging:** Expanded comprehensive audit logging to cover all master data UPDATE operations (customers, vehicles, sponsors, companies, users) in addition to existing CREATE/DELETE/disable/enable logging. Full field-level change tracking in contractEdits table provides complete audit trail for compliance and data integrity.
+- **Database Schema Enhancements:** Added `tankCapacity` (numeric) and ensured `fuelType` (petrol/diesel/electric/hybrid) fields in vehicles table. Expanded company_settings table with 11 new financial default fields. All changes backward-compatible with existing data.
+- **Previous Major Updates (October 21, 2025):**
+  - Database Schema Update: Renamed `persons` table to `sponsors` throughout entire stack
+  - Payments System: Comprehensive payment tracking with dedicated table, CRUD API, RBAC, audit logging
+  - Type Safety: Shared `UserRole` enum for consistent role management
+  - Navigation Reorganization: Page-based architecture with hierarchical sidebar
+  - UI/UX Improvements: Dynamic company name, 6 status cards, filter alignment standardization
+  - Bug Fixes: Server error handler, sponsor form reference, payment validation, dashboard cards
+  - Form Enhancements: Shared insert schemas for type consistency
+  - Audit/RBAC/Availability Verification: Comprehensive coverage verified
+  - End-to-End Testing: Full workflow validation completed
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -68,8 +51,13 @@ Preferred communication style: Simple, everyday language.
 ### Features
 - **Comprehensive Rental Lifecycle:** Five states: `draft` → `confirmed` → `active` → `completed` → `closed`.
 - **Contract Timeline:** Displays complete history with field edits and lifecycle events in chronological order.
-- **Vehicle Return Workflow:** Captures odometer, fuel, condition notes, and calculates extra charges.
+- **Automatic Fuel Charge Calculation:** Smart fuel management system that automatically calculates fuel charges based on vehicle tank capacity, fuel type (petrol/diesel), and configurable per-liter pricing. Formula: `fuelCharge = tankCapacity × (startFuelLevel% - endFuelLevel%) / 100 × pricePerLiter`. Includes manual override capability and detailed breakdown display in completion workflow.
+- **Comprehensive Financial Settings:** Centralized financial configuration page (admin-only) managing 11 default rates: rental rates (daily/weekly/monthly), addon fees (insurance/GPS/baby seat), additional driver fee, extra km rate, security deposit, and fuel pricing (petrol/diesel per liter). All new contracts auto-populate from these defaults with per-contract override capability.
+- **Automatic Vehicle Status Synchronization:** Real-time vehicle availability management integrated with contract lifecycle. Contract confirmation/activation automatically sets vehicle status to "rented", preventing double-booking. Contract completion/closure automatically returns vehicle status to "available" for new rentals.
+- **Vehicle Return Workflow:** Captures odometer, fuel levels, condition notes, and automatically calculates all extra charges including fuel consumption based on tank capacity and pricing.
 - **Payment Tracking System:** Comprehensive payment history with separate `payments` table. Records deposits, final payments, and refunds with full details (amount, method, currency, date, payer, notes). Payment management UI integrated into ContractView with add/delete capabilities and payment history display.
+- **Customer Phone Validation:** Non-blocking duplicate phone number detection with real-time validation (500ms debounce). Shows informative warnings when duplicate phone detected, displays customer names with matching numbers, allows proceeding if intentional (e.g., family members).
+- **Complete Audit Logging:** Comprehensive audit trail covering all operations: CREATE (customers, vehicles, sponsors, companies, contracts, payments, users), UPDATE (all master data with field-level tracking), DELETE/disable/enable, and contract lifecycle events. Dual-layer system: `auditLogs` table for lifecycle events, `contractEdits` table for field-level modifications.
 - **Company Settings Management:** Admin-only page to configure bilingual company information and additional contract clauses.
 - **Dashboard:** Displays critical metrics like active rentals, monthly revenue, overdue returns, and pending refunds (based on 5 valid contract statuses).
 - **Sponsors Master Data:** Reusable sponsor records (individual) for sponsoring customers across contracts. Full CRUD operations with search and disable/enable functionality. Stored in `sponsors` database table and displayed as "Sponsors" throughout the UI.

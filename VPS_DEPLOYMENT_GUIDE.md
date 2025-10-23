@@ -415,6 +415,18 @@ openssl rand -base64 32
 chmod 600 .env
 ```
 
+**Note on Recent Feature Updates:**
+
+The latest system features require NO additional environment variables:
+- ✅ Automatic fuel charge calculation (uses existing DATABASE_URL)
+- ✅ Financial Settings page with 11 defaults (stored in company_settings table)
+- ✅ Vehicle tank capacity tracking (stored in vehicles table)
+- ✅ Automatic vehicle status synchronization (database-driven)
+- ✅ Customer phone uniqueness validation (database query)
+- ✅ Complete UPDATE audit logging (uses existing audit_logs table)
+
+All new features use the existing `DATABASE_URL` connection. No configuration changes needed.
+
 ---
 
 ## Database Initialization

@@ -140,17 +140,36 @@ TRUST_PROXY=true             # Enable if behind reverse proxy
 
 1. **users** - System users
 2. **customers** - Customer master data
-3. **vehicles** - Vehicle master data
+3. **vehicles** - Vehicle master data (includes tankCapacity, fuelType for automatic fuel calculations)
 4. **sponsors** - Individual sponsor master data
 5. **companies** - Company sponsor master data
 6. **contracts** - Rental contracts
 7. **payments** - Payment history
-8. **audit_logs** - System audit trail
-9. **contract_edits** - Field-level contract changes
+8. **audit_logs** - System audit trail (includes ALL master data updates)
+9. **contract_edits** - Field-level contract changes with before/after snapshots
 10. **system_errors** - Application errors
 11. **contract_counter** - Auto-increment for contract numbers
-12. **company_settings** - Global company configuration
+12. **company_settings** - Global company configuration (includes 11 financial defaults)
 13. **sessions** - User sessions (managed by connect-pg-simple)
+
+**New Fields Added:**
+
+**vehicles table:**
+- `tankCapacity` (numeric) - Fuel tank size in liters for automatic fuel charge calculation
+- `fuelType` (text) - "petrol" or "diesel" to match correct fuel price
+
+**company_settings table (Financial Settings):**
+- `defaultDailyRate` (numeric) - Default daily rental rate
+- `defaultWeeklyRate` (numeric) - Default weekly rental rate
+- `defaultMonthlyRate` (numeric) - Default monthly rental rate
+- `insurancePerDay` (numeric) - Insurance cost per day
+- `gpsPerDay` (numeric) - GPS rental per day
+- `babySeatPerDay` (numeric) - Baby seat rental per day
+- `additionalDriverFee` (numeric) - One-time additional driver fee
+- `defaultExtraKmRate` (numeric) - Charge per extra kilometer
+- `defaultSecurityDeposit` (numeric) - Default security deposit amount
+- `petrolPricePerLiter` (numeric) - Current petrol price per liter
+- `dieselPricePerLiter` (numeric) - Current diesel price per liter
 
 ### Schema Initialization
 
@@ -255,6 +274,48 @@ WHERE expire < NOW() - INTERVAL '30 days';
 ```
 
 **Audit Log Retention:**
+
+**Complete Audit Coverage:**
+The system now logs ALL data modifications including:
+- User authentication events (login, logout, password changes)
+- Contract lifecycle events (create, confirm, activate, complete, close)
+- Payment transactions (all payment records)
+- **Master data updates** (customers, vehicles, sponsors, companies, users)
+- **Field-level changes** (before/after values in contract_edits table)
+
+**Query Audit Logs:**
+```sql
+-- View master data updates
+SELECT 
+  action,
+  entity_type,
+  entity_id,
+  user_name,
+  details,
+  ip_address,
+  created_at
+FROM audit_logs
+WHERE action = 'update'
+AND entity_type IN ('customer', 'vehicle', 'sponsor', 'company', 'user')
+ORDER BY created_at DESC
+LIMIT 100;
+
+-- View contract edits with field-level changes
+SELECT 
+  ce.contract_id,
+  ce.edited_by,
+  ce.edit_reason,
+  ce.changes_made,
+  ce.created_at,
+  al.ip_address,
+  al.country
+FROM contract_edits ce
+LEFT JOIN audit_logs al ON ce.contract_id::text = al.entity_id
+WHERE al.action = 'edit_contract'
+ORDER BY ce.created_at DESC;
+```
+
+**Archive and Retention:**
 ```sql
 -- Archive audit logs older than 1 year
 -- (Recommend export before deletion)

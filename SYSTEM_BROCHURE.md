@@ -30,16 +30,20 @@ The MARMAR Rental Car Contract Management System is a comprehensive, bilingual (
 - Daily rental rate × rental duration
 - Insurance charges
 - GPS/additional equipment fees
+- Baby seat rental charges
+- Additional driver fees
 - Extra mileage charges
-- Fuel level discrepancies
+- **Automatic fuel charge calculation** using formula: `fuelCharge = tankCapacity × (startFuelLevel% - endFuelLevel%) / 100 × pricePerLiter`
 - Late return penalties
 - Automatic total calculation with tax
+- All rates auto-populated from Financial Settings with manual override capability
 
 ### 👥 **Master Data Management**
 
 #### **Customer Database**
 - Bilingual customer profiles (English & Arabic names)
 - Complete contact information (email, phone, address)
+- **Phone number uniqueness validation** with non-blocking warnings for duplicates
 - ID/passport documentation
 - Driver's license tracking
 - Customer history and repeat rental tracking
@@ -48,8 +52,10 @@ The MARMAR Rental Car Contract Management System is a comprehensive, bilingual (
 #### **Vehicle Fleet Management**
 - Comprehensive vehicle records (registration, make, model, year)
 - Vehicle specifications and features
+- Tank capacity tracking (in liters) for automatic fuel charge calculation
 - Current odometer readings
 - Fuel level monitoring
+- **Automatic vehicle status synchronization** with contract lifecycle
 - Vehicle availability tracking
 - Maintenance status indicators
 - Disable/enable for out-of-service vehicles
@@ -166,14 +172,27 @@ The MARMAR Rental Car Contract Management System is a comprehensive, bilingual (
 1. **Audit Logs**: High-level lifecycle events (create, confirm, activate, etc.)
 2. **Contract Edits**: Granular field-level change tracking with reasons
 
-### 🚗 **Vehicle Availability Validation**
+#### **Complete UPDATE Tracking**
+- **Master Data Updates**: All updates to customers, vehicles, sponsors, companies, and users fully logged
+- **Field-Level Changes**: Before/after snapshots in contractEdits table
+- **Comprehensive Coverage**: No update goes untracked
+- **Compliance Ready**: Complete audit trail for regulatory requirements
 
-#### **Real-Time Availability Checking**
+### 🚗 **Smart Vehicle Management**
+
+#### **Real-Time Availability Validation**
 - **Date Range Validation**: Prevents double-booking
 - **Overlap Detection**: Automatic checking against existing contracts
 - **Visual Indicators**: Clear availability status badges
 - **Smart Alerts**: Warning messages for unavailable vehicles
 - **Automatic Prevention**: Form submission blocked for conflicts
+
+#### **Automatic Vehicle Status Synchronization**
+- **Contract Confirm/Activate**: Vehicle status automatically changes to "rented"
+- **Contract Complete/Close**: Vehicle status automatically changes to "available"
+- **Seamless Integration**: Status updates integrated with contract lifecycle
+- **No Manual Intervention**: Eliminates human error in status management
+- **Real-Time Updates**: Instant availability reflection across the system
 
 ### 🎨 **Modern User Interface**
 
@@ -233,13 +252,15 @@ The MARMAR Rental Car Contract Management System is a comprehensive, bilingual (
 - **Custom Terms & Conditions**: Bilingual clauses for contracts
 - **System-Wide Settings**: Applied to all contracts and documents
 
-#### **Financial Settings**
-- Default rental rates
-- Insurance pricing
-- GPS and equipment charges
-- Tax rates configuration
-- Currency settings
-- Payment method options
+#### **Comprehensive Financial Settings** (Admin-only)
+- **Rental Rates**: Default daily, weekly, and monthly rates
+- **Insurance & Equipment**: Per-day rates for insurance, GPS, baby seats
+- **Additional Charges**: Additional driver fee, extra kilometer rate
+- **Security Deposit**: Default security deposit amount
+- **Fuel Pricing**: Petrol and diesel price per liter for automatic fuel calculations
+- **Auto-Population**: All defaults automatically populate new contracts
+- **Manual Override**: Per-contract customization capability
+- **11 Configurable Defaults**: Complete financial flexibility
 
 ### 🔄 **Immutability & Data Integrity**
 
@@ -313,12 +334,18 @@ The MARMAR Rental Car Contract Management System is a comprehensive, bilingual (
 ### **Operational Efficiency**
 ✅ **50% Faster Contract Creation**: Streamlined workflow with auto-calculations  
 ✅ **Zero Double-Bookings**: Automatic vehicle availability validation  
+✅ **Auto-Populated Financial Defaults**: All rates pre-filled from Financial Settings  
+✅ **Automatic Fuel Charge Calculation**: Formula-based fuel charge on vehicle return  
+✅ **Vehicle Status Synchronization**: Automatic status updates with contract lifecycle  
 ✅ **Complete Audit Trail**: Never lose track of who did what and when  
 ✅ **Instant Reporting**: Real-time analytics and financial insights  
 ✅ **Bilingual Operations**: Serve English and Arabic customers seamlessly  
 
 ### **Financial Control**
-✅ **Accurate Billing**: Automatic calculation of all charges  
+✅ **Accurate Billing**: Automatic calculation of all charges including fuel  
+✅ **Configurable Defaults**: 11 financial settings with auto-population  
+✅ **Intelligent Fuel Pricing**: Separate petrol and diesel rates per liter  
+✅ **Formula-Based Calculations**: Transparent and consistent fuel charge calculation  
 ✅ **Payment Tracking**: Complete financial history for every contract  
 ✅ **Revenue Analytics**: Understand your business performance  
 ✅ **Outstanding Balances**: Track pending payments and refunds  
@@ -326,6 +353,8 @@ The MARMAR Rental Car Contract Management System is a comprehensive, bilingual (
 
 ### **Compliance & Security**
 ✅ **Complete Audit Logs**: Meet regulatory requirements  
+✅ **Full UPDATE Tracking**: All master data changes logged  
+✅ **Field-Level Change History**: Before/after snapshots preserved  
 ✅ **Role-Based Access**: Secure data access control  
 ✅ **Data Integrity**: Immutable contracts prevent fraud  
 ✅ **Geolocation Tracking**: Know where actions originated  

@@ -181,11 +181,20 @@ If this is your first time logging in:
 4. Success message appears
 5. Customer now available for contracts
 
+**Phone Number Duplicate Warning:**
+- System automatically checks for duplicate phone numbers
+- **Non-blocking warning** displays if phone number already exists
+- Shows names of other customers using same phone
+- You can proceed if intentional (e.g., family members sharing phone)
+- Real-time validation with smooth typing experience
+- Example warning: "⚠️ This phone number is already used by: Ahmed Al-Salem"
+
 **Tips:**
 - ✅ Double-check ID and license numbers for accuracy
 - ✅ Verify license not expired before rental
 - ✅ Use consistent name format
 - ✅ Include country code in phone numbers
+- ✅ Review duplicate phone warnings carefully before proceeding
 
 ### Editing Customers
 
@@ -238,6 +247,8 @@ If this is your first time logging in:
 - **Year**: Manufacturing year (2020, 2021, etc.)
 - **Color**: Vehicle color
 - **VIN**: Vehicle Identification Number
+- **Fuel Type**: Petrol or Diesel (critical for automatic fuel charge calculation)
+- **Tank Capacity**: Fuel tank size in liters (required for automatic fuel calculations)
 - **Current Odometer**: Current mileage reading
 - **Fuel Level**: Current fuel status (Full, 3/4, 1/2, 1/4, Empty)
 
@@ -247,9 +258,17 @@ If this is your first time logging in:
 3. Click **"Create Vehicle"**
 4. Vehicle ready for rental
 
+**Tank Capacity Guidance:**
+- Small cars (Yaris, Corolla): 40-50 liters
+- Mid-size cars (Camry, Accord): 55-65 liters
+- Large cars/SUVs (Land Cruiser): 80-100+ liters
+- Check vehicle manual or manufacturer specs for exact capacity
+
 **Tips:**
 - ✅ Verify VIN accuracy (17 characters)
 - ✅ Record exact odometer reading
+- ✅ **Enter accurate tank capacity** - affects fuel charge calculations
+- ✅ Select correct fuel type (Petrol/Diesel)
 - ✅ Update fuel level after each rental
 - ✅ List all features for customer clarity
 
@@ -276,6 +295,18 @@ If this is your first time logging in:
 - 🟡 **Reserved**: In draft/confirmed contract
 - 🔴 **Rented**: Currently active rental
 - ⚪ **Disabled**: Out of service
+
+**Automatic Status Synchronization:**
+The system automatically updates vehicle status based on contract lifecycle:
+- **When you Confirm or Activate contract** → Vehicle status changes to "rented"
+- **When you Complete or Close contract** → Vehicle status changes to "available"
+- **No manual updates needed** - system handles everything
+- **Real-time updates** - status reflects instantly across all screens
+
+**Status Lifecycle:**
+```
+Available → (Confirm/Activate) → Rented → (Complete/Close) → Available
+```
 
 **Availability Checking:**
 - System automatically checks when creating contracts
@@ -355,12 +386,31 @@ If this is your first time logging in:
 
 ### Step 5: Financial Information
 
+**Auto-Populated Financial Defaults:**
+When you create a new contract, ALL rates automatically populate from Financial Settings:
+- **Daily Rate**: Pre-filled from system default
+- **Weekly Rate**: Pre-filled from system default
+- **Monthly Rate**: Pre-filled from system default
+- **Insurance (per day)**: Pre-filled from system default
+- **GPS Fee (per day)**: Pre-filled from system default
+- **Baby Seat Fee (per day)**: Pre-filled from system default
+- **Additional Driver Fee**: Pre-filled from system default
+- **Extra Km Rate**: Pre-filled from system default
+- **Security Deposit**: Pre-filled from system default
+
+**Manual Override Capability:**
+You can edit ANY auto-populated rate for specific contract needs:
+- Click into any rate field
+- Enter custom value
+- System uses your override for this contract only
+- Other contracts unaffected
+
 **Automatic Calculations:**
-- **Daily Rate**: From financial settings or custom
 - **Total Days**: Auto-calculated from dates
 - **Subtotal**: Rate × Days
 - **Insurance**: Daily insurance × Days
 - **GPS Fee**: If selected, daily fee × Days
+- **Baby Seat Fee**: If selected, daily fee × Days
 - **Other Charges**: Manual entry
 - **Total**: Sum of all charges
 - **Tax**: Applied to total (if configured)
@@ -371,12 +421,6 @@ If this is your first time logging in:
 - **Remaining Balance**: Auto-calculated
 - **Payment Method**: Cash, Card, Bank, Check
 - **Payment Status**: Paid, Pending, Partial
-
-**Manual Overrides:**
-- Can override daily rate
-- Can add custom other charges
-- Can adjust deposit amount
-- Tax applied automatically
 
 ### Step 6: Additional Information
 
@@ -480,19 +524,40 @@ DRAFT → CONFIRMED → ACTIVE → COMPLETED → CLOSED
 1. Click **"Complete Contract"** button
 2. Enter return information:
    - **Return Odometer**: Exact reading
-   - **Return Fuel Level**: Actual fuel level
+   - **Return Fuel Level**: Actual fuel level (Full, 3/4, 1/2, 1/4, Empty)
    - **Condition Notes**: Any damage or issues
-   - **Extra Charges**: Additional costs
+   - **Extra Charges**: Additional costs (optional manual entry)
    - **Charge Reason**: Why extra charged
 3. Click **"Complete"**
-4. System calculates final amount
+4. System automatically calculates final amount including fuel charge
+
+**Automatic Fuel Charge Calculation:**
+The system automatically calculates fuel charges based on this formula:
+
+```
+fuelCharge = tankCapacity × (startFuel% - endFuel%) / 100 × pricePerLiter
+```
+
+**Example:**
+- Tank Capacity: 60 liters (from vehicle record)
+- Start Fuel: 100% (Full tank at handover)
+- Return Fuel: 50% (Half tank at return)
+- Petrol Price: 2.50 SAR/liter (from Financial Settings)
+- **Automatic Fuel Charge**: 60 × (100-50) / 100 × 2.50 = **75 SAR**
+
+**What You See:**
+- Fuel charge automatically appears in completion breakdown
+- Clear calculation shown: "Fuel used: 30 liters × 2.50 SAR = 75 SAR"
+- No manual calculation needed
+- Can override if needed for special cases
 
 **Extra Charges Examples:**
+- **Automatic**: Fuel level difference (calculated automatically)
 - Extra mileage beyond limit
-- Fuel level difference
 - Late return fees
 - Damage costs
 - Traffic fines
+- Cleaning fees
 
 **Available Actions:**
 - Record payments

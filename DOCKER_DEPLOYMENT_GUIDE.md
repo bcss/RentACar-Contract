@@ -432,6 +432,10 @@ SESSION_NAME=marmar.sid
 
 # Security
 TRUST_PROXY=true
+
+# Note: Recent feature updates require NO additional environment variables
+# All new features (fuel calculation, financial settings, tank capacity,
+# vehicle status sync, phone validation, audit logging) use existing DATABASE_URL
 ```
 
 **Generate Secure Passwords:**

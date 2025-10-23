@@ -221,7 +221,9 @@ The system includes one protected administrator account:
 
 ### Financial Settings
 
-**Location**: Settings → Financials
+**Location**: Settings → Financials (Admin-only access)
+
+This comprehensive financial configuration page contains 11 default settings that automatically populate all new contracts, streamlining contract creation while allowing per-contract customization.
 
 #### Default Rates Configuration
 
@@ -234,23 +236,65 @@ The system includes one protected administrator account:
 - **Insurance (Daily)**: Insurance cost per day
 - **GPS Fee (Daily)**: GPS device rental per day
 - **Baby Seat Fee (Daily)**: Child seat rental per day
-- **Additional Driver Fee**: Fee for extra drivers
+- **Additional Driver Fee**: One-time fee for extra drivers
+- **Extra Km Rate**: Charge per kilometer beyond included mileage
 
-**Tax Configuration**
-- **VAT Rate**: Percentage (e.g., 15 for 15%)
-- **Tax Included**: Whether tax is already in prices
+**Financial Defaults**
+- **Security Deposit**: Default deposit amount required from customers
 
-**Payment Settings**
-- **Default Currency**: Primary currency (SAR, USD, EUR, etc.)
-- **Accepted Payment Methods**: Cash, Card, Bank Transfer, Check
+**Fuel Pricing** (Critical for automatic fuel charge calculation)
+- **Petrol Price per Liter**: Current petrol/gasoline price per liter
+- **Diesel Price per Liter**: Current diesel price per liter
+
+**How Auto-Population Works:**
+1. Administrator configures all 11 defaults in Financial Settings
+2. When creating new contract, all rates automatically populate form fields
+3. User can override any rate for specific contract if needed
+4. Updated financial settings only affect NEW contracts (existing contracts unchanged)
+
+**Fuel Charge Calculation:**
+The system automatically calculates fuel charges when completing contracts using this formula:
+
+```
+fuelCharge = tankCapacity × (startFuelLevel% - endFuelLevel%) / 100 × pricePerLiter
+```
+
+**Example:**
+- Tank Capacity: 60 liters
+- Start Fuel: 100% (Full)
+- End Fuel: 50% (Half)
+- Petrol Price: 2.50 SAR/liter
+- Calculation: 60 × (100 - 50) / 100 × 2.50 = 60 × 0.5 × 2.50 = 75 SAR
 
 **How to Configure:**
-1. Go to **Settings → Financials**
-2. Update any rate
+1. Navigate to **Settings → Financials**
+2. Update all 11 financial defaults:
+   - defaultDailyRate
+   - defaultWeeklyRate
+   - defaultMonthlyRate
+   - insurancePerDay
+   - gpsPerDay
+   - babySeatPerDay
+   - additionalDriverFee
+   - defaultExtraKmRate
+   - defaultSecurityDeposit
+   - petrolPricePerLiter (important for automatic fuel calculations)
+   - dieselPricePerLiter (important for automatic fuel calculations)
 3. Click **"Save Financial Settings"**
-4. New contracts use updated rates
+4. All new contracts will use these defaults
 
-**Note**: Changes affect **new contracts only**. Existing contracts retain their original rates.
+**Best Practices:**
+- ✅ Update fuel prices weekly or when market rates change
+- ✅ Review all defaults monthly to ensure competitive pricing
+- ✅ Set realistic security deposit amounts
+- ✅ Keep daily/weekly/monthly rates proportional
+- ✅ Document price changes for audit purposes
+
+**Important Notes:**
+- Changes affect **new contracts only** - existing contracts retain original rates
+- Per-contract override capability preserved
+- Fuel price accuracy critical for fair customer billing
+- All rates stored in company's primary currency
 
 ### Terms & Conditions
 
@@ -307,6 +351,16 @@ The system includes one protected administrator account:
    - **License Expiry**: License expiration date
 3. Click **"Create Customer"**
 
+**Phone Number Validation:**
+- System automatically checks for duplicate phone numbers
+- **Non-blocking warning** displayed if duplicate found
+- Shows names of other customers with same phone
+- User can proceed if intentional (e.g., family members, shared numbers)
+- Real-time validation with 500ms debounce for smooth data entry
+- Warning examples:
+  * "This phone number is already used by: Ahmed Al-Salem"
+  * "This phone number is already used by: 2 other customers"
+
 #### Customer Management
 
 **Search & Filter:**
@@ -338,10 +392,22 @@ The system includes one protected administrator account:
    - **Year**: Manufacturing year
    - **Color**: Vehicle color
    - **VIN**: Vehicle Identification Number
+   - **Fuel Type**: Petrol or Diesel (critical for fuel charge calculation)
+   - **Tank Capacity**: Fuel tank size in liters (critical for automatic fuel charge calculation)
    - **Current Odometer**: Current mileage
    - **Fuel Level**: Current fuel level (Full, 3/4, 1/2, 1/4, Empty)
    - **Features**: GPS, Bluetooth, etc. (optional)
 3. Click **"Create Vehicle"**
+
+**Tank Capacity Configuration:**
+- Tank capacity (in liters) is REQUIRED for automatic fuel charge calculation
+- System uses this value in formula: `fuelCharge = tankCapacity × (startFuel% - endFuel%) / 100 × pricePerLiter`
+- Common tank capacities:
+  * Small cars (Yaris, Corolla): 40-50 liters
+  * Mid-size cars (Camry, Accord): 55-65 liters
+  * Large cars/SUVs (Land Cruiser, Suburban): 80-100+ liters
+- Verify tank capacity from vehicle manual or manufacturer specifications
+- Incorrect tank capacity leads to inaccurate fuel charge calculations
 
 #### Vehicle Availability
 
@@ -351,11 +417,23 @@ The system includes one protected administrator account:
 - Prevents double-booking
 - Shows availability status badges
 
+**Automatic Status Synchronization:**
+- **Contract Confirm/Activate**: Vehicle status automatically changes to "rented"
+- **Contract Complete/Close**: Vehicle status automatically changes to "available"
+- **Seamless Integration**: No manual status updates required
+- **Real-Time Updates**: Status reflects instantly across system
+- **Error Prevention**: Eliminates manual status update errors
+
 **Managing Out-of-Service Vehicles:**
 1. Disable vehicle temporarily
 2. Prevents new contract creation
 3. Existing contracts unaffected
 4. Re-enable when repaired/serviced
+
+**Status Lifecycle:**
+```
+Available → (Confirm/Activate) → Rented → (Complete/Close) → Available
+```
 
 ### Sponsors
 
@@ -421,6 +499,7 @@ The system includes one protected administrator account:
 - Vehicle create, update, disable/enable
 - Sponsor create, update, disable/enable
 - Company create, update, disable/enable
+- **Complete UPDATE tracking** - All field-level changes logged with before/after values
 
 **Contract Operations:**
 - Contract creation
