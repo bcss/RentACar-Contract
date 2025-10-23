@@ -11,7 +11,7 @@ Preferred communication style: Simple, everyday language.
 ### Frontend
 - **Technology Stack:** React with TypeScript, Wouter for routing, TanStack Query for state management, React Hook Form with Zod validation, Radix UI/shadcn/ui for components, Tailwind CSS for styling, and Vite for building.
 - **Design System:** Material Design 3 with cyan-blue primary, dual theme (light/dark), i18next for bilingual support (English/Arabic) with RTL/LTR switching, and specific font families (Inter, Cairo, JetBrains Mono).
-- **UI/UX Decisions:** Hierarchical sidebar with collapsible sections (Masters, Reports, Audit, Settings) with localStorage state persistence (default collapsed on first visit), bilingual tooltips on header buttons (sidebar toggle, theme toggle, language toggle), stable RTL/LTR layout with forced LTR header direction to prevent button position swapping during language toggle, tabbed views for active/disabled lists, enhanced filtering, system error acknowledgment, full English/Arabic translations, Material Design 3 styling, semantic chart colors for status badges, and responsive design.
+- **UI/UX Decisions:** Hierarchical sidebar with collapsible sections (Masters, Reports, Audit, Settings) with localStorage state persistence (default collapsed on first visit), bilingual tooltips on header buttons (sidebar toggle, theme toggle, language toggle), full RTL/LTR layout with dynamic sidebar positioning (right side in Arabic, left side in English), comprehensive data visualization with recharts in all report pages, tabbed views for active/disabled lists, enhanced filtering, system error acknowledgment, full English/Arabic translations, Material Design 3 styling, semantic chart colors for status badges, and responsive design.
 - **Key Features:** Context-based theme/language, custom hooks for authentication, shared Zod schemas, print functionality, contract lifecycle management, comprehensive timeline visualization, and route protection.
 
 ### Backend
@@ -39,6 +39,7 @@ Preferred communication style: Simple, everyday language.
 - **Complete Audit Logging:** Comprehensive audit trail for all CREATE, UPDATE, DELETE/disable/enable operations, and contract lifecycle events.
 - **Company Settings Management:** Admin-only page for configuring bilingual company information and contract clauses.
 - **Dashboard:** Displays critical metrics like active rentals, monthly revenue, overdue returns.
+- **Advanced Analytics & Reporting:** Comprehensive reporting with data visualization using recharts library. Financial Reports include monthly revenue trends (line chart), revenue by status (pie chart), and payment method breakdown (pie chart). Operational Reports feature vehicle utilization analysis (bar chart) and contract status distribution (pie chart). Customer Reports display top customers by revenue (bar chart) and customer retention analysis (donut chart). All charts are responsive, bilingual-ready, and theme-compatible.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
 - **MARMAR PDF Integration:** Professional PDF generation for rental contracts.
@@ -57,3 +58,4 @@ Preferred communication style: Simple, everyday language.
 - **Form Handling:** `react-hook-form`, `@hookform/resolvers`, `zod`.
 - **Internationalization:** `i18next`, `react-i18next`.
 - **Styling:** `tailwindcss`, `class-variance-authority`, `clsx`.
+- **Data Visualization:** `recharts` for responsive charts and graphs.

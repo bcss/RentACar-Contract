@@ -49,7 +49,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  side?: 'left' | 'right';
+}
+
+export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const { t, i18n } = useTranslation();
   const [location] = useLocation();
   const { user, isAdmin, isManager } = useAuth();
@@ -272,7 +276,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar data-testid="sidebar-main">
+    <Sidebar side={side} data-testid="sidebar-main">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <span className="material-icons text-3xl text-primary">

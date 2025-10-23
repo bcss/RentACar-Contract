@@ -13,8 +13,8 @@ export function Header() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="flex flex-row items-center p-4 border-b bg-background sticky top-0 z-10" dir="ltr">
-      {/* Left side - Sidebar Toggle */}
+    <header className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-10">
+      {/* Sidebar Toggle */}
       <div className="flex items-center gap-4">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -35,10 +35,7 @@ export function Header() {
         </Tooltip>
       </div>
       
-      {/* Spacer */}
-      <div className="flex-1" />
-      
-      {/* Right side - Theme & Language Toggles */}
+      {/* Theme & Language Toggles */}
       <div className="flex items-center gap-2">
         {/* Theme Toggle */}
         <Tooltip>

@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Link } from 'wouter';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface FinancialReport {
   summary: {
@@ -251,6 +252,62 @@ export default function FinancialReports() {
                 </Card>
               </div>
 
+              <Card data-testid="card-monthly-revenue-chart">
+                <CardHeader>
+                  <CardTitle>{t('financialReports.monthlyRevenueTrend')}</CardTitle>
+                  <CardDescription>Revenue trends over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {report.monthlyBreakdown.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      {t('financialReports.noData')}
+                    </p>
+                  ) : (
+                    <ResponsiveContainer width="100%" minHeight={300}>
+                      <LineChart data={report.monthlyBreakdown}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis 
+                          dataKey="month" 
+                          tickFormatter={formatMonth}
+                          className="text-xs"
+                        />
+                        <YAxis 
+                          tickFormatter={(value) => `${value.toLocaleString()}`}
+                          className="text-xs"
+                        />
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length) return null;
+                            return (
+                              <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                                <p className="text-sm font-medium mb-1">
+                                  {formatMonth(payload[0].payload.month)}
+                                </p>
+                                <p className="text-sm text-primary">
+                                  Revenue: {formatCurrency(payload[0].value as number)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Contracts: {payload[0].payload.contractCount}
+                                </p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Legend />
+                        <Line 
+                          type="monotone" 
+                          dataKey="revenue" 
+                          stroke="hsl(var(--primary))" 
+                          strokeWidth={2}
+                          dot={{ fill: 'hsl(var(--primary))' }}
+                          name="Revenue"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>{t('financialReports.monthlyBreakdown')}</CardTitle>
@@ -287,37 +344,56 @@ export default function FinancialReports() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card data-testid="card-revenue-by-status-chart">
                 <CardHeader>
                   <CardTitle>{t('financialReports.revenueByStatus')}</CardTitle>
+                  <CardDescription>Revenue distribution across contract statuses</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{t('financialReports.confirmed')}</span>
-                      <span className="text-sm font-bold" data-testid="text-revenue-confirmed">
-                        {formatCurrency(report.revenueByStatus.confirmed)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{t('financialReports.active')}</span>
-                      <span className="text-sm font-bold" data-testid="text-revenue-active">
-                        {formatCurrency(report.revenueByStatus.active)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{t('financialReports.completed')}</span>
-                      <span className="text-sm font-bold" data-testid="text-revenue-completed">
-                        {formatCurrency(report.revenueByStatus.completed)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{t('financialReports.closed')}</span>
-                      <span className="text-sm font-bold" data-testid="text-revenue-closed">
-                        {formatCurrency(report.revenueByStatus.closed)}
-                      </span>
-                    </div>
-                  </div>
+                  <ResponsiveContainer width="100%" minHeight={300}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: t('financialReports.confirmed'), value: report.revenueByStatus.confirmed, color: 'hsl(207, 90%, 54%)' },
+                          { name: t('financialReports.active'), value: report.revenueByStatus.active, color: 'hsl(142, 71%, 45%)' },
+                          { name: t('financialReports.completed'), value: report.revenueByStatus.completed, color: 'hsl(199, 89%, 48%)' },
+                          { name: t('financialReports.closed'), value: report.revenueByStatus.closed, color: 'hsl(220, 9%, 46%)' },
+                        ].filter(item => item.value > 0)}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {[
+                          { name: t('financialReports.confirmed'), value: report.revenueByStatus.confirmed, color: 'hsl(207, 90%, 54%)' },
+                          { name: t('financialReports.active'), value: report.revenueByStatus.active, color: 'hsl(142, 71%, 45%)' },
+                          { name: t('financialReports.completed'), value: report.revenueByStatus.completed, color: 'hsl(199, 89%, 48%)' },
+                          { name: t('financialReports.closed'), value: report.revenueByStatus.closed, color: 'hsl(220, 9%, 46%)' },
+                        ].filter(item => item.value > 0).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (!active || !payload || !payload.length) return null;
+                          return (
+                            <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                              <p className="text-sm font-medium mb-1">
+                                {payload[0].name}
+                              </p>
+                              <p className="text-sm text-primary">
+                                {formatCurrency(payload[0].value as number)}
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
             </>
@@ -379,9 +455,10 @@ export default function FinancialReports() {
                 </Card>
               </div>
 
-              <Card>
+              <Card data-testid="card-payment-methods-chart">
                 <CardHeader>
                   <CardTitle>{t('financialReports.paymentMethods')}</CardTitle>
+                  <CardDescription>Payment method breakdown</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {report.methodBreakdown.length === 0 ? (
@@ -389,16 +466,57 @@ export default function FinancialReports() {
                       {t('financialReports.noPayments')}
                     </p>
                   ) : (
-                    <div className="space-y-4">
-                      {report.methodBreakdown.map((item) => (
-                        <div key={item.method} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{getPaymentMethodLabel(item.method)}</span>
-                          <span className="text-sm font-bold" data-testid={`text-method-${item.method}`}>
-                            {formatCurrency(item.amount)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <ResponsiveContainer width="100%" minHeight={300}>
+                      <PieChart>
+                        <Pie
+                          data={report.methodBreakdown.map((item, index) => ({
+                            name: getPaymentMethodLabel(item.method),
+                            value: item.amount,
+                            color: [
+                              'hsl(142, 71%, 45%)',
+                              'hsl(199, 89%, 48%)',
+                              'hsl(207, 90%, 54%)',
+                              'hsl(45, 100%, 51%)',
+                            ][index % 4]
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {report.methodBreakdown.map((item, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={[
+                                'hsl(142, 71%, 45%)',
+                                'hsl(199, 89%, 48%)',
+                                'hsl(207, 90%, 54%)',
+                                'hsl(45, 100%, 51%)',
+                              ][index % 4]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length) return null;
+                            return (
+                              <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                                <p className="text-sm font-medium mb-1">
+                                  {payload[0].name}
+                                </p>
+                                <p className="text-sm text-primary">
+                                  {formatCurrency(payload[0].value as number)}
+                                </p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
                   )}
                 </CardContent>
               </Card>

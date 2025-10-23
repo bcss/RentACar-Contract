@@ -164,6 +164,9 @@ function AppContent() {
     "--sidebar-width-icon": "3rem",
   };
 
+  // Determine sidebar side based on language (RTL support)
+  const sidebarSide = i18n.language === 'ar' ? 'right' : 'left';
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -179,7 +182,7 @@ function AppContent() {
   return (
     <SidebarProvider style={style as React.CSSProperties}>
       <div className="flex h-screen w-full">
-        <AppSidebar />
+        <AppSidebar side={sidebarSide as 'left' | 'right'} />
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header />
           <main className="flex-1 overflow-auto">

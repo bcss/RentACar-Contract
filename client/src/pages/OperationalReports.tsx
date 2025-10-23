@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Link } from 'wouter';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface VehicleUtilization {
   vehicleId: string;
@@ -324,6 +325,67 @@ export default function OperationalReports() {
                 </CardContent>
               </Card>
 
+              <Card data-testid="card-vehicle-utilization-chart">
+                <CardHeader>
+                  <CardTitle>{t('operationalReports.vehicleUtilizationChart')}</CardTitle>
+                  <CardDescription>
+                    Utilization rates by vehicle
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {vehicleUtilizationData.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      {t('operationalReports.noVehicles')}
+                    </p>
+                  ) : (
+                    <ResponsiveContainer width="100%" minHeight={300}>
+                      <BarChart data={vehicleUtilizationData}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis 
+                          dataKey="registration" 
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                          className="text-xs"
+                        />
+                        <YAxis 
+                          tickFormatter={(value) => `${value}%`}
+                          className="text-xs"
+                        />
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length) return null;
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                                <p className="text-sm font-medium mb-1">
+                                  {data.make} {data.model}
+                                </p>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  {data.registration}
+                                </p>
+                                <p className="text-sm text-primary">
+                                  Utilization: {data.utilizationRate.toFixed(1)}%
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {data.totalDaysRented} days rented / {data.availableDays} available
+                                </p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Legend />
+                        <Bar 
+                          dataKey="utilizationRate" 
+                          fill="hsl(var(--primary))"
+                          name="Utilization Rate (%)"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>{t('operationalReports.vehicleUtilization')}</CardTitle>
@@ -441,6 +503,60 @@ export default function OperationalReports() {
                   </Card>
                 ))}
               </div>
+
+              <Card data-testid="card-contract-status-chart">
+                <CardHeader>
+                  <CardTitle>{t('operationalReports.contractStatusDistribution')}</CardTitle>
+                  <CardDescription>Contract status breakdown by percentage</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" minHeight={300}>
+                    <PieChart>
+                      <Pie
+                        data={contractStatusData.filter(item => item.count > 0).map(item => ({
+                          name: t(`operationalReports.${item.status}`),
+                          value: item.count,
+                          status: item.status
+                        }))}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {contractStatusData.filter(item => item.count > 0).map((item, index) => {
+                          const colors: Record<string, string> = {
+                            draft: 'hsl(38, 92%, 50%)',
+                            confirmed: 'hsl(207, 90%, 54%)',
+                            active: 'hsl(142, 71%, 45%)',
+                            completed: 'hsl(199, 89%, 48%)',
+                            closed: 'hsl(220, 9%, 46%)',
+                          };
+                          return <Cell key={`cell-${index}`} fill={colors[item.status] || 'hsl(var(--primary))'} />;
+                        })}
+                      </Pie>
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (!active || !payload || !payload.length) return null;
+                          return (
+                            <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                              <p className="text-sm font-medium mb-1">
+                                {payload[0].name}
+                              </p>
+                              <p className="text-sm text-primary">
+                                Count: {payload[0].value}
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
 
               <Card>
                 <CardHeader>

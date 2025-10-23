@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Link } from 'wouter';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface CustomerActivity {
   customerId: string;
@@ -157,20 +158,83 @@ export default function CustomerReports() {
               </CardContent>
             </Card>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>All Customer Activity</CardTitle>
-                <CardDescription>
-                  Sorted by total revenue (highest first)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {report.customerActivity.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-12">
-                    No customer activity in this period
-                  </p>
-                ) : (
-                  <Table>
+            <>
+              <Card data-testid="card-top-customers-chart">
+                <CardHeader>
+                  <CardTitle>Top 10 Customers by Revenue</CardTitle>
+                  <CardDescription>
+                    Highest revenue generating customers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {report.customerActivity.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No customer activity in this period
+                    </p>
+                  ) : (
+                    <ResponsiveContainer width="100%" minHeight={300}>
+                      <BarChart data={report.customerActivity.slice(0, 10)}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis 
+                          dataKey="nameEn" 
+                          angle={-45}
+                          textAnchor="end"
+                          height={120}
+                          className="text-xs"
+                          tick={{ fontSize: 11 }}
+                        />
+                        <YAxis 
+                          tickFormatter={(value) => `${value.toLocaleString()}`}
+                          className="text-xs"
+                        />
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length) return null;
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                                <p className="text-sm font-medium mb-1">
+                                  {data.nameEn || data.nameAr}
+                                </p>
+                                <p className="text-sm text-primary">
+                                  Revenue: {formatCurrency(data.totalRevenue)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Contracts: {data.contractCount}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Rental Days: {data.totalDays}
+                                </p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Legend />
+                        <Bar 
+                          dataKey="totalRevenue" 
+                          fill="hsl(var(--primary))"
+                          name="Total Revenue"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Customer Activity</CardTitle>
+                  <CardDescription>
+                    Sorted by total revenue (highest first)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {report.customerActivity.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-12">
+                      No customer activity in this period
+                    </p>
+                  ) : (
+                    <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead data-testid="table-header-customer">Customer</TableHead>
@@ -201,6 +265,7 @@ export default function CustomerReports() {
                 )}
               </CardContent>
             </Card>
+            </>
           )}
         </TabsContent>
 
@@ -250,6 +315,66 @@ export default function CustomerReports() {
                   </CardContent>
                 </Card>
               </div>
+
+              <Card data-testid="card-repeat-vs-new-chart">
+                <CardHeader>
+                  <CardTitle>Repeat vs New Customers</CardTitle>
+                  <CardDescription>
+                    Customer acquisition and retention breakdown
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" minHeight={300}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { 
+                            name: 'Repeat Customers', 
+                            value: report.repeatCustomers.length,
+                            color: 'hsl(142, 71%, 45%)'
+                          },
+                          { 
+                            name: 'New Customers', 
+                            value: report.newCustomers.length,
+                            color: 'hsl(199, 89%, 48%)'
+                          },
+                        ].filter(item => item.value > 0)}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                        outerRadius={100}
+                        innerRadius={60}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {[
+                          { name: 'Repeat Customers', value: report.repeatCustomers.length, color: 'hsl(142, 71%, 45%)' },
+                          { name: 'New Customers', value: report.newCustomers.length, color: 'hsl(199, 89%, 48%)' },
+                        ].filter(item => item.value > 0).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (!active || !payload || !payload.length) return null;
+                          return (
+                            <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                              <p className="text-sm font-medium mb-1">
+                                {payload[0].name}
+                              </p>
+                              <p className="text-sm text-primary">
+                                Count: {payload[0].value}
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
 
               <Card>
                 <CardHeader>
