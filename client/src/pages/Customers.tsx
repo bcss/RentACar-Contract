@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -42,11 +42,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Search, Edit, Ban, CheckCircle } from 'lucide-react';
+import { Plus, Search, Edit, Ban, CheckCircle, AlertTriangle } from 'lucide-react';
 import type { Customer } from '@shared/schema';
 import { insertCustomerSchema } from '@shared/schema';
 import {
@@ -73,6 +74,12 @@ const customerFormSchema = insertCustomerSchema.extend({
 
 type CustomerFormData = z.infer<typeof customerFormSchema>;
 
+interface PhoneDuplicateWarning {
+  hasDuplicate: boolean;
+  duplicateCount: number;
+  duplicateCustomers: Array<{ id: string; nameEn: string | null; nameAr: string | null }>;
+}
+
 export default function Customers() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -84,6 +91,8 @@ export default function Customers() {
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const [enableDialogOpen, setEnableDialogOpen] = useState(false);
   const [customerToToggle, setCustomerToToggle] = useState<Customer | null>(null);
+  const [phoneWarning, setPhoneWarning] = useState<PhoneDuplicateWarning | null>(null);
+  const phoneCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(customerFormSchema),
@@ -103,6 +112,51 @@ export default function Customers() {
       licenseExpiryDate: undefined,
     },
   });
+
+  // Watch phone field for changes
+  const phoneValue = form.watch('phone');
+
+  // Check for duplicate phone numbers with debouncing
+  useEffect(() => {
+    // Clear any existing timeout
+    if (phoneCheckTimeoutRef.current) {
+      clearTimeout(phoneCheckTimeoutRef.current);
+    }
+
+    // Clear warning if phone is empty
+    if (!phoneValue || phoneValue.trim() === '') {
+      setPhoneWarning(null);
+      return;
+    }
+
+    // Debounce the API call
+    phoneCheckTimeoutRef.current = setTimeout(async () => {
+      try {
+        const excludeId = selectedCustomer?.id || '';
+        const url = `/api/customers/check-phone/${encodeURIComponent(phoneValue)}${excludeId ? `?excludeId=${excludeId}` : ''}`;
+        const response = await fetch(url);
+        
+        if (response.ok) {
+          const data: PhoneDuplicateWarning = await response.json();
+          
+          if (data.hasDuplicate) {
+            setPhoneWarning(data);
+          } else {
+            setPhoneWarning(null);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking phone uniqueness:', error);
+      }
+    }, 500);
+
+    // Cleanup function
+    return () => {
+      if (phoneCheckTimeoutRef.current) {
+        clearTimeout(phoneCheckTimeoutRef.current);
+      }
+    };
+  }, [phoneValue, selectedCustomer?.id]);
 
   const { data: activeCustomers = [], isLoading: activeLoading } = useQuery<Customer[]>({
     queryKey: ['/api/customers', 'active'],
@@ -228,6 +282,7 @@ export default function Customers() {
 
   const handleEdit = (customer: Customer) => {
     setSelectedCustomer(customer);
+    setPhoneWarning(null);
     form.reset({
       nameEn: customer.nameEn ?? '',
       nameAr: customer.nameAr ?? '',
@@ -244,6 +299,23 @@ export default function Customers() {
       licenseExpiryDate: customer.licenseExpiryDate ? new Date(customer.licenseExpiryDate) : undefined,
     });
     setEditOpen(true);
+  };
+
+  const handleCreateDialogChange = (open: boolean) => {
+    setCreateOpen(open);
+    if (!open) {
+      setPhoneWarning(null);
+      form.reset();
+    }
+  };
+
+  const handleEditDialogChange = (open: boolean) => {
+    setEditOpen(open);
+    if (!open) {
+      setPhoneWarning(null);
+      setSelectedCustomer(null);
+      form.reset();
+    }
   };
 
   const handleUpdate = (data: CustomerFormData) => {
@@ -430,6 +502,14 @@ export default function Customers() {
             )}
           />
         </div>
+        {phoneWarning && phoneWarning.hasDuplicate && (
+          <Alert variant="default" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20" data-testid="alert-phone-duplicate-warning">
+            <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+            <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+              ⚠️ Warning: This phone number is already used by customer(s): {phoneWarning.duplicateCustomers.map(c => c.nameEn || c.nameAr || 'Unknown').join(', ')}. You can still proceed if this is intentional.
+            </AlertDescription>
+          </Alert>
+        )}
         <FormField
           control={form.control}
           name="licenseNumber"
@@ -591,7 +671,7 @@ export default function Customers() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{t('customers.title')}</CardTitle>
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            <Dialog open={createOpen} onOpenChange={handleCreateDialogChange}>
               <DialogTrigger asChild>
                 <Button data-testid="button-create-customer">
                   <Plus className="h-4 w-4 mr-2" />
@@ -658,7 +738,7 @@ export default function Customers() {
       </Card>
 
       {/* Edit Dialog */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+      <Dialog open={editOpen} onOpenChange={handleEditDialogChange}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{t('customers.editCustomer')}</DialogTitle>

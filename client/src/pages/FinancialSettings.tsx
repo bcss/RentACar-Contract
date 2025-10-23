@@ -44,8 +44,8 @@ export default function FinancialSettings() {
   const { toast } = useToast();
   const { isAdmin, isLoading: authLoading } = useAuth();
 
-  const { data: settings, isLoading } = useQuery<CompanySettings>({
-    queryKey: ['/api/settings'],
+  const { data: settings, isLoading } = useQuery<any>({
+    queryKey: ['/api/settings/financial'],
   });
 
   const form = useForm<FinancialSettingsForm>({
@@ -85,21 +85,14 @@ export default function FinancialSettings() {
 
   const updateMutation = useMutation({
     mutationFn: async (data: FinancialSettingsForm) => {
-      if (!settings) {
-        throw new Error('Settings not loaded');
-      }
-      // Merge with existing settings
-      const fullData = {
-        ...settings,
-        ...data,
-      };
-      return await apiRequest('PUT', '/api/settings', fullData);
+      return await apiRequest('PUT', '/api/settings/financial', data);
     },
     onSuccess: () => {
       toast({
         title: t('common.success'),
         description: 'Financial settings saved successfully',
       });
+      queryClient.invalidateQueries({ queryKey: ['/api/settings/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
     },
     onError: (error: Error) => {

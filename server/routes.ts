@@ -165,6 +165,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check for duplicate phone number
+  app.get("/api/customers/check-phone/:phone", isAuthenticated, async (req: any, res) => {
+    try {
+      const phone = req.params.phone;
+      const excludeId = req.query.excludeId as string | undefined;
+      
+      const customers = await storage.getCustomers(false);
+      const duplicates = customers.filter(c => 
+        c.phone === phone && c.id !== excludeId
+      );
+      
+      res.json({ 
+        hasDuplicate: duplicates.length > 0,
+        duplicateCount: duplicates.length,
+        duplicateCustomers: duplicates.map(c => ({
+          id: c.id,
+          nameEn: c.nameEn,
+          nameAr: c.nameAr,
+        }))
+      });
+    } catch (error) {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to check phone" });
+    }
+  });
+
   // Vehicle routes
   app.get("/api/vehicles", isAuthenticated, async (req: any, res) => {
     try {
