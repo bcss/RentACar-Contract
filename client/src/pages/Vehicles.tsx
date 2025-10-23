@@ -64,6 +64,7 @@ const vehicleFormSchema = insertVehicleSchema.extend({
   monthlyRate: z.string().optional().transform(val => val || undefined),
   color: z.string().optional().transform(val => val || undefined),
   fuelType: z.string().optional().transform(val => val || undefined),
+  tankCapacity: z.coerce.number().optional().nullable(),
 });
 
 type VehicleFormData = z.infer<typeof vehicleFormSchema>;
@@ -89,6 +90,7 @@ export default function Vehicles() {
       year: new Date().getFullYear().toString(),
       color: '',
       fuelType: 'petrol',
+      tankCapacity: null,
       dailyRate: '',
       weeklyRate: '',
       monthlyRate: '',
@@ -219,6 +221,7 @@ export default function Vehicles() {
       year: vehicle.year ?? new Date().getFullYear().toString(),
       color: vehicle.color || '',
       fuelType: vehicle.fuelType || 'petrol',
+      tankCapacity: vehicle.tankCapacity ?? null,
       dailyRate: vehicle.dailyRate ?? '',
       weeklyRate: vehicle.weeklyRate || '',
       monthlyRate: vehicle.monthlyRate || '',
@@ -354,29 +357,50 @@ export default function Vehicles() {
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="fuelType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('vehicles.fuelType')}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="fuelType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('vehicles.fuelType')}</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-vehicle-fuel-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="petrol">{t('vehicles.fuelTypePetrol')}</SelectItem>
+                    <SelectItem value="diesel">{t('vehicles.fuelTypeDiesel')}</SelectItem>
+                    <SelectItem value="electric">{t('vehicles.fuelTypeElectric')}</SelectItem>
+                    <SelectItem value="hybrid">{t('vehicles.fuelTypeHybrid')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="tankCapacity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tank Capacity (L)</FormLabel>
                 <FormControl>
-                  <SelectTrigger data-testid="select-vehicle-fuel-type">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value ?? ''} 
+                    onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
+                    data-testid="input-vehicle-tank-capacity" 
+                  />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="petrol">{t('vehicles.fuelTypePetrol')}</SelectItem>
-                  <SelectItem value="diesel">{t('vehicles.fuelTypeDiesel')}</SelectItem>
-                  <SelectItem value="electric">{t('vehicles.fuelTypeElectric')}</SelectItem>
-                  <SelectItem value="hybrid">{t('vehicles.fuelTypeHybrid')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <div className="grid grid-cols-3 gap-4">
           <FormField
             control={form.control}
@@ -476,7 +500,9 @@ export default function Vehicles() {
               <TableCell className="font-medium">{vehicle.registration}</TableCell>
               <TableCell>
                 <div>{vehicle.make} {vehicle.model}</div>
-                <div className="text-sm text-muted-foreground">{vehicle.fuelType}</div>
+                <div className="text-sm text-muted-foreground">
+                  {vehicle.fuelType}{vehicle.tankCapacity ? ` (${vehicle.tankCapacity}L)` : ''}
+                </div>
               </TableCell>
               <TableCell>{vehicle.year}</TableCell>
               <TableCell>{vehicle.color || '-'}</TableCell>

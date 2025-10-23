@@ -6,11 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { insertCompanySettingsSchema, type CompanySettings } from "@shared/schema";
 import { z } from "zod";
+import { Lock } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -20,226 +22,75 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+// Schema for financial settings only
+const financialSettingsSchema = z.object({
+  defaultDailyRate: z.string().min(1, "Default daily rate is required"),
+  defaultWeeklyRate: z.string().min(1, "Default weekly rate is required"),
+  defaultMonthlyRate: z.string().min(1, "Default monthly rate is required"),
+  insurancePerDay: z.string().min(1, "Insurance per day is required"),
+  gpsPerDay: z.string().min(1, "GPS per day is required"),
+  babySeatPerDay: z.string().min(1, "Baby seat per day is required"),
+  additionalDriverFee: z.string().min(1, "Additional driver fee is required"),
+  defaultExtraKmRate: z.string().min(1, "Default extra km rate is required"),
+  defaultSecurityDeposit: z.string().min(1, "Default security deposit is required"),
+  petrolPricePerLiter: z.string().min(1, "Petrol price per liter is required"),
+  dieselPricePerLiter: z.string().min(1, "Diesel price per liter is required"),
+});
+
+type FinancialSettingsForm = z.infer<typeof financialSettingsSchema>;
+
 export default function FinancialSettings() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isLoading: authLoading } = useAuth();
 
   const { data: settings, isLoading } = useQuery<CompanySettings>({
     queryKey: ['/api/settings'],
   });
 
-  const form = useForm<z.infer<typeof insertCompanySettingsSchema>>({
-    resolver: zodResolver(insertCompanySettingsSchema),
+  const form = useForm<FinancialSettingsForm>({
+    resolver: zodResolver(financialSettingsSchema),
     defaultValues: {
-      companyNameEn: "",
-      companyNameAr: "",
-      companyLegalNameEn: "",
-      companyLegalNameAr: "",
-      taglineEn: "",
-      taglineAr: "",
-      phone: "",
-      phoneAr: "",
-      mobile: "",
-      mobileAr: "",
-      email: "",
-      website: "",
-      addressEn: "",
-      addressAr: "",
-      logoUrl: "",
-      currencyEn: "AED",
-      currencyAr: "د.إ",
-      vatPercentage: "5",
-      termsSection1En: "",
-      termsSection1Ar: "",
-      termsSection2En: "",
-      termsSection2Ar: "",
-      termsSection3En: "",
-      termsSection3Ar: "",
-      paymentTermsFineEn: "",
-      paymentTermsFineAr: "",
-      paymentTermsBalanceEn: "",
-      paymentTermsBalanceAr: "",
-      paymentTermsFineWeekEn: "",
-      paymentTermsFineWeekAr: "",
-      paymentTermsSecurityEn: "",
-      paymentTermsSecurityAr: "",
-      paymentTermsAcknowledgeEn: "",
-      paymentTermsAcknowledgeAr: "",
-      paymentTermsInspectionEn: "",
-      paymentTermsInspectionAr: "",
-      paymentTermsRepairEn: "",
-      paymentTermsRepairAr: "",
-      paymentTermsAccidentNewLicenseEn: "",
-      paymentTermsAccidentNewLicenseAr: "",
-      paymentTermsAccidentGeneralEn: "",
-      paymentTermsAccidentGeneralAr: "",
-      clauseWriteoffEn: "",
-      clauseWriteoffAr: "",
-      clauseCreditAuthEn: "",
-      clauseCreditAuthAr: "",
-      clauseDesertProhibitionEn: "",
-      clauseDesertProhibitionAr: "",
-      clauseAccidentHirerFaultEn: "",
-      clauseAccidentHirerFaultAr: "",
-      clauseAccidentNotFaultEn: "",
-      clauseAccidentNotFaultAr: "",
-      clauseMonthlyPaymentEn: "",
-      clauseMonthlyPaymentAr: "",
-      clauseDailyKmLimitEn: "",
-      clauseDailyKmLimitAr: "",
-      clauseMonthlyKmLimitEn: "",
-      clauseMonthlyKmLimitAr: "",
-      clauseSelfRepairPenaltyEn: "",
-      clauseSelfRepairPenaltyAr: "",
-      clauseDailyRateDefaultEn: "",
-      clauseDailyRateDefaultAr: "",
-      clauseBackpageReferenceEn: "",
-      clauseBackpageReferenceAr: "",
+      defaultDailyRate: "150",
+      defaultWeeklyRate: "900",
+      defaultMonthlyRate: "3000",
+      insurancePerDay: "25",
+      gpsPerDay: "15",
+      babySeatPerDay: "20",
+      additionalDriverFee: "50",
+      defaultExtraKmRate: "1.5",
+      defaultSecurityDeposit: "1500",
+      petrolPricePerLiter: "3.5",
+      dieselPricePerLiter: "3.2",
     },
   });
 
   useEffect(() => {
     if (settings) {
       form.reset({
-        companyNameEn: settings.companyNameEn,
-        companyNameAr: settings.companyNameAr,
-        companyLegalNameEn: settings.companyLegalNameEn,
-        companyLegalNameAr: settings.companyLegalNameAr,
-        taglineEn: settings.taglineEn,
-        taglineAr: settings.taglineAr,
-        phone: settings.phone,
-        phoneAr: settings.phoneAr,
-        mobile: settings.mobile,
-        mobileAr: settings.mobileAr,
-        email: settings.email,
-        website: settings.website,
-        addressEn: settings.addressEn,
-        addressAr: settings.addressAr,
-        logoUrl: settings.logoUrl || "",
-        currencyEn: settings.currencyEn || "AED",
-        currencyAr: settings.currencyAr || "د.إ",
-        vatPercentage: settings.vatPercentage || "5",
-        termsSection1En: settings.termsSection1En || "",
-        termsSection1Ar: settings.termsSection1Ar || "",
-        termsSection2En: settings.termsSection2En || "",
-        termsSection2Ar: settings.termsSection2Ar || "",
-        termsSection3En: settings.termsSection3En || "",
-        termsSection3Ar: settings.termsSection3Ar || "",
-        paymentTermsFineEn: settings.paymentTermsFineEn || "",
-        paymentTermsFineAr: settings.paymentTermsFineAr || "",
-        paymentTermsBalanceEn: settings.paymentTermsBalanceEn || "",
-        paymentTermsBalanceAr: settings.paymentTermsBalanceAr || "",
-        paymentTermsFineWeekEn: settings.paymentTermsFineWeekEn || "",
-        paymentTermsFineWeekAr: settings.paymentTermsFineWeekAr || "",
-        paymentTermsSecurityEn: settings.paymentTermsSecurityEn || "",
-        paymentTermsSecurityAr: settings.paymentTermsSecurityAr || "",
-        paymentTermsAcknowledgeEn: settings.paymentTermsAcknowledgeEn || "",
-        paymentTermsAcknowledgeAr: settings.paymentTermsAcknowledgeAr || "",
-        paymentTermsInspectionEn: settings.paymentTermsInspectionEn || "",
-        paymentTermsInspectionAr: settings.paymentTermsInspectionAr || "",
-        paymentTermsRepairEn: settings.paymentTermsRepairEn || "",
-        paymentTermsRepairAr: settings.paymentTermsRepairAr || "",
-        paymentTermsAccidentNewLicenseEn: settings.paymentTermsAccidentNewLicenseEn || "",
-        paymentTermsAccidentNewLicenseAr: settings.paymentTermsAccidentNewLicenseAr || "",
-        paymentTermsAccidentGeneralEn: settings.paymentTermsAccidentGeneralEn || "",
-        paymentTermsAccidentGeneralAr: settings.paymentTermsAccidentGeneralAr || "",
-        clauseWriteoffEn: settings.clauseWriteoffEn || "",
-        clauseWriteoffAr: settings.clauseWriteoffAr || "",
-        clauseCreditAuthEn: settings.clauseCreditAuthEn || "",
-        clauseCreditAuthAr: settings.clauseCreditAuthAr || "",
-        clauseDesertProhibitionEn: settings.clauseDesertProhibitionEn || "",
-        clauseDesertProhibitionAr: settings.clauseDesertProhibitionAr || "",
-        clauseAccidentHirerFaultEn: settings.clauseAccidentHirerFaultEn || "",
-        clauseAccidentHirerFaultAr: settings.clauseAccidentHirerFaultAr || "",
-        clauseAccidentNotFaultEn: settings.clauseAccidentNotFaultEn || "",
-        clauseAccidentNotFaultAr: settings.clauseAccidentNotFaultAr || "",
-        clauseMonthlyPaymentEn: settings.clauseMonthlyPaymentEn || "",
-        clauseMonthlyPaymentAr: settings.clauseMonthlyPaymentAr || "",
-        clauseDailyKmLimitEn: settings.clauseDailyKmLimitEn || "",
-        clauseDailyKmLimitAr: settings.clauseDailyKmLimitAr || "",
-        clauseMonthlyKmLimitEn: settings.clauseMonthlyKmLimitEn || "",
-        clauseMonthlyKmLimitAr: settings.clauseMonthlyKmLimitAr || "",
-        clauseSelfRepairPenaltyEn: settings.clauseSelfRepairPenaltyEn || "",
-        clauseSelfRepairPenaltyAr: settings.clauseSelfRepairPenaltyAr || "",
-        clauseDailyRateDefaultEn: settings.clauseDailyRateDefaultEn || "",
-        clauseDailyRateDefaultAr: settings.clauseDailyRateDefaultAr || "",
-        clauseBackpageReferenceEn: settings.clauseBackpageReferenceEn || "",
-        clauseBackpageReferenceAr: settings.clauseBackpageReferenceAr || "",
+        defaultDailyRate: settings.defaultDailyRate,
+        defaultWeeklyRate: settings.defaultWeeklyRate,
+        defaultMonthlyRate: settings.defaultMonthlyRate,
+        insurancePerDay: settings.insurancePerDay,
+        gpsPerDay: settings.gpsPerDay,
+        babySeatPerDay: settings.babySeatPerDay,
+        additionalDriverFee: settings.additionalDriverFee,
+        defaultExtraKmRate: settings.defaultExtraKmRate,
+        defaultSecurityDeposit: settings.defaultSecurityDeposit,
+        petrolPricePerLiter: settings.petrolPricePerLiter,
+        dieselPricePerLiter: settings.dieselPricePerLiter,
       });
     }
   }, [settings, form]);
 
   const updateMutation = useMutation({
-    mutationFn: async (data: Partial<z.infer<typeof insertCompanySettingsSchema>>) => {
+    mutationFn: async (data: FinancialSettingsForm) => {
       if (!settings) {
         throw new Error('Settings not loaded');
       }
+      // Merge with existing settings
       const fullData = {
-        companyNameEn: settings.companyNameEn,
-        companyNameAr: settings.companyNameAr,
-        companyLegalNameEn: settings.companyLegalNameEn,
-        companyLegalNameAr: settings.companyLegalNameAr,
-        taglineEn: settings.taglineEn,
-        taglineAr: settings.taglineAr,
-        phone: settings.phone,
-        phoneAr: settings.phoneAr,
-        mobile: settings.mobile,
-        mobileAr: settings.mobileAr,
-        email: settings.email,
-        website: settings.website,
-        addressEn: settings.addressEn,
-        addressAr: settings.addressAr,
-        logoUrl: settings.logoUrl || "",
-        currencyEn: settings.currencyEn || "AED",
-        currencyAr: settings.currencyAr || "د.إ",
-        vatPercentage: settings.vatPercentage || "5",
-        termsSection1En: settings.termsSection1En || "",
-        termsSection1Ar: settings.termsSection1Ar || "",
-        termsSection2En: settings.termsSection2En || "",
-        termsSection2Ar: settings.termsSection2Ar || "",
-        termsSection3En: settings.termsSection3En || "",
-        termsSection3Ar: settings.termsSection3Ar || "",
-        paymentTermsFineEn: settings.paymentTermsFineEn || "",
-        paymentTermsFineAr: settings.paymentTermsFineAr || "",
-        paymentTermsBalanceEn: settings.paymentTermsBalanceEn || "",
-        paymentTermsBalanceAr: settings.paymentTermsBalanceAr || "",
-        paymentTermsFineWeekEn: settings.paymentTermsFineWeekEn || "",
-        paymentTermsFineWeekAr: settings.paymentTermsFineWeekAr || "",
-        paymentTermsSecurityEn: settings.paymentTermsSecurityEn || "",
-        paymentTermsSecurityAr: settings.paymentTermsSecurityAr || "",
-        paymentTermsAcknowledgeEn: settings.paymentTermsAcknowledgeEn || "",
-        paymentTermsAcknowledgeAr: settings.paymentTermsAcknowledgeAr || "",
-        paymentTermsInspectionEn: settings.paymentTermsInspectionEn || "",
-        paymentTermsInspectionAr: settings.paymentTermsInspectionAr || "",
-        paymentTermsRepairEn: settings.paymentTermsRepairEn || "",
-        paymentTermsRepairAr: settings.paymentTermsRepairAr || "",
-        paymentTermsAccidentNewLicenseEn: settings.paymentTermsAccidentNewLicenseEn || "",
-        paymentTermsAccidentNewLicenseAr: settings.paymentTermsAccidentNewLicenseAr || "",
-        paymentTermsAccidentGeneralEn: settings.paymentTermsAccidentGeneralEn || "",
-        paymentTermsAccidentGeneralAr: settings.paymentTermsAccidentGeneralAr || "",
-        clauseWriteoffEn: settings.clauseWriteoffEn || "",
-        clauseWriteoffAr: settings.clauseWriteoffAr || "",
-        clauseCreditAuthEn: settings.clauseCreditAuthEn || "",
-        clauseCreditAuthAr: settings.clauseCreditAuthAr || "",
-        clauseDesertProhibitionEn: settings.clauseDesertProhibitionEn || "",
-        clauseDesertProhibitionAr: settings.clauseDesertProhibitionAr || "",
-        clauseAccidentHirerFaultEn: settings.clauseAccidentHirerFaultEn || "",
-        clauseAccidentHirerFaultAr: settings.clauseAccidentHirerFaultAr || "",
-        clauseAccidentNotFaultEn: settings.clauseAccidentNotFaultEn || "",
-        clauseAccidentNotFaultAr: settings.clauseAccidentNotFaultAr || "",
-        clauseMonthlyPaymentEn: settings.clauseMonthlyPaymentEn || "",
-        clauseMonthlyPaymentAr: settings.clauseMonthlyPaymentAr || "",
-        clauseDailyKmLimitEn: settings.clauseDailyKmLimitEn || "",
-        clauseDailyKmLimitAr: settings.clauseDailyKmLimitAr || "",
-        clauseMonthlyKmLimitEn: settings.clauseMonthlyKmLimitEn || "",
-        clauseMonthlyKmLimitAr: settings.clauseMonthlyKmLimitAr || "",
-        clauseSelfRepairPenaltyEn: settings.clauseSelfRepairPenaltyEn || "",
-        clauseSelfRepairPenaltyAr: settings.clauseSelfRepairPenaltyAr || "",
-        clauseDailyRateDefaultEn: settings.clauseDailyRateDefaultEn || "",
-        clauseDailyRateDefaultAr: settings.clauseDailyRateDefaultAr || "",
-        clauseBackpageReferenceEn: settings.clauseBackpageReferenceEn || "",
-        clauseBackpageReferenceAr: settings.clauseBackpageReferenceAr || "",
+        ...settings,
         ...data,
       };
       return await apiRequest('PUT', '/api/settings', fullData);
@@ -247,32 +98,36 @@ export default function FinancialSettings() {
     onSuccess: () => {
       toast({
         title: t('common.success'),
-        description: t('settings.saved'),
+        description: 'Financial settings saved successfully',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
     },
     onError: (error: Error) => {
       toast({
         title: t('common.error'),
-        description: error.message || t('settings.saveFailed'),
+        description: error.message || 'Failed to save financial settings',
         variant: "destructive",
       });
     },
   });
 
-  const saveSettings = () => {
-    const data = {
-      currencyEn: form.getValues('currencyEn'),
-      currencyAr: form.getValues('currencyAr'),
-      vatPercentage: form.getValues('vatPercentage'),
-    };
+  const onSubmit = (data: FinancialSettingsForm) => {
     updateMutation.mutate(data);
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-muted-foreground">{t('common.loading')}</p>
+      <div className="h-full overflow-auto">
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="mb-6">
+            <Skeleton className="h-9 w-64 mb-2" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <div className="space-y-6">
+            <Skeleton className="h-96 w-full" />
+            <Skeleton className="h-96 w-full" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -280,81 +135,291 @@ export default function FinancialSettings() {
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
-        <span className="material-icons text-6xl text-muted-foreground">lock</span>
-        <p className="text-muted-foreground">{t('msg.noPermission')}</p>
+        <Lock className="w-16 h-16 text-muted-foreground" />
+        <p className="text-muted-foreground text-lg">{t('msg.noPermission')}</p>
       </div>
     );
   }
 
   return (
     <div className="h-full overflow-auto">
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Financial Settings</h1>
-          <p className="text-muted-foreground mt-1">Configure currency and VAT settings</p>
+          <h1 className="text-3xl font-bold" data-testid="text-financial-settings-title">Financial Settings</h1>
+          <p className="text-muted-foreground mt-1">Configure default rates, add-on pricing, and fuel costs</p>
         </div>
 
         <Form {...form}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Currency & VAT Configuration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="currencyEn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Currency (English)</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="AED" data-testid="input-currency-en" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Default Rental Rates */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Default Rental Rates</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="defaultDailyRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Daily Rate (AED)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="150" 
+                            data-testid="input-default-daily-rate" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="currencyAr"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>العملة (عربي)</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="text-right" dir="rtl" placeholder="د.إ" data-testid="input-currency-ar" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                  <FormField
+                    control={form.control}
+                    name="defaultWeeklyRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Weekly Rate (AED)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="900" 
+                            data-testid="input-default-weekly-rate" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="vatPercentage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>VAT Percentage (%)</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="number" placeholder="5" data-testid="input-vat-percentage" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button
-                type="button"
-                onClick={saveSettings}
-                disabled={updateMutation.isPending}
-                data-testid="button-save-financial-settings"
-              >
-                {updateMutation.isPending ? t('common.saving') : t('common.save')}
-              </Button>
-            </CardFooter>
-          </Card>
+                  <FormField
+                    control={form.control}
+                    name="defaultMonthlyRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Monthly Rate (AED)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="3000" 
+                            data-testid="input-default-monthly-rate" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Add-on Pricing */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Add-on Pricing (Per Day)</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="insurancePerDay"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Insurance (AED/day)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="25" 
+                            data-testid="input-insurance-per-day" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="gpsPerDay"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>GPS (AED/day)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="15" 
+                            data-testid="input-gps-per-day" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="babySeatPerDay"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Baby Seat (AED/day)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="20" 
+                            data-testid="input-baby-seat-per-day" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="additionalDriverFee"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Additional Driver Fee (AED)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="50" 
+                            data-testid="input-additional-driver-fee" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Default Values */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Default Values</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="defaultExtraKmRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Extra KM Rate (AED/km)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="1.5" 
+                            data-testid="input-default-extra-km-rate" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="defaultSecurityDeposit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Security Deposit (AED)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="1500" 
+                            data-testid="input-default-security-deposit" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Fuel Pricing */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Fuel Pricing</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="petrolPricePerLiter"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Petrol Price (AED/liter)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="3.5" 
+                            data-testid="input-petrol-price-per-liter" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="dieselPricePerLiter"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Diesel Price (AED/liter)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="number" 
+                            step="0.01"
+                            placeholder="3.2" 
+                            data-testid="input-diesel-price-per-liter" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end gap-2">
+                <Button
+                  type="submit"
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save-financial-settings"
+                >
+                  {updateMutation.isPending ? t('common.saving') : t('common.save')}
+                </Button>
+              </CardFooter>
+            </Card>
+          </form>
         </Form>
       </div>
     </div>

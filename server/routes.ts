@@ -715,6 +715,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const confirmed = await storage.confirmContract(req.params.id, userId);
       
+      // Update vehicle status to "rented"
+      await storage.updateVehicle(confirmed.vehicleId, { status: "rented" });
+      
       // Create audit log
       await createAuditLog(userId, 'confirm', confirmed.id, req, `Confirmed contract #${confirmed.contractNumber}`);
       
@@ -736,6 +739,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const activated = await storage.activateContract(req.params.id, userId);
+      
+      // Update vehicle status to "rented" (in case it wasn't set during confirm)
+      await storage.updateVehicle(activated.vehicleId, { status: "rented" });
       
       // Create audit log
       await createAuditLog(userId, 'activate', activated.id, req, `Activated contract #${activated.contractNumber} - vehicle handed over`);
@@ -780,6 +786,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Complete the contract with charge data
       const completed = await storage.completeContract(req.params.id, userId, chargeData);
       
+      // Update vehicle status to "available" after return
+      await storage.updateVehicle(completed.vehicleId, { status: "available" });
+      
       // Create audit log
       await createAuditLog(userId, 'complete', completed.id, req, `Completed contract #${completed.contractNumber} - vehicle returned`);
       
@@ -820,6 +829,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // The system trusts admin judgment on deposit resolution before closing
 
       const closed = await storage.closeContract(req.params.id, userId);
+      
+      // Ensure vehicle status is "available" after closing
+      await storage.updateVehicle(closed.vehicleId, { status: "available" });
       
       // Create audit log
       await createAuditLog(userId, 'close', closed.id, req, `Closed contract #${closed.contractNumber} - all payments settled and verified`);
@@ -1382,6 +1394,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error updating company settings:", error);
       res.status(400).json({ message: error.message || "Failed to update company settings" });
+    }
+  });
+
+  // Financial Settings routes (subset of company settings)
+  app.get('/api/settings/financial', isAuthenticated, async (req: any, res) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      
+      // Return only financial-related fields
+      const financialSettings = {
+        defaultDailyRate: settings.defaultDailyRate,
+        defaultWeeklyRate: settings.defaultWeeklyRate,
+        defaultMonthlyRate: settings.defaultMonthlyRate,
+        insurancePerDay: settings.insurancePerDay,
+        gpsPerDay: settings.gpsPerDay,
+        babySeatPerDay: settings.babySeatPerDay,
+        additionalDriverFee: settings.additionalDriverFee,
+        defaultExtraKmRate: settings.defaultExtraKmRate,
+        defaultSecurityDeposit: settings.defaultSecurityDeposit,
+        petrolPricePerLiter: settings.petrolPricePerLiter,
+        dieselPricePerLiter: settings.dieselPricePerLiter,
+        vatPercentage: settings.vatPercentage,
+        currencyEn: settings.currencyEn,
+        currencyAr: settings.currencyAr,
+      };
+      
+      res.json(financialSettings);
+    } catch (error) {
+      console.error("Error fetching financial settings:", error);
+      res.status(500).json({ message: "Failed to fetch financial settings" });
+    }
+  });
+
+  app.put('/api/settings/financial', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get current settings first
+      const currentSettings = await storage.getCompanySettings();
+      
+      // Merge financial updates with current settings
+      const updatedSettings = {
+        ...currentSettings,
+        ...req.body, // Only financial fields should be in req.body
+      };
+      
+      // Validate and update
+      const validatedData = insertCompanySettingsSchema.parse(updatedSettings);
+      const settings = await storage.updateCompanySettings(validatedData, userId);
+      
+      // Create audit log
+      await createAuditLog(
+        userId,
+        'update_settings',
+        undefined,
+        req.ip,
+        'Updated financial settings'
+      );
+      
+      res.json(settings);
+    } catch (error: any) {
+      console.error("Error updating financial settings:", error);
+      res.status(400).json({ message: error.message || "Failed to update financial settings" });
     }
   });
 

@@ -76,6 +76,72 @@ export default function ContractView() {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [paymentCurrency, setPaymentCurrency] = useState('SAR');
   const [paymentNotes, setPaymentNotes] = useState('');
+  const [fuelCalculationBreakdown, setFuelCalculationBreakdown] = useState('');
+  const [isAutoCalculatedFuel, setIsAutoCalculatedFuel] = useState(false);
+
+  // Auto-calculate fuel charge when fuel level changes
+  useEffect(() => {
+    if (!fuelLevelEnd || !contract || !vehicle || !companySettings) {
+      return;
+    }
+
+    // Parse fuel levels to percentages
+    const parseFuelLevel = (level: string): number | null => {
+      const levelMap: { [key: string]: number } = {
+        'Full': 100,
+        '3/4': 75,
+        '1/2': 50,
+        '1/4': 25,
+        'Empty': 0,
+      };
+      return levelMap[level] ?? null;
+    };
+
+    const startPercent = parseFuelLevel(contract.fuelLevelStart || contract.inspectionFuelPercentage?.toString() || 'Full');
+    const endPercent = parseFuelLevel(fuelLevelEnd);
+
+    if (startPercent === null || endPercent === null) {
+      setFuelCalculationBreakdown('Unable to calculate: Invalid fuel level');
+      return;
+    }
+
+    // Check if we have tank capacity
+    if (!vehicle.tankCapacity) {
+      setFuelCalculationBreakdown('Unable to calculate: Tank capacity not set for this vehicle');
+      return;
+    }
+
+    // Check if we have fuel type and pricing
+    const fuelType = vehicle.fuelType?.toLowerCase();
+    let pricePerLiter = 0;
+    
+    if (fuelType === 'petrol') {
+      pricePerLiter = parseFloat(companySettings.petrolPricePerLiter || '0');
+    } else if (fuelType === 'diesel') {
+      pricePerLiter = parseFloat(companySettings.dieselPricePerLiter || '0');
+    } else {
+      setFuelCalculationBreakdown('Unable to calculate: Unknown fuel type or no pricing configured');
+      return;
+    }
+
+    // Calculate fuel consumed
+    const fuelConsumed = (vehicle.tankCapacity * (startPercent - endPercent)) / 100;
+    
+    if (fuelConsumed <= 0) {
+      setFuelCalculationBreakdown('No fuel charge (tank returned with same or more fuel)');
+      setFuelCharge('0');
+      setIsAutoCalculatedFuel(true);
+      return;
+    }
+
+    const calculatedCharge = fuelConsumed * pricePerLiter;
+    
+    setFuelCharge(calculatedCharge.toFixed(2));
+    setFuelCalculationBreakdown(
+      `Auto-calculated: ${fuelConsumed.toFixed(1)}L @ ${pricePerLiter.toFixed(2)} AED/L = ${calculatedCharge.toFixed(2)} AED`
+    );
+    setIsAutoCalculatedFuel(true);
+  }, [fuelLevelEnd, contract, vehicle, companySettings]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -1971,16 +2037,27 @@ export default function ContractView() {
                 </div>
 
                 <div>
-                  <Label htmlFor="fuel-charge">Fuel Charge ({currency})</Label>
+                  <Label htmlFor="fuel-charge">
+                    Fuel Charge ({currency})
+                    {isAutoCalculatedFuel && <span className="text-xs text-muted-foreground ml-2">(Auto-calculated - editable)</span>}
+                  </Label>
                   <Input
                     id="fuel-charge"
                     type="number"
                     step="0.01"
                     value={fuelCharge}
-                    onChange={(e) => setFuelCharge(e.target.value)}
+                    onChange={(e) => {
+                      setFuelCharge(e.target.value);
+                      setIsAutoCalculatedFuel(false);
+                    }}
                     placeholder="0.00"
                     data-testid="input-fuel-charge"
                   />
+                  {fuelCalculationBreakdown && (
+                    <p className="text-xs text-muted-foreground mt-1" data-testid="text-fuel-breakdown">
+                      {fuelCalculationBreakdown}
+                    </p>
+                  )}
                 </div>
 
                 <div>

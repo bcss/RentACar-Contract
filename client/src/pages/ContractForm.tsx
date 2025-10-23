@@ -297,14 +297,36 @@ export default function ContractForm() {
     }
   }, [watchedCompanySponsorId, isAuthenticated]);
 
-  // Load selected vehicle details and auto-populate pricing
+  // Auto-populate from financial settings for NEW contracts only
+  useEffect(() => {
+    if (!isEditing && settings && isAuthenticated) {
+      // Only auto-populate if fields are empty (for new contracts)
+      if (!form.getValues('dailyRate')) {
+        form.setValue('dailyRate', settings.defaultDailyRate);
+      }
+      if (!form.getValues('weeklyRate')) {
+        form.setValue('weeklyRate', settings.defaultWeeklyRate);
+      }
+      if (!form.getValues('monthlyRate')) {
+        form.setValue('monthlyRate', settings.defaultMonthlyRate);
+      }
+      if (!form.getValues('extraKmRate')) {
+        form.setValue('extraKmRate', settings.defaultExtraKmRate);
+      }
+      if (!form.getValues('securityDeposit')) {
+        form.setValue('securityDeposit', settings.defaultSecurityDeposit);
+      }
+    }
+  }, [isEditing, settings, isAuthenticated, form]);
+
+  // Load selected vehicle details and auto-populate pricing (overrides defaults if vehicle has custom rates)
   useEffect(() => {
     if (watchedVehicleId && isAuthenticated) {
       queryClient.fetchQuery({
         queryKey: ['/api/vehicles', watchedVehicleId],
       }).then((vehicle) => {
         setSelectedVehicle(vehicle as Vehicle);
-        // Auto-populate pricing
+        // Auto-populate pricing from vehicle (overrides financial settings defaults)
         if (vehicle) {
           const v = vehicle as Vehicle;
           form.setValue('dailyRate', v.dailyRate);

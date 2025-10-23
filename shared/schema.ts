@@ -143,6 +143,7 @@ export const vehicles = pgTable("vehicles", {
   year: varchar("year").notNull(),
   color: varchar("color").notNull(),
   fuelType: varchar("fuel_type"), // petrol, diesel, electric, hybrid
+  tankCapacity: integer("tank_capacity"), // Fuel tank capacity in liters
   
   // Tracking
   odometer: integer("odometer"), // Current mileage
@@ -702,6 +703,21 @@ export const companySettings = pgTable("company_settings", {
   currencyEn: varchar("currency_en", { length: 10 }).notNull().default("AED"),
   currencyAr: varchar("currency_ar", { length: 10 }).notNull().default("د.إ"),
   vatPercentage: varchar("vat_percentage").notNull().default("5"),
+  
+  // Financial Settings - Default Rates and Pricing
+  defaultDailyRate: varchar("default_daily_rate").notNull().default("150"),
+  defaultWeeklyRate: varchar("default_weekly_rate").notNull().default("900"),
+  defaultMonthlyRate: varchar("default_monthly_rate").notNull().default("3000"),
+  insurancePerDay: varchar("insurance_per_day").notNull().default("25"),
+  gpsPerDay: varchar("gps_per_day").notNull().default("15"),
+  babySeatPerDay: varchar("baby_seat_per_day").notNull().default("20"),
+  additionalDriverFee: varchar("additional_driver_fee").notNull().default("50"),
+  defaultExtraKmRate: varchar("default_extra_km_rate").notNull().default("1.5"),
+  defaultSecurityDeposit: varchar("default_security_deposit").notNull().default("1500"),
+  
+  // Fuel Pricing
+  petrolPricePerLiter: varchar("petrol_price_per_liter").notNull().default("3.5"),
+  dieselPricePerLiter: varchar("diesel_price_per_liter").notNull().default("3.2"),
   
   // Terms & Conditions Sections (bilingual)
   termsSection1En: text("terms_section_1_en").notNull().default(""),
