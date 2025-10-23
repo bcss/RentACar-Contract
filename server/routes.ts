@@ -738,6 +738,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
 
+      // DOUBLE-BOOKING PREVENTION: Check vehicle availability before confirming
+      const isAvailable = await storage.checkVehicleAvailability(
+        contract.vehicleId,
+        new Date(contract.rentalStartDate),
+        new Date(contract.rentalEndDate),
+        contract.id // Exclude current contract from availability check
+      );
+      
+      if (!isAvailable) {
+        return res.status(400).json({ 
+          message: "Vehicle is not available for the selected dates. Another confirmed, active, or completed contract exists for this period. Please choose different dates or another vehicle." 
+        });
+      }
+
       const confirmed = await storage.confirmContract(req.params.id, userId);
       
       // Update vehicle status to "rented"
@@ -761,6 +775,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!contract) {
         return res.status(404).json({ message: "Contract not found" });
+      }
+
+      // DATE VALIDATION: Prevent activation before rental start date
+      const now = new Date();
+      const startDate = new Date(contract.rentalStartDate);
+      now.setHours(0, 0, 0, 0); // Compare dates only, ignore time
+      startDate.setHours(0, 0, 0, 0);
+      
+      if (now < startDate) {
+        return res.status(400).json({ 
+          message: `Cannot activate contract before rental start date. Start date is ${contract.rentalStartDate}, but today is ${new Date().toISOString().split('T')[0]}. Please wait until the start date to activate.` 
+        });
       }
 
       const activated = await storage.activateContract(req.params.id, userId);
@@ -788,13 +814,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
 
-      const { odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven } = req.body;
+      const { odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride } = req.body;
+      
+      // SECURITY: Calculate fuel charge on backend instead of trusting client
+      const vehicle = await storage.getVehicleById(contract.vehicleId);
+      const settings = await storage.getCompanySettings();
+      
+      let calculatedFuelCharge = 0;
+      let fuelChargeDetails = '';
+      
+      // Parse fuel levels to numbers (they're stored as strings)
+      const fuelLevelStart = parseFloat(contract.fuelLevelStart || '0');
+      const fuelLevelEndNum = parseFloat(fuelLevelEnd || '0');
+      
+      if (vehicle && settings && fuelLevelStart && fuelLevelEndNum < fuelLevelStart) {
+        const tankCapacity = vehicle.tankCapacity || 0;
+        const fuelType = vehicle.fuelType || 'petrol';
+        
+        // Only calculate if vehicle has tank capacity and uses fuel
+        if (tankCapacity > 0 && (fuelType === 'petrol' || fuelType === 'diesel')) {
+          const fuelConsumed = (tankCapacity * (fuelLevelStart - fuelLevelEndNum)) / 100;
+          const pricePerLiter = fuelType === 'diesel' 
+            ? parseFloat(settings.dieselPricePerLiter || '0')
+            : parseFloat(settings.petrolPricePerLiter || '0');
+          
+          calculatedFuelCharge = Math.round(fuelConsumed * pricePerLiter * 100) / 100;
+          fuelChargeDetails = `Fuel consumed: ${fuelConsumed.toFixed(2)}L × ${pricePerLiter} AED/L = ${calculatedFuelCharge.toFixed(2)} AED`;
+        }
+      }
+      
+      // Use calculated charge unless manual override is explicitly flagged
+      let finalFuelCharge = calculatedFuelCharge.toString();
+      let auditNote = `Completed contract #${contract.contractNumber} - vehicle returned`;
+      
+      if (fuelChargeOverride && clientFuelCharge !== undefined && parseFloat(clientFuelCharge) !== calculatedFuelCharge) {
+        finalFuelCharge = clientFuelCharge;
+        auditNote += ` | FUEL CHARGE OVERRIDE: Backend calculated ${calculatedFuelCharge.toFixed(2)} AED (${fuelChargeDetails}), but manual override set to ${clientFuelCharge} AED`;
+      } else if (calculatedFuelCharge > 0) {
+        auditNote += ` | Fuel charge auto-calculated: ${fuelChargeDetails}`;
+      }
       
       // Prepare charge data
       const chargeData = {
         extraKmCharge,
         extraKmDriven,
-        fuelCharge,
+        fuelCharge: finalFuelCharge,
         damageCharge,
         otherCharges,
         totalExtraCharges,
@@ -814,8 +878,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update vehicle status to "available" after return
       await storage.updateVehicle(completed.vehicleId, { status: "available" });
       
-      // Create audit log
-      await createAuditLog(userId, 'complete', completed.id, req, `Completed contract #${completed.contractNumber} - vehicle returned`);
+      // Create audit log with calculation details
+      await createAuditLog(userId, 'complete', completed.id, req, auditNote);
       
       res.json(completed);
     } catch (error: any) {
@@ -841,11 +905,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Verify all payments are settled
-      const outstandingBalance = parseFloat(contract.outstandingBalance || '0');
-      if (outstandingBalance > 0 && !contract.finalPaymentReceived) {
+      // PAYMENT VERIFICATION: Query new payments table to verify settlement
+      const contractPayments = await storage.getPaymentsByContract(contract.id);
+      const totalPaid = contractPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount || '0'), 0);
+      const totalAmount = parseFloat(contract.totalAmount || '0');
+      const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
+      const totalDue = totalAmount + totalExtraCharges;
+      
+      // SECURITY FIX: Round to currency precision (2 decimals) to prevent floating point exploits
+      const totalPaidRounded = Math.round(totalPaid * 100) / 100;
+      const totalDueRounded = Math.round(totalDue * 100) / 100;
+      const computedOutstanding = totalDueRounded - totalPaidRounded;
+      
+      // Block closing if there's any outstanding balance (using minimal threshold for precision)
+      if (computedOutstanding > 0.001) { // 0.001 threshold ensures even 1 fils (0.01 AED/100) is caught
         return res.status(400).json({ 
-          message: `Cannot close contract with outstanding balance of ${outstandingBalance}. Please record final payment first.` 
+          message: `Cannot close contract with outstanding balance of ${computedOutstanding.toFixed(2)} AED. Total due: ${totalDueRounded.toFixed(2)} AED, Total paid: ${totalPaidRounded.toFixed(2)} AED. Please record remaining payment first.` 
         });
       }
 
@@ -868,85 +943,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Phase 2: Payment recording routes (Admin/Manager only)
-  
-  // Record deposit payment
-  app.post('/api/contracts/:id/deposit', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const contract = await storage.getContract(req.params.id);
-      
-      if (!contract) {
-        return res.status(404).json({ message: "Contract not found" });
-      }
-
-      const { method } = req.body;
-      
-      if (!method) {
-        return res.status(400).json({ message: "Payment method is required" });
-      }
-
-      const updated = await storage.recordDepositPayment(req.params.id, method);
-      
-      // Create audit log
-      await createAuditLog(userId, 'payment', updated.id, req, `Recorded deposit payment for contract #${updated.contractNumber} via ${method}`);
-      
-      res.json(updated);
-    } catch (error: any) {
-      console.error("Error recording deposit payment:", error);
-      res.status(400).json({ message: error.message || "Failed to record deposit payment" });
-    }
-  });
-
-  // Record final payment
-  app.post('/api/contracts/:id/final-payment', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const contract = await storage.getContract(req.params.id);
-      
-      if (!contract) {
-        return res.status(404).json({ message: "Contract not found" });
-      }
-
-      const { method } = req.body;
-      
-      if (!method) {
-        return res.status(400).json({ message: "Payment method is required" });
-      }
-
-      const updated = await storage.recordFinalPayment(req.params.id, method);
-      
-      // Create audit log
-      await createAuditLog(userId, 'payment', updated.id, req, `Recorded final payment for contract #${updated.contractNumber} via ${method}`);
-      
-      res.json(updated);
-    } catch (error: any) {
-      console.error("Error recording final payment:", error);
-      res.status(400).json({ message: error.message || "Failed to record final payment" });
-    }
-  });
-
-  // Record deposit refund
-  app.post('/api/contracts/:id/refund', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const contract = await storage.getContract(req.params.id);
-      
-      if (!contract) {
-        return res.status(404).json({ message: "Contract not found" });
-      }
-
-      const updated = await storage.recordDepositRefund(req.params.id);
-      
-      // Create audit log
-      await createAuditLog(userId, 'refund', updated.id, req, `Refunded deposit for contract #${updated.contractNumber}`);
-      
-      res.json(updated);
-    } catch (error: any) {
-      console.error("Error recording deposit refund:", error);
-      res.status(400).json({ message: error.message || "Failed to record deposit refund" });
-    }
-  });
+  // LEGACY PAYMENT ROUTES REMOVED - Use new payments table system instead
+  // The new payment system uses separate /api/payments endpoints with full CRUD
+  // Old routes: /api/contracts/:id/deposit, /api/contracts/:id/final-payment, /api/contracts/:id/refund
+  // New route: POST /api/payments (with contractId, amount, method, etc.)
 
   // Disable contract (Admin only)
   app.post('/api/contracts/:id/disable', isAuthenticated, requireAdmin, async (req: any, res) => {

@@ -26,7 +26,8 @@ The system manages contracts through **five distinct states**:
 - Customer must exist in system
 
 **Validation Checks:**
-- Vehicle availability validation (checks for overlapping confirmed/active contracts)
+- ✅ **BACKEND ENFORCED:** Vehicle availability validation (checks for overlapping confirmed/active/completed contracts using `checkVehicleAvailability()`)
+- ✅ **BACKEND ENFORCED:** Double-booking prevention - returns 400 error if vehicle is unavailable
 - Date validation (start date must be before end date)
 - All mandatory fields present (customer, vehicle, dates, rates)
 
@@ -38,7 +39,7 @@ The system manages contracts through **five distinct states**:
 
 **Side Effects:**
 - Vehicle becomes unavailable for other bookings during contract period
-- Contract becomes immutable (cannot be edited)
+- ✅ **BACKEND ENFORCED:** Contract becomes immutable (cannot be edited via PATCH endpoint - returns 403 error for non-draft contracts)
 - Contract number is finalized and visible
 - Vehicle status badge changes to "Rented" in Vehicles page
 
@@ -61,7 +62,7 @@ The system manages contracts through **five distinct states**:
 
 **Validation Checks:**
 - Status validation (must be confirmed)
-- Date validation (cannot activate before start date)
+- ✅ **BACKEND ENFORCED:** Date validation (cannot activate before start date) - compares current date vs rentalStartDate, returns 400 error if too early
 - Vehicle status verification
 
 **Actions Performed:**
@@ -110,8 +111,13 @@ The system manages contracts through **five distinct states**:
    - conditionNotes
    - Additional charges (damage, cleaning, etc.)
 
-2. **Automatic Fuel Charge Calculation:**
+2. **✅ BACKEND ENFORCED: Automatic Fuel Charge Calculation:**
    ```
+   SERVER-SIDE CALCULATION (NOT client-provided):
+   - Backend fetches vehicle.tankCapacity and vehicle.fuelType
+   - Backend fetches petrolPricePerLiter / dieselPricePerLiter from company settings
+   - Backend calculates fuel charge automatically:
+   
    IF endFuelLevel < startFuelLevel:
      fuelConsumed (liters) = tankCapacity × (startFuelLevel% - endFuelLevel%) / 100
      
@@ -122,7 +128,8 @@ The system manages contracts through **five distinct states**:
      ELSE:
        fuelCharge = 0 (electric/hybrid - no fuel charge)
    
-   User can override calculated fuelCharge if needed
+   SECURITY: Backend ignores client-provided fuel charge unless fuelChargeOverride flag is set
+   Manual override is logged in audit trail with both calculated and override values
    ```
 
 3. Calculate total charges:
@@ -181,7 +188,12 @@ This charge is automatically added to totalCharges.
 
 **Validation Checks:**
 - Status validation (must be completed)
-- Payment verification (warning if total payments < total charges)
+- ✅ **BACKEND ENFORCED:** Payment verification using NEW payments table
+  - Backend queries `getPaymentsByContract(contractId)` to get all payment records
+  - Calculates `totalPaid = SUM(payments.amount)`
+  - Calculates `totalDue = totalAmount + totalExtraCharges`
+  - Returns 400 error if `totalPaid < totalDue` AND `outstandingBalance > 0`
+  - Displays detailed error message with amounts for transparency
 
 **Actions Performed:**
 1. Update contract status: `completed` → `closed`
