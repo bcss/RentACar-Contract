@@ -1,7 +1,7 @@
-# Rental Car Contract Management System
+# RCCMS - Rental Car Contract Management System
 
 ## Overview
-This bilingual (English/Arabic) rental car contract management system, built with React, Express, and PostgreSQL, enables users to create, manage, and finalize rental contracts. It features role-based access control, immutability for finalized contracts, comprehensive audit logging, and Material Design principles with RTL/LTR layouts. The system supports a full rental lifecycle, from draft to closed, including payment tracking, vehicle return workflows, detailed company settings management, and complete contract timeline visualization.
+RCCMS (Rental Car Contract Management System) is a generic, bilingual (English/Arabic) rental car contract management system built with React, Express, and PostgreSQL. It enables rental car companies to create, manage, and finalize rental contracts. It features role-based access control, immutability for finalized contracts, comprehensive audit logging, and Material Design principles with RTL/LTR layouts. The system supports a full rental lifecycle, from draft to closed, including payment tracking, vehicle return workflows, detailed company settings management, and complete contract timeline visualization.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -43,7 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Report Export Functionality:** Full PDF and Excel export support for all four report types (Financial, Operational, Customer, Audit). Exports respect date range filters and include bilingual support (English/Arabic). Backend uses jsPDF v3.x with proper named export for PDF generation and xlsx library for Excel files. **Chart Visualization in Exports:** Charts from recharts are captured as images using html2canvas on the frontend, sent to backend via POST requests, and embedded in PDF exports (full images) and Excel exports (metadata sheet). Request body size limit increased to 10MB to accommodate base64-encoded chart images. Each report page has dedicated export buttons generating downloadable files with proper extensions (.pdf, .xlsx).
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
-- **MARMAR PDF Integration:** Professional PDF generation for rental contracts.
+- **Professional PDF Integration:** Professional PDF generation for rental contracts with bilingual support.
 
 ## External Dependencies
 
@@ -61,3 +61,13 @@ Preferred communication style: Simple, everyday language.
 - **Styling:** `tailwindcss`, `class-variance-authority`, `clsx`.
 - **Data Visualization:** `recharts` for responsive charts and graphs, `html2canvas` for capturing chart visualizations as images for export.
 - **Export & Document Generation:** `jspdf` (v3.x with named export), `jspdf-autotable`, `xlsx` for PDF and Excel report exports.
+## Client Company Information
+**Current Client:** MARMAR Rent-a-Car (مــرمــر)
+- **Company Legal Name:** CARS AND BUSES RENTAL LLC (لتأجير الحافلات والسيارات ش.ذ.م.م)
+- **Location:** P.O. Box 34088, Al Nakeel, RAK - UAE
+- **Contact:** marmarrac@gmail.com, www.marmarcars.com
+- **Developer:** AKN Consulting
+- **Support:** +91 9400750821, rccms@akn-consulting.com
+- **Developer Location:** Muttathu, Thattayil, Pathanamthitta - 691525, Kerala, India
+
+**Note:** MARMAR company data is stored as default settings in the `company_settings` table. Any rental car company can use this system by updating company settings through the admin panel.

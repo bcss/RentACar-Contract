@@ -1,5 +1,5 @@
 # User Guide
-## MARMAR Rental Car Contract Management System
+## RCCMS - Rental Car Contract Management System
 
 **Version 1.0** | **For Daily Users (Manager, Staff, Viewer)**
 

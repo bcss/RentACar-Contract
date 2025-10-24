@@ -395,7 +395,7 @@
     -webkit-print-color-adjust: exact !important;
   }
 
-  /* MARMAR Template Print Optimizations */
+  /* Rental Contract Print Optimizations */
   .print-only.border-2 {
     border-width: 2px !important;
   }

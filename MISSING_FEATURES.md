@@ -1,4 +1,4 @@
-# MARMAR Rental Car Contract Management System - Missing Features
+# RCCMS Rental Car Contract Management System - Missing Features
 
 ## Document Purpose
 This document identifies features that could enhance the MARMAR rental car contract management system but are not currently implemented. Each feature includes a description, business value, priority level, complexity estimate, and implementation recommendations.
@@ -987,7 +987,7 @@ Export and analyze audit logs for compliance and security.
 
 ### Summary
 
-The MARMAR system is **feature-complete** for current operations but has significant opportunities for enhancement. The missing features fall into three categories:
+The RCCMS system is **feature-complete** for current operations but has significant opportunities for enhancement. The missing features fall into three categories:
 
 1. **Operational Efficiency**: Email/SMS notifications, bulk operations, renewals
 2. **Business Intelligence**: Analytics, forecasting, advanced reporting

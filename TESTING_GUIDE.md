@@ -1,4 +1,4 @@
-# MARMAR Rental Car Contract Management System - Testing Guide
+# RCCMS Rental Car Contract Management System - Testing Guide
 
 ## Document Purpose
 This guide is designed for testers with no prior knowledge of the MARMAR rental car contract management system. It provides detailed, step-by-step instructions to test all features comprehensively.

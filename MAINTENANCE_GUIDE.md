@@ -1,5 +1,5 @@
 # Maintenance Guide
-## MARMAR Rental Car Contract Management System
+## RCCMS - Rental Car Contract Management System
 
 **Version 1.0** | **For System Administrators & Technical Staff**
 
@@ -485,10 +485,10 @@ pm2 status
 pm2 monit
 
 # View logs
-pm2 logs marmar-app
+pm2 logs rccms-app
 
 # Application metrics
-pm2 describe marmar-app
+pm2 describe rccms-app
 ```
 
 **Node.js Process Health:**
@@ -516,7 +516,7 @@ GROUP BY state, wait_event_type;
 **Slow Queries:**
 ```sql
 -- Enable slow query logging
-ALTER DATABASE marmar_db SET log_min_duration_statement = 1000; -- 1 second
+ALTER DATABASE rccms_db SET log_min_duration_statement = 1000; -- 1 second
 
 -- View current queries
 SELECT 
@@ -567,7 +567,7 @@ df -h
 du -sh /var/lib/postgresql/data
 
 # Application directory
-du -sh /opt/marmar-app
+du -sh /opt/rccms-app
 ```
 
 **Memory Usage:**
@@ -647,10 +647,10 @@ const pool = new Pool({
 **Check Logs:**
 ```bash
 # PM2 logs
-pm2 logs marmar-app --lines 100
+pm2 logs rccms-app --lines 100
 
 # System logs
-journalctl -u marmar-app -n 100 --no-pager
+journalctl -u rccms-app -n 100 --no-pager
 ```
 
 **Common Causes:**
@@ -772,7 +772,7 @@ SELECT pg_terminate_backend(pid);
 **Memory Issues:**
 ```bash
 # Restart application
-pm2 restart marmar-app
+pm2 restart rccms-app
 
 # Check memory leaks
 pm2 monit
@@ -815,7 +815,7 @@ npm list | grep -i pdf
 ```bash
 # PDF generation can be memory-intensive
 # Increase Node memory limit
-NODE_OPTIONS="--max-old-space-size=2048" pm2 restart marmar-app
+NODE_OPTIONS="--max-old-space-size=2048" pm2 restart rccms-app
 ```
 
 ### Geolocation Service Failures
@@ -925,7 +925,7 @@ sudo systemctl status certbot.timer
 **Manual Certificate Update:**
 ```bash
 # Update nginx configuration
-sudo nano /etc/nginx/sites-available/marmar-app
+sudo nano /etc/nginx/sites-available/rccms-app
 
 # Test nginx config
 sudo nginx -t
@@ -980,10 +980,10 @@ npm run build
 ```bash
 # 1. Backup
 ./backup-database.sh
-cp -r /opt/marmar-app /opt/marmar-app.backup.$(date +%Y%m%d)
+cp -r /opt/rccms-app /opt/rccms-app.backup.$(date +%Y%m%d)
 
 # 2. Pull latest code
-cd /opt/marmar-app
+cd /opt/rccms-app
 git pull origin main
 
 # 3. Install dependencies
@@ -996,10 +996,10 @@ npm run db:push
 npm run build
 
 # 6. Restart application
-pm2 restart marmar-app
+pm2 restart rccms-app
 
 # 7. Verify
-pm2 logs marmar-app --lines 50
+pm2 logs rccms-app --lines 50
 curl http://localhost:5000/api/health
 
 # 8. Monitor
@@ -1009,20 +1009,20 @@ pm2 monit
 **Rollback Procedure:**
 ```bash
 # Stop application
-pm2 stop marmar-app
+pm2 stop rccms-app
 
 # Restore application files
-rm -rf /opt/marmar-app
-cp -r /opt/marmar-app.backup.20250121 /opt/marmar-app
+rm -rf /opt/rccms-app
+cp -r /opt/rccms-app.backup.20250121 /opt/rccms-app
 
 # Restore database (if schema changed)
 gunzip -c /var/backups/marmar/latest.sql.gz | psql "$DATABASE_URL"
 
 # Restart
-pm2 start marmar-app
+pm2 start rccms-app
 
 # Verify
-pm2 logs marmar-app
+pm2 logs rccms-app
 ```
 
 ### PostgreSQL Upgrades
@@ -1103,7 +1103,7 @@ LIMIT 10;
 **Solution:**
 ```bash
 # Restart application to clear memory
-pm2 restart marmar-app
+pm2 restart rccms-app
 
 # Reduce max connections
 # Check for memory leaks in custom code
@@ -1172,14 +1172,14 @@ psql "$DATABASE_URL" -c "SELECT pid, query, state FROM pg_stat_activity WHERE st
 ### Application
 ```bash
 # PM2 commands
-pm2 start marmar-app
-pm2 stop marmar-app
-pm2 restart marmar-app
-pm2 reload marmar-app       # Zero-downtime restart
-pm2 delete marmar-app
-pm2 logs marmar-app
+pm2 start rccms-app
+pm2 stop rccms-app
+pm2 restart rccms-app
+pm2 reload rccms-app       # Zero-downtime restart
+pm2 delete rccms-app
+pm2 logs rccms-app
 pm2 monit
-pm2 describe marmar-app
+pm2 describe rccms-app
 
 # Build and start
 npm run build
@@ -1192,11 +1192,11 @@ npm run dev
 ### System
 ```bash
 # Service management (systemd)
-sudo systemctl status marmar-app
-sudo systemctl start marmar-app
-sudo systemctl stop marmar-app
-sudo systemctl restart marmar-app
-sudo systemctl enable marmar-app
+sudo systemctl status rccms-app
+sudo systemctl start rccms-app
+sudo systemctl stop rccms-app
+sudo systemctl restart rccms-app
+sudo systemctl enable rccms-app
 
 # Nginx
 sudo systemctl status nginx
@@ -1213,15 +1213,15 @@ sudo systemctl restart postgresql
 ## Appendix B: Log Locations
 
 **Application Logs:**
-- PM2 logs: `~/.pm2/logs/marmar-app-*.log`
-- PM2 error logs: `~/.pm2/logs/marmar-app-error.log`
-- PM2 out logs: `~/.pm2/logs/marmar-app-out.log`
+- PM2 logs: `~/.pm2/logs/rccms-app-*.log`
+- PM2 error logs: `~/.pm2/logs/rccms-app-error.log`
+- PM2 out logs: `~/.pm2/logs/rccms-app-out.log`
 
 **System Logs:**
 - Nginx access: `/var/log/nginx/access.log`
 - Nginx error: `/var/log/nginx/error.log`
 - PostgreSQL: `/var/log/postgresql/postgresql-14-main.log`
-- Systemd: `journalctl -u marmar-app`
+- Systemd: `journalctl -u rccms-app`
 
 **Audit Logs:**
 - Stored in `audit_logs` database table

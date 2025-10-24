@@ -1,5 +1,5 @@
 # VPS Deployment Guide
-## MARMAR Rental Car Contract Management System
+## RCCMS - Rental Car Contract Management System
 
 **For Ubuntu 20.04+ / Debian 11+ Servers**
 
@@ -232,19 +232,19 @@ psql
 
 ```sql
 -- Create application database
-CREATE DATABASE marmar_db;
+CREATE DATABASE rccms_db;
 
 -- Create application user with strong password
-CREATE USER marmar_user WITH ENCRYPTED PASSWORD 'your_strong_password_here_min_16_chars';
+CREATE USER rccms_user WITH ENCRYPTED PASSWORD 'your_strong_password_here_min_16_chars';
 
 -- Grant all privileges on database
-GRANT ALL PRIVILEGES ON DATABASE marmar_db TO marmar_user;
+GRANT ALL PRIVILEGES ON DATABASE rccms_db TO rccms_user;
 
 -- Connect to the database
-\c marmar_db
+\c rccms_db
 
 -- Grant schema privileges
-GRANT ALL ON SCHEMA public TO marmar_user;
+GRANT ALL ON SCHEMA public TO rccms_user;
 
 -- Enable UUID generation extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -285,8 +285,8 @@ sudo nano /etc/postgresql/14/main/pg_hba.conf
 
 ```conf
 # Application access
-host    marmar_db    marmar_user    127.0.0.1/32    md5
-host    marmar_db    marmar_user    ::1/128         md5
+host    rccms_db    rccms_user    127.0.0.1/32    md5
+host    rccms_db    rccms_user    ::1/128         md5
 ```
 
 **Restart PostgreSQL:**
@@ -299,10 +299,10 @@ sudo systemctl restart postgresql
 
 ```bash
 # Test connection
-psql -h localhost -U marmar_user -d marmar_db -W
+psql -h localhost -U rccms_user -d rccms_db -W
 
 # If successful, you'll see:
-# marmar_db=>
+# rccms_db=>
 
 # Test query
 SELECT current_database(), current_user, version();
@@ -315,7 +315,7 @@ SELECT current_database(), current_user, version();
 
 ```bash
 # Your DATABASE_URL will be:
-DATABASE_URL=postgresql://marmar_user:your_strong_password@localhost:5432/marmar_db
+DATABASE_URL=postgresql://rccms_user:your_strong_password@localhost:5432/rccms_db
 ```
 
 ---
@@ -338,20 +338,20 @@ su - marmar
 cd ~
 
 # Clone repository (replace with your repo URL)
-git clone https://github.com/your-org/marmar-app.git
+git clone https://github.com/your-org/rccms-app.git
 
 # Navigate into directory
-cd marmar-app
+cd rccms-app
 ```
 
 **Option B - Upload Files via SCP:**
 
 ```bash
 # From your local machine:
-scp -r /path/to/marmar-app marmar@your-server-ip:~/marmar-app
+scp -r /path/to/rccms-app marmar@your-server-ip:~/rccms-app
 
 # Then SSH into server and navigate:
-cd ~/marmar-app
+cd ~/rccms-app
 ```
 
 ### 3. Install Application Dependencies
@@ -374,13 +374,13 @@ nano .env
 
 ```env
 # Database Configuration
-DATABASE_URL=postgresql://marmar_user:your_strong_password@localhost:5432/marmar_db
+DATABASE_URL=postgresql://rccms_user:your_strong_password@localhost:5432/rccms_db
 
 # Extract individual PostgreSQL parameters (auto-derived from DATABASE_URL)
 PGHOST=localhost
-PGUSER=marmar_user
+PGUSER=rccms_user
 PGPASSWORD=your_strong_password
-PGDATABASE=marmar_db
+PGDATABASE=rccms_db
 PGPORT=5432
 
 # Session Secret (CRITICAL - Generate a strong random string)
@@ -456,7 +456,7 @@ npm run db:push --force
 
 ```bash
 # Connect to database
-psql -h localhost -U marmar_user -d marmar_db -W
+psql -h localhost -U rccms_user -d rccms_db -W
 ```
 
 ```sql
@@ -496,7 +496,7 @@ The application creates a super admin on first run, but you can also create manu
 # CHANGE PASSWORD IMMEDIATELY after first login!
 
 # Option 2: Create manually via database
-psql -h localhost -U marmar_user -d marmar_db -W
+psql -h localhost -U rccms_user -d rccms_db -W
 ```
 
 ```sql
@@ -538,7 +538,7 @@ node -e "const bcrypt = require('bcrypt'); console.log(bcrypt.hashSync('YourSecu
 ### 4. Initialize Company Settings
 
 ```sql
-psql -h localhost -U marmar_user -d marmar_db -W
+psql -h localhost -U rccms_user -d rccms_db -W
 ```
 
 ```sql
@@ -593,7 +593,7 @@ nano ecosystem.config.js
 ```javascript
 module.exports = {
   apps: [{
-    name: 'marmar-app',
+    name: 'rccms-app',
     script: './dist/index.js',  // Compiled backend entry point
     instances: 2,  // Number of instances (CPU cores)
     exec_mode: 'cluster',  // Cluster mode for load balancing
@@ -614,7 +614,7 @@ module.exports = {
 ### 2. Create Logs Directory
 
 ```bash
-mkdir -p ~/marmar-app/logs
+mkdir -p ~/rccms-app/logs
 ```
 
 ### 3. Start Application with PM2
@@ -627,7 +627,7 @@ pm2 start ecosystem.config.js
 pm2 status
 
 # View logs
-pm2 logs marmar-app
+pm2 logs rccms-app
 
 # Monitor
 pm2 monit
@@ -653,25 +653,25 @@ sudo systemctl status pm2-marmar
 pm2 status
 
 # Restart application
-pm2 restart marmar-app
+pm2 restart rccms-app
 
 # Stop application
-pm2 stop marmar-app
+pm2 stop rccms-app
 
 # View logs (last 100 lines)
-pm2 logs marmar-app --lines 100
+pm2 logs rccms-app --lines 100
 
 # Monitor resources
 pm2 monit
 
 # Reload (zero-downtime restart)
-pm2 reload marmar-app
+pm2 reload rccms-app
 
 # Delete from PM2
-pm2 delete marmar-app
+pm2 delete rccms-app
 
 # Show detailed info
-pm2 describe marmar-app
+pm2 describe rccms-app
 ```
 
 ---
@@ -682,7 +682,7 @@ pm2 describe marmar-app
 
 ```bash
 # Create nginx site configuration
-sudo nano /etc/nginx/sites-available/marmar-app
+sudo nano /etc/nginx/sites-available/rccms-app
 ```
 
 **Add configuration:**
@@ -755,8 +755,8 @@ server {
     }
 
     # Access and Error Logs
-    access_log /var/log/nginx/marmar-app-access.log;
-    error_log /var/log/nginx/marmar-app-error.log;
+    access_log /var/log/nginx/rccms-app-access.log;
+    error_log /var/log/nginx/rccms-app-error.log;
 }
 ```
 
@@ -764,7 +764,7 @@ server {
 
 ```bash
 # Create symbolic link to enable site
-sudo ln -s /etc/nginx/sites-available/marmar-app /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/rccms-app /etc/nginx/sites-enabled/
 
 # Remove default site (optional)
 sudo rm /etc/nginx/sites-enabled/default
@@ -937,13 +937,13 @@ sudo netstat -plnt | grep 5432
 
 ```bash
 # PM2 logs
-pm2 logs marmar-app
+pm2 logs rccms-app
 
 # Nginx access log
-sudo tail -f /var/log/nginx/marmar-app-access.log
+sudo tail -f /var/log/nginx/rccms-app-access.log
 
 # Nginx error log
-sudo tail -f /var/log/nginx/marmar-app-error.log
+sudo tail -f /var/log/nginx/rccms-app-error.log
 
 # PostgreSQL log
 sudo tail -f /var/log/postgresql/postgresql-14-main.log
@@ -962,7 +962,7 @@ df -h
 pm2 monit
 
 # Database connections
-psql -U marmar_user -d marmar_db -c "SELECT count(*) FROM pg_stat_activity WHERE datname='marmar_db';"
+psql -U rccms_user -d rccms_db -c "SELECT count(*) FROM pg_stat_activity WHERE datname='rccms_db';"
 ```
 
 ### 3. Database Backups
@@ -982,7 +982,7 @@ BACKUP_FILE="$BACKUP_DIR/marmar_backup_$DATE.sql.gz"
 mkdir -p $BACKUP_DIR
 
 export PGPASSWORD='your_strong_password'
-pg_dump -h localhost -U marmar_user -d marmar_db | gzip > "$BACKUP_FILE"
+pg_dump -h localhost -U rccms_user -d rccms_db | gzip > "$BACKUP_FILE"
 
 if [ -f "$BACKUP_FILE" ]; then
     echo "Backup successful: $BACKUP_FILE"
@@ -1012,7 +1012,7 @@ crontab -e
 
 ```bash
 # Pull latest code
-cd ~/marmar-app
+cd ~/rccms-app
 git pull origin main
 
 # Install dependencies
@@ -1025,10 +1025,10 @@ npm run db:push
 npm run build
 
 # Reload with zero downtime
-pm2 reload marmar-app
+pm2 reload rccms-app
 
 # Check logs
-pm2 logs marmar-app --lines 50
+pm2 logs rccms-app --lines 50
 ```
 
 ---
@@ -1039,13 +1039,13 @@ pm2 logs marmar-app --lines 50
 
 ```bash
 # Check PM2 logs
-pm2 logs marmar-app --lines 100
+pm2 logs rccms-app --lines 100
 
 # Check if port 5000 is in use
 sudo lsof -i :5000
 
 # Check database connection
-psql -h localhost -U marmar_user -d marmar_db -W
+psql -h localhost -U rccms_user -d rccms_db -W
 ```
 
 ### Nginx Errors
@@ -1055,7 +1055,7 @@ psql -h localhost -U marmar_user -d marmar_db -W
 sudo nginx -t
 
 # Check nginx error log
-sudo tail -50 /var/log/nginx/marmar-app-error.log
+sudo tail -50 /var/log/nginx/rccms-app-error.log
 
 # Restart nginx
 sudo systemctl restart nginx
@@ -1068,10 +1068,10 @@ sudo systemctl restart nginx
 sudo systemctl status postgresql
 
 # Check database exists
-psql -U marmar_user -d marmar_db -c "SELECT current_database();"
+psql -U rccms_user -d rccms_db -c "SELECT current_database();"
 
 # Verify DATABASE_URL in .env
-cat ~/marmar-app/.env | grep DATABASE_URL
+cat ~/rccms-app/.env | grep DATABASE_URL
 ```
 
 ### High Memory Usage
@@ -1081,10 +1081,10 @@ cat ~/marmar-app/.env | grep DATABASE_URL
 pm2 status
 
 # Restart application
-pm2 restart marmar-app
+pm2 restart rccms-app
 
 # Reduce PM2 instances if needed
-pm2 scale marmar-app 1
+pm2 scale rccms-app 1
 ```
 
 ---
@@ -1112,8 +1112,8 @@ pm2 scale marmar-app 1
 ```bash
 # Application Management
 pm2 status                    # Check app status
-pm2 restart marmar-app        # Restart app
-pm2 logs marmar-app          # View logs
+pm2 restart rccms-app        # Restart app
+pm2 logs rccms-app          # View logs
 pm2 monit                    # Monitor resources
 
 # Nginx
@@ -1122,7 +1122,7 @@ sudo nginx -t                # Test configuration
 sudo systemctl reload nginx  # Reload nginx
 
 # Database
-psql -U marmar_user -d marmar_db  # Connect to DB
+psql -U rccms_user -d rccms_db  # Connect to DB
 sudo systemctl status postgresql   # Check PostgreSQL
 
 # System
