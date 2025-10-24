@@ -40,7 +40,7 @@ Preferred communication style: Simple, everyday language.
 - **Company Settings Management:** Admin-only page for configuring bilingual company information and contract clauses.
 - **Dashboard:** Displays critical metrics like active rentals, monthly revenue, overdue returns.
 - **Advanced Analytics & Reporting:** Comprehensive reporting with data visualization using recharts library. Financial Reports include monthly revenue trends (line chart), revenue by status (pie chart), and payment method breakdown (pie chart). Operational Reports feature vehicle utilization analysis (bar chart) and contract status distribution (pie chart). Customer Reports display top customers by revenue (bar chart) and customer retention analysis (donut chart). All charts are responsive, bilingual-ready, and theme-compatible.
-- **Report Export Functionality:** Full PDF and Excel export support for all four report types (Financial, Operational, Customer, Audit). Exports respect date range filters and include bilingual support (English/Arabic). Backend uses jsPDF v3.x with proper named export for PDF generation and xlsx library for Excel files. Each report page has dedicated export buttons generating downloadable files with proper extensions (.pdf, .xlsx).
+- **Report Export Functionality:** Full PDF and Excel export support for all four report types (Financial, Operational, Customer, Audit). Exports respect date range filters and include bilingual support (English/Arabic). Backend uses jsPDF v3.x with proper named export for PDF generation and xlsx library for Excel files. **Chart Visualization in Exports:** Charts from recharts are captured as images using html2canvas on the frontend, sent to backend via POST requests, and embedded in PDF exports (full images) and Excel exports (metadata sheet). Request body size limit increased to 10MB to accommodate base64-encoded chart images. Each report page has dedicated export buttons generating downloadable files with proper extensions (.pdf, .xlsx).
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
 - **MARMAR PDF Integration:** Professional PDF generation for rental contracts.
@@ -59,5 +59,5 @@ Preferred communication style: Simple, everyday language.
 - **Form Handling:** `react-hook-form`, `@hookform/resolvers`, `zod`.
 - **Internationalization:** `i18next`, `react-i18next`.
 - **Styling:** `tailwindcss`, `class-variance-authority`, `clsx`.
-- **Data Visualization:** `recharts` for responsive charts and graphs.
+- **Data Visualization:** `recharts` for responsive charts and graphs, `html2canvas` for capturing chart visualizations as images for export.
 - **Export & Document Generation:** `jspdf` (v3.x with named export), `jspdf-autotable`, `xlsx` for PDF and Excel report exports.
