@@ -77,6 +77,7 @@ const resources = {
       "financialReports.card": "Card",
       "financialReports.bankTransfer": "Bank Transfer",
       "financialReports.unknown": "Unknown",
+      "financialReports.monthlyRevenueTrend": "Monthly Revenue Trend",
       
       // Operational Reports
       "operationalReports.title": "Operational Reports",
@@ -155,6 +156,7 @@ const resources = {
       "common.dateFrom": "Date From",
       "common.dateTo": "Date To",
       "common.saving": "Saving...",
+      "common.processing": "Processing...",
       
       // Date Selector
       "date.day": "DD",
@@ -740,6 +742,7 @@ const resources = {
       "financialReports.card": "بطاقة",
       "financialReports.bankTransfer": "تحويل بنكي",
       "financialReports.unknown": "غير معروف",
+      "financialReports.monthlyRevenueTrend": "اتجاه الإيرادات الشهرية",
       
       // Operational Reports
       "operationalReports.title": "التقارير التشغيلية",
@@ -818,6 +821,7 @@ const resources = {
       "common.dateFrom": "من تاريخ",
       "common.dateTo": "إلى تاريخ",
       "common.saving": "جاري الحفظ...",
+      "common.processing": "جاري المعالجة...",
       
       // Date Selector
       "date.day": "يوم",
