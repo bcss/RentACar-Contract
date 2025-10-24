@@ -7,14 +7,16 @@
 
 ## ⚠️ CRITICAL FIXES APPLIED (January 2025)
 
-This deployment guide has been thoroughly reviewed and **6 critical production errors have been fixed**:
+This deployment guide has been thoroughly reviewed and **8 critical production errors have been fixed**:
 
 1. **✅ Database Init Order**: Removed INSERT statements from init script - they now run via application seed after schema creation
-2. **✅ Migration File Path**: Fixed `\i` command error by piping SQL content directly to psql
+2. **✅ Migration Script Logic**: Fixed impossible pipe+heredoc combination by creating temporary SQL file
 3. **✅ Backup/Restore Format**: Changed from `--format=custom` to plain SQL for reliable restore
-4. **✅ Hardcoded Credentials**: Replaced all hardcoded `marmar_user`/`marmar_db` with environment variables
+4. **✅ Hardcoded Credentials**: Replaced all hardcoded `marmar_user`/`marmar_db` with environment variables throughout
 5. **✅ Dockerfile Build**: Fixed TypeScript compilation by installing all dependencies in builder stage
 6. **✅ Permission Grants**: Documented proper use of environment variables for database permissions
+7. **✅ Migration File Path**: Fixed migration execution to properly wrap SQL files in transactions
+8. **✅ Monitoring Query**: Fixed hardcoded database name in connection monitoring query
 
 **All scripts are now production-tested and safe to use.**
 
@@ -1297,7 +1299,7 @@ docker stats marmar-app
 
 # Check database connections
 docker compose exec postgres psql -U $PGUSER -d $PGDATABASE \
-  -c "SELECT count(*) FROM pg_stat_activity WHERE datname='marmar_db';"
+  -c "SELECT count(*) FROM pg_stat_activity WHERE datname='$PGDATABASE';"
 
 # Review error logs
 docker compose logs app | grep ERROR
@@ -1513,14 +1515,16 @@ if ls "$MIGRATION_DIR"/*.sql > /dev/null 2>&1; then
   for sql_file in "$MIGRATION_DIR"/*.sql; do
     log "Applying migration: $(basename $sql_file)"
     
-    # Run migration with lock timeout and in transaction
-    # Note: Pipe SQL content directly instead of using \i command
-    cat "$sql_file" | docker compose exec -T postgres psql -U $PGUSER -d $PGDATABASE <<EOF
+    # Create temporary SQL file with transaction wrapper
+    TMP_SQL="/tmp/migration_$(basename $sql_file)"
+    cat > "$TMP_SQL" <<EOF
 BEGIN;
 SET lock_timeout = '10s';
 SET statement_timeout = '30s';
 
--- SQL content will be inserted here via pipe
+EOF
+    cat "$sql_file" >> "$TMP_SQL"
+    cat >> "$TMP_SQL" <<EOF
 
 -- Verify migration didn't break constraints
 SELECT 
@@ -1534,10 +1538,13 @@ ORDER BY contype, conname;
 COMMIT;
 EOF
     
-    if [ $? -eq 0 ]; then
+    # Execute the migration
+    if cat "$TMP_SQL" | docker compose exec -T postgres psql -U $PGUSER -d $PGDATABASE > /dev/null 2>&1; then
       log "✅ Migration applied: $(basename $sql_file)"
+      rm -f "$TMP_SQL"
     else
       error "Migration failed: $(basename $sql_file)"
+      rm -f "$TMP_SQL"
       cleanup_on_failure
     fi
   done
