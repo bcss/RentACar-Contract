@@ -1388,9 +1388,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export endpoints
-  app.get('/api/reports/financial/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/reports/financial/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
     try {
       const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const { charts = [] } = req.body;
       const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
       const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
       const isRTL = lang === 'ar';
@@ -1403,8 +1404,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createPDF, 
         addPDFSummarySection, 
         addPDFTable, 
+        addPDFChartImages,
         createExcelWorkbook, 
-        addExcelSheet, 
+        addExcelSheet,
+        addExcelChartSheet,
         exportExcelToBuffer,
         formatCurrency,
         formatDate 
@@ -1445,6 +1448,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ]);
           
           addPDFTable(doc, ['Month', 'Revenue', 'Contracts'], monthlyData, currentY + 5);
+        }
+        
+        // Add charts if available
+        if (charts && charts.length > 0) {
+          addPDFChartImages(doc, charts, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : currentY + 10);
         }
 
         // Send PDF
@@ -1494,6 +1502,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }));
         addExcelSheet(wb, 'Outstanding Payments', outstandingData);
         
+        // Add charts sheet if available
+        if (charts && charts.length > 0) {
+          addExcelChartSheet(wb, charts);
+        }
+        
         const buffer = exportExcelToBuffer(wb);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename="financial-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx"`);
@@ -1507,9 +1520,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/reports/operational/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/reports/operational/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
     try {
       const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const { charts = [] } = req.body;
       const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
       const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
       const isRTL = lang === 'ar';
@@ -1520,9 +1534,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { 
         createPDF, 
         addPDFSummarySection, 
-        addPDFTable, 
+        addPDFTable,
+        addPDFChartImages,
         createExcelWorkbook, 
-        addExcelSheet, 
+        addExcelSheet,
+        addExcelChartSheet,
         exportExcelToBuffer,
         formatPercentage
       } = await import('./utils/exportHelpers');
@@ -1564,6 +1580,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           addPDFTable(doc, ['Registration', 'Vehicle', 'Contracts', 'Total Days', 'Status'], statsData, currentY + 5);
         }
 
+        // Add charts if provided
+        if (charts && charts.length > 0) {
+          addPDFChartImages(doc, charts, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : currentY + 10);
+        }
+
         // Send PDF
         const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
         res.setHeader('Content-Type', 'application/pdf');
@@ -1602,6 +1623,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
         addExcelSheet(wb, 'Contract Status', statusData);
         
+        // Add charts sheet if available
+        if (charts && charts.length > 0) {
+          addExcelChartSheet(wb, charts);
+        }
+        
         const buffer = exportExcelToBuffer(wb);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename="operational-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx"`);
@@ -1615,9 +1641,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/reports/customers/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/reports/customers/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
     try {
       const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const { charts = [] } = req.body;
       const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
       const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
       const isRTL = lang === 'ar';
@@ -1628,9 +1655,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { 
         createPDF, 
-        addPDFTable, 
+        addPDFTable,
+        addPDFChartImages,
         createExcelWorkbook, 
-        addExcelSheet, 
+        addExcelSheet,
+        addExcelChartSheet,
         exportExcelToBuffer,
         formatCurrency,
         formatDate
@@ -1666,6 +1695,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ]);
           
           addPDFTable(doc, ['Customer', 'Contracts', 'Revenue', 'Days', 'Last Rental'], customerData, currentY + 5);
+        }
+
+        // Add charts if provided
+        if (charts && charts.length > 0) {
+          addPDFChartImages(doc, charts, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : currentY + 10);
         }
 
         // Send PDF
@@ -1705,6 +1739,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'First Rental': formatDate(item.lastRental)
         }));
         addExcelSheet(wb, 'New Customers', newData);
+        
+        // Add charts sheet if available
+        if (charts && charts.length > 0) {
+          addExcelChartSheet(wb, charts);
+        }
         
         const buffer = exportExcelToBuffer(wb);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

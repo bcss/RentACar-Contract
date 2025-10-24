@@ -155,3 +155,83 @@ export function formatDate(date: Date | string | null | undefined): string {
 export function formatPercentage(value: number): string {
   return `${value.toFixed(1)}%`;
 }
+
+// Chart Image Interface
+export interface ChartImage {
+  name: string;
+  dataUrl: string;
+  width: number;
+  height: number;
+}
+
+// Add chart images to PDF
+export function addPDFChartImages(
+  doc: jsPDF,
+  charts: ChartImage[],
+  startY: number
+): number {
+  let currentY = startY;
+  const pageHeight = doc.internal.pageSize.height;
+  const pageWidth = doc.internal.pageSize.width;
+  const margin = 10;
+  const maxWidth = pageWidth - (margin * 2);
+  
+  charts.forEach((chart, index) => {
+    if (!chart.dataUrl) return;
+    
+    // Calculate dimensions to fit within page width
+    const imgWidth = Math.min(maxWidth, 180); // Max 180mm width
+    const aspectRatio = chart.height / chart.width;
+    const imgHeight = imgWidth * aspectRatio;
+    
+    // Check if we need a new page
+    if (currentY + imgHeight + 20 > pageHeight - margin) {
+      doc.addPage();
+      currentY = margin + 10;
+    }
+    
+    // Add chart title
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(chart.name, pageWidth / 2, currentY, { align: 'center' });
+    currentY += 7;
+    
+    // Add image
+    try {
+      doc.addImage(
+        chart.dataUrl,
+        'PNG',
+        (pageWidth - imgWidth) / 2, // Center horizontally
+        currentY,
+        imgWidth,
+        imgHeight
+      );
+      currentY += imgHeight + 15;
+    } catch (error) {
+      console.error(`Failed to add chart ${chart.name} to PDF:`, error);
+      currentY += 10;
+    }
+  });
+  
+  return currentY;
+}
+
+// Add chart images to Excel workbook
+export function addExcelChartSheet(
+  workbook: XLSX.WorkBook,
+  charts: ChartImage[]
+): XLSX.WorkBook {
+  // Create a simple sheet listing the charts
+  const chartData = charts.map(chart => ({
+    'Chart Name': chart.name,
+    'Status': 'Image captured',
+    'Note': 'Chart images are available in PDF export'
+  }));
+  
+  if (chartData.length > 0) {
+    const worksheet = XLSX.utils.json_to_sheet(chartData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Charts');
+  }
+  
+  return workbook;
+}
