@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Link } from 'wouter';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { captureMultipleCharts } from '@/utils/chartExport';
+import { useToast } from '@/hooks/use-toast';
 
 interface FinancialReport {
   summary: {
@@ -77,9 +79,23 @@ export default function FinancialReports() {
     return `/api/reports/financial${params.toString() ? `?${params.toString()}` : ''}`;
   };
 
+  const { toast } = useToast();
+  
   // Export handlers
   const handleExport = async (format: 'pdf' | 'excel') => {
     try {
+      toast({
+        title: t('common.processing'),
+        description: 'Capturing charts...',
+      });
+      
+      // Capture charts as images
+      const chartImages = await captureMultipleCharts([
+        { elementId: 'financial-chart-revenue-trend', chartName: 'Monthly Revenue Trend' },
+        { elementId: 'financial-chart-revenue-status', chartName: 'Revenue by Status' },
+        { elementId: 'financial-chart-payment-methods', chartName: 'Payment Methods' },
+      ]);
+      
       const params = new URLSearchParams();
       params.append('format', format);
       params.append('lang', i18n.language);
@@ -91,7 +107,12 @@ export default function FinancialReports() {
       }
       
       const response = await fetch(`/api/reports/financial/export?${params.toString()}`, {
-        credentials: 'include'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ charts: chartImages }),
       });
       
       if (!response.ok) throw new Error('Export failed');
@@ -105,8 +126,18 @@ export default function FinancialReports() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      
+      toast({
+        title: t('common.success'),
+        description: 'Report exported successfully',
+      });
     } catch (error) {
       console.error('Export error:', error);
+      toast({
+        title: t('common.error'),
+        description: 'Failed to export report',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -302,6 +333,7 @@ export default function FinancialReports() {
                       {t('financialReports.noData')}
                     </p>
                   ) : (
+                    <div id="financial-chart-revenue-trend">
                     <ResponsiveContainer width="100%" minHeight={300}>
                       <LineChart data={report.monthlyBreakdown}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -343,6 +375,7 @@ export default function FinancialReports() {
                         />
                       </LineChart>
                     </ResponsiveContainer>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -389,6 +422,7 @@ export default function FinancialReports() {
                   <CardDescription>Revenue distribution across contract statuses</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div id="financial-chart-revenue-status">
                   <ResponsiveContainer width="100%" minHeight={300}>
                     <PieChart>
                       <Pie
@@ -433,6 +467,7 @@ export default function FinancialReports() {
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             </>
@@ -505,6 +540,7 @@ export default function FinancialReports() {
                       {t('financialReports.noPayments')}
                     </p>
                   ) : (
+                    <div id="financial-chart-payment-methods">
                     <ResponsiveContainer width="100%" minHeight={300}>
                       <PieChart>
                         <Pie
@@ -556,6 +592,7 @@ export default function FinancialReports() {
                         <Legend />
                       </PieChart>
                     </ResponsiveContainer>
+                    </div>
                   )}
                 </CardContent>
               </Card>
