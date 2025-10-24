@@ -20,7 +20,14 @@ export async function captureChart(
   try {
     const element = document.getElementById(elementId);
     if (!element) {
-      console.error(`Chart element not found: ${elementId}`);
+      console.warn(`Chart element not found: ${elementId} - skipping`);
+      return null;
+    }
+
+    // Check if element is visible
+    const rect = element.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      console.warn(`Chart element ${elementId} is not visible - skipping`);
       return null;
     }
 
@@ -29,12 +36,13 @@ export async function captureChart(
 
     const canvas = await html2canvas(element, {
       backgroundColor: null,
-      scale: 2, // Higher quality
+      scale: 1.5, // Reduced from 2 to lower file size
       logging: false,
       useCORS: true,
+      allowTaint: true,
     });
 
-    const dataUrl = canvas.toDataURL('image/png');
+    const dataUrl = canvas.toDataURL('image/png', 0.8); // Add compression
     
     return {
       name: chartName,
