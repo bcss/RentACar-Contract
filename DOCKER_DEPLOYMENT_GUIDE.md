@@ -162,14 +162,14 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && \
+# Install ALL dependencies (including devDependencies for TypeScript compilation)
+RUN npm ci && \
     npm cache clean --force
 
 # Copy application code
 COPY . .
 
-# Build application
+# Build application (requires TypeScript and build tools)
 RUN npm run build
 
 # Stage 2: Production image
@@ -486,65 +486,12 @@ Create `init-scripts/01-init.sql`:
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create default super admin user
--- Password: admin123 (bcrypt hash below)
--- CHANGE THIS PASSWORD IMMEDIATELY after first login!
-INSERT INTO users (
-    username,
-    password_hash,
-    email,
-    first_name,
-    last_name,
-    role,
-    is_immutable
-) VALUES (
-    'admin',
-    '$2b$10$YourBcryptHashHereFromGenerationStep',
-    'admin@marmar-rental.com',
-    'System',
-    'Administrator',
-    'admin',
-    true
-) ON CONFLICT (username) DO NOTHING;
-
--- Insert default company settings
-INSERT INTO company_settings (
-    company_name_en,
-    company_name_ar,
-    phone,
-    email,
-    address_en,
-    address_ar,
-    commercial_registration,
-    tax_id
-) VALUES (
-    'MARMAR Car Rental',
-    'شركة مرمر لتأجير السيارات',
-    '+966 XX XXX XXXX',
-    'info@marmar-rental.com',
-    'Your Address Here',
-    'عنوانك هنا',
-    'CR-XXXXXXXX',
-    'TAX-XXXXXXXX'
-)
-ON CONFLICT DO NOTHING;
-
--- Grant necessary permissions
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO marmar_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO marmar_user;
+-- Grant necessary permissions to database user
+-- Note: Replace ${PGUSER} with your actual database user from .env
+-- Example: If PGUSER=marmar_user, use: GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO marmar_user;
 ```
 
-**Generate Admin Password Hash:**
-
-```bash
-# Install bcrypt if needed
-npm install bcrypt
-
-# Generate hash
-node -e "const bcrypt = require('bcrypt'); console.log(bcrypt.hashSync('admin123', 10));"
-
-# Copy the output hash and replace in 01-init.sql above
-```
+**IMPORTANT**: User and company settings insertion happens AFTER schema creation via the application's seed process. The init script only enables extensions and sets permissions.
 
 ### 2. Build Application First Time
 
@@ -587,6 +534,9 @@ docker compose exec app npm run db:push
 
 # Or if that doesn't work:
 docker compose exec app npm run db:push --force
+
+# The superadmin user and company settings are automatically seeded
+# by the application on first startup via server/auth/seedSuperAdmin.ts
 ```
 
 ### 3. Verify Application
@@ -619,9 +569,9 @@ curl https://localhost:443  # If SSL configured
 - HTTPS: `https://your-domain.com`
 
 **Default Login:**
-- Username: `admin`
-- Password: `admin123`
-- **CHANGE IMMEDIATELY!**
+- Username: `superadmin`
+- Password: `Admin@123456`
+- **⚠️ CRITICAL: Never delete or modify this user - required for system operation**
 
 ---
 
@@ -710,13 +660,22 @@ Create `backup-database.sh`:
 
 ```bash
 #!/bin/bash
+# Load environment variables
+if [ -f .env ]; then
+  source .env
+else
+  echo "ERROR: .env file not found!"
+  exit 1
+fi
+
 BACKUP_DIR="./backups"
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/marmar_backup_$DATE.sql.gz"
 
 mkdir -p $BACKUP_DIR
 
-docker compose exec -T postgres pg_dump -U marmar_user marmar_db | gzip > "$BACKUP_FILE"
+# Use environment variables for credentials
+docker compose exec -T postgres pg_dump -U $PGUSER $PGDATABASE | gzip > "$BACKUP_FILE"
 
 if [ -f "$BACKUP_FILE" ]; then
     echo "Backup successful: $BACKUP_FILE"
@@ -747,12 +706,15 @@ crontab -e
 ### 2. Restore Database
 
 ```bash
+# Load environment variables
+source .env
+
 # Stop application
 docker compose stop app
 
-# Restore from backup
+# Restore from backup (plain SQL format)
 gunzip -c backups/marmar_backup_20250121_020000.sql.gz | \
-  docker compose exec -T postgres psql -U marmar_user -d marmar_db
+  docker compose exec -T postgres psql -U $PGUSER -d $PGDATABASE
 
 # Start application
 docker compose start app
@@ -840,14 +802,17 @@ curl http://localhost:5000/api/health
 ### 4. Database Monitoring
 
 ```bash
+# Load environment variables
+source .env
+
 # Connect to database
-docker compose exec postgres psql -U marmar_user -d marmar_db
+docker compose exec postgres psql -U $PGUSER -d $PGDATABASE
 
 # Check database size
-docker compose exec postgres psql -U marmar_user -d marmar_db -c "SELECT pg_size_pretty(pg_database_size('marmar_db'));"
+docker compose exec postgres psql -U $PGUSER -d $PGDATABASE -c "SELECT pg_size_pretty(pg_database_size('$PGDATABASE'));"
 
 # Active connections
-docker compose exec postgres psql -U marmar_user -d marmar_db -c "SELECT count(*) FROM pg_stat_activity WHERE datname='marmar_db';"
+docker compose exec postgres psql -U $PGUSER -d $PGDATABASE -c "SELECT count(*) FROM pg_stat_activity WHERE datname='$PGDATABASE';"
 ```
 
 ---
@@ -1495,9 +1460,9 @@ log "Step 3/10: Creating comprehensive backup..."
 BACKUP_FILE="$BACKUP_DIR/marmar_backup_$(date +%Y%m%d_%H%M%S).sql.gz"
 VOLUME_BACKUP="$BACKUP_DIR/postgres_volume_$(date +%Y%m%d_%H%M%S).tar.gz"
 
-# Database backup
+# Database backup (plain SQL format for easy restore)
 log "Creating database backup: $BACKUP_FILE"
-docker compose exec -T postgres pg_dump -U $PGUSER -d $PGDATABASE --format=custom | gzip > "$BACKUP_FILE"
+docker compose exec -T postgres pg_dump -U $PGUSER -d $PGDATABASE | gzip > "$BACKUP_FILE"
 
 # Verify backup integrity
 if [ ! -s "$BACKUP_FILE" ]; then
@@ -1534,12 +1499,13 @@ if ls "$MIGRATION_DIR"/*.sql > /dev/null 2>&1; then
     log "Applying migration: $(basename $sql_file)"
     
     # Run migration with lock timeout and in transaction
-    docker compose exec -T postgres psql -U $PGUSER -d $PGDATABASE <<EOF
+    # Note: Pipe SQL content directly instead of using \i command
+    cat "$sql_file" | docker compose exec -T postgres psql -U $PGUSER -d $PGDATABASE <<EOF
 BEGIN;
 SET lock_timeout = '10s';
 SET statement_timeout = '30s';
 
-\i /migrations/$(basename $sql_file)
+-- SQL content will be inserted here via pipe
 
 -- Verify migration didn't break constraints
 SELECT 
@@ -1854,12 +1820,12 @@ ALTER DATABASE $PGDATABASE RENAME TO ${PGDATABASE}_old;
 CREATE DATABASE $PGDATABASE OWNER $PGUSER;
 EOF
 
-# Restore from backup
+# Restore from backup (plain SQL format)
 log "Restoring data..."
 if [[ "$BACKUP_FILE" == *.gz ]]; then
-  gunzip -c "$BACKUP_FILE" | docker compose exec -T postgres pg_restore -U $PGUSER -d $PGDATABASE --no-owner --no-acl
+  gunzip -c "$BACKUP_FILE" | docker compose exec -T postgres psql -U $PGUSER -d $PGDATABASE
 else
-  docker compose exec -T postgres pg_restore -U $PGUSER -d $PGDATABASE --no-owner --no-acl < "$BACKUP_FILE"
+  docker compose exec -T postgres psql -U $PGUSER -d $PGDATABASE < "$BACKUP_FILE"
 fi
 
 if [ $? -eq 0 ]; then
