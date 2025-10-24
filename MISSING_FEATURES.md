@@ -463,9 +463,106 @@ Self-service portal for customers to view their rental history and contracts.
 
 ---
 
+### 11. Google Translation API Integration 🌐
+**Priority**: 🟡 Medium  
+**Complexity**: Moderate (1-2 weeks)  
+**Business Value**: Medium-High
+
+**Description**:
+Integrate Google Translation API to automatically translate dynamic content between English and Arabic, enhancing the existing bilingual system.
+
+**Features**:
+- Automatic translation of user-generated content (notes, descriptions)
+- Real-time translation of dynamic fields
+- Translate customer names, vehicle descriptions, and custom fields
+- Translation quality validation
+- Fallback to manual translation for critical content
+- Translation history and audit trail
+- Batch translation for bulk data
+- Support for additional languages in the future
+
+**Business Benefits**:
+- Consistent translation quality across all content
+- Reduced manual translation effort
+- Faster data entry (enter in one language, auto-translate)
+- Easy expansion to additional languages (French, Hindi, etc.)
+- Improved user experience with comprehensive bilingual support
+- Time savings for staff entering bilingual data
+
+**Implementation Notes**:
+- Use Replit's Google Cloud integration for API key management
+- Google Cloud Translation API v3 (Advanced)
+- Server-side translation to protect API keys
+- Rate limiting and cost management
+- Cache frequently translated phrases
+- Admin configuration for translation preferences
+- Manual override option for sensitive translations
+
+**API Integration**:
+```typescript
+// Backend translation service
+import { TranslationServiceClient } from '@google-cloud/translate';
+
+async function translateText(text: string, targetLang: 'ar' | 'en') {
+  const client = new TranslationServiceClient();
+  const [translation] = await client.translateText({
+    parent: `projects/${projectId}/locations/global`,
+    contents: [text],
+    mimeType: 'text/plain',
+    sourceLanguageCode: 'auto',
+    targetLanguageCode: targetLang,
+  });
+  return translation.translations[0].translatedText;
+}
+```
+
+**Configuration Needed**:
+- Google Cloud project setup
+- Translation API enabled
+- API credentials (managed via Replit integration)
+- Monthly usage budget alerts
+- Translation quality settings
+
+**Use Cases**:
+1. **Customer Creation**: Enter name in English, auto-translate to Arabic
+2. **Vehicle Descriptions**: Add vehicle notes in one language, display in both
+3. **Contract Terms**: Translate custom terms and conditions
+4. **System Messages**: Translate dynamic error messages and notifications
+5. **Reports**: Auto-translate custom report filters and notes
+
+**Cost Considerations**:
+- Google Translation API: ~$20 per 1 million characters
+- Estimated monthly cost: $10-50 (depending on usage)
+- Implement caching to reduce API calls
+- Translation quota monitoring
+
+**Database Changes**:
+```typescript
+export const translationCache = pgTable("translation_cache", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sourceText: text("source_text").notNull(),
+  sourceLang: varchar("source_lang", { length: 5 }).notNull(),
+  targetLang: varchar("target_lang", { length: 5 }).notNull(),
+  translatedText: text("translated_text").notNull(),
+  provider: varchar("provider").notNull().default("google"),
+  createdAt: timestamp("created_at").defaultNow(),
+  usageCount: integer("usage_count").default(1),
+});
+```
+
+**Estimated Effort**: 10-14 days
+- API integration and setup: 3 days
+- Translation service implementation: 3 days
+- Frontend integration (auto-translate buttons): 2 days
+- Caching and optimization: 2 days
+- Admin configuration UI: 2 days
+- Testing and refinement: 2 days
+
+---
+
 ## Low Priority Features
 
-### 11. Barcode/QR Code Generation 🔧
+### 12. Barcode/QR Code Generation 🔧
 **Priority**: 🟢 Low  
 **Complexity**: Simple (2-3 days)  
 **Business Value**: Low-Medium
@@ -490,7 +587,7 @@ Generate barcodes or QR codes for contracts and vehicles.
 
 ---
 
-### 12. Multi-Currency Support 💰
+### 13. Multi-Currency Support 💰
 **Priority**: 🟢 Low  
 **Complexity**: Moderate (1 week)  
 **Business Value**: Low (unless international operations)
@@ -521,7 +618,7 @@ Support for multiple currencies with exchange rate tracking.
 
 ---
 
-### 13. Loyalty & Rewards Program 💎
+### 14. Loyalty & Rewards Program 💎
 **Priority**: 🟢 Low  
 **Complexity**: Complex (2-3 weeks)  
 **Business Value**: Medium (for customer retention)
@@ -561,7 +658,7 @@ export const loyaltyPoints = pgTable("loyalty_points", {
 
 ---
 
-### 14. Damage Assessment with Photos 📸
+### 15. Damage Assessment with Photos 📸
 **Priority**: 🟢 Low  
 **Complexity**: Moderate (1-2 weeks)  
 **Business Value**: Medium
@@ -595,7 +692,7 @@ Enhanced damage tracking with photo documentation.
 
 ---
 
-### 15. WhatsApp Integration 📱
+### 16. WhatsApp Integration 📱
 **Priority**: 🟢 Low  
 **Complexity**: Moderate (1 week)  
 **Business Value**: Medium (region-dependent)
@@ -628,7 +725,7 @@ WhatsApp notifications and communication.
 
 ## Nice-to-Have Features
 
-### 16. Mobile Apps (iOS/Android) 📱
+### 17. Mobile Apps (iOS/Android) 📱
 **Priority**: 🔵 Future  
 **Complexity**: Major (3-6 months)  
 **Business Value**: High (for mobile-first markets)
@@ -655,7 +752,7 @@ Native mobile apps for staff and customers.
 
 ---
 
-### 17. AI-Powered Features 🤖
+### 18. AI-Powered Features 🤖
 **Priority**: 🔵 Future  
 **Complexity**: Major (2-4 months)  
 **Business Value**: High (for competitive advantage)
@@ -687,7 +784,7 @@ Artificial intelligence and machine learning features.
 
 ---
 
-### 18. API for Third-Party Integrations 🔌
+### 19. API for Third-Party Integrations 🔌
 **Priority**: 🔵 Future  
 **Complexity**: Complex (3-4 weeks)  
 **Business Value**: Medium-High
@@ -720,7 +817,7 @@ Public API for integrations with third-party systems.
 
 ---
 
-### 19. Backup & Restore System 🔧
+### 20. Backup & Restore System 🔧
 **Priority**: 🟠 High (for production)  
 **Complexity**: Moderate (1 week)  
 **Business Value**: Critical (for data safety)
@@ -753,7 +850,7 @@ Automated backup and restore functionality.
 
 ---
 
-### 20. Audit Log Export & Analysis 📊
+### 21. Audit Log Export & Analysis 📊
 **Priority**: 🟡 Medium  
 **Complexity**: Simple (3-5 days)  
 **Business Value**: Medium
