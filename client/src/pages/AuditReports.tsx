@@ -37,7 +37,7 @@ interface AuditReport {
 }
 
 export default function AuditReports() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isAdmin, isManager } = useAuth();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -53,6 +53,39 @@ export default function AuditReports() {
       params.append('endDate', endDate.toISOString());
     }
     return `/api/reports/audit${params.toString() ? `?${params.toString()}` : ''}`;
+  };
+
+  // Export handlers
+  const handleExport = async (format: 'pdf' | 'excel') => {
+    try {
+      const params = new URLSearchParams();
+      params.append('format', format);
+      params.append('lang', i18n.language);
+      if (startDate) {
+        params.append('startDate', startDate.toISOString());
+      }
+      if (endDate) {
+        params.append('endDate', endDate.toISOString());
+      }
+      
+      const response = await fetch(`/api/reports/audit/export?${params.toString()}`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) throw new Error('Export failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit-report.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Export error:', error);
+    }
   };
 
   const { data: report, isLoading } = useQuery<AuditReport>({
@@ -112,10 +145,16 @@ export default function AuditReports() {
             Contract modifications and user activity tracking
           </p>
         </div>
-        <Button variant="outline" disabled data-testid="button-export">
-          <span className="material-icons mr-2">download</span>
-          Export (Coming Soon)
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => handleExport('pdf')} data-testid="button-export-pdf">
+            <span className="material-icons mr-2">picture_as_pdf</span>
+            Export PDF
+          </Button>
+          <Button variant="outline" onClick={() => handleExport('excel')} data-testid="button-export-excel">
+            <span className="material-icons mr-2">table_chart</span>
+            Export Excel
+          </Button>
+        </div>
       </div>
 
       <Card>
