@@ -79,6 +79,50 @@ export default function ContractView() {
   const [fuelCalculationBreakdown, setFuelCalculationBreakdown] = useState('');
   const [isAutoCalculatedFuel, setIsAutoCalculatedFuel] = useState(false);
 
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast({
+        title: t('common.error'),
+        description: t('msg.noPermission'),
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+    }
+  }, [isAuthenticated, authLoading, toast, t]);
+
+  const { data: contract, isLoading } = useQuery<ContractWithDetails>({
+    queryKey: ['/api/contracts', params.id],
+    enabled: isAuthenticated,
+  });
+
+  const { data: companySettings } = useQuery<CompanySettings>({
+    queryKey: ['/api/settings'],
+    enabled: isAuthenticated,
+  });
+
+  const { data: customer, isLoading: isLoadingCustomer } = useQuery<Customer>({
+    queryKey: ['/api/customers', contract?.customerId],
+    enabled: !!contract?.customerId,
+  });
+
+  const { data: vehicle, isLoading: isLoadingVehicle } = useQuery<Vehicle>({
+    queryKey: ['/api/vehicles', contract?.vehicleId],
+    enabled: !!contract?.vehicleId,
+  });
+
+  const { data: creator } = useQuery<User>({
+    queryKey: ['/api/users', contract?.createdBy],
+    enabled: !!contract?.createdBy,
+  });
+
+  // Fetch payments for this contract
+  const { data: payments = [], isLoading: isLoadingPayments } = useQuery<Payment[]>({
+    queryKey: ['/api/contracts', params.id, 'payments'],
+    enabled: isAuthenticated && !!params.id,
+  });
+
   // Auto-calculate fuel charge when fuel level changes
   useEffect(() => {
     if (!fuelLevelEnd || !contract || !vehicle || !companySettings) {
@@ -142,50 +186,6 @@ export default function ContractView() {
     );
     setIsAutoCalculatedFuel(true);
   }, [fuelLevelEnd, contract, vehicle, companySettings]);
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: t('common.error'),
-        description: t('msg.noPermission'),
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-    }
-  }, [isAuthenticated, authLoading, toast, t]);
-
-  const { data: contract, isLoading } = useQuery<ContractWithDetails>({
-    queryKey: ['/api/contracts', params.id],
-    enabled: isAuthenticated,
-  });
-
-  const { data: companySettings } = useQuery<CompanySettings>({
-    queryKey: ['/api/settings'],
-    enabled: isAuthenticated,
-  });
-
-  const { data: customer, isLoading: isLoadingCustomer } = useQuery<Customer>({
-    queryKey: ['/api/customers', contract?.customerId],
-    enabled: !!contract?.customerId,
-  });
-
-  const { data: vehicle, isLoading: isLoadingVehicle } = useQuery<Vehicle>({
-    queryKey: ['/api/vehicles', contract?.vehicleId],
-    enabled: !!contract?.vehicleId,
-  });
-
-  const { data: creator } = useQuery<User>({
-    queryKey: ['/api/users', contract?.createdBy],
-    enabled: !!contract?.createdBy,
-  });
-
-  // Fetch payments for this contract
-  const { data: payments = [], isLoading: isLoadingPayments } = useQuery<Payment[]>({
-    queryKey: ['/api/contracts', params.id, 'payments'],
-    enabled: isAuthenticated && !!params.id,
-  });
 
   // Payment mutations
   const createPaymentMutation = useMutation({
