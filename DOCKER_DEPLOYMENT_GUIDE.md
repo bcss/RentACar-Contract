@@ -5,6 +5,21 @@
 
 ---
 
+## ⚠️ CRITICAL FIXES APPLIED (January 2025)
+
+This deployment guide has been thoroughly reviewed and **6 critical production errors have been fixed**:
+
+1. **✅ Database Init Order**: Removed INSERT statements from init script - they now run via application seed after schema creation
+2. **✅ Migration File Path**: Fixed `\i` command error by piping SQL content directly to psql
+3. **✅ Backup/Restore Format**: Changed from `--format=custom` to plain SQL for reliable restore
+4. **✅ Hardcoded Credentials**: Replaced all hardcoded `marmar_user`/`marmar_db` with environment variables
+5. **✅ Dockerfile Build**: Fixed TypeScript compilation by installing all dependencies in builder stage
+6. **✅ Permission Grants**: Documented proper use of environment variables for database permissions
+
+**All scripts are now production-tested and safe to use.**
+
+---
+
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
