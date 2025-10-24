@@ -68,7 +68,7 @@ export function Header() {
               className="hover-elevate active-elevate-2"
             >
               <span className="font-mono text-sm font-semibold">
-                {language === 'en' ? 'ع' : 'EN'}
+                {language === 'en' ? 'عربي' : 'EN'}
               </span>
             </Button>
           </TooltipTrigger>
