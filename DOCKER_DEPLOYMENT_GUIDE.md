@@ -1359,7 +1359,7 @@ Create `scripts/deploy-production.sh`:
 
 ```bash
 #!/bin/bash
-# MARMAR Production Deployment Automation
+# RCCMS Production Deployment Automation
 # Handles backup → migration → deployment → validation → rollback on failure
 # Version: 2.0
 # Author: AKN Consulting
@@ -1409,7 +1409,7 @@ cleanup_on_failure() {
 trap cleanup_on_failure ERR
 
 log "==================================================================="
-log "MARMAR Production Deployment - Version $VERSION"
+log "RCCMS Production Deployment - Version $VERSION"
 log "==================================================================="
 
 # Step 1: Pre-flight checks
@@ -1747,7 +1747,7 @@ Create `scripts/rollback.sh`:
 
 ```bash
 #!/bin/bash
-# MARMAR Production Rollback Script
+# RCCMS Production Rollback Script
 # Comprehensive rollback with database restoration and container reversion
 # Version: 2.0
 # Author: AKN Consulting
@@ -1799,7 +1799,7 @@ else
 fi
 
 log "==================================================================="
-log "⚠️  MARMAR PRODUCTION ROLLBACK"
+log "⚠️  RCCMS PRODUCTION ROLLBACK"
 log "==================================================================="
 log "Backup file: $BACKUP_FILE"
 log "Target image: $OLD_IMAGE_TAG"
@@ -2398,7 +2398,7 @@ docker compose down
 
 **Docker Deployment Complete!**
 
-Your MARMAR Rental Car Contract Management System is now running in Docker containers.
+Your RCCMS (Rental Car Contract Management System) is now running in Docker containers.
 
 **Access**: `https://your-domain.com`
 
