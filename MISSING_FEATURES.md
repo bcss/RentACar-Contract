@@ -3,6 +3,8 @@
 ## Document Purpose
 This document identifies features that could enhance the MARMAR rental car contract management system but are not currently implemented. Each feature includes a description, business value, priority level, complexity estimate, and implementation recommendations.
 
+**Client**: MARMAR Rent-a-Car Company  
+**Developed By**: AKN Consulting  
 **Document Date**: October 24, 2025  
 **System Version**: Production-Ready Release  
 **Feature Status**: Enhancement Opportunities
@@ -921,4 +923,7 @@ Transform MARMAR from a **contract management system** into a comprehensive **bu
 **Document Version**: 1.0  
 **Created**: October 24, 2025  
 **Next Review**: After Phase 1 completion  
-**Maintained By**: Development Team
+**Client**: MARMAR Rent-a-Car Company  
+**Developed By**: AKN Consulting  
+**Contact**: +919400750821 | rccms@akn-consulting.com | rccms@akn-consulting.in  
+**Address**: Muttathu, Thattayil, Pathanamthitta - 691525
