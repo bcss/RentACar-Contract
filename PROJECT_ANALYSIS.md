@@ -3,6 +3,8 @@
 ## Document Purpose
 This document provides a comprehensive analysis of the MARMAR rental car contract management system at both micro and macro levels, identifying bugs, errors, inconsistencies, and areas for improvement.
 
+**Client**: MARMAR Rent-a-Car Company  
+**Developed By**: AKN Consulting  
 **Analysis Date**: October 24, 2025  
 **System Version**: Production-Ready Release  
 **Analysis Scope**: Complete codebase review including frontend, backend, database, and infrastructure
@@ -775,4 +777,7 @@ The system is well-built, secure, and functional. The identified issues are prim
 **Document Version**: 1.0  
 **Analysis Date**: October 24, 2025  
 **Next Review**: After first production deployment  
-**Analyst**: AI Code Review System
+**Client**: MARMAR Rent-a-Car Company  
+**Developed By**: AKN Consulting  
+**Contact**: +919400750821 | rccms@akn-consulting.com | rccms@akn-consulting.in  
+**Address**: Muttathu, Thattayil, Pathanamthitta - 691525
