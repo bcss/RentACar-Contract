@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Link } from 'wouter';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { captureMultipleCharts } from '@/utils/chartExport';
+import { useToast } from '@/hooks/use-toast';
 
 interface VehicleUtilization {
   vehicleId: string;
@@ -105,9 +107,22 @@ export default function OperationalReports() {
     return `/api/reports/operational${params.toString() ? `?${params.toString()}` : ''}`;
   };
 
+  const { toast } = useToast();
+  
   // Export handlers
   const handleExport = async (format: 'pdf' | 'excel') => {
     try {
+      toast({
+        title: t('common.processing'),
+        description: 'Capturing charts...',
+      });
+      
+      // Capture charts as images
+      const chartImages = await captureMultipleCharts([
+        { elementId: 'operational-chart-vehicle-util', chartName: 'Vehicle Utilization' },
+        { elementId: 'operational-chart-contract-status', chartName: 'Contract Status' },
+      ]);
+      
       const params = new URLSearchParams();
       params.append('format', format);
       params.append('lang', i18n.language);
@@ -119,7 +134,12 @@ export default function OperationalReports() {
       }
       
       const response = await fetch(`/api/reports/operational/export?${params.toString()}`, {
-        credentials: 'include'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ charts: chartImages }),
       });
       
       if (!response.ok) throw new Error('Export failed');
@@ -133,8 +153,18 @@ export default function OperationalReports() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      
+      toast({
+        title: t('common.success'),
+        description: 'Report exported successfully',
+      });
     } catch (error) {
       console.error('Export error:', error);
+      toast({
+        title: t('common.error'),
+        description: 'Failed to export report',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -377,50 +407,52 @@ export default function OperationalReports() {
                       {t('operationalReports.noVehicles')}
                     </p>
                   ) : (
-                    <ResponsiveContainer width="100%" minHeight={300}>
-                      <BarChart data={vehicleUtilizationData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis 
-                          dataKey="registration" 
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                          className="text-xs"
-                        />
-                        <YAxis 
-                          tickFormatter={(value) => `${value}%`}
-                          className="text-xs"
-                        />
-                        <Tooltip 
-                          content={({ active, payload }) => {
-                            if (!active || !payload || !payload.length) return null;
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-background border border-border rounded-md p-3 shadow-lg">
-                                <p className="text-sm font-medium mb-1">
-                                  {data.make} {data.model}
-                                </p>
-                                <p className="text-xs text-muted-foreground mb-2">
-                                  {data.registration}
-                                </p>
-                                <p className="text-sm text-primary">
-                                  Utilization: {data.utilizationRate.toFixed(1)}%
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {data.totalDaysRented} days rented / {data.availableDays} available
-                                </p>
-                              </div>
-                            );
-                          }}
-                        />
-                        <Legend />
-                        <Bar 
-                          dataKey="utilizationRate" 
-                          fill="hsl(var(--primary))"
-                          name="Utilization Rate (%)"
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <div id="operational-chart-vehicle-util">
+                      <ResponsiveContainer width="100%" minHeight={300}>
+                        <BarChart data={vehicleUtilizationData}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis 
+                            dataKey="registration" 
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                            className="text-xs"
+                          />
+                          <YAxis 
+                            tickFormatter={(value) => `${value}%`}
+                            className="text-xs"
+                          />
+                          <Tooltip 
+                            content={({ active, payload }) => {
+                              if (!active || !payload || !payload.length) return null;
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                                  <p className="text-sm font-medium mb-1">
+                                    {data.make} {data.model}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mb-2">
+                                    {data.registration}
+                                  </p>
+                                  <p className="text-sm text-primary">
+                                    Utilization: {data.utilizationRate.toFixed(1)}%
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {data.totalDaysRented} days rented / {data.availableDays} available
+                                  </p>
+                                </div>
+                              );
+                            }}
+                          />
+                          <Legend />
+                          <Bar 
+                            dataKey="utilizationRate" 
+                            fill="hsl(var(--primary))"
+                            name="Utilization Rate (%)"
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -549,37 +581,38 @@ export default function OperationalReports() {
                   <CardDescription>Contract status breakdown by percentage</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" minHeight={300}>
-                    <PieChart>
-                      <Pie
-                        data={contractStatusData.filter(item => item.count > 0).map(item => ({
-                          name: t(`operationalReports.${item.status}`),
-                          value: item.count,
-                          status: item.status
-                        }))}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {contractStatusData.filter(item => item.count > 0).map((item, index) => {
-                          const colors: Record<string, string> = {
-                            draft: 'hsl(38, 92%, 50%)',
-                            confirmed: 'hsl(207, 90%, 54%)',
-                            active: 'hsl(142, 71%, 45%)',
-                            completed: 'hsl(199, 89%, 48%)',
-                            closed: 'hsl(220, 9%, 46%)',
-                          };
-                          return <Cell key={`cell-${index}`} fill={colors[item.status] || 'hsl(var(--primary))'} />;
-                        })}
-                      </Pie>
-                      <Tooltip 
-                        content={({ active, payload }) => {
-                          if (!active || !payload || !payload.length) return null;
-                          return (
+                  <div id="operational-chart-contract-status">
+                    <ResponsiveContainer width="100%" minHeight={300}>
+                      <PieChart>
+                        <Pie
+                          data={contractStatusData.filter(item => item.count > 0).map(item => ({
+                            name: t(`operationalReports.${item.status}`),
+                            value: item.count,
+                            status: item.status
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {contractStatusData.filter(item => item.count > 0).map((item, index) => {
+                            const colors: Record<string, string> = {
+                              draft: 'hsl(38, 92%, 50%)',
+                              confirmed: 'hsl(207, 90%, 54%)',
+                              active: 'hsl(142, 71%, 45%)',
+                              completed: 'hsl(199, 89%, 48%)',
+                              closed: 'hsl(220, 9%, 46%)',
+                            };
+                            return <Cell key={`cell-${index}`} fill={colors[item.status] || 'hsl(var(--primary))'} />;
+                          })}
+                        </Pie>
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length) return null;
+                            return (
                             <div className="bg-background border border-border rounded-md p-3 shadow-lg">
                               <p className="text-sm font-medium mb-1">
                                 {payload[0].name}
@@ -594,6 +627,7 @@ export default function OperationalReports() {
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
 

@@ -12,6 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Link } from 'wouter';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { captureMultipleCharts } from '@/utils/chartExport';
+import { useToast } from '@/hooks/use-toast';
 
 interface CustomerActivity {
   customerId: string;
@@ -49,9 +51,22 @@ export default function CustomerReports() {
     return `/api/reports/customers${params.toString() ? `?${params.toString()}` : ''}`;
   };
 
+  const { toast } = useToast();
+  
   // Export handlers
   const handleExport = async (format: 'pdf' | 'excel') => {
     try {
+      toast({
+        title: t('common.processing'),
+        description: 'Capturing charts...',
+      });
+      
+      // Capture charts as images
+      const chartImages = await captureMultipleCharts([
+        { elementId: 'customer-chart-top-customers', chartName: 'Top Customers' },
+        { elementId: 'customer-chart-retention', chartName: 'Customer Retention' },
+      ]);
+      
       const params = new URLSearchParams();
       params.append('format', format);
       params.append('lang', i18n.language);
@@ -63,7 +78,12 @@ export default function CustomerReports() {
       }
       
       const response = await fetch(`/api/reports/customers/export?${params.toString()}`, {
-        credentials: 'include'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ charts: chartImages }),
       });
       
       if (!response.ok) throw new Error('Export failed');
@@ -77,8 +97,18 @@ export default function CustomerReports() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      
+      toast({
+        title: t('common.success'),
+        description: 'Report exported successfully',
+      });
     } catch (error) {
       console.error('Export error:', error);
+      toast({
+        title: t('common.error'),
+        description: 'Failed to export report',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -211,51 +241,53 @@ export default function CustomerReports() {
                       No customer activity in this period
                     </p>
                   ) : (
-                    <ResponsiveContainer width="100%" minHeight={300}>
-                      <BarChart data={report.customerActivity.slice(0, 10)}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis 
-                          dataKey="nameEn" 
-                          angle={-45}
-                          textAnchor="end"
-                          height={120}
-                          className="text-xs"
-                          tick={{ fontSize: 11 }}
-                        />
-                        <YAxis 
-                          tickFormatter={(value) => `${value.toLocaleString()}`}
-                          className="text-xs"
-                        />
-                        <Tooltip 
-                          content={({ active, payload }) => {
-                            if (!active || !payload || !payload.length) return null;
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-background border border-border rounded-md p-3 shadow-lg">
-                                <p className="text-sm font-medium mb-1">
-                                  {data.nameEn || data.nameAr}
-                                </p>
-                                <p className="text-sm text-primary">
-                                  Revenue: {formatCurrency(data.totalRevenue)}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Contracts: {data.contractCount}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Rental Days: {data.totalDays}
-                                </p>
-                              </div>
-                            );
-                          }}
-                        />
-                        <Legend />
-                        <Bar 
-                          dataKey="totalRevenue" 
-                          fill="hsl(var(--primary))"
-                          name="Total Revenue"
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <div id="customer-chart-top-customers">
+                      <ResponsiveContainer width="100%" minHeight={300}>
+                        <BarChart data={report.customerActivity.slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis 
+                            dataKey="nameEn" 
+                            angle={-45}
+                            textAnchor="end"
+                            height={120}
+                            className="text-xs"
+                            tick={{ fontSize: 11 }}
+                          />
+                          <YAxis 
+                            tickFormatter={(value) => `${value.toLocaleString()}`}
+                            className="text-xs"
+                          />
+                          <Tooltip 
+                            content={({ active, payload }) => {
+                              if (!active || !payload || !payload.length) return null;
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                                  <p className="text-sm font-medium mb-1">
+                                    {data.nameEn || data.nameAr}
+                                  </p>
+                                  <p className="text-sm text-primary">
+                                    Revenue: {formatCurrency(data.totalRevenue)}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Contracts: {data.contractCount}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Rental Days: {data.totalDays}
+                                  </p>
+                                </div>
+                              );
+                            }}
+                          />
+                          <Legend />
+                          <Bar 
+                            dataKey="totalRevenue" 
+                            fill="hsl(var(--primary))"
+                            name="Total Revenue"
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -363,55 +395,57 @@ export default function CustomerReports() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" minHeight={300}>
-                    <PieChart>
-                      <Pie
-                        data={[
-                          { 
-                            name: 'Repeat Customers', 
-                            value: report.repeatCustomers.length,
-                            color: 'hsl(142, 71%, 45%)'
-                          },
-                          { 
-                            name: 'New Customers', 
-                            value: report.newCustomers.length,
-                            color: 'hsl(199, 89%, 48%)'
-                          },
-                        ].filter(item => item.value > 0)}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
-                        outerRadius={100}
-                        innerRadius={60}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {[
-                          { name: 'Repeat Customers', value: report.repeatCustomers.length, color: 'hsl(142, 71%, 45%)' },
-                          { name: 'New Customers', value: report.newCustomers.length, color: 'hsl(199, 89%, 48%)' },
-                        ].filter(item => item.value > 0).map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        content={({ active, payload }) => {
-                          if (!active || !payload || !payload.length) return null;
-                          return (
-                            <div className="bg-background border border-border rounded-md p-3 shadow-lg">
-                              <p className="text-sm font-medium mb-1">
-                                {payload[0].name}
-                              </p>
-                              <p className="text-sm text-primary">
-                                Count: {payload[0].value}
-                              </p>
-                            </div>
-                          );
-                        }}
-                      />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <div id="customer-chart-retention">
+                    <ResponsiveContainer width="100%" minHeight={300}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { 
+                              name: 'Repeat Customers', 
+                              value: report.repeatCustomers.length,
+                              color: 'hsl(142, 71%, 45%)'
+                            },
+                            { 
+                              name: 'New Customers', 
+                              value: report.newCustomers.length,
+                              color: 'hsl(199, 89%, 48%)'
+                            },
+                          ].filter(item => item.value > 0)}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                          outerRadius={100}
+                          innerRadius={60}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {[
+                            { name: 'Repeat Customers', value: report.repeatCustomers.length, color: 'hsl(142, 71%, 45%)' },
+                            { name: 'New Customers', value: report.newCustomers.length, color: 'hsl(199, 89%, 48%)' },
+                          ].filter(item => item.value > 0).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length) return null;
+                            return (
+                              <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+                                <p className="text-sm font-medium mb-1">
+                                  {payload[0].name}
+                                </p>
+                                <p className="text-sm text-primary">
+                                  Count: {payload[0].value}
+                                </p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
 
