@@ -3,6 +3,11 @@
 ## Document Purpose
 This guide is designed for testers with no prior knowledge of the MARMAR rental car contract management system. It provides detailed, step-by-step instructions to test all features comprehensively.
 
+**Client**: MARMAR Rent-a-Car Company  
+**Developed By**: AKN Consulting  
+**Contact**: +919400750821 | rccms@akn-consulting.com | rccms@akn-consulting.in  
+**Address**: Muttathu, Thattayil, Pathanamthitta - 691525
+
 ---
 
 ## Table of Contents
@@ -18,8 +23,8 @@ This guide is designed for testers with no prior knowledge of the MARMAR rental 
 
 ## System Overview
 
-### What is MARMAR?
-MARMAR is a bilingual (English/Arabic) rental car contract management system that helps manage the complete lifecycle of car rental contracts from creation to closure.
+### What is This System?
+This is a comprehensive bilingual (English/Arabic) rental car contract management system developed by **AKN Consulting** for **MARMAR Rent-a-Car Company**. The system helps manage the complete lifecycle of car rental contracts from creation to closure.
 
 ### Key Capabilities
 - **Contract Management**: Create, edit, and track rental contracts through 5 lifecycle states
@@ -1744,10 +1749,18 @@ If you encounter issues or have questions during testing:
 4. Include your user role and language setting
 5. Report to the development team
 
+### Contact Development Team
+**AKN Consulting**  
+📧 Email: rccms@akn-consulting.com / rccms@akn-consulting.in  
+📱 Phone: +919400750821  
+📍 Address: Muttathu, Thattayil, Pathanamthitta - 691525
+
 ---
 
 **Document Version**: 1.0  
 **Last Updated**: October 24, 2025  
+**Client**: MARMAR Rent-a-Car Company  
+**Developed By**: AKN Consulting  
 **System**: MARMAR Rental Car Contract Management System  
 
 ---
