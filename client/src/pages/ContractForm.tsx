@@ -484,7 +484,7 @@ export default function ContractForm() {
         
         if (!isNaN(subtotalValue) && !isNaN(vatAmountValue)) {
           const total = subtotalValue + vatAmountValue;
-          form.setValue('totalAmount', total.toFixed(2));
+          form.setValue('totalAmount', total.toFixed(2), { shouldValidate: true });
         }
       }
     });
