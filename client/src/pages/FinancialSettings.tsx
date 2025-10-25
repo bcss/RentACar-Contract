@@ -22,24 +22,44 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-// Schema for financial settings only
-const financialSettingsSchema = z.object({
+// Schema for currency settings
+const currencySettingsSchema = z.object({
   currencyEn: z.string().min(1, "Currency (English) is required"),
   currencyAr: z.string().min(1, "Currency (Arabic) is required"),
+});
+
+// Schema for rental rates
+const rentalRatesSchema = z.object({
   defaultDailyRate: z.string().min(1, "Default daily rate is required"),
   defaultWeeklyRate: z.string().min(1, "Default weekly rate is required"),
   defaultMonthlyRate: z.string().min(1, "Default monthly rate is required"),
+});
+
+// Schema for add-on pricing
+const addonPricingSchema = z.object({
   insurancePerDay: z.string().min(1, "Insurance per day is required"),
   gpsPerDay: z.string().min(1, "GPS per day is required"),
   babySeatPerDay: z.string().min(1, "Baby seat per day is required"),
   additionalDriverFee: z.string().min(1, "Additional driver fee is required"),
+});
+
+// Schema for extra charges
+const extraChargesSchema = z.object({
   defaultExtraKmRate: z.string().min(1, "Default extra km rate is required"),
   defaultSecurityDeposit: z.string().min(1, "Default security deposit is required"),
+});
+
+// Schema for fuel pricing
+const fuelPricingSchema = z.object({
   petrolPricePerLiter: z.string().min(1, "Petrol price per liter is required"),
   dieselPricePerLiter: z.string().min(1, "Diesel price per liter is required"),
 });
 
-type FinancialSettingsForm = z.infer<typeof financialSettingsSchema>;
+type CurrencySettingsForm = z.infer<typeof currencySettingsSchema>;
+type RentalRatesForm = z.infer<typeof rentalRatesSchema>;
+type AddonPricingForm = z.infer<typeof addonPricingSchema>;
+type ExtraChargesForm = z.infer<typeof extraChargesSchema>;
+type FuelPricingForm = z.infer<typeof fuelPricingSchema>;
 
 export default function FinancialSettings() {
   const { t } = useTranslation();
@@ -50,20 +70,45 @@ export default function FinancialSettings() {
     queryKey: ['/api/settings/financial'],
   });
 
-  const form = useForm<FinancialSettingsForm>({
-    resolver: zodResolver(financialSettingsSchema),
+  // Individual forms for each card
+  const currencyForm = useForm<CurrencySettingsForm>({
+    resolver: zodResolver(currencySettingsSchema),
     defaultValues: {
       currencyEn: "AED",
       currencyAr: "د.إ",
+    },
+  });
+
+  const rentalRatesForm = useForm<RentalRatesForm>({
+    resolver: zodResolver(rentalRatesSchema),
+    defaultValues: {
       defaultDailyRate: "150",
       defaultWeeklyRate: "900",
       defaultMonthlyRate: "3000",
+    },
+  });
+
+  const addonPricingForm = useForm<AddonPricingForm>({
+    resolver: zodResolver(addonPricingSchema),
+    defaultValues: {
       insurancePerDay: "25",
       gpsPerDay: "15",
       babySeatPerDay: "20",
       additionalDriverFee: "50",
+    },
+  });
+
+  const extraChargesForm = useForm<ExtraChargesForm>({
+    resolver: zodResolver(extraChargesSchema),
+    defaultValues: {
       defaultExtraKmRate: "1.5",
       defaultSecurityDeposit: "1500",
+    },
+  });
+
+  const fuelPricingForm = useForm<FuelPricingForm>({
+    resolver: zodResolver(fuelPricingSchema),
+    defaultValues: {
       petrolPricePerLiter: "3.5",
       dieselPricePerLiter: "3.2",
     },
@@ -71,32 +116,41 @@ export default function FinancialSettings() {
 
   useEffect(() => {
     if (settings) {
-      form.reset({
+      currencyForm.reset({
         currencyEn: settings.currencyEn || "AED",
         currencyAr: settings.currencyAr || "د.إ",
+      });
+      rentalRatesForm.reset({
         defaultDailyRate: settings.defaultDailyRate,
         defaultWeeklyRate: settings.defaultWeeklyRate,
         defaultMonthlyRate: settings.defaultMonthlyRate,
+      });
+      addonPricingForm.reset({
         insurancePerDay: settings.insurancePerDay,
         gpsPerDay: settings.gpsPerDay,
         babySeatPerDay: settings.babySeatPerDay,
         additionalDriverFee: settings.additionalDriverFee,
+      });
+      extraChargesForm.reset({
         defaultExtraKmRate: settings.defaultExtraKmRate,
         defaultSecurityDeposit: settings.defaultSecurityDeposit,
+      });
+      fuelPricingForm.reset({
         petrolPricePerLiter: settings.petrolPricePerLiter,
         dieselPricePerLiter: settings.dieselPricePerLiter,
       });
     }
-  }, [settings, form]);
+  }, [settings, currencyForm, rentalRatesForm, addonPricingForm, extraChargesForm, fuelPricingForm]);
 
-  const updateMutation = useMutation({
-    mutationFn: async (data: FinancialSettingsForm) => {
+  // Individual mutation for each form
+  const createUpdateMutation = (successMessage: string) => useMutation({
+    mutationFn: async (data: any) => {
       return await apiRequest('PUT', '/api/settings/financial', data);
     },
     onSuccess: () => {
       toast({
         title: t('common.success'),
-        description: 'Financial settings saved successfully',
+        description: successMessage,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/settings/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
@@ -104,15 +158,17 @@ export default function FinancialSettings() {
     onError: (error: Error) => {
       toast({
         title: t('common.error'),
-        description: error.message || 'Failed to save financial settings',
+        description: error.message || 'Failed to save settings',
         variant: "destructive",
       });
     },
   });
 
-  const onSubmit = (data: FinancialSettingsForm) => {
-    updateMutation.mutate(data);
-  };
+  const currencyMutation = createUpdateMutation('Currency settings saved successfully');
+  const rentalRatesMutation = createUpdateMutation('Rental rates saved successfully');
+  const addonPricingMutation = createUpdateMutation('Add-on pricing saved successfully');
+  const extraChargesMutation = createUpdateMutation('Extra charges saved successfully');
+  const fuelPricingMutation = createUpdateMutation('Fuel pricing saved successfully');
 
   if (authLoading || isLoading) {
     return (
@@ -148,329 +204,383 @@ export default function FinancialSettings() {
           <p className="text-muted-foreground mt-1">Configure default rates, add-on pricing, and fuel costs</p>
         </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Currency Configuration */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Currency Configuration</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="currencyEn"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Currency Code (English)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder="AED" 
-                            data-testid="input-currency-en" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        <div className="space-y-6">
+          {/* Currency Configuration */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Currency Configuration</CardTitle>
+            </CardHeader>
+            <Form {...currencyForm}>
+              <form onSubmit={currencyForm.handleSubmit((data) => currencyMutation.mutate(data))}>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={currencyForm.control}
+                      name="currencyEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Currency Code (English)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="AED" 
+                              data-testid="input-currency-en" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="currencyAr"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Currency Symbol (Arabic)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            className="text-right" 
-                            dir="rtl"
-                            placeholder="د.إ" 
-                            data-testid="input-currency-ar" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  This currency will be displayed throughout the system in financial reports, contracts, and invoices.
-                </p>
-              </CardContent>
-            </Card>
+                    <FormField
+                      control={currencyForm.control}
+                      name="currencyAr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Currency Symbol (Arabic)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              className="text-right" 
+                              dir="rtl"
+                              placeholder="د.إ" 
+                              data-testid="input-currency-ar" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    This currency will be displayed throughout the system in financial reports, contracts, and invoices.
+                  </p>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button
+                    type="submit"
+                    disabled={currencyMutation.isPending}
+                    data-testid="button-save-currency-settings"
+                  >
+                    {currencyMutation.isPending ? t('common.saving') : t('common.save')}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </Card>
 
-            {/* Default Rental Rates */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Default Rental Rates</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="defaultDailyRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Daily Rate (AED)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="150" 
-                            data-testid="input-default-daily-rate" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          {/* Default Rental Rates */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Default Rental Rates</CardTitle>
+            </CardHeader>
+            <Form {...rentalRatesForm}>
+              <form onSubmit={rentalRatesForm.handleSubmit((data) => rentalRatesMutation.mutate(data))}>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={rentalRatesForm.control}
+                      name="defaultDailyRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Daily Rate</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="150" 
+                              data-testid="input-default-daily-rate" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="defaultWeeklyRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Weekly Rate (AED)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="900" 
-                            data-testid="input-default-weekly-rate" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={rentalRatesForm.control}
+                      name="defaultWeeklyRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Weekly Rate</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="900" 
+                              data-testid="input-default-weekly-rate" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="defaultMonthlyRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Monthly Rate (AED)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="3000" 
-                            data-testid="input-default-monthly-rate" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                    <FormField
+                      control={rentalRatesForm.control}
+                      name="defaultMonthlyRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Monthly Rate</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="3000" 
+                              data-testid="input-default-monthly-rate" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button
+                    type="submit"
+                    disabled={rentalRatesMutation.isPending}
+                    data-testid="button-save-rental-rates"
+                  >
+                    {rentalRatesMutation.isPending ? t('common.saving') : t('common.save')}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </Card>
 
-            {/* Add-on Pricing */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Add-on Pricing (Per Day)</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="insurancePerDay"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Insurance (AED/day)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="25" 
-                            data-testid="input-insurance-per-day" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          {/* Add-on Pricing */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Add-on Pricing (Per Day)</CardTitle>
+            </CardHeader>
+            <Form {...addonPricingForm}>
+              <form onSubmit={addonPricingForm.handleSubmit((data) => addonPricingMutation.mutate(data))}>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={addonPricingForm.control}
+                      name="insurancePerDay"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Insurance Per Day</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="25" 
+                              data-testid="input-insurance-per-day" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="gpsPerDay"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>GPS (AED/day)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="15" 
-                            data-testid="input-gps-per-day" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={addonPricingForm.control}
+                      name="gpsPerDay"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>GPS Per Day</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="15" 
+                              data-testid="input-gps-per-day" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="babySeatPerDay"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Baby Seat (AED/day)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="20" 
-                            data-testid="input-baby-seat-per-day" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={addonPricingForm.control}
+                      name="babySeatPerDay"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Baby Seat Per Day</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="20" 
+                              data-testid="input-baby-seat-per-day" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="additionalDriverFee"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Additional Driver Fee (AED)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="50" 
-                            data-testid="input-additional-driver-fee" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                    <FormField
+                      control={addonPricingForm.control}
+                      name="additionalDriverFee"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Additional Driver Fee</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="50" 
+                              data-testid="input-additional-driver-fee" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button
+                    type="submit"
+                    disabled={addonPricingMutation.isPending}
+                    data-testid="button-save-addon-pricing"
+                  >
+                    {addonPricingMutation.isPending ? t('common.saving') : t('common.save')}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </Card>
 
-            {/* Default Values */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Default Values</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="defaultExtraKmRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Extra KM Rate (AED/km)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="1.5" 
-                            data-testid="input-default-extra-km-rate" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          {/* Extra Charges */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Extra Charges</CardTitle>
+            </CardHeader>
+            <Form {...extraChargesForm}>
+              <form onSubmit={extraChargesForm.handleSubmit((data) => extraChargesMutation.mutate(data))}>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={extraChargesForm.control}
+                      name="defaultExtraKmRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Extra KM Rate (per km)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="1.5" 
+                              data-testid="input-default-extra-km-rate" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="defaultSecurityDeposit"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Security Deposit (AED)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="1500" 
-                            data-testid="input-default-security-deposit" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                    <FormField
+                      control={extraChargesForm.control}
+                      name="defaultSecurityDeposit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Security Deposit</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="1500" 
+                              data-testid="input-default-security-deposit" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button
+                    type="submit"
+                    disabled={extraChargesMutation.isPending}
+                    data-testid="button-save-extra-charges"
+                  >
+                    {extraChargesMutation.isPending ? t('common.saving') : t('common.save')}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </Card>
 
-            {/* Fuel Pricing */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Fuel Pricing</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="petrolPricePerLiter"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Petrol Price (AED/liter)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="3.5" 
-                            data-testid="input-petrol-price-per-liter" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          {/* Fuel Pricing */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Fuel Pricing</CardTitle>
+            </CardHeader>
+            <Form {...fuelPricingForm}>
+              <form onSubmit={fuelPricingForm.handleSubmit((data) => fuelPricingMutation.mutate(data))}>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={fuelPricingForm.control}
+                      name="petrolPricePerLiter"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Petrol Price (per liter)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="3.5" 
+                              data-testid="input-petrol-price-per-liter" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="dieselPricePerLiter"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Diesel Price (AED/liter)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.01"
-                            placeholder="3.2" 
-                            data-testid="input-diesel-price-per-liter" 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end gap-2">
-                <Button
-                  type="submit"
-                  disabled={updateMutation.isPending}
-                  data-testid="button-save-financial-settings"
-                >
-                  {updateMutation.isPending ? t('common.saving') : t('common.save')}
-                </Button>
-              </CardFooter>
-            </Card>
-          </form>
-        </Form>
+                    <FormField
+                      control={fuelPricingForm.control}
+                      name="dieselPricePerLiter"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Diesel Price (per liter)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="3.2" 
+                              data-testid="input-diesel-price-per-liter" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button
+                    type="submit"
+                    disabled={fuelPricingMutation.isPending}
+                    data-testid="button-save-fuel-pricing"
+                  >
+                    {fuelPricingMutation.isPending ? t('common.saving') : t('common.save')}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </Card>
+        </div>
       </div>
     </div>
   );
