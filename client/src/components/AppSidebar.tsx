@@ -47,7 +47,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface AppSidebarProps {
   side?: 'left' | 'right';
@@ -265,7 +265,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const handleLogout = async () => {
     try {
       await apiRequest('POST', '/api/logout');
-      window.location.href = '/';
+      // Clear all cached data
+      queryClient.clear();
+      // Redirect to login page
+      window.location.href = '/login';
     } catch (error) {
       toast({
         variant: 'destructive',
