@@ -69,6 +69,203 @@ const vehicleFormSchema = insertVehicleSchema.extend({
 
 type VehicleFormData = z.infer<typeof vehicleFormSchema>;
 
+// VehicleForm component - moved outside to prevent re-renders and input focus loss
+interface VehicleFormProps {
+  form: any;
+  t: (key: string) => string;
+  onSubmit: (data: VehicleFormData) => void;
+  isPending: boolean;
+}
+
+const VehicleForm = ({ form, t, onSubmit, isPending }: VehicleFormProps) => (
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <FormField
+        control={form.control}
+        name="registration"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t('vehicles.registration')}</FormLabel>
+            <FormControl>
+              <Input {...field} data-testid="input-vehicle-registration" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="make"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('vehicles.make')}</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-vehicle-make" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="model"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('vehicles.model')}</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-vehicle-model" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="year"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('vehicles.year')}</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} data-testid="input-vehicle-year" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="color"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('vehicles.color')}</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-vehicle-color" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="fuelType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('vehicles.fuelType')}</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger data-testid="select-vehicle-fuel-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="petrol">{t('vehicles.fuelTypePetrol')}</SelectItem>
+                  <SelectItem value="diesel">{t('vehicles.fuelTypeDiesel')}</SelectItem>
+                  <SelectItem value="electric">{t('vehicles.fuelTypeElectric')}</SelectItem>
+                  <SelectItem value="hybrid">{t('vehicles.fuelTypeHybrid')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="tankCapacity"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tank Capacity (L)</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  {...field} 
+                  value={field.value ?? ''} 
+                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
+                  data-testid="input-vehicle-tank-capacity" 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        <FormField
+          control={form.control}
+          name="dailyRate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('vehicles.dailyRate')}</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} data-testid="input-vehicle-daily-rate" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="weeklyRate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('vehicles.weeklyRate')}</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} data-testid="input-vehicle-weekly-rate" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="monthlyRate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('vehicles.monthlyRate')}</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} data-testid="input-vehicle-monthly-rate" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <FormField
+        control={form.control}
+        name="status"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t('vehicles.status')}</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger data-testid="select-vehicle-status">
+                  <SelectValue />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="available">{t('vehicles.statusAvailable')}</SelectItem>
+                <SelectItem value="rented">{t('vehicles.statusRented')}</SelectItem>
+                <SelectItem value="maintenance">{t('vehicles.statusMaintenance')}</SelectItem>
+                <SelectItem value="out_of_service">{t('vehicles.statusOutOfService')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <DialogFooter>
+        <Button type="submit" disabled={isPending} data-testid="button-submit-vehicle">
+          {isPending ? t('common.saving') : t('common.save')}
+        </Button>
+      </DialogFooter>
+    </form>
+  </Form>
+);
+
 export default function Vehicles() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -285,195 +482,6 @@ export default function Vehicles() {
 
   const isAdmin = user?.role === 'admin';
 
-  const VehicleForm = ({ onSubmit, isPending }: { onSubmit: (data: VehicleFormData) => void; isPending: boolean }) => (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="registration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('vehicles.registration')}</FormLabel>
-              <FormControl>
-                <Input {...field} data-testid="input-vehicle-registration" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="make"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('vehicles.make')}</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-vehicle-make" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="model"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('vehicles.model')}</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-vehicle-model" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="year"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('vehicles.year')}</FormLabel>
-                <FormControl>
-                  <Input type="text" {...field} data-testid="input-vehicle-year" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('vehicles.color')}</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-vehicle-color" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="fuelType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('vehicles.fuelType')}</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger data-testid="select-vehicle-fuel-type">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="petrol">{t('vehicles.fuelTypePetrol')}</SelectItem>
-                    <SelectItem value="diesel">{t('vehicles.fuelTypeDiesel')}</SelectItem>
-                    <SelectItem value="electric">{t('vehicles.fuelTypeElectric')}</SelectItem>
-                    <SelectItem value="hybrid">{t('vehicles.fuelTypeHybrid')}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="tankCapacity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tank Capacity (L)</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
-                    value={field.value ?? ''} 
-                    onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
-                    data-testid="input-vehicle-tank-capacity" 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="dailyRate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('vehicles.dailyRate')}</FormLabel>
-                <FormControl>
-                  <Input type="text" {...field} data-testid="input-vehicle-daily-rate" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="weeklyRate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('vehicles.weeklyRate')}</FormLabel>
-                <FormControl>
-                  <Input type="text" {...field} data-testid="input-vehicle-weekly-rate" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="monthlyRate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('vehicles.monthlyRate')}</FormLabel>
-                <FormControl>
-                  <Input type="text" {...field} data-testid="input-vehicle-monthly-rate" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('vehicles.status')}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger data-testid="select-vehicle-status">
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="available">{t('vehicles.statusAvailable')}</SelectItem>
-                  <SelectItem value="rented">{t('vehicles.statusRented')}</SelectItem>
-                  <SelectItem value="maintenance">{t('vehicles.statusMaintenance')}</SelectItem>
-                  <SelectItem value="out_of_service">{t('vehicles.statusOutOfService')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <DialogFooter>
-          <Button type="submit" disabled={isPending} data-testid="button-submit-vehicle">
-            {isPending ? t('common.saving') : t('common.save')}
-          </Button>
-        </DialogFooter>
-      </form>
-    </Form>
-  );
-
   const VehicleTable = ({ vehicles, showActions }: { vehicles: Vehicle[]; showActions: 'disable' | 'enable' }) => (
     <Table>
       <TableHeader>
@@ -576,7 +584,7 @@ export default function Vehicles() {
                     {t('vehicles.addVehicle')}
                   </DialogDescription>
                 </DialogHeader>
-                <VehicleForm onSubmit={handleCreate} isPending={createMutation.isPending} />
+                <VehicleForm form={form} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
               </DialogContent>
             </Dialog>
           </div>
@@ -637,7 +645,7 @@ export default function Vehicles() {
               {t('vehicles.editVehicle')}
             </DialogDescription>
           </DialogHeader>
-          <VehicleForm onSubmit={handleUpdate} isPending={updateMutation.isPending} />
+          <VehicleForm form={form} t={t} onSubmit={handleUpdate} isPending={updateMutation.isPending} />
         </DialogContent>
       </Dialog>
 
