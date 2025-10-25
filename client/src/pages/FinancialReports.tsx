@@ -89,12 +89,19 @@ export default function FinancialReports() {
         description: 'Capturing charts...',
       });
       
-      // Capture charts as images
-      const chartImages = await captureMultipleCharts([
-        { elementId: 'financial-chart-revenue-trend', chartName: 'Monthly Revenue Trend' },
-        { elementId: 'financial-chart-revenue-status', chartName: 'Revenue by Status' },
-        { elementId: 'financial-chart-payment-methods', chartName: 'Payment Methods' },
-      ]);
+      // Capture charts based on active tab
+      const chartsToCapture = activeTab === 'revenue' 
+        ? [
+            { elementId: 'financial-chart-revenue-trend', chartName: 'Monthly Revenue Trend' },
+            { elementId: 'financial-chart-revenue-status', chartName: 'Revenue by Status' },
+          ]
+        : activeTab === 'collection'
+        ? [
+            { elementId: 'financial-chart-payment-methods', chartName: 'Payment Methods' },
+          ]
+        : []; // No charts on outstanding tab
+      
+      const chartImages = await captureMultipleCharts(chartsToCapture);
       
       const params = new URLSearchParams();
       params.append('format', format);
