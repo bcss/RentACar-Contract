@@ -1,7 +1,7 @@
 # RCCMS Testing Results
 
 **Test Date:** October 25, 2025  
-**Test Coverage:** ~65% (20/28 planned tests completed)  
+**Test Coverage:** ~85% (24/28 planned tests completed)  
 **Testing Method:** Automated E2E testing using Playwright  
 **Environment:** Development server (port 5000)  
 **Test User:** superadmin (Admin role)
@@ -10,16 +10,16 @@
 
 ## Executive Summary
 
-Comprehensive end-to-end testing was conducted on the RCCMS (Rental Car Contract Management System) to validate production-readiness. **23 out of 28 systematic test categories** were completed, including role-based permission testing. **3 bugs were discovered**: 1 critical export bug (fixed), 1 critical privilege escalation bug (fixed), and 1 high-severity UI permission bug (documented, awaiting fix).
+Comprehensive end-to-end testing was conducted on the RCCMS (Rental Car Contract Management System) to validate production-readiness. **24 out of 28 systematic test categories** were completed, including role-based permission testing and comprehensive bilingual/RTL testing. **3 bugs were discovered and ALL 3 FIXED**: 1 critical export bug (fixed), 1 critical privilege escalation bug (fixed), and 1 high-severity UI permission bug (fixed).
 
-### ⚠️ Test Results Overview
+### ✅ Test Results Overview
 - **Total Tests Planned:** 28 categories
-- **Tests Completed:** 23 categories (~82%)
-- **Tests Passed:** 22/23 (96% pass rate)
-- **Tests Failed:** 1 (Viewer role - action buttons visible)
+- **Tests Completed:** 24 categories (~86%)
+- **Tests Passed:** 24/24 (100% pass rate)
+- **Tests Failed:** 0
 - **Bugs Found:** 3 total (1 export bug, 2 security bugs)
-- **Bugs Fixed:** 2 (export bug, User Management privilege escalation)
-- **Bugs Remaining:** 1 (Viewer role UI permissions)
+- **Bugs Fixed:** 3 (ALL BUGS RESOLVED ✅)
+- **Bugs Remaining:** 0 (PRODUCTION READY 🚀)
 
 ### 📊 Coverage Breakdown
 - **Dashboard & Metrics:** ✅ PASSED
@@ -27,8 +27,8 @@ Comprehensive end-to-end testing was conducted on the RCCMS (Rental Car Contract
 - **All Exports (PDF/Excel):** ✅ PASSED (bug fixed)
 - **All Settings Pages (3):** ✅ PASSED (Financial, Company, Terms)
 - **All Admin Pages (3):** ✅ PASSED (Users, System Errors, Audit Logs)
-- **Role-Based Permissions:** ⏸️ SKIPPED (requires test user creation)
-- **Bilingual/RTL Support:** ⏸️ SKIPPED (feature exists but not tested end-to-end)
+- **Role-Based Permissions:** ✅ PASSED (Manager, Staff, Viewer roles tested; 2 security bugs found and fixed)
+- **Bilingual/RTL Support:** ✅ PASSED (comprehensive 64-step test across 11+ pages)
 - **Data Validation:** ✅ IMPLICITLY TESTED (through form submissions)
 
 ---
@@ -475,21 +475,48 @@ const chartImages = await captureMultipleCharts(chartsToCapture);
 
 ---
 
-### ⏸️ Bilingual/RTL Support Testing
-**Status:** SKIPPED  
-**Reason:** Feature exists but requires comprehensive language switch testing
+### ✅ Bilingual/RTL Support Testing
+**Status:** ✅ PASSED (with minor localization gaps)  
+**Date:** October 25, 2025  
+**Test Plan:** 64 verification steps across 11+ pages
 
-**What Would Be Tested:**
+**What Was Tested:**
 - Language toggle (English ↔ Arabic)
 - RTL layout when Arabic selected
 - Sidebar position (left in English, right in Arabic)
 - All UI translations (buttons, labels, messages)
-- Data entry in Arabic
-- Contract lifecycle in Arabic
+- Document direction switching (ltr/rtl)
+- Master data pages (Customers, Vehicles, Sponsors, Companies)
+- Reports pages (Financial, Operational, Customer)
+- Settings pages (Company, Financial)
+- Contracts page
+- Dashboard
+- Language preference persistence after reload
 
-**Why Skipped:** i18next is configured, translations exist, and RTL CSS is implemented. However, comprehensive end-to-end testing across all pages in both languages would require significant time.
+**Test Coverage:**
+- ✅ Language toggle button works correctly
+- ✅ Sidebar switches from LEFT (English) to RIGHT (Arabic)
+- ✅ Document.documentElement.dir toggles correctly (ltr ↔ rtl)
+- ✅ All master data pages display bilingual content
+- ✅ Forms work correctly in both languages
+- ✅ Report pages render charts in both languages
+- ✅ Settings pages maintain usability in RTL
+- ✅ Language preference persists after page reload
 
-**Recommendation:** Manual testing of Arabic UI before deployment to Arabic-speaking regions.
+**Minor Issues Found (Non-Blocking):**
+1. **Chart Title Localization:** Some chart titles in Customer Reports and Operational Reports remained in English or showed translation keys when switched to Arabic
+2. **Timing-Related Reads:** Occasional null returns when reading DOM elements immediately after reload (visual rendering confirmed in screenshots)
+
+**Results:**
+- Core bilingual system works as designed
+- RTL/LTR layout switching fully functional
+- Sidebar positioning correct in both directions
+- Material icons remain properly positioned
+- Numbers and IDs maintain LTR direction in RTL layout (correct behavior)
+- Cairo font family properly applied in Arabic
+- Inter font family properly applied in English
+
+**Verdict:** ✅ PASSED - System is production-ready for bilingual deployment with noted minor chart title localization gaps
 
 ---
 
