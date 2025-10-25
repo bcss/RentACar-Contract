@@ -1587,7 +1587,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Add charts if available
         if (charts && charts.length > 0) {
-          addPDFChartImages(doc, charts, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : currentY + 10);
+          const docWithTable = doc as any;
+          addPDFChartImages(doc, charts, docWithTable.lastAutoTable ? docWithTable.lastAutoTable.finalY + 10 : currentY + 10);
         }
 
         // Send PDF
@@ -1717,7 +1718,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Add charts if provided
         if (charts && charts.length > 0) {
-          addPDFChartImages(doc, charts, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : currentY + 10);
+          const docWithTable = doc as any;
+          addPDFChartImages(doc, charts, docWithTable.lastAutoTable ? docWithTable.lastAutoTable.finalY + 10 : currentY + 10);
         }
 
         // Send PDF
@@ -1834,7 +1836,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Add charts if provided
         if (charts && charts.length > 0) {
-          addPDFChartImages(doc, charts, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : currentY + 10);
+          const docWithTable = doc as any;
+          addPDFChartImages(doc, charts, docWithTable.lastAutoTable ? docWithTable.lastAutoTable.finalY + 10 : currentY + 10);
         }
 
         // Send PDF
