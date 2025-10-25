@@ -25,10 +25,10 @@ This document provides a comprehensive visual tour of RCCMS with detailed explan
 **Screenshot:** `01-login-page.png`
 
 **Description:**
-The login page is the entry point to RCCMS. It features clean Material Design 3 styling with the MARMAR branding and professional rental car imagery.
+The login page is the entry point to RCCMS. It features clean Material Design 3 styling with professional rental car imagery and customizable company branding.
 
 **Key Elements:**
-- **RCCMS Logo & Branding:** "MARMAR - Contract Management System" header
+- **RCCMS Logo & Branding:** Company name and system title (customizable via Company Settings)
 - **Login Form:**
   - Username field (data-testid="input-username")
   - Password field (data-testid="input-password")  
@@ -938,10 +938,10 @@ Configure company information and contract clauses (Admin only). This makes RCCM
 **Action Buttons:**
 - **Save Settings:** (data-testid="button-save-settings") Update configuration
 - **Preview PDF:** See how contract PDF will look
-- **Reset to Defaults:** Restore MARMAR defaults
+- **Reset to Defaults:** Restore default template settings
 
 **Generic System Note:**
-RCCMS comes with MARMAR Rent-a-Car as default company data. Any rental car company can customize these settings to make the system their own. The system is completely generic and reusable.
+RCCMS is a completely generic rental car management system. Any rental car company can customize these settings to configure their own company information, branding, and contract clauses. The system is fully reusable and requires no code changes to deploy for different companies.
 
 ---
 
