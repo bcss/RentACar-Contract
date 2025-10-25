@@ -529,7 +529,7 @@ export default function CompanySettings() {
                   <FormItem>
                     <FormLabel>{t('settings.logoUrl')}</FormLabel>
                     <FormControl>
-                      <Input {...field} data-testid="input-logo-url" />
+                      <Input {...field} value={field.value || ""} data-testid="input-logo-url" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
