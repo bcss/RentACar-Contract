@@ -330,7 +330,7 @@ without reason     Customer confirmed    Payment tracking    Extra charges    Co
 │       • Sets depositRefunded = true                                           │
 │ • Vehicle available for next rental                                            │
 │ • Actions Available:                                                           │
-│   └─→ Print PDF → Generate MARMAR contract template                           │
+│   └─→ Print PDF → Generate contract template                                  │
 │   └─→ View Timeline → Complete history                                        │
 │   └─→ Audit log: CLOSE event                                                  │
 └────────────────────────────────────────────────────────────────────────────────┘
@@ -511,10 +511,10 @@ without reason     Customer confirmed    Payment tracking    Extra charges    Co
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 8. PDF Generation (MARMAR Template)
+## 8. PDF Generation (Contract Template)
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                      MARMAR PDF CONTRACT TEMPLATE                            │
+│                      RCCMS PDF CONTRACT TEMPLATE                             │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  Trigger: Click "Print" button on contract view                             │
@@ -743,7 +743,7 @@ This comprehensive workflow diagram shows the complete rental car contract manag
 ✅ **Payment Tracking**: Deposit, final payment, and refund workflows
 ✅ **Audit Trail**: Dual-layer system (field edits + lifecycle events)
 ✅ **Dashboard**: Real-time metrics (active rentals, revenue, overdue, refunds)
-✅ **PDF Generation**: MARMAR contract template with dynamic sponsor sections
+✅ **PDF Generation**: Professional contract template with dynamic sponsor sections
 ✅ **Bilingual**: Full English/Arabic support with RTL/LTR layouts
 ✅ **Immutability**: Edit tracking with reasons for confirmed+ contracts
 ✅ **Disable-Only**: No delete operations, only disable/enable

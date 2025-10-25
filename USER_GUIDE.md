@@ -23,7 +23,7 @@
 ## Introduction
 
 ### Welcome
-Welcome to the MARMAR Rental Car Contract Management System. This guide will help you navigate daily operations, create contracts, manage customers and vehicles, and process payments efficiently.
+Welcome to the RCCMS Rental Car Contract Management System. This guide will help you navigate daily operations, create contracts, manage customers and vehicles, and process payments efficiently.
 
 ### User Roles
 

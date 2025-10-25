@@ -1,7 +1,7 @@
 # Complete Contract Flow Documentation
 
 ## Overview
-This document provides a comprehensive breakdown of the complete rental contract lifecycle in the MARMAR Rental Car Contract Management System, including all state transitions, validations, side effects, and automated processes.
+This document provides a comprehensive breakdown of the complete rental contract lifecycle in the RCCMS Rental Car Contract Management System, including all state transitions, validations, side effects, and automated processes.
 
 ## Contract Lifecycle States
 
@@ -223,7 +223,7 @@ This charge is automatically added to totalCharges.
 **Available In:** All states (draft, confirmed, active, completed, closed)
 
 **Actions:**
-- Generate PDF contract using MARMAR template
+- Generate PDF contract using professional template
 - Record print event in `auditLogs` table
 - Include all contract details, payment history, charges breakdown
 - Support bilingual printing (English/Arabic)
@@ -585,7 +585,7 @@ const fuelCharge = fuelConsumedLiters * pricePerLiter;
 
 ## Summary
 
-The MARMAR Rental Car Contract Management System provides a **complete, automated, and auditable** contract lifecycle management solution with:
+The RCCMS Rental Car Contract Management System provides a **complete, automated, and auditable** contract lifecycle management solution with:
 
 ✅ **Five-state workflow** (Draft → Confirmed → Active → Completed → Closed)  
 ✅ **Automatic vehicle status synchronization** (prevents double-booking)  

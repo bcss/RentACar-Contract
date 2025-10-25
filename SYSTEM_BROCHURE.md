@@ -5,7 +5,7 @@
 
 ## Overview
 
-The MARMAR Rental Car Contract Management System is a comprehensive, bilingual (English/Arabic) web-based platform designed specifically for car rental businesses. Built with modern technology and Material Design 3 principles, it streamlines the entire rental lifecycle from initial contract creation to final closure, while maintaining complete audit trails and financial tracking.
+The RCCMS Rental Car Contract Management System is a comprehensive, bilingual (English/Arabic) web-based platform designed specifically for car rental businesses. Built with modern technology and Material Design 3 principles, it streamlines the entire rental lifecycle from initial contract creation to final closure, while maintaining complete audit trails and financial tracking.
 
 ---
 
@@ -220,7 +220,7 @@ The MARMAR Rental Car Contract Management System is a comprehensive, bilingual (
 
 ### 📄 **Professional PDF Contract Generation**
 
-#### **Integrated MARMAR Template**
+#### **Integrated Contract Template**
 - Professional bilingual contract template
 - Dynamic content insertion
 - All contract details included
@@ -521,7 +521,7 @@ This system comes with comprehensive documentation:
 
 ## Conclusion
 
-The MARMAR Rental Car Contract Management System represents a complete, professional solution for modern car rental businesses. With its bilingual capabilities, comprehensive feature set, robust security, and detailed audit trails, it provides everything needed to manage your rental operations efficiently and professionally.
+The RCCMS Rental Car Contract Management System represents a complete, professional solution for modern car rental businesses. With its bilingual capabilities, comprehensive feature set, robust security, and detailed audit trails, it provides everything needed to manage your rental operations efficiently and professionally.
 
 **Key Advantages:**
 - ✅ Complete lifecycle management

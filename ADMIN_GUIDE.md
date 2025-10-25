@@ -22,7 +22,7 @@
 ## Introduction
 
 ### Purpose
-This guide provides comprehensive instructions for system administrators managing the MARMAR Rental Car Contract Management System. It covers all administrative functions, security settings, user management, and system monitoring.
+This guide provides comprehensive instructions for system administrators managing the RCCMS Rental Car Contract Management System. It covers all administrative functions, security settings, user management, and system monitoring.
 
 ### Administrator Role
 As an administrator, you have full access to:
