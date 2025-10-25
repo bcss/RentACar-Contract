@@ -61,11 +61,14 @@ export default function CustomerReports() {
         description: 'Capturing charts...',
       });
       
-      // Capture charts as images
-      const chartImages = await captureMultipleCharts([
-        { elementId: 'customer-chart-top-customers', chartName: 'Top Customers' },
-        { elementId: 'customer-chart-retention', chartName: 'Customer Retention' },
-      ]);
+      // Capture charts based on active tab
+      const chartsToCapture = activeTab === 'activity' 
+        ? [{ elementId: 'customer-chart-top-customers', chartName: 'Top Customers' }]
+        : activeTab === 'repeat'
+        ? [{ elementId: 'customer-chart-retention', chartName: 'Customer Retention' }]
+        : []; // No charts on new customers tab
+      
+      const chartImages = await captureMultipleCharts(chartsToCapture);
       
       const params = new URLSearchParams();
       params.append('format', format);
