@@ -1088,7 +1088,7 @@ export default function ContractForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span className="material-icons">person</span>
-                Hirer Type / نوع المستأجر
+                {t('form.hirerTypeTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1105,9 +1105,9 @@ export default function ContractForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="direct">Direct / مباشر</SelectItem>
-                        <SelectItem value="with_sponsor">With Sponsor / مع كفيل</SelectItem>
-                        <SelectItem value="from_company">From Company / من شركة</SelectItem>
+                        <SelectItem value="direct">{t('form.direct')}</SelectItem>
+                        <SelectItem value="with_sponsor">{t('form.withSponsor')}</SelectItem>
+                        <SelectItem value="from_company">{t('form.fromCompany')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -1343,7 +1343,7 @@ export default function ContractForm() {
                           name="registration"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Registration / Plate *</FormLabel>
+                              <FormLabel>{t('form.registrationPlate')} *</FormLabel>
                               <FormControl>
                                 <Input {...field} data-testid="input-new-vehicle-registration" />
                               </FormControl>
@@ -1601,7 +1601,7 @@ export default function ContractForm() {
                 name="timeIn"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Time In / وقت الدخول</FormLabel>
+                    <FormLabel>{t('form.timeIn')}</FormLabel>
                     <FormControl>
                       <Input {...field} value={field.value || ''} type="time" placeholder="09:00" data-testid="input-time-in" />
                     </FormControl>
@@ -1614,7 +1614,7 @@ export default function ContractForm() {
                 name="timeOut"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Time Out / وقت الخروج</FormLabel>
+                    <FormLabel>{t('form.timeOut')}</FormLabel>
                     <FormControl>
                       <Input {...field} value={field.value || ''} type="time" placeholder="17:00" data-testid="input-time-out" />
                     </FormControl>
@@ -1785,7 +1785,7 @@ export default function ContractForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span className="material-icons">checklist</span>
-                Vehicle Inspection / فحص المركبة
+                {t('form.vehicleInspection')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -1795,7 +1795,7 @@ export default function ContractForm() {
                   name="odometerStart"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Odometer Start (km) / عداد الكيلومترات</FormLabel>
+                      <FormLabel>{t('form.odometerStartKm')}</FormLabel>
                       <FormControl>
                         <Input {...field} value={field.value || ''} type="number" data-testid="input-odometer-start" />
                       </FormControl>
@@ -1804,7 +1804,7 @@ export default function ContractForm() {
                   )}
                 />
                 <div className="space-y-4">
-                  <FormLabel>Checklist / قائمة الفحص</FormLabel>
+                  <FormLabel>{t('form.checklist')}</FormLabel>
                   <div className="space-y-3">
                     <FormField
                       control={form.control}
@@ -1818,7 +1818,7 @@ export default function ContractForm() {
                               data-testid="checkbox-inspection-tools"
                             />
                           </FormControl>
-                          <FormLabel className="font-normal">Tools Present / الأدوات موجودة</FormLabel>
+                          <FormLabel className="font-normal">{t('form.toolsPresent')}</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -1834,7 +1834,7 @@ export default function ContractForm() {
                               data-testid="checkbox-inspection-spare-tyre"
                             />
                           </FormControl>
-                          <FormLabel className="font-normal">Spare Tyre Present / الإطار الاحتياطي موجود</FormLabel>
+                          <FormLabel className="font-normal">{t('form.spareTyrePresent')}</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -1850,7 +1850,7 @@ export default function ContractForm() {
                               data-testid="checkbox-inspection-gps"
                             />
                           </FormControl>
-                          <FormLabel className="font-normal">GPS Present / جهاز GPS موجود</FormLabel>
+                          <FormLabel className="font-normal">{t('form.gpsPresent')}</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -1864,7 +1864,7 @@ export default function ContractForm() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between mb-2">
-                      <FormLabel>Fuel Level / مستوى الوقود: {field.value || 100}%</FormLabel>
+                      <FormLabel>{t('form.fuelLevelPercentage')}: {field.value || 100}%</FormLabel>
                     </div>
                     <FormControl>
                       <Slider
@@ -1886,7 +1886,7 @@ export default function ContractForm() {
                 name="inspectionDamageNotes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Damage Notes / ملاحظات الأضرار</FormLabel>
+                    <FormLabel>{t('form.damageNotes')}</FormLabel>
                     <FormControl>
                       <Textarea {...field} value={field.value || ''} placeholder="Note any existing damage..." data-testid="input-damage-notes" />
                     </FormControl>
@@ -1902,7 +1902,7 @@ export default function ContractForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span className="material-icons">receipt_long</span>
-                Extra Charges / الرسوم الإضافية
+                {t('form.extraCharges')}
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1911,7 +1911,7 @@ export default function ContractForm() {
                 name="salikCharge"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>SALIK Charge / رسوم سالك</FormLabel>
+                    <FormLabel>{t('form.salikCharge')}</FormLabel>
                     <FormControl>
                       <Input {...field} value={field.value || ''} type="number" step="0.01" placeholder="0.00" data-testid="input-salik-charge" />
                     </FormControl>
@@ -1924,7 +1924,7 @@ export default function ContractForm() {
                 name="trafficFineCharge"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Traffic Fine / المخالفات المرورية</FormLabel>
+                    <FormLabel>{t('form.trafficFine')}</FormLabel>
                     <FormControl>
                       <Input {...field} value={field.value || ''} type="number" step="0.01" placeholder="0.00" data-testid="input-traffic-fine-charge" />
                     </FormControl>
@@ -1938,7 +1938,7 @@ export default function ContractForm() {
           {/* Notes */}
           <Card>
             <CardHeader>
-              <CardTitle>Additional Notes / ملاحظات إضافية</CardTitle>
+              <CardTitle>{t('form.additionalNotes')}</CardTitle>
             </CardHeader>
             <CardContent>
               <FormField
@@ -1946,7 +1946,7 @@ export default function ContractForm() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes</FormLabel>
+                    <FormLabel>{t('form.notes')}</FormLabel>
                     <FormControl>
                       <Textarea {...field} value={field.value || ''} placeholder="Enter any additional notes..." data-testid="input-notes" />
                     </FormControl>
