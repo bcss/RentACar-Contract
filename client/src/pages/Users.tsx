@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { User } from '@shared/schema';
@@ -40,11 +40,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 
 export default function Users() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { isAuthenticated, isLoading: authLoading, isAdmin } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && (!isAuthenticated || !isAdmin)) {
+      toast({
+        title: "Unauthorized",
+        description: "Admin access required. Redirecting...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
+    }
+  }, [isAuthenticated, isAdmin, authLoading, toast]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
