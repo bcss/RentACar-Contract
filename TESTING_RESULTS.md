@@ -743,46 +743,68 @@ useEffect(() => {
 
 ---
 
-### Security Bug #2: Viewer Role - Action Buttons Visible (UNFIXED 🚨)
+### Security Bug #2: Viewer Role - Action Buttons Visible (FIXED ✅)
 **Severity:** HIGH  
-**Status:** NOT FIXED
+**Status:** FIXED
 
 **Issue:**  
-Viewer role (read-only) sees action buttons (Add, Edit, Delete) on all CRUD pages.
+Viewer role (read-only) saw action buttons (Add, Edit, Delete) on CRUD pages.
 
 **Expected Behavior:**  
 Viewer should see NO action buttons - read-only access only.
 
-**Actual Behavior:**  
-Viewer sees:
+**Actual Behavior (Before Fix):**  
+Viewer saw:
 - "Add Customer" button on Customers page
 - "Edit" buttons on all customer rows
-- Similar buttons on Vehicles, Contracts, Sponsors, Companies pages
+- Similar buttons on Vehicles, Contracts pages
 
 **Pages Affected:**  
-- `/customers`
-- `/vehicles`
-- `/contracts`
-- `/sponsors`
-- `/companies`
+- `/customers` - ❌ Showed Add/Edit buttons
+- `/vehicles` - ❌ Showed Add/Edit buttons
+- `/contracts` - ❌ Showed Edit buttons for drafts
+- `/sponsors` - ✅ Already protected with `canManage` (admin || manager)
+- `/companies` - ✅ Already protected with `isManagerOrAdmin` (admin || manager)
 
 **Root Cause:**  
-Pages do not check user role before rendering action buttons. Missing conditional rendering like:
+Pages did not check user role before rendering action buttons. Missing conditional rendering like:
 ```typescript
 {!isViewer && <Button>Add Customer</Button>}
 ```
 
-**Impact:**  
-- Poor UX: Viewer can click buttons that will fail
-- Security concern: Backend must enforce permissions (defense in depth principle violated)
-- If backend authorization is bypassed, Viewer could perform unauthorized actions
+**Fix Applied:**  
+Added `isViewer` role checking to all affected pages:
 
-**Recommended Fix:**  
-Add role checking to all CRUD pages:
-1. Import `useAuth` hook
-2. Destructure `isViewer` (or `!isViewer` for action buttons)
-3. Conditionally render action buttons
-4. Apply to: Customers, Vehicles, Contracts, Sponsors, Companies pages
+1. **Customers.tsx**:
+   - Line 47: Added `isViewer` to `useAuth()` destructuring
+   - Line 267: Wrapped "Add Customer" button: `{!isViewer && <Button ...>}`
+   - Line 394: Wrapped Edit buttons: `{!isViewer && <Button ...>}`
+
+2. **Vehicles.tsx**:
+   - Line 44: Added `isViewer` to `useAuth()` destructuring
+   - Line 237: Wrapped "Add Vehicle" button: `{!isViewer && <Button ...>}`
+   - Line 354: Wrapped Edit buttons: `{!isViewer && <Button ...>}`
+
+3. **Contracts.tsx**:
+   - Line 48: Added `isViewer` to `useAuth()` destructuring
+   - Line 368: Enhanced condition: `contract.status === 'draft' && !isViewer`
+
+4. **Sponsors.tsx** (already protected):
+   - Uses `canManage = user?.role === 'admin' || user?.role === 'manager'`
+
+5. **Companies.tsx** (already protected):
+   - Uses `isManagerOrAdmin = user?.role === 'admin' || user?.role === 'manager'`
+
+**Verification:**  
+✅ Code inspection confirms all action buttons now conditionally rendered  
+✅ Viewer role will only see View/Print buttons (no Create/Edit/Delete)  
+✅ Defense in depth: UI prevents action + Backend enforces with middleware  
+⚠️ E2E testing blocked by OIDC auth issues (unrelated to fix)
+
+**Impact:**  
+- Improved UX: Viewer no longer sees buttons that would fail
+- Security hardened: Defense in depth principle now properly implemented
+- Consistent with backend permissions (GET allowed, POST/PATCH/DELETE blocked)
 
 ---
 
@@ -811,11 +833,11 @@ Staff creates rental contracts which require selecting sponsors/companies. There
 | Feature | Admin | Manager | Staff | Viewer |
 |---------|-------|---------|-------|--------|
 | Dashboard | ✅ Full | ✅ Full | ✅ Full | ✅ Read |
-| Customers | ✅ Full | ✅ Full | ✅ Full | 🚨 **Shows buttons** |
-| Vehicles | ✅ Full | ✅ Full | ✅ Full | 🚨 **Shows buttons** |
-| Contracts | ✅ Full | ✅ Full | ✅ Full | 🚨 **Shows buttons** |
-| Sponsors | ✅ Full | ✅ Full | ✅ Read | 🚨 **Shows buttons** |
-| Companies | ✅ Full | ✅ Full | ✅ Read | 🚨 **Shows buttons** |
+| Customers | ✅ Full | ✅ Full | ✅ Full | ✅ **Fixed** Read-only |
+| Vehicles | ✅ Full | ✅ Full | ✅ Full | ✅ **Fixed** Read-only |
+| Contracts | ✅ Full | ✅ Full | ✅ Full | ✅ **Fixed** Read-only |
+| Sponsors | ✅ Full | ✅ Full | ✅ Read | ✅ Read |
+| Companies | ✅ Full | ✅ Full | ✅ Read | ✅ Read |
 | Reports | ✅ Full | ✅ Full | ❌ No Access | ✅ Read |
 | Audit Logs | ✅ Full | ✅ Full | ❌ No Access | ❌ No Access |
 | User Management | ✅ Full | ❌ **Fixed** | ❌ No Access | ❌ No Access |
@@ -824,18 +846,19 @@ Staff creates rental contracts which require selecting sponsors/companies. There
 
 **Legend:**  
 - ✅ Working correctly
-- ❌ Blocked correctly  
-- 🚨 Security bug (action buttons visible to Viewer)
+- ❌ Blocked correctly
 
 ---
 
 ## Updated Bug Summary
 
 **Total Bugs Found:** 2 security bugs  
-**Bugs Fixed:** 1 (User Management - Manager access)  
-**Bugs Remaining:** 1 (Viewer role - action buttons visible)  
+**Bugs Fixed:** 2 (All security bugs resolved)  
+  1. ✅ User Management - Manager privilege escalation (Fixed)
+  2. ✅ Viewer role - Action buttons visibility (Fixed)
+**Bugs Remaining:** 0  
 
-**Updated Production Readiness:** ⚠️ **NOT PRODUCTION-READY** until Viewer role bug is fixed.
+**Updated Production Readiness:** ✅ **SECURITY BUGS RESOLVED** - System now production-ready from security perspective (pending E2E verification when OIDC testing is resolved)
 
 ---
 
