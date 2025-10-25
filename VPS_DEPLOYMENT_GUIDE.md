@@ -41,9 +41,9 @@
 
 ### Domain Requirements
 
-- Registered domain name (e.g., `marmar-rental.com`)
+- Registered domain name (e.g., `your-rental-company.com`)
 - DNS configured to point to your VPS IP address
-- (Optional) Subdomain for staging (e.g., `staging.marmar-rental.com`)
+- (Optional) Subdomain for staging (e.g., `staging.your-rental-company.com`)
 
 ### Access Requirements
 
@@ -542,7 +542,7 @@ psql -h localhost -U rccms_user -d rccms_db -W
 ```
 
 ```sql
--- Insert default company settings
+-- Insert default company settings (customize with your company information)
 INSERT INTO company_settings (
   company_name_en,
   company_name_ar,
@@ -553,10 +553,10 @@ INSERT INTO company_settings (
   commercial_registration,
   tax_id
 ) VALUES (
-  'MARMAR Car Rental',
-  'شركة مرمر لتأجير السيارات',
+  'Your Car Rental Company',
+  'شركتك لتأجير السيارات',
   '+966 XX XXX XXXX',
-  'info@marmar-rental.com',
+  'info@your-company.com',
   'Your Address Here',
   'عنوانك هنا',
   'CR-XXXXXXXX',
@@ -1135,7 +1135,7 @@ df -h                       # Disk space
 
 **Deployment Complete!**
 
-Your MARMAR Rental Car Contract Management System should now be running at `https://your-domain.com`
+Your RCCMS Rental Car Contract Management System should now be running at `https://your-domain.com`
 
 **Default Login:**
 - Username: `admin`

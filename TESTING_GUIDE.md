@@ -1,9 +1,9 @@
 # RCCMS Rental Car Contract Management System - Testing Guide
 
 ## Document Purpose
-This guide is designed for testers with no prior knowledge of the MARMAR rental car contract management system. It provides detailed, step-by-step instructions to test all features comprehensively.
+This guide is designed for testers with no prior knowledge of the rental car contract management system. It provides detailed, step-by-step instructions to test all features comprehensively.
 
-**Client**: MARMAR Rent-a-Car Company  
+**System**: RCCMS - Rental Car Contract Management System  
 **Developed By**: AKN Consulting  
 **Contact**: +919400750821 | rccms@akn-consulting.com | rccms@akn-consulting.in  
 **Address**: Muttathu, Thattayil, Pathanamthitta - 691525
@@ -24,7 +24,7 @@ This guide is designed for testers with no prior knowledge of the MARMAR rental 
 ## System Overview
 
 ### What is This System?
-This is a comprehensive bilingual (English/Arabic) rental car contract management system developed by **AKN Consulting** for **MARMAR Rent-a-Car Company**. The system helps manage the complete lifecycle of car rental contracts from creation to closure.
+This is a comprehensive bilingual (English/Arabic) rental car contract management system developed by **AKN Consulting**. The system helps manage the complete lifecycle of car rental contracts from creation to closure for any rental car company.
 
 ### Key Capabilities
 - **Contract Management**: Create, edit, and track rental contracts through 5 lifecycle states
@@ -51,7 +51,7 @@ This is a comprehensive bilingual (English/Arabic) rental car contract managemen
 
 ### Initial Login
 1. Navigate to the application URL
-2. You should see a landing page with "MARMAR Contract Management System"
+2. You should see a landing page with "RCCMS - Contract Management System"
 3. Click the **"Log In to Continue"** button
 4. Enter your test credentials
 5. Click **"Log In"**
@@ -875,8 +875,8 @@ Use this checklist to track your testing progress:
 **Steps**:
 1. Navigate to **Settings → Company Settings**
 2. Update bilingual company information:
-   - **Company Name (EN)**: `MARMAR Car Rental`
-   - **Company Name (AR)**: `تأجير السيارات مرمر`
+   - **Company Name (EN)**: `Sample Car Rental Company`
+   - **Company Name (AR)**: `شركة عينة لتأجير السيارات`
    - **Address (EN)**: `123 Sheikh Zayed Road, Dubai, UAE`
    - **Address (AR)**: `123 شارع الشيخ زايد، دبي، الإمارات`
    - **Phone**: `+971-4-1234567`
@@ -1759,9 +1759,8 @@ If you encounter issues or have questions during testing:
 
 **Document Version**: 1.0  
 **Last Updated**: October 24, 2025  
-**Client**: MARMAR Rent-a-Car Company  
+**System**: RCCMS - Rental Car Contract Management System  
 **Developed By**: AKN Consulting  
-**System**: MARMAR Rental Car Contract Management System  
 
 ---
 

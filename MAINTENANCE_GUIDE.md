@@ -22,7 +22,7 @@
 ## Introduction
 
 ### Purpose
-This guide provides technical information for maintaining, troubleshooting, and optimizing the MARMAR Rental Car Contract Management System in production environments.
+This guide provides technical information for maintaining, troubleshooting, and optimizing the RCCMS Rental Car Contract Management System in production environments.
 
 ### Target Audience
 - System Administrators
