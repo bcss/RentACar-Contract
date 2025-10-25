@@ -1545,31 +1545,28 @@ export class DatabaseStorage implements IStorage {
       return true;
     });
 
+    // Audit logs (all CRUD actions)
+    const allAuditLogs = await this.getAllAuditLogs();
+    const filteredAuditLogs = allAuditLogs.filter(log => {
+      if (!startDate && !endDate) return true;
+      if (!log.createdAt) return false;
+      const logDate = new Date(log.createdAt);
+      if (startDate && logDate < startDate) return false;
+      if (endDate && logDate > endDate) return false;
+      return true;
+    });
+
     // Get user names for modifications
     const userIds = new Set(filteredModifications.map(m => m.editedBy));
-    const users = await Promise.all(
+    const usersData = await Promise.all(
       Array.from(userIds).map(id => this.getUser(id))
     );
-    const userMap = new Map(users.filter(u => u).map(u => [u!.id, `${u!.firstName || ''} ${u!.lastName || ''}`.trim() || u!.username]));
+    const userMap = new Map(usersData.filter(u => u).map(u => [u!.id, `${u!.firstName || ''} ${u!.lastName || ''}`.trim() || u!.username]));
 
     const modificationsWithUser = filteredModifications.map(m => ({
       ...m,
       userName: userMap.get(m.editedBy) || 'Unknown',
     }));
-
-    // User activity summary
-    const userActivity = Array.from(userIds).map(userId => {
-      const userName = userMap.get(userId) || 'Unknown';
-      const userMods = filteredModifications.filter(m => m.editedBy === userId);
-      const contracts = new Set(userMods.map(m => m.contractId));
-
-      return {
-        userId,
-        userName,
-        modificationCount: userMods.length,
-        contractsModified: contracts.size,
-      };
-    }).sort((a, b) => b.modificationCount - a.modificationCount);
 
     // CRITICAL FIX: Add summary statistics for audit report
     const uniqueContracts = new Set(filteredModifications.map(m => m.contractId));
@@ -1603,6 +1600,7 @@ export class DatabaseStorage implements IStorage {
     return {
       summary: {
         totalModifications,
+        totalAuditLogs: filteredAuditLogs.length,
         uniqueContracts: uniqueContracts.size,
         avgModificationsPerContract,
         activeUsers: userIds.size,
@@ -1612,6 +1610,7 @@ export class DatabaseStorage implements IStorage {
         const bTime = b.editedAt ? new Date(b.editedAt).getTime() : 0;
         return bTime - aTime;
       }),
+      auditLogs: filteredAuditLogs,
       userActivity,
       mostModifiedContracts,
       fieldBreakdown,

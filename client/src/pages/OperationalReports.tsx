@@ -119,9 +119,9 @@ export default function OperationalReports() {
       
       // Capture charts based on active tab
       const chartsToCapture = activeTab === 'utilization' 
-        ? [{ elementId: 'operational-chart-vehicle-util', chartName: 'Vehicle Utilization' }]
+        ? [{ elementId: 'operational-chart-vehicle-util', chartName: t('operationalReports.vehicleUtilization') }]
         : activeTab === 'status'
-        ? [{ elementId: 'operational-chart-contract-status', chartName: 'Contract Status' }]
+        ? [{ elementId: 'operational-chart-contract-status', chartName: t('operationalReports.contractStatusSummary') }]
         : []; // No charts on charges tab
       
       const chartImages = await captureMultipleCharts(chartsToCapture);

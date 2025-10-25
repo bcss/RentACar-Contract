@@ -63,9 +63,9 @@ export default function CustomerReports() {
       
       // Capture charts based on active tab
       const chartsToCapture = activeTab === 'activity' 
-        ? [{ elementId: 'customer-chart-top-customers', chartName: 'Top Customers' }]
+        ? [{ elementId: 'customer-chart-top-customers', chartName: t('customerReports.topCustomers') }]
         : activeTab === 'repeat'
-        ? [{ elementId: 'customer-chart-retention', chartName: 'Customer Retention' }]
+        ? [{ elementId: 'customer-chart-retention', chartName: t('customerReports.customerRetention') }]
         : []; // No charts on new customers tab
       
       const chartImages = await captureMultipleCharts(chartsToCapture);

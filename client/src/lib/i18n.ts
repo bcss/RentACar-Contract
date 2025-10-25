@@ -79,6 +79,11 @@ const resources = {
       "financialReports.unknown": "Unknown",
       "financialReports.monthlyRevenueTrend": "Monthly Revenue Trend",
       
+      // Customer Reports
+      "customerReports.title": "Customer Reports",
+      "customerReports.topCustomers": "Top Customers",
+      "customerReports.customerRetention": "Customer Retention",
+      
       // Operational Reports
       "operationalReports.title": "Operational Reports",
       "operationalReports.vehicleUtilization": "Vehicle Utilization",
@@ -747,6 +752,11 @@ const resources = {
       "financialReports.bankTransfer": "تحويل بنكي",
       "financialReports.unknown": "غير معروف",
       "financialReports.monthlyRevenueTrend": "اتجاه الإيرادات الشهرية",
+      
+      // Customer Reports
+      "customerReports.title": "تقارير العملاء",
+      "customerReports.topCustomers": "أفضل العملاء",
+      "customerReports.customerRetention": "الاحتفاظ بالعملاء",
       
       // Operational Reports
       "operationalReports.title": "التقارير التشغيلية",

@@ -31,9 +31,22 @@ interface UserActivity {
   contractsModified: number;
 }
 
+interface AuditLog {
+  id: string;
+  userId: string;
+  action: string;
+  contractId: string | null;
+  details: string | null;
+  createdAt: string;
+  userName: string;
+  userFirstName: string | null;
+  userLastName: string | null;
+}
+
 interface AuditReport {
   modifications: Modification[];
   userActivity: UserActivity[];
+  auditLogs: AuditLog[];
 }
 
 export default function AuditReports() {
@@ -195,9 +208,12 @@ export default function AuditReports() {
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2" data-testid="tabs-audit-reports">
+        <TabsList className="grid w-full grid-cols-3" data-testid="tabs-audit-reports">
           <TabsTrigger value="modifications" data-testid="tab-modifications">
             Contract Modifications
+          </TabsTrigger>
+          <TabsTrigger value="all-actions" data-testid="tab-all-actions">
+            All Actions
           </TabsTrigger>
           <TabsTrigger value="users" data-testid="tab-users">
             User Activity
@@ -279,6 +295,83 @@ export default function AuditReports() {
                     {report.modifications.length > 100 && (
                       <p className="text-sm text-muted-foreground text-center pt-4">
                         Showing first 100 modifications. Use date filters to narrow results.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="all-actions" className="space-y-6 mt-6">
+          {isLoading ? (
+            <Skeleton className="h-96 w-full" />
+          ) : !report ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <p className="text-muted-foreground">No data available</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>All System Actions</CardTitle>
+                <CardDescription>
+                  Complete CRUD operation history for all entities (contracts, customers, vehicles, sponsors, companies)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {report.auditLogs.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-12">
+                    No system actions in this period
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {report.auditLogs.slice(0, 100).map((log) => (
+                      <div 
+                        key={log.id} 
+                        className="border rounded-lg p-4 hover-elevate"
+                        data-testid={`audit-log-${log.id}`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="font-mono text-xs">
+                                {log.action}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(log.createdAt).toLocaleString(i18n.language === 'ar' ? 'ar-SA' : 'en-US')}
+                              </span>
+                            </div>
+                            
+                            {log.details && (
+                              <p className="text-sm">
+                                {log.details}
+                              </p>
+                            )}
+                            
+                            {log.contractId && (
+                              <p className="text-xs text-muted-foreground">
+                                Contract ID: {log.contractId}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="text-right">
+                            <p className="text-sm font-medium">
+                              {log.userFirstName && log.userLastName 
+                                ? `${log.userFirstName} ${log.userLastName}`
+                                : log.userName}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {report.auditLogs.length > 100 && (
+                      <p className="text-sm text-muted-foreground text-center pt-4">
+                        Showing first 100 actions. Use date filters to narrow results.
                       </p>
                     )}
                   </div>
