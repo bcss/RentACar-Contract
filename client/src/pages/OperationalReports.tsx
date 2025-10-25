@@ -117,11 +117,14 @@ export default function OperationalReports() {
         description: 'Capturing charts...',
       });
       
-      // Capture charts as images
-      const chartImages = await captureMultipleCharts([
-        { elementId: 'operational-chart-vehicle-util', chartName: 'Vehicle Utilization' },
-        { elementId: 'operational-chart-contract-status', chartName: 'Contract Status' },
-      ]);
+      // Capture charts based on active tab
+      const chartsToCapture = activeTab === 'utilization' 
+        ? [{ elementId: 'operational-chart-vehicle-util', chartName: 'Vehicle Utilization' }]
+        : activeTab === 'status'
+        ? [{ elementId: 'operational-chart-contract-status', chartName: 'Contract Status' }]
+        : []; // No charts on charges tab
+      
+      const chartImages = await captureMultipleCharts(chartsToCapture);
       
       const params = new URLSearchParams();
       params.append('format', format);
