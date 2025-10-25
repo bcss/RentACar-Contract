@@ -80,6 +80,237 @@ interface PhoneDuplicateWarning {
   duplicateCustomers: Array<{ id: string; nameEn: string | null; nameAr: string | null }>;
 }
 
+// CustomerForm component - moved outside to prevent re-renders and input focus loss
+interface CustomerFormProps {
+  form: any;
+  phoneWarning: PhoneDuplicateWarning | null;
+  t: (key: string) => string;
+  onSubmit: (data: CustomerFormData) => void;
+  isPending: boolean;
+}
+
+const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFormProps) => (
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="nameEn"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('customers.nameEn')}</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-customer-name-en" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="nameAr"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('customers.nameAr')}</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-customer-name-ar" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="nationalId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('customers.nationalId')}</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-customer-national-id" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="nationality"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nationality / الجنسية</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-customer-nationality" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="gender"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Gender / الجنس</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger data-testid="select-customer-gender">
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male / ذكر</SelectItem>
+                    <SelectItem value="female">Female / أنثى</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="dateOfBirth"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date of Birth / تاريخ الولادة</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                  data-testid="input-customer-dob"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('customers.phone')}</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-customer-phone" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('customers.email')}</FormLabel>
+              <FormControl>
+                <Input {...field} type="email" data-testid="input-customer-email" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      {phoneWarning && phoneWarning.hasDuplicate && (
+        <Alert variant="default" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20" data-testid="alert-phone-duplicate-warning">
+          <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+            ⚠️ Warning: This phone number is already used by customer(s): {phoneWarning.duplicateCustomers.map(c => c.nameEn || c.nameAr || 'Unknown').join(', ')}. You can still proceed if this is intentional.
+          </AlertDescription>
+        </Alert>
+      )}
+      <FormField
+        control={form.control}
+        name="licenseNumber"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t('customers.licenseNumber')}</FormLabel>
+            <FormControl>
+              <Input {...field} data-testid="input-customer-license-number" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="licenseIssuedBy"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>License Issued By / صدر الرخصة</FormLabel>
+              <FormControl>
+                <Input {...field} data-testid="input-customer-license-issued-by" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="licenseIssueDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>License Issue Date / تاريخ الإصدار</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                  data-testid="input-customer-license-issue-date"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <FormField
+        control={form.control}
+        name="licenseExpiryDate"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t('customers.licenseExpiry')}</FormLabel>
+            <FormControl>
+              <Input
+                type="date"
+                value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                data-testid="input-customer-license-expiry"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="address"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t('customers.address')}</FormLabel>
+            <FormControl>
+              <Input {...field} data-testid="input-customer-address" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <DialogFooter>
+        <Button type="submit" disabled={isPending} data-testid="button-submit-customer">
+          {isPending ? t('common.saving') : t('common.save')}
+        </Button>
+      </DialogFooter>
+    </form>
+  </Form>
+);
+
 export default function Customers() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -374,228 +605,6 @@ export default function Customers() {
 
   const isAdmin = user?.role === 'admin';
 
-  const CustomerForm = ({ onSubmit, isPending }: { onSubmit: (data: CustomerFormData) => void; isPending: boolean }) => (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="nameEn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('customers.nameEn')}</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-customer-name-en" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="nameAr"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('customers.nameAr')}</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-customer-name-ar" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="nationalId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('customers.nationalId')}</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-customer-national-id" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="nationality"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nationality / الجنسية</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-customer-nationality" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="gender"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Gender / الجنس</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger data-testid="select-customer-gender">
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male / ذكر</SelectItem>
-                      <SelectItem value="female">Female / أنثى</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="dateOfBirth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date of Birth / تاريخ الولادة</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
-                    data-testid="input-customer-dob"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('customers.phone')}</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-customer-phone" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('customers.email')}</FormLabel>
-                <FormControl>
-                  <Input {...field} type="email" data-testid="input-customer-email" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        {phoneWarning && phoneWarning.hasDuplicate && (
-          <Alert variant="default" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20" data-testid="alert-phone-duplicate-warning">
-            <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
-            <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-              ⚠️ Warning: This phone number is already used by customer(s): {phoneWarning.duplicateCustomers.map(c => c.nameEn || c.nameAr || 'Unknown').join(', ')}. You can still proceed if this is intentional.
-            </AlertDescription>
-          </Alert>
-        )}
-        <FormField
-          control={form.control}
-          name="licenseNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('customers.licenseNumber')}</FormLabel>
-              <FormControl>
-                <Input {...field} data-testid="input-customer-license-number" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="licenseIssuedBy"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>License Issued By / صدر الرخصة</FormLabel>
-                <FormControl>
-                  <Input {...field} data-testid="input-customer-license-issued-by" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="licenseIssueDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>License Issue Date / تاريخ الإصدار</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
-                    data-testid="input-customer-license-issue-date"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          control={form.control}
-          name="licenseExpiryDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('customers.licenseExpiry')}</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                  onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
-                  data-testid="input-customer-license-expiry"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('customers.address')}</FormLabel>
-              <FormControl>
-                <Input {...field} data-testid="input-customer-address" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <DialogFooter>
-          <Button type="submit" disabled={isPending} data-testid="button-submit-customer">
-            {isPending ? t('common.saving') : t('common.save')}
-          </Button>
-        </DialogFooter>
-      </form>
-    </Form>
-  );
-
   const CustomerTable = ({ customers, showActions }: { customers: Customer[]; showActions: 'disable' | 'enable' }) => (
     <Table>
       <TableHeader>
@@ -685,7 +694,7 @@ export default function Customers() {
                     {t('customers.addCustomer')}
                   </DialogDescription>
                 </DialogHeader>
-                <CustomerForm onSubmit={handleCreate} isPending={createMutation.isPending} />
+                <CustomerForm form={form} phoneWarning={phoneWarning} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
               </DialogContent>
             </Dialog>
           </div>
@@ -746,7 +755,7 @@ export default function Customers() {
               {t('customers.editCustomer')}
             </DialogDescription>
           </DialogHeader>
-          <CustomerForm onSubmit={handleUpdate} isPending={updateMutation.isPending} />
+          <CustomerForm form={form} phoneWarning={phoneWarning} t={t} onSubmit={handleUpdate} isPending={updateMutation.isPending} />
         </DialogContent>
       </Dialog>
 
