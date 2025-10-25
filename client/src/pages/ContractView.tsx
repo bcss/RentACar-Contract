@@ -1904,11 +1904,11 @@ export default function ContractView() {
         />
       </div>
 
-      {/* Terms & Conditions - Print Only */}
+      {/* Legal Terms - Print Only */}
       {companySettings && (
         <div className="print-only border-t-2 border-black pt-4 mt-8">
           <h2 className="text-lg font-bold mb-4 text-center">
-            TERMS & CONDITIONS / <span className="font-arabic">الشروط والأحكام</span>
+            LEGAL TERMS / <span className="font-arabic">الشروط القانونية</span>
           </h2>
           
           {companySettings.termsSection1En && companySettings.termsSection1En.trim() && (

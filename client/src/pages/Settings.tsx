@@ -318,7 +318,7 @@ export default function Settings() {
     updateMutation.mutate(data);
   };
 
-  const saveTermsConditions = () => {
+  const saveLegalTerms = () => {
     const data = {
       termsSection1En: form.getValues('termsSection1En'),
       termsSection1Ar: form.getValues('termsSection1Ar'),
@@ -1606,7 +1606,7 @@ export default function Settings() {
             </TabsContent>
 
             <TabsContent value="terms" className="space-y-6">
-            {/* Terms & Conditions */}
+            {/* Legal Terms */}
             <Card>
               <CardHeader>
                 <CardTitle>{t('settings.termsConditions')}</CardTitle>
@@ -1752,7 +1752,7 @@ export default function Settings() {
               <CardFooter className="flex justify-end">
                 <Button
                   type="button"
-                  onClick={saveTermsConditions}
+                  onClick={saveLegalTerms}
                   disabled={updateMutation.isPending}
                   data-testid="button-save-terms"
                 >
