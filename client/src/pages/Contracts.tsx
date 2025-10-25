@@ -262,10 +262,10 @@ export default function Contracts() {
                 <SelectContent>
                   <SelectItem value="all">{t('common.all')}</SelectItem>
                   <SelectItem value="draft">{t('contracts.draft')}</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="confirmed">{t('contracts.confirmed')}</SelectItem>
+                  <SelectItem value="active">{t('contracts.active')}</SelectItem>
+                  <SelectItem value="completed">{t('contracts.completed')}</SelectItem>
+                  <SelectItem value="closed">{t('contracts.closed')}</SelectItem>
                   <SelectItem value="disabled">{t('common.disabled')}</SelectItem>
                 </SelectContent>
               </Select>
