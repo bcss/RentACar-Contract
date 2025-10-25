@@ -121,6 +121,7 @@ export const insertCustomerSchema = createInsertSchema(customers).omit({
   disabledAt: true,
   disabled: true,
 }).extend({
+  nationalId: z.string().min(1, "National ID is required"),
   dateOfBirth: z.coerce.date().optional(),
   licenseIssueDate: z.coerce.date().optional(),
   licenseExpiryDate: z.coerce.date().optional(),
