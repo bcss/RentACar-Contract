@@ -96,12 +96,12 @@ Complete English and Arabic interface with automatic RTL/LTR switching. Professi
 
 ---
 
-## 📊 Built for UAE Rental Companies
+## 📊 Built for Rental Companies
 
 > *"RCCMS transformed our operations. We went from manual Excel sheets to a professional system that saves us hours every day and eliminates calculation errors."*
 > 
-> **— MARMAR Rent-a-Car**  
-> Ras Al Khaimah, UAE
+> **— Satisfied Customer**  
+> UAE Rental Car Company
 
 ### Proven Results:
 
