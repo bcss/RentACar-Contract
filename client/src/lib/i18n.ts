@@ -323,6 +323,10 @@ const resources = {
       "customers.disabledAt": "Disabled At",
       "customers.noCustomers": "No customers found",
       "customers.details": "Customer Details",
+      "customers.gender": "Gender",
+      "customers.male": "Male",
+      "customers.female": "Female",
+      "customers.dateOfBirth": "Date of Birth",
       
       // Vehicle Management
       "vehicles.title": "Vehicle Management",
@@ -988,6 +992,10 @@ const resources = {
       "customers.disabledAt": "تاريخ التعطيل",
       "customers.noCustomers": "لا يوجد عملاء",
       "customers.details": "تفاصيل العميل",
+      "customers.gender": "الجنس",
+      "customers.male": "ذكر",
+      "customers.female": "أنثى",
+      "customers.dateOfBirth": "تاريخ الولادة",
       
       // Vehicle Management
       "vehicles.title": "إدارة المركبات",

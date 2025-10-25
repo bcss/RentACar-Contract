@@ -977,18 +977,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { method } = req.body;
       
+      // Get currency from settings
+      const settings = await storage.getCompanySettings();
+      const currency = settings.currencyEn || 'AED';
+      
       // Create payment record in payments table
       const payment = await storage.createPayment({
         contractId: contract.id,
         amount: contract.securityDeposit || '0',
         paymentMethod: method || 'cash',
-        currency: 'SAR',
+        currency: currency,
         notes: 'Deposit payment',
         paidAt: new Date(),
         createdBy: userId,
       } as any);
       
-      await createAuditLog(userId, 'payment', contract.id, req, `Recorded deposit payment of ${contract.securityDeposit || '0'} SAR for contract #${contract.contractNumber}`);
+      await createAuditLog(userId, 'payment', contract.id, req, `Recorded deposit payment of ${contract.securityDeposit || '0'} ${currency} for contract #${contract.contractNumber}`);
       
       res.json(payment);
     } catch (error: any) {
@@ -1009,6 +1013,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { method } = req.body;
       
+      // Get currency from settings
+      const settings = await storage.getCompanySettings();
+      const currency = settings.currencyEn || 'AED';
+      
       // Calculate final payment amount (total amount + extra charges - already paid)
       const totalAmount = parseFloat(contract.totalAmount || '0');
       const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
@@ -1025,13 +1033,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contractId: contract.id,
         amount: finalPaymentAmount.toString(),
         paymentMethod: method || 'cash',
-        currency: 'SAR',
+        currency: currency,
         notes: 'Final payment',
         paidAt: new Date(),
         createdBy: userId,
       } as any);
       
-      await createAuditLog(userId, 'payment', contract.id, req, `Recorded final payment of ${finalPaymentAmount.toFixed(2)} SAR for contract #${contract.contractNumber}`);
+      await createAuditLog(userId, 'payment', contract.id, req, `Recorded final payment of ${finalPaymentAmount.toFixed(2)} ${currency} for contract #${contract.contractNumber}`);
       
       res.json(payment);
     } catch (error: any) {
@@ -1052,18 +1060,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { method } = req.body;
       
+      // Get currency from settings
+      const settings = await storage.getCompanySettings();
+      const currency = settings.currencyEn || 'AED';
+      
       // Create negative payment record for refund
       const payment = await storage.createPayment({
         contractId: contract.id,
         amount: `-${contract.securityDeposit || '0'}`,
         paymentMethod: method || 'cash',
-        currency: 'SAR',
+        currency: currency,
         notes: 'Deposit refund',
         paidAt: new Date(),
         createdBy: userId,
       } as any);
       
-      await createAuditLog(userId, 'payment', contract.id, req, `Refunded deposit of ${contract.securityDeposit || '0'} SAR for contract #${contract.contractNumber}`);
+      await createAuditLog(userId, 'payment', contract.id, req, `Refunded deposit of ${contract.securityDeposit || '0'} ${currency} for contract #${contract.contractNumber}`);
       
       res.json(payment);
     } catch (error: any) {

@@ -154,15 +154,15 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
           name="gender"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Gender / الجنس</FormLabel>
+              <FormLabel>{t('customers.gender')}</FormLabel>
               <FormControl>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger data-testid="select-customer-gender">
-                    <SelectValue placeholder="Select gender" />
+                    <SelectValue placeholder={t('customers.gender')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="male">Male / ذكر</SelectItem>
-                    <SelectItem value="female">Female / أنثى</SelectItem>
+                    <SelectItem value="male">{t('customers.male')}</SelectItem>
+                    <SelectItem value="female">{t('customers.female')}</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -175,7 +175,7 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
           name="dateOfBirth"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date of Birth / تاريخ الولادة</FormLabel>
+              <FormLabel>{t('customers.dateOfBirth')}</FormLabel>
               <FormControl>
                 <Input
                   type="date"

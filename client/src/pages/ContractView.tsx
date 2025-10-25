@@ -74,10 +74,15 @@ export default function ContractView() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [paymentCurrency, setPaymentCurrency] = useState('SAR');
+  const [paymentCurrency, setPaymentCurrency] = useState(currency);
   const [paymentNotes, setPaymentNotes] = useState('');
   const [fuelCalculationBreakdown, setFuelCalculationBreakdown] = useState('');
   const [isAutoCalculatedFuel, setIsAutoCalculatedFuel] = useState(false);
+
+  // Update payment currency when system currency changes
+  useEffect(() => {
+    setPaymentCurrency(currency);
+  }, [currency]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -2243,18 +2248,16 @@ export default function ContractView() {
             </div>
 
             <div>
-              <Label htmlFor="payment-currency">Currency</Label>
-              <Select value={paymentCurrency} onValueChange={setPaymentCurrency}>
-                <SelectTrigger id="payment-currency" data-testid="select-payment-currency">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SAR">SAR</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
-                  <SelectItem value="AED">AED</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Currency</Label>
+              <Input 
+                value={paymentCurrency} 
+                disabled 
+                className="bg-muted" 
+                data-testid="input-payment-currency"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                System currency configured in Financial Settings
+              </p>
             </div>
 
             <div>

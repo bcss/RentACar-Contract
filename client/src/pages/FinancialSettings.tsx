@@ -24,6 +24,8 @@ import {
 
 // Schema for financial settings only
 const financialSettingsSchema = z.object({
+  currencyEn: z.string().min(1, "Currency (English) is required"),
+  currencyAr: z.string().min(1, "Currency (Arabic) is required"),
   defaultDailyRate: z.string().min(1, "Default daily rate is required"),
   defaultWeeklyRate: z.string().min(1, "Default weekly rate is required"),
   defaultMonthlyRate: z.string().min(1, "Default monthly rate is required"),
@@ -51,6 +53,8 @@ export default function FinancialSettings() {
   const form = useForm<FinancialSettingsForm>({
     resolver: zodResolver(financialSettingsSchema),
     defaultValues: {
+      currencyEn: "AED",
+      currencyAr: "د.إ",
       defaultDailyRate: "150",
       defaultWeeklyRate: "900",
       defaultMonthlyRate: "3000",
@@ -68,6 +72,8 @@ export default function FinancialSettings() {
   useEffect(() => {
     if (settings) {
       form.reset({
+        currencyEn: settings.currencyEn || "AED",
+        currencyAr: settings.currencyAr || "د.إ",
         defaultDailyRate: settings.defaultDailyRate,
         defaultWeeklyRate: settings.defaultWeeklyRate,
         defaultMonthlyRate: settings.defaultMonthlyRate,
@@ -144,6 +150,57 @@ export default function FinancialSettings() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Currency Configuration */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Currency Configuration</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="currencyEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Currency Code (English)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            placeholder="AED" 
+                            data-testid="input-currency-en" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="currencyAr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Currency Symbol (Arabic)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            className="text-right" 
+                            dir="rtl"
+                            placeholder="د.إ" 
+                            data-testid="input-currency-ar" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  This currency will be displayed throughout the system in financial reports, contracts, and invoices.
+                </p>
+              </CardContent>
+            </Card>
+
             {/* Default Rental Rates */}
             <Card>
               <CardHeader>
