@@ -578,7 +578,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden: You can only view your own contracts" });
       }
       
-      res.json(contract);
+      // CRITICAL FIX: Calculate real-time outstanding balance based on actual payments
+      // The stored outstandingBalance can become stale when payments are added
+      const contractPayments = await storage.getPaymentsByContract(contract.id);
+      const totalPaid = contractPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount || '0'), 0);
+      const totalAmount = parseFloat(contract.totalAmount || '0');
+      const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
+      const totalDue = totalAmount + totalExtraCharges;
+      
+      // Calculate precise outstanding balance
+      const totalPaidRounded = Math.round(totalPaid * 100) / 100;
+      const totalDueRounded = Math.round(totalDue * 100) / 100;
+      const computedOutstanding = Math.max(0, totalDueRounded - totalPaidRounded);
+      
+      // Return contract with dynamically calculated outstanding balance
+      res.json({
+        ...contract,
+        outstandingBalance: computedOutstanding.toFixed(2),
+      });
     } catch (error) {
       console.error("Error fetching contract:", error);
       res.status(500).json({ message: "Failed to fetch contract" });
