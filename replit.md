@@ -61,13 +61,27 @@ Preferred communication style: Simple, everyday language.
 - **Styling:** `tailwindcss`, `class-variance-authority`, `clsx`.
 - **Data Visualization:** `recharts` for responsive charts and graphs, `html2canvas` for capturing chart visualizations as images for export.
 - **Export & Document Generation:** `jspdf` (v3.x with named export), `jspdf-autotable`, `xlsx` for PDF and Excel report exports.
-## Client Company Information
-**Current Client:** MARMAR Rent-a-Car (مــرمــر)
-- **Company Legal Name:** CARS AND BUSES RENTAL LLC (لتأجير الحافلات والسيارات ش.ذ.م.م)
-- **Location:** P.O. Box 34088, Al Nakeel, RAK - UAE
-- **Contact:** marmarrac@gmail.com, www.marmarcars.com
+## Generic System Architecture
+
+**Important:** RCCMS is a completely generic rental car management system designed to be deployed for any rental car company worldwide.
+
+### System Customization
+- **Company Settings:** All company-specific information is configurable through the admin panel (Company Settings page)
+- **Bilingual Fields:** Company name, address, and contract clauses can be set in both English and Arabic
+- **No Code Changes Required:** Any rental car company can deploy and customize RCCMS without modifying source code
+- **Default Data:** The system includes sample data for demonstration purposes only
+
+### Configuration Options
+Companies can configure:
+- Company legal name (English & Arabic)
+- Business registration numbers
+- Contact information (address, phone, email, website)
+- Contract terms and conditions (bilingual)
+- Rental rates and pricing
+- Fuel pricing by type
+- Contract PDF branding and layout
+
+**Developer Information:**
 - **Developer:** AKN Consulting
 - **Support:** +91 9400750821, rccms@akn-consulting.com
-- **Developer Location:** Muttathu, Thattayil, Pathanamthitta - 691525, Kerala, India
-
-**Note:** MARMAR company data is stored as default settings in the `company_settings` table. Any rental car company can use this system by updating company settings through the admin panel.
+- **Location:** Muttathu, Thattayil, Pathanamthitta - 691525, Kerala, India
