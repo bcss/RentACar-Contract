@@ -42,7 +42,7 @@ import { format } from 'date-fns';
 export default function Contracts() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin, isViewer } = useAuth();
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const statusFromUrl = searchParams.get('status') || 'all';
@@ -362,7 +362,7 @@ export default function Contracts() {
                                   <span className="material-icons">visibility</span>
                                 </Link>
                               </Button>
-                              {contract.status === 'draft' && (
+                              {contract.status === 'draft' && !isViewer && (
                                 <Button
                                   variant="ghost"
                                   size="icon"

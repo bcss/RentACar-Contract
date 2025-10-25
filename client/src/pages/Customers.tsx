@@ -313,7 +313,7 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
 
 export default function Customers() {
   const { t } = useTranslation();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
@@ -637,14 +637,16 @@ export default function Customers() {
               <TableCell>{customer.licenseNumber || '-'}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(customer)}
-                    data-testid={`button-edit-customer-${customer.id}`}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
+                  {!isViewer && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(customer)}
+                      data-testid={`button-edit-customer-${customer.id}`}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
                   {isAdmin && showActions === 'disable' && (
                     <Button
                       variant="ghost"
@@ -680,23 +682,25 @@ export default function Customers() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{t('customers.title')}</CardTitle>
-            <Dialog open={createOpen} onOpenChange={handleCreateDialogChange}>
-              <DialogTrigger asChild>
-                <Button data-testid="button-create-customer">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('customers.addCustomer')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>{t('customers.newCustomer')}</DialogTitle>
-                  <DialogDescription>
+            {!isViewer && (
+              <Dialog open={createOpen} onOpenChange={handleCreateDialogChange}>
+                <DialogTrigger asChild>
+                  <Button data-testid="button-create-customer">
+                    <Plus className="h-4 w-4 mr-2" />
                     {t('customers.addCustomer')}
-                  </DialogDescription>
-                </DialogHeader>
-                <CustomerForm form={form} phoneWarning={phoneWarning} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
-              </DialogContent>
-            </Dialog>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>{t('customers.newCustomer')}</DialogTitle>
+                    <DialogDescription>
+                      {t('customers.addCustomer')}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <CustomerForm form={form} phoneWarning={phoneWarning} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </CardHeader>
         <CardContent>

@@ -268,7 +268,7 @@ const VehicleForm = ({ form, t, onSubmit, isPending }: VehicleFormProps) => (
 
 export default function Vehicles() {
   const { t } = useTranslation();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
@@ -527,14 +527,16 @@ export default function Vehicles() {
               <TableCell>{vehicle.dailyRate}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(vehicle)}
-                    data-testid={`button-edit-vehicle-${vehicle.id}`}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
+                  {!isViewer && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(vehicle)}
+                      data-testid={`button-edit-vehicle-${vehicle.id}`}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
                   {isAdmin && showActions === 'disable' && (
                     <Button
                       variant="ghost"
@@ -570,23 +572,25 @@ export default function Vehicles() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{t('vehicles.title')}</CardTitle>
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-              <DialogTrigger asChild>
-                <Button data-testid="button-create-vehicle">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('vehicles.addVehicle')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>{t('vehicles.newVehicle')}</DialogTitle>
-                  <DialogDescription>
+            {!isViewer && (
+              <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button data-testid="button-create-vehicle">
+                    <Plus className="h-4 w-4 mr-2" />
                     {t('vehicles.addVehicle')}
-                  </DialogDescription>
-                </DialogHeader>
-                <VehicleForm form={form} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
-              </DialogContent>
-            </Dialog>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>{t('vehicles.newVehicle')}</DialogTitle>
+                    <DialogDescription>
+                      {t('vehicles.addVehicle')}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <VehicleForm form={form} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </CardHeader>
         <CardContent>

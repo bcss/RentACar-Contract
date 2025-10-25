@@ -196,7 +196,7 @@ const SponsorForm = ({ form, t, onSubmit, isPending }: SponsorFormProps) => (
 );
 
 export default function Sponsors() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
