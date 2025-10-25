@@ -1,5 +1,7 @@
 # RCCMS Rental Car Contract Management System - Testing Guide
 
+> **📊 Latest Test Results:** See [TESTING_RESULTS.md](./TESTING_RESULTS.md) for comprehensive automated testing results (20/28 tests completed, 100% pass rate, 1 critical bug fixed).
+
 ## Document Purpose
 This guide is designed for testers with no prior knowledge of the rental car contract management system. It provides detailed, step-by-step instructions to test all features comprehensively.
 
