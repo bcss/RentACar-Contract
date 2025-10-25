@@ -944,10 +944,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // LEGACY PAYMENT ROUTES REMOVED - Use new payments table system instead
-  // The new payment system uses separate /api/payments endpoints with full CRUD
-  // Old routes: /api/contracts/:id/deposit, /api/contracts/:id/final-payment, /api/contracts/:id/refund
-  // New route: POST /api/payments (with contractId, amount, method, etc.)
+  // LEGACY PAYMENT ROUTES - Backward compatibility wrappers using new payments table
+  // These routes maintain compatibility with existing frontend code
+  // They create payment records in the payments table with appropriate types
+  
+  // Record deposit payment
+  app.post('/api/contracts/:id/deposit', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      const { method } = req.body;
+      
+      // Create payment record in payments table
+      const payment = await storage.createPayment({
+        contractId: contract.id,
+        amount: contract.securityDeposit || '0',
+        paymentMethod: method || 'cash',
+        currency: 'SAR',
+        notes: 'Deposit payment',
+        paidAt: new Date(),
+        createdBy: userId,
+      } as any);
+      
+      await createAuditLog(userId, 'payment', contract.id, req, `Recorded deposit payment of ${contract.securityDeposit || '0'} SAR for contract #${contract.contractNumber}`);
+      
+      res.json(payment);
+    } catch (error: any) {
+      console.error("Error recording deposit:", error);
+      res.status(400).json({ message: error.message || "Failed to record deposit" });
+    }
+  });
+  
+  // Record final payment
+  app.post('/api/contracts/:id/final-payment', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      const { method } = req.body;
+      
+      // Calculate final payment amount (total amount + extra charges - already paid)
+      const totalAmount = parseFloat(contract.totalAmount || '0');
+      const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
+      const totalDue = totalAmount + totalExtraCharges;
+      
+      // Get existing payments
+      const existingPayments = await storage.getPaymentsByContract(contract.id);
+      const totalPaid = existingPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount || '0'), 0);
+      
+      const finalPaymentAmount = Math.max(0, totalDue - totalPaid);
+      
+      // Create payment record in payments table
+      const payment = await storage.createPayment({
+        contractId: contract.id,
+        amount: finalPaymentAmount.toString(),
+        paymentMethod: method || 'cash',
+        currency: 'SAR',
+        notes: 'Final payment',
+        paidAt: new Date(),
+        createdBy: userId,
+      } as any);
+      
+      await createAuditLog(userId, 'payment', contract.id, req, `Recorded final payment of ${finalPaymentAmount.toFixed(2)} SAR for contract #${contract.contractNumber}`);
+      
+      res.json(payment);
+    } catch (error: any) {
+      console.error("Error recording final payment:", error);
+      res.status(400).json({ message: error.message || "Failed to record final payment" });
+    }
+  });
+  
+  // Record deposit refund
+  app.post('/api/contracts/:id/refund', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const contract = await storage.getContract(req.params.id);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      const { method } = req.body;
+      
+      // Create negative payment record for refund
+      const payment = await storage.createPayment({
+        contractId: contract.id,
+        amount: `-${contract.securityDeposit || '0'}`,
+        paymentMethod: method || 'cash',
+        currency: 'SAR',
+        notes: 'Deposit refund',
+        paidAt: new Date(),
+        createdBy: userId,
+      } as any);
+      
+      await createAuditLog(userId, 'payment', contract.id, req, `Refunded deposit of ${contract.securityDeposit || '0'} SAR for contract #${contract.contractNumber}`);
+      
+      res.json(payment);
+    } catch (error: any) {
+      console.error("Error recording refund:", error);
+      res.status(400).json({ message: error.message || "Failed to record refund" });
+    }
+  });
 
   // Disable contract (Admin only)
   app.post('/api/contracts/:id/disable', isAuthenticated, requireAdmin, async (req: any, res) => {
