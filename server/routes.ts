@@ -567,7 +567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      const contract = await storage.getContract(req.params.id);
+      const contract = await storage.getContractWithDetails(req.params.id);
       
       if (!contract) {
         return res.status(404).json({ message: "Contract not found" });

@@ -253,6 +253,28 @@ export class DatabaseStorage implements IStorage {
     return contract;
   }
 
+  async getContractWithDetails(id: string): Promise<ContractWithDetails | undefined> {
+    const [result] = await db
+      .select({
+        ...contracts,
+        customerNameEn: customers.nameEn,
+        customerNameAr: customers.nameAr,
+        vehicleRegistration: vehicles.registration,
+        vehicleMake: vehicles.make,
+        vehicleModel: vehicles.model,
+        sponsor: sponsors,
+        companySponsor: companies,
+      })
+      .from(contracts)
+      .leftJoin(customers, eq(contracts.customerId, customers.id))
+      .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
+      .leftJoin(sponsors, eq(contracts.sponsorId, sponsors.id))
+      .leftJoin(companies, eq(contracts.companySponsorId, companies.id))
+      .where(eq(contracts.id, id));
+    
+    return result as ContractWithDetails | undefined;
+  }
+
   async getAllContracts(): Promise<ContractWithDetails[]> {
     const results = await db
       .select({
