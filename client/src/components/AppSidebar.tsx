@@ -316,6 +316,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 onClick={toggleSidebar}
                 data-testid="button-sidebar-toggle"
                 className="h-9 w-9 hover-elevate active-elevate-2"
+                aria-label={t('header.toggleSidebar')}
               >
                 <PanelLeft className="h-5 w-5" />
               </Button>
