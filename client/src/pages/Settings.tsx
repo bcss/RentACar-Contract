@@ -698,7 +698,7 @@ export default function Settings() {
                       <FormItem>
                         <FormLabel>{t('settings.currencyEn')}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="AED" data-testid="input-currency-en" />
+                          <Input {...field} placeholder="e.g., USD, EUR, GBP" data-testid="input-currency-en" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
