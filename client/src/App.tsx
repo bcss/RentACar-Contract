@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -182,9 +182,14 @@ function AppContent() {
     <SidebarProvider style={style as React.CSSProperties}>
       <div className="flex h-screen w-full">
         <AppSidebar side={sidebarSide as 'left' | 'right'} />
-        <main className="flex-1 overflow-auto">
-          <Router />
-        </main>
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="fixed top-4 z-50" style={{ [sidebarSide]: '1rem' }}>
+            <SidebarTrigger data-testid="button-sidebar-toggle" className="h-9 w-9" />
+          </div>
+          <main className="flex-1 overflow-auto">
+            <Router />
+          </main>
+        </div>
       </div>
     </SidebarProvider>
   );

@@ -461,27 +461,8 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-4">
-        {/* Control buttons: Sidebar Toggle, Theme, Language */}
-        <div className="flex items-center justify-between gap-2 px-2">
-          {/* Sidebar Toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => toggleSidebar()}
-                data-testid="button-sidebar-toggle"
-                className="h-9 w-9 hover-elevate active-elevate-2"
-              >
-                <PanelLeft className="h-4 w-4" />
-                <span className="sr-only">{t('header.toggleSidebar')}</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{t('header.toggleSidebar')}</p>
-            </TooltipContent>
-          </Tooltip>
-
+        {/* Control buttons: Theme, Language */}
+        <div className="flex items-center justify-center gap-2 px-2">
           {/* Theme Toggle */}
           <Tooltip>
             <TooltipTrigger asChild>
