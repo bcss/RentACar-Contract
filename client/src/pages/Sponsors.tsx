@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useBilingualField } from '@/hooks/useBilingualField';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useTranslation } from 'react-i18next';
@@ -199,6 +200,7 @@ export default function Sponsors() {
   const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { getBilingualValue } = useBilingualField();
   const [searchQuery, setSearchQuery] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -412,8 +414,7 @@ export default function Sponsors() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>{t('sponsors.nameEn')}</TableHead>
-          <TableHead>{t('sponsors.nameAr')}</TableHead>
+          <TableHead>{t('sponsors.name')}</TableHead>
           <TableHead>{t('sponsors.nationality')}</TableHead>
           <TableHead>{t('sponsors.passportId')}</TableHead>
           <TableHead>{t('sponsors.licenseNumber')}</TableHead>
@@ -425,18 +426,15 @@ export default function Sponsors() {
       <TableBody>
         {sponsors.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={8} className="text-center text-muted-foreground">
+            <TableCell colSpan={7} className="text-center text-muted-foreground">
               {t('sponsors.noSponsors')}
             </TableCell>
           </TableRow>
         ) : (
           sponsors.map((sponsor) => (
             <TableRow key={sponsor.id} data-testid={`row-person-${sponsor.id}`}>
-              <TableCell className="font-medium" data-testid={`text-person-name-en-${sponsor.id}`}>
-                {sponsor.nameEn}
-              </TableCell>
-              <TableCell data-testid={`text-person-name-ar-${sponsor.id}`}>
-                {sponsor.nameAr || '-'}
+              <TableCell className="font-medium" data-testid={`text-person-name-${sponsor.id}`}>
+                {getBilingualValue(sponsor.nameEn, sponsor.nameAr)}
               </TableCell>
               <TableCell data-testid={`text-person-nationality-${sponsor.id}`}>
                 {sponsor.nationality || '-'}

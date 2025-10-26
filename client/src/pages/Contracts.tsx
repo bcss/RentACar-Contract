@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useBilingualField } from '@/hooks/useBilingualField';
 import { Link, useLocation } from 'wouter';
 import { Contract, ContractWithDetails } from '@shared/schema';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ import { format } from 'date-fns';
 export default function Contracts() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { getBilingualValue } = useBilingualField();
   const { isAuthenticated, isLoading, isAdmin, isViewer } = useAuth();
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
@@ -334,7 +336,7 @@ export default function Contracts() {
                         #{contract.contractNumber}
                       </TableCell>
                       <TableCell data-testid={`text-customer-name-${contract.id}`}>
-                        {contract.customerNameEn}
+                        {getBilingualValue(contract.customerNameEn, contract.customerNameAr)}
                       </TableCell>
                       <TableCell>
                         {getStatusBadge(contract.status, isDisabled)}

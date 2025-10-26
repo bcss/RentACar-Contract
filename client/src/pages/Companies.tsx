@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useBilingualField } from '@/hooks/useBilingualField';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useTranslation } from 'react-i18next';
@@ -57,6 +58,7 @@ export default function Companies() {
   const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { getBilingualValue } = useBilingualField();
   const [searchQuery, setSearchQuery] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -517,8 +519,7 @@ export default function Companies() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t('companies.nameEn')}</TableHead>
-                      <TableHead>{t('companies.nameAr')}</TableHead>
+                      <TableHead>{t('companies.name')}</TableHead>
                       <TableHead>{t('companies.registrationNumber')}</TableHead>
                       <TableHead>{t('companies.contactPerson')}</TableHead>
                       <TableHead>{t('companies.phone')}</TableHead>
@@ -528,8 +529,7 @@ export default function Companies() {
                   <TableBody>
                     {filteredActiveCompanies.map((company) => (
                       <TableRow key={company.id} data-testid={`row-company-${company.id}`}>
-                        <TableCell className="font-medium">{company.nameEn}</TableCell>
-                        <TableCell className="font-arabic">{company.nameAr || '-'}</TableCell>
+                        <TableCell className="font-medium">{getBilingualValue(company.nameEn, company.nameAr)}</TableCell>
                         <TableCell>{company.registrationNumber || '-'}</TableCell>
                         <TableCell>{company.contactPerson || '-'}</TableCell>
                         <TableCell>{company.phone || '-'}</TableCell>
@@ -580,8 +580,7 @@ export default function Companies() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t('companies.nameEn')}</TableHead>
-                      <TableHead>{t('companies.nameAr')}</TableHead>
+                      <TableHead>{t('companies.name')}</TableHead>
                       <TableHead>{t('companies.registrationNumber')}</TableHead>
                       <TableHead>{t('companies.contactPerson')}</TableHead>
                       <TableHead>{t('companies.phone')}</TableHead>
@@ -591,8 +590,7 @@ export default function Companies() {
                   <TableBody>
                     {filteredDisabledCompanies.map((company) => (
                       <TableRow key={company.id} data-testid={`row-disabled-company-${company.id}`}>
-                        <TableCell className="font-medium">{company.nameEn}</TableCell>
-                        <TableCell className="font-arabic">{company.nameAr || '-'}</TableCell>
+                        <TableCell className="font-medium">{getBilingualValue(company.nameEn, company.nameAr)}</TableCell>
                         <TableCell>{company.registrationNumber || '-'}</TableCell>
                         <TableCell>{company.contactPerson || '-'}</TableCell>
                         <TableCell>{company.phone || '-'}</TableCell>

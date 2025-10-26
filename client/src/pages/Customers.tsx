@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
+import { useBilingualField } from '@/hooks/useBilingualField';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -313,6 +314,7 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
 
 export default function Customers() {
   const { t } = useTranslation();
+  const { getBilingualValue } = useBilingualField();
   const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -628,8 +630,7 @@ export default function Customers() {
           customers.map((customer) => (
             <TableRow key={customer.id} data-testid={`row-customer-${customer.id}`}>
               <TableCell className="font-medium">
-                <div>{customer.nameEn}</div>
-                <div className="text-sm text-muted-foreground">{customer.nameAr}</div>
+                {getBilingualValue(customer.nameEn, customer.nameAr)}
               </TableCell>
               <TableCell>{customer.nationalId}</TableCell>
               <TableCell>{customer.phone}</TableCell>
