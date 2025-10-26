@@ -11,6 +11,7 @@ import {
   sponsors,
   companies,
   payments,
+  vehicleInspections,
   type User,
   type UpsertUser,
   type Contract,
@@ -33,6 +34,8 @@ import {
   type InsertCompany,
   type Payment,
   type InsertPayment,
+  type VehicleInspection,
+  type InsertVehicleInspection,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike } from "drizzle-orm";
@@ -107,6 +110,11 @@ export interface IStorage {
   getPaymentsByContract(contractId: string): Promise<Payment[]>;
   getPaymentById(id: string): Promise<Payment | undefined>;
   deletePayment(id: string): Promise<void>;
+  
+  // Vehicle inspection operations
+  createVehicleInspection(inspection: InsertVehicleInspection): Promise<VehicleInspection>;
+  getVehicleInspectionsByContract(contractId: string): Promise<VehicleInspection[]>;
+  getVehicleInspection(id: string): Promise<VehicleInspection | undefined>;
   
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
@@ -879,6 +887,32 @@ export class DatabaseStorage implements IStorage {
 
   async deletePayment(id: string): Promise<void> {
     await db.delete(payments).where(eq(payments.id, id));
+  }
+
+  // Vehicle inspection operations
+  async createVehicleInspection(inspectionData: InsertVehicleInspection): Promise<VehicleInspection> {
+    const [inspection] = await db
+      .insert(vehicleInspections)
+      .values(inspectionData)
+      .returning();
+    return inspection;
+  }
+
+  async getVehicleInspectionsByContract(contractId: string): Promise<VehicleInspection[]> {
+    return await db
+      .select()
+      .from(vehicleInspections)
+      .where(eq(vehicleInspections.contractId, contractId))
+      .orderBy(desc(vehicleInspections.createdAt));
+  }
+
+  async getVehicleInspection(id: string): Promise<VehicleInspection | undefined> {
+    const [inspection] = await db
+      .select()
+      .from(vehicleInspections)
+      .where(eq(vehicleInspections.id, id))
+      .limit(1);
+    return inspection;
   }
 
   // Audit log operations

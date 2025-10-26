@@ -160,6 +160,19 @@ export function VehicleInspectionForm({ onSubmit, isPending }: VehicleInspection
     
     if (photos.length === 0) {
       newErrors.photos = t('inspection.errors.photosRequired');
+    } else if (photos.length < 6) {
+      newErrors.photos = t('inspection.errors.allPhotosRequired');
+    } else {
+      const angles = photos.map(p => p.angle);
+      const uniqueAngles = new Set(angles);
+      if (uniqueAngles.size !== 6) {
+        newErrors.photos = t('inspection.errors.allPhotosRequired');
+      }
+      const requiredAngles: PhotoAngle[] = ['front', 'back', 'left', 'right', 'top', 'dashboard'];
+      const missingAngles = requiredAngles.filter(angle => !angles.includes(angle));
+      if (missingAngles.length > 0) {
+        newErrors.photos = t('inspection.errors.allPhotosRequired');
+      }
     }
     
     if (Object.keys(newErrors).length > 0) {

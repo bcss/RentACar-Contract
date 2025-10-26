@@ -634,8 +634,20 @@ export const insertVehicleInspectionSchema = createInsertSchema(vehicleInspectio
   odometerReading: z.number().min(0),
   photos: z.array(z.object({
     angle: z.enum(['front', 'back', 'left', 'right', 'top', 'dashboard']),
-    data: z.string(), // base64 encoded image
-  })).min(1, "At least one photo is required").max(6, "Maximum 6 photos allowed"),
+    data: z.string().min(1, "Photo data required"), // base64 encoded image
+  }))
+    .length(6, "Exactly 6 photos required (front, back, left, right, top, dashboard)")
+    .refine((photos) => {
+      const angles = photos.map(p => p.angle);
+      const uniqueAngles = new Set(angles);
+      return uniqueAngles.size === 6;
+    }, { message: "All 6 unique photo angles must be provided" })
+    .refine((photos) => {
+      const requiredAngles: Array<'front' | 'back' | 'left' | 'right' | 'top' | 'dashboard'> = 
+        ['front', 'back', 'left', 'right', 'top', 'dashboard'];
+      const angles = photos.map(p => p.angle);
+      return requiredAngles.every(angle => angles.includes(angle));
+    }, { message: "Missing required photo angles" }),
 });
 
 export type InsertVehicleInspection = z.infer<typeof insertVehicleInspectionSchema>;
