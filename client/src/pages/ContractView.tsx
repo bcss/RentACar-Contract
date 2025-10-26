@@ -60,6 +60,7 @@ export default function ContractView() {
   const [showFinalPaymentDialog, setShowFinalPaymentDialog] = useState(false);
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [showInspectionDialog, setShowInspectionDialog] = useState(false);
+  const [showPostReturnInspectionDialog, setShowPostReturnInspectionDialog] = useState(false);
 
   // Return workflow form state
   const [odometerEnd, setOdometerEnd] = useState('');
@@ -308,6 +309,35 @@ export default function ContractView() {
 
       // Then activate the contract
       await activateMutation.mutateAsync();
+    } catch (error: any) {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  // Handle post-return inspection submission (opens return dialog after)
+  const handlePostReturnInspectionSubmit = async (inspectionData: any) => {
+    try {
+      // Create the post-return inspection
+      await apiRequest('POST', `/api/contracts/${params.id}/inspections`, inspectionData);
+      
+      toast({
+        title: t('common.success'),
+        description: t('inspection.postReturnCreated'),
+      });
+
+      // Invalidate inspections cache to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id, 'inspections'] });
+
+      // Close inspection dialog
+      setShowPostReturnInspectionDialog(false);
+      
+      // Open return charges dialog automatically
+      setShowReturnDialog(true);
     } catch (error: any) {
       toast({
         title: t('common.error'),
@@ -1326,7 +1356,7 @@ export default function ContractView() {
             </Button>
           )}
           {contract.status === 'active' && canManageWorkflow && (
-            <Button onClick={() => setShowReturnDialog(true)} data-testid="button-complete-rental">
+            <Button onClick={() => setShowPostReturnInspectionDialog(true)} data-testid="button-complete-rental">
               <span className="material-icons">assignment_turned_in</span>
               <span>Complete Rental (Vehicle Returned)</span>
             </Button>
@@ -1940,13 +1970,22 @@ export default function ContractView() {
                 const inspectionTypeLabel = inspection.inspectionType === 'pre_delivery' 
                   ? t('inspection.preDelivery')
                   : t('inspection.postReturn');
+                const inspectionIcon = inspection.inspectionType === 'pre_delivery' 
+                  ? 'local_shipping' 
+                  : 'assignment_turned_in';
+                const badgeVariant = inspection.inspectionType === 'pre_delivery' 
+                  ? 'default' 
+                  : 'secondary';
                 
                 return (
                   <div key={inspection.id} className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline">{inspectionTypeLabel}</Badge>
+                          <Badge variant={badgeVariant} className="flex items-center gap-1">
+                            <span className="material-icons text-sm">{inspectionIcon}</span>
+                            {inspectionTypeLabel}
+                          </Badge>
                           <span className="text-sm text-muted-foreground">
                             {inspection.createdAt && format(new Date(inspection.createdAt), 'PPp')}
                           </span>
@@ -2418,6 +2457,23 @@ export default function ContractView() {
             inspectionType="pre_delivery"
             onSubmit={handleInspectionSubmit}
             onCancel={() => setShowInspectionDialog(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Post-Return Inspection Dialog */}
+      <Dialog open={showPostReturnInspectionDialog} onOpenChange={setShowPostReturnInspectionDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('inspection.postReturnTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('inspection.postReturnDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <VehicleInspectionForm
+            inspectionType="post_return"
+            onSubmit={handlePostReturnInspectionSubmit}
+            onCancel={() => setShowPostReturnInspectionDialog(false)}
           />
         </DialogContent>
       </Dialog>

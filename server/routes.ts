@@ -832,6 +832,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
 
+      // VALIDATION: Ensure post-return inspection exists
+      const inspections = await storage.getVehicleInspectionsByContract(req.params.id);
+      const hasPostReturnInspection = inspections.some(i => i.inspectionType === 'post_return');
+      
+      if (!hasPostReturnInspection) {
+        return res.status(400).json({ 
+          message: "Post-return vehicle inspection is required before completing the rental. Please complete the inspection first." 
+        });
+      }
+
       const { odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride } = req.body;
       
       // SECURITY: Calculate fuel charge on backend instead of trusting client
