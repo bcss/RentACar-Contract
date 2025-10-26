@@ -399,7 +399,7 @@ export default function OperationalReports() {
 
               <Card data-testid="card-vehicle-utilization-chart">
                 <CardHeader>
-                  <CardTitle>{t('operationalReports.vehicleUtilizationChart')}</CardTitle>
+                  <CardTitle>{t('operationalReports.vehicleUtilization')}</CardTitle>
                   <CardDescription>
                     Utilization rates by vehicle
                   </CardDescription>
