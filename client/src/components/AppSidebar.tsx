@@ -18,6 +18,7 @@ import {
   SidebarMenuSubButton,
   SidebarHeader,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -45,9 +46,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { PanelLeft } from 'lucide-react';
 
 interface AppSidebarProps {
   side?: 'left' | 'right';
@@ -58,6 +63,9 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const [location] = useLocation();
   const { user, isAdmin, isManager } = useAuth();
   const { toast } = useToast();
+  const { toggleSidebar } = useSidebar();
+  const { language, toggleLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -452,7 +460,70 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 space-y-4">
+        {/* Control buttons: Sidebar Toggle, Theme, Language */}
+        <div className="flex items-center justify-between gap-2 px-2">
+          {/* Sidebar Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => toggleSidebar()}
+                data-testid="button-sidebar-toggle"
+                className="h-9 w-9 hover-elevate active-elevate-2"
+              >
+                <PanelLeft className="h-4 w-4" />
+                <span className="sr-only">{t('header.toggleSidebar')}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>{t('header.toggleSidebar')}</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Theme Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                data-testid="button-theme-toggle"
+                className="h-9 w-9 hover-elevate active-elevate-2"
+              >
+                <span className="material-icons">
+                  {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+                </span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>{t('header.switchTheme')}</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Language Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleLanguage}
+                data-testid="button-language-toggle"
+                className="h-9 w-9 hover-elevate active-elevate-2"
+              >
+                <span className="font-mono text-sm font-semibold">
+                  {language === 'en' ? 'عربي' : 'EN'}
+                </span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>{t('header.switchLanguage')}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 w-full hover-elevate p-2 rounded-md" data-testid="button-user-menu">
