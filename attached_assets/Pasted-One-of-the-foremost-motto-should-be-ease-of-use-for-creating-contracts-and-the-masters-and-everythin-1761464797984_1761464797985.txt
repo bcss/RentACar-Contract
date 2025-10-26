@@ -1,0 +1,21 @@
+One of the foremost motto should be ease of use for creating contracts and the masters and everything. Is it so ? 
+
+Also the hirer type in contracts screen shows in English and Arabic together is it needed as there is rtl/ltr already in place. Is there any similar situation in the app anywhere ? Even in the new contract page inseveral fields it is there and several fields it is not there. 
+
+Why is SAR being shown in contract view etc. 
+
+I can see that there no currency setting in Financial Setting ? Why ? There are several places In financial settings I can see hard coded currency label of AED. Make a list and let me know where all. 
+
+Also the translation buttons can be shown on top of the menu bar and the menu bar collapse and expand button can be connected to the menu bar instead of in the top bar as a standalone button. After this remove the top bar and the dashboard and other screens get more screen real estate isn't it?
+
+The contract search filter should be as per stages and at the end disabled. 
+
+Did you test the app as per the document you created and did you find anything that needs to be added for testing. I asked for two testing results documents. Are they completely and truthfully tested and filled up. What are the gaps found in the testing. Can we create an extensive task list to plug the gaps or holes or bugs.
+
+Why is the audit report in reports menu not showing any actions ? creating contracts, customers, vehicle, sponsor, company etc. are coming under audit logs?
+
+What is the operationalReports.vehicleUtilizationChart  in operational reports. Any similar field labels anywhere in the project ?
+
+The contract has has two stages other than editing stages which are pre delivery and post return stages. The vehicle inspection should happen in both stages. The photos of physical photo inspections should be uploaded in pre delivery and post return stages. Also the fields also should be split into these two stages. I need you  suggestions in this regarding or design before doing anything.
+
+Even though you said you tested 100% and everything works still why I was able to find all of the above. What is the reason ?
