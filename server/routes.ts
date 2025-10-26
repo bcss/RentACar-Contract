@@ -2,7 +2,7 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -1377,6 +1377,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error deleting payment:", error);
       res.status(400).json({ message: error.message || "Failed to delete payment" });
+    }
+  });
+
+  // Vehicle Inspection routes
+  app.post('/api/contracts/:contractId/inspections', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { contractId } = req.params;
+
+      // Verify contract exists
+      const contract = await storage.getContract(contractId);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      // Get user info for inspector name
+      const user = req.user;
+      const inspectorName = user.firstName && user.lastName 
+        ? `${user.firstName} ${user.lastName}`.trim()
+        : user.username;
+
+      // Validate inspection data
+      const validatedData = insertVehicleInspectionSchema.parse({
+        ...req.body,
+        contractId,
+        vehicleId: contract.vehicleId,
+        inspectorName: req.body.inspectorName || inspectorName,
+      });
+
+      // Create inspection
+      const inspection = await storage.createVehicleInspection({
+        ...validatedData,
+        createdBy: userId,
+      } as any);
+
+      // Create comprehensive audit log
+      const inspectionType = inspection.inspectionType === 'pre_delivery' ? 'Pre-Delivery' : 'Post-Return';
+      await createAuditLog(
+        userId,
+        'create_inspection',
+        contractId,
+        req,
+        `Created ${inspectionType} inspection for contract #${contract.contractNumber} - Odometer: ${inspection.odometerReading}km, Fuel: ${inspection.fuelLevel}%, Photos: ${JSON.parse(inspection.photos as any).length}`
+      );
+
+      res.json(inspection);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error creating inspection:", error);
+      res.status(400).json({ message: error.message || "Failed to create inspection" });
+    }
+  });
+
+  app.get('/api/contracts/:contractId/inspections', isAuthenticated, async (req: any, res) => {
+    try {
+      const { contractId } = req.params;
+      const inspections = await storage.getVehicleInspectionsByContract(contractId);
+      res.json(inspections);
+    } catch (error: any) {
+      console.error("Error fetching inspections:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch inspections" });
+    }
+  });
+
+  app.get('/api/inspections/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const inspection = await storage.getVehicleInspection(id);
+      if (!inspection) {
+        return res.status(404).json({ message: "Inspection not found" });
+      }
+      res.json(inspection);
+    } catch (error: any) {
+      console.error("Error fetching inspection:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch inspection" });
     }
   });
 
