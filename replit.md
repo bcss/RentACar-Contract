@@ -44,16 +44,22 @@ Preferred communication style: Simple, everyday language.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
 - **Professional PDF Integration:** Professional PDF generation for rental contracts with bilingual support.
-- **Vehicle Inspection System:** Comprehensive pre-delivery and post-return vehicle inspection workflow with mandatory photo documentation. **Key Features:**
-  - **Mandatory Pre-Delivery Inspection:** Contract activation requires completion of pre-delivery inspection with 6 mandatory photos (front, back, left, right, top, dashboard view)
-  - **Strict Photo Validation:** Enforces exactly 6 unique photos at different angles - no duplicates allowed, validated on frontend and backend
+- **Vehicle Inspection System:** Comprehensive two-stage vehicle inspection workflow with mandatory photo documentation at both pre-delivery and post-return stages. **Key Features:**
+  - **Two-Stage Workflow:**
+    - **Pre-Delivery Inspection:** Required before contract activation (gates `draft` → `confirmed` → `active`)
+    - **Post-Return Inspection:** Required before rental completion (gates `active` → `completed`)
+  - **Sequential Gating:** System enforces proper workflow with backend validation - activation blocked without pre-delivery inspection, completion blocked without post-return inspection
+  - **Mandatory Photo Documentation:** Each inspection requires exactly 6 unique photos at different angles (front, back, left, right, top, dashboard view)
+  - **Strict Photo Validation:** No duplicates allowed - validated on both frontend and backend
   - **Automatic Photo Compression:** All photos automatically compressed to 1920x1080 resolution, 0.85 quality, JPEG format for optimal storage
-  - **Inspection History View:** Complete inspection timeline with photo gallery, zoom capabilities, and inspection details (inspector name, odometer reading, fuel level, condition notes)
-  - **Bilingual Support:** Full English/Arabic translations for all inspection labels, messages, and photo angles
-  - **Comprehensive Audit Logging:** All inspection actions logged with full details (type, odometer, fuel level, photo count)
+  - **Visual Differentiation:** Inspection history displays both types with distinct badge variants (default for pre-delivery, secondary for post-return) and Material icons (local_shipping/assignment_turned_in)
+  - **Inspection History View:** Complete timeline with photo gallery, zoom capabilities, inspection details (inspector name, odometer reading, fuel level, condition notes)
+  - **Bilingual Support:** Full English/Arabic translations for all inspection labels, messages, photo angles, and dialog titles
+  - **Comprehensive Audit Logging:** All inspection creation events logged with full details (type, odometer, fuel level, photo count)
   - **JSONB Photo Storage:** Base64-encoded photos stored in JSONB column (MVP approach, ready for migration to object storage for scale)
   - **Inspector Tracking:** Automatic capture of inspector name, timestamp, and user authentication
-  - **API Endpoints:** POST /api/contracts/:id/inspections (create), GET /api/contracts/:id/inspections (list), GET /api/inspections/:id (details)
+  - **API Endpoints:** POST /api/contracts/:id/inspections (create with type validation), GET /api/contracts/:id/inspections (list all for contract), GET /api/inspections/:id (individual inspection details)
+  - **Workflow Integration:** Pre-delivery inspection auto-chains to activation; post-return inspection auto-chains to return charges dialog
 
 ## External Dependencies
 
