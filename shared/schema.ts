@@ -546,7 +546,7 @@ export const payments = pgTable("payments", {
   // Payment Details
   amount: varchar("amount").notNull(), // Payment amount (stored as string for precision)
   paymentMethod: varchar("payment_method", { length: 50 }).notNull(), // cash, card, bank_transfer, check, etc.
-  currency: varchar("currency", { length: 10 }).notNull().default("SAR"), // SAR, USD, EUR, etc.
+  currency: varchar("currency", { length: 10 }).notNull().default(""), // Currency from company settings
   
   // Payment Metadata
   paidAt: timestamp("paid_at").notNull().defaultNow(), // When payment was received
@@ -701,8 +701,8 @@ export const companySettings = pgTable("company_settings", {
   logoUrl: varchar("logo_url"),
   
   // Currency and VAT
-  currencyEn: varchar("currency_en", { length: 10 }).notNull().default("AED"),
-  currencyAr: varchar("currency_ar", { length: 10 }).notNull().default("د.إ"),
+  currencyEn: varchar("currency_en", { length: 10 }).notNull().default(""),
+  currencyAr: varchar("currency_ar", { length: 10 }).notNull().default(""),
   vatPercentage: varchar("vat_percentage").notNull().default("5"),
   
   // Financial Settings - Default Rates and Pricing

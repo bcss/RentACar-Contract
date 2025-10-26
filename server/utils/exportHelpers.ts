@@ -139,7 +139,7 @@ export function exportExcelToBuffer(workbook: XLSX.WorkBook): Buffer {
   return Buffer.from(excelBuffer);
 }
 
-export function formatCurrency(amount: number, currency: string = 'AED'): string {
+export function formatCurrency(amount: number, currency: string): string {
   return `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
 

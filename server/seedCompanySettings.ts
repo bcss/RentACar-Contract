@@ -99,8 +99,8 @@ export async function seedCompanySettings() {
       
       await storage.updateCompanySettings({
         ...settings,
-        currencyEn: "AED",
-        currencyAr: "د.إ",
+        currencyEn: "",
+        currencyAr: "",
         vatPercentage: "5",
         termsSection1En: TERMS_SECTION_1_EN,
         termsSection1Ar: TERMS_SECTION_1_AR,

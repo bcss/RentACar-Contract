@@ -17,8 +17,8 @@ export function useCurrency(): UseCurrencyReturn {
   });
 
   const currency = currentLanguage === 'ar' 
-    ? (settings?.currencyAr || 'د.إ')
-    : (settings?.currencyEn || 'AED');
+    ? (settings?.currencyAr || '')
+    : (settings?.currencyEn || '');
 
   return {
     currency,

@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrency } from "@/hooks/useCurrency";
 import { insertCompanySettingsSchema, type CompanySettings } from "@shared/schema";
 import { z } from "zod";
 import { Lock } from "lucide-react";
@@ -65,6 +66,7 @@ export default function FinancialSettings() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { isAdmin, isLoading: authLoading } = useAuth();
+  const { currency } = useCurrency();
 
   const { data: settings, isLoading } = useQuery<any>({
     queryKey: ['/api/settings/financial'],
@@ -74,8 +76,8 @@ export default function FinancialSettings() {
   const currencyForm = useForm<CurrencySettingsForm>({
     resolver: zodResolver(currencySettingsSchema),
     defaultValues: {
-      currencyEn: "AED",
-      currencyAr: "د.إ",
+      currencyEn: "",
+      currencyAr: "",
     },
   });
 
@@ -117,8 +119,8 @@ export default function FinancialSettings() {
   useEffect(() => {
     if (settings) {
       currencyForm.reset({
-        currencyEn: settings.currencyEn || "AED",
-        currencyAr: settings.currencyAr || "د.إ",
+        currencyEn: settings.currencyEn || "",
+        currencyAr: settings.currencyAr || "",
       });
       rentalRatesForm.reset({
         defaultDailyRate: settings.defaultDailyRate,
@@ -223,7 +225,7 @@ export default function FinancialSettings() {
                           <FormControl>
                             <Input 
                               {...field} 
-                              placeholder="AED" 
+                              placeholder="e.g., USD, EUR, GBP" 
                               data-testid="input-currency-en" 
                             />
                           </FormControl>
@@ -243,7 +245,7 @@ export default function FinancialSettings() {
                               {...field} 
                               className="text-right" 
                               dir="rtl"
-                              placeholder="د.إ" 
+                              placeholder="مثال: $، €، £" 
                               data-testid="input-currency-ar" 
                             />
                           </FormControl>
@@ -283,7 +285,7 @@ export default function FinancialSettings() {
                       name="defaultDailyRate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Daily Rate</FormLabel>
+                          <FormLabel>{`Daily Rate${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -303,7 +305,7 @@ export default function FinancialSettings() {
                       name="defaultWeeklyRate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Weekly Rate</FormLabel>
+                          <FormLabel>{`Weekly Rate${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -323,7 +325,7 @@ export default function FinancialSettings() {
                       name="defaultMonthlyRate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Monthly Rate</FormLabel>
+                          <FormLabel>{`Monthly Rate${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -366,7 +368,7 @@ export default function FinancialSettings() {
                       name="insurancePerDay"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Insurance Per Day</FormLabel>
+                          <FormLabel>{`Insurance Per Day${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -386,7 +388,7 @@ export default function FinancialSettings() {
                       name="gpsPerDay"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>GPS Per Day</FormLabel>
+                          <FormLabel>{`GPS Per Day${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -406,7 +408,7 @@ export default function FinancialSettings() {
                       name="babySeatPerDay"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Baby Seat Per Day</FormLabel>
+                          <FormLabel>{`Baby Seat Per Day${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -426,7 +428,7 @@ export default function FinancialSettings() {
                       name="additionalDriverFee"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Additional Driver Fee</FormLabel>
+                          <FormLabel>{`Additional Driver Fee${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -469,7 +471,7 @@ export default function FinancialSettings() {
                       name="defaultExtraKmRate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Extra KM Rate (per km)</FormLabel>
+                          <FormLabel>{`Extra KM Rate${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -489,7 +491,7 @@ export default function FinancialSettings() {
                       name="defaultSecurityDeposit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Security Deposit</FormLabel>
+                          <FormLabel>{`Security Deposit${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -532,7 +534,7 @@ export default function FinancialSettings() {
                       name="petrolPricePerLiter"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Petrol Price (per liter)</FormLabel>
+                          <FormLabel>{`Petrol Price Per Liter${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
@@ -552,7 +554,7 @@ export default function FinancialSettings() {
                       name="dieselPricePerLiter"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Diesel Price (per liter)</FormLabel>
+                          <FormLabel>{`Diesel Price Per Liter${currency ? ` (${currency})` : ''}`}</FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
