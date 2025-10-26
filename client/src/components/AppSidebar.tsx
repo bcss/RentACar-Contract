@@ -289,23 +289,41 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   return (
     <Sidebar side={side} data-testid="sidebar-main">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <span className="material-icons text-3xl text-primary">
-            directions_car
-          </span>
-          <div>
-            <h2 className="text-lg font-semibold">
-              {settings 
-                ? i18n.language === 'ar' 
-                  ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
-                  : settings.companyNameEn || settings.companyNameAr || t('landing.title')
-                : t('landing.title')
-              }
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {t('landing.title')}
-            </p>
+        <div className="flex items-center gap-3 justify-between">
+          <div className="flex items-center gap-3">
+            <span className="material-icons text-3xl text-primary">
+              directions_car
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold">
+                {settings 
+                  ? i18n.language === 'ar' 
+                    ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
+                    : settings.companyNameEn || settings.companyNameAr || t('landing.title')
+                  : t('landing.title')
+                }
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {t('landing.title')}
+              </p>
+            </div>
           </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                data-testid="button-sidebar-toggle"
+                className="h-9 w-9 hover-elevate active-elevate-2"
+              >
+                <PanelLeft className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>{t('header.toggleSidebar')}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </SidebarHeader>
       
