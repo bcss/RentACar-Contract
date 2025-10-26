@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ContractTimeline } from '@/components/ContractTimeline';
+import { VehicleInspectionForm } from '@/components/VehicleInspectionForm';
 import {
   Select,
   SelectContent,
@@ -42,6 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
 import { isUnauthorizedError } from '@/lib/authUtils';
+import { ZoomIn } from 'lucide-react';
 
 export default function ContractView() {
   const { t, i18n } = useTranslation();
@@ -57,6 +59,7 @@ export default function ContractView() {
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showFinalPaymentDialog, setShowFinalPaymentDialog] = useState(false);
   const [showRefundDialog, setShowRefundDialog] = useState(false);
+  const [showInspectionDialog, setShowInspectionDialog] = useState(false);
 
   // Return workflow form state
   const [odometerEnd, setOdometerEnd] = useState('');
@@ -125,6 +128,12 @@ export default function ContractView() {
   // Fetch payments for this contract
   const { data: payments = [], isLoading: isLoadingPayments } = useQuery<Payment[]>({
     queryKey: ['/api/contracts', params.id, 'payments'],
+    enabled: isAuthenticated && !!params.id,
+  });
+
+  // Fetch inspections for this contract
+  const { data: inspections = [], isLoading: isLoadingInspections } = useQuery<any[]>({
+    queryKey: ['/api/contracts', params.id, 'inspections'],
     enabled: isAuthenticated && !!params.id,
   });
 
@@ -272,6 +281,7 @@ export default function ContractView() {
         description: 'Rental activated - Vehicle handed over',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
+      setShowInspectionDialog(false);
     },
     onError: (error: Error) => {
       toast({
@@ -281,6 +291,32 @@ export default function ContractView() {
       });
     },
   });
+
+  // Handle inspection submission and activation
+  const handleInspectionSubmit = async (inspectionData: any) => {
+    try {
+      // First create the inspection - photos will be handled by backend
+      await apiRequest('POST', `/api/contracts/${params.id}/inspections`, inspectionData);
+      
+      toast({
+        title: t('common.success'),
+        description: t('inspection.created'),
+      });
+
+      // Invalidate inspections cache to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id, 'inspections'] });
+
+      // Then activate the contract
+      await activateMutation.mutateAsync();
+    } catch (error: any) {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
 
   const completeMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -1284,28 +1320,10 @@ export default function ContractView() {
             </>
           )}
           {contract.status === 'confirmed' && canManageWorkflow && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button data-testid="button-activate-rental">
-                  <span className="material-icons">local_shipping</span>
-                  <span>Activate Rental (Hand Over Vehicle)</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Activate Rental</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Confirm that the vehicle has been handed over to the customer and the rental is now active.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => activateMutation.mutate()}>
-                    Activate
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button onClick={() => setShowInspectionDialog(true)} data-testid="button-activate-rental">
+              <span className="material-icons">local_shipping</span>
+              <span>Activate Rental (Pre-Delivery Inspection)</span>
+            </Button>
           )}
           {contract.status === 'active' && canManageWorkflow && (
             <Button onClick={() => setShowReturnDialog(true)} data-testid="button-complete-rental">
@@ -1904,6 +1922,82 @@ export default function ContractView() {
         />
       </div>
 
+      {/* Vehicle Inspections History */}
+      {inspections && inspections.length > 0 && (
+        <Card className="print-hidden">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="material-icons">camera_alt</span>
+              {t('inspection.history')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {inspections.map((inspection: any) => {
+                const photos = typeof inspection.photos === 'string' 
+                  ? JSON.parse(inspection.photos) 
+                  : inspection.photos;
+                const inspectionTypeLabel = inspection.inspectionType === 'pre_delivery' 
+                  ? t('inspection.preDelivery')
+                  : t('inspection.postReturn');
+                
+                return (
+                  <div key={inspection.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline">{inspectionTypeLabel}</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {inspection.createdAt && format(new Date(inspection.createdAt), 'PPp')}
+                          </span>
+                        </div>
+                        <p className="text-sm">
+                          <span className="font-medium">{t('inspection.inspector')}:</span> {inspection.inspectorName}
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium">{t('inspection.odometer')}:</span> {inspection.odometerReading} km
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium">{t('inspection.fuelLevel')}:</span> {inspection.fuelLevel}%
+                        </p>
+                        {inspection.conditionNotes && (
+                          <p className="text-sm mt-2">
+                            <span className="font-medium">{t('inspection.condition')}:</span> {inspection.conditionNotes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                      {photos.map((photo: any, index: number) => (
+                        <div key={index} className="group relative aspect-video bg-muted rounded overflow-hidden border">
+                          <img
+                            src={photo.data}
+                            alt={t(`inspection.angles.${photo.angle}`)}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button
+                              onClick={() => window.open(photo.data, '_blank')}
+                              className="text-white hover-elevate p-2 rounded"
+                            >
+                              <ZoomIn className="w-5 h-5" />
+                            </button>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs px-2 py-1 text-center">
+                            {t(`inspection.angles.${photo.angle}`)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Legal Terms - Print Only */}
       {companySettings && (
         <div className="print-only border-t-2 border-black pt-4 mt-8">
@@ -2308,6 +2402,23 @@ export default function ContractView() {
               {createPaymentMutation.isPending ? 'Recording...' : 'Record Payment'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pre-Delivery Inspection Dialog */}
+      <Dialog open={showInspectionDialog} onOpenChange={setShowInspectionDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('inspection.preDeliveryTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('inspection.preDeliveryDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <VehicleInspectionForm
+            inspectionType="pre_delivery"
+            onSubmit={handleInspectionSubmit}
+            onCancel={() => setShowInspectionDialog(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>

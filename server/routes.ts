@@ -1414,12 +1414,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create comprehensive audit log
       const inspectionType = inspection.inspectionType === 'pre_delivery' ? 'Pre-Delivery' : 'Post-Return';
+      const photosCount = Array.isArray(inspection.photos) 
+        ? inspection.photos.length 
+        : (typeof inspection.photos === 'string' ? JSON.parse(inspection.photos).length : 0);
       await createAuditLog(
         userId,
         'create_inspection',
         contractId,
         req,
-        `Created ${inspectionType} inspection for contract #${contract.contractNumber} - Odometer: ${inspection.odometerReading}km, Fuel: ${inspection.fuelLevel}%, Photos: ${JSON.parse(inspection.photos as any).length}`
+        `Created ${inspectionType} inspection for contract #${contract.contractNumber} - Odometer: ${inspection.odometerReading}km, Fuel: ${inspection.fuelLevel}%, Photos: ${photosCount}`
       );
 
       res.json(inspection);

@@ -23,7 +23,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **Database:** PostgreSQL (via Neon serverless).
-- **Schema Design:** Tables for `Sessions`, `Users`, `Customers`, `Vehicles`, `Sponsors`, `Companies`, `Contracts`, `Payments`, `Audit Logs`, `Contract Edits`, `Contract Counter`, `System Errors`, and `Company Settings`.
+- **Schema Design:** Tables for `Sessions`, `Users`, `Customers`, `Vehicles`, `Sponsors`, `Companies`, `Contracts`, `Payments`, `Vehicle Inspections`, `Audit Logs`, `Contract Edits`, `Contract Counter`, `System Errors`, and `Company Settings`.
 - **Key Design Decisions:** Draft vs. finalized status with immutability, bilingual field storage, auto-incrementing contract numbers, dual-layer audit trail, singleton pattern for global settings, master data pattern for key entities, and separate payment tracking.
 - **Disable-Only Architecture:** Replaced all delete operations with disable/enable functionality for key entities, tracking `disabled`, `disabledBy`, `disabledAt` fields.
 
@@ -44,6 +44,16 @@ Preferred communication style: Simple, everyday language.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
 - **Professional PDF Integration:** Professional PDF generation for rental contracts with bilingual support.
+- **Vehicle Inspection System:** Comprehensive pre-delivery and post-return vehicle inspection workflow with mandatory photo documentation. **Key Features:**
+  - **Mandatory Pre-Delivery Inspection:** Contract activation requires completion of pre-delivery inspection with 6 mandatory photos (front, back, left, right, top, dashboard view)
+  - **Strict Photo Validation:** Enforces exactly 6 unique photos at different angles - no duplicates allowed, validated on frontend and backend
+  - **Automatic Photo Compression:** All photos automatically compressed to 1920x1080 resolution, 0.85 quality, JPEG format for optimal storage
+  - **Inspection History View:** Complete inspection timeline with photo gallery, zoom capabilities, and inspection details (inspector name, odometer reading, fuel level, condition notes)
+  - **Bilingual Support:** Full English/Arabic translations for all inspection labels, messages, and photo angles
+  - **Comprehensive Audit Logging:** All inspection actions logged with full details (type, odometer, fuel level, photo count)
+  - **JSONB Photo Storage:** Base64-encoded photos stored in JSONB column (MVP approach, ready for migration to object storage for scale)
+  - **Inspector Tracking:** Automatic capture of inspector name, timestamp, and user authentication
+  - **API Endpoints:** POST /api/contracts/:id/inspections (create), GET /api/contracts/:id/inspections (list), GET /api/inspections/:id (details)
 
 ## External Dependencies
 

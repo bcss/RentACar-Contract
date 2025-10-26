@@ -22,13 +22,16 @@ interface Photo {
 }
 
 interface VehicleInspectionFormProps {
+  inspectionType: 'pre_delivery' | 'post_return';
   onSubmit: (data: {
+    inspectionType: 'pre_delivery' | 'post_return';
     inspectorName: string;
     odometerReading: number;
     fuelLevel: number;
     conditionNotes: string;
     photos: Photo[];
   }) => void;
+  onCancel?: () => void;
   isPending?: boolean;
 }
 
@@ -46,7 +49,7 @@ const COMPRESSED_MAX_WIDTH = 1920;
 const COMPRESSED_MAX_HEIGHT = 1080;
 const COMPRESSION_QUALITY = 0.85;
 
-export function VehicleInspectionForm({ onSubmit, isPending }: VehicleInspectionFormProps) {
+export function VehicleInspectionForm({ inspectionType, onSubmit, onCancel, isPending }: VehicleInspectionFormProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
   
@@ -181,6 +184,7 @@ export function VehicleInspectionForm({ onSubmit, isPending }: VehicleInspection
     }
     
     onSubmit({
+      inspectionType,
       inspectorName: inspectorName.trim(),
       odometerReading: odometerValue,
       fuelLevel: fuelValue,
@@ -353,6 +357,17 @@ export function VehicleInspectionForm({ onSubmit, isPending }: VehicleInspection
       </div>
 
       <div className="flex justify-end gap-2">
+        {onCancel && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isPending}
+            data-testid="button-cancel-inspection"
+          >
+            {t('common.cancel')}
+          </Button>
+        )}
         <Button
           type="submit"
           disabled={isPending}
