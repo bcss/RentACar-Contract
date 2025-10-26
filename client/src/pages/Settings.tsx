@@ -708,11 +708,11 @@ export default function Settings() {
                   <FormField
                     control={form.control}
                     name="currencyAr"
-                    render={({ field }) => (
+                    render={({ field}) => (
                       <FormItem>
                         <FormLabel>{t('settings.currencyAr')}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="د.إ" data-testid="input-currency-ar" />
+                          <Input {...field} placeholder="مثال: $، €، £" dir="rtl" className="text-right" data-testid="input-currency-ar" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
