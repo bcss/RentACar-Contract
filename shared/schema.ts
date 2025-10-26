@@ -583,6 +583,64 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
 
+// Vehicle Inspections table - Track pre-delivery and post-return inspections with photos
+export const vehicleInspections = pgTable("vehicle_inspections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  
+  // Inspection Type
+  inspectionType: varchar("inspection_type", { length: 20 }).notNull(), // 'pre_delivery' or 'post_return'
+  
+  // Inspector Information
+  inspectorName: varchar("inspector_name").notNull(), // Auto-filled from logged-in user
+  
+  // Vehicle Metrics
+  odometerReading: integer("odometer_reading").notNull(),
+  fuelLevel: integer("fuel_level").notNull(), // 0-100%
+  conditionNotes: text("condition_notes"), // Damage description
+  
+  // Photos - JSONB array of {angle: string, data: string (base64)}
+  // Angles: 'front', 'back', 'left', 'right', 'top', 'dashboard'
+  photos: jsonb("photos").notNull(), // Array of photo objects
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const vehicleInspectionsRelations = relations(vehicleInspections, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [vehicleInspections.contractId],
+    references: [contracts.id],
+  }),
+  vehicle: one(vehicles, {
+    fields: [vehicleInspections.vehicleId],
+    references: [vehicles.id],
+  }),
+  creator: one(users, {
+    fields: [vehicleInspections.createdBy],
+    references: [users.id],
+    relationName: "inspectionCreator",
+  }),
+}));
+
+export const insertVehicleInspectionSchema = createInsertSchema(vehicleInspections).omit({
+  id: true,
+  createdAt: true,
+  createdBy: true,
+}).extend({
+  fuelLevel: z.number().min(0).max(100),
+  odometerReading: z.number().min(0),
+  photos: z.array(z.object({
+    angle: z.enum(['front', 'back', 'left', 'right', 'top', 'dashboard']),
+    data: z.string(), // base64 encoded image
+  })).min(1, "At least one photo is required").max(6, "Maximum 6 photos allowed"),
+});
+
+export type InsertVehicleInspection = z.infer<typeof insertVehicleInspectionSchema>;
+export type VehicleInspection = typeof vehicleInspections.$inferSelect;
+
 // Audit logs table
 export const auditLogs = pgTable("audit_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
