@@ -1590,10 +1590,13 @@ export class DatabaseStorage implements IStorage {
       return true;
     });
 
-    // Get user names for modifications
-    const userIds = new Set(filteredModifications.map(m => m.editedBy));
+    // Get user names from BOTH modifications and audit logs
+    const modificationUserIds = new Set(filteredModifications.map(m => m.editedBy));
+    const auditLogUserIds = new Set(filteredAuditLogs.map(log => log.userId).filter(id => id !== null) as string[]);
+    const allUserIds = new Set([...modificationUserIds, ...auditLogUserIds]);
+    
     const usersData = await Promise.all(
-      Array.from(userIds).map(id => this.getUser(id))
+      Array.from(allUserIds).map(id => this.getUser(id))
     );
     const userMap = new Map(usersData.filter(u => u).map(u => [u!.id, `${u!.firstName || ''} ${u!.lastName || ''}`.trim() || u!.username]));
 
@@ -1620,20 +1623,37 @@ export class DatabaseStorage implements IStorage {
       .sort((a, b) => b.modificationCount - a.modificationCount)
       .slice(0, 10); // Top 10
     
-    // User activity breakdown (count modifications per user)
-    const userActivityMap = new Map<string, number>();
+    // User activity breakdown - COMPLETE VERSION: Count from BOTH modifications AND audit logs
+    const userActivityMap = new Map<string, { modifications: number; auditActions: number; total: number }>();
+    
+    // Count modifications
     filteredModifications.forEach(m => {
       const userId = m.editedBy;
-      userActivityMap.set(userId, (userActivityMap.get(userId) || 0) + 1);
+      const current = userActivityMap.get(userId) || { modifications: 0, auditActions: 0, total: 0 };
+      current.modifications += 1;
+      current.total += 1;
+      userActivityMap.set(userId, current);
+    });
+    
+    // Count audit log actions (create, confirm, activate, complete, close, etc.)
+    filteredAuditLogs.forEach(log => {
+      if (log.userId) {
+        const current = userActivityMap.get(log.userId) || { modifications: 0, auditActions: 0, total: 0 };
+        current.auditActions += 1;
+        current.total += 1;
+        userActivityMap.set(log.userId, current);
+      }
     });
     
     const userActivity = Array.from(userActivityMap.entries())
-      .map(([userId, count]) => ({
+      .map(([userId, counts]) => ({
         userId,
         userName: userMap.get(userId) || 'Unknown',
-        modificationCount: count,
+        modificationCount: counts.modifications,
+        auditActionCount: counts.auditActions,
+        totalActions: counts.total,
       }))
-      .sort((a, b) => b.modificationCount - a.modificationCount);
+      .sort((a, b) => b.totalActions - a.totalActions);
 
     return {
       summary: {
@@ -1641,7 +1661,7 @@ export class DatabaseStorage implements IStorage {
         totalAuditLogs: filteredAuditLogs.length,
         uniqueContracts: uniqueContracts.size,
         avgModificationsPerContract,
-        activeUsers: userIds.size,
+        activeUsers: allUserIds.size, // Total users from both modifications and audit logs
       },
       modifications: modificationsWithUser.sort((a, b) => {
         const aTime = a.editedAt ? new Date(a.editedAt).getTime() : 0;
