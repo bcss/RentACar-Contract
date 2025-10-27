@@ -479,6 +479,208 @@ Available → (Confirm/Activate) → Rented → (Complete/Close) → Available
 
 ---
 
+## Vehicle Inspection Management
+
+### Overview
+
+**Location**: View inspections within each contract's detail page
+
+**Access Level**: Admin and Manager can view all inspections; Staff/Viewer can view only
+
+### Two-Stage Inspection System
+
+RCCMS implements a mandatory two-stage vehicle inspection workflow to protect both the rental company and customers from disputes:
+
+**Stage 1: Pre-Delivery Inspection**
+- **When**: Required before contract activation
+- **Purpose**: Document vehicle condition before handover to customer
+- **Gating**: Contract cannot be activated without pre-delivery inspection
+
+**Stage 2: Post-Return Inspection**
+- **When**: Required before contract completion
+- **Purpose**: Document vehicle condition after customer returns vehicle
+- **Gating**: Contract cannot be completed without post-return inspection
+
+### Pre-Delivery Inspection Process
+
+**Administrator/Manager Workflow:**
+
+1. Contract must be in **Confirmed** status
+2. User clicks **"Activate Contract"** button
+3. System automatically opens **Pre-Delivery Inspection** dialog
+4. Inspector (staff member) must complete:
+   - **Inspector Name**: Full name of person conducting inspection
+   - **Odometer Reading**: Current vehicle mileage
+   - **Fuel Level**: Exact fuel percentage (0-100%)
+   - **Condition Notes**: Document any existing scratches, dents, or damage
+   - **6 Mandatory Photos**: Front, Back, Left Side, Right Side, Top View, Dashboard
+5. System validates:
+   - All fields filled
+   - Exactly 6 photos uploaded
+   - Each photo is unique (no duplicates)
+   - Photos meet size requirements (< 10MB each)
+6. Photos automatically compressed to 1920x1080, 0.85 quality, JPEG format
+7. Click **"Save Inspection & Activate"**
+8. Contract automatically activates after successful inspection creation
+
+**What is Stored:**
+- Inspector name and timestamp
+- Complete vehicle condition documentation
+- 6 photos in JSONB format (base64-encoded)
+- Odometer and fuel readings for comparison at return
+
+**Why This Matters:**
+- Legal proof of vehicle condition before handover
+- Protects against false damage claims
+- Photo evidence of pre-existing damage
+- Required by insurance and legal compliance
+- Cannot activate contract without this step
+
+### Post-Return Inspection Process
+
+**Administrator/Manager Workflow:**
+
+1. Contract must be in **Active** status
+2. User clicks **"Complete Contract"** button
+3. System automatically opens **Post-Return Inspection** dialog
+4. Inspector must complete:
+   - **Inspector Name**: Full name of person conducting inspection
+   - **Odometer Reading**: Current vehicle mileage at return
+   - **Fuel Level**: Exact fuel percentage at return (0-100%)
+   - **Condition Notes**: Document any NEW damage found
+   - **6 Mandatory Photos**: Front, Back, Left Side, Right Side, Top View, Dashboard
+5. System validates same requirements as pre-delivery
+6. Click **"Save Inspection"**
+7. System automatically opens **Return Charges** dialog
+8. Inspector reviews auto-filled data and adds damage charges if needed
+9. Contract completes after finalizing charges
+
+**What is Stored:**
+- Same fields as pre-delivery inspection
+- Allows comparison of before/after condition
+- Photo evidence of return condition
+- Automatic fuel charge calculation based on difference
+
+**Why This Matters:**
+- Legal proof of vehicle condition after return
+- Compare with pre-delivery photos to identify new damage
+- Justifies damage charges with photo evidence
+- Required for contract completion
+- Cannot complete contract without this step
+
+### Inspection History View
+
+**Location**: Open any contract → Inspection History card
+
+**What You See:**
+- Chronological list of all inspections for that contract
+- Visual badges showing inspection type:
+  - **Pre-Delivery**: Blue badge with truck icon
+  - **Post-Return**: Gray badge with checkmark icon
+- For each inspection:
+  - Inspection date and time
+  - Inspector name
+  - Odometer reading
+  - Fuel level
+  - Condition notes
+  - 6 photos in gallery with zoom capability
+- Click any photo to view full-size
+
+**Comparison View:**
+- Admins can compare pre-delivery vs post-return photos side-by-side
+- Easily identify new damage
+- Justify charges with visual proof
+
+### Photo Storage & Management
+
+**Technical Details:**
+- Photos stored as base64-encoded JSONB in PostgreSQL
+- Each photo includes:
+  - `angle`: front, back, left, right, top, dashboard
+  - `data`: base64 image data
+- Automatic compression reduces storage needs
+- Photos permanently stored with contract
+- Cannot be deleted (audit trail)
+
+**Storage Considerations:**
+- Each inspection: ~6MB compressed (6 photos × 1MB average)
+- 1000 inspections: ~6GB database storage
+- **Future Migration Path**: Can move to object storage (S3, R2, etc.) for scale
+- Current JSONB approach sufficient for MVP and medium-scale operations
+
+**Backup Requirements:**
+- Ensure PostgreSQL backups include large JSONB data
+- Test restore process with photo data
+- Monitor database size growth
+- Plan migration to object storage at ~5,000 active contracts
+
+### Inspection Audit Logging
+
+All inspection operations are fully logged:
+
+**Pre-Delivery Inspection Created:**
+- Action: `CREATE`
+- Entity: `inspection` (type: pre_delivery)
+- Details: Inspector name, odometer, fuel level, photo count
+- Timestamp and user who created
+
+**Post-Return Inspection Created:**
+- Action: `CREATE`
+- Entity: `inspection` (type: post_return)
+- Details: Same as pre-delivery
+- Links to contract completion event
+
+**Audit Log Location**: Logs & Errors → Audit Logs → All Actions tab
+
+### Best Practices for Administrators
+
+**Photo Quality:**
+- ✅ Ensure good lighting conditions
+- ✅ Capture all angles clearly
+- ✅ Document damage close-up AND wide shots
+- ✅ Use consistent photo angles for before/after comparison
+- ❌ Don't accept blurry or dark photos
+- ❌ Don't skip any of the 6 required angles
+
+**Inspection Timing:**
+- ✅ Conduct pre-delivery inspection immediately before customer pickup
+- ✅ Conduct post-return inspection immediately when customer returns
+- ✅ Don't delay inspections (conditions may change)
+- ✅ Ensure customer present for transparency
+
+**Documentation:**
+- ✅ Be thorough in condition notes
+- ✅ Document even minor scratches
+- ✅ Use specific language ("2cm scratch on rear bumper")
+- ❌ Don't use vague descriptions ("some damage")
+
+**Damage Disputes:**
+- ✅ Compare pre vs post photos immediately
+- ✅ Show customer side-by-side comparison
+- ✅ Document customer acknowledgment
+- ✅ Keep inspection records for minimum 2 years
+- ✅ Use inspection photos as legal evidence if needed
+
+### Troubleshooting Inspection Issues
+
+**Problem: "Upload Failed" Error**
+- **Cause**: Photo too large (>10MB)
+- **Solution**: Use lower resolution camera or compress photos before upload
+
+**Problem: "Duplicate Photo" Error**
+- **Cause**: Same photo uploaded twice
+- **Solution**: Ensure 6 unique photos from different angles
+
+**Problem**: Cannot activate/complete contract
+- **Cause**: Missing required inspection
+- **Solution**: Complete inspection dialog before attempting activation/completion
+
+**Problem**: Photos not displaying
+- **Cause**: Browser cache or large JSONB data
+- **Solution**: Refresh page, check database connection
+
+---
+
 ## Audit Logs & Monitoring
 
 ### Accessing Audit Logs
