@@ -1304,7 +1304,7 @@ export class DatabaseStorage implements IStorage {
         return contract !== undefined;
       })
       .forEach(payment => {
-        const method = payment.method || 'unknown';
+        const method = payment.paymentMethod || 'unknown';
         paymentMethods.set(method, (paymentMethods.get(method) || 0) + parseFloat(payment.amount));
       });
 
@@ -1331,7 +1331,7 @@ export class DatabaseStorage implements IStorage {
         return {
           id: payment.id,
           amount: parseFloat(payment.amount),
-          method: payment.method || 'unknown',
+          method: payment.paymentMethod || 'unknown',
           date: payment.paidAt || payment.createdAt,
           contractNumber: contract?.contractNumber || 0,
           contractId: payment.contractId,
@@ -1620,16 +1620,20 @@ export class DatabaseStorage implements IStorage {
       .sort((a, b) => b.modificationCount - a.modificationCount)
       .slice(0, 10); // Top 10
     
-    // Modification field breakdown
-    const fieldCounts = new Map<string, number>();
+    // User activity breakdown (count modifications per user)
+    const userActivityMap = new Map<string, number>();
     filteredModifications.forEach(m => {
-      const field = m.fieldName || 'unknown';
-      fieldCounts.set(field, (fieldCounts.get(field) || 0) + 1);
+      const userId = m.editedBy;
+      userActivityMap.set(userId, (userActivityMap.get(userId) || 0) + 1);
     });
     
-    const fieldBreakdown = Array.from(fieldCounts.entries())
-      .map(([field, count]) => ({ field, count }))
-      .sort((a, b) => b.count - a.count);
+    const userActivity = Array.from(userActivityMap.entries())
+      .map(([userId, count]) => ({
+        userId,
+        userName: userMap.get(userId) || 'Unknown',
+        modificationCount: count,
+      }))
+      .sort((a, b) => b.modificationCount - a.modificationCount);
 
     return {
       summary: {
@@ -1647,7 +1651,6 @@ export class DatabaseStorage implements IStorage {
       auditLogs: filteredAuditLogs,
       userActivity,
       mostModifiedContracts,
-      fieldBreakdown,
     };
   }
 
