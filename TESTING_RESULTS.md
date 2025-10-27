@@ -23,8 +23,45 @@
 This test report should be read in conjunction with:
 - **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
 - **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (15 tables, 100+ endpoints, 22 pages)
+- **PROJECT_ANALYSIS.md** - Complete system analysis including recent bug fixes
 
 For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
+
+## Recent Bug Fixes Validated (October 27, 2025)
+
+**Schema Mismatch Bugs Discovered & Resolved:**
+
+During comprehensive documentation review, 4 hidden data contract violations were discovered and fixed:
+
+**✅ Bug #1: Payment Method Field Access - FIXED**
+- **Issue**: Financial reports accessed `payment.method` instead of correct `payment.paymentMethod`
+- **Impact**: Payment method breakdown showed "unknown" for all payments
+- **Fix**: Corrected property access in server/storage.ts (lines 1307, 1334)
+- **Validation**: Financial reports now accurately categorize cash/card/bank_transfer payments
+
+**✅ Bug #2: Missing i18n Translation Keys - FIXED**
+- **Issue**: 16+ audit log actions (confirm, activate, complete, close, etc.) lacked translations
+- **Impact**: Audit logs displayed untranslated keys instead of localized text
+- **Fix**: Added 26 translation keys in client/src/lib/i18n.ts (English + Arabic)
+- **Validation**: All audit log actions now display properly in both languages
+
+**✅ Bug #3: ContractEdits Property Access - FIXED**
+- **Issue**: Code accessed non-existent `m.fieldName` property
+- **Impact**: Audit report endpoint would throw runtime error
+- **Fix**: Removed incorrect field breakdown logic (schema uses JSONB snapshots)
+- **Validation**: Audit reports load without errors
+
+**✅ Bug #4: Undefined Variable Reference - FIXED**
+- **Issue**: Audit report return statement referenced undefined `userActivity` variable
+- **Impact**: Audit report endpoint would fail
+- **Fix**: Implemented userActivity calculation from user modification counts
+- **Validation**: Audit reports return complete data with user activity statistics
+
+**Testing Impact:**
+- All report endpoints now function correctly without errors
+- Financial reports provide accurate data for business intelligence
+- Audit logs meet compliance requirements with full bilingual support
+- No database migrations required - all fixes were code-only changes
 
 ---
 

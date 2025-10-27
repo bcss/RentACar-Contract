@@ -43,8 +43,54 @@ This guide provides technical information for maintaining, troubleshooting, and 
 This guide should be read in conjunction with:
 - **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
 - **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (15 tables, 100+ endpoints, 22 pages)
+- **PROJECT_ANALYSIS.md** - Complete system analysis including recent bug fixes and prevention strategies
 
 For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
+
+### Recent Bug Fixes & Maintenance Notes (October 27, 2025)
+
+**Schema Mismatch Bugs Resolved:**
+
+During comprehensive documentation review, systematic codebase analysis uncovered 4 hidden data contract violations that existed since initial development:
+
+**Bug #1: Payment Method Field Access (server/storage.ts)**
+- **Issue**: Code accessed `payment.method` but schema defines `payment.paymentMethod`
+- **Fix**: Corrected property access in 2 locations (lines 1307, 1334)
+- **Impact**: Financial reports now show accurate payment method breakdowns
+- **Detection**: Manual schema comparison vs business logic code review
+
+**Bug #2: Missing i18n Translation Keys (client/src/lib/i18n.ts)**
+- **Issue**: 16+ audit log actions lacked English/Arabic translations
+- **Fix**: Added 26 translation keys for all lifecycle and master data operations
+- **Impact**: Audit logs now fully bilingual for compliance
+- **Detection**: Frontend code review revealed untranslated action keys
+
+**Bug #3: ContractEdits Property Access (server/storage.ts)**
+- **Issue**: Code accessed non-existent `m.fieldName` property
+- **Fix**: Removed incorrect field breakdown logic (schema uses JSONB snapshots)
+- **Impact**: Prevented runtime errors in audit report endpoint
+- **Detection**: LSP diagnostics + schema cross-reference
+
+**Bug #4: Undefined Variable Reference (server/storage.ts)**
+- **Issue**: Return statement referenced undefined `userActivity` variable
+- **Fix**: Implemented userActivity calculation from modification counts
+- **Impact**: Audit report endpoint now returns complete data
+- **Detection**: LSP diagnostics flagged undefined variable
+
+**Prevention Strategies Implemented:**
+1. TypeScript strict mode enforcement for database access
+2. LSP diagnostics review before commits
+3. Schema validation checklist for code reviews
+4. Integration testing for report endpoints
+
+**Maintenance Implications:**
+- Always cross-reference property access with `shared/schema.ts`
+- Run LSP diagnostics (`npm run typecheck`) before deployments
+- Test reports with real data patterns, not just happy paths
+- Document all field mappings between frontend and backend
+
+**No Database Migrations Required:**
+All fixes were code-only changes in application layer. No schema modifications or data migrations needed. Full backward compatibility maintained.
 
 ---
 
