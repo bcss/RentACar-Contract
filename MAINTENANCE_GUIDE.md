@@ -1496,3 +1496,350 @@ For deployment procedures, refer to:
 For user operations, refer to:
 - **Administrator Guide**
 - **User Guide**
+
+---
+
+## Vehicle Inspection Photo Storage Maintenance
+
+### Overview
+
+**Feature:** Two-stage vehicle inspection system with mandatory 6-photo documentation
+**Storage Implementation:** JSONB column in PostgreSQL `vehicle_inspections` table
+**Maintenance Focus:** Storage optimization, backup procedures, performance monitoring
+
+**RATIONALE FOR MAINTENANCE PROCEDURES:**
+- **Storage Growth:** Photos accumulate rapidly (3MB per inspection × 2 per contract)
+- **Backup Impact:** Photos significantly increase backup size and duration
+- **Performance:** Large JSONB columns can slow queries if not properly indexed
+- **Cost:** Database storage more expensive than object storage at scale
+
+### Photo Storage Architecture
+
+**Current Implementation (MVP):**
+```typescript
+// shared/schema.ts
+export const vehicleInspections = pgTable('vehicle_inspections', {
+  id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar('contract_id').notNull().references(() => contracts.id),
+  inspection_type: varchar('inspection_type', { length: 20 }).notNull(), // 'pre_delivery' or 'post_return'
+  inspector_name: varchar('inspector_name', { length: 255 }).notNull(),
+  odometer_reading: integer('odometer_reading').notNull(),
+  fuel_level: integer('fuel_level').notNull(),
+  condition_notes: text('condition_notes'),
+  photos: jsonb('photos').notNull(), // Array of base64 encoded photos
+  created_by: varchar('created_by').references(() => users.id),
+  created_at: timestamp('created_at').defaultNow()
+});
+```
+
+**Photo Structure in JSONB:**
+```json
+[
+  {"angle": "front", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+  {"angle": "back", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+  {"angle": "left", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+  {"angle": "right", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+  {"angle": "top", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+  {"angle": "dashboard", "data": "data:image/jpeg;base64,/9j/4AAQ..."}
+]
+```
+
+**Storage Characteristics:**
+- **Compression:** Client-side JPEG compression to ~500KB per photo
+- **Total per Inspection:** ~3MB (6 photos × 500KB)
+- **Total per Contract:** ~6MB (2 inspections)
+- **Encoding:** Base64 (increases size by ~33% over binary)
+
+### Storage Monitoring
+
+**Check Current Storage Usage:**
+```sql
+-- Total storage by inspection photos
+SELECT 
+  COUNT(*) as inspection_count,
+  COUNT(*) * 6 as photo_count,
+  pg_size_pretty(pg_total_relation_size('vehicle_inspections')) as table_size,
+  pg_size_pretty(pg_total_relation_size('vehicle_inspections') - pg_relation_size('vehicle_inspections')) as index_size,
+  pg_size_pretty(pg_relation_size('vehicle_inspections')) as data_size
+FROM vehicle_inspections;
+
+-- Storage breakdown by inspection type
+SELECT 
+  inspection_type,
+  COUNT(*) as count,
+  pg_size_pretty(SUM(pg_column_size(photos))) as photos_size
+FROM vehicle_inspections
+GROUP BY inspection_type;
+
+-- Largest inspections (potential compression issues)
+SELECT 
+  id,
+  contract_id,
+  inspection_type,
+  pg_size_pretty(pg_column_size(photos)) as photo_column_size,
+  jsonb_array_length(photos) as photo_count,
+  created_at
+FROM vehicle_inspections
+ORDER BY pg_column_size(photos) DESC
+LIMIT 10;
+```
+
+**Expected Results:**
+- **Per Inspection:** ~3-4MB
+- **If >6MB:** Photo compression failed, investigate
+- **If <2MB:** Unusually good compression or low quality
+
+**Growth Projection:**
+```sql
+-- Calculate monthly growth rate
+SELECT 
+  DATE_TRUNC('month', created_at) as month,
+  COUNT(*) as inspections_created,
+  COUNT(*) * 3 as estimated_mb_added
+FROM vehicle_inspections
+GROUP BY DATE_TRUNC('month', created_at)
+ORDER BY month DESC;
+```
+
+### Performance Optimization
+
+**Query Performance:**
+```sql
+-- Check query performance on inspections table
+EXPLAIN ANALYZE
+SELECT * FROM vehicle_inspections
+WHERE contract_id = '[some-uuid]'
+AND inspection_type = 'pre_delivery';
+
+-- Expected: Index scan on contract_id, <10ms execution
+```
+
+**Create Required Indexes:**
+```sql
+-- Contract lookup index (if not exists)
+CREATE INDEX IF NOT EXISTS idx_inspections_contract_id 
+ON vehicle_inspections(contract_id);
+
+-- Type filter index
+CREATE INDEX IF NOT EXISTS idx_inspections_type 
+ON vehicle_inspections(inspection_type);
+
+-- Created date index (for time-series queries)
+CREATE INDEX IF NOT EXISTS idx_inspections_created_at 
+ON vehicle_inspections(created_at DESC);
+```
+
+**RATIONALE FOR INDEXES:**
+- `contract_id`: Most common query pattern (fetch all inspections for contract)
+- `inspection_type`: Filter pre/post inspections
+- `created_at`: Time-series analysis and archival queries
+
+**JSONB Optimization:**
+```sql
+-- Vacuum to reclaim space after deletes
+VACUUM ANALYZE vehicle_inspections;
+
+-- Reindex if query performance degrades
+REINDEX TABLE vehicle_inspections;
+```
+
+### Backup Procedures
+
+**Backup Considerations:**
+- **With Photos:** Full backup including inspection photos (recommended)
+- **Without Photos:** Schema-only or data without JSONB (NOT recommended)
+
+**Full Backup (Recommended):**
+```bash
+# Complete backup including photos
+pg_dump -h $PGHOST -U $PGUSER -d $PGDATABASE \
+  --format=custom \
+  --compress=9 \
+  -f rccms_backup_$(date +%Y%m%d_%H%M%S).dump
+
+# Estimated backup size with 1000 inspections:
+# - Database structure: ~5MB
+# - Contract data: ~50MB
+# - Inspection photos: ~6GB (1000 inspections × 6MB)
+# - Total: ~6GB
+```
+
+**Backup Frequency:**
+- **Daily:** Incremental backup (changed data only)
+- **Weekly:** Full backup including all photos
+- **Monthly:** Archival backup with verification
+
+**Restore Test:**
+```bash
+# Test restore to verify backup integrity
+pg_restore -h localhost -U postgres -d rccms_test \
+  --clean --if-exists \
+  rccms_backup_20251027.dump
+
+# Verify photo restoration
+psql -h localhost -U postgres -d rccms_test -c \
+  "SELECT COUNT(*), pg_size_pretty(pg_total_relation_size('vehicle_inspections')) 
+   FROM vehicle_inspections;"
+```
+
+**CRITICAL:** Test restore monthly to ensure photos are recoverable
+
+### Storage Scaling Strategy
+
+**When to Migrate to Object Storage:**
+
+**Triggers:**
+- Database size >50GB due to photos
+- Backup time >30 minutes
+- Backup cost >$50/month
+- Photo retrieval latency >2 seconds
+
+**Migration Path (JSONB → S3/Object Storage):**
+
+1. **Setup Object Storage:**
+   - AWS S3, DigitalOcean Spaces, or Cloudflare R2
+   - Configure CORS for direct upload
+   - Create separate bucket for inspection photos
+
+2. **Schema Migration:**
+```sql
+-- Add new column for object storage URLs
+ALTER TABLE vehicle_inspections 
+ADD COLUMN photo_urls JSONB;
+
+-- Example structure:
+-- [
+--   {"angle": "front", "url": "https://s3.../inspection-123-front.jpg"},
+--   ...
+-- ]
+```
+
+3. **Data Migration Script:**
+```javascript
+// Migrate existing base64 photos to object storage
+const inspections = await db.select().from(vehicleInspections);
+for (const inspection of inspections) {
+  const photoUrls = [];
+  for (const photo of inspection.photos) {
+    // Decode base64
+    const buffer = Buffer.from(photo.data.split(',')[1], 'base64');
+    // Upload to S3
+    const url = await uploadToS3(buffer, `inspection-${inspection.id}-${photo.angle}.jpg`);
+    photoUrls.push({angle: photo.angle, url});
+  }
+  // Update record
+  await db.update(vehicleInspections)
+    .set({photo_urls: photoUrls})
+    .where(eq(vehicleInspections.id, inspection.id));
+}
+```
+
+4. **Remove Base64 Column:**
+```sql
+-- After verifying migration success
+ALTER TABLE vehicle_inspections DROP COLUMN photos;
+```
+
+**Post-Migration Benefits:**
+- **Storage Cost:** ~90% reduction ($10/TB S3 vs $100/TB database)
+- **Backup Speed:** 10x faster (database smaller)
+- **Scalability:** Unlimited photo storage
+- **CDN:** Faster photo delivery worldwide
+
+**RATIONALE:** JSONB storage is perfect for MVP (simple, atomic, included in backups). Migrate to object storage when scale demands it (typically >50GB photos).
+
+### Monitoring & Alerting
+
+**Setup Monitoring:**
+```sql
+-- Create monitoring view
+CREATE OR REPLACE VIEW inspection_storage_metrics AS
+SELECT 
+  COUNT(*) as total_inspections,
+  COUNT(*) * 6 as total_photos,
+  pg_size_pretty(pg_total_relation_size('vehicle_inspections')) as total_size,
+  pg_size_pretty(pg_total_relation_size('vehicle_inspections') / COUNT(*)) as avg_size_per_inspection,
+  DATE_TRUNC('month', NOW()) as report_month
+FROM vehicle_inspections;
+```
+
+**Alert Thresholds:**
+- **Database Size:** Alert if >40GB (approaching 50GB migration trigger)
+- **Backup Duration:** Alert if >25 minutes
+- **Query Performance:** Alert if inspection queries >500ms
+
+**Monthly Report:**
+```sql
+-- Generate monthly storage report
+SELECT 
+  DATE_TRUNC('month', created_at) as month,
+  COUNT(*) as new_inspections,
+  COUNT(*) * 6 as new_photos,
+  pg_size_pretty(SUM(pg_column_size(photos))) as storage_added
+FROM vehicle_inspections
+WHERE created_at >= DATE_TRUNC('month', NOW() - INTERVAL '12 months')
+GROUP BY DATE_TRUNC('month', created_at)
+ORDER BY month DESC;
+```
+
+### Troubleshooting Storage Issues
+
+**Issue: Database Growing Too Fast**
+
+**Diagnosis:**
+```sql
+SELECT 
+  pg_size_pretty(pg_database_size(current_database())) as db_size,
+  pg_size_pretty(pg_total_relation_size('vehicle_inspections')) as inspections_size,
+  ROUND(100.0 * pg_total_relation_size('vehicle_inspections') / pg_database_size(current_database()), 2) as pct_of_db
+FROM vehicle_inspections
+LIMIT 1;
+```
+
+**Solutions:**
+- If inspections >70% of database: Consider object storage migration
+- Run VACUUM to reclaim space
+- Archive old inspections (>2 years) to separate table
+
+**Issue: Backup Failures**
+
+**Common Causes:**
+- Backup size exceeds storage quota
+- Backup duration exceeds time window
+- Network timeout during transfer
+
+**Solutions:**
+```bash
+# Compress backup more aggressively
+pg_dump --compress=9 ...
+
+# Split backup into chunks
+pg_dump --table=vehicle_inspections > inspections.sql
+pg_dump --exclude-table=vehicle_inspections > other.sql
+
+# Use parallel backup
+pg_dump --jobs=4 --format=directory ...
+```
+
+**MAINTENANCE CHECKLIST:**
+
+**Daily:**
+- ✅ Monitor database size growth
+- ✅ Check backup completion
+
+**Weekly:**
+- ✅ Verify inspection creation rate
+- ✅ Review query performance
+- ✅ Check for failed photo uploads
+
+**Monthly:**
+- ✅ Test backup restore with photos
+- ✅ Analyze storage growth trends
+- ✅ Review migration timeline to object storage
+- ✅ Vacuum and analyze database
+
+**Quarterly:**
+- ✅ Capacity planning for next 12 months
+- ✅ Evaluate object storage migration
+- ✅ Update backup retention policy
+

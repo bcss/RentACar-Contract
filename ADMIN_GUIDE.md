@@ -996,3 +996,230 @@ Each error log contains:
 **End of Administrator Guide**
 
 For technical deployment and maintenance issues, refer to the **Maintenance Guide** and deployment guides (VPS/Docker).
+
+---
+
+## Vehicle Inspection System Administration
+
+### Overview
+
+**System Feature:** Two-Stage Vehicle Inspection Workflow
+**Admin Responsibility:** Monitor inspection compliance, manage photo storage, review audit logs
+
+**RATIONALE FOR ADMIN OVERSIGHT:**
+- **Legal Compliance:** Ensure all contracts have required photo documentation
+- **Storage Management:** Monitor photo storage usage and compression
+- **Audit Trail:** Verify inspection logs for compliance and disputes
+- **Quality Control:** Review inspection completeness and photo quality
+
+### Inspection System Architecture
+
+**Technical Implementation:**
+- **Two Inspection Types:** Pre-delivery (before activation) and Post-return (before completion)
+- **Photo Requirements:** Exactly 6 photos per inspection (no duplicates allowed)
+- **Storage:** JSONB column in `vehicle_inspections` table
+- **Compression:** Automatic client-side compression to ~500KB per photo
+- **Workflow Gates:** Backend enforces inspections before state transitions
+
+**Database Tables:**
+```sql
+-- vehicle_inspections table
+CREATE TABLE vehicle_inspections (
+  id UUID PRIMARY KEY,
+  contract_id UUID NOT NULL REFERENCES contracts(id),
+  inspection_type VARCHAR(20) NOT NULL, -- 'pre_delivery' or 'post_return'
+  inspector_name VARCHAR(255) NOT NULL,
+  odometer_reading INTEGER NOT NULL,
+  fuel_level INTEGER NOT NULL,
+  condition_notes TEXT,
+  photos JSONB NOT NULL, -- Array of 6 base64 photos
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### Monitoring Inspection Compliance
+
+**Check Contracts Without Inspections:**
+```sql
+-- Find ACTIVE contracts without pre-delivery inspection
+SELECT c.id, c.contract_number, c.status
+FROM contracts c
+LEFT JOIN vehicle_inspections vi ON c.id = vi.contract_id AND vi.inspection_type = 'pre_delivery'
+WHERE c.status = 'active' AND vi.id IS NULL;
+
+-- Find COMPLETED contracts without post-return inspection
+SELECT c.id, c.contract_number, c.status
+FROM contracts c
+LEFT JOIN vehicle_inspections vi ON c.id = vi.contract_id AND vi.inspection_type = 'post_return'
+WHERE c.status = 'completed' AND vi.id IS NULL;
+```
+
+**Expected Result:** Zero rows (all contracts should have required inspections due to workflow gates)
+
+**If Any Found:** Indicates workflow bypass bug - report immediately to developer
+
+### Photo Storage Management
+
+**Monitor Storage Usage:**
+```sql
+-- Check total inspection photo storage
+SELECT 
+  COUNT(*) as total_inspections,
+  COUNT(*) * 6 as total_photos,
+  pg_size_pretty(pg_total_relation_size('vehicle_inspections')) as table_size
+FROM vehicle_inspections;
+```
+
+**Expected Storage Per Inspection:**
+- 6 photos × 500KB = ~3MB per inspection (compressed)
+- 100 inspections ≈ 300MB
+- 1,000 inspections ≈ 3GB
+
+**Storage Growth Calculation:**
+```
+Monthly Contracts: [X]
+Inspections per Contract: 2 (pre + post)
+Storage per Month: X × 2 × 3MB = [Y] MB/month
+Annual Storage: Y × 12 MB/year
+```
+
+**RATIONALE FOR JSONB STORAGE:**
+- **Simplicity:** No separate photo storage service needed (MVP approach)
+- **Atomicity:** Photos stored with inspection metadata
+- **Backup:** Photos included in database backups automatically
+- **Migration Path:** Can migrate to object storage (S3) when scale requires
+
+**When to Migrate to Object Storage:**
+- Database size > 50GB due to photos
+- Backup/restore time >30 minutes
+- Photo retrieval latency >2s
+- Cost of database storage > object storage cost
+
+### Audit Log Review
+
+**Inspection Creation Logs:**
+```sql
+-- View all inspection creation events
+SELECT 
+  al.action,
+  al.contract_id,
+  al.user_id,
+  u.username,
+  al.details,
+  al.timestamp
+FROM audit_logs al
+JOIN users u ON al.user_id = u.id
+WHERE al.action = 'INSPECTION_CREATED'
+ORDER BY al.timestamp DESC
+LIMIT 50;
+```
+
+**Verify Inspection Details:**
+- Check `details` JSONB column contains:
+  - `inspection_type`: "pre_delivery" or "post_return"
+  - `inspector_name`: Staff member name
+  - `odometer_reading`: Reasonable value
+  - `fuel_level`: 0-100
+  - `photo_count`: Always 6
+
+**Red Flags to Investigate:**
+- ❌ Photo count ≠ 6 (indicates validation bypass)
+- ❌ Duplicate odometer readings across inspections
+- ❌ Fuel level outside 0-100 range
+- ❌ Missing inspector name
+- ❌ Pre-delivery inspection after activation (wrong order)
+
+### Troubleshooting Inspection Issues
+
+**Issue 1: User Cannot Upload Photos**
+
+**Symptoms:**
+- Photo upload fails
+- Error: "Photo too large"
+- Browser freezes during upload
+
+**Diagnosis:**
+```sql
+-- Check recent system errors
+SELECT * FROM system_errors 
+WHERE error_message ILIKE '%photo%' OR error_message ILIKE '%inspection%'
+ORDER BY created_at DESC LIMIT 10;
+```
+
+**Solutions:**
+- Verify photo file size <10MB original (compression handles reduction)
+- Check browser JavaScript enabled
+- Clear browser cache and reload
+- Try different browser
+- Check server request size limit (should be 10MB in routes.ts)
+
+**Issue 2: Workflow Gate Not Enforcing**
+
+**Symptoms:**
+- Contract activated without pre-delivery inspection
+- Contract completed without post-return inspection
+
+**Diagnosis:**
+```sql
+-- Find contracts that bypassed inspection requirement
+SELECT c.id, c.contract_number, c.status, 
+  COUNT(vi.id) FILTER (WHERE vi.inspection_type = 'pre_delivery') as pre_count,
+  COUNT(vi.id) FILTER (WHERE vi.inspection_type = 'post_return') as post_count
+FROM contracts c
+LEFT JOIN vehicle_inspections vi ON c.id = vi.contract_id
+WHERE c.status IN ('active', 'completed', 'closed')
+GROUP BY c.id, c.contract_number, c.status
+HAVING 
+  (c.status IN ('active', 'completed', 'closed') AND COUNT(vi.id) FILTER (WHERE vi.inspection_type = 'pre_delivery') = 0)
+  OR
+  (c.status IN ('completed', 'closed') AND COUNT(vi.id) FILTER (WHERE vi.inspection_type = 'post_return') = 0);
+```
+
+**If Found:** CRITICAL BUG - Backend validation bypassed
+**Action:** Contact developer immediately, provide contract IDs
+
+**Issue 3: Photos Not Loading in Inspection History**
+
+**Symptoms:**
+- Inspection list shows, but photos blank
+- "Loading..." never completes
+- Browser console errors
+
+**Diagnosis:**
+- Check browser console (F12) for JavaScript errors
+- Verify photos exist in database:
+```sql
+SELECT id, contract_id, jsonb_array_length(photos) as photo_count
+FROM vehicle_inspections
+WHERE id = '[inspection-id]';
+```
+
+**Solutions:**
+- If photo_count ≠ 6: Data corruption, review audit logs
+- If photos exist but don't display: Frontend issue, check browser compatibility
+- Clear browser cache and reload
+
+### Best Practices for Admins
+
+✅ **Weekly Checks:**
+- Review inspection completion rate (should be 100%)
+- Monitor photo storage growth
+- Check for system errors related to inspections
+- Verify audit log entries for all inspections
+
+✅ **Monthly Reviews:**
+- Database size analysis
+- Backup/restore test including photos
+- Staff compliance with inspection procedures
+- Customer feedback on inspection process
+
+✅ **Quarterly Actions:**
+- Storage optimization review
+- Consider object storage migration if >50GB
+- Review and update inspection photo requirements
+- Staff training on inspection best practices
+
+**ADMIN REMINDER:**
+The inspection system is a LEGAL PROTECTION feature. Incomplete inspections = lost disputes. Ensure 100% compliance through monitoring and staff training.
+
