@@ -337,6 +337,245 @@ WHERE acknowledged = true
 AND acknowledged_at < NOW() - INTERVAL '90 days';
 ```
 
+### Vehicle Inspection Photo Storage
+
+**Overview:**
+RCCMS implements a two-stage vehicle inspection workflow (pre-delivery and post-return) with mandatory photo documentation. Photos are stored as base64-encoded JSONB data in PostgreSQL.
+
+**Storage Architecture:**
+
+**Table Structure:**
+```sql
+CREATE TABLE vehicle_inspections (
+  id SERIAL PRIMARY KEY,
+  contract_id INTEGER NOT NULL REFERENCES contracts(id),
+  inspection_type VARCHAR(20) NOT NULL, -- 'pre_delivery' or 'post_return'
+  inspector_name VARCHAR(255) NOT NULL,
+  odometer_reading INTEGER NOT NULL,
+  fuel_level INTEGER NOT NULL,
+  condition_notes TEXT,
+  photos JSONB NOT NULL, -- Array of {angle, data} objects
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_by INTEGER REFERENCES users(id)
+);
+```
+
+**Photo Format:**
+```json
+{
+  "photos": [
+    {"angle": "front", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+    {"angle": "back", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+    {"angle": "left", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+    {"angle": "right", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+    {"angle": "top", "data": "data:image/jpeg;base64,/9j/4AAQ..."},
+    {"angle": "dashboard", "data": "data:image/jpeg;base64,/9j/4AAQ..."}
+  ]
+}
+```
+
+**Photo Compression:**
+- All photos automatically compressed to 1920x1080 resolution
+- JPEG format at 0.85 quality
+- Average compressed photo size: ~800KB - 1MB
+- Total per inspection: ~6MB (6 photos)
+
+**Storage Estimates:**
+
+| Contracts | Inspections | Storage Required |
+|-----------|-------------|------------------|
+| 100       | 200         | ~1.2 GB          |
+| 500       | 1,000       | ~6 GB            |
+| 1,000     | 2,000       | ~12 GB           |
+| 5,000     | 10,000      | ~60 GB           |
+
+**Monitor Photo Storage:**
+```sql
+-- Check total inspection photo storage
+SELECT 
+  COUNT(*) as total_inspections,
+  pg_size_pretty(SUM(pg_column_size(photos))) as photos_storage_size,
+  pg_size_pretty(pg_total_relation_size('vehicle_inspections')) as total_table_size
+FROM vehicle_inspections;
+
+-- Check by inspection type
+SELECT 
+  inspection_type,
+  COUNT(*) as count,
+  pg_size_pretty(SUM(pg_column_size(photos))) as photos_size
+FROM vehicle_inspections
+GROUP BY inspection_type;
+
+-- Find largest inspection records
+SELECT 
+  id,
+  contract_id,
+  inspection_type,
+  pg_size_pretty(pg_column_size(photos)) as photo_size,
+  jsonb_array_length(photos) as photo_count,
+  created_at
+FROM vehicle_inspections
+ORDER BY pg_column_size(photos) DESC
+LIMIT 20;
+```
+
+**Photo Validation Queries:**
+```sql
+-- Verify all inspections have 6 photos
+SELECT 
+  id,
+  contract_id,
+  inspection_type,
+  jsonb_array_length(photos) as photo_count
+FROM vehicle_inspections
+WHERE jsonb_array_length(photos) != 6;
+
+-- Check for missing photo angles
+SELECT 
+  id,
+  contract_id,
+  inspection_type,
+  jsonb_agg(photo->>'angle') as angles
+FROM vehicle_inspections,
+  jsonb_array_elements(photos) as photo
+GROUP BY id, contract_id, inspection_type
+HAVING jsonb_agg(photo->>'angle') != 
+  '["front", "back", "left", "right", "top", "dashboard"]'::jsonb;
+```
+
+**Performance Optimization:**
+
+**Index on Contract ID:**
+```sql
+CREATE INDEX idx_inspections_contract 
+ON vehicle_inspections(contract_id);
+
+CREATE INDEX idx_inspections_type 
+ON vehicle_inspections(inspection_type);
+```
+
+**JSONB Indexing (if needed for search):**
+```sql
+-- GIN index for photo angle searches
+CREATE INDEX idx_inspections_photos_gin 
+ON vehicle_inspections USING GIN (photos);
+```
+
+**Storage Maintenance:**
+
+**Vacuum JSONB Data:**
+```sql
+-- Regular vacuum to reclaim space
+VACUUM ANALYZE vehicle_inspections;
+
+-- Check bloat
+SELECT 
+  schemaname,
+  tablename,
+  pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS total_size,
+  pg_size_pretty(pg_relation_size(schemaname||'.'||tablename)) AS table_size,
+  pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename) - 
+                 pg_relation_size(schemaname||'.'||tablename)) AS external_size
+FROM pg_tables
+WHERE tablename = 'vehicle_inspections';
+```
+
+**Migration to Object Storage:**
+
+When database size exceeds 50GB or you hit ~5,000 active contracts, consider migrating to object storage:
+
+**Recommended Services:**
+- AWS S3
+- Cloudflare R2 (cheaper egress)
+- Digital Ocean Spaces
+- Backblaze B2
+
+**Migration Strategy:**
+1. Set up object storage bucket
+2. Create new `photo_url` column in `vehicle_inspections`
+3. Write migration script to:
+   - Extract base64 photos from JSONB
+   - Upload to object storage
+   - Store URLs in `photo_url` column
+   - Remove base64 data from `photos` column
+4. Update application code to fetch from URLs
+5. Test thoroughly before removing JSONB data
+6. Archive JSONB backup before final cleanup
+
+**Example Migration Script (Pseudo-code):**
+```typescript
+// migration-to-s3.ts
+async function migratePhotosToS3() {
+  const inspections = await db.select().from(vehicleInspections);
+  
+  for (const inspection of inspections) {
+    const photoUrls = [];
+    
+    for (const photo of inspection.photos) {
+      // Extract base64 data
+      const buffer = Buffer.from(photo.data.split(',')[1], 'base64');
+      
+      // Upload to S3
+      const key = `inspections/${inspection.id}/${photo.angle}.jpg`;
+      await s3.upload(bucket, key, buffer);
+      
+      photoUrls.push({
+        angle: photo.angle,
+        url: `https://cdn.example.com/${key}`
+      });
+    }
+    
+    // Update record with URLs
+    await db.update(vehicleInspections)
+      .set({ photo_urls: photoUrls })
+      .where(eq(vehicleInspections.id, inspection.id));
+  }
+}
+```
+
+**Backup Considerations:**
+
+⚠️ **CRITICAL**: Inspection photos are legal evidence and MUST be included in backups
+
+**Verify Photo Data in Backups:**
+```bash
+# Test restore and verify photo data
+pg_restore -d test_database backup.dump
+psql test_database -c "SELECT COUNT(*), 
+  pg_size_pretty(SUM(pg_column_size(photos))) 
+  FROM vehicle_inspections;"
+```
+
+**Photo Retention Policy:**
+- **Minimum**: Keep inspection photos for duration of contract + 2 years
+- **Recommended**: Keep indefinitely for legal protection
+- **Never delete** without legal counsel approval
+- Archive old photos to cold storage if needed
+
+**Troubleshooting Photo Issues:**
+
+**Problem: Database size growing too fast**
+- Solution: Check photo compression settings
+- Verify compression is working (photos should be ~1MB each)
+- Consider migration to object storage
+
+**Problem: Slow query performance on inspections table**
+- Solution: Add indexes on contract_id and inspection_type
+- Run VACUUM ANALYZE regularly
+- Consider partitioning table by year
+
+**Problem: Backup restoration very slow**
+- Solution: Large JSONB data takes time to restore
+- Test restoration process regularly
+- Consider incremental backups
+- Plan migration to object storage
+
+**Problem: Photo data corrupted**
+- Solution: Verify base64 encoding
+- Check for truncated data
+- Ensure backups are valid
+- Implement photo validation on upload
+
 ---
 
 ## Backup & Recovery
