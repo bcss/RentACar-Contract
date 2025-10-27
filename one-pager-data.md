@@ -4,6 +4,15 @@
 
 *Built for the UAE Market | Bilingual | Fully Compliant*
 
+## Authoritative Documentation
+
+This one-pager references features documented in:
+- **replit.md** - Authoritative technical specifications and system architecture
+- **MASTER_FEATURE_LIST.md** - Complete feature catalog with 100+ endpoints
+- **PROJECT_ANALYSIS.md** - Business value analysis and ROI calculations
+
+All claims and statistics are backed by actual implementation data.
+
 ---
 
 ## Stop Losing Money on Manual Contracts
