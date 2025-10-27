@@ -97,20 +97,26 @@ If this is your first time logging in:
 
 The system features a professional Microsoft 365 Admin-style sidebar with icon-only controls for a clean, modern interface.
 
-**Sidebar Header Controls (Icon-Only)**
-- **☰ Hamburger Menu**: Toggle sidebar between expanded and collapsed (icon-only) modes
+**Sidebar Header Controls (Icon-Only, Responsive Layout)**
+- **☰ Hamburger Menu**: Toggle sidebar between expanded (~256px) and collapsed (~48px) modes
 - **🌙 Theme Toggle**: Switch between light and dark modes
 - **🌐 Language Toggle**: Switch between English and Arabic
-- **Tooltip Labels**: Hover over any icon to see its label
-- **No Text Overflow**: All controls use icons only - no text labels that could overflow
+- **Responsive Design**: Controls stack **horizontally** when sidebar expanded, **vertically** when collapsed
+- **No Overflow**: Vertical stacking in collapsed mode prevents any text/icon overflow
+- **Tooltip Accessibility**: Hover over any icon to see its label (tooltips position correctly for RTL/LTR)
 
 **Sidebar Navigation Menu (Left Side in English, Right Side in Arabic)**
-- **Dashboard**: Overview and quick stats
-- **Masters**: Customers, Vehicles, Sponsors, Companies
-- **Contracts**: All rental contracts
-- **Reports**: Financial, Operational, Customer, Audit
-- **Settings**: Company info, Financial settings, Terms (Admin only)
-- **Logs & Errors**: Audit logs, System errors (Admin/Manager only)
+- **Dashboard**: Overview and quick stats (tooltip in collapsed mode)
+- **Masters**: Customers, Vehicles, Sponsors, Companies (collapsible submenu)
+- **Contracts**: All rental contracts (tooltip in collapsed mode)
+- **Reports**: Financial, Operational, Customer, Audit (collapsible submenu, Admin/Manager only)
+- **Audit & Errors**: Audit logs, System errors (collapsible submenu, Admin/Manager only)
+- **Settings**: Company info, Financial settings, Terms (collapsible submenu, Admin only)
+
+**Smart Submenu Behavior:**
+- **Collapsed Mode**: Clicking a submenu (e.g., Masters) automatically expands the sidebar first, then opens the submenu
+- **No Flickering**: Uses deferred opening pattern to ensure smooth expansion
+- **Accessibility**: All menu items show tooltips with labels when sidebar is collapsed
 
 **Sidebar Footer - User Profile**
 - **When Expanded**: Shows your avatar, name, and role badge
