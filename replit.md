@@ -101,3 +101,43 @@ Companies can configure:
 - **Developer:** AKN Consulting
 - **Support:** +91 9400750821, rccms@akn-consulting.com
 - **Location:** Muttathu, Thattayil, Pathanamthitta - 691525, Kerala, India
+
+## Documentation Maintenance Requirements
+
+**CRITICAL:** Whenever ANY feature is added, modified, or removed from the application, the following 15 documentation files MUST be updated to reflect the changes:
+
+### User-Facing Documentation:
+1. **USER_GUIDE.md** - Update user workflows, procedures, and feature descriptions
+2. **ADMIN_GUIDE.md** - Update administrative procedures and system management
+
+### Technical Documentation:
+3. **MAINTENANCE_GUIDE.md** - Update technical maintenance procedures, database queries, performance considerations
+4. **CONTRACT_FLOW.md** - Update contract lifecycle workflows, state transitions, validation rules
+5. **WORKFLOW_DIAGRAM.md** - Update visual workflow representations
+6. **DOCKER_DEPLOYMENT_GUIDE.md** - Update deployment procedures and configuration
+7. **VPS_DEPLOYMENT_GUIDE.md** - Update VPS deployment instructions
+
+### Testing Documentation:
+8. **TESTING_GUIDE.md** - Add/update test scenarios for new features
+9. **TESTING_RESULTS.md** - Update test results after feature changes
+
+### Analysis & Status Documentation:
+10. **PROJECT_ANALYSIS.md** - Update feature analysis and technical architecture
+11. **PRODUCTION_READINESS_REPORT.md** - Update production readiness checklist
+12. **MISSING_FEATURES.md** - Add missing features or remove implemented ones
+
+### Marketing Documentation:
+13. **compelling-features.md** - Add new features to compelling features list with ROI
+14. **one-pager-data.md** - Update marketing one-pager with new features
+15. **SYSTEM_BROCHURE.md** - Update system brochure with new capabilities
+
+### Update Requirements:
+- **Include Rationale:** Every feature decision must include "why" it was implemented
+- **Complete Coverage:** Don't assume partial updates - update ALL relevant sections
+- **Consistency:** Ensure terminology, naming, and descriptions match across all files
+- **Examples:** Provide practical examples for new features
+- **Test Scenarios:** Add comprehensive test cases for new functionality
+- **Screenshots:** Update screenshot documentation when UI changes
+- **ROI Impact:** Document business value and cost savings for new features
+
+**This is a permanent requirement - NO EXCEPTIONS.**

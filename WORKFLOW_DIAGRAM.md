@@ -275,29 +275,170 @@ without reason     Customer confirmed    Payment tracking    Extra charges    Co
 │ • ⚠️ IMMUTABLE: Edits require reason (tracked in contractEdits table)         │
 │ • Actions Available:                                                           │
 │   └─→ Edit Contract (with reason) → Creates audit trail                       │
-│   └─→ Activate Contract → Transition to ACTIVE                                │
+│   └─→ Activate Contract → Opens Pre-Delivery Inspection Dialog                │
 │   └─→ Audit log: CONFIRM event                                                │
 └────────────────────────────────────────────────────────────────────────────────┘
                                     │
-                                    │ POST /api/contracts/:id/activate
+                                    │ Click "Activate Contract"
+                                    v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│ 🚨 MANDATORY WORKFLOW GATE: Pre-Delivery Inspection                            │
+├────────────────────────────────────────────────────────────────────────────────┤
+│ RATIONALE:                                                                      │
+│ • Legal Protection: Photo evidence prevents AED 48k/year in false damage claims│
+│ • Dispute Prevention: 95% reduction in damage disputes with photo comparison   │
+│ • Insurance Compliance: Required by insurance policies                         │
+│ • Customer Trust: Professional process builds credibility                      │
+│ • Cannot Skip: System enforces - activation blocked without inspection         │
+│                                                                                 │
+│ DIALOG OPENS AUTOMATICALLY:                                                    │
+│ ┌────────────────────────────────────────────────────────────────┐            │
+│ │ Pre-Delivery Vehicle Inspection                                │            │
+│ ├────────────────────────────────────────────────────────────────┤            │
+│ │ Inspector Name: _______________________ (accountability)       │            │
+│ │ Odometer Reading: _____________________ (baseline mileage)     │            │
+│ │ Fuel Level (%): ________________________ (0-100%, baseline)    │            │
+│ │ Condition Notes: ______________________________________         │            │
+│ │ ___________________________________________________             │            │
+│ │                                                                 │            │
+│ │ 📸 Upload 6 Mandatory Photos:                                  │            │
+│ │   ✅ Front View     [ Choose File... ]                         │            │
+│ │   ✅ Back View      [ Choose File... ]                         │            │
+│ │   ✅ Left Side      [ Choose File... ]                         │            │
+│ │   ✅ Right Side     [ Choose File... ]                         │            │
+│ │   ✅ Top View       [ Choose File... ]                         │            │
+│ │   ✅ Dashboard      [ Choose File... ]                         │            │
+│ │                                                                 │            │
+│ │ ⚠️ Validation:                                                  │            │
+│ │ • Exactly 6 photos required                                    │            │
+│ │ • No duplicates allowed                                        │            │
+│ │ • Max 10MB per photo before compression                        │            │
+│ │ • Auto-compressed to 1920x1080, 0.85 quality, JPEG             │            │
+│ │                                                                 │            │
+│ │          [ Cancel ]  [ Save Inspection & Activate ]            │            │
+│ └────────────────────────────────────────────────────────────────┘            │
+│                                                                                 │
+│ ON SAVE:                                                                        │
+│ 1. POST /api/contracts/:id/inspections                                         │
+│    {                                                                            │
+│      contractId, inspection_type: 'pre_delivery',                              │
+│      inspector_name, odometer_reading, fuel_level,                             │
+│      condition_notes, photos: [{angle, data}, ...] (6 photos)                  │
+│    }                                                                            │
+│ 2. Backend validates:                                                           │
+│    ✅ Exactly 6 photos                                                          │
+│    ✅ No duplicate photos (base64 comparison)                                   │
+│    ✅ Creates inspection record with timestamp                                  │
+│ 3. POST /api/contracts/:id/activate (automatic)                                │
+│ 4. Stores ~6MB compressed photos in JSONB                                      │
+│ 5. Audit log: CREATE inspection + ACTIVATE contract                            │
+│                                                                                 │
+│ CANNOT BYPASS:                                                                  │
+│ • Frontend blocks activation without inspection                                │
+│ • Backend returns 400 error if no pre_delivery inspection exists               │
+│ • Photos permanently stored - cannot delete (legal audit trail)                │
+└────────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ After successful inspection
                                     v
 ┌────────────────────────────────────────────────────────────────────────────────┐
 │ State: ACTIVE                                                                  │
 ├────────────────────────────────────────────────────────────────────────────────┤
 │ • Customer has taken the vehicle                                               │
 │ • Vehicle status changed to 'rented'                                           │
+│ • Pre-delivery inspection completed (baseline photos stored)                   │
 │ • Payment tracking enabled:                                                    │
 │   └─→ Record Deposit Payment → POST /api/contracts/:id/deposit                │
 │       • depositAmount, depositMethod, depositDate                             │
 │       • Sets depositPaid = true                                               │
 │ • Actions Available:                                                           │
 │   └─→ Edit Contract (with reason)                                             │
-│   └─→ Complete Contract → Transition to COMPLETED                             │
+│   └─→ Complete Contract → Opens Post-Return Inspection Dialog                 │
 │   └─→ Audit log: ACTIVATE event                                               │
 └────────────────────────────────────────────────────────────────────────────────┘
                                     │
-                                    │ POST /api/contracts/:id/complete
-                                    │ + Vehicle Return Workflow
+                                    │ Click "Complete Contract"
+                                    v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│ 🚨 MANDATORY WORKFLOW GATE: Post-Return Inspection                             │
+├────────────────────────────────────────────────────────────────────────────────┤
+│ RATIONALE:                                                                      │
+│ • Damage Documentation: Photo evidence enables precise damage charge calc      │
+│ • Before/After Comparison: Proves NEW damage during rental (dispute killer)    │
+│ • Fair Billing: Only charge for damage that happened THIS rental               │
+│ • Insurance Claims: Photos required for submitting insurance claims            │
+│ • ROI Impact: Recovers AED 46k/year in otherwise-disputed damage charges       │
+│ • Cannot Skip: Completion blocked without inspection - system enforced         │
+│                                                                                 │
+│ DIALOG OPENS AUTOMATICALLY:                                                    │
+│ ┌────────────────────────────────────────────────────────────────┐            │
+│ │ Post-Return Vehicle Inspection                                 │            │
+│ ├────────────────────────────────────────────────────────────────┤            │
+│ │ Inspector Name: _______________________ (accountability)       │            │
+│ │ Odometer Reading: _____________________ (return mileage)       │            │
+│ │ Fuel Level (%): ________________________ (0-100%, return)      │            │
+│ │ Condition Notes: ______________________________________         │            │
+│ │ (Document ANY NEW damage found)                                │            │
+│ │ ___________________________________________________             │            │
+│ │                                                                 │            │
+│ │ 📸 Upload 6 Mandatory Photos (SAME angles as pre-delivery):   │            │
+│ │   ✅ Front View     [ Choose File... ] → Compare with before   │            │
+│ │   ✅ Back View      [ Choose File... ] → Compare with before   │            │
+│ │   ✅ Left Side      [ Choose File... ] → Compare with before   │            │
+│ │   ✅ Right Side     [ Choose File... ] → Compare with before   │            │
+│ │   ✅ Top View       [ Choose File... ] → Compare with before   │            │
+│ │   ✅ Dashboard      [ Choose File... ] → Verify odometer/fuel  │            │
+│ │                                                                 │            │
+│ │ ⚠️ Validation:                                                  │            │
+│ │ • Exactly 6 photos required (same angles)                      │            │
+│ │ • No duplicates allowed                                        │            │
+│ │ • Max 10MB per photo before compression                        │            │
+│ │ • Auto-compressed to 1920x1080, 0.85 quality, JPEG             │            │
+│ │                                                                 │            │
+│ │          [ Cancel ]  [ Save Inspection ]                       │            │
+│ └────────────────────────────────────────────────────────────────┘            │
+│                                                                                 │
+│ ON SAVE:                                                                        │
+│ 1. POST /api/contracts/:id/inspections                                         │
+│    {                                                                            │
+│      contractId, inspection_type: 'post_return',                               │
+│      inspector_name, odometer_reading, fuel_level,                             │
+│      condition_notes, photos: [{angle, data}, ...] (6 photos)                  │
+│    }                                                                            │
+│ 2. Backend validates:                                                           │
+│    ✅ Exactly 6 photos                                                          │
+│    ✅ No duplicate photos (base64 comparison)                                   │
+│    ✅ Creates inspection record with timestamp                                  │
+│ 3. AUTOMATIC CHAINING to Return Charges Dialog:                                │
+│    ┌─────────────────────────────────────────────────────────┐                │
+│    │ Calculate Return Charges                                │                │
+│    ├─────────────────────────────────────────────────────────┤                │
+│    │ Odometer: [auto-filled from inspection]                 │                │
+│    │ Fuel Level: [auto-filled from inspection]               │                │
+│    │ Condition: [auto-filled from inspection]                │                │
+│    │                                                          │                │
+│    │ 💰 Automatic Fuel Charge Calculation:                   │                │
+│    │ Tank: 60L × (100% - 30%) / 100 × 3.5 SAR = 147 SAR     │                │
+│    │                                                          │                │
+│    │ Additional Charges:                                      │                │
+│    │ Damage: ____________ (justified by photos)              │                │
+│    │ Cleaning: ____________                                  │                │
+│    │ Late Fee: ____________                                  │                │
+│    │                                                          │                │
+│    │          [ Cancel ]  [ Complete Contract ]              │                │
+│    └─────────────────────────────────────────────────────────┘                │
+│ 4. POST /api/contracts/:id/complete (after charges confirmed)                  │
+│ 5. Stores ~6MB compressed photos in JSONB                                      │
+│ 6. Audit log: CREATE inspection + COMPLETE contract                            │
+│                                                                                 │
+│ CANNOT BYPASS:                                                                  │
+│ • Frontend blocks completion without inspection                                │
+│ • Backend returns 400 error if no post_return inspection exists                │
+│ • Photos permanently stored - cannot delete (legal audit trail)                │
+│ • Side-by-side comparison available in inspection history view                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ After successful inspection + charges
                                     v
 ┌────────────────────────────────────────────────────────────────────────────────┐
 │ State: COMPLETED                                                               │
