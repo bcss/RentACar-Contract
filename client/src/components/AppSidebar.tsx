@@ -77,6 +77,9 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const [reportsOpen, setReportsOpen] = useState(false);
   const [auditOpen, setAuditOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  
+  // Track which submenu should open after sidebar expands
+  const [pendingSubmenuOpen, setPendingSubmenuOpen] = useState<string | null>(null);
 
   // Load collapsible state from localStorage on mount
   useEffect(() => {
@@ -91,11 +94,40 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     if (savedSettings !== null) setSettingsOpen(savedSettings === 'true');
   }, []);
 
+  // When sidebar expands and there's a pending submenu, open it
+  useEffect(() => {
+    if (sidebarState === 'expanded' && pendingSubmenuOpen) {
+      // Sidebar has expanded, now open the pending submenu
+      switch (pendingSubmenuOpen) {
+        case 'masters':
+          setMastersOpen(true);
+          localStorage.setItem('sidebar_masters_open', 'true');
+          break;
+        case 'reports':
+          setReportsOpen(true);
+          localStorage.setItem('sidebar_reports_open', 'true');
+          break;
+        case 'audit':
+          setAuditOpen(true);
+          localStorage.setItem('sidebar_audit_open', 'true');
+          break;
+        case 'settings':
+          setSettingsOpen(true);
+          localStorage.setItem('sidebar_settings_open', 'true');
+          break;
+      }
+      setPendingSubmenuOpen(null); // Clear pending state
+    }
+  }, [sidebarState, pendingSubmenuOpen]);
+
   // Save collapsible state to localStorage when changed
   const handleMastersToggle = (open: boolean) => {
     // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    // and defer opening the submenu until after expansion completes
     if (open && sidebarState === 'collapsed') {
+      setPendingSubmenuOpen('masters');
       toggleSidebar();
+      return; // Don't open submenu yet - wait for sidebar to expand
     }
     setMastersOpen(open);
     localStorage.setItem('sidebar_masters_open', String(open));
@@ -103,8 +135,11 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   const handleReportsToggle = (open: boolean) => {
     // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    // and defer opening the submenu until after expansion completes
     if (open && sidebarState === 'collapsed') {
+      setPendingSubmenuOpen('reports');
       toggleSidebar();
+      return; // Don't open submenu yet - wait for sidebar to expand
     }
     setReportsOpen(open);
     localStorage.setItem('sidebar_reports_open', String(open));
@@ -112,8 +147,11 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   const handleAuditToggle = (open: boolean) => {
     // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    // and defer opening the submenu until after expansion completes
     if (open && sidebarState === 'collapsed') {
+      setPendingSubmenuOpen('audit');
       toggleSidebar();
+      return; // Don't open submenu yet - wait for sidebar to expand
     }
     setAuditOpen(open);
     localStorage.setItem('sidebar_audit_open', String(open));
@@ -121,8 +159,11 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   const handleSettingsToggle = (open: boolean) => {
     // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    // and defer opening the submenu until after expansion completes
     if (open && sidebarState === 'collapsed') {
+      setPendingSubmenuOpen('settings');
       toggleSidebar();
+      return; // Don't open submenu yet - wait for sidebar to expand
     }
     setSettingsOpen(open);
     localStorage.setItem('sidebar_settings_open', String(open));
@@ -397,7 +438,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>{t('nav.menu')}</SidebarGroupLabel>
+          {sidebarState === 'expanded' && <SidebarGroupLabel>{t('nav.menu')}</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {/* Dashboard */}
@@ -405,7 +446,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 <SidebarMenuButton asChild isActive={location === '/'} data-testid="nav-dashboard">
                   <Link href="/">
                     <span className="material-icons">dashboard</span>
-                    <span>{t('nav.dashboard')}</span>
+                    {sidebarState === 'expanded' && <span>{t('nav.dashboard')}</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -416,10 +457,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton data-testid="nav-masters">
                       <span className="material-icons">folder</span>
-                      <span>{t('nav.masters')}</span>
-                      <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                        chevron_right
-                      </span>
+                      {sidebarState === 'expanded' && <span>{t('nav.masters')}</span>}
+                      {sidebarState === 'expanded' && (
+                        <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                          chevron_right
+                        </span>
+                      )}
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -429,7 +472,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                           <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
                             <Link href={item.url}>
                               <span className="material-icons">{item.icon}</span>
-                              <span>{item.title}</span>
+                              {sidebarState === 'expanded' && <span>{item.title}</span>}
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -444,7 +487,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 <SidebarMenuButton asChild isActive={location === '/contracts'} data-testid="nav-contracts">
                   <Link href="/contracts">
                     <span className="material-icons">description</span>
-                    <span>{t('nav.contracts')}</span>
+                    {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -456,10 +499,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton data-testid="nav-reports">
                         <span className="material-icons">assessment</span>
-                        <span>{t('nav.reports')}</span>
-                        <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                          chevron_right
-                        </span>
+                        {sidebarState === 'expanded' && <span>{t('nav.reports')}</span>}
+                        {sidebarState === 'expanded' && (
+                          <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                            chevron_right
+                          </span>
+                        )}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
@@ -469,7 +514,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                             <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/reports/', '')}-reports`}>
                               <Link href={item.url}>
                                 <span className="material-icons">{item.icon}</span>
-                                <span>{item.title}</span>
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
                               </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
@@ -487,10 +532,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton data-testid="nav-audit-parent">
                         <span className="material-icons">assessment</span>
-                        <span>{t('nav.auditLogsAndErrors')}</span>
-                        <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                          chevron_right
-                        </span>
+                        {sidebarState === 'expanded' && <span>{t('nav.auditLogsAndErrors')}</span>}
+                        {sidebarState === 'expanded' && (
+                          <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                            chevron_right
+                          </span>
+                        )}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
@@ -500,7 +547,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                             <SidebarMenuSubButton asChild isActive={location.startsWith('/audit-logs') && window.location.search.includes(item.url.split('=')[1])} data-testid={`nav-${item.url.split('?')[0].replace('/', '')}-${item.url.split('=')[1]}`}>
                               <Link href={item.url}>
                                 <span className="material-icons">{item.icon}</span>
-                                <span>{item.title}</span>
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
                               </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
@@ -518,10 +565,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton data-testid="nav-settings">
                         <span className="material-icons">settings</span>
-                        <span>{t('nav.settings')}</span>
-                        <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                          chevron_right
-                        </span>
+                        {sidebarState === 'expanded' && <span>{t('nav.settings')}</span>}
+                        {sidebarState === 'expanded' && (
+                          <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                            chevron_right
+                          </span>
+                        )}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
@@ -531,7 +580,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                             <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
                               <Link href={item.url}>
                                 <span className="material-icons">{item.icon}</span>
-                                <span>{item.title}</span>
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
                               </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
