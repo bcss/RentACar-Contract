@@ -757,9 +757,59 @@ All inspection operations are fully logged:
 
 ## Audit Logs & Monitoring
 
+### Dual Audit System Architecture
+
+**Important:** RCCMS provides TWO distinct audit views for different purposes:
+
+#### 1. System Audit Logs (Logs & Errors → Audit Logs)
+
+**Purpose:** Complete system-wide security and compliance logging
+
+**Endpoint:** `/api/audit-logs`
+
+**Scope:** ALL operations including:
+- User authentication (logins, logouts)
+- Business operations (contracts, master data, payments, inspections)
+- System errors (acknowledged errors)
+- Configuration changes (company settings updates)
+
+**Use Cases:**
+- Security audits and monitoring
+- Compliance reporting
+- System troubleshooting
+- User behavior analysis
+
+#### 2. Business Operations Audit (Reports → Audit Report)
+
+**Purpose:** Business operations audit trail only
+
+**Endpoint:** `/api/reports/audit`
+
+**Scope:** ONLY business operations:
+- Contract lifecycle (create, confirm, activate, complete, close)
+- Master data operations (customers, vehicles, sponsors, companies)
+- Payment operations (create_payment)
+- Inspection operations (create_inspection)
+- Contract field modifications
+
+**Excludes:**
+- user_login, user_logout
+- system_error_acknowledged
+- update_company_settings
+
+**Use Cases:**
+- Operational reporting
+- Contract audit trails
+- Business analytics
+- User productivity tracking
+
+**Key Difference:**
+- System Audit Logs = Comprehensive (for security/compliance)
+- Business Operations Audit = Filtered (for operational reporting)
+
 ### Accessing Audit Logs
 
-**Location**: Logs & Errors → Audit Logs
+**Location**: Logs & Errors → Audit Logs (System-Wide) OR Reports → Audit Report (Business Operations)
 
 **Access Level**: Admin and Manager only
 

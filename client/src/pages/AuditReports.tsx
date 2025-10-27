@@ -152,10 +152,13 @@ export default function AuditReports() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            Audit Reports
+            {t('audit.businessOpsTitle')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Contract modifications and user activity tracking
+            {t('audit.businessOpsSubtitle')}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t('audit.businessOpsDescription')}
           </p>
         </div>
         <div className="flex gap-2">

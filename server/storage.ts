@@ -1579,9 +1579,31 @@ export class DatabaseStorage implements IStorage {
       return true;
     });
 
-    // Audit logs (all CRUD actions)
+    // Business operations audit logs (exclude system-level operations)
+    // Business operations include: contracts, master data, payments, inspections
+    const businessOperationActions = [
+      // Contract lifecycle
+      'create_contract', 'confirm_contract', 'activate_contract', 'complete_contract', 'close_contract',
+      // Master data - Customers
+      'create_customer', 'update_customer', 'disable_customer', 'enable_customer',
+      // Master data - Vehicles
+      'create_vehicle', 'update_vehicle', 'disable_vehicle', 'enable_vehicle',
+      // Master data - Sponsors
+      'create_sponsor', 'update_sponsor', 'disable_sponsor', 'enable_sponsor',
+      // Master data - Companies
+      'create_company', 'update_company', 'disable_company', 'enable_company',
+      // Payments
+      'create_payment',
+      // Inspections
+      'create_inspection'
+    ];
+    
     const allAuditLogs = await this.getAllAuditLogs();
     const filteredAuditLogs = allAuditLogs.filter(log => {
+      // Filter by business operations only
+      if (!businessOperationActions.includes(log.action)) return false;
+      
+      // Filter by date range
       if (!startDate && !endDate) return true;
       if (!log.createdAt) return false;
       const logDate = new Date(log.createdAt);
@@ -1655,6 +1677,22 @@ export class DatabaseStorage implements IStorage {
       }))
       .sort((a, b) => b.totalActions - a.totalActions);
 
+    // Categorize audit logs by operation type for clearer reporting
+    const contractOperations = filteredAuditLogs.filter(log => 
+      ['create_contract', 'confirm_contract', 'activate_contract', 'complete_contract', 'close_contract'].includes(log.action)
+    );
+    
+    const masterDataOperations = filteredAuditLogs.filter(log => 
+      ['create_customer', 'update_customer', 'disable_customer', 'enable_customer',
+       'create_vehicle', 'update_vehicle', 'disable_vehicle', 'enable_vehicle',
+       'create_sponsor', 'update_sponsor', 'disable_sponsor', 'enable_sponsor',
+       'create_company', 'update_company', 'disable_company', 'enable_company'].includes(log.action)
+    );
+    
+    const paymentOperations = filteredAuditLogs.filter(log => log.action === 'create_payment');
+    
+    const inspectionOperations = filteredAuditLogs.filter(log => log.action === 'create_inspection');
+
     return {
       summary: {
         totalModifications,
@@ -1662,13 +1700,41 @@ export class DatabaseStorage implements IStorage {
         uniqueContracts: uniqueContracts.size,
         avgModificationsPerContract,
         activeUsers: allUserIds.size, // Total users from both modifications and audit logs
+        // Operation breakdown
+        contractOperationsCount: contractOperations.length,
+        masterDataOperationsCount: masterDataOperations.length,
+        paymentOperationsCount: paymentOperations.length,
+        inspectionOperationsCount: inspectionOperations.length,
       },
       modifications: modificationsWithUser.sort((a, b) => {
         const aTime = a.editedAt ? new Date(a.editedAt).getTime() : 0;
         const bTime = b.editedAt ? new Date(b.editedAt).getTime() : 0;
         return bTime - aTime;
       }),
-      auditLogs: filteredAuditLogs,
+      auditLogs: filteredAuditLogs, // All business operations (for backward compatibility)
+      // Categorized operations for clearer reporting
+      categories: {
+        contractOperations: contractOperations.sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bTime - aTime;
+        }),
+        masterDataOperations: masterDataOperations.sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bTime - aTime;
+        }),
+        paymentOperations: paymentOperations.sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bTime - aTime;
+        }),
+        inspectionOperations: inspectionOperations.sort((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bTime - aTime;
+        }),
+      },
       userActivity,
       mostModifiedContracts,
     };

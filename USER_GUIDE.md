@@ -873,21 +873,59 @@ fuelCharge = tankCapacity × (startFuel% - endFuel%) / 100 × pricePerLiter
 - Improve retention
 - Understand customer base
 
-### 4. Audit Report
+### 4. Audit Reports
+
+**Important:** The system provides TWO distinct audit views:
+
+#### Business Operations Audit (Reports → Audit Report)
 
 **What It Shows:** (Admin/Manager only)
-- User activity summary
-- Contract modifications
-- System access logs
-- Action frequency
-- Compliance data
+- Contract lifecycle operations (create, confirm, activate, complete, close)
+- Master data operations (customers, vehicles, sponsors, companies)
+- Payment operations
+- Vehicle inspection operations
+- Contract field modifications
+- User activity statistics
+- Categorized by operation type
+
+**What It Excludes:**
+- User logins/logouts
+- System errors
+- Configuration changes
 
 **How to Use:**
 1. Go to Reports → Audit Report
-2. Filter by user, action, date
-3. Review activity
-4. Export for compliance
-5. Investigate anomalies
+2. Filter by date range
+3. Review tabs: Contract Modifications, All Actions, User Activity
+4. View operation categories (contracts, master data, payments, inspections)
+5. Export for operational reporting
+
+**Value:**
+- Track business operations only
+- Focus on contract and master data audit trail
+- Analyze operational patterns
+- User productivity tracking
+
+#### System Audit Logs (Logs & Errors → Audit Logs)
+
+**What It Shows:** (Admin/Manager only)
+- ALL system operations including:
+  - User authentication (logins, logouts)
+  - Business operations (contracts, master data, payments, inspections)
+  - System errors (acknowledged)
+  - Configuration changes (company settings)
+
+**How to Use:**
+1. Go to Logs & Errors → Audit Logs
+2. Filter by action type, user, date range
+3. Review complete system activity
+4. Monitor security and compliance
+
+**Value:**
+- Complete security audit trail
+- Compliance reporting
+- System monitoring
+- Troubleshooting
 
 ---
 

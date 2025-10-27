@@ -701,6 +701,12 @@ const resources = {
       
       // Audit Logs
       "audit.title": "Audit Logs",
+      "audit.systemLogsTitle": "System Audit Logs",
+      "audit.systemLogsSubtitle": "Complete security and compliance log including all system operations",
+      "audit.systemLogsDescription": "(User logins, business operations, system errors, and configuration changes)",
+      "audit.businessOpsTitle": "Business Operations Audit",
+      "audit.businessOpsSubtitle": "Contracts, master data, payments, and inspection operations audit trail",
+      "audit.businessOpsDescription": "(Excludes system logs like logins, errors, and configuration changes)",
       "audit.user": "User",
       "audit.action": "Action",
       "audit.contract": "Contract",
@@ -1480,6 +1486,12 @@ const resources = {
       
       // Audit Logs
       "audit.title": "سجلات التدقيق",
+      "audit.systemLogsTitle": "سجلات تدقيق النظام",
+      "audit.systemLogsSubtitle": "سجل الأمان والامتثال الكامل بما في ذلك جميع عمليات النظام",
+      "audit.systemLogsDescription": "(تسجيل دخول المستخدمين، العمليات التجارية، أخطاء النظام، وتغييرات التكوين)",
+      "audit.businessOpsTitle": "تدقيق العمليات التجارية",
+      "audit.businessOpsSubtitle": "مسار تدقيق العقود والبيانات الرئيسية والمدفوعات والفحوصات",
+      "audit.businessOpsDescription": "(يستثني سجلات النظام مثل تسجيل الدخول والأخطاء وتغييرات التكوين)",
       "audit.user": "المستخدم",
       "audit.action": "الإجراء",
       "audit.contract": "العقد",
