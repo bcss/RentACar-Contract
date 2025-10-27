@@ -289,23 +289,20 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   return (
     <Sidebar side={side} collapsible="icon" data-testid="sidebar-main">
       <SidebarHeader className="p-3 border-b">
-        {/* Microsoft 365-style control cluster */}
-        <div className="flex items-center justify-between gap-1.5 mb-3">
-          {/* Sidebar Toggle */}
+        {/* Microsoft 365-style control cluster - Icon-only buttons */}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          {/* Sidebar Toggle - Icon only */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                size={sidebarState === 'expanded' ? 'sm' : 'icon'}
+                size="icon"
                 onClick={toggleSidebar}
                 data-testid="button-sidebar-toggle"
-                className="hover-elevate active-elevate-2 shrink-0"
+                className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
                 aria-label={sidebarState === 'expanded' ? t('header.collapseSidebar') : t('header.expandSidebar')}
               >
                 <Menu className="h-4 w-4" />
-                {sidebarState === 'expanded' && (
-                  <span className="ml-2 text-xs">{t('header.collapse')}</span>
-                )}
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
@@ -313,23 +310,20 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             </TooltipContent>
           </Tooltip>
 
-          {/* Right side controls: Theme + Language */}
+          {/* Right side controls: Theme + Language - Icons only */}
           <div className="flex items-center gap-1">
-            {/* Theme Toggle */}
+            {/* Theme Toggle - Icon only */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size={sidebarState === 'expanded' ? 'sm' : 'icon'}
+                  size="icon"
                   onClick={toggleTheme}
                   data-testid="button-theme-toggle"
-                  className="hover-elevate active-elevate-2 shrink-0"
+                  className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
                   aria-label={theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}
                 >
                   {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                  {sidebarState === 'expanded' && (
-                    <span className="ml-2 text-xs">{t('header.theme')}</span>
-                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom">
@@ -337,21 +331,18 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
               </TooltipContent>
             </Tooltip>
 
-            {/* Language Toggle */}
+            {/* Language Toggle - Icon only */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size={sidebarState === 'expanded' ? 'sm' : 'icon'}
+                  size="icon"
                   onClick={toggleLanguage}
                   data-testid="button-language-toggle"
-                  className="hover-elevate active-elevate-2 shrink-0"
+                  className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
                   aria-label={language === 'en' ? t('header.switchToArabic') : t('header.switchToEnglish')}
                 >
                   <Globe className="h-4 w-4" />
-                  {sidebarState === 'expanded' && (
-                    <span className="ml-2 text-xs">{language === 'en' ? 'عربي' : 'EN'}</span>
-                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom">
@@ -362,11 +353,11 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
         </div>
 
         {/* Company branding - below controls */}
-        <div className="flex items-center gap-3">
-          <span className="material-icons text-3xl text-primary shrink-0">
-            directions_car
-          </span>
-          {sidebarState === 'expanded' && (
+        {sidebarState === 'expanded' && (
+          <div className="flex items-center gap-3">
+            <span className="material-icons text-3xl text-primary shrink-0">
+              directions_car
+            </span>
             <div className="overflow-hidden">
               <h2 className="text-base font-semibold truncate">
                 {settings 
@@ -380,8 +371,15 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 {t('landing.title')}
               </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+        {sidebarState === 'collapsed' && (
+          <div className="flex items-center justify-center">
+            <span className="material-icons text-2xl text-primary">
+              directions_car
+            </span>
+          </div>
+        )}
       </SidebarHeader>
       
       <SidebarContent>
@@ -535,71 +533,46 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 space-y-4">
-        {/* Control buttons: Theme, Language */}
-        <div className="flex items-center justify-center gap-2 px-2">
-          {/* Theme Toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                data-testid="button-theme-toggle"
-                className="h-9 w-9 hover-elevate active-elevate-2"
-              >
-                <span className="material-icons">
-                  {theme === 'dark' ? 'light_mode' : 'dark_mode'}
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{t('header.switchTheme')}</p>
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Language Toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleLanguage}
-                data-testid="button-language-toggle"
-                className="h-9 w-9 hover-elevate active-elevate-2"
-              >
-                <span className="font-mono text-sm font-semibold">
-                  {language === 'en' ? 'عربي' : 'EN'}
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{t('header.switchLanguage')}</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        {/* User menu */}
+      <SidebarFooter className="p-3">
+        {/* User menu - Responsive to sidebar state */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 w-full hover-elevate p-2 rounded-md" data-testid="button-user-menu">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.profileImageUrl || ''} alt={user?.firstName || ''} style={{ objectFit: 'cover' }} />
-                <AvatarFallback>{getUserInitials()}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium truncate" data-testid="text-username">
-                  {user?.firstName || user?.lastName 
-                    ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
-                    : user?.username || 'User'}
-                </p>
-                <Badge variant={getRoleBadgeVariant(user?.role || 'staff')} className="text-xs mt-1" data-testid="badge-role">
-                  {t(`role.${user?.role || 'staff'}`)}
-                </Badge>
-              </div>
-              <span className="material-icons text-muted-foreground">expand_more</span>
-            </button>
-          </DropdownMenuTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                {sidebarState === 'expanded' ? (
+                  <button className="flex items-center gap-3 w-full hover-elevate p-2 rounded-md" data-testid="button-user-menu">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={user?.profileImageUrl || ''} alt={user?.firstName || ''} style={{ objectFit: 'cover' }} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-sm font-medium truncate" data-testid="text-username">
+                        {user?.firstName || user?.lastName 
+                          ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+                          : user?.username || 'User'}
+                      </p>
+                      <Badge variant={getRoleBadgeVariant(user?.role || 'staff')} className="text-xs mt-1" data-testid="badge-role">
+                        {t(`role.${user?.role || 'staff'}`)}
+                      </Badge>
+                    </div>
+                    <span className="material-icons text-muted-foreground">expand_more</span>
+                  </button>
+                ) : (
+                  <button className="flex items-center justify-center w-full hover-elevate p-2 rounded-md" data-testid="button-user-menu">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user?.profileImageUrl || ''} alt={user?.firstName || ''} style={{ objectFit: 'cover' }} />
+                      <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                  </button>
+                )}
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>{user?.firstName || user?.lastName 
+                ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+                : user?.username || 'User'}</p>
+            </TooltipContent>
+          </Tooltip>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>{t('auth.myAccount')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
