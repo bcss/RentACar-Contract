@@ -3,6 +3,8 @@
 
 **For Ubuntu 20.04+ / Debian 11+ Servers**
 
+**Application Features**: RCCMS includes a professional Microsoft 365 Admin-style interface with icon-only controls, adaptive sidebar (expanded/collapsed), and perfect bilingual support with RTL/LTR mirroring. All UI assets are included in the application build - no additional configuration required.
+
 ---
 
 ## Table of Contents

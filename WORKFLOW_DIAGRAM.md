@@ -44,7 +44,8 @@
 ## 2. Main Application Structure
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                              SIDEBAR NAVIGATION                              │
+│               MICROSOFT 365-STYLE SIDEBAR NAVIGATION                         │
+│  ☰ Sidebar Toggle │ 🌙 Theme │ 🌐 Language (Icon-Only Controls)           │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │  📊 Dashboard         → Overview, metrics, quick actions                     │
 │  👥 Customers         → Master data for hirers/drivers                       │

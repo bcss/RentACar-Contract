@@ -3,6 +3,8 @@
 ## Overview
 This document provides a comprehensive breakdown of the complete rental contract lifecycle in the RCCMS Rental Car Contract Management System, including all state transitions, validations, side effects, and automated processes.
 
+**UI Navigation**: All contract operations are accessed through the Microsoft 365-style sidebar navigation with icon-only controls for theme, language, and sidebar toggle. The professional interface ensures staff can navigate workflows efficiently in both English and Arabic with zero text overflow issues.
+
 ## Contract Lifecycle States
 
 The system manages contracts through **five distinct states**:

@@ -22,6 +22,10 @@ This deployment guide has been thoroughly reviewed and **8 critical production e
 
 ---
 
+## Application Features
+
+RCCMS features a professional **Microsoft 365 Admin-style interface** with icon-only controls (no text overflow in English or Arabic), adaptive sidebar design (expanded/collapsed modes), and comprehensive bilingual support with automatic RTL/LTR mirroring. The enterprise-grade UI requires no special configuration - all assets are bundled in the application build.
+
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)

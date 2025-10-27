@@ -50,6 +50,7 @@ This guide provides technical information for maintaining, troubleshooting, and 
 - **Routing**: Wouter
 - **State Management**: TanStack Query v5
 - **Styling**: Tailwind CSS, Shadcn/UI components
+- **UI Pattern**: Microsoft 365 Admin-style sidebar with icon-only controls
 - **Internationalization**: i18next
 - **Form Validation**: React Hook Form + Zod
 
@@ -80,7 +81,7 @@ This guide provides technical information for maintaining, troubleshooting, and 
 project-root/
 ├── client/                  # Frontend React application
 │   ├── src/
-│   │   ├── components/      # Reusable UI components
+│   │   ├── components/      # Reusable UI components (AppSidebar.tsx - Microsoft 365-style)
 │   │   ├── pages/           # Page components
 │   │   ├── lib/             # Utilities and helpers
 │   │   └── hooks/           # Custom React hooks

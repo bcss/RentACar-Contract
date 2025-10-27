@@ -93,7 +93,18 @@ If this is your first time logging in:
 
 ### Interface Overview
 
-**Sidebar Navigation (Left Side)**
+**Microsoft 365-Style Sidebar Navigation**
+
+The system features a professional Microsoft 365 Admin-style sidebar with icon-only controls for a clean, modern interface.
+
+**Sidebar Header Controls (Icon-Only)**
+- **☰ Hamburger Menu**: Toggle sidebar between expanded and collapsed (icon-only) modes
+- **🌙 Theme Toggle**: Switch between light and dark modes
+- **🌐 Language Toggle**: Switch between English and Arabic
+- **Tooltip Labels**: Hover over any icon to see its label
+- **No Text Overflow**: All controls use icons only - no text labels that could overflow
+
+**Sidebar Navigation Menu (Left Side in English, Right Side in Arabic)**
 - **Dashboard**: Overview and quick stats
 - **Masters**: Customers, Vehicles, Sponsors, Companies
 - **Contracts**: All rental contracts
@@ -101,11 +112,16 @@ If this is your first time logging in:
 - **Settings**: Company info, Financial settings, Terms (Admin only)
 - **Logs & Errors**: Audit logs, System errors (Admin/Manager only)
 
-**Top Bar**
-- **Sidebar Toggle**: Show/hide sidebar
-- **Language Toggle**: Switch EN/AR
-- **Theme Toggle**: Switch light/dark mode
-- **User Profile**: Your account, logout
+**Sidebar Footer - User Profile**
+- **When Expanded**: Shows your avatar, name, and role badge
+- **When Collapsed**: Shows only your avatar (tooltip shows your name)
+- **Click to Access**: Change password, logout options
+- **No Duplicates**: Theme and language controls are in the header only
+
+**Sidebar States**
+- **Expanded Mode** (~256px): Full menu text visible, company branding shown
+- **Collapsed Mode** (~48px): Icon-only navigation, centered icons, space-efficient
+- **RTL/LTR Support**: Sidebar automatically moves to right side in Arabic mode
 
 **Main Content Area**
 - Pages display here based on sidebar selection

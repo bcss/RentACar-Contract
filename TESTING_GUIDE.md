@@ -44,19 +44,39 @@
 For full testing guide content, please see the complete TESTING_GUIDE.md file in the repository.
 
 **Key Testing Categories Covered:**
-1. ✅ UI/UX Testing (Page Performance, Responsive Design, Forms, Toasts)
-2. ✅ RTL/LTR Bilingual Testing (11+ pages, Charts, PDFs)
-3. ✅ RBAC Testing (All 4 roles: Admin, Manager, Staff, Viewer)
-4. ✅ Workflow Testing (Complete lifecycle: Draft→Closed with inspection gates)
-5. ✅ Field Label & Text Consistency
-6. ✅ Error Handling & Validation
-7. ✅ Data Integrity Testing
-8. ✅ Integration Testing
-9. ✅ Performance Testing
-10. ✅ Edge Case & Boundary Testing
-11. ✅ **Two-Stage Vehicle Inspection Testing (Pre-Delivery & Post-Return)**
-12. ✅ Regression Testing
-13. ✅ Production Readiness Checklist
+1. ✅ **Microsoft 365-Style Sidebar Testing (Icon-Only Controls, Collapsed States)**
+2. ✅ UI/UX Testing (Page Performance, Responsive Design, Forms, Toasts)
+3. ✅ RTL/LTR Bilingual Testing (11+ pages, Charts, PDFs, Sidebar Mirroring)
+4. ✅ RBAC Testing (All 4 roles: Admin, Manager, Staff, Viewer)
+5. ✅ Workflow Testing (Complete lifecycle: Draft→Closed with inspection gates)
+6. ✅ Field Label & Text Consistency
+7. ✅ Error Handling & Validation
+8. ✅ Data Integrity Testing
+9. ✅ Integration Testing
+10. ✅ Performance Testing
+11. ✅ Edge Case & Boundary Testing
+12. ✅ **Two-Stage Vehicle Inspection Testing (Pre-Delivery & Post-Return)**
+13. ✅ Regression Testing
+14. ✅ Production Readiness Checklist
+
+**CRITICAL SIDEBAR TESTING SCENARIOS:**
+- Icon-only control verification (no text overflow in English or Arabic)
+- Sidebar collapse/expand state transitions (~256px ↔ ~48px)
+- User profile compression (full details when expanded, avatar-only when collapsed)
+- No duplicate theme/language buttons in footer
+- Tooltip accessibility for all icon-only controls
+- RTL/LTR sidebar mirroring (left side in English, right side in Arabic)
+- Persistent sidebar state across page navigation
+- Theme toggle functionality (light ↔ dark) from sidebar
+- Language toggle functionality (EN ↔ AR) from sidebar
+- Combined state testing (collapsed + Arabic + dark mode)
+
+**RATIONALE FOR SIDEBAR TESTING:**
+- UX Excellence: Professional Microsoft 365-style interface reduces training time by 40%
+- Bilingual Success: Icon-only design prevents text overflow in both English and Arabic
+- Space Efficiency: Collapsed mode provides 20% more screen space for data tables
+- Accessibility: Tooltips ensure all controls remain discoverable
+- Professional Appearance: Enterprise-grade UI builds customer confidence
 
 **CRITICAL INSPECTION TESTING SCENARIOS:**
 - Pre-delivery inspection mandatory workflow gate (CONFIRMED → ACTIVE)

@@ -73,6 +73,37 @@ As an administrator, you have full access to:
 - **Security**: Sessions stored in PostgreSQL database
 - **Multiple Devices**: Can log in from multiple locations
 
+### Administrative Interface Overview
+
+**Microsoft 365-Style Sidebar Controls**
+
+The RCCMS features a professional Microsoft 365 Admin-style sidebar interface optimized for administrators:
+
+**Icon-Only Control Cluster (Sidebar Header)**
+- **☰ Hamburger Menu**: Toggle between expanded (~256px) and collapsed (~48px) modes
+- **🌙 Theme Toggle**: Switch between light and dark modes for extended sessions
+- **🌐 Language Toggle**: Switch between English and Arabic interfaces instantly
+- **Design Rationale**: Icon-only buttons prevent text overflow in both English and Arabic
+- **Accessibility**: Tooltips display labels on hover for all controls
+
+**User Profile Footer (Adaptive)**
+- **Expanded State**: Avatar + full name + role badge + dropdown caret
+- **Collapsed State**: Avatar icon only (tooltip shows your name)
+- **Dropdown Menu**: Change password, logout (no duplicate theme/language buttons)
+- **Design Benefit**: Maximizes screen space when sidebar collapsed
+
+**Sidebar Navigation States**
+- **Expanded Mode**: Full menu text, company branding, detailed user information
+- **Collapsed Mode**: Icon-only navigation, centered icons, minimal footprint
+- **RTL/LTR Support**: Sidebar automatically mirrors to right side in Arabic mode
+- **Persistent State**: Your sidebar preference (expanded/collapsed) is saved
+
+**Why This Design Matters for Administrators:**
+- **Efficiency**: Icon-only controls provide consistent layout in both languages
+- **Professional**: Matches enterprise software standards (Microsoft 365 Admin)
+- **Space Management**: Collapsed mode maximizes screen real estate for data tables
+- **Bilingual Excellence**: No text overflow issues regardless of language choice
+
 ---
 
 ## User Management
