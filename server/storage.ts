@@ -1593,7 +1593,7 @@ export class DatabaseStorage implements IStorage {
     // Get user names from BOTH modifications and audit logs
     const modificationUserIds = new Set(filteredModifications.map(m => m.editedBy));
     const auditLogUserIds = new Set(filteredAuditLogs.map(log => log.userId).filter(id => id !== null) as string[]);
-    const allUserIds = new Set([...modificationUserIds, ...auditLogUserIds]);
+    const allUserIds = new Set([...Array.from(modificationUserIds), ...Array.from(auditLogUserIds)]);
     
     const usersData = await Promise.all(
       Array.from(allUserIds).map(id => this.getUser(id))
@@ -1613,7 +1613,7 @@ export class DatabaseStorage implements IStorage {
       : 0;
     
     // Most frequently modified contracts
-    const contractModCounts = new Map<number, number>();
+    const contractModCounts = new Map<string, number>();
     filteredModifications.forEach(m => {
       contractModCounts.set(m.contractId, (contractModCounts.get(m.contractId) || 0) + 1);
     });
