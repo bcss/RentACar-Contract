@@ -93,21 +93,37 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   // Save collapsible state to localStorage when changed
   const handleMastersToggle = (open: boolean) => {
+    // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    if (open && sidebarState === 'collapsed') {
+      toggleSidebar();
+    }
     setMastersOpen(open);
     localStorage.setItem('sidebar_masters_open', String(open));
   };
 
   const handleReportsToggle = (open: boolean) => {
+    // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    if (open && sidebarState === 'collapsed') {
+      toggleSidebar();
+    }
     setReportsOpen(open);
     localStorage.setItem('sidebar_reports_open', String(open));
   };
 
   const handleAuditToggle = (open: boolean) => {
+    // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    if (open && sidebarState === 'collapsed') {
+      toggleSidebar();
+    }
     setAuditOpen(open);
     localStorage.setItem('sidebar_audit_open', String(open));
   };
 
   const handleSettingsToggle = (open: boolean) => {
+    // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    if (open && sidebarState === 'collapsed') {
+      toggleSidebar();
+    }
     setSettingsOpen(open);
     localStorage.setItem('sidebar_settings_open', String(open));
   };
@@ -289,8 +305,8 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   return (
     <Sidebar side={side} collapsible="icon" data-testid="sidebar-main">
       <SidebarHeader className="p-3 border-b">
-        {/* Microsoft 365-style control cluster - Icon-only buttons */}
-        <div className="flex items-center justify-between gap-2 mb-3">
+        {/* Microsoft 365-style control cluster - Vertical stack for no overflow */}
+        <div className="flex flex-col items-center gap-2 mb-3">
           {/* Sidebar Toggle - Icon only */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -305,51 +321,48 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 <Menu className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">
+            <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
               <p>{sidebarState === 'expanded' ? t('header.collapseSidebar') : t('header.expandSidebar')}</p>
             </TooltipContent>
           </Tooltip>
 
-          {/* Right side controls: Theme + Language - Icons only */}
-          <div className="flex items-center gap-1">
-            {/* Theme Toggle - Icon only */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleTheme}
-                  data-testid="button-theme-toggle"
-                  className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
-                  aria-label={theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}
-                >
-                  {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>{theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}</p>
-              </TooltipContent>
-            </Tooltip>
+          {/* Theme Toggle - Icon only */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                data-testid="button-theme-toggle"
+                className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
+                aria-label={theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}
+              >
+                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+              <p>{theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}</p>
+            </TooltipContent>
+          </Tooltip>
 
-            {/* Language Toggle - Icon only */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleLanguage}
-                  data-testid="button-language-toggle"
-                  className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
-                  aria-label={language === 'en' ? t('header.switchToArabic') : t('header.switchToEnglish')}
-                >
-                  <Globe className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>{language === 'en' ? t('header.switchToArabic') : t('header.switchToEnglish')}</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          {/* Language Toggle - Icon only */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleLanguage}
+                data-testid="button-language-toggle"
+                className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
+                aria-label={language === 'en' ? t('header.switchToArabic') : t('header.switchToEnglish')}
+              >
+                <Globe className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+              <p>{language === 'en' ? t('header.switchToArabic') : t('header.switchToEnglish')}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Company branding - below controls */}
