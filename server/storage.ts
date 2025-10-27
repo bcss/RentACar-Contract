@@ -129,6 +129,7 @@ export interface IStorage {
   getContractAuditLogs(contractId: string): Promise<any[]>;
   
   // System error operations
+  createSystemError(error: InsertSystemError): Promise<SystemError>;
   getAllSystemErrors(): Promise<SystemError[]>;
   getUnacknowledgedSystemErrors(): Promise<SystemError[]>;
   acknowledgeSystemError(id: string, acknowledgedBy: string): Promise<SystemError>;
@@ -1010,6 +1011,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // System error operations
+  async createSystemError(error: InsertSystemError): Promise<SystemError> {
+    const [newError] = await db.insert(systemErrors).values(error).returning();
+    return newError;
+  }
+
   async getAllSystemErrors(): Promise<SystemError[]> {
     return await db.select().from(systemErrors).orderBy(desc(systemErrors.createdAt));
   }
