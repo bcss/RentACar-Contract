@@ -7,6 +7,14 @@
 
 The RCCMS Rental Car Contract Management System is a comprehensive, bilingual (English/Arabic) web-based platform designed specifically for car rental businesses. Built with modern technology and Material Design 3 principles, it streamlines the entire rental lifecycle from initial contract creation to final closure, while maintaining complete audit trails and financial tracking.
 
+## Authoritative Documentation
+
+This brochure should be read in conjunction with:
+- **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
+- **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (15 tables, 100+ endpoints, 22 pages)
+
+For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
+
 ---
 
 ## Key Features

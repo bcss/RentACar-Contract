@@ -6,6 +6,14 @@
 **Purpose:** Complete testing scenarios for all features, workflows, and edge cases  
 **Target Audience:** QA Engineers, Developers, System Administrators
 
+## Authoritative Documentation
+
+This guide should be read in conjunction with:
+- **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
+- **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (15 tables, 100+ endpoints, 22 pages)
+
+For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
+
 ---
 
 ## Table of Contents

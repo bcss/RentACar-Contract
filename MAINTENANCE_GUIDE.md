@@ -38,6 +38,14 @@ This guide provides technical information for maintaining, troubleshooting, and 
 - Network and security basics
 - Command line proficiency
 
+### Authoritative Documentation
+
+This guide should be read in conjunction with:
+- **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
+- **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (15 tables, 100+ endpoints, 22 pages)
+
+For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
+
 ---
 
 ## System Architecture

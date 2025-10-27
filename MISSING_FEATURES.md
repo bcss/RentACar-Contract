@@ -9,6 +9,14 @@ This document identifies features that could enhance the rental car contract man
 **System Version**: Production-Ready Release  
 **Feature Status**: Enhancement Opportunities
 
+## Authoritative Documentation
+
+This document should be read in conjunction with:
+- **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
+- **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (15 tables, 100+ endpoints, 22 pages)
+
+For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
+
 ---
 
 ## Table of Contents
