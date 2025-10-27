@@ -346,8 +346,8 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   return (
     <Sidebar side={side} collapsible="icon" data-testid="sidebar-main">
       <SidebarHeader className="p-3 border-b">
-        {/* Microsoft 365-style control cluster - Vertical stack for no overflow */}
-        <div className="flex flex-col items-center gap-2 mb-3">
+        {/* Microsoft 365-style control cluster - Responsive to sidebar state */}
+        <div className={`flex ${sidebarState === 'collapsed' ? 'flex-col' : 'flex-row'} items-center gap-2 mb-3`}>
           {/* Sidebar Toggle - Icon only */}
           <Tooltip>
             <TooltipTrigger asChild>
