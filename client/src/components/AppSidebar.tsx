@@ -443,28 +443,46 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             <SidebarMenu>
               {/* Dashboard */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={location === '/'} data-testid="nav-dashboard">
-                  <Link href="/">
-                    <span className="material-icons">dashboard</span>
-                    {sidebarState === 'expanded' && <span>{t('nav.dashboard')}</span>}
-                  </Link>
-                </SidebarMenuButton>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <SidebarMenuButton asChild isActive={location === '/'} data-testid="nav-dashboard">
+                      <Link href="/">
+                        <span className="material-icons">dashboard</span>
+                        {sidebarState === 'expanded' && <span>{t('nav.dashboard')}</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </TooltipTrigger>
+                  {sidebarState === 'collapsed' && (
+                    <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                      <p>{t('nav.dashboard')}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
               </SidebarMenuItem>
 
               {/* Masters - Collapsible */}
               <Collapsible open={mastersOpen} onOpenChange={handleMastersToggle} className="group/collapsible">
                 <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton data-testid="nav-masters">
-                      <span className="material-icons">folder</span>
-                      {sidebarState === 'expanded' && <span>{t('nav.masters')}</span>}
-                      {sidebarState === 'expanded' && (
-                        <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                          chevron_right
-                        </span>
-                      )}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton data-testid="nav-masters">
+                          <span className="material-icons">folder</span>
+                          {sidebarState === 'expanded' && <span>{t('nav.masters')}</span>}
+                          {sidebarState === 'expanded' && (
+                            <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                              chevron_right
+                            </span>
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                    </TooltipTrigger>
+                    {sidebarState === 'collapsed' && (
+                      <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                        <p>{t('nav.masters')}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {masterItems.filter(item => item.show).map((item) => (
@@ -484,29 +502,47 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
               {/* Contracts */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={location === '/contracts'} data-testid="nav-contracts">
-                  <Link href="/contracts">
-                    <span className="material-icons">description</span>
-                    {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
-                  </Link>
-                </SidebarMenuButton>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <SidebarMenuButton asChild isActive={location === '/contracts'} data-testid="nav-contracts">
+                      <Link href="/contracts">
+                        <span className="material-icons">description</span>
+                        {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </TooltipTrigger>
+                  {sidebarState === 'collapsed' && (
+                    <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                      <p>{t('nav.contracts')}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
               </SidebarMenuItem>
 
               {/* Reports - Collapsible (Admin/Manager only) */}
               {(isAdmin || isManager) && (
                 <Collapsible open={reportsOpen} onOpenChange={handleReportsToggle} className="group/collapsible">
                   <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton data-testid="nav-reports">
-                        <span className="material-icons">assessment</span>
-                        {sidebarState === 'expanded' && <span>{t('nav.reports')}</span>}
-                        {sidebarState === 'expanded' && (
-                          <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                            chevron_right
-                          </span>
-                        )}
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton data-testid="nav-reports">
+                            <span className="material-icons">assessment</span>
+                            {sidebarState === 'expanded' && <span>{t('nav.reports')}</span>}
+                            {sidebarState === 'expanded' && (
+                              <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                                chevron_right
+                              </span>
+                            )}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                      </TooltipTrigger>
+                      {sidebarState === 'collapsed' && (
+                        <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                          <p>{t('nav.reports')}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {reportItems.filter(item => item.show).map((item) => (
@@ -529,17 +565,26 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
               {(isAdmin || isManager) && (
                 <Collapsible open={auditOpen} onOpenChange={handleAuditToggle} className="group/collapsible">
                   <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton data-testid="nav-audit-parent">
-                        <span className="material-icons">assessment</span>
-                        {sidebarState === 'expanded' && <span>{t('nav.auditLogsAndErrors')}</span>}
-                        {sidebarState === 'expanded' && (
-                          <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                            chevron_right
-                          </span>
-                        )}
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton data-testid="nav-audit-parent">
+                            <span className="material-icons">assessment</span>
+                            {sidebarState === 'expanded' && <span>{t('nav.auditLogsAndErrors')}</span>}
+                            {sidebarState === 'expanded' && (
+                              <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                                chevron_right
+                              </span>
+                            )}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                      </TooltipTrigger>
+                      {sidebarState === 'collapsed' && (
+                        <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                          <p>{t('nav.auditLogsAndErrors')}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {auditItems.filter(item => item.show).map((item) => (
@@ -562,17 +607,26 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
               {isAdmin && (
                 <Collapsible open={settingsOpen} onOpenChange={handleSettingsToggle} className="group/collapsible">
                   <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton data-testid="nav-settings">
-                        <span className="material-icons">settings</span>
-                        {sidebarState === 'expanded' && <span>{t('nav.settings')}</span>}
-                        {sidebarState === 'expanded' && (
-                          <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                            chevron_right
-                          </span>
-                        )}
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton data-testid="nav-settings">
+                            <span className="material-icons">settings</span>
+                            {sidebarState === 'expanded' && <span>{t('nav.settings')}</span>}
+                            {sidebarState === 'expanded' && (
+                              <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
+                                chevron_right
+                              </span>
+                            )}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                      </TooltipTrigger>
+                      {sidebarState === 'collapsed' && (
+                        <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                          <p>{t('nav.settings')}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {settingsItems.filter(item => item.show).map((item) => (
