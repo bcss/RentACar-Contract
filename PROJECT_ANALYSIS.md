@@ -318,6 +318,110 @@ Test Execution (October 27, 2025):
 - Implement real-time audit log streaming for security monitoring
 - Add configurable retention policies for different audit types
 
+---
+
+### System Error Logging Implementation (October 27, 2025)
+
+**PROBLEM IDENTIFIED:**
+- System had a `systemErrors` table but NO errors were being saved to it
+- Database had 0 error records despite application running for extended period
+- Errors were only logged to console (lost after restart)
+- No persistent error tracking for debugging or compliance
+
+**IMPLEMENTATION:**
+
+**1. Storage Layer** (`server/storage.ts`):
+- Added `createSystemError()` method to IStorage interface
+- Implemented method in DatabaseStorage class
+- Method signature: `createSystemError(error: InsertSystemError): Promise<SystemError>`
+
+**2. Global Error Middleware** (`server/index.ts`):
+- Updated error middleware to save ALL unhandled errors to database
+- Captures full context: endpoint, method, user ID, IP address, user agent, stack trace
+- Includes request body, query params, and route params for debugging
+- Graceful fallback: If database logging fails, continues with console logging only
+
+**3. Route-Level Error Logging** (`server/routes.ts`):
+- Created `logSystemError()` helper function for manual error logging
+- Helper signature: `logSystemError(error: any, req: Request, additionalContext?: Record<string, any>)`
+- Integrated into critical routes:
+  - `GET /api/auth/user` - Authentication errors
+  - `POST /api/contracts` - Contract creation errors
+  - `POST /api/contracts/:contractId/payments` - Payment processing errors
+
+**4. Error Context Captured:**
+```typescript
+{
+  errorType: string,           // e.g., "ValidationError", "DatabaseError"
+  errorMessage: string,         // Human-readable error message
+  errorStack: string,           // Full stack trace for debugging
+  userId: string | null,        // User who triggered the error (if authenticated)
+  endpoint: string,             // API endpoint (e.g., "/api/contracts")
+  method: string,               // HTTP method (GET, POST, etc.)
+  ipAddress: string,            // Client IP address
+  userAgent: string,            // Browser/client user agent
+  additionalData: string,       // JSON with SANITIZED request body, query, params, custom context
+  acknowledged: boolean,        // Admin can mark as reviewed
+  acknowledgedBy: string,       // Admin who acknowledged
+  acknowledgedAt: timestamp     // When it was acknowledged
+}
+```
+
+**5. Security: Request Data Sanitization**
+
+**Critical Security Implementation:**
+- All request data is sanitized before logging to prevent exposure of sensitive information
+- Sensitive fields are automatically redacted with `[REDACTED]` placeholder
+- Sanitizer recursively processes nested objects and arrays
+
+**Redacted Fields:**
+- Passwords: `password`, `passwordHash`, `newPassword`, `currentPassword`, `confirmPassword`
+- Authentication tokens: `token`, `accessToken`, `refreshToken`, `apiKey`, `secret`
+- Payment data: `creditCard`, `cvv`, `ssn`, `pin`
+
+**Implementation:**
+```typescript
+// Example sanitized request body
+{
+  "username": "john_doe",
+  "password": "[REDACTED]",    // Sensitive field redacted
+  "email": "john@example.com"
+}
+```
+
+**Security Benefits:**
+- Prevents credential exposure in error logs
+- Compliance with data protection regulations (GDPR, PCI-DSS)
+- Safe error log sharing for debugging without exposing sensitive data
+- Reduces risk of data breaches from compromised error logs
+
+**6. Benefits Delivered:**
+
+- **Persistent Error Tracking:** All errors now stored permanently in database
+- **Debugging Power:** Full stack traces and request context available for investigation
+- **Compliance:** Error logs available for security audits and compliance reporting
+- **Production Monitoring:** Can identify patterns and recurring issues
+- **User Impact Analysis:** Track which users/operations are affected by errors
+- **Security:** Sensitive data automatically redacted before logging
+
+**7. Testing Results:**
+
+- ✅ Global middleware captures unhandled errors
+- ✅ Route-level helper captures handled errors in critical paths
+- ✅ Errors appear in System Errors page (/system-errors)
+- ✅ Full context (endpoint, method, stack trace) captured correctly
+- ✅ Sensitive fields (passwords, tokens) automatically redacted
+- ✅ Acknowledgment workflow functional for Admin/Manager roles
+
+**8. Future Enhancements:**
+
+- Add error logging to remaining catch blocks across all routes
+- Implement error rate monitoring and alerting
+- Add error grouping/deduplication for similar errors
+- Create error analytics dashboard with trends and patterns
+- Add automated error notification for critical errors (email/Slack)
+- Implement error retention policies for database cleanup
+
 ### Issue Summary
 | Severity | Count | Description |
 |----------|-------|-------------|

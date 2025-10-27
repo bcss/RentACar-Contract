@@ -37,6 +37,7 @@ Preferred communication style: Simple, everyday language.
 - **Payment Tracking System:** Comprehensive payment history for deposits, final payments, refunds.
 - **Customer Phone Validation:** Non-blocking duplicate phone number detection.
 - **Complete Audit Logging:** Comprehensive audit trail for CRUD operations and contract lifecycle events.
+- **System Error Logging:** Automatic error logging to database with full context (endpoint, method, user, stack trace, request details).
 - **Company Settings Management:** Admin-only configuration for bilingual company information and contract clauses.
 - **Dashboard:** Critical metrics (active rentals, monthly revenue, overdue returns).
 - **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality (`jsPDF`, `xlsx`), and chart visualization.
@@ -49,6 +50,14 @@ Preferred communication style: Simple, everyday language.
 - **System Audit Logs:** System-wide security and compliance logging for all operations (user auth, business ops, system errors, config changes). Accessed by Admin/Manager.
 - **Business Operations Audit:** Focuses solely on business operations (contract lifecycle, master data, payments, inspections, contract field modifications). Excludes system-level events. Accessed by Admin/Manager.
 - **Benefits:** Clear separation for clarity, efficiency, compliance, and user experience.
+
+### Error Logging System
+- **Automatic Error Capture:** All errors caught by global error middleware are automatically logged to `systemErrors` table.
+- **Helper Function:** `logSystemError()` helper available in routes for logging errors with full context.
+- **Critical Route Integration:** Error logging implemented in authentication, contract creation, and payment processing routes.
+- **Error Details Logged:** Error type, message, stack trace, user ID, endpoint, HTTP method, IP address, user agent, request body/query/params.
+- **Admin Features:** Errors viewable in System Errors page, can be acknowledged by Admin/Manager users.
+- **Error Tracking:** All system errors stored in database for debugging, compliance, and system health monitoring.
 
 ## External Dependencies
 

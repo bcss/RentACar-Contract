@@ -3,6 +3,35 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 
+// Sanitize request data to remove sensitive fields before logging
+function sanitizeRequestData(data: any): any {
+  if (!data || typeof data !== 'object') return data;
+  
+  const sensitiveFields = [
+    'password', 'passwordhash', 'newpassword', 'currentpassword', 'confirmpassword',
+    'token', 'accesstoken', 'refreshtoken', 'apikey', 'secret',
+    'creditcard', 'cvv', 'ssn', 'pin', 'authorization', 'bearer'
+  ];
+  
+  const sanitized: any = Array.isArray(data) ? [] : {};
+  
+  for (const key in data) {
+    // Normalize key name by removing underscores, hyphens, and converting to lowercase
+    // This catches: password, PASSWORD, pass_word, pass-word, etc.
+    const normalizedKey = key.toLowerCase().replace(/[_-]/g, '');
+    
+    if (sensitiveFields.some(field => normalizedKey.includes(field))) {
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof data[key] === 'object' && data[key] !== null) {
+      sanitized[key] = sanitizeRequestData(data[key]);
+    } else {
+      sanitized[key] = data[key];
+    }
+  }
+  
+  return sanitized;
+}
+
 const app = express();
 // Increase payload limit for chart exports (base64 images can be large)
 app.use(express.json({ limit: '10mb' }));
@@ -61,9 +90,9 @@ app.use((req, res, next) => {
         ipAddress: req.ip || req.headers['x-forwarded-for'] as string || req.socket.remoteAddress,
         userAgent: req.headers['user-agent'],
         additionalData: JSON.stringify({
-          body: req.body,
-          query: req.query,
-          params: req.params,
+          body: sanitizeRequestData(req.body),
+          query: sanitizeRequestData(req.query),
+          params: sanitizeRequestData(req.params),
         }),
       });
     } catch (dbError) {

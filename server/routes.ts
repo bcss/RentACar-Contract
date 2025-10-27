@@ -21,6 +21,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed company settings on startup
   await seedCompanySettings();
 
+  // Sanitize request data to remove sensitive fields before logging
+  function sanitizeRequestData(data: any): any {
+    if (!data || typeof data !== 'object') return data;
+    
+    const sensitiveFields = [
+      'password', 'passwordhash', 'newpassword', 'currentpassword', 'confirmpassword',
+      'token', 'accesstoken', 'refreshtoken', 'apikey', 'secret',
+      'creditcard', 'cvv', 'ssn', 'pin', 'authorization', 'bearer'
+    ];
+    
+    const sanitized: any = Array.isArray(data) ? [] : {};
+    
+    for (const key in data) {
+      // Normalize key name by removing underscores, hyphens, and converting to lowercase
+      // This catches: password, PASSWORD, pass_word, pass-word, etc.
+      const normalizedKey = key.toLowerCase().replace(/[_-]/g, '');
+      
+      if (sensitiveFields.some(field => normalizedKey.includes(field))) {
+        sanitized[key] = '[REDACTED]';
+      } else if (typeof data[key] === 'object' && data[key] !== null) {
+        sanitized[key] = sanitizeRequestData(data[key]);
+      } else {
+        sanitized[key] = data[key];
+      }
+    }
+    
+    return sanitized;
+  }
+
   // Helper function to create audit log with enhanced tracking
   async function createAuditLog(userId: string, action: string, contractId: string | undefined, req: Request, details?: string) {
     try {
@@ -61,10 +90,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ipAddress: req.ip || req.headers['x-forwarded-for'] as string || req.socket.remoteAddress,
         userAgent: req.headers['user-agent'],
         additionalData: JSON.stringify({
-          body: req.body,
-          query: req.query,
-          params: req.params,
-          ...additionalContext,
+          body: sanitizeRequestData(req.body),
+          query: sanitizeRequestData(req.query),
+          params: sanitizeRequestData(req.params),
+          // Sanitize additional context to prevent bypass
+          ...(additionalContext ? sanitizeRequestData(additionalContext) : {}),
         }),
       });
     } catch (dbError) {
