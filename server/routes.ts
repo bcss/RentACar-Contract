@@ -47,6 +47,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
+  // Helper function to log system errors to database
+  async function logSystemError(error: any, req: Request, additionalContext?: Record<string, any>) {
+    try {
+      const userId = (req as any).user?.id;
+      await storage.createSystemError({
+        errorType: error.name || "UnknownError",
+        errorMessage: error.message || "An unknown error occurred",
+        errorStack: error.stack,
+        userId: userId,
+        endpoint: req.path,
+        method: req.method,
+        ipAddress: req.ip || req.headers['x-forwarded-for'] as string || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+        additionalData: JSON.stringify({
+          body: req.body,
+          query: req.query,
+          params: req.params,
+          ...additionalContext,
+        }),
+      });
+    } catch (dbError) {
+      // If database logging fails, log to console only
+      console.error("Failed to log error to database:", dbError);
+    }
+  }
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -57,6 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
+      await logSystemError(error, req);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
@@ -666,6 +693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(contract);
     } catch (error: any) {
       console.error("Error creating contract:", error);
+      await logSystemError(error, req, { action: 'create_contract' });
       res.status(400).json({ message: error.message || "Failed to create contract" });
     }
   });
@@ -1351,6 +1379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: fromZodError(error).message });
       }
       console.error("Error creating payment:", error);
+      await logSystemError(error, req, { action: 'create_payment' });
       res.status(400).json({ message: error.message || "Failed to create payment" });
     }
   });
