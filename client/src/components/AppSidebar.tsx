@@ -287,7 +287,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   };
 
   return (
-    <Sidebar side={side} data-testid="sidebar-main">
+    <Sidebar side={side} collapsible="icon" data-testid="sidebar-main">
       <SidebarHeader className="p-3 border-b">
         {/* Microsoft 365-style control cluster */}
         <div className="flex items-center justify-between gap-1.5 mb-3">
