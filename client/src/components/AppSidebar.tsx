@@ -52,7 +52,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { PanelLeft } from 'lucide-react';
+import { Menu, Sun, Moon, Globe } from 'lucide-react';
 
 interface AppSidebarProps {
   side?: 'left' | 'right';
@@ -63,7 +63,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const [location] = useLocation();
   const { user, isAdmin, isManager } = useAuth();
   const { toast } = useToast();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, state: sidebarState } = useSidebar();
   const { language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
@@ -288,14 +288,87 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   return (
     <Sidebar side={side} data-testid="sidebar-main">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3 justify-between">
-          <div className="flex items-center gap-3">
-            <span className="material-icons text-3xl text-primary">
-              directions_car
-            </span>
-            <div>
-              <h2 className="text-lg font-semibold">
+      <SidebarHeader className="p-3 border-b">
+        {/* Microsoft 365-style control cluster */}
+        <div className="flex items-center justify-between gap-1.5 mb-3">
+          {/* Sidebar Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size={sidebarState === 'expanded' ? 'sm' : 'icon'}
+                onClick={toggleSidebar}
+                data-testid="button-sidebar-toggle"
+                className="hover-elevate active-elevate-2 shrink-0"
+                aria-label={sidebarState === 'expanded' ? t('header.collapseSidebar') : t('header.expandSidebar')}
+              >
+                <Menu className="h-4 w-4" />
+                {sidebarState === 'expanded' && (
+                  <span className="ml-2 text-xs">{t('header.collapse')}</span>
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>{sidebarState === 'expanded' ? t('header.collapseSidebar') : t('header.expandSidebar')}</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Right side controls: Theme + Language */}
+          <div className="flex items-center gap-1">
+            {/* Theme Toggle */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size={sidebarState === 'expanded' ? 'sm' : 'icon'}
+                  onClick={toggleTheme}
+                  data-testid="button-theme-toggle"
+                  className="hover-elevate active-elevate-2 shrink-0"
+                  aria-label={theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}
+                >
+                  {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                  {sidebarState === 'expanded' && (
+                    <span className="ml-2 text-xs">{t('header.theme')}</span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Language Toggle */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size={sidebarState === 'expanded' ? 'sm' : 'icon'}
+                  onClick={toggleLanguage}
+                  data-testid="button-language-toggle"
+                  className="hover-elevate active-elevate-2 shrink-0"
+                  aria-label={language === 'en' ? t('header.switchToArabic') : t('header.switchToEnglish')}
+                >
+                  <Globe className="h-4 w-4" />
+                  {sidebarState === 'expanded' && (
+                    <span className="ml-2 text-xs">{language === 'en' ? 'عربي' : 'EN'}</span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{language === 'en' ? t('header.switchToArabic') : t('header.switchToEnglish')}</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* Company branding - below controls */}
+        <div className="flex items-center gap-3">
+          <span className="material-icons text-3xl text-primary shrink-0">
+            directions_car
+          </span>
+          {sidebarState === 'expanded' && (
+            <div className="overflow-hidden">
+              <h2 className="text-base font-semibold truncate">
                 {settings 
                   ? i18n.language === 'ar' 
                     ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
@@ -303,28 +376,11 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   : t('landing.title')
                 }
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground truncate">
                 {t('landing.title')}
               </p>
             </div>
-          </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleSidebar}
-                data-testid="button-sidebar-toggle"
-                className="h-9 w-9 hover-elevate active-elevate-2"
-                aria-label={t('header.toggleSidebar')}
-              >
-                <PanelLeft className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{t('header.toggleSidebar')}</p>
-            </TooltipContent>
-          </Tooltip>
+          )}
         </div>
       </SidebarHeader>
       

@@ -32,8 +32,16 @@ const resources = {
       
       // Header Tooltips
       "header.toggleSidebar": "Toggle sidebar",
+      "header.collapseSidebar": "Collapse sidebar",
+      "header.expandSidebar": "Expand sidebar",
+      "header.collapse": "Collapse",
+      "header.theme": "Theme",
+      "header.switchToDark": "Switch to dark mode",
+      "header.switchToLight": "Switch to light mode",
       "header.switchTheme": "Switch theme",
       "header.switchLanguage": "Switch language",
+      "header.switchToArabic": "Switch to Arabic",
+      "header.switchToEnglish": "Switch to English",
       
       // Financial Reports
       "financialReports.title": "Financial Reports",
@@ -783,8 +791,16 @@ const resources = {
       
       // Header Tooltips
       "header.toggleSidebar": "إظهار/إخفاء الشريط الجانبي",
+      "header.collapseSidebar": "إخفاء الشريط الجانبي",
+      "header.expandSidebar": "إظهار الشريط الجانبي",
+      "header.collapse": "إخفاء",
+      "header.theme": "المظهر",
+      "header.switchToDark": "التبديل إلى الوضع الليلي",
+      "header.switchToLight": "التبديل إلى الوضع النهاري",
       "header.switchTheme": "تغيير المظهر",
       "header.switchLanguage": "تغيير اللغة",
+      "header.switchToArabic": "التبديل إلى العربية",
+      "header.switchToEnglish": "التبديل إلى الإنجليزية",
       
       // Financial Reports
       "financialReports.title": "التقارير المالية",
