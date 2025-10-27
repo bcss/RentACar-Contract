@@ -47,15 +47,42 @@ This deployment guide has been thoroughly reviewed and **8 critical production e
 - **OS**: Ubuntu 20.04+, Debian 11+, RHEL 8+, or Windows 10+ with WSL2
 - **CPU**: 2 cores
 - **RAM**: 4GB
-- **Storage**: 20GB
+- **Storage**: 20GB (includes ~2GB for inspection photo storage)
 - **Docker**: Version 20.10+
 - **Docker Compose**: Version 2.0+
 
 **Recommended Specifications:**
 - **CPU**: 4 cores
 - **RAM**: 8GB
-- **Storage**: 50GB SSD
+- **Storage**: 50GB SSD (accommodates ~20GB for inspection photos at scale)
 - **Docker**: Latest stable version
+
+**📸 Inspection Photo Storage Considerations:**
+
+**RATIONALE FOR CURRENT APPROACH (JSONB Storage):**
+- **MVP Simplicity:** Base64-encoded photos in JSONB column eliminates external dependencies
+- **Fast Deployment:** No object storage setup required - system works immediately
+- **Backup Integration:** Photos included automatically in PostgreSQL backups
+- **Data Integrity:** Photos never orphaned - deleted with contract via foreign key cascade
+- **Cost-Effective:** No separate storage service costs for small-medium deployments
+
+**STORAGE CALCULATIONS:**
+- **Per Contract:** 2 inspections × 6 photos × ~500KB compressed = ~6MB
+- **100 contracts/month:** 600MB/month = 7.2GB/year
+- **1000 contracts/month:** 6GB/month = 72GB/year
+
+**MIGRATION PATH TO OBJECT STORAGE (For Scale):**
+When contract volume exceeds **500 contracts/month** (threshold where object storage becomes cost-effective):
+1. Add S3/R2/Backblaze B2 integration (AED 0.60/GB/month vs database costs)
+2. Migrate photos to object storage while keeping JSONB URLs
+3. Update upload logic to use pre-signed URLs
+4. Archive old inspection photos to cheaper cold storage
+
+**WHY DEFER OBJECT STORAGE:**
+- Adds complexity: S3 credentials, bucket policies, CDN setup
+- Overkill for MVP: Most rental companies process <200 contracts/month
+- Database storage acceptable until 10,000+ total contracts
+- Migration path is straightforward when needed
 
 ### What You'll Need
 

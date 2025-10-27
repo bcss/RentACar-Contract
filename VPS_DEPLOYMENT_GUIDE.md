@@ -30,14 +30,54 @@
 - **OS**: Ubuntu 20.04 LTS or Debian 11+
 - **CPU**: 2 cores
 - **RAM**: 4GB
-- **Storage**: 20GB SSD
+- **Storage**: 20GB SSD (includes ~2GB for inspection photo storage)
 - **Network**: Public IP address
 
 **Recommended Specifications:**
 - **CPU**: 4 cores
 - **RAM**: 8GB
-- **Storage**: 50GB SSD
+- **Storage**: 50GB SSD (accommodates ~20GB for inspection photos at scale)
 - **Bandwidth**: 100 Mbps+
+
+**📸 Database Sizing for Vehicle Inspection Photos:**
+
+**RATIONALE FOR POSTGRESQL JSONB STORAGE:**
+- **Simplified Deployment:** No external object storage service required
+- **Atomic Backups:** Photos included in database backup strategy
+- **Data Integrity:** Foreign key constraints prevent orphaned photos
+- **MVP Speed:** Zero additional infrastructure to configure
+- **Cost Control:** Avoids separate storage service fees for small deployments
+
+**STORAGE GROWTH PROJECTIONS:**
+- **Per Contract:** 2 inspections × 6 photos × ~500KB = ~6MB
+- **Low Volume (50 contracts/month):** 300MB/month = 3.6GB/year
+- **Medium Volume (200 contracts/month):** 1.2GB/month = 14.4GB/year
+- **High Volume (500 contracts/month):** 3GB/month = 36GB/year
+
+**VPS DISK SIZING RECOMMENDATIONS:**
+- **Startup (0-500 total contracts):** 20GB SSD sufficient
+- **Growing (500-2000 contracts):** 50GB SSD recommended
+- **Established (2000-10000 contracts):** 100GB SSD required
+- **Enterprise (10000+ contracts):** Consider object storage migration
+
+**POSTGRESQL PERFORMANCE WITH JSONB:**
+- **JSONB Query Performance:** Acceptable for <10,000 inspection records
+- **Indexing:** GIN indexes on JSONB columns enable fast queries
+- **Compression:** PostgreSQL TOAST automatically compresses large JSONB values
+- **Backup Impact:** Database dump size grows proportionally with photos
+
+**MIGRATION TRIGGER POINTS:**
+When to migrate to object storage (S3/R2/Backblaze B2):
+1. **Storage Cost Threshold:** Database costs >AED 200/month vs object storage <AED 50/month
+2. **Volume Threshold:** >500 contracts/month (3GB new photos monthly)
+3. **Backup Duration:** PostgreSQL dumps take >30 minutes
+4. **CDN Requirement:** Need geo-distributed photo access
+
+**WHY START WITH POSTGRESQL:**
+- Eliminates 3 external dependencies: S3 bucket, IAM credentials, CDN
+- Faster deployment: No object storage configuration delays
+- Lower maintenance: One service instead of two
+- Acceptable performance for 95% of rental companies worldwide
 
 ### Domain Requirements
 
