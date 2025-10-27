@@ -486,10 +486,33 @@ DRAFT → CONFIRMED → ACTIVE → COMPLETED → CLOSED
 
 **Available Actions:**
 - Print contract PDF
+- Complete pre-delivery inspection (required)
 - Activate (hand over vehicle)
 - View details
 
-**Next Step:** Click **"Activate Contract"** when customer picks up
+**IMPORTANT - Pre-Delivery Vehicle Inspection:**
+Before activating a contract, you MUST complete a pre-delivery vehicle inspection:
+
+1. Click **"Activate Contract"** button
+2. Pre-delivery inspection dialog opens automatically
+3. Fill required fields:
+   - **Inspector Name**: Your name
+   - **Odometer Reading**: Current vehicle mileage
+   - **Fuel Level**: Current fuel percentage (0-100%)
+   - **Condition Notes**: Any existing damage or issues
+   - **6 Mandatory Photos**: Front, Back, Left Side, Right Side, Top View, Dashboard
+4. Upload exactly 6 unique photos (no duplicates allowed)
+5. Click **"Save Inspection & Activate"**
+6. System validates photos and creates inspection record
+7. Contract automatically activates after successful inspection
+
+**Why Pre-Delivery Inspection is Mandatory:**
+- Documents vehicle condition before handover
+- Legal protection against false damage claims
+- Photo evidence of pre-existing damage
+- Required for activation - cannot skip
+
+**Next Step:** Complete pre-delivery inspection to activate
 
 ### 3. Active Status
 
@@ -498,6 +521,7 @@ DRAFT → CONFIRMED → ACTIVE → COMPLETED → CLOSED
 - Rental period started
 - Customer driving
 - Payment deposit collected
+- Pre-delivery inspection completed
 
 **What Changes:**
 - **Immutable**: Cannot edit
@@ -507,29 +531,63 @@ DRAFT → CONFIRMED → ACTIVE → COMPLETED → CLOSED
 **Available Actions:**
 - Print contract
 - View details
+- View pre-delivery inspection photos
 - Wait for return
+- Complete post-return inspection (required before completion)
 - Mark as completed when returned
 
-**Next Step:** Click **"Complete Contract"** when vehicle returned
+**Next Step:** Click **"Complete Contract"** when vehicle returned (triggers post-return inspection)
 
 ### 4. Completed Status
 
 **What It Means:**
 - Vehicle returned by customer
-- Inspection completed
+- Post-return inspection completed
 - Extra charges calculated
 - Awaiting final payment
 
-**Return Process:**
+**IMPORTANT - Two-Stage Return Process:**
+
+**STEP 1: Post-Return Vehicle Inspection (Mandatory)**
+
+When vehicle is returned, you MUST complete a post-return inspection BEFORE finalizing charges:
+
 1. Click **"Complete Contract"** button
-2. Enter return information:
-   - **Return Odometer**: Exact reading
-   - **Return Fuel Level**: Actual fuel level (Full, 3/4, 1/2, 1/4, Empty)
-   - **Condition Notes**: Any damage or issues
-   - **Extra Charges**: Additional costs (optional manual entry)
-   - **Charge Reason**: Why extra charged
-3. Click **"Complete"**
-4. System automatically calculates final amount including fuel charge
+2. Post-return inspection dialog opens automatically
+3. Fill required fields:
+   - **Inspector Name**: Your name
+   - **Odometer Reading**: Exact reading at return
+   - **Fuel Level**: Actual fuel percentage (0-100%)
+   - **Condition Notes**: Any damage or issues found
+   - **6 Mandatory Photos**: Front, Back, Left Side, Right Side, Top View, Dashboard
+4. Upload exactly 6 unique photos of returned vehicle condition
+5. Click **"Save Inspection"**
+6. System validates photos and creates inspection record
+7. Return charges dialog opens automatically after successful inspection
+
+**Why Post-Return Inspection is Mandatory:**
+- Documents vehicle condition after return
+- Legal proof of damage (if any)
+- Compare with pre-delivery inspection photos
+- Required for completion - cannot skip
+- Protects against customer disputes
+
+**STEP 2: Calculate Return Charges**
+
+After completing post-return inspection, the return charges dialog appears automatically:
+
+1. Review return information (auto-filled from inspection):
+   - **Return Odometer**: From inspection
+   - **Return Fuel Level**: From inspection
+   - **Condition Notes**: From inspection
+2. System automatically calculates:
+   - **Fuel Charge**: Based on fuel difference (see formula below)
+   - **Extra Mileage**: If over contract limit
+3. Add manual charges if needed:
+   - **Damage Charges**: From inspection findings
+   - **Other Charges**: Late fees, cleaning, etc.
+4. Click **"Complete"**
+5. Contract status changes to Completed
 
 **Automatic Fuel Charge Calculation:**
 The system automatically calculates fuel charges based on this formula:
