@@ -479,13 +479,271 @@ In the UAE market, bilingual support isn't optional - it's expected. But most co
 
 ---
 
-## Summary: Three Features That Transform Your Business
+## Feature 4: Two-Stage Vehicle Inspection with Photo Documentation
+
+**Eliminate Damage Disputes - Capture Complete Photo Evidence Before & After Every Rental**
+
+---
+
+### 🔴 The Damage Dispute Problem
+
+Customer returns the vehicle. Your staff notices a new scratch on the bumper. Customer claims it was there before. You have no photos to prove otherwise. Either you absorb the AED 800 repair cost, or you spend hours arguing with the customer who threatens to post negative reviews. You lose either way.
+
+#### Pain Points:
+- ❌ No photo evidence of vehicle condition before handover
+- ❌ "He said, she said" arguments about pre-existing damage
+- ❌ Staff forgetting to inspect vehicles properly
+- ❌ Lost revenue from damage you can't prove
+- ❌ Customer disputes that take hours to resolve
+- ❌ Negative reviews from disagreements over damage
+- ❌ Insurance claims rejected due to lack of documentation
+- ❌ Legal liability without proof of vehicle condition
+
+---
+
+### ✅ Comprehensive Two-Stage Inspection Workflow
+
+RCCMS enforces a mandatory two-stage vehicle inspection system with photo documentation. You CANNOT activate a contract without a pre-delivery inspection, and you CANNOT complete a rental without a post-return inspection. Every inspection requires exactly 6 photos from different angles, creating an unbreakable chain of photo evidence.
+
+#### 1. Pre-Delivery Inspection (Mandatory Before Activation)
+*Document vehicle condition before customer takes possession*
+
+**Required Documentation:**
+- **Inspector Name:** Who conducted the inspection
+- **Odometer Reading:** Exact mileage at handover
+- **Fuel Level:** Precise fuel percentage (0-100%)
+- **Condition Notes:** Written description of any existing damage
+- **6 Mandatory Photos:**
+  1. Front view
+  2. Back view
+  3. Left side view
+  4. Right side view
+  5. Top view
+  6. Dashboard view
+
+**System Enforcement:**
+- Cannot skip this step - contract activation button triggers inspection dialog
+- All 6 photos required - no shortcuts
+- Photos automatically compressed to 1920x1080, 0.85 quality
+- Duplicate photo detection - must be 6 unique angles
+- Photos stored permanently as legal evidence
+- Timestamp and inspector name captured automatically
+
+**Workflow Integration:**
+1. Staff clicks "Activate Contract"
+2. Pre-delivery inspection dialog opens automatically
+3. Staff fills in details and uploads 6 photos
+4. System validates all requirements
+5. Photos compressed and stored
+6. Contract activates only after successful inspection
+7. Customer receives vehicle with documented proof of condition
+
+#### 2. Post-Return Inspection (Mandatory Before Completion)
+*Document vehicle condition after customer returns it*
+
+**Required Documentation:**
+- Same fields as pre-delivery inspection
+- Inspector records exact return condition
+- 6 new photos from same angles for comparison
+- Condition notes highlight any NEW damage found
+
+**System Enforcement:**
+- Cannot skip this step - completion button triggers inspection dialog
+- Return charges dialog opens ONLY after post-return inspection
+- System auto-fills odometer and fuel readings into charges calculation
+- Photos immediately available for side-by-side comparison
+
+**Workflow Integration:**
+1. Customer returns vehicle
+2. Staff clicks "Complete Contract"
+3. Post-return inspection dialog opens automatically
+4. Staff documents return condition with 6 photos
+5. System validates all requirements
+6. Return charges dialog opens with auto-filled data
+7. Staff can compare before/after photos instantly
+8. Contract completes with full photo documentation
+
+#### 3. Sequential Workflow Gating
+*System enforces proper workflow - no shortcuts allowed*
+
+**Pre-Delivery Gate:**
+```
+Draft → Confirm → [PRE-DELIVERY INSPECTION REQUIRED] → Active
+```
+- Cannot activate without pre-delivery inspection
+- Backend validation prevents API bypass
+- Staff sees clear error message if they try to skip
+
+**Post-Return Gate:**
+```
+Active → [POST-RETURN INSPECTION REQUIRED] → Completed
+```
+- Cannot complete without post-return inspection
+- Backend validation enforces requirements
+- Return charges calculation depends on inspection data
+
+**Why This Matters:**
+- Staff cannot forget inspections - system blocks them
+- Consistent process across all rentals
+- No "I'll do the inspection later" excuses
+- Complete legal protection for every single rental
+
+#### 4. Visual Inspection History
+*See complete inspection timeline with photos*
+
+**Inspection History Card:**
+- Shows all inspections for a contract (chronological)
+- Visual badges distinguish types:
+  - **Pre-Delivery:** Blue badge with truck icon
+  - **Post-Return:** Gray badge with checkmark icon
+- For each inspection:
+  - Date and time
+  - Inspector name
+  - Odometer and fuel readings
+  - Condition notes
+  - 6-photo gallery with zoom capability
+- Click any photo to view full-size
+- Side-by-side comparison mode
+
+**Comparison Features:**
+- Pre vs. post photos side-by-side
+- Identify new damage instantly
+- Zoom in on specific areas
+- Show customer the proof
+- Export photos for insurance claims
+
+#### 5. Photo Storage & Management
+*Enterprise-grade photo storage in PostgreSQL*
+
+**Technical Implementation:**
+- Photos stored as base64-encoded JSONB
+- Automatic compression: 1920x1080, 0.85 quality, JPEG
+- Each inspection: ~6MB total storage (6 photos × ~1MB each)
+- Photos permanently stored with contract
+- Cannot be deleted (legal audit trail)
+- Future migration path to object storage for scale
+
+**Storage Estimates:**
+- 100 rentals: ~1.2GB database storage
+- 1,000 rentals: ~12GB database storage
+- 5,000 rentals: ~60GB (migration to S3/R2 recommended)
+
+**Photo Validation:**
+- Exactly 6 photos required
+- No duplicate photos allowed
+- Unique angles enforced
+- Maximum 10MB per photo before compression
+- Frontend and backend validation
+
+---
+
+### 💼 What This Means for Your Business
+
+#### Immediate Impact:
+- ✅ Zero damage disputes - complete photo evidence
+- ✅ Protect against fraudulent damage claims
+- ✅ Settle disputes in 30 seconds by showing photos
+- ✅ Insurance claims processed faster with documentation
+- ✅ Staff accountability - inspections cannot be skipped
+- ✅ Professional image with thorough inspection process
+
+#### Long-Term Value:
+- 📈 Eliminate 95% of damage dispute losses
+- 📈 Recover full repair costs with photo proof
+- 📈 Reduce customer complaints and negative reviews
+- 📈 Faster insurance claim processing
+- 📈 Legal protection in court disputes
+- 📈 Build customer trust through transparency
+
+---
+
+### 💰 Financial Impact of Damage Disputes
+
+**Without Photo Evidence:**
+- Average damage dispute: AED 500-2,000
+- Disputes you can't prove: ~80%
+- Frequency: 1 in 20 rentals (5%)
+- Lost revenue: 100 rentals × 5% × AED 1,000 × 80% = **AED 4,000/month**
+- **Annual cost: AED 48,000**
+
+**With RCCMS Two-Stage Inspection:**
+- Disputes resolved with photo evidence: 95%
+- Customer acceptance when shown proof: 90%
+- Time to resolve dispute: 30 seconds vs. 2 hours
+- Lost revenue: ~AED 200/month
+- **Annual savings: AED 46,000+**
+
+---
+
+### 📋 Real-World Example: Damage Dispute Resolution
+
+**Scenario:** Customer returns vehicle with a scratched bumper. Claims it was there before rental.
+
+**Without RCCMS:**
+- Staff has no photos from before
+- Customer denies responsibility
+- Argument takes 1 hour
+- Customer threatens negative review
+- You absorb AED 800 repair cost
+- Customer relationship damaged
+
+**With RCCMS:**
+1. Open inspection history on tablet/phone
+2. Show pre-delivery photos from 7 days ago - bumper pristine
+3. Show post-return photos from today - clear scratch
+4. Side-by-side comparison undeniable
+5. Customer apologizes, pays repair charge
+6. **Dispute resolved in 30 seconds**
+7. Customer respects professional documentation
+
+---
+
+### 🏆 Competitive Advantage
+
+**Industry Standard:** Most rental companies use handwritten inspection forms with no photos, or optional photo uploads that staff skip when busy.
+
+**RCCMS Advantage:** 
+- Mandatory inspections with system enforcement
+- Cannot skip - workflow prevents it
+- 6 photos required - no partial documentation
+- Automatic compression and storage
+- Side-by-side comparison tools
+- Complete audit trail
+
+**This level of inspection rigor is typically only seen in enterprise rental companies with dedicated inspection staff. RCCMS brings this capability to every rental business at any scale.**
+
+---
+
+### 🎯 Additional Benefits
+
+**Insurance & Legal:**
+- Insurance companies accept claims faster with photos
+- Legal disputes won with photo evidence
+- Compliance with insurance policy requirements
+- Protection against false claims
+
+**Operational:**
+- Staff training standardized - everyone follows same process
+- Vehicle maintenance tracking - identify recurring damage
+- Customer education - they see the thoroughness
+- Fleet management - track vehicle condition over time
+
+**Customer Trust:**
+- Transparent process builds confidence
+- Customers know they won't be falsely charged
+- Professional image of your business
+- Detailed handover process impresses customers
+
+---
+
+## Summary: Four Features That Transform Your Business
 
 These aren't just features - they're solutions to real business problems that cost you money every day:
 
 1. **Complete audit trails** protect you from disputes and ensure compliance
 2. **Automatic financial calculations** recover lost revenue and save hours of staff time
 3. **Professional bilingual support** positions you as the premium choice in the UAE market
+4. **Two-stage vehicle inspection** eliminates damage disputes with mandatory photo documentation
 
 Together, these features deliver ROI that pays for the system within the first month.
 
@@ -496,10 +754,11 @@ Together, these features deliver ROI that pays for the system within the first m
 **Annual Costs:**
 - Lost revenue from calculation errors: **AED 60,000/year**
 - Time wasted on manual processes: **AED 18,000/year** (50 hours/month × AED 30/hour)
-- Dispute losses from lack of documentation: **AED 24,000/year** (AED 2,000/month average)
+- Dispute losses from lack of audit documentation: **AED 24,000/year** (AED 2,000/month average)
+- Damage dispute losses without photo evidence: **AED 48,000/year**
 - Professional image loss: **Unquantifiable but significant**
 
-**Total Annual Cost: AED 102,000+**
+**Total Annual Cost: AED 150,000+**
 
 ---
 
