@@ -9,7 +9,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/AppSidebar";
 import Login from "@/pages/Login";
-import NotFound from "@/pages/not-found";
 import "@/lib/i18n";
 import { useEffect, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -17,8 +16,9 @@ import { useTranslation } from "react-i18next";
 import { CompanySettings as CompanySettingsType } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 
-// Lazy load all pages except Login (needed immediately)
+// Lazy load all pages except Login (needed immediately for initial load)
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const NotFound = lazy(() => import("@/pages/not-found"));
 const Customers = lazy(() => import("@/pages/Customers"));
 const Vehicles = lazy(() => import("@/pages/Vehicles"));
 const Sponsors = lazy(() => import("@/pages/Sponsors"));
@@ -84,13 +84,14 @@ function Router() {
   }
 
   return (
-    <Switch>
-      <Route path="/" component={isAuthenticated ? () => (
-        <Suspense fallback={<PageLoader />}>
-          <Dashboard />
-        </Suspense>
-      ) : Login} />
-      <Route path="/login" component={Login} />
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={isAuthenticated ? () => (
+          <Suspense fallback={<PageLoader />}>
+            <Dashboard />
+          </Suspense>
+        ) : Login} />
+        <Route path="/login" component={Login} />
       <Route path="/dashboard">
         {() => <ProtectedRoute component={Dashboard} />}
       </Route>
@@ -143,8 +144,9 @@ function Router() {
       <Route path="/reports/audit">
         {() => <ProtectedRoute component={AuditReports} />}
       </Route>
-      <Route component={NotFound} />
-    </Switch>
+      <Route component={() => <NotFound />} />
+      </Switch>
+    </Suspense>
   );
 }
 
