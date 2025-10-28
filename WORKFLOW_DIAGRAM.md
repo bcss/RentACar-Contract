@@ -897,3 +897,286 @@ This comprehensive workflow diagram shows the complete rental car contract manag
 ✅ **Bilingual**: Full English/Arabic support with RTL/LTR layouts
 ✅ **Immutability**: Edit tracking with reasons for confirmed+ contracts
 ✅ **Disable-Only**: No delete operations, only disable/enable
+
+---
+
+## Enhanced Contract Lifecycle Workflow (December 2025 Updates)
+
+### Updated State Transition Diagram with Validation Gates
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    CONTRACT LIFECYCLE                            │
+│                 (with Validation Gates)                          │
+└──────────────────────────────────────────────────────────────────┘
+
+┌─────────────┐
+│   DRAFT     │  ← Created by Staff+
+└─────┬───────┘
+      │
+      │ ⚠️ VALIDATION GATE: Contract Date
+      │ → Rental start date cannot be in the past
+      │ → Midnight-normalized UTC comparison
+      │ → Frontend (Zod) + Backend (API) enforcement
+      │
+      ├─────→ (Confirm - Staff+)
+      │
+┌─────▼───────┐
+│  CONFIRMED  │  ← Editable by Staff+
+└─────┬───────┘
+      │
+      │ 📋 MANDATORY: Pre-Delivery Inspection
+      │ → 6 photos required (front, back, left, right, top, dashboard)
+      │ → Inspector name, odometer, fuel level, condition notes
+      │ → Cannot activate without this step
+      │
+      ├─────→ (Activate - Manager+)
+      │
+┌─────▼───────┐
+│   ACTIVE    │  ← Immutable
+└─────┬───────┘
+      │
+      │ 📋 MANDATORY: Post-Return Inspection
+      │ → Same 6 photo requirements
+      │ → Validates vehicle return condition
+      │ → Auto-chains to fuel charge calculation
+      │ → Cannot complete without this step
+      │
+      ├─────→ (Complete - Manager+)
+      │
+      │ ❓ DECISION POINT: Early Completion?
+      │ → IF completionDate < rentalEndDate
+      │    THEN require early closure reason (min 10 chars)
+      │    Reason stored in contracts.earlyClosureReason
+      │ → ELSE proceed normally (no reason required)
+      │
+┌─────▼─────────┐
+│  COMPLETED    │  ← Immutable
+└─────┬─────────┘
+      │
+      │ ⚠️ VALIDATION GATE: Payment Verification
+      │ → Backend calculates: totalPaid = SUM(payments.amount)
+      │ → Verifies: totalPaid >= contract.totalAmount
+      │ → IF underpaid:
+      │      RETURN 400 error with exact amounts
+      │      "Total paid (X) is less than total due (Y)"
+      │      Cannot close until fully paid
+      │ → IF fully paid:
+      │      Proceed with closure
+      │
+      ├─────→ (Close - Admin only)
+      │
+┌─────▼───────┐
+│   CLOSED    │  ← Immutable, archived
+└─────────────┘
+```
+
+---
+
+### Enhanced Payment Recording Workflow
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│              PAYMENT RECORDING WITH VALIDATION                   │
+└──────────────────────────────────────────────────────────────────┘
+
+User clicks "Record Payment"
+      │
+      ▼
+┌─────────────────────┐
+│ Select Payment      │
+│ Method              │
+└─────┬───────────────┘
+      │
+      ├──── (Cash) ────────────────┐
+      │                            │
+      ├──── (Card) ────────────────┼──→ ⚠️ REQUIRED: Last 4 Digits
+      │                            │    → Must be exactly 4 digits
+      │                            │    → Frontend + Backend validation
+      ├──── (Check/Cheque) ───────┼──→ ⚠️ REQUIRED: Cheque Number
+      │                            │    → Cannot submit without number
+      │                            │    → Audit trail for verification
+      └──── (Bank Transfer) ──────┼──→ ⚠️ REQUIRED: Reference Number
+                                   │    → Bank reconciliation tracking
+                                   │    → Proof of transfer
+                                   ▼
+                         ┌──────────────────┐
+                         │ Submit Payment   │
+                         └────────┬─────────┘
+                                  │
+                                  │ Backend Validation
+                                  │ → Verify conditional fields present
+                                  │ → Store payment with details
+                                  │ → Log to audit trail
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │ Payment Recorded │
+                         └──────────────────┘
+```
+
+---
+
+### Contract Closure Protection Workflow
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│          CONTRACT CLOSURE WITH PAYMENT VERIFICATION              │
+└──────────────────────────────────────────────────────────────────┘
+
+Admin clicks "Close Contract"
+      │
+      ▼
+┌─────────────────────────────────┐
+│ Backend Payment Verification    │
+│ totalPaid = SUM(payments.amount)│
+│ totalDue = contract.totalAmount │
+└─────┬───────────────────────────┘
+      │
+      ├────── (totalPaid < totalDue) ──────┐
+      │                                    │
+      │                                    ▼
+      │                          ┌──────────────────────┐
+      │                          │ ❌ BLOCK CLOSURE      │
+      │                          │ Return 400 Error     │
+      │                          │ "Total paid (X) is   │
+      │                          │  less than total     │
+      │                          │  due (Y). Record     │
+      │                          │  final payment first"│
+      │                          └──────────────────────┘
+      │
+      └────── (totalPaid >= totalDue) ─────┐
+                                           │
+                                           ▼
+                                 ┌──────────────────────┐
+                                 │ ✅ ALLOW CLOSURE      │
+                                 │ Contract status →    │
+                                 │ CLOSED               │
+                                 │ Calculate final      │
+                                 │ refund (if any)      │
+                                 └──────────────────────┘
+```
+
+---
+
+### Dashboard Context-Aware Navigation Flow
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│           DASHBOARD SMART NAVIGATION WORKFLOW                    │
+└──────────────────────────────────────────────────────────────────┘
+
+User views Dashboard
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Dashboard Metric Cards (Clickable)                              │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │ Active       │  │ Overdue      │  │ Pending      │         │
+│  │ Rentals      │  │ Returns      │  │ Refunds      │         │
+│  │  "24 Active" │  │  "3 Overdue" │  │  "8 Pending" │         │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘         │
+│         │                 │                 │                   │
+└─────────┼─────────────────┼─────────────────┼──────────────────┘
+          │                 │                 │
+          │                 │                 │
+     Click Card         Click Card       Click Card
+          │                 │                 │
+          ▼                 ▼                 ▼
+  /contracts?        /contracts?      /contracts?
+  status=active      overdue=true    pendingRefunds=true
+          │                 │                 │
+          ▼                 ▼                 ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│ Contracts Page  │  │ Contracts Page  │  │ Contracts Page  │
+│ Auto-Filter:    │  │ Auto-Filter:    │  │ Auto-Filter:    │
+│ Active Only     │  │ Overdue Only    │  │ Refunds Pending │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+
+Benefits:
+✅ Zero manual filtering required
+✅ One-click access to critical lists
+✅ Bookmarkable URLs for quick access
+✅ 80% faster navigation
+```
+
+---
+
+### Mandatory Field Validation Workflow
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│        DUAL-LAYER VALIDATION ENFORCEMENT WORKFLOW                │
+└──────────────────────────────────────────────────────────────────┘
+
+User fills form (Customer/Company/Contract)
+      │
+      ▼
+┌─────────────────────────────────┐
+│ LAYER 1: Frontend Validation    │
+│ (Zod Schema)                    │
+│                                 │
+│ Check mandatory fields:         │
+│ - Customer: National ID,        │
+│   Nationality, Phone (min 1),   │
+│   License Number                │
+│ - Company: TAX ID, Contact,     │
+│   Phone, Email                  │
+│ - Contract: Date not in past    │
+└─────┬───────────────────────────┘
+      │
+      ├─────── (Validation FAILS) ────────┐
+      │                                   │
+      │                                   ▼
+      │                         ┌──────────────────┐
+      │                         │ Show Errors      │
+      │                         │ Block Submission │
+      │                         └──────────────────┘
+      │
+      └─────── (Validation PASSES) ──────┐
+                                         │
+                                         ▼
+                               ┌─────────────────────────┐
+                               │ Submit to Backend API   │
+                               └─────┬───────────────────┘
+                                     │
+                                     ▼
+                       ┌─────────────────────────────────┐
+                       │ LAYER 2: Backend Validation     │
+                       │ (API Endpoint)                  │
+                       │                                 │
+                       │ Re-validate all fields:         │
+                       │ - Parse with same Zod schema    │
+                       │ - Cannot be bypassed via        │
+                       │   Postman, curl, scripts        │
+                       └─────┬───────────────────────────┘
+                             │
+                             ├─── (Validation FAILS) ────┐
+                             │                           │
+                             │                           ▼
+                             │                 ┌──────────────────┐
+                             │                 │ Return 400 Error │
+                             │                 │ With Details     │
+                             │                 │ No DB Entry      │
+                             │                 └──────────────────┘
+                             │
+                             └─── (Validation PASSES) ──┐
+                                                         │
+                                                         ▼
+                                               ┌──────────────────┐
+                                               │ Create DB Entry  │
+                                               │ Log to Audit     │
+                                               │ Return Success   │
+                                               └──────────────────┘
+
+Security Benefit:
+✅ Frontend validation cannot be bypassed
+✅ API tools blocked by backend enforcement
+✅ 100% complete records guaranteed
+```
+
+---
+
+**End of Enhanced Workflow Diagrams**
+

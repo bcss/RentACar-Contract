@@ -105,3 +105,271 @@ For full testing guide content, please see the complete TESTING_GUIDE.md file in
 
 This guide ensures zero bugs reach production.
 
+
+---
+
+## Testing Procedures for December 2025 Enhancements
+
+### Test Suite: Mandatory Field Validation
+
+**Objective**: Verify dual-layer validation enforcement (frontend + backend)
+
+#### TC-VAL-001: Customer Mandatory Fields
+
+**Test Steps**:
+1. Navigate to Masters → Customers → Add Customer
+2. Fill only Name fields (English & Arabic)
+3. Leave blank: National ID, Nationality, Phone, License Number
+4. Attempt to submit form
+
+**Expected Results**:
+- ✅ Form validation prevents submission
+- ✅ Error messages displayed for all mandatory fields
+- ✅ Form cannot be submitted until all fields filled
+
+**Backend Bypass Test**:
+1. Use Postman/curl to POST to `/api/customers` with missing fields
+2. Expected: 400 error with validation message
+3. Expected: Database entry NOT created
+
+---
+
+#### TC-VAL-002: Company Mandatory Fields
+
+**Test Steps**:
+1. Navigate to Masters → Companies → Add Company (Admin/Manager only)
+2. Fill only Name fields
+3. Leave blank: TAX ID, Contact Person, Phone, Email
+4. Attempt to submit form
+
+**Expected Results**:
+- ✅ Form validation prevents submission
+- ✅ Error messages displayed for all mandatory fields
+
+**Backend Bypass Test**:
+1. POST to `/api/companies` with missing fields via API tool
+2. Expected: 400 error
+3. Expected: No database entry created
+
+---
+
+#### TC-VAL-003: Contract Date Validation
+
+**Test Steps**:
+1. Navigate to Contracts → New Contract
+2. Select customer and vehicle
+3. Set rental start date to yesterday or earlier
+4. Attempt to proceed
+
+**Expected Results**:
+- ✅ Form validation error: "Rental start date cannot be in the past"
+- ✅ Cannot create contract with past date
+
+**Backend Test**:
+1. POST to `/api/contracts` with `rentalStartDate` in past
+2. Expected: 400 error with date validation message
+
+---
+
+### Test Suite: Context-Aware Dashboard Navigation
+
+**Objective**: Verify one-click filtered navigation from dashboard
+
+#### TC-NAV-001: Active Rentals Navigation
+
+**Test Steps**:
+1. Navigate to Dashboard
+2. Note the "Active Rentals" count (e.g., "24 Active")
+3. Click the Active Rentals metric card
+
+**Expected Results**:
+- ✅ Redirects to `/contracts?status=active`
+- ✅ Contracts page auto-applies active status filter
+- ✅ Only active contracts displayed
+- ✅ Filter count matches dashboard count
+
+---
+
+#### TC-NAV-002: Overdue Returns Navigation
+
+**Test Steps**:
+1. Navigate to Dashboard
+2. Note the "Overdue Returns" count
+3. Click the Overdue Returns metric card (red)
+
+**Expected Results**:
+- ✅ Redirects to `/contracts?overdue=true`
+- ✅ Only contracts past end date displayed
+- ✅ Count matches dashboard overdue count
+
+---
+
+#### TC-NAV-003: Deep-Link Bookmarking
+
+**Test Steps**:
+1. Navigate to `/contracts?overdue=true` directly via URL
+2. Observe contracts list
+
+**Expected Results**:
+- ✅ Overdue filter auto-applied on page load
+- ✅ Only overdue contracts shown
+- ✅ URL parameter preserved during navigation
+
+---
+
+### Test Suite: Separate Report Exports
+
+**Objective**: Verify tab-scoped report generation
+
+#### TC-REP-001: Vehicle Utilization Export
+
+**Test Steps**:
+1. Navigate to Reports → Operational Reports
+2. Select **Vehicle Utilization** tab
+3. Click "Export to PDF"
+4. Check downloaded file
+
+**Expected Results**:
+- ✅ Filename: `vehicle-utilization-report.pdf`
+- ✅ Content: Only vehicle utilization data
+- ✅ Chart: Vehicle utilization pie chart included
+- ✅ No contract status or extra charges data
+
+**Excel Export Test**:
+1. Click "Export to Excel"
+2. Expected filename: `vehicle-utilization-report.xlsx`
+3. Expected content: Same as PDF (vehicle data only)
+
+---
+
+#### TC-REP-002: Contract Status Export
+
+**Test Steps**:
+1. Select **Contract Status** tab
+2. Click "Export to PDF"
+
+**Expected Results**:
+- ✅ Filename: `contract-status-report.pdf`
+- ✅ Content: Only contract status distribution
+- ✅ No vehicle or charges data
+
+---
+
+#### TC-REP-003: Extra Charges Export
+
+**Test Steps**:
+1. Select **Extra Charges** tab
+2. Click "Export to PDF"
+
+**Expected Results**:
+- ✅ Filename: `extra-charges-report.pdf`
+- ✅ Content: Only extra charges analysis
+- ✅ Table: Contracts with charges listed
+
+---
+
+### Test Suite: Enhanced Payment Validation
+
+**Objective**: Verify payment method details and closure protection
+
+#### TC-PAY-001: Cheque Payment Validation
+
+**Test Steps**:
+1. Navigate to contract → Payments → Record Payment
+2. Select "Check/Cheque" as payment method
+3. Leave cheque number field blank
+4. Attempt to submit
+
+**Expected Results**:
+- ✅ Form validation error: "Cheque number required"
+- ✅ Cannot submit without cheque number
+
+---
+
+#### TC-PAY-002: Card Payment Validation
+
+**Test Steps**:
+1. Record payment with "Card" method
+2. Leave "Last 4 Digits" blank or enter invalid value
+3. Attempt to submit
+
+**Expected Results**:
+- ✅ Validation error if blank
+- ✅ Must be exactly 4 digits
+
+---
+
+#### TC-PAY-003: Contract Closure Protection
+
+**Test Steps**:
+1. Create contract with AED 5,000 total
+2. Record payments totaling AED 4,500
+3. Attempt to close contract (Admin only)
+
+**Expected Results**:
+- ✅ Backend blocks closure with 400 error
+- ✅ Error message: "Total paid (4500) is less than total due (5000)"
+- ✅ Must record final AED 500 payment before closure allowed
+
+**Full Payment Test**:
+1. Record final AED 500 payment
+2. Attempt closure again
+3. Expected: Contract closure succeeds
+
+---
+
+### Test Suite: Early Closure Reason Tracking
+
+**Objective**: Verify early closure detection and reason requirement
+
+#### TC-EARLY-001: Early Closure Detection
+
+**Test Steps**:
+1. Create active contract with end date 7 days in future
+2. Complete contract now (before end date)
+3. Observe system behavior
+
+**Expected Results**:
+- ✅ Early Closure Reason Dialog opens automatically
+- ✅ Dialog cannot be dismissed (required)
+- ✅ Minimum 10 characters required for reason
+
+**Reason Submission Test**:
+1. Enter reason: "Customer early return"
+2. Submit completion
+3. Expected: Contract completed successfully
+4. Expected: Reason stored in `contracts.earlyClosureReason`
+5. Expected: Reason visible in timeline
+
+---
+
+#### TC-EARLY-002: Normal Closure (No Reason Required)
+
+**Test Steps**:
+1. Complete contract ON or AFTER end date
+2. Observe system behavior
+
+**Expected Results**:
+- ✅ Early Closure Dialog does NOT appear
+- ✅ Contract completion proceeds normally
+- ✅ No reason required
+
+---
+
+### Regression Testing Checklist
+
+After validating all new features, verify existing functionality:
+
+- ✅ Contract creation workflow (confirm → activate → complete → close)
+- ✅ Vehicle inspection workflow (pre-delivery + post-return)
+- ✅ Payment recording and history
+- ✅ PDF contract generation
+- ✅ User management and roles
+- ✅ Audit logs capture all new operations
+- ✅ Bilingual support (English/Arabic)
+- ✅ Theme switching (light/dark)
+
+---
+
+**End of Testing Procedures**
+

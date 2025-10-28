@@ -1287,3 +1287,258 @@ Complete inspection history with before/after photos provides bulletproof eviden
 - **Disputes Prevented:** 95% reduction
 - **ROI:** 10,000%+ return on time invested
 
+
+---
+
+## Using New System Features (December 2025)
+
+### Dashboard Quick Navigation
+
+**Feature**: Click metric cards for instant filtered views
+
+#### Accessing Filtered Contract Lists
+
+**Step 1**: View Dashboard  
+Your dashboard displays critical metrics in clickable cards.
+
+**Step 2**: Click Any Metric Card  
+
+**Active Rentals** (blue card)  
+→ Takes you to Contracts page showing only active contracts  
+→ No manual filtering needed
+
+**Overdue Returns** (red card)  
+→ Shows only contracts past their return date  
+→ Prioritize these for immediate follow-up
+
+**Pending Refunds** (yellow card)  
+→ Shows contracts with security deposit to refund  
+→ Process refunds quickly
+
+**Step 3**: Use Filtered View  
+The contracts list auto-applies the appropriate filter. You can:
+- View filtered results
+- Bookmark the URL for quick access later
+- Share the link with team members
+
+**Pro Tip**: Save bookmarks for frequently accessed filters like "Overdue Returns" for instant access.
+
+---
+
+### Understanding Mandatory Fields
+
+**What Changed**: Some fields are now required and cannot be skipped
+
+#### When Creating Customers
+
+You must fill these fields (marked with ⚠️):
+- **National ID**: Customer's national ID or passport number
+- **Nationality**: Customer's country
+- **Phone**: Contact number (cannot be empty)
+- **License Number**: Driver's license number
+
+**Why This Matters**: Complete customer information ensures we can contact customers and meet legal requirements.
+
+**If You Try to Skip**: The form will show errors and prevent submission until all mandatory fields are filled.
+
+---
+
+#### When Creating Companies
+
+You must fill these fields (marked with ⚠️):
+- **TAX ID**: Company tax identification number
+- **Contact Person**: Primary contact name
+- **Phone**: Company phone number
+- **Email**: Company email address
+
+**Why This Matters**: Complete company information is required for tax reporting and legal compliance.
+
+---
+
+#### When Creating Contracts
+
+**Rental Start Date Restriction**:
+- Cannot select a date in the past
+- Must be today or future date
+
+**Why This Matters**: Prevents booking errors and calendar conflicts.
+
+**If You Try**: System shows error "Rental start date cannot be in the past" and prevents contract creation.
+
+---
+
+### Recording Payments with Details
+
+**What Changed**: Additional payment details now required based on payment method
+
+#### Check/Cheque Payments
+
+**Required Field**: Cheque Number
+
+**Steps**:
+1. Select "Check/Cheque" as payment method
+2. Enter amount
+3. **Enter cheque number** (mandatory field)
+4. Submit payment
+
+**Why**: Cheque number creates audit trail for verification if check bounces.
+
+---
+
+#### Card Payments
+
+**Required Field**: Last 4 Digits
+
+**Steps**:
+1. Select "Card" as payment method
+2. Enter amount
+3. **Enter last 4 digits of card** (mandatory field)
+4. Submit payment
+
+**Why**: Links payment to specific card for dispute resolution.
+
+---
+
+#### Bank Transfer Payments
+
+**Required Field**: Reference Number
+
+**Steps**:
+1. Select "Bank Transfer" as payment method
+2. Enter amount
+3. **Enter bank reference number** (mandatory field)
+4. Submit payment
+
+**Why**: Reference number enables bank reconciliation and proof of transfer.
+
+---
+
+### Closing Contracts with Full Payment
+
+**What Changed**: Cannot close contract until fully paid
+
+#### Understanding the Rule
+
+**Before Closing**: System checks if total payments equal or exceed contract total.
+
+**If Underpaid**: System blocks closure and shows:
+- Error message: "Total paid (4,500 AED) is less than total due (5,000 AED)"
+- Must record final payment first
+
+**If Fully Paid**: Contract closure proceeds normally.
+
+---
+
+#### How to Close Contract Properly
+
+**Step 1**: Complete the contract (Manager/Admin)  
+This transitions contract to "Completed" status.
+
+**Step 2**: Verify Payment Total  
+Open contract and check payment history:
+- View all recorded payments
+- Verify total matches contract amount
+
+**Step 3**: Record Final Payment (if needed)  
+If balance remains:
+1. Click "Record Payment"
+2. Enter remaining amount
+3. Select payment method and provide required details
+4. Submit payment
+
+**Step 4**: Close Contract (Admin only)  
+Once fully paid:
+1. Click "Close Contract"
+2. System verifies payment
+3. Contract closes successfully
+
+**Pro Tip**: Check payment history before attempting closure to avoid errors.
+
+---
+
+### Early Contract Completion
+
+**What Changed**: System asks for reason when completing contracts early
+
+#### What is Early Completion?
+
+Completing a contract **before** its scheduled end date.
+
+Example:
+- Contract end date: December 31
+- Customer returns: December 25 (6 days early)
+- This triggers early completion workflow
+
+---
+
+#### Early Completion Steps
+
+**Step 1**: Click "Complete Contract" (Manager/Admin)
+
+**Step 2**: System Detects Early Completion  
+If completing before end date, system opens "Early Closure Reason" dialog.
+
+**Step 3**: Provide Reason  
+Enter reason for early completion (minimum 10 characters):
+- "Customer early return"
+- "Vehicle needed urgently for another rental"
+- "Contract amended by mutual agreement"
+
+**Step 4**: Submit Completion  
+Once reason provided, contract completion proceeds normally.
+
+**Why This Matters**: Helps management understand patterns in early returns for business analysis.
+
+---
+
+### Exporting Operational Reports
+
+**What Changed**: Separate exports for each report tab
+
+#### How to Export Focused Reports
+
+**Step 1**: Navigate to Reports → Operational Reports
+
+**Step 2**: Select Tab  
+Choose the analysis you need:
+- **Vehicle Utilization**: Fleet usage statistics
+- **Contract Status**: Contract distribution by status
+- **Extra Charges**: Analysis of additional fees
+
+**Step 3**: Choose Export Format  
+- **PDF**: For presentation and printing
+- **Excel**: For further analysis in Excel
+
+**Step 4**: Download Report  
+File downloads with descriptive name:
+- `vehicle-utilization-report.pdf`
+- `contract-status-report.xlsx`
+- `extra-charges-report.pdf`
+
+**Pro Tip**: Tab-specific exports contain only relevant data, making files smaller and easier to analyze.
+
+---
+
+## Tips for Efficient Workflow
+
+### Quick Access Shortcuts
+
+1. **Bookmark Filtered Views**  
+Bookmark frequently used filters:
+- Overdue Contracts: `/contracts?overdue=true`
+- Active Contracts: `/contracts?status=active`
+- Available Vehicles: `/vehicles?status=available`
+
+2. **Use Dashboard Navigation**  
+Let the dashboard take you to the right filtered view instead of manually setting filters.
+
+3. **Prepare Payment Details**  
+When recording payments, have cheque numbers, card details, or transfer references ready for faster data entry.
+
+4. **Check Payment Balance Before Closing**  
+Review payment history before attempting contract closure to ensure full payment recorded.
+
+---
+
+**End of New Features Guide**
+
