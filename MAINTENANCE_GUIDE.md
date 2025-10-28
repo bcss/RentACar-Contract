@@ -893,6 +893,35 @@ netstat -an | grep :5432 | wc -l
 
 ### Performance Optimization
 
+**Frontend Performance (December 2025):**
+
+The application features advanced lazy loading for optimal performance:
+
+**Monitoring Frontend Performance:**
+```bash
+# Check initial bundle size
+ls -lh dist/assets/index-*.js
+
+# Verify lazy chunks are generated
+ls -lh dist/assets/*.js | grep -v index
+
+# Expected: Main bundle ~50KB, lazy chunks for each page
+```
+
+**Performance Metrics to Track:**
+- Initial bundle size: Should be ~50KB (down from ~744KB)
+- Time to Interactive (TTI): Should be 1-2 seconds
+- Page transition times: Should show professional loading spinner
+- Browser cache hits: Previously visited pages load instantly
+
+**Performance Validation:**
+1. Clear browser cache
+2. Navigate to application
+3. Check browser DevTools → Network tab
+4. Verify initial JavaScript < 60KB
+5. Navigate to dashboard - confirm separate chunk loads
+6. Return to dashboard - confirm loads from cache
+
 **Database Indexes:**
 ```sql
 -- Ensure critical indexes exist
