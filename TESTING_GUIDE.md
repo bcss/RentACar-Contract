@@ -371,5 +371,170 @@ After validating all new features, verify existing functionality:
 
 ---
 
+### Test Suite: Performance Optimization (December 2025)
+
+**Objective**: Verify lazy loading implementation and performance improvements
+
+#### TC-PERF-001: Initial Page Load Performance
+
+**Test Steps**:
+1. Clear browser cache completely
+2. Open DevTools → Network tab
+3. Navigate to application URL
+4. Measure initial bundle size and load time
+
+**Expected Results**:
+- ✅ Initial JavaScript bundle ≤ 60KB (target: ~50KB)
+- ✅ Login page interactive within 2 seconds
+- ✅ No full page bundle download (~744KB eliminated)
+- ✅ Console shows no errors
+
+**Measurement**:
+- Record total JS size transferred
+- Record time to interactive (TTI)
+- Compare with baseline (should be 88% smaller)
+
+---
+
+#### TC-PERF-002: Lazy Loading Verification
+
+**Test Steps**:
+1. Clear browser cache
+2. Open DevTools → Network tab → Filter JS files
+3. Login to system
+4. Observe network activity
+5. Navigate to Dashboard
+6. Observe additional JS chunk loading
+
+**Expected Results**:
+- ✅ Login page loads immediately (no lazy loading)
+- ✅ Dashboard loads separate chunk on navigation
+- ✅ Professional loading spinner displays during chunk fetch
+- ✅ "Loading..." text visible during transition
+- ✅ Smooth transition after chunk loads
+
+**Verification**:
+- Check Network tab for dynamic imports (chunk-*.js files)
+- Verify Loading component renders (Loader2 spinner visible)
+- Confirm 21 pages are lazy-loaded except Login
+
+---
+
+#### TC-PERF-003: Browser Caching Test
+
+**Test Steps**:
+1. Navigate to Dashboard (first time - loads chunk)
+2. Navigate to Contracts page
+3. Navigate back to Dashboard
+4. Check Network tab
+
+**Expected Results**:
+- ✅ Dashboard chunk loads from disk cache (not network)
+- ✅ Load time < 100ms
+- ✅ No loading spinner on second visit
+- ✅ Instant page transition
+
+---
+
+#### TC-PERF-004: All Routes Lazy Load Test
+
+**Test Steps**:
+1. Clear browser cache
+2. Login
+3. Systematically navigate to each page:
+   - Dashboard
+   - Customers
+   - Vehicles
+   - Sponsors
+   - Companies
+   - Contracts
+   - Contract Form
+   - Contract View
+   - Users
+   - Audit Logs
+   - System Errors
+   - Settings
+   - Company Settings
+   - Financial Settings
+   - Terms & Conditions
+   - Financial Reports
+   - Operational Reports
+   - Customer Reports
+   - Audit Reports
+   - NotFound (navigate to /invalid-route)
+
+**Expected Results for Each Route**:
+- ✅ Separate chunk loads on first visit (visible in Network tab)
+- ✅ Loading spinner displays briefly
+- ✅ Page renders correctly after chunk loads
+- ✅ No console errors
+- ✅ Second visit loads from cache (instant)
+
+---
+
+#### TC-PERF-005: Mobile/Slow Connection Test
+
+**Test Steps**:
+1. Open DevTools → Network tab
+2. Throttle to "Slow 3G"
+3. Clear cache and reload
+4. Observe load behavior
+
+**Expected Results**:
+- ✅ Login page still loads within 5-6 seconds (acceptable on 3G)
+- ✅ Loading spinner displays during chunk fetches
+- ✅ Application remains responsive
+- ✅ No timeout errors
+- ✅ Graceful degradation on slow connections
+
+---
+
+#### TC-PERF-006: Bundle Size Analysis
+
+**Test Steps**:
+1. Build production bundle: `npm run build`
+2. Analyze dist/assets directory
+3. Check file sizes
+
+**Expected Results**:
+- ✅ Main bundle (index-*.js) ≤ 60KB
+- ✅ Lazy chunks present for each route
+- ✅ Largest chunks: ContractView (~115KB), ContractForm (~89KB), Settings (~73KB)
+- ✅ Total of all chunks = previous bundle size (~744KB)
+- ✅ No single chunk exceeds 150KB
+
+---
+
+#### TC-PERF-007: Suspense Fallback Test
+
+**Test Steps**:
+1. Throttle network to "Slow 3G"
+2. Navigate to a lazy-loaded page
+3. Observe loading state
+
+**Expected Results**:
+- ✅ Loading skeleton displays immediately
+- ✅ Loader2 animated spinner visible
+- ✅ "Loading..." text displayed
+- ✅ No blank white screen
+- ✅ Professional appearance during loading
+
+---
+
+### Performance Testing Checklist
+
+**Before Release:**
+- ✅ Initial bundle ≤ 60KB (88% reduction verified)
+- ✅ Login page loads in 1-2 seconds (3-4x faster)
+- ✅ All 21 pages lazy load correctly
+- ✅ Loading spinner displays on all route transitions
+- ✅ Browser caching works (instant second visits)
+- ✅ No console errors during lazy loading
+- ✅ Mobile/3G performance acceptable
+- ✅ NotFound page lazy loads correctly
+- ✅ Suspense boundaries catch all lazy load errors
+
+---
+
 **End of Testing Procedures**
 
