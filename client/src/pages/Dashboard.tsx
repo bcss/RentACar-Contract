@@ -352,7 +352,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/vehicles')} data-testid="card-vehicle-utilization">
+            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/vehicles?status=rented')} data-testid="card-vehicle-utilization">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Vehicle Utilization

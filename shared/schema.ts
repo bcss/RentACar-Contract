@@ -425,7 +425,7 @@ export const contracts = pgTable("contracts", {
   paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"), // pending, partial, paid, refunded
   outstandingBalance: varchar("outstanding_balance"), // Remaining amount to be paid
   
-  // Extra Charges (Phase 2) - Detailed breakdown matching MARMAR template
+  // Extra Charges (Phase 2) - Detailed breakdown for rental charges
   extraKmCharge: varchar("extra_km_charge"), // Calculated overage charge
   extraKmDriven: integer("extra_km_driven"), // Km over the limit
   fuelCharge: varchar("fuel_charge"), // Fuel refill charge
@@ -748,24 +748,24 @@ export type SystemError = typeof systemErrors.$inferSelect;
 export const companySettings = pgTable("company_settings", {
   id: varchar("id").primaryKey().default("singleton"),
   // Company Names
-  companyNameEn: varchar("company_name_en").notNull().default("MARMAR"),
-  companyNameAr: varchar("company_name_ar").notNull().default("مــرمــر"),
-  companyLegalNameEn: varchar("company_legal_name_en").notNull().default("CARS AND BUSES RENTAL LLC"),
-  companyLegalNameAr: varchar("company_legal_name_ar").notNull().default("لتأجير الحافلات والسيارات ش.ذ.م.م"),
+  companyNameEn: varchar("company_name_en").notNull().default("RCCMS"),
+  companyNameAr: varchar("company_name_ar").notNull().default("نظام إدارة عقود تأجير السيارات"),
+  companyLegalNameEn: varchar("company_legal_name_en").notNull().default("RENTAL CAR COMPANY LLC"),
+  companyLegalNameAr: varchar("company_legal_name_ar").notNull().default("شركة تأجير السيارات ش.ذ.م.م"),
   taglineEn: varchar("tagline_en").notNull().default("RENT A CAR"),
   taglineAr: varchar("tagline_ar").notNull().default("تأجير السيارات"),
   
   // Contact Information
-  phone: varchar("phone").notNull().default("07 222 12 33"),
-  phoneAr: varchar("phone_ar").notNull().default("٠٧ ٢٢٢ ١٢ ٣٣"),
-  mobile: varchar("mobile").notNull().default("050 50 33 786 / 050 648 24 24"),
-  mobileAr: varchar("mobile_ar").notNull().default("٠٥٠ ٥٠ ٣٣ ٧٨٦ / ٠٥٠ ٦٤٨ ٢٤ ٢٤"),
-  email: varchar("email").notNull().default("marmarrac@gmail.com"),
-  website: varchar("website").notNull().default("www.marmarcars.com"),
+  phone: varchar("phone").notNull().default("+971 0 000 0000"),
+  phoneAr: varchar("phone_ar").notNull().default("+٩٧١ ٠ ٠٠٠ ٠٠٠٠"),
+  mobile: varchar("mobile").notNull().default("+971 50 000 0000"),
+  mobileAr: varchar("mobile_ar").notNull().default("+٩٧١ ٥٠ ٠٠٠ ٠٠٠٠"),
+  email: varchar("email").notNull().default("info@rentalcompany.com"),
+  website: varchar("website").notNull().default("www.rentalcompany.com"),
   
   // Address
-  addressEn: varchar("address_en").notNull().default("P.O. Box : 34088, Al Nakeel, RAK - UAE"),
-  addressAr: varchar("address_ar").notNull().default("ص.ب: ٣٤٠٨٨، النخيل، رأس الخيمة - الإمارات"),
+  addressEn: varchar("address_en").notNull().default("P.O. Box: 00000, City, UAE"),
+  addressAr: varchar("address_ar").notNull().default("ص.ب: ٠٠٠٠٠، المدينة، الإمارات"),
   
   // Logo (optional, can be URL or base64)
   logoUrl: varchar("logo_url"),
@@ -808,7 +808,7 @@ export const companySettings = pgTable("company_settings", {
   paymentTermsFineWeekEn: text("payment_terms_fine_week_en").notNull().default("In case any fine the Hirer must to be cleared within one week maximum or the Hirer will be charged AED 25/- per week"),
   paymentTermsFineWeekAr: text("payment_terms_fine_week_ar").notNull().default("في حال وجود غرامة، على (المستأجر) سداد الغرامة خلال أسبوع واحد نعطي التقارير والإنذار بسداد مبلغ ٢٥ درهما غرامة تأخير"),
   
-  paymentTermsSecurityEn: text("payment_terms_security_en").notNull().default("The Hirer agrees Marmar Rent A Car to retain AED 1500/- for fine security for 15 days from the date for return of vehicle."),
+  paymentTermsSecurityEn: text("payment_terms_security_en").notNull().default("The Hirer agrees that the Company may retain AED 1500/- for fine security for 15 days from the date of return of vehicle."),
   paymentTermsSecurityAr: text("payment_terms_security_ar").notNull().default("يتم الاحتفاظ بمبلغ ١٥٠٠ درهم من قيمة البطاقة الائتمانية من تاريخ إعادة السيارة لمدة ١٥ يوما من تاريخ إرجاع السيارة الإيجار"),
   
   paymentTermsAcknowledgeEn: text("payment_terms_acknowledge_en").notNull().default("Acknowledge the I/ we read above and reverse mentioned terms and conditions and agree to abide by them."),
@@ -830,8 +830,8 @@ export const companySettings = pgTable("company_settings", {
   clauseWriteoffEn: text("clause_writeoff_en").notNull().default("In case of writing off the car by the concerned parties. The person who rented the car shall pay 5000 Dirhams a compensation for the full damaged of the rented cars in addition to the rent, till all procedures are completed and insurance company give the compensation. If the car is cofiscated by concerned authorities for any reason caused by the person who rented the car He/She shall pay the full value of the car in addition the rent and the above mentioned."),
   clauseWriteoffAr: text("clause_writeoff_ar").notNull().default("في حالة تسقط السيارة من الجهات منعضة يقوم المستأجر بدفع مبلغ خمسة آلف درهم (٥٠٠٠) درهما تعويضا عن أي ضرر يلحق المطالبة الايجار الإجمالي المترتب بالإضافة إلى قيمة الإيجار حتى انتهاء كافة الإجراءات بالإضافة والمصروحي في حالة مصادرة السيارة من جهات معينة بسبب قد تسبب ف"),
   
-  clauseCreditAuthEn: text("clause_credit_auth_en").notNull().default("I, the undersigned authorise Marmar Rent A Car to charge my credit card the rent value and any other additional amounts or offence and penalties (Police or Muncipality adding Dhs. 20 for each fine) even after the returned back of the vehicle to the Company within the hire period through the credit card belonging to .......................... Dhs. additional"),
-  clauseCreditAuthAr: text("clause_credit_auth_ar").notNull().default("أنا الموقع أدناه أفوض المرمر لتأجرة السيارات بتقاضى قيمة الإيجار وأى مبالغ إضافية أو مخالفات و غرامات (سرعة و بلدية بمبلغ ٣٠ درهم على كل مخالفة) حتى بعد إعادة استيارة الشركة ضمن فترة استئجار السيارة وذلك من خلال بطاقة الائتمان الخاصة بـــ..........................درهم إضافية"),
+  clauseCreditAuthEn: text("clause_credit_auth_en").notNull().default("I, the undersigned authorise the Company to charge my credit card the rent value and any other additional amounts or offence and penalties (Police or Municipality adding Dhs. 20 for each fine) even after the returned back of the vehicle to the Company within the hire period through the credit card belonging to .......................... Dhs. additional"),
+  clauseCreditAuthAr: text("clause_credit_auth_ar").notNull().default("أنا الموقع أدناه أفوض الشركة لتأجير السيارات بتقاضى قيمة الإيجار وأى مبالغ إضافية أو مخالفات و غرامات (سرعة و بلدية بمبلغ ٣٠ درهم على كل مخالفة) حتى بعد إعادة السيارة للشركة ضمن فترة استئجار السيارة وذلك من خلال بطاقة الائتمان الخاصة بـــ..........................درهم إضافية"),
   
   clauseDesertProhibitionEn: text("clause_desert_prohibition_en").notNull().default("Vehicle not allowed to drive in Desert Area"),
   clauseDesertProhibitionAr: text("clause_desert_prohibition_ar").notNull().default("السيـــارة لايسمح للقيـــادة فــي منــطقة صحــراويــة"),

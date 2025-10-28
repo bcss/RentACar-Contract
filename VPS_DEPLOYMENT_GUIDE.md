@@ -135,13 +135,13 @@ sudo apt install -y curl wget git build-essential
 
 ```bash
 # Create system user for application
-sudo useradd -m -s /bin/bash marmar
+sudo useradd -m -s /bin/bash rccms
 
 # Add user to sudo group (if needed for maintenance)
-sudo usermod -aG sudo marmar
+sudo usermod -aG sudo rccms
 
 # Set strong password
-sudo passwd marmar
+sudo passwd rccms
 ```
 
 ### 4. Configure Firewall
@@ -242,7 +242,7 @@ sudo npm install -g pm2
 pm2 --version
 
 # Generate startup script (run as root)
-sudo pm2 startup systemd -u marmar --hp /home/marmar
+sudo pm2 startup systemd -u rccms --hp /home/rccms
 ```
 
 ### 4. Install Nginx
@@ -378,8 +378,8 @@ DATABASE_URL=postgresql://rccms_user:your_strong_password@localhost:5432/rccms_d
 ### 1. Switch to Application User
 
 ```bash
-su - marmar
-# Enter password for marmar user
+su - rccms
+# Enter password for rccms user
 ```
 
 ### 2. Clone or Upload Application
@@ -401,7 +401,7 @@ cd rccms-app
 
 ```bash
 # From your local machine:
-scp -r /path/to/rccms-app marmar@your-server-ip:~/rccms-app
+scp -r /path/to/rccms-app rccms@your-server-ip:~/rccms-app
 
 # Then SSH into server and navigate:
 cd ~/rccms-app
@@ -446,7 +446,7 @@ PORT=5000
 
 # Session Configuration
 SESSION_MAX_AGE=604800000    # 7 days in milliseconds
-SESSION_NAME=marmar.sid
+SESSION_NAME=rccms.sid
 
 # Security
 TRUST_PROXY=true  # Important: Enable if behind nginx reverse proxy
@@ -569,7 +569,7 @@ INSERT INTO users (
 ) VALUES (
   'admin',
   '$2b$10$...',  -- Replace with bcrypt hash from above
-  'admin@marmar-rental.com',
+  'admin@rccms-rental.com',
   'System',
   'Administrator',
   'admin',
@@ -693,10 +693,10 @@ pm2 monit
 pm2 save
 
 # Already configured during PM2 installation:
-# sudo pm2 startup systemd -u marmar --hp /home/marmar
+# sudo pm2 startup systemd -u rccms --hp /home/rccms
 
 # Verify startup script
-sudo systemctl status pm2-marmar
+sudo systemctl status pm2-rccms
 ```
 
 ### 5. PM2 Management Commands
@@ -1028,9 +1028,9 @@ nano ~/backup-database.sh
 
 ```bash
 #!/bin/bash
-BACKUP_DIR="/home/marmar/backups"
+BACKUP_DIR="/home/rccms/backups"
 DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="$BACKUP_DIR/marmar_backup_$DATE.sql.gz"
+BACKUP_FILE="$BACKUP_DIR/rccms_backup_$DATE.sql.gz"
 
 mkdir -p $BACKUP_DIR
 
@@ -1039,7 +1039,7 @@ pg_dump -h localhost -U rccms_user -d rccms_db | gzip > "$BACKUP_FILE"
 
 if [ -f "$BACKUP_FILE" ]; then
     echo "Backup successful: $BACKUP_FILE"
-    find $BACKUP_DIR -name "marmar_backup_*.sql.gz" -mtime +30 -delete
+    find $BACKUP_DIR -name "rccms_backup_*.sql.gz" -mtime +30 -delete
 else
     echo "Backup failed!"
     exit 1
@@ -1058,7 +1058,7 @@ chmod +x ~/backup-database.sh
 crontab -e
 
 # Add daily backup at 2 AM
-0 2 * * * /home/marmar/backup-database.sh >> /home/marmar/backup.log 2>&1
+0 2 * * * /home/rccms/backup-database.sh >> /home/rccms/backup.log 2>&1
 ```
 
 ### 4. Application Updates

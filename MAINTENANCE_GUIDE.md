@@ -179,7 +179,7 @@ NODE_ENV=production          # Environment (production|development)
 
 # Session Configuration
 SESSION_MAX_AGE=604800000    # 7 days in milliseconds
-SESSION_NAME=marmar.sid      # Session cookie name
+SESSION_NAME=rccms.sid      # Session cookie name
 
 # Security
 TRUST_PROXY=true             # Enable if behind reverse proxy
@@ -650,9 +650,9 @@ psql test_database -c "SELECT COUNT(*),
 #!/bin/bash
 # backup-database.sh
 
-BACKUP_DIR="/var/backups/marmar"
+BACKUP_DIR="/var/backups/rccms"
 DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="$BACKUP_DIR/marmar_backup_$DATE.sql.gz"
+BACKUP_FILE="$BACKUP_DIR/rccms_backup_$DATE.sql.gz"
 
 # Create backup directory
 mkdir -p $BACKUP_DIR
@@ -670,7 +670,7 @@ else
 fi
 
 # Delete backups older than 30 days
-find $BACKUP_DIR -name "marmar_backup_*.sql.gz" -mtime +30 -delete
+find $BACKUP_DIR -name "rccms_backup_*.sql.gz" -mtime +30 -delete
 
 echo "Old backups cleaned up"
 ```
@@ -686,7 +686,7 @@ chmod +x backup-database.sh
 crontab -e
 
 # Add daily backup at 2 AM
-0 2 * * * /path/to/backup-database.sh >> /var/log/marmar-backup.log 2>&1
+0 2 * * * /path/to/backup-database.sh >> /var/log/rccms-backup.log 2>&1
 ```
 
 **Specific Tables Backup:**
@@ -705,7 +705,7 @@ pg_dump "$DATABASE_URL" \
 **Full Database Restore:**
 ```bash
 # Extract and restore
-gunzip -c marmar_backup_20250121_020000.sql.gz | psql "$DATABASE_URL"
+gunzip -c rccms_backup_20250121_020000.sql.gz | psql "$DATABASE_URL"
 ```
 
 **Restore Specific Tables:**
@@ -734,7 +734,7 @@ gunzip -c backup.sql.gz | psql "$DATABASE_URL"
 createdb test_restore
 
 # Restore latest backup
-gunzip -c /var/backups/marmar/latest.sql.gz | psql test_restore
+gunzip -c /var/backups/rccms/latest.sql.gz | psql test_restore
 
 # Run verification queries
 psql test_restore -c "SELECT COUNT(*) FROM contracts;"
@@ -1079,7 +1079,7 @@ sudo apt clean
 sudo journalctl --vacuum-time=7d
 
 # Remove old backups
-find /var/backups/marmar -mtime +30 -delete
+find /var/backups/rccms -mtime +30 -delete
 
 # Analyze disk usage
 du -sh /* | sort -rh | head -20
@@ -1310,7 +1310,7 @@ rm -rf /opt/rccms-app
 cp -r /opt/rccms-app.backup.20250121 /opt/rccms-app
 
 # Restore database (if schema changed)
-gunzip -c /var/backups/marmar/latest.sql.gz | psql "$DATABASE_URL"
+gunzip -c /var/backups/rccms/latest.sql.gz | psql "$DATABASE_URL"
 
 # Restart
 pm2 start rccms-app

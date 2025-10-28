@@ -48,9 +48,13 @@ export default function Contracts() {
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const statusFromUrl = searchParams.get('status') || 'all';
+  const overdueFromUrl = searchParams.get('overdue') === 'true';
+  const pendingRefundsFromUrl = searchParams.get('pendingRefunds') === 'true';
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>(statusFromUrl);
+  const [showOverdueOnly, setShowOverdueOnly] = useState<boolean>(overdueFromUrl);
+  const [showPendingRefundsOnly, setShowPendingRefundsOnly] = useState<boolean>(pendingRefundsFromUrl);
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
   const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
@@ -62,7 +66,12 @@ export default function Contracts() {
   useEffect(() => {
     const params = new URLSearchParams(location.split('?')[1] || '');
     const status = params.get('status') || 'all';
+    const overdue = params.get('overdue') === 'true';
+    const pendingRefunds = params.get('pendingRefunds') === 'true';
+    
     setStatusFilter(status);
+    setShowOverdueOnly(overdue);
+    setShowPendingRefundsOnly(pendingRefunds);
   }, [location]);
 
   useEffect(() => {
@@ -182,7 +191,28 @@ export default function Contracts() {
       }
     }
     
-    return matchesSearch && matchesStatus && matchesDateRange;
+    // Context-aware filter for overdue contracts (from dashboard)
+    let matchesOverdue = true;
+    if (showOverdueOnly) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const isOverdue = contract.status === 'active' && contract.rentalEndDate && (() => {
+        const endDate = new Date(contract.rentalEndDate);
+        endDate.setHours(0, 0, 0, 0);
+        return endDate < today;
+      })();
+      matchesOverdue = isOverdue;
+    }
+    
+    // Context-aware filter for pending refunds (from dashboard)
+    let matchesPendingRefunds = true;
+    if (showPendingRefundsOnly) {
+      matchesPendingRefunds = contract.status === 'closed' && 
+                              contract.depositPaid === true && 
+                              contract.depositRefunded !== true;
+    }
+    
+    return matchesSearch && matchesStatus && matchesDateRange && matchesOverdue && matchesPendingRefunds;
   });
 
   const getStatusBadge = (status: string, disabled?: boolean) => {

@@ -38,13 +38,13 @@ const TERMS_SECTION_2_EN = `1. Hirer or Guarantor should follow and execute all 
 10. Hirer is responsible to pay fine if he repairs the vehicle without a written permission from the office.
 11. Hirer should return back the vehicle before 9pm. Any delay the office will take payment for full day hire.
 12. Hirer is responsible about any complaint case or any obligations regarding the vehicle before the office or the official authorities, which occurs within the hire period. Also he will alone be responsible if he uses the vehicle to transport any forbidden items that are considered as illegal as per any of the Country's law. Hirer also should pay the full amount to the contract until some arrangement is reached between hirer and the office.
-13. Hirer should return back the vehicle at the end of hiring period mentioned in the contract unless the vehicle should be in good condition as it was in the beginning and after checking with and obtaining the approval of MARMAR RENT A CAR to renew the hire period, otherwise each delay in day of hire will be accounted as double at the day hire value mentioned in the contract.
-14. MARMAR RENT A CAR has the right to take the proper procedure against the hirer if he did not obey or execute the contract conditions.
+13. Hirer should return back the vehicle at the end of hiring period mentioned in the contract unless the vehicle should be in good condition as it was in the beginning and after checking with and obtaining the approval of the Company to renew the hire period, otherwise each delay in day of hire will be accounted as double at the day hire value mentioned in the contract.
+14. The Company has the right to take the proper procedure against the hirer if he did not obey or execute the contract conditions.
 15. Hirer is responsible for all damages and repairs that occur to the vehicle within the hire period and he will pay the full amount of the contract until repairing the damages
 16. One day hire means 24 hours and any extra will be calculated as full day's hire
 17. The vehicle is for use in U.A.E. only. The insurance coverage is also for U.A.E. only.
-18. The hirer undertakes not to stick color or paper on the vehicle glass or any other stickers on the vehicle's "body" otherwise hirer should pay a compensation of Dhs. to MARMAR RENT A CAR and will alone bear the full responsibility in front of the concerned authorities.
-19. Hirer should inform the police and MARMAR RENT A CAR immediately if any accident occurs to the vehicle, otherwise hirer will also alone bear the full responsibility in front of the concerned authorities.
+18. The hirer undertakes not to stick color or paper on the vehicle glass or any other stickers on the vehicle's "body" otherwise hirer should pay a compensation of Dhs. to the Company and will alone bear the full responsibility in front of the concerned authorities.
+19. Hirer should inform the police and the Company immediately if any accident occurs to the vehicle, otherwise hirer will also alone bear the full responsibility in front of the concerned authorities.
 20. The hirer is less than 25 years old and responsible for the vehicle damages he/she should pay 20% from the amount of repairing.
 21. The hirer is allowed to drive 300 kms per day, for anything above 300 kms there is a charge of 50 fils per km.
 22. If no previous arrangement has been made for weekly, monthly rates then the hirer is liable to pay the daily rate.
@@ -72,7 +72,7 @@ const TERMS_SECTION_2_AR = `١. المحترل يجب تركيته إليه دو
 ١٧. التأجير لمدة يوم يعني ٢٤ ساعة وما زاد عن ذلك يحتسب يوم كامل
 ١٨. المركبة صالحة للاستعمال في دولة الإمارات المتحدة وبوليصة التأمين سارية في دولة الإمارات المتحدة فقط وخلاف ذلك يتحمل المستأجر كافة المسؤولية
 ١٩. يتحمل المستأجر عدم إضافة أوراق ملونة على زجاج المركبة أو أي ملصقات أخرى على شكل المركبة، وخلاف ذلك يلتزم المستأجر بدفع تعويض قيمته ٥٠٠ درهم للمكتب كما يتحمل المسؤولية القانونية كاملة أمام الجهات المختصة
-٢٠. في حالة حدوث حادث للمركبة على المستأجر أن يقوم بإبلاغ الشرطة ومكتب مرمر فورا وخلاف ذلك يتحمل المسؤولية
+٢٠. في حالة حدوث حادث للمركبة على المستأجر أن يقوم بإبلاغ الشرطة والشركة فورا وخلاف ذلك يتحمل المسؤولية
 ٢١. المسافة المحددة للمستأجر ٣٠٠ كيلومتر في اليوم الواحد وما يزيد عن ذلك يدفع ٥٠ فلس للكيلومتر الواحد
 ٢٢. إذا لم يكن هناك اتفاق مسبق للإيجار الأسبوعي أو الشهري فسوف يحتسب السعر اليومي
 ٢٣. تأمين الطرف الثالث فقط
@@ -80,9 +80,9 @@ const TERMS_SECTION_2_AR = `١. المحترل يجب تركيته إليه دو
 ٢٥. يحظر بشدة التدخين داخل السيارة والمستأجر سيكون عرضة لسداد غرامة بمبلغ ٣٠٠ درهم
 ٢٦. سيتم فرض ضريبة القيمة المضافة بنسبة ٥٪`;
 
-const TERMS_SECTION_3_EN = `MARMAR RENT A CAR hereby authorized to receive from the above said identity holder Traffic Fines and Penalty for Parking the car or any penalty due the police presently`;
+const TERMS_SECTION_3_EN = `The Company is hereby authorized to receive from the above said identity holder Traffic Fines and Penalty for Parking the car or any penalty due the police presently`;
 
-const TERMS_SECTION_3_AR = `مرمر لتأجير السيارات مخول بموجب هذا باستلام الغرامات المرورية وغرامات ركن السيارة من حامل الهوية المذكور أعلاه أو أي غرامة مستحقة للشرطة حالياً`;
+const TERMS_SECTION_3_AR = `الشركة مخولة بموجب هذا باستلام الغرامات المرورية وغرامات ركن السيارة من حامل الهوية المذكور أعلاه أو أي غرامة مستحقة للشرطة حالياً`;
 
 export async function seedCompanySettings() {
   try {

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -270,13 +271,25 @@ export default function Vehicles() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { toast } = useToast();
+  const [location] = useLocation();
+  const searchParams = new URLSearchParams(location.split('?')[1] || '');
+  const statusFilterFromUrl = searchParams.get('status'); // e.g., 'rented', 'available'
+  
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | null>(statusFilterFromUrl);
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const [enableDialogOpen, setEnableDialogOpen] = useState(false);
   const [vehicleToToggle, setVehicleToToggle] = useState<Vehicle | null>(null);
+
+  // Update status filter when URL changes
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    const status = params.get('status');
+    setStatusFilter(status);
+  }, [location]);
 
   const form = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleFormSchema),
@@ -454,15 +467,26 @@ export default function Vehicles() {
   };
 
   const filterVehicles = (vehicles: Vehicle[]) => {
-    if (!searchQuery.trim()) return vehicles;
-    const query = searchQuery.toLowerCase();
-    return vehicles.filter(
-      (v) =>
-        v.registration?.toLowerCase().includes(query) ||
-        v.make?.toLowerCase().includes(query) ||
-        v.model?.toLowerCase().includes(query) ||
-        v.color?.toLowerCase().includes(query)
-    );
+    let filtered = vehicles;
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (v) =>
+          v.registration?.toLowerCase().includes(query) ||
+          v.make?.toLowerCase().includes(query) ||
+          v.model?.toLowerCase().includes(query) ||
+          v.color?.toLowerCase().includes(query)
+      );
+    }
+    
+    // Context-aware filter for vehicle status (from dashboard)
+    if (statusFilter) {
+      filtered = filtered.filter(v => v.status === statusFilter);
+    }
+    
+    return filtered;
   };
 
   const filteredActiveVehicles = filterVehicles(activeVehicles);
