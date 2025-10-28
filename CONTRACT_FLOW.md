@@ -748,3 +748,133 @@ The RCCMS Rental Car Contract Management System provides a **complete, automated
 ✅ **Bilingual support** (English/Arabic throughout)
 
 **Zero gaps between documentation and implementation** - every feature documented here is fully implemented and tested.
+
+---
+
+## Enhanced Contract Lifecycle Rules (December 2025 Updates)
+
+### Mandatory Contract Date Validation
+
+**Rule:** Rental start date cannot be in the past
+
+**Implementation:**
+- **Frontend Validation:** Zod schema with `.refine()` checks `startDate >= today`
+- **Backend Validation:** API endpoint validates `new Date(rentalStartDate) >= midnightToday`
+- **Timezone Safety:** Uses midnight-normalized UTC comparison to prevent timezone edge cases
+
+**Why This Matters:**
+- Prevents booking historical contracts
+- Avoids calendar conflicts and accounting errors
+- Ensures rental periods are always future-dated or current
+
+**Error Message:** "Rental start date cannot be in the past"
+
+---
+
+### Early Closure Reason Workflow
+
+**Trigger:** Contract completed before `rentalEndDate`
+
+**Detection Logic:**
+```javascript
+if (new Date(completionDate) < new Date(rentalEndDate)) {
+  // Early closure detected - require reason
+  openEarlyClosureReasonDialog();
+}
+```
+
+**User Experience:**
+
+1. **Manager/Admin clicks "Complete Contract"** for active contract
+2. **System detects early closure** (completion date < rental end date)
+3. **Early Closure Reason Dialog opens** (cannot be dismissed)
+4. **User must provide reason:**
+   - Minimum 10 characters required
+   - Examples: "Customer early return", "Vehicle needed urgently", "Contract amended"
+5. **Reason stored** in `contracts.earlyClosureReason` field
+6. **Contract completion proceeds** only after reason submitted
+
+**Business Value:**
+- **Analytics:** Track patterns in early returns (customer satisfaction indicator)
+- **Revenue Analysis:** Calculate lost revenue from shortened rentals
+- **Operational Planning:** Identify vehicles frequently returned early
+- **Customer Service:** Understand if early returns indicate service issues
+
+**Reporting Integration:**
+- Early closure reasons visible in contract timeline
+- Filterable in operational reports
+- Included in contract export data
+
+---
+
+### Payment Validation Before Closure
+
+**Rule:** Cannot close contract until final payment recorded
+
+**Backend Enforcement:**
+```javascript
+// Backend validation in PATCH /api/contracts/:id/close
+const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+const totalDue = contract.totalAmount;
+
+if (totalPaid < totalDue) {
+  return res.status(400).json({
+    error: `Total paid (${totalPaid}) is less than total due (${totalDue}). 
+            Please record final payment before closing.`
+  });
+}
+
+// Only proceed if fully paid
+closeContract();
+```
+
+**User Experience:**
+
+1. **Admin attempts to close contract** with outstanding balance
+2. **Backend validates** `totalPaid >= totalDue` (rounded to currency precision)
+3. **If underpaid:**
+   - Request blocked with 400 error
+   - Error message displays exact amounts: "Total paid (AED 4,500) is less than total due (AED 5,000)"
+   - User must record final payment first
+4. **If fully paid:**
+   - Contract closure proceeds
+   - Final refund calculated (if applicable)
+
+**Why This Protection Exists:**
+- **Revenue Protection:** Cannot accidentally close contracts with unpaid balances
+- **Audit Compliance:** Forces proper payment recording before closure
+- **Financial Accuracy:** Ensures all contracts closed with complete payment records
+- **Prevents Fraud:** Cannot bypass payment recording to close contracts prematurely
+
+**Integration with Payment System:**
+- Payment recording enforces conditional details (cheque number, last 4 digits, reference)
+- Complete payment history visible in contract view before closure
+- Admin can verify balance before attempting closure
+
+---
+
+### Updated Contract Lifecycle with New Rules
+
+```
+DRAFT
+  ↓ (Confirm - Staff+)
+CONFIRMED [NEW: Date validation enforced at creation]
+  ↓ (Activate - Manager+, requires pre-delivery inspection)
+ACTIVE
+  ↓ (Complete - Manager+, requires post-return inspection)
+  ↓ [NEW: Early closure? → Reason required]
+COMPLETED [NEW: Payment validation enforced here]
+  ↓ (Close - Admin only, requires totalPaid >= totalDue)
+CLOSED (immutable)
+```
+
+**Key Enforcement Points:**
+1. **Creation:** Date cannot be in past (frontend + backend)
+2. **Activation:** Pre-delivery inspection mandatory
+3. **Completion:** Post-return inspection + early closure reason (if applicable)
+4. **Closure:** Final payment verified before allowed
+
+---
+
+**End of Enhanced Rules Section**
+
