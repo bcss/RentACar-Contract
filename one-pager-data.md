@@ -385,3 +385,35 @@ Customer disputes AED 1,200 scratch:
 
 **RCCMS: Professional Rental Car Management - Built for the UAE Market**
 
+
+---
+
+## System Enhancements (December 2025)
+
+### Data Integrity Enforcement
+- **Dual-Layer Validation**: Frontend (Zod) + Backend (API) enforcement prevents data bypass
+- **Mandatory Customer Fields**: National ID, Nationality, Phone, License Number (cannot bypass)
+- **Mandatory Company Fields**: TAX ID, Contact Person, Phone, Email (cannot bypass)
+- **Contract Date Validation**: Rental start date cannot be in the past (timezone-safe)
+
+### Enhanced User Experience
+- **Context-Aware Dashboard Navigation**: One-click access to filtered contract lists (Active, Overdue, Pending Refunds)
+- **Deep-Link URLs**: Bookmarkable filtered views with URL parameters (`?overdue=true`, `?status=active`)
+- **Separate Report Exports**: Tab-scoped PDF/Excel exports with descriptive filenames
+  - `vehicle-utilization-report.pdf`
+  - `contract-status-report.pdf`
+  - `extra-charges-report.pdf`
+
+### Financial Compliance
+- **Enhanced Payment Validation**: Conditional required fields based on payment method
+  - Check/Cheque → Requires cheque number
+  - Card → Requires last 4 digits
+  - Bank Transfer → Requires reference number
+- **Contract Closure Protection**: Cannot close until `totalPaid >= totalDue` (backend enforced)
+- **Early Closure Tracking**: Mandatory reason when completing before end date (business intelligence)
+
+### Audit & Compliance
+- **Complete Audit Trail**: All validation enforcement logged
+- **Payment Method Tracking**: Full payment details for audit compliance
+- **Early Closure Analytics**: Track patterns in early returns for revenue analysis
+

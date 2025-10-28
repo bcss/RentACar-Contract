@@ -1170,3 +1170,200 @@ The system is well-built, secure, and functional. The identified issues are prim
 **Developed By**: AKN Consulting  
 **Contact**: +919400750821 | rccms@akn-consulting.com | rccms@akn-consulting.in  
 **Address**: Muttathu, Thattayil, Pathanamthitta - 691525
+
+---
+
+## Architectural Enhancements (December 2025)
+
+### Dual-Layer Validation Architecture
+
+**Pattern**: Frontend + Backend Validation Enforcement
+
+**Implementation**:
+```typescript
+// Frontend: Zod Schema Validation
+const insertCustomerSchema = createInsertSchema(customers).extend({
+  nationalId: z.string().min(1, "National ID required"),
+  nationality: z.string().min(1, "Nationality required"),
+  phone: z.string().notNull().min(1, "Phone required"),
+  licenseNumber: z.string().min(1, "License Number required"),
+});
+
+// Backend: API Validation
+router.post('/api/customers', async (req, res) => {
+  const validated = insertCustomerSchema.parse(req.body); // Throws if validation fails
+  // ... database operations
+});
+```
+
+**Architectural Benefits**:
+- **Cannot Bypass**: Backend enforces rules regardless of client state
+- **Immediate Feedback**: Frontend validation provides UX improvement
+- **Security**: Prevents API tool abuse (Postman, curl, scripts)
+- **Data Integrity**: Guarantees complete records at database level
+
+**Design Decisions**:
+- Phone validation uses `.notNull().min(1)` to prevent both NULL and empty string ""
+- Date validation uses midnight-normalized UTC for timezone safety
+- Backend validation throws 400 error (not 500) for invalid data
+- All validation failures logged to audit trail
+
+---
+
+### Context-Aware Navigation Pattern
+
+**Pattern**: URL Parameter-Driven Filtering
+
+**Implementation**:
+```typescript
+// Dashboard passes query parameters
+<Link href="/contracts?overdue=true">
+  <Card>12 Overdue Returns</Card>
+</Link>
+
+// Contracts page auto-applies filters on mount
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('overdue') === 'true') {
+    // Auto-filter to overdue contracts
+  }
+}, []);
+```
+
+**Architectural Benefits**:
+- **Deep-Linking**: Bookmarkable URLs for specific filtered views
+- **Maintainability**: Filter state managed via URL (no complex state management)
+- **User Experience**: Zero-click navigation to critical lists
+- **Backward Compatible**: Pages work with or without parameters
+
+**Design Decisions**:
+- URL parameters preserve filter state across navigation
+- Multiple filters can coexist (`?status=active&overdue=true`)
+- Dashboard cards serve as filtered entry points
+- No complex client-side routing required
+
+---
+
+### Payment Validation Architecture
+
+**Pattern**: Conditional Required Fields + Closure Protection
+
+**Implementation**:
+```typescript
+// Conditional validation using Zod superRefine
+const paymentSchema = z.object({
+  paymentMethod: z.enum(['cash', 'card', 'check', 'bank_transfer']),
+  chequeNumber: z.string().optional(),
+  lastFourDigits: z.string().optional(),
+  referenceNumber: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.paymentMethod === 'check' && !data.chequeNumber) {
+    ctx.addIssue({ code: 'custom', message: 'Cheque number required', path: ['chequeNumber'] });
+  }
+  // ... similar for card and bank_transfer
+});
+
+// Backend closure protection
+router.patch('/api/contracts/:id/close', async (req, res) => {
+  const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+  if (totalPaid < contract.totalAmount) {
+    return res.status(400).json({ error: 'Insufficient payment' });
+  }
+  // ... proceed with closure
+});
+```
+
+**Architectural Benefits**:
+- **Revenue Protection**: Cannot close contracts with unpaid balances
+- **Audit Trail**: Payment method details tracked for compliance
+- **Flexibility**: Conditional validation adapts to payment method
+- **Fraud Prevention**: Track cheque/card/transfer details
+
+**Design Decisions**:
+- Zod superRefine enables conditional validation logic
+- Backend recalculates totals (never trust client)
+- Currency precision rounded to 2 decimals prevents floating-point errors
+- Error messages display exact amounts for transparency
+
+---
+
+### Reporting Enhancement Architecture
+
+**Pattern**: Tab-Scoped Export Generation
+
+**Implementation**:
+```typescript
+// Frontend passes activeTab parameter
+const exportPDF = (activeTab: string) => {
+  window.open(`/api/reports/operational/export?format=pdf&activeTab=${activeTab}`);
+};
+
+// Backend conditionally includes sections
+router.get('/api/reports/operational/export', (req, res) => {
+  const { activeTab } = req.query;
+  const sections = {
+    utilization: activeTab === 'utilization' || !activeTab,
+    status: activeTab === 'status' || !activeTab,
+    charges: activeTab === 'charges' || !activeTab,
+  };
+  // ... generate report with only enabled sections
+});
+```
+
+**Architectural Benefits**:
+- **Focused Exports**: Only relevant data in each report
+- **Professional Naming**: Descriptive filenames improve organization
+- **Backward Compatible**: Legacy clients receive generic report
+- **Maintainability**: Single export endpoint handles all tabs
+
+**Design Decisions**:
+- Query parameter `activeTab` determines export scope
+- Filenames dynamically generated based on tab
+- PDF and Excel exports share same backend logic
+- No activeTab parameter → generic report (backward compatibility)
+
+---
+
+### Early Closure Tracking Architecture
+
+**Pattern**: Workflow-Triggered Mandatory Data Collection
+
+**Implementation**:
+```typescript
+// Frontend detects early closure condition
+const handleCompleteContract = () => {
+  if (new Date() < new Date(contract.rentalEndDate)) {
+    // Open early closure reason dialog (cannot dismiss)
+    setEarlyClosureDialogOpen(true);
+  } else {
+    // Proceed with normal completion
+    completeContract();
+  }
+};
+
+// Backend stores reason with contract
+router.patch('/api/contracts/:id/complete', async (req, res) => {
+  const { earlyClosureReason } = req.body;
+  if (completionDate < rentalEndDate && !earlyClosureReason) {
+    return res.status(400).json({ error: 'Early closure reason required' });
+  }
+  // ... update contract with reason
+});
+```
+
+**Architectural Benefits**:
+- **Business Intelligence**: Track patterns in early returns
+- **Revenue Analysis**: Calculate lost revenue from shortened rentals
+- **Customer Insights**: Identify service issues causing early returns
+- **Audit Trail**: Reason stored with contract and audit logs
+
+**Design Decisions**:
+- Date comparison on frontend for immediate UX
+- Backend validation ensures reason provided
+- Minimum 10 characters prevents lazy reasons
+- Reason visible in timeline and operational reports
+
+---
+
+**End of December 2025 Architectural Enhancements**
+
