@@ -76,21 +76,21 @@ export const customers = pgTable("customers", {
   nameAr: varchar("name_ar"),
   
   // Identification
-  nationalId: varchar("national_id").unique(), // National ID or Passport Number
+  nationalId: varchar("national_id").unique(), // National ID or Passport Number (required by form validation)
   gender: varchar("gender", { length: 10 }), // male, female
   dateOfBirth: timestamp("date_of_birth"),
   
   // Contact Information
-  phone: varchar("phone").notNull(),
+  phone: varchar("phone").notNull(), // REQUIRED
   email: varchar("email"),
   address: text("address"),
   
   // License Information
-  licenseNumber: varchar("license_number"),
+  licenseNumber: varchar("license_number"), // Driver's license number (required by form validation)
   licenseIssuedBy: varchar("license_issued_by"), // Issuing authority/country
   licenseIssueDate: timestamp("license_issue_date"),
   licenseExpiryDate: timestamp("license_expiry_date"),
-  nationality: varchar("nationality"),
+  nationality: varchar("nationality"), // Required by form validation
   
   // Additional Information
   notes: text("notes"),
@@ -121,7 +121,10 @@ export const insertCustomerSchema = createInsertSchema(customers).omit({
   disabledAt: true,
   disabled: true,
 }).extend({
+  phone: z.string().min(1, "Phone number is required"),
   nationalId: z.string().min(1, "National ID is required"),
+  nationality: z.string().min(1, "Nationality is required"),
+  licenseNumber: z.string().min(1, "License number is required"),
   dateOfBirth: z.coerce.date().optional(),
   licenseIssueDate: z.coerce.date().optional(),
   licenseExpiryDate: z.coerce.date().optional(),
@@ -290,6 +293,10 @@ export const insertCompanySchema = createInsertSchema(companies).omit({
   disabledAt: true,
   disabled: true,
 }).extend({
+  taxId: z.string().min(1, "Tax ID is required"),
+  contactPerson: z.string().min(1, "Contact person is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  email: z.string().email("Invalid email").min(1, "Email is required"),
   registrationValidity: z.coerce.date().optional(),
   taxValidity: z.coerce.date().optional(),
 });
@@ -510,7 +517,11 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   disabledAt: true,
 }).extend({
   // Coerce date strings to Date objects for all date fields
-  rentalStartDate: z.coerce.date(),
+  rentalStartDate: z.coerce.date().refine((date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    return date >= today;
+  }, { message: "Rental start date cannot be in the past" }),
   rentalEndDate: z.coerce.date(),
   depositPaidDate: z.coerce.date().optional(),
   depositRefundedDate: z.coerce.date().optional(),

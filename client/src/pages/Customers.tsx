@@ -64,13 +64,11 @@ import {
 const customerFormSchema = insertCustomerSchema.extend({
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   nameAr: z.string().optional().transform(val => val || undefined),
-  nationalId: z.string().optional().transform(val => val || undefined),
-  nationality: z.string().optional().transform(val => val || undefined),
   gender: z.string().optional().transform(val => val || undefined),
   address: z.string().optional().transform(val => val || undefined),
-  licenseNumber: z.string().optional().transform(val => val || undefined),
   licenseIssuedBy: z.string().optional().transform(val => val || undefined),
   notes: z.string().optional().transform(val => val || undefined),
+  // Required fields: nationalId, nationality, phone, licenseNumber (inherited from insertCustomerSchema)
 });
 
 type CustomerFormData = z.infer<typeof customerFormSchema>;

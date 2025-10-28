@@ -67,7 +67,11 @@ const contractFormSchema = z.object({
   hirerMobile: z.string().nullable().optional(),
   hirerAddress: z.string().nullable().optional(),
   
-  rentalStartDate: z.coerce.date(),
+  rentalStartDate: z.coerce.date().refine((date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    return date >= today;
+  }, { message: "Rental start date cannot be in the past" }),
   rentalEndDate: z.coerce.date(),
   rentalType: z.string().default('daily'),
   
