@@ -9,31 +9,46 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/AppSidebar";
 import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import Customers from "@/pages/Customers";
-import Vehicles from "@/pages/Vehicles";
-import Sponsors from "@/pages/Sponsors";
-import Companies from "@/pages/Companies";
-import Contracts from "@/pages/Contracts";
-import ContractForm from "@/pages/ContractForm";
-import ContractView from "@/pages/ContractView";
-import Users from "@/pages/Users";
-import AuditLogs from "@/pages/AuditLogs";
-import SystemErrors from "@/pages/SystemErrors";
-import Settings from "@/pages/Settings";
-import CompanySettings from "@/pages/CompanySettings";
-import FinancialSettings from "@/pages/FinancialSettings";
-import TermsConditions from "@/pages/TermsConditions";
-import FinancialReports from "@/pages/FinancialReports";
-import OperationalReports from "@/pages/OperationalReports";
-import CustomerReports from "@/pages/CustomerReports";
-import AuditReports from "@/pages/AuditReports";
 import NotFound from "@/pages/not-found";
 import "@/lib/i18n";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { CompanySettings as CompanySettingsType } from "@shared/schema";
+import { Loader2 } from "lucide-react";
+
+// Lazy load all pages except Login (needed immediately)
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Customers = lazy(() => import("@/pages/Customers"));
+const Vehicles = lazy(() => import("@/pages/Vehicles"));
+const Sponsors = lazy(() => import("@/pages/Sponsors"));
+const Companies = lazy(() => import("@/pages/Companies"));
+const Contracts = lazy(() => import("@/pages/Contracts"));
+const ContractForm = lazy(() => import("@/pages/ContractForm"));
+const ContractView = lazy(() => import("@/pages/ContractView"));
+const Users = lazy(() => import("@/pages/Users"));
+const AuditLogs = lazy(() => import("@/pages/AuditLogs"));
+const SystemErrors = lazy(() => import("@/pages/SystemErrors"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const CompanySettings = lazy(() => import("@/pages/CompanySettings"));
+const FinancialSettings = lazy(() => import("@/pages/FinancialSettings"));
+const TermsConditions = lazy(() => import("@/pages/TermsConditions"));
+const FinancialReports = lazy(() => import("@/pages/FinancialReports"));
+const OperationalReports = lazy(() => import("@/pages/OperationalReports"));
+const CustomerReports = lazy(() => import("@/pages/CustomerReports"));
+const AuditReports = lazy(() => import("@/pages/AuditReports"));
+
+// Professional loading skeleton
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" data-testid="loader-spinner" />
+        <p className="text-muted-foreground" data-testid="text-loading">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 // Protected route wrapper with proper redirect
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -47,34 +62,34 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   }, [isAuthenticated, isLoading, setLocation]);
   
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <PageLoader />;
   }
   
   if (!isAuthenticated) {
     return null; // Will redirect via useEffect
   }
   
-  return <Component />;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Component />
+    </Suspense>
+  );
 }
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
     <Switch>
-      <Route path="/" component={isAuthenticated ? Dashboard : Login} />
+      <Route path="/" component={isAuthenticated ? () => (
+        <Suspense fallback={<PageLoader />}>
+          <Dashboard />
+        </Suspense>
+      ) : Login} />
       <Route path="/login" component={Login} />
       <Route path="/dashboard">
         {() => <ProtectedRoute component={Dashboard} />}
@@ -167,11 +182,7 @@ function AppContent() {
   const sidebarSide = i18n.language === 'ar' ? 'right' : 'left';
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!isAuthenticated) {
