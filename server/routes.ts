@@ -1,7 +1,7 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin } from "./auth/localAuth";
+import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor } from "./auth/localAuth";
 import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
@@ -804,8 +804,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Phase 2: State transition routes (Admin/Manager only)
   
-  // Confirm contract (draft → confirmed)
-  app.post('/api/contracts/:id/confirm', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  // Confirm contract (draft → confirmed) - Task 13: Allow Staff to confirm
+  app.post('/api/contracts/:id/confirm', isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
@@ -900,7 +900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride } = req.body;
+      const { odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride, earlyClosureReason } = req.body;
       
       // SECURITY: Calculate fuel charge on backend instead of trusting client
       const vehicle = await storage.getVehicleById(contract.vehicleId);
@@ -951,11 +951,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         outstandingBalance,
       };
 
-      // Update contract with return inspection data
+      // Update contract with return inspection data and early closure reason (Task 11)
       await storage.updateContract(req.params.id, {
         odometerEnd,
         fuelLevelEnd,
         vehicleCondition,
+        earlyClosureReason: earlyClosureReason || null,
       });
 
       // Complete the contract with charge data

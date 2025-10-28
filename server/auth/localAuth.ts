@@ -195,3 +195,14 @@ export const requireManagerOrAdmin: RequestHandler = async (req, res, next) => {
   
   next();
 };
+
+// Task 13: Allow Staff, Manager, and Admin to perform editor-level actions (like confirming contracts)
+export const requireEditor: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+  
+  if (!user || (user.role !== 'admin' && user.role !== 'manager' && user.role !== 'staff')) {
+    return res.status(403).json({ message: "Forbidden: Editor access required (Staff, Manager, or Admin)" });
+  }
+  
+  next();
+};

@@ -455,6 +455,7 @@ export const contracts = pgTable("contracts", {
   completedAt: timestamp("completed_at"),
   closedBy: varchar("closed_by"),
   closedAt: timestamp("closed_at"),
+  earlyClosureReason: text("early_closure_reason"), // Task 11: Optional reason for early completion
   
   // Audit fields
   createdBy: varchar("created_by").notNull(),
@@ -547,6 +548,9 @@ export type ContractWithDetails = Contract & {
   vehicleModel: string | null;
   sponsor?: Sponsor | null;
   companySponsor?: Company | null;
+  creatorName?: string | null; // Added for Task 10
+  creatorFirstName?: string | null; // Added for Task 10
+  creatorLastName?: string | null; // Added for Task 10
 };
 
 // Payments table - Track all payments received for contracts
@@ -558,6 +562,11 @@ export const payments = pgTable("payments", {
   amount: varchar("amount").notNull(), // Payment amount (stored as string for precision)
   paymentMethod: varchar("payment_method", { length: 50 }).notNull(), // cash, card, bank_transfer, check, etc.
   currency: varchar("currency", { length: 10 }).notNull().default(""), // Currency from company settings
+  
+  // Task 12: Payment method details (conditional based on payment method)
+  chequeNumber: varchar("cheque_number"), // Required for check/cheque payments
+  last4Digits: varchar("last4_digits", { length: 4 }), // Required for card payments
+  referenceNumber: varchar("reference_number"), // Required for non-cash/non-card payments
   
   // Payment Metadata
   paidAt: timestamp("paid_at").notNull().defaultNow(), // When payment was received
@@ -589,6 +598,46 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
 }).extend({
   paidAt: z.coerce.date(),
   amount: z.string().min(1, "Amount is required"),
+}).superRefine((data, ctx) => {
+  // Task 12: Conditional validation based on payment method
+  const method = data.paymentMethod?.toLowerCase();
+  
+  if (method === 'check' || method === 'cheque') {
+    if (!data.chequeNumber || data.chequeNumber.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Cheque number is required for cheque payments",
+        path: ['chequeNumber'],
+      });
+    }
+  }
+  
+  if (method === 'card' || method === 'credit_card' || method === 'debit_card') {
+    if (!data.last4Digits || data.last4Digits.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Last 4 digits are required for card payments",
+        path: ['last4Digits'],
+      });
+    } else if (!/^\d{4}$/.test(data.last4Digits)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Last 4 digits must be exactly 4 digits",
+        path: ['last4Digits'],
+      });
+    }
+  }
+  
+  if (method && method !== 'cash' && method !== 'check' && method !== 'cheque' && 
+      method !== 'card' && method !== 'credit_card' && method !== 'debit_card') {
+    if (!data.referenceNumber || data.referenceNumber.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Reference number is required for this payment method",
+        path: ['referenceNumber'],
+      });
+    }
+  }
 });
 
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;

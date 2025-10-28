@@ -353,6 +353,7 @@ export default function Contracts() {
                   <TableHead>{t('contracts.status')}</TableHead>
                   <TableHead>{t('contracts.rentalStartDate')}</TableHead>
                   <TableHead>{t('contracts.rentalEndDate')}</TableHead>
+                  <TableHead>{t('contracts.createdBy')}</TableHead>
                   <TableHead>{t('contracts.createdDate')}</TableHead>
                   <TableHead className="text-right">{t('contracts.actions')}</TableHead>
                 </TableRow>
@@ -376,6 +377,11 @@ export default function Contracts() {
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {contract.rentalEndDate ? format(new Date(contract.rentalEndDate), 'PP') : '-'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground" data-testid={`text-creator-${contract.id}`}>
+                        {contract.creatorFirstName && contract.creatorLastName 
+                          ? `${contract.creatorFirstName} ${contract.creatorLastName}`
+                          : contract.creatorName || '-'}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {contract.createdAt && format(new Date(contract.createdAt), 'PP')}

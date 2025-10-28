@@ -273,12 +273,16 @@ export class DatabaseStorage implements IStorage {
         vehicleModel: vehicles.model,
         sponsor: sponsors,
         companySponsor: companies,
+        creatorName: users.username,
+        creatorFirstName: users.firstName,
+        creatorLastName: users.lastName,
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .leftJoin(sponsors, eq(contracts.sponsorId, sponsors.id))
       .leftJoin(companies, eq(contracts.companySponsorId, companies.id))
+      .leftJoin(users, eq(contracts.createdBy, users.id))
       .where(eq(contracts.id, id));
     
     return result as ContractWithDetails | undefined;
@@ -295,12 +299,16 @@ export class DatabaseStorage implements IStorage {
         vehicleModel: vehicles.model,
         sponsor: sponsors,
         companySponsor: companies,
+        creatorName: users.username,
+        creatorFirstName: users.firstName,
+        creatorLastName: users.lastName,
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .leftJoin(sponsors, eq(contracts.sponsorId, sponsors.id))
       .leftJoin(companies, eq(contracts.companySponsorId, companies.id))
+      .leftJoin(users, eq(contracts.createdBy, users.id))
       .where(eq(contracts.disabled, false))
       .orderBy(desc(contracts.createdAt));
     
@@ -318,12 +326,16 @@ export class DatabaseStorage implements IStorage {
         vehicleModel: vehicles.model,
         sponsor: sponsors,
         companySponsor: companies,
+        creatorName: users.username,
+        creatorFirstName: users.firstName,
+        creatorLastName: users.lastName,
       })
       .from(contracts)
       .leftJoin(customers, eq(contracts.customerId, customers.id))
       .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .leftJoin(sponsors, eq(contracts.sponsorId, sponsors.id))
       .leftJoin(companies, eq(contracts.companySponsorId, companies.id))
+      .leftJoin(users, eq(contracts.createdBy, users.id))
       .where(eq(contracts.disabled, true))
       .orderBy(desc(contracts.disabledAt));
     

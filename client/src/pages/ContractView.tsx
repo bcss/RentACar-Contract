@@ -82,6 +82,14 @@ export default function ContractView() {
   const [paymentNotes, setPaymentNotes] = useState('');
   const [fuelCalculationBreakdown, setFuelCalculationBreakdown] = useState('');
   const [isAutoCalculatedFuel, setIsAutoCalculatedFuel] = useState(false);
+  
+  // Task 12b: Payment method details
+  const [chequeNumber, setChequeNumber] = useState('');
+  const [last4Digits, setLast4Digits] = useState('');
+  const [referenceNumber, setReferenceNumber] = useState('');
+  
+  // Task 11: Early closure reason
+  const [earlyClosureReason, setEarlyClosureReason] = useState('');
 
   // Update payment currency when system currency changes
   useEffect(() => {
@@ -583,7 +591,11 @@ export default function ContractView() {
     const depositPaidAmount = contract.depositPaid ? securityDeposit : 0;
     const outstandingBalance = totalAmount + totalExtraCharges - depositPaidAmount;
 
+    // Task 11: Check if this is early completion and pass early closure reason
+    const isEarlyCompletion = contract?.rentalEndDate && new Date() < new Date(contract.rentalEndDate);
+    
     completeMutation.mutate({
+      earlyClosureReason: isEarlyCompletion ? earlyClosureReason : undefined,
       odometerEnd: odometerEndNum,
       fuelLevelEnd,
       vehicleCondition,
@@ -2159,6 +2171,32 @@ export default function ContractView() {
               />
             </div>
 
+            {/* Task 11: Early closure reason field - shown if returning before rental end date */}
+            {contract?.rentalEndDate && new Date() < new Date(contract.rentalEndDate) && (
+              <div className="border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 p-4 rounded">
+                <h4 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-2 flex items-center gap-2">
+                  <span className="material-icons text-sm">warning</span>
+                  Early Rental Completion
+                </h4>
+                <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-3">
+                  The rental is being completed before the scheduled end date ({format(new Date(contract.rentalEndDate), 'PP')}). 
+                  Please provide a reason for early closure.
+                </p>
+                <div>
+                  <Label htmlFor="early-closure-reason">Early Closure Reason *</Label>
+                  <Textarea
+                    id="early-closure-reason"
+                    value={earlyClosureReason}
+                    onChange={(e) => setEarlyClosureReason(e.target.value)}
+                    placeholder="Enter reason for early completion (e.g., customer request, vehicle needed for maintenance, etc.)"
+                    rows={2}
+                    data-testid="textarea-early-closure-reason"
+                    className="bg-white dark:bg-gray-900"
+                  />
+                </div>
+              </div>
+            )}
+
             {extraCharges && (
               <div className="border rounded-md p-4 bg-muted/50 space-y-3">
                 <h4 className="font-semibold">Auto-Calculated Charges</h4>
@@ -2242,7 +2280,14 @@ export default function ContractView() {
             <Button variant="outline" onClick={() => setShowReturnDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleReturnSubmit} disabled={completeMutation.isPending} data-testid="button-submit-return">
+            <Button 
+              onClick={handleReturnSubmit} 
+              disabled={
+                completeMutation.isPending || 
+                (contract?.rentalEndDate && new Date() < new Date(contract.rentalEndDate) && !earlyClosureReason.trim())
+              } 
+              data-testid="button-submit-return"
+            >
               {completeMutation.isPending ? 'Processing...' : 'Complete Rental'}
             </Button>
           </DialogFooter>
@@ -2395,7 +2440,13 @@ export default function ContractView() {
 
             <div>
               <Label htmlFor="payment-method">Payment Method *</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <Select value={paymentMethod} onValueChange={(value) => {
+                setPaymentMethod(value);
+                // Reset conditional fields when method changes
+                setChequeNumber('');
+                setLast4Digits('');
+                setReferenceNumber('');
+              }}>
                 <SelectTrigger id="payment-method" data-testid="select-payment-method">
                   <SelectValue />
                 </SelectTrigger>
@@ -2408,6 +2459,50 @@ export default function ContractView() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Task 12b: Conditional payment fields */}
+            {(paymentMethod === 'check' || paymentMethod === 'cheque') && (
+              <div>
+                <Label htmlFor="cheque-number">Cheque Number *</Label>
+                <Input
+                  id="cheque-number"
+                  placeholder="Enter cheque number"
+                  value={chequeNumber}
+                  onChange={(e) => setChequeNumber(e.target.value)}
+                  data-testid="input-cheque-number"
+                />
+              </div>
+            )}
+
+            {paymentMethod === 'card' && (
+              <div>
+                <Label htmlFor="last4-digits">Last 4 Digits of Card *</Label>
+                <Input
+                  id="last4-digits"
+                  placeholder="Enter last 4 digits"
+                  maxLength={4}
+                  value={last4Digits}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setLast4Digits(value);
+                  }}
+                  data-testid="input-last4-digits"
+                />
+              </div>
+            )}
+
+            {paymentMethod === 'bank_transfer' && (
+              <div>
+                <Label htmlFor="reference-number">Reference Number *</Label>
+                <Input
+                  id="reference-number"
+                  placeholder="Enter reference/transaction number"
+                  value={referenceNumber}
+                  onChange={(e) => setReferenceNumber(e.target.value)}
+                  data-testid="input-reference-number"
+                />
+              </div>
+            )}
 
             <div>
               <Label htmlFor="payment-notes">Notes (Optional)</Label>
@@ -2427,15 +2522,26 @@ export default function ContractView() {
             </Button>
             <Button
               onClick={() => {
+                // Task 12b: Include conditional fields in payment data
                 createPaymentMutation.mutate({
                   amount: paymentAmount,
                   paymentMethod,
                   currency: paymentCurrency,
                   notes: paymentNotes || undefined,
                   paidAt: new Date(),
+                  chequeNumber: (paymentMethod === 'check' || paymentMethod === 'cheque') ? chequeNumber : undefined,
+                  last4Digits: paymentMethod === 'card' ? last4Digits : undefined,
+                  referenceNumber: paymentMethod === 'bank_transfer' ? referenceNumber : undefined,
                 });
               }}
-              disabled={!paymentAmount || !paymentMethod || createPaymentMutation.isPending}
+              disabled={
+                !paymentAmount || 
+                !paymentMethod || 
+                ((paymentMethod === 'check' || paymentMethod === 'cheque') && !chequeNumber) ||
+                (paymentMethod === 'card' && (!last4Digits || last4Digits.length !== 4)) ||
+                (paymentMethod === 'bank_transfer' && !referenceNumber) ||
+                createPaymentMutation.isPending
+              }
               data-testid="button-submit-payment"
             >
               {createPaymentMutation.isPending ? 'Recording...' : 'Record Payment'}
