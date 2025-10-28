@@ -416,14 +416,20 @@ fuelCharge = tankCapacity × (startFuelLevel% - endFuelLevel%) / 100 × pricePer
 2. Fill required fields:
    - **Name (English)**: Full customer name in English
    - **Name (Arabic)**: Full customer name in Arabic
+   - **National ID**: ⚠️ **MANDATORY** - National ID or passport number (enforced at frontend + backend)
+   - **Nationality**: ⚠️ **MANDATORY** - Customer nationality (enforced at frontend + backend)
+   - **Phone**: ⚠️ **MANDATORY** - Contact number with country code (enforced at frontend + backend)
+   - **License Number**: ⚠️ **MANDATORY** - Driver's license number (enforced at frontend + backend)
    - **Email**: Valid email address
-   - **Phone**: Contact number with country code
    - **Address**: Physical address
-   - **ID Number**: National ID or passport number
-   - **ID Type**: Type of identification
-   - **License Number**: Driver's license number
    - **License Expiry**: License expiration date
 3. Click **"Create Customer"**
+
+**⚠️ Mandatory Field Enforcement:**
+- **Dual-Layer Validation:** All mandatory fields enforced at BOTH frontend (Zod schema) AND backend (API validation)
+- **Cannot Bypass:** Backend validation prevents API-level bypass of frontend validation
+- **Phone Validation:** Required `.min(1)` in addition to `.notNull()` to prevent empty string submissions
+- **Data Integrity:** Ensures complete customer records for contract creation and legal compliance
 
 **Phone Number Validation:**
 - System automatically checks for duplicate phone numbers
@@ -542,12 +548,17 @@ Available → (Confirm/Activate) → Rented → (Complete/Close) → Available
    - **Company Name (English)**
    - **Company Name (Arabic)**
    - **Registration Number**: Business registration
-   - **Tax ID**: Tax identification number
-   - **Contact Person**: Primary contact name
-   - **Email**: Company email
-   - **Phone**: Company phone
+   - **Tax ID**: ⚠️ **MANDATORY** - Tax identification number (enforced at frontend + backend)
+   - **Contact Person**: ⚠️ **MANDATORY** - Primary contact name (enforced at frontend + backend)
+   - **Phone**: ⚠️ **MANDATORY** - Company phone (enforced at frontend + backend)
+   - **Email**: ⚠️ **MANDATORY** - Company email (enforced at frontend + backend)
    - **Address**: Business address
 3. Click **"Create Company"**
+
+**⚠️ Mandatory Field Enforcement:**
+- **Dual-Layer Validation:** TAX ID, Contact Person, Phone, Email enforced at BOTH frontend AND backend
+- **Cannot Bypass:** Backend validation prevents API-level bypass
+- **Business Compliance:** Ensures complete corporate records for tax reporting and legal compliance
 
 **Usage**: Companies can be selected for "From Company" hirer type contracts.
 
@@ -1346,4 +1357,177 @@ WHERE id = '[inspection-id]';
 
 **ADMIN REMINDER:**
 The inspection system is a LEGAL PROTECTION feature. Incomplete inspections = lost disputes. Ensure 100% compliance through monitoring and staff training.
+
+
+---
+
+## Recent System Enhancements (December 2025)
+
+### Dashboard Context-Aware Navigation
+
+**Feature:** One-click filtered navigation from dashboard metric cards
+
+**How It Works:**
+1. Dashboard displays critical metrics:
+   - Active Rentals (contracts in active status)
+   - Monthly Revenue (current month's total)
+   - Overdue Returns (contracts past end date)
+   - Pending Refunds (contracts with security deposit balance)
+
+2. Click any metric card to navigate to filtered view:
+   - **Active Rentals** → Contracts page filtered to active status
+   - **Overdue Returns** → Contracts page with `?overdue=true` parameter
+   - **Pending Refunds** → Contracts page with `?pendingRefunds=true` parameter  
+   - **Vehicle Utilization** → Vehicles page with `?status=active` or `?status=rented`
+
+**Technical Implementation:**
+- URL parameters preserve filter state across navigation
+- Deep-linking enables bookmarkable filtered views
+- Contracts page auto-applies filters on mount based on query parameters
+- Vehicles page supports `?status=` filtering for dashboard integration
+
+**Administrator Benefit:**
+- Zero-click access to critical contract lists
+- Instant visibility into overdue contracts requiring action
+- Quick access to pending refund processing
+- Streamlined workflow for high-priority operations
+
+---
+
+### Separate Operational Report Exports
+
+**Feature:** Individual PDF/Excel exports for each operational report tab
+
+**Previous Behavior:**
+- Single generic operational report export combining all data
+- Confusing filenames like `operational-report.pdf`
+- Mixed content not focused on specific analysis
+
+**Enhanced Behavior:**
+- **Vehicle Utilization Tab** → Exports only vehicle statistics
+  - Filename: `vehicle-utilization-report.pdf` / `.xlsx`
+  - Content: Vehicle Utilization Summary + Vehicle Statistics table
+  - Charts: Utilization pie chart included in export
+
+- **Contract Status Tab** → Exports only contract status data
+  - Filename: `contract-status-report.pdf` / `.xlsx`
+  - Content: Contract Status Distribution only
+  - Charts: Status bar chart included in export
+
+- **Extra Charges Tab** → Exports only extra charges analysis
+  - Filename: `extra-charges-report.pdf` / `.xlsx`
+  - Content: Extra Charges Summary + Contracts with Charges table
+  - Charts: Charges breakdown chart included in export
+
+**Technical Implementation:**
+- Frontend passes `activeTab` parameter to export endpoint (`?activeTab=utilization|status|charges`)
+- Backend conditionally includes only relevant sections based on tab
+- Descriptive filenames improve organization and file management
+- Legacy clients without `activeTab` continue receiving generic report
+
+**Administrator Benefit:**
+- Focused exports for specific analysis needs
+- Clear filenames for report archiving and organization
+- Reduced file sizes (only relevant data included)
+- Professional presentation for stakeholders and management
+
+---
+
+### Enhanced Data Validation
+
+**Feature:** Dual-layer mandatory field enforcement (frontend + backend)
+
+**Mandatory Customer Fields:**
+- National ID ⚠️
+- Nationality ⚠️
+- Phone ⚠️ (with `.min(1)` to prevent empty strings)
+- License Number ⚠️
+
+**Mandatory Company Fields:**
+- TAX ID ⚠️
+- Contact Person ⚠️
+- Phone ⚠️
+- Email ⚠️
+
+**Mandatory Contract Rules:**
+- Rental start date cannot be in the past
+- Uses midnight-normalized comparison for timezone safety
+- Validated at both frontend (form) and backend (API) levels
+
+**Why Dual-Layer Validation:**
+- **Frontend Validation:** Immediate user feedback, prevents form submission with missing data
+- **Backend Validation:** Security layer prevents API-level bypass (e.g., Postman, curl)
+- **Data Integrity:** Ensures complete records for legal compliance and contract creation
+- **Cannot Bypass:** Backend returns 400 error if validation fails, regardless of frontend state
+
+**Technical Details:**
+- Phone validation: `text().notNull().min(1, "Phone required")` prevents both NULL and empty string ""
+- Date validation: `startDate >= today` compared at midnight UTC for consistency
+- Schema validation: `insertCustomerSchema.parse()` enforces rules server-side
+
+---
+
+### Enhanced Payment Validation
+
+**Feature:** Conditional payment details + final payment enforcement
+
+**Payment Method Details (Conditional Requirements):**
+
+1. **Check/Cheque Payments:**
+   - Requires: Cheque Number (mandatory field)
+   - Validation: Cannot submit payment without cheque number
+
+2. **Card Payments:**
+   - Requires: Last 4 Digits of card (mandatory field)
+   - Validation: Must be exactly 4 digits
+
+3. **Bank Transfer Payments:**
+   - Requires: Reference Number (mandatory field)
+   - Validation: Cannot submit without transfer reference
+
+**Contract Closure Enforcement:**
+- **Cannot Close Contract** until final payment recorded
+- Backend verification: `totalPaid >= totalDue` (rounded to currency precision)
+- Error message displays: "Total paid (X) is less than total due (Y). Please record final payment before closing."
+- Admin/Manager can view payment history to verify balance
+- Prevents premature contract closure with outstanding balances
+
+**Why This Matters:**
+- **Audit Trail:** Complete payment method details for financial reporting
+- **Financial Accuracy:** Cannot close contracts with unpaid balances
+- **Fraud Prevention:** Cheque/card/transfer details tracked for verification
+- **Compliance:** Payment details required for tax reporting and audits
+
+---
+
+### Early Closure Reason Tracking
+
+**Feature:** Mandatory reason when completing contracts before end date
+
+**Trigger Condition:**
+- Contract completed before `rentalEndDate`
+- System detects: `completionDate < rentalEndDate`
+
+**Workflow:**
+1. User clicks "Complete Contract" before end date
+2. System opens Early Closure Reason Dialog (cannot be dismissed)
+3. User must provide reason (text area, minimum 10 characters)
+4. Examples: "Customer early return", "Vehicle needed urgently", "Contract amendment"
+5. Reason stored in `contracts.earlyClosureReason` field
+6. Contract completion proceeds only after reason provided
+
+**Why Track Early Closures:**
+- **Business Intelligence:** Understand patterns in early returns
+- **Revenue Analysis:** Calculate lost revenue from shortened rentals
+- **Customer Satisfaction:** Identify if early returns indicate service issues
+- **Operational Planning:** Adjust inventory and scheduling based on patterns
+
+**Reporting Integration:**
+- Early closure reasons included in operational reports
+- Filter contracts by early closure status
+- Analyze frequency and reasons for business improvements
+
+---
+
+**End of Recent Enhancements Section**
 
