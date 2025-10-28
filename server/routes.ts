@@ -1808,7 +1808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/reports/operational/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
     try {
-      const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang, activeTab } = req.query; // Task 14: Get active tab
       const { charts = [] } = req.body;
       const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
       const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
@@ -1830,8 +1830,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } = await import('./utils/exportHelpers');
 
       if (exportFormat === 'pdf') {
+        // Task 14: Determine report title based on active tab
+        const reportTitles = {
+          utilization: 'Vehicle Utilization Report',
+          status: 'Contract Status Report',
+          charges: 'Extra Charges Report'
+        };
+        const reportTitle = reportTitles[activeTab as keyof typeof reportTitles] || 'Operational Report';
+        
         const doc = createPDF(
-          'Operational Report',
+          reportTitle,
           {
             nameEn: settings.companyNameEn,
             nameAr: settings.companyNameAr,
@@ -1841,29 +1849,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isRTL
         );
 
-        // Add summary section
-        let currentY = addPDFSummarySection(doc, 'Summary', [
-          { label: 'Total Vehicles', value: report.utilization.totalVehicles.toString() },
-          { label: 'Active Vehicles', value: report.utilization.activeVehicles.toString() },
-          { label: 'Utilization Rate', value: formatPercentage(report.utilization.utilizationRate) },
-        ], 55);
+        let currentY = 55;
 
-        // Add vehicle stats table
-        if (report.vehicleStats.length > 0) {
-          currentY += 5;
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Vehicle Statistics', 14, currentY);
-          
-          const statsData = report.vehicleStats.slice(0, 15).map((item: any) => [
-            item.registration || 'N/A',
-            `${item.make} ${item.model}`,
-            item.contractCount.toString(),
-            item.totalDays.toString(),
-            item.isActive ? 'Rented' : 'Available'
-          ]);
-          
-          addPDFTable(doc, ['Registration', 'Vehicle', 'Contracts', 'Total Days', 'Status'], statsData, currentY + 5);
+        // Task 14: Conditionally add content based on active tab
+        if (activeTab === 'utilization') {
+          // Add utilization summary section
+          currentY = addPDFSummarySection(doc, 'Vehicle Utilization Summary', [
+            { label: 'Total Vehicles', value: report.utilization.totalVehicles.toString() },
+            { label: 'Active Vehicles', value: report.utilization.activeVehicles.toString() },
+            { label: 'Utilization Rate', value: formatPercentage(report.utilization.utilizationRate) },
+          ], currentY);
+
+          // Add vehicle stats table
+          if (report.vehicleStats.length > 0) {
+            currentY += 5;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Vehicle Statistics', 14, currentY);
+            
+            const statsData = report.vehicleStats.slice(0, 15).map((item: any) => [
+              item.registration || 'N/A',
+              `${item.make} ${item.model}`,
+              item.contractCount.toString(),
+              item.totalDays.toString(),
+              item.isActive ? 'Rented' : 'Available'
+            ]);
+            
+            addPDFTable(doc, ['Registration', 'Vehicle', 'Contracts', 'Total Days', 'Status'], statsData, currentY + 5);
+          }
+        } else if (activeTab === 'status') {
+          // Add contract status summary
+          currentY = addPDFSummarySection(doc, 'Contract Status Distribution', [
+            { label: 'Draft', value: report.statusSummary.draft.toString() },
+            { label: 'Confirmed', value: report.statusSummary.confirmed.toString() },
+            { label: 'Active', value: report.statusSummary.active.toString() },
+            { label: 'Completed', value: report.statusSummary.completed.toString() },
+            { label: 'Closed', value: report.statusSummary.closed.toString() },
+          ], currentY);
+        } else if (activeTab === 'charges') {
+          // Add extra charges summary
+          currentY = addPDFSummarySection(doc, 'Extra Charges Summary', [
+            { label: 'Total Extra Charges', value: `${report.extraCharges.total.toFixed(2)} ${settings.currencyEn || 'AED'}` },
+            { label: 'Average per Contract', value: `${report.extraCharges.average.toFixed(2)} ${settings.currencyEn || 'AED'}` },
+            { label: 'Contracts with Charges', value: report.extraCharges.contracts.length.toString() },
+          ], currentY);
+
+          // Add extra charges table
+          if (report.extraCharges.contracts.length > 0) {
+            currentY += 5;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Contracts with Extra Charges', 14, currentY);
+            
+            const chargesData = report.extraCharges.contracts.slice(0, 15).map((item: any) => [
+              `#${item.contractNumber}`,
+              item.customerName || 'N/A',
+              item.extraKmCharge.toFixed(2),
+              item.fuelCharge.toFixed(2),
+              item.damageCharge.toFixed(2),
+              item.otherCharges.toFixed(2),
+              item.totalExtraCharges.toFixed(2)
+            ]);
+            
+            addPDFTable(doc, ['Contract', 'Customer', 'Extra KM', 'Fuel', 'Damage', 'Other', 'Total'], chargesData, currentY + 5);
+          }
         }
 
         // Add charts if provided
@@ -1880,35 +1929,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (exportFormat === 'excel') {
         const wb = createExcelWorkbook();
         
-        // Summary sheet
-        const summaryData = [
-          { Metric: 'Total Vehicles', Value: report.utilization.totalVehicles },
-          { Metric: 'Active Vehicles', Value: report.utilization.activeVehicles },
-          { Metric: 'Utilization Rate (%)', Value: report.utilization.utilizationRate },
-        ];
-        addExcelSheet(wb, 'Summary', summaryData);
-        
-        // Vehicle stats sheet
-        const statsData = report.vehicleStats.map((item: any) => ({
-          Registration: item.registration || 'N/A',
-          Make: item.make,
-          Model: item.model,
-          'Contract Count': item.contractCount,
-          'Total Revenue': item.totalRevenue,
-          'Total Days': item.totalDays,
-          Status: item.isActive ? 'Rented' : 'Available'
-        }));
-        addExcelSheet(wb, 'Vehicle Statistics', statsData);
-        
-        // Contract status sheet
-        const statusData = [
-          { Status: 'Draft', Count: report.statusSummary.draft },
-          { Status: 'Confirmed', Count: report.statusSummary.confirmed },
-          { Status: 'Active', Count: report.statusSummary.active },
-          { Status: 'Completed', Count: report.statusSummary.completed },
-          { Status: 'Closed', Count: report.statusSummary.closed },
-        ];
-        addExcelSheet(wb, 'Contract Status', statusData);
+        // Task 14: Conditionally add sheets based on active tab
+        if (activeTab === 'utilization') {
+          // Utilization summary sheet
+          const summaryData = [
+            { Metric: 'Total Vehicles', Value: report.utilization.totalVehicles },
+            { Metric: 'Active Vehicles', Value: report.utilization.activeVehicles },
+            { Metric: 'Utilization Rate (%)', Value: report.utilization.utilizationRate },
+          ];
+          addExcelSheet(wb, 'Utilization Summary', summaryData);
+          
+          // Vehicle stats sheet
+          const statsData = report.vehicleStats.map((item: any) => ({
+            Registration: item.registration || 'N/A',
+            Make: item.make,
+            Model: item.model,
+            'Contract Count': item.contractCount,
+            'Total Revenue': item.totalRevenue,
+            'Total Days': item.totalDays,
+            Status: item.isActive ? 'Rented' : 'Available'
+          }));
+          addExcelSheet(wb, 'Vehicle Statistics', statsData);
+        } else if (activeTab === 'status') {
+          // Contract status sheet only
+          const statusData = [
+            { Status: 'Draft', Count: report.statusSummary.draft },
+            { Status: 'Confirmed', Count: report.statusSummary.confirmed },
+            { Status: 'Active', Count: report.statusSummary.active },
+            { Status: 'Completed', Count: report.statusSummary.completed },
+            { Status: 'Closed', Count: report.statusSummary.closed },
+          ];
+          addExcelSheet(wb, 'Contract Status', statusData);
+        } else if (activeTab === 'charges') {
+          // Extra charges summary sheet
+          const chargesSummaryData = [
+            { Metric: 'Total Extra Charges', Value: report.extraCharges.total },
+            { Metric: 'Average per Contract', Value: report.extraCharges.average },
+            { Metric: 'Contracts with Charges', Value: report.extraCharges.contracts.length },
+          ];
+          addExcelSheet(wb, 'Charges Summary', chargesSummaryData);
+          
+          // Extra charges details sheet
+          const chargesDetailsData = report.extraCharges.contracts.map((item: any) => ({
+            'Contract Number': `#${item.contractNumber}`,
+            Customer: item.customerName || 'N/A',
+            'Extra KM Charge': item.extraKmCharge,
+            'Fuel Charge': item.fuelCharge,
+            'Damage Charge': item.damageCharge,
+            'Other Charges': item.otherCharges,
+            'Total Extra Charges': item.totalExtraCharges
+          }));
+          addExcelSheet(wb, 'Charges Details', chargesDetailsData);
+        }
         
         // Add charts sheet if available
         if (charts && charts.length > 0) {

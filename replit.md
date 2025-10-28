@@ -29,22 +29,35 @@ Preferred communication style: Simple, everyday language.
 
 ### Core Features
 - **Comprehensive Rental Lifecycle:** `draft` → `confirmed` → `active` → `completed` → `closed`.
-- **Contract Timeline:** Displays full history of field edits and lifecycle events.
+- **Contract Timeline:** Displays full history of field edits and lifecycle events with creator attribution.
 - **Automatic Fuel Charge Calculation:** Based on tank capacity, fuel type, and configurable pricing.
 - **Comprehensive Financial Settings:** Admin-only centralized configuration for rental rates, addon fees, and fuel pricing.
 - **Automatic Vehicle Status Synchronization:** Real-time vehicle availability integrated with contract lifecycle.
-- **Vehicle Return Workflow:** Captures odometer, fuel, condition, calculates extra charges.
-- **Payment Tracking System:** Comprehensive payment history for deposits, final payments, refunds.
+- **Vehicle Return Workflow:** Captures odometer, fuel, condition, calculates extra charges. Includes early closure reason dialog for contracts completed before rental end date.
+- **Enhanced Payment Tracking System:** Comprehensive payment history with conditional validation - requires cheque number for check payments, last 4 card digits for card payments, and reference number for bank transfers. Final payment recording mandatory before contract closure.
 - **Customer Phone Validation:** Non-blocking duplicate phone number detection.
 - **Complete Audit Logging:** Comprehensive audit trail for CRUD operations and contract lifecycle events.
 - **System Error Logging:** Automatic error logging to database with full context (endpoint, method, user, stack trace, request details).
 - **Company Settings Management:** Admin-only configuration for bilingual company information and contract clauses.
-- **Dashboard:** Critical metrics (active rentals, monthly revenue, overdue returns).
-- **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality (`jsPDF`, `xlsx`), and chart visualization.
+- **Dashboard with Context-Aware Navigation:** Critical metrics (active rentals, monthly revenue, overdue returns) with deep-link filtering via URL parameters - clicking metric cards navigates to filtered views (contracts by status/overdue/pendingRefunds, vehicles by status).
+- **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, separated PDF and Excel export functionality (`jsPDF`, `xlsx`) - Vehicle Utilization, Contract Status, and Extra Charges reports export individually with descriptive filenames, and chart visualization.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
 - **Professional PDF Integration:** Professional, bilingual PDF generation for rental contracts.
 - **Vehicle Inspection System:** Two-stage workflow (pre-delivery, post-return) with mandatory 6-photo documentation, strict validation, automatic compression, visual differentiation, full history view, bilingual support, audit logging, and JSONB photo storage.
+
+### Data Validation & Business Rules
+- **Mandatory Customer Fields:** National ID, Nationality, Phone, License Number - enforced at both frontend (Zod schema) and backend (API validation) to prevent bypass.
+- **Mandatory Company Fields:** TAX ID, Contact Person, Phone, Email - enforced at both frontend and backend levels.
+- **Contract Date Validation:** Rental start date cannot be in the past - uses midnight-normalized comparison for timezone safety, validated at both form and API levels.
+- **Payment Method Validation:** Conditional required fields based on payment method - cheque number for cheques, last 4 digits for cards, reference number for bank transfers. Enforced via Zod superRefine validation.
+- **Contract Closure Enforcement:** Final payment must be recorded before contract can be closed - backend verifies total paid equals total due (rounded to currency precision) before allowing closure.
+
+### Role-Based Permissions
+- **Admin:** Full system access including user management, company settings, financial settings, contract closure, disable/enable operations.
+- **Manager:** Business operations access - can confirm/activate/complete contracts, view reports, manage customers/vehicles/sponsors/companies.
+- **Staff:** Editor-level access - can create drafts, confirm contracts (via `requireEditor` middleware), manage master data, record payments. Cannot close contracts or modify system settings.
+- **Viewer:** Read-only access to contracts, customers, vehicles, and reports. Cannot create or modify data.
 
 ### Dual Audit System Architecture
 - **System Audit Logs:** System-wide security and compliance logging for all operations (user auth, business ops, system errors, config changes). Accessed by Admin/Manager.

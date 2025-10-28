@@ -129,6 +129,7 @@ export default function OperationalReports() {
       const params = new URLSearchParams();
       params.append('format', format);
       params.append('lang', i18n.language);
+      params.append('activeTab', activeTab); // Task 14: Pass active tab for separate exports
       if (startDate) {
         params.append('startDate', startDate.toISOString());
       }
@@ -151,7 +152,13 @@ export default function OperationalReports() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `operational-report.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      // Task 14: Use descriptive filenames based on active tab
+      const reportNames = {
+        utilization: 'vehicle-utilization-report',
+        status: 'contract-status-report',
+        charges: 'extra-charges-report'
+      };
+      a.download = `${reportNames[activeTab as keyof typeof reportNames] || 'operational-report'}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
