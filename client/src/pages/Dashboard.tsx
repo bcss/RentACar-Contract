@@ -254,7 +254,7 @@ export default function Dashboard() {
                 {contractsLoading ? (
                   <Skeleton className="h-10 w-20" />
                 ) : (
-                  <div className="text-3xl font-bold text-primary" data-testid="stat-active-contracts">{activeContracts}</div>
+                  <div className="text-2xl sm:text-3xl xl:text-4xl font-bold text-primary truncate" data-testid="stat-active-contracts">{activeContracts}</div>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">Currently rented out</p>
               </CardContent>
@@ -278,7 +278,7 @@ export default function Dashboard() {
                 {contractsLoading ? (
                   <Skeleton className="h-10 w-32" />
                 ) : (
-                  <div className="text-3xl font-bold text-chart-1" data-testid="stat-monthly-revenue">
+                  <div className="text-2xl sm:text-3xl xl:text-4xl font-bold text-chart-1 truncate" data-testid="stat-monthly-revenue">
                     {currency} {monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                 )}
@@ -306,7 +306,7 @@ export default function Dashboard() {
                 {contractsLoading ? (
                   <Skeleton className="h-10 w-16" />
                 ) : (
-                  <div className={`text-3xl font-bold ${overdueContracts.length > 0 ? 'text-destructive' : ''}`} data-testid="stat-overdue-contracts">
+                  <div className={`text-2xl sm:text-3xl xl:text-4xl font-bold truncate ${overdueContracts.length > 0 ? 'text-destructive' : ''}`} data-testid="stat-overdue-contracts">
                     {overdueContracts.length}
                   </div>
                 )}
@@ -334,7 +334,7 @@ export default function Dashboard() {
                 {contractsLoading ? (
                   <Skeleton className="h-10 w-16" />
                 ) : (
-                  <div className={`text-3xl font-bold ${pendingRefunds.length > 0 ? 'text-chart-3' : ''}`} data-testid="stat-pending-refunds">
+                  <div className={`text-2xl sm:text-3xl xl:text-4xl font-bold truncate ${pendingRefunds.length > 0 ? 'text-chart-3' : ''}`} data-testid="stat-pending-refunds">
                     {pendingRefunds.length}
                   </div>
                 )}
@@ -364,7 +364,7 @@ export default function Dashboard() {
                   <Skeleton className="h-10 w-24" />
                 ) : (
                   <>
-                    <div className="text-3xl font-bold text-chart-2" data-testid="stat-vehicle-utilization">
+                    <div className="text-2xl sm:text-3xl xl:text-4xl font-bold text-chart-2 truncate" data-testid="stat-vehicle-utilization">
                       {vehicleUtilization.toFixed(1)}%
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -396,7 +396,7 @@ export default function Dashboard() {
                   <Skeleton className="h-10 w-24" />
                 ) : (
                   <>
-                    <div className={`text-3xl font-bold ${paymentCollectionRate >= 90 ? 'text-chart-2' : paymentCollectionRate >= 70 ? 'text-chart-3' : 'text-destructive'}`} data-testid="stat-payment-collection-rate">
+                    <div className={`text-2xl sm:text-3xl xl:text-4xl font-bold truncate ${paymentCollectionRate >= 90 ? 'text-chart-2' : paymentCollectionRate >= 70 ? 'text-chart-3' : 'text-destructive'}`} data-testid="stat-payment-collection-rate">
                       {paymentCollectionRate.toFixed(1)}%
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -426,7 +426,7 @@ export default function Dashboard() {
                   <Skeleton className="h-10 w-28" />
                 ) : (
                   <>
-                    <div className="text-3xl font-bold text-chart-5" data-testid="stat-avg-extra-charges">
+                    <div className="text-2xl sm:text-3xl xl:text-4xl font-bold text-chart-5 truncate" data-testid="stat-avg-extra-charges">
                       {currency} {avgExtraCharges.toFixed(2)}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
