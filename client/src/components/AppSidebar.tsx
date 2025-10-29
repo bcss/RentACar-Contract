@@ -466,6 +466,25 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 </Tooltip>
               </SidebarMenuItem>
 
+              {/* Contracts */}
+              <SidebarMenuItem>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <SidebarMenuButton asChild isActive={location === '/contracts'} data-testid="nav-contracts">
+                      <Link href="/contracts">
+                        <span className="material-icons">description</span>
+                        {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </TooltipTrigger>
+                  {sidebarState === 'collapsed' && (
+                    <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                      <p>{t('nav.contracts')}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </SidebarMenuItem>
+
               {/* Masters - Collapsible */}
               <Collapsible open={mastersOpen} onOpenChange={handleMastersToggle} className="group/collapsible">
                 <SidebarMenuItem>
@@ -505,25 +524,6 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
-
-              {/* Contracts */}
-              <SidebarMenuItem>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <SidebarMenuButton asChild isActive={location === '/contracts'} data-testid="nav-contracts">
-                      <Link href="/contracts">
-                        <span className="material-icons">description</span>
-                        {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
-                      </Link>
-                    </SidebarMenuButton>
-                  </TooltipTrigger>
-                  {sidebarState === 'collapsed' && (
-                    <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
-                      <p>{t('nav.contracts')}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </SidebarMenuItem>
 
               {/* Reports - Collapsible (Admin/Manager only) */}
               {(isAdmin || isManager) && (

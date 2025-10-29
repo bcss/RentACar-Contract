@@ -1639,8 +1639,8 @@ export class DatabaseStorage implements IStorage {
     // Business operations audit logs (exclude system-level operations)
     // Business operations include: contracts, master data, payments, inspections
     const businessOperationActions = [
-      // Contract lifecycle
-      'create_contract', 'confirm_contract', 'activate_contract', 'complete_contract', 'close_contract',
+      // Contract lifecycle (using actual database action names)
+      'create', 'confirm', 'activate', 'complete', 'close',
       // Master data - Customers
       'create_customer', 'update_customer', 'disable_customer', 'enable_customer',
       // Master data - Vehicles
@@ -1649,10 +1649,12 @@ export class DatabaseStorage implements IStorage {
       'create_sponsor', 'update_sponsor', 'disable_sponsor', 'enable_sponsor',
       // Master data - Companies
       'create_company', 'update_company', 'disable_company', 'enable_company',
+      // Other master data
+      'create_person', 'update_settings',
       // Payments
-      'create_payment',
+      'payment',
       // Inspections
-      'create_inspection'
+      'inspection'
     ];
     
     const allAuditLogs = await this.getAllAuditLogs();
@@ -1737,19 +1739,20 @@ export class DatabaseStorage implements IStorage {
 
     // Categorize audit logs by operation type for clearer reporting
     const contractOperations = filteredAuditLogs.filter(log => 
-      ['create_contract', 'confirm_contract', 'activate_contract', 'complete_contract', 'close_contract'].includes(log.action)
+      ['create', 'confirm', 'activate', 'complete', 'close'].includes(log.action)
     );
     
     const masterDataOperations = filteredAuditLogs.filter(log => 
       ['create_customer', 'update_customer', 'disable_customer', 'enable_customer',
        'create_vehicle', 'update_vehicle', 'disable_vehicle', 'enable_vehicle',
        'create_sponsor', 'update_sponsor', 'disable_sponsor', 'enable_sponsor',
-       'create_company', 'update_company', 'disable_company', 'enable_company'].includes(log.action)
+       'create_company', 'update_company', 'disable_company', 'enable_company',
+       'create_person', 'update_settings'].includes(log.action)
     );
     
-    const paymentOperations = filteredAuditLogs.filter(log => log.action === 'create_payment');
+    const paymentOperations = filteredAuditLogs.filter(log => log.action === 'payment');
     
-    const inspectionOperations = filteredAuditLogs.filter(log => log.action === 'create_inspection');
+    const inspectionOperations = filteredAuditLogs.filter(log => log.action === 'inspection');
 
     return {
       summary: {
