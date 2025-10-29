@@ -252,6 +252,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/reports/audit',
       show: isAdmin || isManager,
     },
+    {
+      title: t('nav.userActivity'),
+      icon: 'person_search',
+      url: '/reports/user-activity',
+      show: isAdmin || isManager,
+    },
   ];
 
   const auditItems = [

@@ -1584,6 +1584,45 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Helper function to transform JSONB snapshots into individual field changes
+  private transformContractEditToFieldChanges(edit: any, userName: string): any[] {
+    const fieldChanges: any[] = [];
+    
+    if (!edit.fieldsBefore || !edit.fieldsAfter) {
+      return fieldChanges;
+    }
+    
+    const before = edit.fieldsBefore as Record<string, any>;
+    const after = edit.fieldsAfter as Record<string, any>;
+    
+    // Compare all fields and create individual change records
+    const allFields = new Set([...Object.keys(before), ...Object.keys(after)]);
+    
+    for (const field of Array.from(allFields)) {
+      const oldValue = before[field];
+      const newValue = after[field];
+      
+      // Skip if values are identical
+      if (JSON.stringify(oldValue) === JSON.stringify(newValue)) {
+        continue;
+      }
+      
+      fieldChanges.push({
+        id: `${edit.id}-${field}`,
+        contractId: edit.contractId,
+        editedBy: edit.editedBy,
+        editedAt: edit.editedAt,
+        fieldChanged: field,
+        oldValue: oldValue != null ? String(oldValue) : null,
+        newValue: newValue != null ? String(newValue) : null,
+        reason: edit.editReason,
+        userName,
+      });
+    }
+    
+    return fieldChanges;
+  }
+
   // Reports - Audit
   async getAuditReport(startDate?: Date, endDate?: Date) {
     // Contract modifications
@@ -1640,21 +1679,22 @@ export class DatabaseStorage implements IStorage {
     );
     const userMap = new Map(usersData.filter(u => u).map(u => [u!.id, `${u!.firstName || ''} ${u!.lastName || ''}`.trim() || u!.username]));
 
-    const modificationsWithUser = filteredModifications.map(m => ({
-      ...m,
-      userName: userMap.get(m.editedBy) || 'Unknown',
-    }));
+    // CRITICAL FIX: Transform JSONB snapshots into individual field changes
+    const transformedModifications = filteredModifications.flatMap(m => {
+      const userName = userMap.get(m.editedBy) || 'Unknown';
+      return this.transformContractEditToFieldChanges(m, userName);
+    });
 
-    // CRITICAL FIX: Add summary statistics for audit report
-    const uniqueContracts = new Set(filteredModifications.map(m => m.contractId));
-    const totalModifications = filteredModifications.length;
+    // Calculate statistics using transformed modifications
+    const uniqueContracts = new Set(transformedModifications.map(m => m.contractId));
+    const totalModifications = transformedModifications.length;
     const avgModificationsPerContract = uniqueContracts.size > 0 
       ? totalModifications / uniqueContracts.size 
       : 0;
     
     // Most frequently modified contracts
     const contractModCounts = new Map<string, number>();
-    filteredModifications.forEach(m => {
+    transformedModifications.forEach(m => {
       contractModCounts.set(m.contractId, (contractModCounts.get(m.contractId) || 0) + 1);
     });
     
@@ -1666,8 +1706,8 @@ export class DatabaseStorage implements IStorage {
     // User activity breakdown - COMPLETE VERSION: Count from BOTH modifications AND audit logs
     const userActivityMap = new Map<string, { modifications: number; auditActions: number; total: number }>();
     
-    // Count modifications
-    filteredModifications.forEach(m => {
+    // Count modifications (from transformed data)
+    transformedModifications.forEach(m => {
       const userId = m.editedBy;
       const current = userActivityMap.get(userId) || { modifications: 0, auditActions: 0, total: 0 };
       current.modifications += 1;
@@ -1724,7 +1764,8 @@ export class DatabaseStorage implements IStorage {
         paymentOperationsCount: paymentOperations.length,
         inspectionOperationsCount: inspectionOperations.length,
       },
-      modifications: modificationsWithUser.sort((a, b) => {
+      // CRITICAL FIX: Return transformed modifications with individual field changes
+      modifications: transformedModifications.sort((a, b) => {
         const aTime = a.editedAt ? new Date(a.editedAt).getTime() : 0;
         const bTime = b.editedAt ? new Date(b.editedAt).getTime() : 0;
         return bTime - aTime;

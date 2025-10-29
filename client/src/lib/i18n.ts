@@ -29,6 +29,7 @@ const resources = {
       "nav.operationalReports": "Operational Reports",
       "nav.customerReports": "Customer Reports",
       "nav.auditReports": "Audit Reports",
+      "nav.userActivity": "User Activity",
       
       // Header Tooltips
       "header.toggleSidebar": "Toggle sidebar",
@@ -817,6 +818,7 @@ const resources = {
       "nav.operationalReports": "التقارير التشغيلية",
       "nav.customerReports": "تقارير العملاء",
       "nav.auditReports": "تقارير التدقيق",
+      "nav.userActivity": "نشاط المستخدمين",
       
       // Header Tooltips
       "header.toggleSidebar": "إظهار/إخفاء الشريط الجانبي",

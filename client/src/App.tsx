@@ -37,6 +37,7 @@ const FinancialReports = lazy(() => import("@/pages/FinancialReports"));
 const OperationalReports = lazy(() => import("@/pages/OperationalReports"));
 const CustomerReports = lazy(() => import("@/pages/CustomerReports"));
 const AuditReports = lazy(() => import("@/pages/AuditReports"));
+const UserActivity = lazy(() => import("@/pages/UserActivity"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -143,6 +144,9 @@ function Router() {
       </Route>
       <Route path="/reports/audit">
         {() => <ProtectedRoute component={AuditReports} />}
+      </Route>
+      <Route path="/reports/user-activity">
+        {() => <ProtectedRoute component={UserActivity} />}
       </Route>
       <Route component={() => <NotFound />} />
       </Switch>

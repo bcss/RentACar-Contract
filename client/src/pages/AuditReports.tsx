@@ -28,7 +28,8 @@ interface UserActivity {
   userId: string;
   userName: string;
   modificationCount: number;
-  contractsModified: number;
+  auditActionCount: number;
+  totalActions: number;
 }
 
 interface AuditLog {
@@ -47,6 +48,24 @@ interface AuditReport {
   modifications: Modification[];
   userActivity: UserActivity[];
   auditLogs: AuditLog[];
+  summary: {
+    totalModifications: number;
+    totalAuditLogs: number;
+    uniqueContracts: number;
+    avgModificationsPerContract: number;
+    activeUsers: number;
+    contractOperationsCount: number;
+    masterDataOperationsCount: number;
+    paymentOperationsCount: number;
+    inspectionOperationsCount: number;
+  };
+  categories: {
+    contractOperations: AuditLog[];
+    masterDataOperations: AuditLog[];
+    paymentOperations: AuditLog[];
+    inspectionOperations: AuditLog[];
+  };
+  mostModifiedContracts: Array<{ contractId: string; modificationCount: number }>;
 }
 
 export default function AuditReports() {
@@ -54,7 +73,7 @@ export default function AuditReports() {
   const { isAdmin, isManager } = useAuth();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState('modifications');
+  const [activeTab, setActiveTab] = useState('contract-ops');
 
   // Build query URL with date filters
   const getQueryUrl = () => {
@@ -130,8 +149,15 @@ export default function AuditReports() {
       kmStart: 'KM Start',
       kmEnd: 'KM End',
       notes: 'Notes',
+      dailyRate: 'Daily Rate',
+      weeklyRate: 'Weekly Rate',
+      monthlyRate: 'Monthly Rate',
     };
     return labels[field] || field;
+  };
+
+  const formatActionName = (action: string) => {
+    return action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   if (!isAdmin && !isManager) {
@@ -152,13 +178,10 @@ export default function AuditReports() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            {t('audit.businessOpsTitle')}
+            Business Operations Audit
           </h1>
           <p className="text-muted-foreground mt-1">
-            {t('audit.businessOpsSubtitle')}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {t('audit.businessOpsDescription')}
+            Track all contract operations, master data changes, and financial activities
           </p>
         </div>
         <div className="flex gap-2">
@@ -175,7 +198,7 @@ export default function AuditReports() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Date Range</CardTitle>
+          <CardTitle>Date Range Filter</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-end gap-4">
@@ -211,19 +234,23 @@ export default function AuditReports() {
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3" data-testid="tabs-audit-reports">
-          <TabsTrigger value="modifications" data-testid="tab-modifications">
-            Contract Modifications
+        <TabsList className="grid w-full grid-cols-4" data-testid="tabs-audit-reports">
+          <TabsTrigger value="contract-ops" data-testid="tab-contract-ops">
+            Contract Operations
           </TabsTrigger>
-          <TabsTrigger value="all-actions" data-testid="tab-all-actions">
-            All Actions
+          <TabsTrigger value="master-data" data-testid="tab-master-data">
+            Master Data
           </TabsTrigger>
-          <TabsTrigger value="users" data-testid="tab-users">
-            User Activity
+          <TabsTrigger value="financial" data-testid="tab-financial">
+            Financial Operations
+          </TabsTrigger>
+          <TabsTrigger value="summary" data-testid="tab-summary">
+            Summary Statistics
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="modifications" className="space-y-6 mt-6">
+        {/* Tab 1: Contract Operations */}
+        <TabsContent value="contract-ops" className="space-y-6 mt-6">
           {isLoading ? (
             <Skeleton className="h-96 w-full" />
           ) : !report ? (
@@ -235,116 +262,32 @@ export default function AuditReports() {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Contract Modifications</CardTitle>
+                <CardTitle>Contract Lifecycle Operations</CardTitle>
                 <CardDescription>
-                  Most recent modifications first
+                  Create, confirm, activate, complete, and close events ({report.categories.contractOperations.length} total)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {report.modifications.length === 0 ? (
+                {report.categories.contractOperations.length === 0 ? (
                   <p className="text-muted-foreground text-center py-12">
-                    No contract modifications in this period
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {report.modifications.slice(0, 100).map((mod) => (
-                      <div 
-                        key={mod.id} 
-                        className="border rounded-lg p-4 hover-elevate"
-                        data-testid={`modification-${mod.id}`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <Link href={`/contracts/${mod.contractId}`}>
-                              <span className="text-primary hover:underline font-medium">
-                                Contract {mod.contractId.slice(0, 8)}
-                              </span>
-                            </Link>
-                            <Badge variant="outline">{getFieldLabel(mod.fieldChanged)}</Badge>
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            {format(new Date(mod.editedAt), 'MMM d, yyyy HH:mm')}
-                          </span>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4 mb-2">
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Old Value</p>
-                            <p className="text-sm font-mono bg-muted p-2 rounded">
-                              {mod.oldValue || 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">New Value</p>
-                            <p className="text-sm font-mono bg-muted p-2 rounded">
-                              {mod.newValue || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Modified by: <span className="font-medium">{mod.userName}</span>
-                          </span>
-                          {mod.reason && (
-                            <span className="text-muted-foreground">
-                              Reason: <span className="font-medium">{mod.reason}</span>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {report.modifications.length > 100 && (
-                      <p className="text-sm text-muted-foreground text-center pt-4">
-                        Showing first 100 modifications. Use date filters to narrow results.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="all-actions" className="space-y-6 mt-6">
-          {isLoading ? (
-            <Skeleton className="h-96 w-full" />
-          ) : !report ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground">No data available</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>All System Actions</CardTitle>
-                <CardDescription>
-                  Complete CRUD operation history for all entities (contracts, customers, vehicles, sponsors, companies)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {report.auditLogs.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-12">
-                    No system actions in this period
+                    No contract operations in this period
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {report.auditLogs.slice(0, 100).map((log) => (
+                    {report.categories.contractOperations.slice(0, 100).map((log) => (
                       <div 
                         key={log.id} 
                         className="border rounded-lg p-4 hover-elevate"
-                        data-testid={`audit-log-${log.id}`}
+                        data-testid={`contract-op-${log.id}`}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 space-y-1">
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="font-mono text-xs">
-                                {log.action}
+                              <Badge variant="default" className="font-mono text-xs">
+                                {formatActionName(log.action)}
                               </Badge>
                               <span className="text-sm text-muted-foreground">
-                                {new Date(log.createdAt).toLocaleString(i18n.language === 'ar' ? 'ar-SA' : 'en-US')}
+                                {format(new Date(log.createdAt), 'MMM d, yyyy HH:mm')}
                               </span>
                             </div>
                             
@@ -355,8 +298,82 @@ export default function AuditReports() {
                             )}
                             
                             {log.contractId && (
-                              <p className="text-xs text-muted-foreground">
-                                Contract ID: {log.contractId}
+                              <Link href={`/contracts/${log.contractId}`}>
+                                <span className="text-xs text-primary hover:underline">
+                                  Contract: {log.contractId.slice(0, 8)}
+                                </span>
+                              </Link>
+                            )}
+                          </div>
+
+                          <div className="text-right">
+                            <p className="text-sm font-medium">
+                              {log.userFirstName && log.userLastName 
+                                ? `${log.userFirstName} ${log.userLastName}`
+                                : log.userName}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {report.categories.contractOperations.length > 100 && (
+                      <p className="text-sm text-muted-foreground text-center pt-4">
+                        Showing first 100 operations. Use date filters to narrow results.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Tab 2: Master Data Operations */}
+        <TabsContent value="master-data" className="space-y-6 mt-6">
+          {isLoading ? (
+            <Skeleton className="h-96 w-full" />
+          ) : !report ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <p className="text-muted-foreground">No data available</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Master Data Operations</CardTitle>
+                <CardDescription>
+                  CRUD operations for customers, vehicles, sponsors, and companies ({report.categories.masterDataOperations.length} total)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {report.categories.masterDataOperations.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-12">
+                    No master data operations in this period
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {report.categories.masterDataOperations.slice(0, 100).map((log) => (
+                      <div 
+                        key={log.id} 
+                        className="border rounded-lg p-4 hover-elevate"
+                        data-testid={`master-data-op-${log.id}`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="font-mono text-xs">
+                                {formatActionName(log.action)}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {format(new Date(log.createdAt), 'MMM d, yyyy HH:mm')}
+                              </span>
+                            </div>
+                            
+                            {log.details && (
+                              <p className="text-sm">
+                                {log.details}
                               </p>
                             )}
                           </div>
@@ -372,9 +389,9 @@ export default function AuditReports() {
                       </div>
                     ))}
                     
-                    {report.auditLogs.length > 100 && (
+                    {report.categories.masterDataOperations.length > 100 && (
                       <p className="text-sm text-muted-foreground text-center pt-4">
-                        Showing first 100 actions. Use date filters to narrow results.
+                        Showing first 100 operations. Use date filters to narrow results.
                       </p>
                     )}
                   </div>
@@ -384,7 +401,8 @@ export default function AuditReports() {
           )}
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-6 mt-6">
+        {/* Tab 3: Financial Operations */}
+        <TabsContent value="financial" className="space-y-6 mt-6">
           {isLoading ? (
             <Skeleton className="h-96 w-full" />
           ) : !report ? (
@@ -395,7 +413,180 @@ export default function AuditReports() {
             </Card>
           ) : (
             <>
-              <div className="grid gap-4 md:grid-cols-3">
+              {/* Contract Modifications */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contract Field Modifications</CardTitle>
+                  <CardDescription>
+                    Field-level changes to contract data ({report.modifications.length} total)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {report.modifications.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-12">
+                      No contract modifications in this period
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {report.modifications.slice(0, 50).map((mod) => (
+                        <div 
+                          key={mod.id} 
+                          className="border rounded-lg p-4 hover-elevate"
+                          data-testid={`modification-${mod.id}`}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Link href={`/contracts/${mod.contractId}`}>
+                                <span className="text-primary hover:underline font-medium">
+                                  Contract {mod.contractId.slice(0, 8)}
+                                </span>
+                              </Link>
+                              <Badge variant="outline">{getFieldLabel(mod.fieldChanged)}</Badge>
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {format(new Date(mod.editedAt), 'MMM d, yyyy HH:mm')}
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-2">
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Old Value</p>
+                              <p className="text-sm font-mono bg-muted p-2 rounded">
+                                {mod.oldValue || 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">New Value</p>
+                              <p className="text-sm font-mono bg-muted p-2 rounded">
+                                {mod.newValue || 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Modified by: <span className="font-medium">{mod.userName}</span>
+                            </span>
+                            {mod.reason && (
+                              <span className="text-muted-foreground">
+                                Reason: <span className="font-medium">{mod.reason}</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {report.modifications.length > 50 && (
+                        <p className="text-sm text-muted-foreground text-center pt-4">
+                          Showing first 50 modifications. Use date filters to narrow results.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Payment Operations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payment Operations</CardTitle>
+                  <CardDescription>
+                    Payment creation events ({report.categories.paymentOperations.length} total)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {report.categories.paymentOperations.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-12">
+                      No payment operations in this period
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {report.categories.paymentOperations.slice(0, 50).map((log) => (
+                        <div 
+                          key={log.id} 
+                          className="border rounded-lg p-4 hover-elevate"
+                          data-testid={`payment-op-${log.id}`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="default" className="font-mono text-xs">
+                                  Payment Recorded
+                                </Badge>
+                                <span className="text-sm text-muted-foreground">
+                                  {format(new Date(log.createdAt), 'MMM d, yyyy HH:mm')}
+                                </span>
+                              </div>
+                              
+                              {log.details && (
+                                <p className="text-sm">
+                                  {log.details}
+                                </p>
+                              )}
+                              
+                              {log.contractId && (
+                                <Link href={`/contracts/${log.contractId}`}>
+                                  <span className="text-xs text-primary hover:underline">
+                                    Contract: {log.contractId.slice(0, 8)}
+                                  </span>
+                                </Link>
+                              )}
+                            </div>
+
+                            <div className="text-right">
+                              <p className="text-sm font-medium">
+                                {log.userFirstName && log.userLastName 
+                                  ? `${log.userFirstName} ${log.userLastName}`
+                                  : log.userName}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {report.categories.paymentOperations.length > 50 && (
+                        <p className="text-sm text-muted-foreground text-center pt-4">
+                          Showing first 50 operations. Use date filters to narrow results.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </TabsContent>
+
+        {/* Tab 4: Summary Statistics */}
+        <TabsContent value="summary" className="space-y-6 mt-6">
+          {isLoading ? (
+            <Skeleton className="h-96 w-full" />
+          ) : !report ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <p className="text-muted-foreground">No data available</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Overview Statistics */}
+              <div className="grid gap-4 md:grid-cols-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Total Operations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-total-operations">
+                      {report.summary.totalAuditLogs}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      All business operations
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -404,10 +595,10 @@ export default function AuditReports() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold" data-testid="text-active-users">
-                      {report.userActivity.length}
+                      {report.summary.activeUsers}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Made modifications
+                      Users who made changes
                     </p>
                   </CardContent>
                 </Card>
@@ -415,15 +606,15 @@ export default function AuditReports() {
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Total Modifications
+                      Contract Modifications
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold" data-testid="text-total-modifications">
-                      {report.modifications.length}
+                      {report.summary.totalModifications}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      In selected period
+                      Field-level changes
                     </p>
                   </CardContent>
                 </Card>
@@ -431,60 +622,125 @@ export default function AuditReports() {
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Avg. per User
+                      Unique Contracts
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold" data-testid="text-avg-modifications">
-                      {report.userActivity.length > 0
-                        ? (report.modifications.length / report.userActivity.length).toFixed(1)
-                        : '0.0'}
+                    <div className="text-2xl font-bold" data-testid="text-unique-contracts">
+                      {report.summary.uniqueContracts}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Modifications
+                      Modified contracts
                     </p>
                   </CardContent>
                 </Card>
               </div>
 
+              {/* Operation Breakdown */}
               <Card>
                 <CardHeader>
-                  <CardTitle>User Activity Summary</CardTitle>
+                  <CardTitle>Operation Breakdown</CardTitle>
                   <CardDescription>
-                    Sorted by modification count (highest first)
+                    Distribution of operations by category
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {report.userActivity.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-12">
-                      No user activity in this period
-                    </p>
-                  ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="material-icons text-primary">description</span>
+                        <div>
+                          <p className="font-medium">Contract Operations</p>
+                          <p className="text-sm text-muted-foreground">Lifecycle events</p>
+                        </div>
+                      </div>
+                      <Badge variant="default">{report.summary.contractOperationsCount}</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="material-icons text-primary">storage</span>
+                        <div>
+                          <p className="font-medium">Master Data Operations</p>
+                          <p className="text-sm text-muted-foreground">Customers, vehicles, sponsors, companies</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">{report.summary.masterDataOperationsCount}</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="material-icons text-primary">payments</span>
+                        <div>
+                          <p className="font-medium">Payment Operations</p>
+                          <p className="text-sm text-muted-foreground">Payment recordings</p>
+                        </div>
+                      </div>
+                      <Badge variant="default">{report.summary.paymentOperationsCount}</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="material-icons text-primary">edit_note</span>
+                        <div>
+                          <p className="font-medium">Contract Modifications</p>
+                          <p className="text-sm text-muted-foreground">Field-level changes</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline">{report.summary.totalModifications}</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="material-icons text-primary">check_circle</span>
+                        <div>
+                          <p className="font-medium">Vehicle Inspections</p>
+                          <p className="text-sm text-muted-foreground">Pre/post inspections</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline">{report.summary.inspectionOperationsCount}</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Most Modified Contracts */}
+              {report.mostModifiedContracts.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Most Modified Contracts</CardTitle>
+                    <CardDescription>
+                      Contracts with the most field changes
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead data-testid="table-header-user">User</TableHead>
-                          <TableHead className="text-right" data-testid="table-header-modifications">
-                            Modifications
-                          </TableHead>
-                          <TableHead className="text-right" data-testid="table-header-contracts-modified">
-                            Contracts Modified
-                          </TableHead>
+                          <TableHead>Contract ID</TableHead>
+                          <TableHead className="text-right">Modifications</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {report.userActivity.map((user) => (
-                          <TableRow key={user.userId} data-testid={`row-user-${user.userId}`}>
-                            <TableCell className="font-medium">{user.userName}</TableCell>
-                            <TableCell className="text-right">{user.modificationCount}</TableCell>
-                            <TableCell className="text-right">{user.contractsModified}</TableCell>
+                        {report.mostModifiedContracts.map((contract) => (
+                          <TableRow key={contract.contractId}>
+                            <TableCell>
+                              <Link href={`/contracts/${contract.contractId}`}>
+                                <span className="text-primary hover:underline font-mono">
+                                  {contract.contractId.slice(0, 12)}
+                                </span>
+                              </Link>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Badge variant="outline">{contract.modificationCount}</Badge>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </>
           )}
         </TabsContent>
