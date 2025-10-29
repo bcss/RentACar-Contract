@@ -1,0 +1,5 @@
+customer_national_id,vehicle_plate,rental_start_date,rental_end_date,daily_rate,hirer_type,sponsor_national_id,company_tax_id,discount,deposit,extra_driver_fee,gps_fee,child_seat_fee,insurance_fee,delivery_fee,pickup_location_en,pickup_location_ar,dropoff_location_en,dropoff_location_ar,notes_en,notes_ar,status
+1234567890,ABC-1234,2024-12-01,2024-12-07,150,direct,,,50,500,0,0,0,100,0,Main Office,المكتب الرئيسي,Main Office,المكتب الرئيسي,Week rental,إيجار أسبوع,completed
+9876543210,XYZ-9876,2024-12-10,2024-12-20,160,with_sponsor,11111111111,,0,600,50,30,0,120,0,Main Office,المكتب الرئيسي,Airport,المطار,10-day rental with sponsor,إيجار 10 أيام مع كفيل,active
+5555555555,DEF-5555,2024-12-15,2025-01-15,140,from_company,,1234567890001,200,1000,100,30,50,150,75,Airport,المطار,Main Office,المكتب الرئيسي,Monthly corporate rental,إيجار شهري للشركة,confirmed
+1234567890,LMN-7777,2025-01-01,2025-01-05,200,direct,,,0,800,0,30,0,150,50,Main Office,المكتب الرئيسي,Hotel Downtown,فندق وسط المدينة,Electric vehicle rental,إيجار سيارة كهربائية,draft

@@ -1,0 +1,8 @@
+contract_customer_national_id,contract_vehicle_plate,contract_start_date,payment_date,amount,payment_method,cheque_number,card_last_four,bank_transfer_reference,notes_en,notes_ar
+1234567890,ABC-1234,2024-12-01,2024-12-01,650,cash,,,,Deposit payment,دفعة الإيداع
+1234567890,ABC-1234,2024-12-01,2024-12-07,600,card,,1234,,Final payment,الدفعة النهائية
+9876543210,XYZ-9876,2024-12-10,2024-12-10,600,cash,,,,Deposit,إيداع
+9876543210,XYZ-9876,2024-12-10,2024-12-15,900,card,,5678,,Partial payment,دفعة جزئية
+5555555555,DEF-5555,2024-12-15,2024-12-15,1000,bank_transfer,,,TRF123456789,Deposit via bank transfer,إيداع عبر تحويل بنكي
+5555555555,DEF-5555,2024-12-15,2025-01-01,2250,cheque,CHQ987654321,,,Mid-month payment,دفعة منتصف الشهر
+1234567890,LMN-7777,2025-01-01,2025-01-01,800,cash,,,,Deposit for electric car,إيداع للسيارة الكهربائية

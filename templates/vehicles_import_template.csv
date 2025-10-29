@@ -1,0 +1,5 @@
+plate_number,brand_en,brand_ar,model_en,model_ar,year,color_en,color_ar,fuel_type,tank_capacity_liters,daily_rate,weekly_rate,monthly_rate,chassis_number,registration_expiry,insurance_expiry,last_service_date,next_service_km,notes_en,notes_ar
+ABC-1234,Toyota,تويوتا,Camry,كامري,2023,White,أبيض,petrol,60,150,900,3000,JT2BF28K123456789,2026-12-31,2025-12-31,2024-11-15,145000,Premium sedan,سيدان فاخر
+XYZ-9876,Honda,هوندا,Accord,أكورد,2024,Silver,فضي,petrol,55,160,950,3200,1HGCP26869A123456,2027-06-30,2026-06-30,2024-12-01,118000,Family car,سيارة عائلية
+DEF-5555,Nissan,نيسان,Altima,ألتيما,2022,Black,أسود,petrol,58,140,850,2900,1N4AL3AP7MC123456,2025-11-20,2025-11-20,2024-10-10,162000,,
+LMN-7777,Tesla,تيسلا,Model 3,موديل 3,2024,Blue,أزرق,electric,0,200,1200,4000,5YJ3E1EA5MF123456,2027-12-31,2026-12-31,2024-12-15,89000,Electric vehicle - no fuel,سيارة كهربائية - بدون وقود

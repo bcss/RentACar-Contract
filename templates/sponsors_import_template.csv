@@ -1,0 +1,4 @@
+national_id,name_en,name_ar,phone,email,address_en,address_ar,relationship_to_hirer,notes_en,notes_ar
+11111111111,Mohammed Al-Faisal,محمد الفيصل,+966502345678,m.faisal@example.com,234 Al-Olaya Street Riyadh,234 شارع العليا الرياض,Brother,Reliable sponsor,كفيل موثوق
+22222222222,Fatima Al-Harbi,فاطمة الحربي,+966503456789,f.harbi@example.com,567 Tahlia Street Jeddah,567 شارع التحلية جدة,Sister,Corporate guarantor,ضامن شركة
+33333333333,Khalid Al-Mansour,خالد المنصور,+966504567890,k.mansour@example.com,890 King Abdullah Road Dammam,890 طريق الملك عبدالله الدمام,Friend,,

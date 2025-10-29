@@ -1,0 +1,4 @@
+national_id,name_en,name_ar,nationality,phone,email,address_en,address_ar,license_number,license_expiry,date_of_birth,notes_en,notes_ar
+1234567890,Ahmed Al-Rashid,أحمد الراشد,Saudi Arabian,+966501234567,ahmed.rashid@example.com,123 King Fahd Road Riyadh,123 طريق الملك فهد الرياض,987654321,2026-12-31,1985-03-15,Preferred customer,عميل مفضل
+9876543210,Sara Mohammed,سارة محمد,Emirati,+971501234567,sara.m@example.com,456 Sheikh Zayed Road Dubai,456 شارع الشيخ زايد دبي,123456789,2027-06-30,1990-07-22,Corporate account,حساب شركة
+5555555555,John Smith,جون سميث,American,+1234567890,john.smith@example.com,789 Main Street New York,789 شارع ماين نيويورك,AAA123456,2025-11-15,1982-11-03,,

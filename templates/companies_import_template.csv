@@ -1,0 +1,4 @@
+tax_id,name_en,name_ar,contact_person_en,contact_person_ar,phone,email,address_en,address_ar,credit_limit,notes_en,notes_ar
+1234567890001,ABC Corporation,شركة إيه بي سي,Ali Hassan,علي حسن,+966505678901,contact@abc-corp.com,100 Business Bay Dubai,100 خليج الأعمال دبي,50000,Platinum corporate client,عميل شركة بلاتيني
+9876543210002,XYZ Enterprises,مؤسسة إكس واي زد,Sara Al-Mutairi,سارة المطيري,+966506789012,info@xyz-ent.com,200 Financial District Riyadh,200 الحي المالي الرياض,30000,Gold corporate client,عميل شركة ذهبي
+5555555550003,Global Trading LLC,الشركة العالمية للتجارة,Omar Abdullah,عمر عبدالله,+966507890123,support@globaltrading.com,300 Trade Center Jeddah,300 مركز التجارة جدة,20000,,
