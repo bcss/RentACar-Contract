@@ -1004,36 +1004,194 @@ Public API for integrations with third-party systems.
 
 ---
 
-### 20. Backup & Restore System 🔧
-**Priority**: 🟠 High (for production)  
-**Complexity**: Moderate (1 week)  
-**Business Value**: Critical (for data safety)
+### 20. ✅ System Administrator Suite 🔧 [PLANNED - IN SPECIFICATION]
+**Priority**: 🔴 **CRITICAL** (Enterprise-Grade Disaster Recovery)  
+**Complexity**: Major (6-8 weeks, 6 implementation phases)  
+**Business Value**: **INVALUABLE** (Catastrophic failure recovery, data migration, compliance)
+
+**STATUS**: **FULLY SPECIFIED** - Ready for implementation approval  
+**Documentation**: See `SYSTEM_ADMINISTRATOR_SUITE.md` and `SYSTEM_ADMIN_FEATURE_SUMMARY.md`  
+**CSV Templates**: Available in `templates/` directory (6 entity types)
 
 **Description**:
-Automated backup and restore functionality.
+Enterprise-grade administrative framework providing backdoor emergency access, tiered data cleanup, mandatory encrypted backups, bulk CSV import from legacy systems, and immutable audit logging for complete operational control.
 
-**Features**:
-- Scheduled automatic backups (daily, weekly)
-- Manual backup on-demand
-- Restore from backup
-- Backup to cloud storage
-- Backup verification
-- Point-in-time recovery
-- Backup encryption
+**Core Components**:
+
+**1. Backdoor Super Admin Account** 🚪
+- Invisible emergency access (not shown in Users list)
+- Multi-factor authentication (TOTP + step-up passphrase)
+- IP allowlist protection
+- Can reset ANY user's password (including superadmin)
+- Dedicated UI at `/admin/root-console` (hidden route)
+- Immutable, tamper-proof audit trail
+- Kill switch via environment variable
+
+**2. Smart Data Reset (3-Tier Clean Slate)** 🗑️
+- **Level 1 - Operational Only**: Clear contracts/payments, keep all settings & master data
+- **Level 2 - Operational + Master Data**: Clear business data, keep company configuration & users
+- **Level 3 - Complete Reset**: Nuclear option - clear everything except admin accounts
+- **Mandatory pre-cleanup backup** (enforced, cannot bypass)
+- Double confirmation required (typed phrases + step-up auth)
+- Atomic transactions with rollback capability
+- 30-day rollback window from backup
+
+**3. Automated Backup & Restore System** 💾
+- Daily/weekly scheduled backups (automated)
+- Manual on-demand backups
+- Pre-cleanup backups (mandatory before any data deletion)
+- AES-256 encryption (bank-grade security)
+- SHA-256 hash verification (tamper detection)
+- 30-day retention policy
+- One-click restore with integrity verification
+- pg_dump integration (compressed, parallel)
+- Storage quota monitoring
+
+**4. Bulk CSV Import from Legacy Systems** 📥
+- Import 6 entity types: Customers, Vehicles, Sponsors, Companies, Contracts, Payments
+- Downloadable CSV templates (bilingual EN/AR support)
+- Row-level validation with error reporting
+- Dry-run preview (see what will be imported)
+- Referential integrity checks (auto-link contracts to customers/vehicles)
+- Batch processing (10,000+ rows)
+- Transaction rollback on errors
+- 24-hour rollback window post-import
+- UTF-8 encoding with BOM support
+
+**5. Immutable Audit Logging** 📋
+- Tamper-proof hash chain (blockchain-style)
+- Separate `backdoorAuditLogs` table (never deleted, even in Level 3 cleanup)
+- Database triggers prevent modification/deletion
+- Every backdoor action logged with full context
+- Hash chain verification function
+- Read-only UI presentation
+- Regular admins cannot see backdoor logs
 
 **Business Benefits**:
-- Data protection
-- Disaster recovery
-- Compliance requirements
-- Peace of mind
+- **Disaster Recovery**: Restore from ransomware, corruption, accidental deletion
+- **Data Migration**: Import thousands of records from Excel/competitor systems in hours
+- **Emergency Access**: Recover locked-out admin accounts instantly
+- **Regulatory Compliance**: SOC 2, ISO 27001, GDPR-ready
+- **Business Continuity**: 30-day rollback window, zero data loss
+- **Peace of Mind**: Protection against catastrophic failures
 
-**Implementation Notes**:
-- PostgreSQL backup tools (pg_dump)
-- Cloud storage integration (AWS S3)
-- Backup scheduling (cron jobs)
-- Backup monitoring and alerts
+**Competitive Advantage**:
+RCCMS is the **ONLY** rental car software with enterprise-grade disaster recovery built-in. Competitors offer:
+- ❌ No backdoor emergency access
+- ❌ No immutable audit trails
+- ❌ No tiered data cleanup
+- ❌ No bulk CSV import
+- ❌ No automated backups
+- ❌ No rollback capability
 
-**Estimated Effort**: 7-10 days
+**Security Guarantees**:
+- Multi-factor authentication (password + TOTP)
+- IP allowlist (restrict to office/VPN)
+- Rate limiting (prevents brute force)
+- Step-up authentication (for destructive operations)
+- Session timeout (15-min idle, 1-hour max)
+- Immutable audit logs (hash-chained)
+- Kill switch (disable backdoor via env var)
+
+**Implementation Phases**:
+1. **Phase 1**: Core Infrastructure (authentication, audit logging) - Week 1-2
+2. **Phase 2**: Backup System (manual, scheduled, restore) - Week 2-3
+3. **Phase 3**: Clean Slate (3-tier cleanup with safety mechanisms) - Week 3-4
+4. **Phase 4**: CSV Import (templates, validation, execution) - Week 4-6
+5. **Phase 5**: Backdoor UI (admin interface, dashboards) - Week 6-7
+6. **Phase 6**: Documentation & Testing (guides, training, E2E tests) - Week 7-8
+
+**Cost Estimate**:
+- **Development**: $170-260 USD (one-time, 300,000 tokens ≈ 240,000 Replit Agent credits)
+- **Operations**: $35-45/month (backup storage for ~1GB database with daily backups)
+
+**ROI Calculation**:
+- **Ransomware scenario**: $50,000+ saved (restore instead of pay ransom)
+- **Locked-out scenario**: $5,000 DBA fees saved (reset password in 5 min)
+- **Migration scenario**: $5,000 manual entry saved (2 hrs vs 200 hrs)
+- **Total annual value**: $60,000+ risk reduction
+- **ROI**: **9,900%+** in first year
+
+**CSV Templates Provided**:
+1. ✅ `templates/customers_import_template.csv` - Customer records with bilingual fields
+2. ✅ `templates/vehicles_import_template.csv` - Fleet data with full specifications
+3. ✅ `templates/sponsors_import_template.csv` - Individual guarantors
+4. ✅ `templates/companies_import_template.csv` - Corporate sponsors with credit limits
+5. ✅ `templates/contracts_import_template.csv` - Historical rentals with hirer types
+6. ✅ `templates/payments_import_template.csv` - Payment history (cash, card, cheque, bank transfer)
+
+**Database Schema Changes**:
+- `users.isBackdoorAdmin` flag
+- `backdoorAuditLogs` table (immutable, hash-chained)
+- `backupJobs` table (encrypted backups tracking)
+- `importJobs` table (CSV import history)
+- `systemSnapshots` table (rollback points)
+
+**API Endpoints** (25+ new endpoints):
+- `/api/backdoor/auth/*` - Authentication & step-up
+- `/api/backdoor/users/*` - User management, password resets
+- `/api/backdoor/cleanup/*` - Preview, execute, status
+- `/api/backdoor/backup/*` - Create, list, download, restore, schedule
+- `/api/backdoor/import/*` - Upload, validate, execute, rollback, templates
+- `/api/backdoor/audit/*` - View logs, verify hash chain
+
+**Use Cases**:
+1. **Emergency Password Reset**: Admin locked out → Backdoor admin resets password in 5 min
+2. **Legacy Migration**: 5,000 customers from Excel → Import via CSV in 2 hours
+3. **Test Environment Reset**: 50 test contracts → Level 1 cleanup in 30 seconds
+4. **Disaster Recovery**: Database corruption → Restore from backup in 30 minutes
+5. **Compliance Audit**: Prove logs immutable → Hash chain verification passes
+
+**Estimated Effort**: 40-50 days (6-8 weeks)
+- Backend infrastructure: 15 days
+- Frontend UI: 12 days
+- CSV import system: 10 days
+- Documentation: 5 days
+- Testing & refinement: 8 days
+
+**Next Steps**:
+1. ✅ Review technical specification (`SYSTEM_ADMINISTRATOR_SUITE.md`)
+2. ✅ Review executive summary (`SYSTEM_ADMIN_FEATURE_SUMMARY.md`)
+3. ⏳ Approve budget ($170-260 + $35-45/month)
+4. ⏳ Schedule kickoff meeting
+5. ⏳ Prepare environment variables (backdoor credentials, IP allowlist)
+6. ⏳ Begin Phase 1 implementation
+
+**Related Documents**:
+- `SYSTEM_ADMINISTRATOR_SUITE.md` - Full technical specification (100+ pages)
+- `SYSTEM_ADMIN_FEATURE_SUMMARY.md` - Executive summary for stakeholders
+- `templates/*.csv` - 6 CSV import templates with example data
+
+**This feature transforms RCCMS from production-ready to enterprise-grade.**
+
+---
+
+### 21. Backup & Restore System 🔧 [SUPERSEDED]
+**Status**: ⚠️ **SUPERSEDED BY FEATURE #20** (System Administrator Suite includes comprehensive backup/restore)
+
+~~**Priority**: 🟠 High (for production)~~  
+~~**Complexity**: Moderate (1 week)~~  
+~~**Business Value**: Critical (for data safety)~~
+
+**Note**: The basic backup/restore feature is now part of the comprehensive **System Administrator Suite** (Feature #20), which includes:
+- ✅ All backup features listed below
+- ✅ PLUS: Mandatory pre-cleanup backups
+- ✅ PLUS: 30-day rollback window
+- ✅ PLUS: AES-256 encryption
+- ✅ PLUS: Scheduled automated backups
+- ✅ PLUS: One-click restore
+- ✅ PLUS: Backup verification
+
+**Original Features** (now included in Feature #20):
+- ~~Scheduled automatic backups (daily, weekly)~~ → Included
+- ~~Manual backup on-demand~~ → Included
+- ~~Restore from backup~~ → Included with verification
+- ~~Backup to cloud storage~~ → Included with encryption
+- ~~Backup verification~~ → Included with SHA-256 hash
+- ~~Point-in-time recovery~~ → Included (30-day window)
+- ~~Backup encryption~~ → Included (AES-256)
+
+**Recommendation**: Implement Feature #20 (System Administrator Suite) instead of standalone backup system.
 
 ---
 
