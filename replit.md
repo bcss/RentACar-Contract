@@ -46,6 +46,7 @@ Preferred communication style: Simple, everyday language.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
 - **Professional PDF Integration:** Professional, bilingual PDF generation for rental contracts.
 - **Vehicle Inspection System:** Two-stage workflow (pre-delivery, post-return) with mandatory 6-photo documentation, strict validation, automatic compression, visual differentiation, full history view, bilingual support, audit logging, and JSONB photo storage.
+- **System Administrator Suite (Planned):** Enterprise-grade disaster recovery framework including: (1) Backdoor super admin with invisible emergency access and TOTP authentication, (2) 3-tier clean slate system with mandatory pre-cleanup encrypted backups, (3) Bulk CSV import for migrating from legacy systems (6 entity types with validation), (4) Automated scheduled backups with 30-day rollback window, (5) Immutable hash-chained audit logs for backdoor operations. Estimated cost: $170-260 USD development + $35-45/month operations. See `SYSTEM_ADMINISTRATOR_SUITE.md` for full specification.
 
 ### Data Validation & Business Rules
 - **Mandatory Customer Fields:** National ID, Nationality, Phone, License Number - enforced at both frontend (Zod schema) and backend (API validation) to prevent bypass.
