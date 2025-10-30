@@ -997,7 +997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { timeIn, odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride, earlyClosureReason } = req.body;
+      const { timeIn, odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, trafficFineCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride, earlyClosureReason } = req.body;
       
       // SECURITY: Calculate fuel charge on backend instead of trusting client
       const vehicle = await storage.getVehicleById(contract.vehicleId);
@@ -1043,6 +1043,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         extraKmDriven,
         fuelCharge: finalFuelCharge,
         damageCharge,
+        trafficFineCharge,
         otherCharges,
         totalExtraCharges,
         outstandingBalance,

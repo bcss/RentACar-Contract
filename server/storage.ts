@@ -442,6 +442,7 @@ export class DatabaseStorage implements IStorage {
     extraKmDriven?: number;
     fuelCharge?: string;
     damageCharge?: string;
+    trafficFineCharge?: string;
     otherCharges?: string;
     totalExtraCharges?: string;
     outstandingBalance?: string;

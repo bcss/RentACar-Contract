@@ -74,6 +74,7 @@ export default function ContractView() {
   const [vehicleCondition, setVehicleCondition] = useState('');
   const [fuelCharge, setFuelCharge] = useState('');
   const [damageCharge, setDamageCharge] = useState('');
+  const [trafficFineCharge, setTrafficFineCharge] = useState('');
   const [otherCharges, setOtherCharges] = useState('');
   const [timeIn, setTimeIn] = useState(() => {
     const now = new Date();
@@ -593,9 +594,10 @@ export default function ContractView() {
 
     const fuelChargeAmount = parseFloat(fuelCharge || '0');
     const damageChargeAmount = parseFloat(damageCharge || '0');
+    const trafficFineChargeAmount = parseFloat(trafficFineCharge || '0');
     const otherChargesAmount = parseFloat(otherCharges || '0');
 
-    const totalExtraCharges = extraKmChargeAmount + fuelChargeAmount + damageChargeAmount + otherChargesAmount;
+    const totalExtraCharges = extraKmChargeAmount + fuelChargeAmount + damageChargeAmount + trafficFineChargeAmount + otherChargesAmount;
     const totalAmount = parseFloat(contract.totalAmount || '0');
     const securityDeposit = parseFloat(contract.securityDeposit || '0');
     const depositPaidAmount = contract.depositPaid ? securityDeposit : 0;
@@ -614,6 +616,7 @@ export default function ContractView() {
       extraKmCharge: extraKmChargeAmount.toFixed(2),
       fuelCharge: fuelChargeAmount.toFixed(2),
       damageCharge: damageChargeAmount.toFixed(2),
+      trafficFineCharge: trafficFineChargeAmount.toFixed(2),
       otherCharges: otherChargesAmount.toFixed(2),
       totalExtraCharges: totalExtraCharges.toFixed(2),
       outstandingBalance: outstandingBalance.toFixed(2),
@@ -637,9 +640,10 @@ export default function ContractView() {
 
     const fuelChargeAmount = parseFloat(fuelCharge || '0');
     const damageChargeAmount = parseFloat(damageCharge || '0');
+    const trafficFineChargeAmount = parseFloat(trafficFineCharge || '0');
     const otherChargesAmount = parseFloat(otherCharges || '0');
 
-    const totalExtraCharges = extraKmChargeAmount + fuelChargeAmount + damageChargeAmount + otherChargesAmount;
+    const totalExtraCharges = extraKmChargeAmount + fuelChargeAmount + damageChargeAmount + trafficFineChargeAmount + otherChargesAmount;
     const totalAmount = parseFloat(contract.totalAmount || '0');
     const securityDeposit = parseFloat(contract.securityDeposit || '0');
     const depositPaidAmount = contract.depositPaid ? securityDeposit : 0;
@@ -649,6 +653,7 @@ export default function ContractView() {
       extraKmDriven,
       extraKmChargeAmount,
       fuelChargeAmount,
+      trafficFineChargeAmount,
       damageChargeAmount,
       otherChargesAmount,
       totalExtraCharges,
@@ -2279,6 +2284,25 @@ export default function ContractView() {
                     placeholder="0.00"
                     data-testid="input-damage-charge"
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="traffic-fine-charge" className="flex items-center gap-2">
+                    <span className="material-icons text-sm">local_police</span>
+                    {t('contracts.trafficFineCharge')} ({currency})
+                  </Label>
+                  <Input
+                    id="traffic-fine-charge"
+                    type="number"
+                    step="0.01"
+                    value={trafficFineCharge}
+                    onChange={(e) => setTrafficFineCharge(e.target.value)}
+                    placeholder="0.00"
+                    data-testid="input-traffic-fine-charge"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t('contracts.trafficFineHelp')}
+                  </p>
                 </div>
 
                 <div>
