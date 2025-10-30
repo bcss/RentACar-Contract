@@ -15,6 +15,8 @@ Preferred communication style: Simple, everyday language.
 - **Key Features:** Context-based theme/language, custom authentication hooks, shared Zod schemas, print functionality, contract lifecycle management, comprehensive timeline visualization, route protection.
 - **Performance Optimizations:** Route-based lazy loading with React.lazy() and Suspense for all 21 pages (except Login which is eagerly loaded for immediate access), professional loading skeleton with spinner, optimized bundle splitting reduces initial load from ~744KB to ~50KB (88% reduction), 3-4x faster initial page load.
 - **Responsive Dashboard Metrics:** All 7 primary dashboard metric cards use adaptive text sizing (`text-2xl sm:text-3xl xl:text-4xl`) with automatic truncation for optimal display across mobile (24px), tablet (30px), and desktop (36px) viewports.
+- **Personalized User Experience:** Dashboard features time-based greeting (Good morning/afternoon/evening) with user's first name, role badge, and last login timestamp tracking. Non-obtrusive system errors banner at top of dashboard with click-to-navigate functionality.
+- **Professional Navigation:** Sidebar footer includes RCCMS version information and direct links to Privacy Policy, Terms of Service, and Support pages (visible when sidebar expanded).
 
 ### Backend
 - **Technology Stack:** Node.js with TypeScript, Express.js, Drizzle ORM, internal username/password authentication with Passport.js, express-session with PostgreSQL store.
@@ -41,6 +43,8 @@ Preferred communication style: Simple, everyday language.
 - **Complete Audit Logging:** Comprehensive audit trail for CRUD operations and contract lifecycle events.
 - **System Error Logging:** Automatic error logging to database with full context (endpoint, method, user, stack trace, request details).
 - **Company Settings Management:** Admin-only configuration for bilingual company information and contract clauses.
+- **System Health Monitoring:** About page in Settings displays real-time system health including database status, record counts (users, customers, vehicles, contracts, companies, sponsors), storage estimates, and version information. Features comprehensive system information and developer contact details.
+- **Legal Compliance Pages:** Professional Privacy Policy, Terms of Service, and Support pages with comprehensive legal content, accessible via sidebar footer links and standalone routes.
 - **Dashboard with Context-Aware Navigation:** Critical metrics (active rentals, monthly revenue, overdue returns) with deep-link filtering via URL parameters - clicking metric cards navigates to filtered views (contracts by status/overdue/pendingRefunds, vehicles by status).
 - **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, separated PDF and Excel export functionality (`jsPDF`, `xlsx`) - Vehicle Utilization, Contract Status, and Extra Charges reports export individually with descriptive filenames, and chart visualization.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
