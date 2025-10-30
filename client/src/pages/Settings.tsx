@@ -23,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import AboutPage from "@/pages/AboutPage";
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -33,14 +34,14 @@ export default function Settings() {
   // Get tab from URL query parameter
   const searchParams = new URLSearchParams(window.location.search);
   const tabParam = searchParams.get('tab');
-  const initialTab = tabParam === 'financial' ? 'financial' : tabParam === 'terms' ? 'terms' : 'company';
+  const initialTab = tabParam === 'financial' ? 'financial' : tabParam === 'terms' ? 'terms' : tabParam === 'about' ? 'about' : 'company';
   const [activeTab, setActiveTab] = useState(initialTab);
   
   // Update tab when URL changes
   useEffect(() => {
     const newSearchParams = new URLSearchParams(window.location.search);
     const newTabParam = newSearchParams.get('tab');
-    const newTab = newTabParam === 'financial' ? 'financial' : newTabParam === 'terms' ? 'terms' : 'company';
+    const newTab = newTabParam === 'financial' ? 'financial' : newTabParam === 'terms' ? 'terms' : newTabParam === 'about' ? 'about' : 'company';
     setActiveTab(newTab);
   }, [location]);
 
@@ -409,7 +410,7 @@ export default function Settings() {
 
         <Form {...form}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="company" data-testid="tab-company">
                 {t('nav.companySettings')}
               </TabsTrigger>
@@ -418,6 +419,9 @@ export default function Settings() {
               </TabsTrigger>
               <TabsTrigger value="terms" data-testid="tab-terms">
                 {t('nav.termsConditions')}
+              </TabsTrigger>
+              <TabsTrigger value="about" data-testid="tab-about">
+                {t('nav.about')}
               </TabsTrigger>
             </TabsList>
 
@@ -1760,6 +1764,10 @@ export default function Settings() {
                 </Button>
               </CardFooter>
             </Card>
+            </TabsContent>
+
+            <TabsContent value="about">
+              <AboutPage />
             </TabsContent>
           </Tabs>
         </Form>

@@ -41,6 +41,7 @@ const UserActivity = lazy(() => import("@/pages/UserActivity"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
 const SupportPage = lazy(() => import("@/pages/SupportPage"));
+const AboutPage = lazy(() => import("@/pages/AboutPage"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -159,6 +160,9 @@ function Router() {
       </Route>
       <Route path="/support">
         {() => <ProtectedRoute component={SupportPage} />}
+      </Route>
+      <Route path="/settings/about">
+        {() => <ProtectedRoute component={AboutPage} />}
       </Route>
       <Route component={() => <NotFound />} />
       </Switch>

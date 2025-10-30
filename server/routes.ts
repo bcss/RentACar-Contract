@@ -118,6 +118,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // System health endpoint
+  app.get('/api/system/health', isAuthenticated, async (req: any, res) => {
+    try {
+      // Check database health
+      let dbStatus = 'healthy';
+      let dbMessage = 'Database connection is healthy';
+      
+      try {
+        // Simple health check - try to fetch a count
+        const users = await storage.getAllUsers();
+        if (!users) {
+          dbStatus = 'error';
+          dbMessage = 'Failed to query database';
+        }
+      } catch (dbError) {
+        dbStatus = 'error';
+        dbMessage = 'Database connection error';
+      }
+
+      // Get record counts
+      const [users, customers, vehicles, contracts, companies, sponsors] = await Promise.all([
+        storage.getAllUsers(),
+        storage.getCustomers(true),
+        storage.getVehicles(true),
+        storage.getAllContracts(),
+        storage.getCompanies(true),
+        storage.getSponsors(true),
+      ]);
+
+      const activeContracts = contracts.filter((c: any) => c.status === 'active').length;
+      const totalRecords = 
+        users.length + 
+        customers.length + 
+        vehicles.length + 
+        contracts.length + 
+        companies.length + 
+        sponsors.length;
+
+      // Estimate database size (rough calculation)
+      const avgRecordSize = 2; // KB per record (rough estimate)
+      const estimatedSizeKB = totalRecords * avgRecordSize;
+      const estimatedSizeMB = estimatedSizeKB / 1024;
+      
+      let estimatedSize = '';
+      if (estimatedSizeMB < 1) {
+        estimatedSize = `${estimatedSizeKB.toFixed(0)} KB`;
+      } else if (estimatedSizeMB < 1024) {
+        estimatedSize = `${estimatedSizeMB.toFixed(2)} MB`;
+      } else {
+        estimatedSize = `${(estimatedSizeMB / 1024).toFixed(2)} GB`;
+      }
+
+      res.json({
+        database: {
+          status: dbStatus,
+          message: dbMessage,
+        },
+        counts: {
+          users: users.length,
+          customers: customers.length,
+          vehicles: vehicles.length,
+          contracts: contracts.length,
+          activeContracts,
+          companies: companies.length,
+          sponsors: sponsors.length,
+        },
+        storage: {
+          totalRecords,
+          estimatedSize,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching system health:", error);
+      res.status(500).json({ 
+        database: {
+          status: 'error',
+          message: 'Failed to fetch system health',
+        },
+        counts: {
+          users: 0,
+          customers: 0,
+          vehicles: 0,
+          contracts: 0,
+          activeContracts: 0,
+          companies: 0,
+          sponsors: 0,
+        },
+        storage: {
+          totalRecords: 0,
+          estimatedSize: '0 KB',
+        },
+      });
+    }
+  });
+
   // Customer routes
   app.get("/api/customers", isAuthenticated, async (req: any, res) => {
     try {
