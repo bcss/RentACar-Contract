@@ -85,6 +85,13 @@ export async function setupAuth(app: Express) {
           return res.status(500).json({ message: "Login failed" });
         }
 
+        // Update last login timestamp
+        try {
+          await storage.updateLastLogin(user.id);
+        } catch (error) {
+          console.error("Error updating last login:", error);
+        }
+
         // Create audit log for login
         try {
           const ipAddress = req.ip;

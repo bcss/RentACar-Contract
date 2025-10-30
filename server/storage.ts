@@ -51,6 +51,7 @@ export interface IStorage {
   getDisabledUsers(): Promise<User[]>;
   updateUserRole(userId: string, role: string): Promise<User>;
   updateUserPassword(userId: string, passwordHash: string): Promise<User>;
+  updateLastLogin(userId: string): Promise<User>;
   disableUser(userId: string, disabledBy: string): Promise<User>;
   enableUser(userId: string): Promise<User>;
   
@@ -217,6 +218,17 @@ export class DatabaseStorage implements IStorage {
         passwordHash, 
         lastPasswordChange: new Date(),
         updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateLastLogin(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        lastLoginAt: new Date()
       })
       .where(eq(users.id, userId))
       .returning();
