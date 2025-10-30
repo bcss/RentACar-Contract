@@ -52,6 +52,7 @@ export const users = pgTable("users", {
   disabledBy: varchar("disabled_by"),
   disabledAt: timestamp("disabled_at"),
   lastPasswordChange: timestamp("last_password_change").defaultNow(),
+  lastLoginAt: timestamp("last_login_at"), // Track last successful login for dashboard display
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
