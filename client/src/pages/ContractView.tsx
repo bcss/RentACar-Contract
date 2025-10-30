@@ -2662,6 +2662,7 @@ export default function ContractView() {
           </div>
 
           <VehicleInspectionForm
+            key={showInspectionDialog ? 'pre-delivery-open' : 'pre-delivery-closed'}
             inspectionType="pre_delivery"
             onSubmit={handleInspectionSubmit}
             onCancel={() => setShowInspectionDialog(false)}
@@ -2679,6 +2680,7 @@ export default function ContractView() {
             </DialogDescription>
           </DialogHeader>
           <VehicleInspectionForm
+            key={showPostReturnInspectionDialog ? 'post-return-open' : 'post-return-closed'}
             inspectionType="post_return"
             onSubmit={handlePostReturnInspectionSubmit}
             onCancel={() => setShowPostReturnInspectionDialog(false)}

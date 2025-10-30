@@ -18,6 +18,15 @@ export async function generateContractPDF(
       return null;
     }
 
+    // Ensure element has dimensions before capturing
+    const elementWidth = element.scrollWidth || element.offsetWidth || element.clientWidth;
+    const elementHeight = element.scrollHeight || element.offsetHeight || element.clientHeight;
+    
+    if (!elementWidth || !elementHeight || elementWidth <= 0 || elementHeight <= 0) {
+      console.error('Element has no dimensions:', { elementWidth, elementHeight });
+      return null;
+    }
+
     // Capture the contract as a canvas
     const canvas = await html2canvas(element, {
       backgroundColor: '#ffffff',
@@ -25,14 +34,27 @@ export async function generateContractPDF(
       logging: false,
       useCORS: true,
       allowTaint: true,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
+      windowWidth: elementWidth,
+      windowHeight: elementHeight,
     });
+
+    // Validate canvas dimensions
+    if (!canvas || !canvas.width || !canvas.height || canvas.width <= 0 || canvas.height <= 0) {
+      console.error('Invalid canvas dimensions:', { canvasWidth: canvas?.width, canvasHeight: canvas?.height });
+      return null;
+    }
 
     // Calculate PDF dimensions
     const imgWidth = 210; // A4 width in mm
     const pageHeight = 297; // A4 height in mm
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    // Validate calculated dimensions
+    if (!imgHeight || isNaN(imgHeight) || !isFinite(imgHeight) || imgHeight <= 0) {
+      console.error('Invalid calculated image height:', { imgHeight, canvasWidth: canvas.width, canvasHeight: canvas.height });
+      return null;
+    }
+    
     let heightLeft = imgHeight;
     let position = 0;
 
