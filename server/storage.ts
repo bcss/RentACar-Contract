@@ -421,13 +421,14 @@ export class DatabaseStorage implements IStorage {
     return confirmed;
   }
 
-  async activateContract(id: string, userId: string): Promise<Contract> {
+  async activateContract(id: string, userId: string, timeOut?: string): Promise<Contract> {
     const [activated] = await db
       .update(contracts)
       .set({
         status: 'active',
         activatedBy: userId,
         activatedAt: new Date(),
+        timeOut: timeOut, // Capture actual vehicle handover time
         updatedAt: new Date(),
       })
       .where(eq(contracts.id, id))

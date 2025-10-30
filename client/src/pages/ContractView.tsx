@@ -62,6 +62,12 @@ export default function ContractView() {
   const [showInspectionDialog, setShowInspectionDialog] = useState(false);
   const [showPostReturnInspectionDialog, setShowPostReturnInspectionDialog] = useState(false);
 
+  // Activation workflow - capture actual vehicle handover time
+  const [timeOut, setTimeOut] = useState(() => {
+    const now = new Date();
+    return now.toTimeString().slice(0, 5); // HH:MM format
+  });
+
   // Return workflow form state
   const [odometerEnd, setOdometerEnd] = useState('');
   const [fuelLevelEnd, setFuelLevelEnd] = useState('');
@@ -69,6 +75,10 @@ export default function ContractView() {
   const [fuelCharge, setFuelCharge] = useState('');
   const [damageCharge, setDamageCharge] = useState('');
   const [otherCharges, setOtherCharges] = useState('');
+  const [timeIn, setTimeIn] = useState(() => {
+    const now = new Date();
+    return now.toTimeString().slice(0, 5); // HH:MM format
+  });
 
   // Payment method states
   const [depositPaymentMethod, setDepositPaymentMethod] = useState('');
@@ -282,7 +292,7 @@ export default function ContractView() {
 
   const activateMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('POST', `/api/contracts/${params.id}/activate`, {});
+      return await apiRequest('POST', `/api/contracts/${params.id}/activate`, { timeOut });
     },
     onSuccess: () => {
       toast({
@@ -2559,6 +2569,28 @@ export default function ContractView() {
               {t('inspection.preDeliveryDescription')}
             </DialogDescription>
           </DialogHeader>
+          
+          {/* Vehicle Handover Time */}
+          <div className="space-y-2 p-4 bg-card border rounded-lg">
+            <Label htmlFor="timeOut" className="text-sm font-medium">
+              {t('contracts.vehicleHandoverTime')} *
+            </Label>
+            <div className="flex items-center gap-2">
+              <span className="material-icons text-muted-foreground">schedule</span>
+              <Input
+                id="timeOut"
+                type="time"
+                value={timeOut}
+                onChange={(e) => setTimeOut(e.target.value)}
+                data-testid="input-time-out"
+                className="max-w-xs"
+              />
+              <span className="text-sm text-muted-foreground">
+                {t('contracts.timeOutHelp')}
+              </span>
+            </div>
+          </div>
+
           <VehicleInspectionForm
             inspectionType="pre_delivery"
             onSubmit={handleInspectionSubmit}

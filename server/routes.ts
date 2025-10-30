@@ -942,6 +942,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/contracts/:id/activate', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      const { timeOut } = req.body; // Capture actual vehicle handover time
+      
       const contract = await storage.getContract(req.params.id);
       
       if (!contract) {
@@ -960,13 +962,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const activated = await storage.activateContract(req.params.id, userId);
+      const activated = await storage.activateContract(req.params.id, userId, timeOut);
       
       // Update vehicle status to "rented" (in case it wasn't set during confirm)
       await storage.updateVehicle(activated.vehicleId, { status: "rented" });
       
       // Create audit log
-      await createAuditLog(userId, 'activate', activated.id, req, `Activated contract #${activated.contractNumber} - vehicle handed over`);
+      await createAuditLog(userId, 'activate', activated.id, req, `Activated contract #${activated.contractNumber} - vehicle handed over at ${timeOut || 'N/A'}`);
       
       res.json(activated);
     } catch (error: any) {
