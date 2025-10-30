@@ -44,6 +44,8 @@ import {
 import { format } from 'date-fns';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import { ZoomIn } from 'lucide-react';
+import { PDFPreviewModal } from '@/components/PDFPreviewModal';
+import { generateContractPDF } from '@/utils/contractPDF';
 
 export default function ContractView() {
   const { t, i18n } = useTranslation();
@@ -61,6 +63,8 @@ export default function ContractView() {
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [showInspectionDialog, setShowInspectionDialog] = useState(false);
   const [showPostReturnInspectionDialog, setShowPostReturnInspectionDialog] = useState(false);
+  const [showPDFPreview, setShowPDFPreview] = useState(false);
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
 
   // Activation workflow - capture actual vehicle handover time
   const [timeOut, setTimeOut] = useState(() => {
@@ -553,20 +557,36 @@ export default function ContractView() {
 
   const handlePrint = async () => {
     try {
-      await apiRequest('POST', '/api/audit-logs', {
-        action: 'print',
-        contractId: contract?.id,
-        details: `Printed contract #${contract?.contractNumber}`,
-      });
+      // Generate PDF from contract element
+      const blob = await generateContractPDF(
+        'contract-content',
+        `Contract_${contract?.contractNumber}.pdf`
+      );
       
-      window.print();
-      
-      toast({
-        title: t('common.success'),
-        description: t('msg.printSuccess'),
-      });
+      if (blob) {
+        setPdfBlob(blob);
+        setShowPDFPreview(true);
+        
+        // Log the action
+        await apiRequest('POST', '/api/audit-logs', {
+          action: 'print',
+          contractId: contract?.id,
+          details: `Generated PDF preview for contract #${contract?.contractNumber}`,
+        });
+      } else {
+        toast({
+          title: t('common.error'),
+          description: t('pdf.generationError'),
+          variant: "destructive",
+        });
+      }
     } catch (error) {
-      console.error('Print error:', error);
+      console.error('PDF generation error:', error);
+      toast({
+        title: t('common.error'),
+        description: t('pdf.generationError'),
+        variant: "destructive",
+      });
     }
   };
 
@@ -714,9 +734,11 @@ export default function ContractView() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Company Header - Visible only when printing */}
-      {companySettings && (
-        <div className="print-only border-2 border-black p-4 mb-6">
+      {/* Contract Content Wrapper for PDF Generation */}
+      <div id="contract-content">
+        {/* Company Header - Visible only when printing */}
+        {companySettings && (
+          <div className="print-only border-2 border-black p-4 mb-6">
           <div className="grid grid-cols-3 gap-4 items-start">
             {/* Left: English Company Info */}
             <div className="text-left">
@@ -1327,6 +1349,8 @@ export default function ContractView() {
           </div>
         </div>
       )}
+      </div>
+      {/* End of contract-content wrapper */}
 
       <div className="flex items-center justify-between flex-wrap gap-4 no-print">
         <div>
@@ -2661,6 +2685,15 @@ export default function ContractView() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* PDF Preview Modal */}
+      <PDFPreviewModal
+        open={showPDFPreview}
+        onOpenChange={setShowPDFPreview}
+        pdfBlob={pdfBlob}
+        title={`${t('contracts.contract')} #${contract?.contractNumber || ''}`}
+        filename={`Contract_${contract?.contractNumber || 'Unknown'}.pdf`}
+      />
     </div>
   );
 }
