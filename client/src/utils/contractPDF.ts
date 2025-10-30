@@ -18,12 +18,29 @@ export async function generateContractPDF(
       return null;
     }
 
+    // Temporarily show print-only content for PDF generation
+    const printOnlyElements = element.querySelectorAll('.print-only');
+    const originalDisplays: string[] = [];
+    
+    printOnlyElements.forEach((el, index) => {
+      const htmlEl = el as HTMLElement;
+      originalDisplays[index] = htmlEl.style.display;
+      htmlEl.style.display = 'block';
+    });
+
+    // Wait a moment for layout to update
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // Ensure element has dimensions before capturing
     const elementWidth = element.scrollWidth || element.offsetWidth || element.clientWidth;
     const elementHeight = element.scrollHeight || element.offsetHeight || element.clientHeight;
     
     if (!elementWidth || !elementHeight || elementWidth <= 0 || elementHeight <= 0) {
       console.error('Element has no dimensions:', { elementWidth, elementHeight });
+      // Restore display states
+      printOnlyElements.forEach((el, index) => {
+        (el as HTMLElement).style.display = originalDisplays[index];
+      });
       return null;
     }
 
@@ -36,6 +53,11 @@ export async function generateContractPDF(
       allowTaint: true,
       windowWidth: elementWidth,
       windowHeight: elementHeight,
+    });
+
+    // Restore original display states
+    printOnlyElements.forEach((el, index) => {
+      (el as HTMLElement).style.display = originalDisplays[index];
     });
 
     // Validate canvas dimensions
@@ -78,6 +100,18 @@ export async function generateContractPDF(
     return pdf.output('blob');
   } catch (error) {
     console.error('Failed to generate contract PDF:', error);
+    // Make sure to restore display states even if there's an error
+    try {
+      const element = document.getElementById(elementId);
+      if (element) {
+        const printOnlyElements = element.querySelectorAll('.print-only');
+        printOnlyElements.forEach((el) => {
+          (el as HTMLElement).style.display = '';
+        });
+      }
+    } catch (restoreError) {
+      console.error('Failed to restore print-only elements:', restoreError);
+    }
     return null;
   }
 }
