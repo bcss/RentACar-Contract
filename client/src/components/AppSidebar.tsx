@@ -1,7 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'wouter';
+import { Link as WouterLink, useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
+
+// Create a ref-forwarding Link component for compatibility with Radix UI Slot
+const Link = forwardRef<HTMLAnchorElement, React.ComponentProps<typeof WouterLink>>((props, ref) => {
+  return <WouterLink {...props} ref={ref as any} />;
+});
+Link.displayName = 'Link';
 import { useQuery } from '@tanstack/react-query';
 import { CompanySettings } from '@shared/schema';
 import {
@@ -449,40 +455,38 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             <SidebarMenu>
               {/* Dashboard */}
               <SidebarMenuItem>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <SidebarMenuButton asChild isActive={location === '/'} data-testid="nav-dashboard">
-                      <Link href="/">
-                        <span className="material-icons">dashboard</span>
-                        {sidebarState === 'expanded' && <span>{t('nav.dashboard')}</span>}
-                      </Link>
-                    </SidebarMenuButton>
-                  </TooltipTrigger>
-                  {sidebarState === 'collapsed' && (
-                    <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
-                      <p>{t('nav.dashboard')}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={location === '/'} 
+                  data-testid="nav-dashboard"
+                  tooltip={{
+                    children: t('nav.dashboard'),
+                    side: language === 'ar' ? 'left' : 'right'
+                  }}
+                >
+                  <Link href="/">
+                    <span className="material-icons">dashboard</span>
+                    {sidebarState === 'expanded' && <span>{t('nav.dashboard')}</span>}
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
 
               {/* Contracts */}
               <SidebarMenuItem>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <SidebarMenuButton asChild isActive={location === '/contracts'} data-testid="nav-contracts">
-                      <Link href="/contracts">
-                        <span className="material-icons">description</span>
-                        {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
-                      </Link>
-                    </SidebarMenuButton>
-                  </TooltipTrigger>
-                  {sidebarState === 'collapsed' && (
-                    <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
-                      <p>{t('nav.contracts')}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={location === '/contracts'} 
+                  data-testid="nav-contracts"
+                  tooltip={{
+                    children: t('nav.contracts'),
+                    side: language === 'ar' ? 'left' : 'right'
+                  }}
+                >
+                  <Link href="/contracts">
+                    <span className="material-icons">description</span>
+                    {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
 
               {/* Masters - Collapsible */}
