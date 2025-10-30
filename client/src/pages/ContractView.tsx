@@ -606,6 +606,7 @@ export default function ContractView() {
     
     completeMutation.mutate({
       earlyClosureReason: isEarlyCompletion ? earlyClosureReason : undefined,
+      timeIn, // Capture actual vehicle return time
       odometerEnd: odometerEndNum,
       fuelLevelEnd,
       vehicleCondition,
@@ -2141,6 +2142,27 @@ export default function ContractView() {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Vehicle Return Time */}
+            <div className="p-4 bg-card border rounded-lg">
+              <Label htmlFor="timeIn" className="text-sm font-medium">
+                {t('contracts.vehicleReturnTime')} *
+              </Label>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="material-icons text-muted-foreground">schedule</span>
+                <Input
+                  id="timeIn"
+                  type="time"
+                  value={timeIn}
+                  onChange={(e) => setTimeIn(e.target.value)}
+                  data-testid="input-time-in"
+                  className="max-w-xs"
+                />
+                <span className="text-sm text-muted-foreground">
+                  {t('contracts.timeInHelp')}
+                </span>
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="odometer-end">Odometer End (km) *</Label>
               <Input

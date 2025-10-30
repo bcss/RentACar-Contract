@@ -997,7 +997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride, earlyClosureReason } = req.body;
+      const { timeIn, odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride, earlyClosureReason } = req.body;
       
       // SECURITY: Calculate fuel charge on backend instead of trusting client
       const vehicle = await storage.getVehicleById(contract.vehicleId);
@@ -1048,8 +1048,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         outstandingBalance,
       };
 
-      // Update contract with return inspection data and early closure reason (Task 11)
+      // Update contract with return inspection data, timeIn, and early closure reason (Task 11)
       await storage.updateContract(req.params.id, {
+        timeIn, // Capture actual vehicle return time
         odometerEnd,
         fuelLevelEnd,
         vehicleCondition,
@@ -1062,8 +1063,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update vehicle status to "available" after return
       await storage.updateVehicle(completed.vehicleId, { status: "available" });
       
-      // Create audit log with calculation details
-      await createAuditLog(userId, 'complete', completed.id, req, auditNote);
+      // Create audit log with calculation details and return time
+      const finalAuditNote = `${auditNote}${timeIn ? ` | Vehicle returned at ${timeIn}` : ''}`;
+      await createAuditLog(userId, 'complete', completed.id, req, finalAuditNote);
       
       res.json(completed);
     } catch (error: any) {
