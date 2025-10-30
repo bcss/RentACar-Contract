@@ -290,7 +290,7 @@ export default function Dashboard() {
               {user?.role ? t(`users.roles.${user.role}`) : 'User'}
             </Badge>
             <span>•</span>
-            <span data-testid="text-last-login">Last login: {lastLoginText}</span>
+            <span data-testid="text-last-login">{t('greeting.lastLogin')}: {lastLoginText}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
