@@ -709,6 +709,29 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Professional Footer - Version and Links */}
+        {sidebarState === 'expanded' && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="text-center space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">RCCMS Rental Management System</p>
+              <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+              <div className="flex items-center justify-center gap-2 text-xs">
+                <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground hover:underline" data-testid="link-privacy">
+                  Privacy Policy
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground hover:underline" data-testid="link-terms">
+                  Terms of Service
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link href="/support" className="text-muted-foreground hover:text-foreground hover:underline" data-testid="link-support">
+                  Support
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </SidebarFooter>
 
       <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>

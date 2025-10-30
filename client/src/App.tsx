@@ -38,6 +38,9 @@ const OperationalReports = lazy(() => import("@/pages/OperationalReports"));
 const CustomerReports = lazy(() => import("@/pages/CustomerReports"));
 const AuditReports = lazy(() => import("@/pages/AuditReports"));
 const UserActivity = lazy(() => import("@/pages/UserActivity"));
+const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
+const SupportPage = lazy(() => import("@/pages/SupportPage"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -147,6 +150,15 @@ function Router() {
       </Route>
       <Route path="/reports/user-activity">
         {() => <ProtectedRoute component={UserActivity} />}
+      </Route>
+      <Route path="/privacy-policy">
+        {() => <ProtectedRoute component={PrivacyPolicy} />}
+      </Route>
+      <Route path="/terms-of-service">
+        {() => <ProtectedRoute component={TermsOfServicePage} />}
+      </Route>
+      <Route path="/support">
+        {() => <ProtectedRoute component={SupportPage} />}
       </Route>
       <Route component={() => <NotFound />} />
       </Switch>
