@@ -22,8 +22,9 @@ For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 ### 🌍 **Bilingual Support (English/Arabic)**
 - **Complete RTL/LTR Support**: Seamless switching between English and Arabic with proper right-to-left layout
 - **Bilingual Data Entry**: All master data (customers, vehicles, companies) stored in both languages
-- **Localized Interface**: Every button, label, and message adapts to the selected language
+- **Localized Interface**: Every button, label, and message adapts to the selected language, including Dashboard time-ago formatting ("2 hours ago"/"منذ ساعتين") and system notifications
 - **Professional Arabic Typography**: Custom Cairo font for beautiful Arabic text rendering
+- **Complete i18n Coverage**: All UI elements fully bilingual with proper pluralization support
 
 ### 📋 **Complete Contract Lifecycle Management**
 

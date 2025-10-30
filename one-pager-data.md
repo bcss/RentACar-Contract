@@ -71,6 +71,7 @@ Complete English and Arabic interface with automatic RTL/LTR switching. Professi
 - ✅ Professional bilingual PDF contracts
 - ✅ Material Design 3 with Arabic typography (Cairo font)
 - ✅ Seamless language switching for staff and customers
+- ✅ **Complete i18n coverage** - Dashboard time-ago formatting, system notifications, all UI elements fully bilingual
 
 **Impact:** Serve both Arabic and English-speaking customers professionally
 

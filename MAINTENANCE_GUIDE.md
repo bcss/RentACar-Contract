@@ -92,6 +92,43 @@ During comprehensive documentation review, systematic codebase analysis uncovere
 **No Database Migrations Required:**
 All fixes were code-only changes in application layer. No schema modifications or data migrations needed. Full backward compatibility maintained.
 
+### Dashboard Bilingual Enhancements (October 30, 2025)
+
+**UI/UX Improvements:**
+
+Complete i18n integration for Dashboard user-facing elements to eliminate any remaining hard-coded English strings:
+
+**Enhancement #1: Time-Ago Translation Support**
+- **Implementation**: Refactored `getTimeAgo()` helper in `client/src/utils/timeGreeting.ts`
+- **Change**: Returns `{key: string, count?: number}` structure instead of hard-coded strings
+- **Impact**: Last login timestamps now properly bilingual ("2 hours ago"/"منذ ساعتين")
+- **Files Modified**: `client/src/utils/timeGreeting.ts`, `client/src/pages/Dashboard.tsx`
+
+**Enhancement #2: System Errors Banner i18n**
+- **Implementation**: Converted hard-coded error banner text to translation keys
+- **Change**: Uses `t('systemErrors.unacknowledgedCount')` and `t('systemErrors.clickToView')`
+- **Impact**: Error notifications now fully bilingual with proper pluralization
+- **Files Modified**: `client/src/pages/Dashboard.tsx`, `client/src/lib/i18n.ts`
+
+**Enhancement #3: Translation Keys Added**
+- **English**: timeAgo.* (7 keys), systemErrors.* (2 keys), greeting.lastLogin
+- **Arabic**: Corresponding translations with proper pluralization
+- **Impact**: Complete bilingual coverage for all Dashboard UI elements
+
+**Enhancement #4: React Component Fixes**
+- **Issue**: React ref warnings in SidebarMenuButton component
+- **Fix**: Converted to `React.forwardRef()` pattern
+- **Change**: Created ref-forwarding Link wrapper for Radix UI compatibility
+- **Impact**: Clean console output, production-ready React patterns
+- **Files Modified**: `client/src/components/ui/sidebar.tsx`, `client/src/components/AppSidebar.tsx`
+
+**Maintenance Implications:**
+- No database changes required
+- No API changes required
+- Fully backward compatible
+- Automatic language switching works seamlessly
+- Professional bilingual experience for all users
+
 ---
 
 ## System Architecture

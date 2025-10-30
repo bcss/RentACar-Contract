@@ -342,6 +342,7 @@ RCCMS isn't just translated - it's architected from day one to be truly bilingua
 - Context-aware translations (financial vs. legal terms)
 - English and Arabic available for all features
 - Dashboard, reports, settings - everything bilingual
+- **Complete i18n coverage** including time-ago formatting ("2 hours ago"/"منذ ساعتين"), system notifications, and all UI elements
 - No partial translations - 100% coverage
 - Professional terminology for rental car industry
 

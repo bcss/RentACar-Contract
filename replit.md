@@ -15,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **Key Features:** Context-based theme/language, custom authentication hooks, shared Zod schemas, print functionality, contract lifecycle management, comprehensive timeline visualization, route protection.
 - **Performance Optimizations:** Route-based lazy loading with React.lazy() and Suspense for all 21 pages (except Login which is eagerly loaded for immediate access), professional loading skeleton with spinner, optimized bundle splitting reduces initial load from ~744KB to ~50KB (88% reduction), 3-4x faster initial page load.
 - **Responsive Dashboard Metrics:** All 7 primary dashboard metric cards use adaptive text sizing (`text-2xl sm:text-3xl xl:text-4xl`) with automatic truncation for optimal display across mobile (24px), tablet (30px), and desktop (36px) viewports.
-- **Personalized User Experience:** Dashboard features time-based greeting (Good morning/afternoon/evening) with user's first name, role badge, and last login timestamp tracking. Non-obtrusive system errors banner at top of dashboard with click-to-navigate functionality.
+- **Personalized User Experience:** Dashboard features time-based greeting (Good morning/afternoon/evening) with user's first name, role badge, and last login timestamp tracking with full bilingual support (time-ago format: "2 hours ago"/"منذ ساعتين"). Non-obtrusive system errors banner at top of dashboard with click-to-navigate functionality and complete i18n translation support.
 - **Professional Navigation:** Sidebar footer includes RCCMS version information and direct links to Privacy Policy, Terms of Service, and Support pages (visible when sidebar expanded).
 
 ### Backend

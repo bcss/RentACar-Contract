@@ -144,6 +144,39 @@ The RCCMS system is **production-ready** with a comprehensive feature set and so
 - **Query Performance:** GIN indexes on JSONB enable fast photo retrieval
 - **Migration Trigger:** Move to object storage at 500+ contracts/month
 
+#### Dashboard Bilingual Enhancements (October 30, 2025)
+**IMPLEMENTATION RATIONALE:**
+
+**1. Complete i18n Integration for Dashboard**
+- **Time-Ago Translation Support:** Refactored `getTimeAgo()` helper to return translation-ready data structure `{key: string, count?: number}` for full i18n compatibility
+- **System Errors Banner i18n:** Converted hard-coded English strings to translation keys for bilingual support
+- **Translation Keys Added:** Complete timeAgo.* and systemErrors.* keys in both English and Arabic
+- **ROI Impact:** Professional bilingual experience for all user-facing dashboard elements
+
+**2. Technical Implementation Details**
+- **getTimeAgo() Refactor:** Returns `{key: 'timeAgo.hoursAgo', count: 2}` structure instead of hard-coded "2 hours ago"
+- **Dashboard Integration:** Uses `t(timeAgoResult.key, {count: timeAgoResult.count})` for dynamic translation
+- **Pluralization Support:** i18next handles singular/plural forms automatically (e.g., "1 hour ago" vs "2 hours ago")
+- **Arabic Time-Ago:** Properly displays "منذ ساعتين", "منذ دقيقة", "أمس", etc.
+
+**3. UI/UX Component Fixes**
+- **React Ref Warning Resolved:** Converted `SidebarMenuButton` to use `React.forwardRef()` for proper ref forwarding
+- **Link Component Wrapper:** Created ref-forwarding Link wrapper for compatibility with Radix UI Slot component
+- **Console Clean:** Eliminated all React ref warnings for production-ready console output
+- **Why this matters:** Professional developer experience and adherence to React best practices
+
+**4. Translation Coverage**
+- **Time Formats:** "Just now", "2 minutes ago", "3 hours ago", "Yesterday", "5 days ago" (all bilingual)
+- **System Errors:** Unacknowledged error count messages with proper pluralization in both languages
+- **Last Login Label:** "Last login:" / "آخر تسجيل دخول:" properly translated
+- **Complete Dashboard:** All user-facing text now fully bilingual
+
+**5. Business Impact**
+- **Professional Appearance:** No hard-coded English in Arabic mode - complete bilingual integrity
+- **Reduced Support Calls:** Arabic users see proper Arabic time formats without confusion
+- **Compliance Ready:** Full bilingual support meets regional language requirements
+- **User Trust:** Professional localization builds credibility with Arabic-speaking customers
+
 #### Schema Mismatch Bugs Discovered & Fixed (October 27, 2025)
 **DISCOVERY CONTEXT:**
 
