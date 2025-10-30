@@ -26,15 +26,16 @@ export function getTimeBasedGreeting(): { en: string; ar: string } {
 }
 
 /**
- * Format the time difference between two dates into human-readable format
- * E.g., "2 hours ago", "5 minutes ago", "yesterday"
+ * Calculate time difference and return translation key with parameters
+ * Use with i18n's t() function for bilingual support
  * 
  * @param date - The past date to compare with now
- * @returns Human-readable time difference string (English only, will be translated via i18n)
+ * @param locale - Optional locale for date formatting (defaults to browser locale)
+ * @returns Object with translation key and parameters, or formatted date string
  */
-export function getTimeAgo(date: Date | null | undefined): string {
+export function getTimeAgo(date: Date | null | undefined, locale?: string): { key: string; count?: number } | string {
   if (!date) {
-    return "Never";
+    return { key: "timeAgo.never" };
   }
   
   const now = new Date();
@@ -44,17 +45,17 @@ export function getTimeAgo(date: Date | null | undefined): string {
   const diffDays = Math.floor(diffMs / 86400000);
   
   if (diffMins < 1) {
-    return "Just now";
+    return { key: "timeAgo.justNow" };
   } else if (diffMins < 60) {
-    return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    return { key: "timeAgo.minutesAgo", count: diffMins };
   } else if (diffHours < 24) {
-    return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return { key: "timeAgo.hoursAgo", count: diffHours };
   } else if (diffDays === 1) {
-    return "Yesterday";
+    return { key: "timeAgo.yesterday" };
   } else if (diffDays < 7) {
-    return `${diffDays} days ago`;
+    return { key: "timeAgo.daysAgo", count: diffDays };
   } else {
     // For dates older than a week, show the actual date
-    return new Date(date).toLocaleDateString();
+    return new Date(date).toLocaleDateString(locale);
   }
 }

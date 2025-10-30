@@ -230,7 +230,21 @@ export default function Dashboard() {
   const greeting = getTimeBasedGreeting();
   const greetingText = i18n.language === 'ar' ? greeting.ar : greeting.en;
   const firstName = user?.firstName || user?.username || 'User';
-  const lastLoginText = user?.lastLoginAt ? getTimeAgo(new Date(user.lastLoginAt)) : 'Never';
+  
+  // Format last login time using i18n
+  const getLastLoginText = () => {
+    if (!user?.lastLoginAt) {
+      return t('timeAgo.never');
+    }
+    const timeAgoResult = getTimeAgo(new Date(user.lastLoginAt), i18n.language);
+    if (typeof timeAgoResult === 'string') {
+      // It's a formatted date string
+      return timeAgoResult;
+    }
+    // It's a translation key with optional count
+    return t(timeAgoResult.key, { count: timeAgoResult.count });
+  };
+  const lastLoginText = getLastLoginText();
 
   return (
     <div className="p-6 space-y-6">
@@ -238,16 +252,16 @@ export default function Dashboard() {
       {isAdmin && unacknowledgedErrors.length > 0 && !isErrorBannerDismissed && (
         <Alert variant="destructive" className="relative" data-testid="alert-system-errors">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>System Errors</AlertTitle>
+          <AlertTitle>{t('greeting.systemErrors')}</AlertTitle>
           <AlertDescription className="flex items-center justify-between">
             <span>
-              {unacknowledgedErrors.length} unacknowledged system error{unacknowledgedErrors.length > 1 ? 's' : ''} detected.{' '}
+              {t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}{' '}
               <button 
                 className="underline hover:no-underline"
                 onClick={() => setLocation('/system-errors')}
                 data-testid="link-view-errors"
               >
-                Click here to view and acknowledge.
+                {t('systemErrors.clickToView')}
               </button>
             </span>
             <Button

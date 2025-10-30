@@ -47,6 +47,22 @@ const resources = {
       "footer.termsOfService": "Terms of Service",
       "footer.support": "Support",
       
+      // Time Ago
+      "timeAgo.never": "Never",
+      "timeAgo.justNow": "Just now",
+      "timeAgo.minutesAgo": "{{count}} minute ago",
+      "timeAgo.minutesAgo_other": "{{count}} minutes ago",
+      "timeAgo.hoursAgo": "{{count}} hour ago",
+      "timeAgo.hoursAgo_other": "{{count}} hours ago",
+      "timeAgo.yesterday": "Yesterday",
+      "timeAgo.daysAgo": "{{count}} day ago",
+      "timeAgo.daysAgo_other": "{{count}} days ago",
+      
+      // System Errors
+      "systemErrors.unacknowledgedCount": "{{count}} unacknowledged system error detected.",
+      "systemErrors.unacknowledgedCount_other": "{{count}} unacknowledged system errors detected.",
+      "systemErrors.clickToView": "Click here to view and acknowledge.",
+      
       // Header Tooltips
       "header.toggleSidebar": "Toggle sidebar",
       "header.collapseSidebar": "Collapse sidebar",
@@ -851,6 +867,22 @@ const resources = {
       "footer.privacyPolicy": "سياسة الخصوصية",
       "footer.termsOfService": "شروط الخدمة",
       "footer.support": "الدعم",
+      
+      // Time Ago
+      "timeAgo.never": "أبداً",
+      "timeAgo.justNow": "الآن",
+      "timeAgo.minutesAgo": "منذ {{count}} دقيقة",
+      "timeAgo.minutesAgo_other": "منذ {{count}} دقيقة",
+      "timeAgo.hoursAgo": "منذ {{count}} ساعة",
+      "timeAgo.hoursAgo_other": "منذ {{count}} ساعة",
+      "timeAgo.yesterday": "أمس",
+      "timeAgo.daysAgo": "منذ {{count}} يوم",
+      "timeAgo.daysAgo_other": "منذ {{count}} يوم",
+      
+      // System Errors
+      "systemErrors.unacknowledgedCount": "تم اكتشاف {{count}} خطأ نظام غير مقر به.",
+      "systemErrors.unacknowledgedCount_other": "تم اكتشاف {{count}} أخطاء نظام غير مقر بها.",
+      "systemErrors.clickToView": "انقر هنا للعرض والإقرار.",
       
       // Header Tooltips
       "header.toggleSidebar": "إظهار/إخفاء الشريط الجانبي",
