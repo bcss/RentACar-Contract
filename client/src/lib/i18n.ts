@@ -340,6 +340,21 @@ const resources = {
       "contracts.confirmEnableContract": "Are you sure you want to enable this contract?",
       "contracts.activeContracts": "Active Contracts",
       "contracts.createContract": "Create Contract",
+      "contracts.vehicleHandoverTime": "Vehicle Handover Time",
+      "contracts.vehicleReturnTime": "Vehicle Return Time",
+      "contracts.timeOutHelp": "Actual time when vehicle was handed over to customer",
+      "contracts.timeInHelp": "Actual time when customer returned the vehicle",
+      "contracts.trafficFineCharge": "Traffic Fines",
+      "contracts.trafficFineHelp": "Any traffic violations or fines incurred during the rental period",
+      "contracts.contract": "Contract",
+      
+      // PDF Preview
+      "pdf.noPdfLoaded": "No PDF loaded",
+      "pdf.saveAsPDF": "Save as PDF",
+      "pdf.printError": "Could not open print window. Please check your popup blocker settings.",
+      "pdf.saveSuccess": "PDF saved successfully",
+      "pdf.saveError": "Failed to save PDF. Please try again.",
+      "pdf.generationError": "Failed to generate PDF. Please try again.",
       
       // Customer Management
       "customers.title": "Customer Management",
@@ -1161,6 +1176,21 @@ const resources = {
       "contracts.confirmEnableContract": "هل أنت متأكد أنك تريد تفعيل هذا العقد؟",
       "contracts.activeContracts": "العقود النشطة",
       "contracts.createContract": "إنشاء عقد",
+      "contracts.vehicleHandoverTime": "وقت تسليم المركبة",
+      "contracts.vehicleReturnTime": "وقت إرجاع المركبة",
+      "contracts.timeOutHelp": "الوقت الفعلي لتسليم المركبة للعميل",
+      "contracts.timeInHelp": "الوقت الفعلي لإرجاع العميل للمركبة",
+      "contracts.trafficFineCharge": "المخالفات المرورية",
+      "contracts.trafficFineHelp": "أي مخالفات مرورية أو غرامات تم تكبدها خلال فترة الإيجار",
+      "contracts.contract": "عقد",
+      
+      // PDF Preview
+      "pdf.noPdfLoaded": "لم يتم تحميل ملف PDF",
+      "pdf.saveAsPDF": "حفظ كملف PDF",
+      "pdf.printError": "تعذر فتح نافذة الطباعة. يرجى التحقق من إعدادات حظر النوافذ المنبثقة.",
+      "pdf.saveSuccess": "تم حفظ ملف PDF بنجاح",
+      "pdf.saveError": "فشل حفظ ملف PDF. يرجى المحاولة مرة أخرى.",
+      "pdf.generationError": "فشل إنشاء ملف PDF. يرجى المحاولة مرة أخرى.",
       
       // Customer Management
       "customers.title": "إدارة العملاء",
