@@ -75,9 +75,7 @@ const contractFormSchema = z.object({
   rentalEndDate: z.coerce.date(),
   rentalType: z.string().default('daily'),
   
-  // Time fields
-  timeIn: z.string().nullable().optional(),
-  timeOut: z.string().nullable().optional(),
+  // Note: timeIn and timeOut removed from creation - now captured during activation and return
   
   pickupLocation: z.string().min(1, "Pickup location is required"),
   dropoffLocation: z.string().min(1, "Dropoff location is required"),
@@ -231,8 +229,6 @@ export default function ContractForm() {
       rentalStartDate: new Date(),
       rentalEndDate: new Date(),
       rentalType: 'daily',
-      timeIn: '',
-      timeOut: '',
       pickupLocation: '',
       dropoffLocation: '',
       dailyRate: '',
@@ -1595,32 +1591,6 @@ export default function ContractForm() {
                         onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
                         data-testid="input-end-date"
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="timeIn"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.timeIn')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ''} type="time" placeholder="09:00" data-testid="input-time-in" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="timeOut"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.timeOut')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ''} type="time" placeholder="17:00" data-testid="input-time-out" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
