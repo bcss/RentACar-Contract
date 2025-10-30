@@ -11,6 +11,7 @@ import { Contract, SystemError, Vehicle } from '@shared/schema';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,14 +24,17 @@ import {
 } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { getTimeBasedGreeting, getTimeAgo } from '@/utils/timeGreeting';
+import { AlertCircle, X } from 'lucide-react';
 
 export default function Dashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, isAdmin, isManager } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin, isManager, user } = useAuth();
   const { currency } = useCurrency();
   const [, setLocation] = useLocation();
   const [isAcknowledgeAllDialogOpen, setIsAcknowledgeAllDialogOpen] = useState(false);
+  const [isErrorBannerDismissed, setIsErrorBannerDismissed] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -222,12 +226,58 @@ export default function Dashboard() {
     );
   }
 
+  // Get time-based greeting
+  const greeting = getTimeBasedGreeting();
+  const greetingText = i18n.language === 'ar' ? greeting.ar : greeting.en;
+  const firstName = user?.firstName || user?.username || 'User';
+  const lastLoginText = user?.lastLoginAt ? getTimeAgo(new Date(user.lastLoginAt)) : 'Never';
+
   return (
     <div className="p-6 space-y-6">
+      {/* System Errors Banner - Only show if there are unacknowledged errors and banner is not dismissed */}
+      {isAdmin && unacknowledgedErrors.length > 0 && !isErrorBannerDismissed && (
+        <Alert variant="destructive" className="relative" data-testid="alert-system-errors">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>System Errors</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              {unacknowledgedErrors.length} unacknowledged system error{unacknowledgedErrors.length > 1 ? 's' : ''} detected.{' '}
+              <button 
+                className="underline hover:no-underline"
+                onClick={() => setLocation('/system-errors')}
+                data-testid="link-view-errors"
+              >
+                Click here to view and acknowledge.
+              </button>
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 h-6 w-6"
+              onClick={() => setIsErrorBannerDismissed(true)}
+              data-testid="button-dismiss-error-banner"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">{t('dashboard.title')}</h1>
-          <p className="text-muted-foreground">{t('auth.welcomeBack')}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-lg text-muted-foreground" data-testid="text-greeting">
+              {greetingText}, <span className="font-semibold text-foreground">{firstName}</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+            <Badge variant="outline" className="font-normal" data-testid="badge-user-role">
+              {user?.role ? t(`users.roles.${user.role}`) : 'User'}
+            </Badge>
+            <span>•</span>
+            <span data-testid="text-last-login">Last login: {lastLoginText}</span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild data-testid="button-new-contract">
