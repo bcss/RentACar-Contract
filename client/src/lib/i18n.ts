@@ -24,12 +24,28 @@ const resources = {
       "nav.disabledUsers": "Disabled Users",
       "nav.disabledContracts": "Disabled Contracts",
       "nav.settings": "Settings",
+      "nav.about": "About",
       "nav.reports": "Reports",
       "nav.financialReports": "Financial Reports",
       "nav.operationalReports": "Operational Reports",
       "nav.customerReports": "Customer Reports",
       "nav.auditReports": "Audit Reports",
       "nav.userActivity": "User Activity",
+      
+      // Greetings
+      "greeting.goodMorning": "Good morning",
+      "greeting.goodAfternoon": "Good afternoon",
+      "greeting.goodEvening": "Good evening",
+      "greeting.lastLogin": "Last login",
+      "greeting.systemErrors": "System Errors",
+      "greeting.viewSystemErrors": "View system errors",
+      "greeting.dismissBanner": "Dismiss",
+      
+      // Footer
+      "footer.version": "Version",
+      "footer.privacyPolicy": "Privacy Policy",
+      "footer.termsOfService": "Terms of Service",
+      "footer.support": "Support",
       
       // Header Tooltips
       "header.toggleSidebar": "Toggle sidebar",
@@ -813,12 +829,28 @@ const resources = {
       "nav.disabledUsers": "المستخدمون المعطلون",
       "nav.disabledContracts": "العقود المعطلة",
       "nav.settings": "الإعدادات",
+      "nav.about": "حول النظام",
       "nav.reports": "التقارير",
       "nav.financialReports": "التقارير المالية",
       "nav.operationalReports": "التقارير التشغيلية",
       "nav.customerReports": "تقارير العملاء",
       "nav.auditReports": "تقارير التدقيق",
       "nav.userActivity": "نشاط المستخدمين",
+      
+      // Greetings
+      "greeting.goodMorning": "صباح الخير",
+      "greeting.goodAfternoon": "مساء الخير",
+      "greeting.goodEvening": "مساء الخير",
+      "greeting.lastLogin": "آخر تسجيل دخول",
+      "greeting.systemErrors": "أخطاء النظام",
+      "greeting.viewSystemErrors": "عرض أخطاء النظام",
+      "greeting.dismissBanner": "إخفاء",
+      
+      // Footer
+      "footer.version": "الإصدار",
+      "footer.privacyPolicy": "سياسة الخصوصية",
+      "footer.termsOfService": "شروط الخدمة",
+      "footer.support": "الدعم",
       
       // Header Tooltips
       "header.toggleSidebar": "إظهار/إخفاء الشريط الجانبي",
