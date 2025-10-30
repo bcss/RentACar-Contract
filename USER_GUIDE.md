@@ -190,34 +190,54 @@ The system features a professional Microsoft 365 Admin-style sidebar with icon-o
 
 ### Quick Stats Cards
 
-**Six Key Metrics:**
+The dashboard displays key business metrics with **responsive text sizing** that adapts perfectly to your device:
+- **Mobile phones** (small screens): Metrics display at 24px for easy reading
+- **Tablets** (medium screens): Metrics scale to 30px for optimal viewing
+- **Desktop** (large screens): Metrics shown at 36px for maximum impact
+- **Automatic truncation**: Long numbers never overflow or break the layout
 
-1. **Draft Contracts**
-   - Contracts in draft status
-   - Click to view all drafts
+**Seven Primary Metrics (with smart responsive sizing):**
 
-2. **Confirmed Contracts**
-   - Verified contracts awaiting vehicle handover
-   - Click to filter confirmed contracts
-
-3. **Active Rentals**
+1. **Active Contracts**
    - Currently rented vehicles
-   - Most important metric
-   - Click to view active contracts
+   - Most critical business metric
+   - Click to view all active contracts
 
-4. **Completed Rentals**
-   - Vehicles returned, pending final payment
-   - Click to view completed contracts
+2. **Monthly Revenue**
+   - Total revenue for current month
+   - Click to view financial reports
 
-5. **Closed Contracts**
-   - Fully paid and archived
-   - Click to view closed contracts
+3. **Overdue Returns**
+   - Contracts past return date
+   - Needs immediate attention
+   - Click to view overdue contracts
 
-6. **Total Contracts**
-   - All contracts in system
-   - Click to view all
+4. **Pending Refunds**
+   - Deposits awaiting return
+   - Click to view contracts pending refunds
 
-**Navigation**: Click any card to filter the contracts page to that status.
+5. **Vehicle Utilization**
+   - Percentage of fleet currently rented
+   - Click to view vehicle fleet
+
+6. **Payment Collection Rate**
+   - Percentage of payments collected
+   - Click to view payment collection details
+
+7. **Avg. Extra Charges**
+   - Average additional fees per completed contract
+   - Click to view extra charges details
+
+**Additional Status Cards:**
+
+8. **Draft Contracts** - Click to view all drafts
+9. **Confirmed Contracts** - Click to filter confirmed contracts
+10. **Completed Rentals** - Click to view completed contracts
+11. **Closed Contracts** - Click to view closed contracts
+12. **Cancelled Contracts** - Click to view cancelled contracts
+13. **Total Contracts** - Click to view all contracts
+
+**Navigation**: Click any card to instantly filter the contracts or reports page to that specific view.
 
 ---
 
