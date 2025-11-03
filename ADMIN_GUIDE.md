@@ -200,42 +200,169 @@ The RCCMS features a professional Microsoft 365 Admin-style sidebar interface op
 ### Overview
 User management is accessed via **Settings → System Users** in the sidebar.
 
-### User Roles
+### User Roles & Permission Toggles
+
+RCCMS implements a flexible role-based access control (RBAC) system with **4 core roles** enhanced by **3 granular permission toggles**. This design balances organizational simplicity with operational flexibility.
+
+**🔑 Permission Toggles Overview:**
+
+The system includes three targeted permission toggles that administrators can grant to users for enhanced capabilities:
+
+1. **canAccessReports** - Access to reports and analytics pages
+2. **canCloseContracts** - Ability to close completed contracts  
+3. **canViewAllContracts** - View all system contracts (not just own)
+
+**📚 Comprehensive Documentation:**
+- **ROLE_PERMISSIONS.md** - Full permission matrix and workflow examples
+- **OPERATIONAL_RUNBOOK.md** - Step-by-step operational procedures for managing toggles
+
+---
 
 #### 1. **Administrator (admin)**
-**Full System Access**
-- Create, edit, disable/enable all users
-- Access all contracts regardless of creator
-- Modify system settings
-- View and manage all master data
-- Delete payments
-- Access audit logs and system errors
-- Configure company and financial settings
+**Full System Access with Administrative Privileges**
+
+**Core Permissions:**
+- ✅ All system operations including user management
+- ✅ Company settings and financial settings configuration
+- ✅ Full contract lifecycle management (create, edit, confirm, activate, complete, close)
+- ✅ Reports and analytics access
+- ✅ Master data management (customers, vehicles, sponsors, companies)
+- ✅ Payment recording and tracking
+- ✅ Vehicle inspection workflows
+- ✅ Audit logs and system error viewing
+- ✅ User enable/disable operations
+- ✅ **Permission toggle management for other users**
+
+**Default Permission Toggles:**
+- `canAccessReports`: ✅ **true** (always enabled)
+- `canCloseContracts`: ✅ **true** (always enabled)
+- `canViewAllContracts`: ✅ **true** (always enabled)
+
+**Ideal For:** System administrators, IT managers
+
+---
 
 #### 2. **Manager (manager)**
-**Operational Management**
-- View all contracts
-- Create and manage contracts (all statuses)
-- Access audit logs
-- Manage payments (create, view)
-- View all master data
-- Cannot: delete users, modify system settings, delete payments
+**Business Operations Manager with Reporting Access**
+
+**Core Permissions:**
+- ✅ Full contract lifecycle management (create, edit, confirm, activate, complete, close)
+- ✅ Reports and analytics access
+- ✅ Master data management (customers, vehicles, sponsors, companies)
+- ✅ Payment recording and tracking
+- ✅ Vehicle inspection workflows
+- ✅ Audit logs and business operations viewing
+- ❌ User management (cannot create/edit/disable users)
+- ❌ Company settings and financial settings (read-only access)
+- ❌ Permission toggle management
+
+**Default Permission Toggles:**
+- `canAccessReports`: ✅ **true** (enabled by default)
+- `canCloseContracts`: ✅ **true** (enabled by default)
+- `canViewAllContracts`: ✅ **true** (enabled by default)
+
+**Ideal For:** Branch managers, operations managers, business managers
+
+---
 
 #### 3. **Staff (staff)**
-**Daily Operations**
-- Create contracts (own contracts only)
-- Edit contracts they created
-- View customers and vehicles
-- Basic reporting access
-- Cannot: access other users' contracts, modify settings, delete anything
+**Operational Staff with Flexible Permissions**
+
+Base staff permissions provide full operational workflow access without administrative capabilities. **Permission toggles can be granted to elevate capabilities as needed.**
+
+**Base Permissions:**
+- ✅ Contract creation and editing (draft status)
+- ✅ Contract confirmation (full operational workflow)
+- ✅ Contract activation and completion
+- ✅ Payment recording (deposits, final payments, refunds)
+- ✅ Vehicle inspection workflows (pre-delivery and post-return)
+- ✅ Master data management (customers, vehicles, sponsors, companies - create, edit)
+- ❌ Contract closure (requires `canCloseContracts` toggle)
+- ❌ Reports and analytics access (requires `canAccessReports` toggle)
+- ❌ User management
+- ❌ Company/financial settings
+- ❌ View all contracts (by default sees only own contracts, requires `canViewAllContracts` toggle)
+
+**Default Permission Toggles:**
+- `canAccessReports`: ❌ **false** (can be granted for analytics roles)
+- `canCloseContracts`: ❌ **false** (can be granted for senior staff)
+- `canViewAllContracts`: ❌ **false** (can be granted for cross-department visibility)
+
+**Common Staff Configurations:**
+
+| Configuration         | Reports | Close | ViewAll | Use Case                                |
+|-----------------------|---------|-------|---------|----------------------------------------|
+| Standard Staff        | ❌      | ❌    | ❌      | Daily operations, own contracts only   |
+| Senior Staff          | ❌      | ✅    | ❌      | Can finalize deals independently       |
+| Analytics Staff       | ✅      | ❌    | ✅      | Business intelligence and reporting    |
+| Full-Access Staff     | ✅      | ✅    | ✅      | Near-manager capabilities              |
+
+**Ideal For:** Rental agents, customer service staff, operational employees
+
+---
 
 #### 4. **Viewer (viewer)**
-**Read-Only Access**
-- View contracts (all)
-- View reports
-- View master data
-- Cannot: create, edit, or delete anything
-- Ideal for: accountants, supervisors, auditors
+**Read-Only Access for Auditing and Monitoring**
+
+**Core Permissions:**
+- ✅ View contracts (own contracts only by default)
+- ✅ View customers, vehicles, sponsors, companies
+- ✅ View company settings (read-only)
+- ❌ Create or modify any data
+- ❌ Payment operations
+- ❌ Contract lifecycle operations
+- ❌ Reports access (unless granted via toggle)
+- ❌ User management
+- ❌ System settings
+
+**Default Permission Toggles:**
+- `canAccessReports`: ❌ **false** (can be granted for audit/compliance roles)
+- `canCloseContracts`: ❌ **false** (N/A - viewers cannot modify contracts)
+- `canViewAllContracts`: ❌ **false** (can be granted for full visibility)
+
+**Common Viewer Configurations:**
+
+| Configuration         | Reports | Close | ViewAll | Use Case                                |
+|-----------------------|---------|-------|---------|----------------------------------------|
+| Limited Viewer        | ❌      | ❌    | ❌      | Department-specific read-only access   |
+| Audit Viewer          | ✅      | ❌    | ✅      | Compliance monitoring and reporting    |
+
+**Note:** Viewers typically don't need `canCloseContracts` since they have read-only access, but the toggle exists for potential future role elevation.
+
+**Ideal For:** Accountants, auditors, compliance officers, supervisors
+
+---
+
+### Permission Toggle Management
+
+**Who Can Manage Toggles:**  
+Only **Administrator** users can grant or revoke permission toggles for other users.
+
+**How to Grant/Revoke Toggles:**
+
+1. Navigate to **Settings → System Users**
+2. Click the **Edit** (pencil) icon next to the user
+3. Scroll to the **Permission Toggles** section
+4. Check/uncheck the desired toggles:
+   - ☑️ **Access Reports** - Enable reports and analytics access
+   - ☑️ **Close Contracts** - Allow closing completed contracts
+   - ☑️ **View All Contracts** - Grant system-wide contract visibility
+5. Click **"Save Changes"**
+6. User must log out and log back in for changes to take effect
+
+**Audit Trail:**  
+All permission toggle changes are automatically logged in the audit trail with full details (who changed what, when, and for which user).
+
+**Best Practices:**
+- ✅ Grant minimum permissions required for job function (principle of least privilege)
+- ✅ Review user permissions quarterly
+- ✅ Document justification for elevated permissions
+- ✅ Revoke toggles when no longer needed
+- ✅ Use permission toggles instead of role escalation when possible
+
+**Detailed Documentation:**
+- See **OPERATIONAL_RUNBOOK.md** for comprehensive toggle management procedures
+- See **ROLE_PERMISSIONS.md** for complete permission matrix and workflow examples
 
 ### Creating a New User
 

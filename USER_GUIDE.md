@@ -27,28 +27,92 @@ Welcome to the RCCMS Rental Car Contract Management System. This guide will help
 
 ### User Roles
 
-Your access level depends on your assigned role:
+Your access level depends on your assigned role, which can be enhanced with additional permission toggles for flexibility:
+
+#### Core Roles
 
 **Manager**
+- ✅ Full contract lifecycle management (create, confirm, activate, complete, close)
 - ✅ View and manage all contracts
 - ✅ Create customers, vehicles, sponsors, companies
 - ✅ Record and view payments
-- ✅ Access all reports
-- ✅ View audit logs
+- ✅ Access all reports and analytics
+- ✅ View audit logs and system monitoring
+- ❌ Cannot manage users or modify system settings
+
+**Default Permissions:**
+- ✅ Can Access Reports
+- ✅ Can Close Contracts
+- ✅ Can View All Contracts
 
 **Staff**
-- ✅ Create contracts (your own)
-- ✅ Edit your contracts (draft status only)
-- ✅ Create customers and vehicles
-- ✅ View basic reports
+- ✅ Full operational workflow (create, confirm, activate, complete contracts)
+- ✅ Record payments
+- ✅ Create and manage customers and vehicles
+- ✅ Perform vehicle inspections
+- ✅ View own contracts
+- ❌ Additional capabilities require permission toggles (see below)
+
+**Default Permissions:**
+- ❌ Can Access Reports (can be granted)
+- ❌ Can Close Contracts (can be granted)
+- ❌ Can View All Contracts (can be granted)
 
 **Viewer**
-- ✅ View all contracts (read-only)
-- ✅ View reports
+- ✅ View own contracts (read-only)
 - ✅ View customers and vehicles
+- ✅ View master data
 - ❌ Cannot create or edit anything
+- ❌ Additional viewing capabilities require permission toggles (see below)
 
-**Note**: If you need different permissions, contact your system administrator.
+**Default Permissions:**
+- ❌ Can Access Reports (can be granted)
+- ❌ Can Close Contracts (not typically granted)
+- ❌ Can View All Contracts (can be granted for audit roles)
+
+#### Permission Toggles Explained
+
+Your administrator can grant you additional capabilities through three permission toggles:
+
+**1. Can Access Reports** 📊
+- **What it gives you:** Access to Reports section in the sidebar
+- **Includes:** Financial reports, operational reports, customer reports, audit reports
+- **Use case:** Staff members who need analytics for planning, or Viewers in audit/compliance roles
+- **Example:** A senior staff member analyzing rental trends to optimize fleet management
+
+**2. Can Close Contracts** 🔒
+- **What it gives you:** Ability to close completed contracts after final payment
+- **Includes:** "Close Contract" button becomes available on completed contracts
+- **Use case:** Staff members handling full contract lifecycle without manager intervention
+- **Example:** A trusted staff member finalizing contracts at end of shift
+
+**3. Can View All Contracts** 👁️
+- **What it gives you:** See all contracts in the system, not just your own
+- **Includes:** Full contract list access, system-wide search capability
+- **Use case:** Staff coordinating across multiple team members, or Viewers in supervisory roles
+- **Example:** A shift supervisor monitoring all active rentals across the team
+
+#### Common Permission Combinations
+
+Your administrator may configure your account with one of these common combinations:
+
+**Standard Staff (Default)**
+- ❌ Reports ❌ Close ❌ View All
+- Best for: Daily operations, create and manage own contracts
+
+**Senior Staff**
+- ✅ Reports ❌ Close ✅ View All
+- Best for: Shift supervisors, team coordinators
+
+**Trusted Staff**
+- ✅ Reports ✅ Close ✅ View All
+- Best for: Senior operational staff handling full workflow
+
+**Audit Viewer**
+- ✅ Reports ❌ Close ✅ View All
+- Best for: Compliance monitoring, quality assurance
+
+**Note**: If you need different permissions, contact your system administrator. They can adjust your permission toggles through the Users management page.
 
 ### Language Selection
 

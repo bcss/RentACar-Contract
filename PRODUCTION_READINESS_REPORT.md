@@ -590,27 +590,73 @@ Complete maintenance guide available: `MAINTENANCE_GUIDE.md`
 
 **Authorization:**
 - ✅ Role-based access control (Admin, Manager, Staff, Viewer)
+- ✅ Granular permission toggles for flexible access elevation
 - ✅ Route-level middleware protection
 - ✅ Client-side role checks
 - ✅ Immutable superadmin protection
-- ✅ Comprehensive permission matrix
+- ✅ Comprehensive permission matrix with toggle system
+
+**Permission Toggle System:**
+
+RCCMS implements a sophisticated RBAC system with 3 granular permission toggles that enhance the 4 core roles without role explosion:
+
+**Permission Toggles:**
+1. **canAccessReports**: Access to reports and analytics pages
+2. **canCloseContracts**: Ability to close completed contracts
+3. **canViewAllContracts**: View all system contracts (not just own)
+
+**Toggle Defaults by Role:**
+
+| Role | canAccessReports | canCloseContracts | canViewAllContracts |
+|------|------------------|-------------------|---------------------|
+| Admin | ✅ Default | ✅ Default | ✅ Default |
+| Manager | ✅ Default | ✅ Default | ✅ Default |
+| Staff | ❌ Can be granted | ❌ Can be granted | ❌ Can be granted |
+| Viewer | ❌ Can be granted | ❌ Rarely granted | ❌ Can be granted |
+
+**Common Permission Combinations:**
+- **Standard Staff**: No toggles (daily operations)
+- **Senior Staff**: canAccessReports + canViewAllContracts (shift supervisors)
+- **Trusted Staff**: All 3 toggles enabled (senior operational staff)
+- **Audit Viewer**: canAccessReports + canViewAllContracts (compliance monitoring)
+
+**Toggle Management:**
+- Only Admin users can grant/revoke permission toggles
+- Toggles stored in database and persisted across sessions
+- Backend enforcement prevents bypass attempts
+- Real-time permission state validation
+
+**Enterprise Benefits:**
+- ✅ Flexible permission elevation without creating new roles
+- ✅ Granular access control for diverse organizational needs
+- ✅ Audit trail for permission changes
+- ✅ Scales from small businesses to enterprise deployments
 
 **Permission Matrix:**
 
-| Feature | Admin | Manager | Staff | Viewer |
-|---------|-------|---------|-------|--------|
-| Dashboard | ✅ | ✅ | ✅ | ✅ |
-| View Contracts | ✅ | ✅ | ✅ | ✅ |
-| Create Contracts | ✅ | ✅ | ✅ | ❌ |
-| Edit Draft Contracts | ✅ | ✅ | ✅ | ❌ |
-| Finalize Contracts | ✅ | ✅ | ❌ | ❌ |
-| Delete/Disable Contracts | ✅ | ❌ | ❌ | ❌ |
-| Manage Master Data | ✅ | ✅ | ✅ | ❌ |
-| View Reports | ✅ | ✅ | ✅ | ✅ |
-| Export Reports | ✅ | ✅ | ✅ | ❌ |
-| Manage Users | ✅ | ❌ | ❌ | ❌ |
-| Manage Settings | ✅ | ❌ | ❌ | ❌ |
-| View Audit Logs | ✅ | ✅ | ❌ | ❌ |
+| Feature | Admin | Manager | Staff | Viewer | Toggle Required |
+|---------|-------|---------|-------|--------|-----------------|
+| Dashboard | ✅ | ✅ | ✅ | ✅ | - |
+| View Own Contracts | ✅ | ✅ | ✅ | ✅ | - |
+| View All Contracts | ✅ | ✅ | ❌ | ❌ | canViewAllContracts |
+| Create Contracts | ✅ | ✅ | ✅ | ❌ | - |
+| Edit Draft Contracts | ✅ | ✅ | ✅ | ❌ | - |
+| Confirm/Activate Contracts | ✅ | ✅ | ✅ | ❌ | - |
+| Complete Contracts | ✅ | ✅ | ✅ | ❌ | - |
+| Close Contracts | ✅ | ✅ | ❌ | ❌ | canCloseContracts |
+| Record Payments | ✅ | ✅ | ✅ | ❌ | - |
+| Manage Master Data | ✅ | ✅ | ✅ | ❌ | - |
+| Access Reports | ✅ | ✅ | ❌ | ❌ | canAccessReports |
+| Export Reports | ✅ | ✅ | ❌ | ❌ | canAccessReports |
+| Manage Users | ✅ | ❌ | ❌ | ❌ | - |
+| Manage Permission Toggles | ✅ | ❌ | ❌ | ❌ | - |
+| Manage Settings | ✅ | ❌ | ❌ | ❌ | - |
+| View Audit Logs | ✅ | ✅ | ❌ | ❌ | - |
+
+**Reference Documentation:**
+- `ROLE_PERMISSIONS.md`: Complete permission matrix and role descriptions
+- `OPERATIONAL_RUNBOOK.md`: Permission toggle management procedures
+- `ADMIN_GUIDE.md`: Administrator guide to permission management
 
 ### 5.2 Data Security (10/10)
 

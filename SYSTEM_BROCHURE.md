@@ -135,15 +135,44 @@ For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 - **Notes & Documentation**: Attach notes to each payment
 - **RBAC Protected**: Admin/Manager authorization required for payment operations
 
-### 🔐 **Role-Based Access Control (RBAC)**
+### 🔐 **Advanced Role-Based Access Control with Granular Permission Toggles**
 
-#### **Four User Roles**
+RCCMS implements a sophisticated RBAC system that balances simplicity with flexibility using 4 core roles enhanced by 3 targeted permission toggles. This design eliminates role explosion while providing granular access control for diverse organizational needs.
+
+#### **Permission Toggle System** ⭐ NEW FEATURE
+
+**Three Granular Permission Toggles:**
+1. **canAccessReports** 📊 - Access to reports and analytics pages
+2. **canCloseContracts** 🔒 - Ability to close completed contracts
+3. **canViewAllContracts** 👁️ - View all system contracts (not just own)
+
+**How It Works:**
+- Admin/Manager roles have all toggles enabled by default
+- Staff/Viewer roles have all toggles disabled by default
+- Administrators can grant toggles to elevate permissions as needed
+- No need to create new roles for different permission levels
+
+**Common Permission Combinations:**
+- **Standard Staff**: No toggles (daily operations)
+- **Senior Staff**: Reports + ViewAll (shift supervisors)
+- **Trusted Staff**: All 3 toggles (senior operational staff)
+- **Audit Viewer**: Reports + ViewAll (compliance monitoring)
+
+**Business Benefits:**
+- ✅ Flexible permissions without role explosion
+- ✅ Granular access control for organizational diversity
+- ✅ Easy permission elevation as staff advance
+- ✅ Scales from small businesses to enterprise deployments
+
+#### **Four User Roles with Toggle Enhancements**
+
 1. **Administrator**
    - Full system access
-   - User management
+   - User management and permission toggle control
    - System settings configuration
    - Master data management
    - All CRUD operations
+   - **Default Toggles**: All enabled ✅
 
 2. **Manager**
    - Contract management (all statuses)
@@ -151,24 +180,34 @@ For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
    - Master data access
    - Audit log viewing
    - Payment management
+   - **Default Toggles**: All enabled ✅
+   - **Limitation**: Cannot manage users or modify settings
 
 3. **Staff**
-   - Create and edit own contracts
-   - Limited viewing permissions
+   - Full operational workflow (create, confirm, activate, complete contracts)
+   - Record payments
    - Customer and vehicle management
-   - Basic reporting access
+   - Perform vehicle inspections
+   - View own contracts by default
+   - **Default Toggles**: None (can be granted) ❌
+   - **Can be elevated with toggles for**: Reports access, contract closure, system-wide viewing
 
 4. **Viewer**
    - Read-only access
-   - View contracts and reports
+   - View own contracts by default
    - No modification permissions
-   - Ideal for accountants or supervisors
+   - Ideal for accountants, auditors, or supervisors
+   - **Default Toggles**: None (can be granted) ❌
+   - **Can be elevated with toggles for**: Reports access (audit role), system-wide viewing (compliance role)
 
 #### **Immutable Super Admin**
 - Protected system administrator account
 - Cannot be disabled or deleted
 - Ensures system access recovery
 - Configured during initial setup
+- All permission toggles permanently enabled
+
+**Reference:** See `ROLE_PERMISSIONS.md` for complete permission matrix and `OPERATIONAL_RUNBOOK.md` for permission management procedures
 
 ### 📊 **Comprehensive Reporting & Analytics**
 

@@ -536,5 +536,457 @@ After validating all new features, verify existing functionality:
 
 ---
 
+## Testing Permission Toggles
+
+### Overview
+
+RCCMS implements a flexible permission toggle system with 3 granular controls that enhance the 4 core roles. This section provides comprehensive test scenarios for verifying permission toggle functionality.
+
+**Permission Toggles:**
+- `canAccessReports`: Access to reports and analytics
+- `canCloseContracts`: Ability to close completed contracts
+- `canViewAllContracts`: View all system contracts (not just own)
+
+**Core Roles:**
+- **Admin/Manager**: All toggles enabled by default
+- **Staff/Viewer**: All toggles disabled by default (can be granted)
+
+**Reference Documentation:**
+- `ROLE_PERMISSIONS.md` - Comprehensive permission matrix
+- `OPERATIONAL_RUNBOOK.md` - Permission management procedures
+
+---
+
+### Test Suite: Permission Toggle Configuration
+
+#### TC-PERM-001: Toggle State Persistence
+
+**Test Steps**:
+1. Login as Admin
+2. Navigate to Settings → Users
+3. Create new Staff user or select existing Staff user
+4. Grant "Can Access Reports" toggle
+5. Save changes
+6. Refresh browser
+7. Check user's toggle state
+
+**Expected Results**:
+- ✅ Toggle state persists across page reloads
+- ✅ Database correctly stores toggle value (true)
+- ✅ User sees Reports section in sidebar
+- ✅ Toggle state displayed correctly in Users list
+
+---
+
+#### TC-PERM-002: Default Toggle States
+
+**Test Steps**:
+1. Login as Admin
+2. Create new user for each role: Admin, Manager, Staff, Viewer
+3. Do NOT manually set any toggles
+4. Check each user's default toggle state
+
+**Expected Results**:
+
+**Admin (Default)**:
+- ✅ canAccessReports = true
+- ✅ canCloseContracts = true
+- ✅ canViewAllContracts = true
+
+**Manager (Default)**:
+- ✅ canAccessReports = true
+- ✅ canCloseContracts = true
+- ✅ canViewAllContracts = true
+
+**Staff (Default)**:
+- ✅ canAccessReports = false
+- ✅ canCloseContracts = false
+- ✅ canViewAllContracts = false
+
+**Viewer (Default)**:
+- ✅ canAccessReports = false
+- ✅ canCloseContracts = false
+- ✅ canViewAllContracts = false
+
+---
+
+#### TC-PERM-003: Only Admin Can Manage Toggles
+
+**Test Steps**:
+1. Login as Manager
+2. Navigate to Settings → Users
+3. Attempt to view/edit user's permission toggles
+
+**Expected Results**:
+- ✅ Manager can view user list
+- ✅ Manager CANNOT see toggle checkboxes
+- ✅ Manager CANNOT modify toggles
+- ✅ No API access to toggle modification endpoints
+
+**Repeat for Staff/Viewer**:
+- ✅ Staff/Viewer cannot access Users page at all
+
+---
+
+### Test Suite: canAccessReports Toggle
+
+#### TC-REPORTS-001: Staff WITHOUT Reports Toggle
+
+**Test Steps**:
+1. Create Staff user with canAccessReports = false
+2. Login as that Staff user
+3. Check sidebar navigation
+
+**Expected Results**:
+- ✅ "Reports" section NOT visible in sidebar
+- ✅ Direct navigation to `/financial-reports` redirects to unauthorized
+- ✅ Direct navigation to `/operational-reports` returns 403
+- ✅ Direct navigation to `/customer-reports` blocked
+- ✅ Direct navigation to `/audit-reports` blocked
+- ✅ No console errors
+
+---
+
+#### TC-REPORTS-002: Staff WITH Reports Toggle
+
+**Test Steps**:
+1. Admin grants canAccessReports to Staff user
+2. Login as Staff user
+3. Check sidebar and navigate to reports
+
+**Expected Results**:
+- ✅ "Reports" section visible in sidebar
+- ✅ Can access Financial Reports
+- ✅ Can access Operational Reports
+- ✅ Can access Customer Reports
+- ✅ Can access Audit Reports
+- ✅ Can export PDFs/Excel
+- ✅ Charts render correctly
+
+---
+
+#### TC-REPORTS-003: Viewer WITH Reports Toggle (Audit Role)
+
+**Test Steps**:
+1. Create Viewer user
+2. Grant canAccessReports AND canViewAllContracts
+3. Login as Viewer
+4. Navigate to Audit Reports
+
+**Expected Results**:
+- ✅ Can view audit reports
+- ✅ Can see all system contracts (for audit purposes)
+- ✅ Can export audit reports
+- ✅ CANNOT create/edit/delete anything
+- ✅ Read-only access maintained
+
+---
+
+### Test Suite: canCloseContracts Toggle
+
+#### TC-CLOSE-001: Staff WITHOUT Close Toggle
+
+**Test Steps**:
+1. Create Staff user with canCloseContracts = false
+2. Create contract, complete it, record final payment as Manager
+3. Login as Staff user
+4. Navigate to completed contract
+
+**Expected Results**:
+- ✅ "Close Contract" button NOT visible
+- ✅ Direct API call to `/api/contracts/:id/close` returns 403
+- ✅ Contract remains in "completed" status
+- ✅ No unauthorized action possible
+
+---
+
+#### TC-CLOSE-002: Staff WITH Close Toggle
+
+**Test Steps**:
+1. Admin grants canCloseContracts to Staff user
+2. Staff creates contract, completes it, records final payment
+3. Staff attempts to close contract
+
+**Expected Results**:
+- ✅ "Close Contract" button visible
+- ✅ Can successfully close contract
+- ✅ Contract transitions to "closed" status
+- ✅ Audit log records Staff user as closer
+- ✅ Validation still enforced (final payment required)
+
+---
+
+#### TC-CLOSE-003: Close Validation Regardless of Toggle
+
+**Test Steps**:
+1. Staff user WITH canCloseContracts toggle
+2. Complete contract but record partial payment only (not final)
+3. Attempt to close contract
+
+**Expected Results**:
+- ✅ Close button disabled or shows error
+- ✅ Backend validation prevents closure
+- ✅ Error message: "Final payment required before closure"
+- ✅ Toggle grants permission, not bypass of validation
+
+---
+
+### Test Suite: canViewAllContracts Toggle
+
+#### TC-VIEWALL-001: Staff WITHOUT ViewAll Toggle
+
+**Test Steps**:
+1. Create two Staff users: StaffA and StaffB
+2. StaffA creates 3 contracts
+3. StaffB creates 2 contracts
+4. Login as StaffA (canViewAllContracts = false)
+5. Navigate to Contracts page
+
+**Expected Results**:
+- ✅ StaffA sees only their 3 contracts
+- ✅ StaffA CANNOT see StaffB's 2 contracts
+- ✅ Total count shows "3" not "5"
+- ✅ Search/filter only applies to own contracts
+- ✅ Direct navigation to StaffB's contract ID returns 403
+
+---
+
+#### TC-VIEWALL-002: Staff WITH ViewAll Toggle (Supervisor)
+
+**Test Steps**:
+1. Admin grants canViewAllContracts to StaffA
+2. Login as StaffA
+3. Navigate to Contracts page
+
+**Expected Results**:
+- ✅ StaffA sees ALL 5 contracts (own + others)
+- ✅ Total count shows "5"
+- ✅ Can search/filter across all contracts
+- ✅ Can view contract details for any contract
+- ✅ CANNOT edit contracts created by others (unless creator)
+- ✅ Can view audit logs for all contracts
+
+---
+
+#### TC-VIEWALL-003: Viewer WITH ViewAll Toggle
+
+**Test Steps**:
+1. Create Viewer user
+2. Grant canViewAllContracts toggle
+3. Create contracts as Admin and Staff
+4. Login as Viewer
+
+**Expected Results**:
+- ✅ Viewer sees all contracts system-wide
+- ✅ All contracts are read-only
+- ✅ Can view contract details
+- ✅ Can view timeline
+- ✅ CANNOT edit any contract
+- ✅ CANNOT create new contracts
+
+---
+
+### Test Suite: Permission Toggle Combinations
+
+#### TC-COMBO-001: Standard Staff (No Toggles)
+
+**Test Scenario**: Daily operations staff
+
+**Configuration**:
+- canAccessReports = false
+- canCloseContracts = false
+- canViewAllContracts = false
+
+**Expected Capabilities**:
+- ✅ Create own contracts
+- ✅ Confirm own contracts
+- ✅ Activate own contracts
+- ✅ Complete own contracts
+- ✅ Record payments
+- ✅ Perform vehicle inspections
+- ❌ Cannot close contracts
+- ❌ Cannot see Reports section
+- ❌ Only sees own contracts
+
+---
+
+#### TC-COMBO-002: Senior Staff (Reports + ViewAll)
+
+**Test Scenario**: Shift supervisor
+
+**Configuration**:
+- canAccessReports = true
+- canCloseContracts = false
+- canViewAllContracts = true
+
+**Expected Capabilities**:
+- ✅ All Standard Staff capabilities
+- ✅ View all team contracts
+- ✅ Access reports for analysis
+- ✅ Monitor team performance
+- ❌ Cannot close contracts (requires Manager)
+
+---
+
+#### TC-COMBO-003: Trusted Staff (All Toggles)
+
+**Test Scenario**: Senior operational staff
+
+**Configuration**:
+- canAccessReports = true
+- canCloseContracts = true
+- canViewAllContracts = true
+
+**Expected Capabilities**:
+- ✅ Full operational workflow
+- ✅ Close contracts independently
+- ✅ View all contracts
+- ✅ Access all reports
+- ✅ Nearly Manager-level capabilities
+- ❌ Cannot manage users
+- ❌ Cannot modify settings
+
+---
+
+#### TC-COMBO-004: Audit Viewer (Reports + ViewAll)
+
+**Test Scenario**: Compliance monitoring
+
+**Configuration**:
+- canAccessReports = true
+- canCloseContracts = false
+- canViewAllContracts = true
+
+**Expected Capabilities**:
+- ✅ View all contracts (read-only)
+- ✅ Access all reports
+- ✅ Generate audit exports
+- ✅ Monitor compliance
+- ❌ Cannot create/edit/delete
+- ❌ Cannot close contracts
+- ❌ Full read-only across system
+
+---
+
+### Test Suite: Toggle Security & Edge Cases
+
+#### TC-SEC-001: Backend Enforcement
+
+**Test Steps**:
+1. Create Staff user WITHOUT canAccessReports
+2. Use browser DevTools or Postman
+3. Make direct GET request to `/api/reports/financial`
+
+**Expected Results**:
+- ✅ Backend returns 403 Forbidden
+- ✅ Error message: "Access denied"
+- ✅ No data leaked
+- ✅ Frontend toggle state bypassed but backend enforced
+
+---
+
+#### TC-SEC-002: Token Tampering Prevention
+
+**Test Steps**:
+1. Login as Staff WITHOUT toggles
+2. Inspect JWT/session in DevTools
+3. Manually modify session data to fake toggle=true
+4. Attempt to access restricted resource
+
+**Expected Results**:
+- ✅ Session invalidated or ignored
+- ✅ Backend re-validates from database
+- ✅ Access still denied
+- ✅ Tamper attempt logged in audit
+
+---
+
+#### TC-SEC-003: Toggle Removal Impact
+
+**Test Steps**:
+1. Staff user WITH canAccessReports currently viewing report
+2. Admin removes canAccessReports toggle
+3. Staff user attempts to navigate or refresh
+
+**Expected Results**:
+- ✅ On next page load, Reports section disappears
+- ✅ Active report page forces redirect to dashboard
+- ✅ Graceful degradation (no error page)
+- ✅ User informed of permission change
+
+---
+
+### Test Suite: Permission Toggle UI/UX
+
+#### TC-UX-001: Clear Visual Indicators
+
+**Test Steps**:
+1. Login as Staff WITH canAccessReports
+2. Check sidebar
+
+**Expected Results**:
+- ✅ Reports section clearly visible
+- ✅ No visual difference from Admin/Manager (seamless UX)
+- ✅ Icons and labels consistent
+
+---
+
+#### TC-UX-002: Graceful Permission Denial
+
+**Test Steps**:
+1. Login as Staff WITHOUT canCloseContracts
+2. Navigate to completed contract
+3. Observe UI
+
+**Expected Results**:
+- ✅ Close button not visible (clean UI)
+- ✅ OR Close button disabled with tooltip explaining permission
+- ✅ No console errors
+- ✅ Professional appearance
+
+---
+
+#### TC-UX-003: Admin Toggle Management UI
+
+**Test Steps**:
+1. Login as Admin
+2. Navigate to Settings → Users
+3. Edit user
+
+**Expected Results**:
+- ✅ Three toggle checkboxes clearly labeled
+- ✅ Tooltips explain each toggle
+- ✅ Real-time save feedback
+- ✅ Role-based defaults pre-populated
+- ✅ Bilingual labels (EN/AR)
+
+---
+
+### Permission Toggle Testing Checklist
+
+**Before Production:**
+- ✅ All 3 toggles persist correctly in database
+- ✅ Default states correct for all 4 roles
+- ✅ Only Admin can manage toggles
+- ✅ Backend enforcement prevents bypass
+- ✅ Frontend UI respects toggle state
+- ✅ All toggle combinations tested (8 scenarios)
+- ✅ Security tests pass (token tampering, direct API)
+- ✅ Graceful degradation on permission removal
+- ✅ Audit logs record toggle changes
+- ✅ Bilingual UI labels verified
+- ✅ No console errors with any toggle combination
+- ✅ Performance acceptable (toggle checks don't slow down app)
+
+**Common Permission Combinations to Test:**
+1. Standard Staff (0/3 toggles)
+2. Senior Staff (2/3: Reports + ViewAll)
+3. Trusted Staff (3/3: All toggles)
+4. Audit Viewer (2/3: Reports + ViewAll)
+5. Manager (3/3 by default)
+6. Admin (3/3 by default + management rights)
+
+---
+
 **End of Testing Procedures**
 
