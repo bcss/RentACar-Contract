@@ -1348,6 +1348,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash password
       const passwordHash = await hashPassword(password);
 
+      // Set permission toggles based on role
+      // Admin and Manager get all permissions by default
+      // Staff and Viewer get no permissions by default (can be granted later)
+      const userRole = role || 'staff';
+      const isPrivileged = userRole === 'admin' || userRole === 'manager';
+
       // Create user
       const user = await storage.createUser({
         username,
@@ -1355,8 +1361,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         firstName,
         lastName,
-        role: role || 'staff',
+        role: userRole,
         isImmutable: false,
+        canAccessReports: isPrivileged,
+        canCloseContracts: isPrivileged,
+        canViewAllContracts: isPrivileged,
       });
 
       // Create audit log
@@ -1373,6 +1382,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating user:", error);
       res.status(400).json({ message: error.message || "Failed to create user" });
+    }
+  });
+
+  // Update user (Admin only)
+  app.patch('/api/users/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { email, firstName, lastName, role, password, canAccessReports, canCloseContracts, canViewAllContracts } = req.body;
+      const adminId = req.user.id;
+      const userId = req.params.id;
+
+      // Get existing user
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Build update object with only provided fields
+      const updates: any = {};
+      if (email !== undefined) updates.email = email;
+      if (firstName !== undefined) updates.firstName = firstName;
+      if (lastName !== undefined) updates.lastName = lastName;
+      if (role !== undefined) updates.role = role;
+      if (canAccessReports !== undefined) updates.canAccessReports = canAccessReports;
+      if (canCloseContracts !== undefined) updates.canCloseContracts = canCloseContracts;
+      if (canViewAllContracts !== undefined) updates.canViewAllContracts = canViewAllContracts;
+
+      // Hash new password if provided
+      if (password && password.trim().length > 0) {
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.valid) {
+          return res.status(400).json({ message: passwordValidation.message });
+        }
+        updates.passwordHash = await hashPassword(password);
+      }
+
+      // Update user using storage layer (enforces immutable check)
+      const updated = await storage.updateUser(userId, updates);
+
+      // Create audit log - only log fields that were explicitly supplied AND changed
+      const changes = [];
+      if (email !== undefined && email !== existingUser.email) changes.push(`email to ${email}`);
+      if (role !== undefined && role !== existingUser.role) changes.push(`role to ${role}`);
+      if (password && password.trim().length > 0) changes.push('password');
+      if (canAccessReports !== undefined && canAccessReports !== existingUser.canAccessReports) changes.push(`canAccessReports to ${canAccessReports}`);
+      if (canCloseContracts !== undefined && canCloseContracts !== existingUser.canCloseContracts) changes.push(`canCloseContracts to ${canCloseContracts}`);
+      if (canViewAllContracts !== undefined && canViewAllContracts !== existingUser.canViewAllContracts) changes.push(`canViewAllContracts to ${canViewAllContracts}`);
+      
+      if (changes.length > 0) {
+        await createAuditLog(adminId, 'edit', undefined, req, `Updated user ${existingUser.username}: ${changes.join(', ')}`);
+      }
+
+      // Return user without password hash
+      const { passwordHash, ...userWithoutPassword } = updated;
+      res.json(userWithoutPassword);
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      res.status(400).json({ message: error.message || "Failed to update user" });
     }
   });
 

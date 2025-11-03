@@ -49,6 +49,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   getDisabledUsers(): Promise<User[]>;
+  updateUser(userId: string, updates: Partial<Omit<User, 'id' | 'createdAt' | 'lastLogin' | 'isImmutable' | 'username'>>): Promise<User>;
   updateUserRole(userId: string, role: string): Promise<User>;
   updateUserPassword(userId: string, passwordHash: string): Promise<User>;
   updateLastLogin(userId: string): Promise<User>;
@@ -200,6 +201,28 @@ export class DatabaseStorage implements IStorage {
   async createUser(userData: Omit<UpsertUser, 'id'>): Promise<User> {
     const [user] = await db.insert(users).values(userData).returning();
     return user;
+  }
+
+  async updateUser(userId: string, updates: Partial<Omit<User, 'id' | 'createdAt' | 'lastLogin' | 'isImmutable' | 'username'>>): Promise<User> {
+    // Check if user exists and is not immutable
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    if (user.isImmutable) {
+      throw new Error("Cannot modify immutable user");
+    }
+
+    // Update user with provided fields
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
   }
 
   async updateUserRole(userId: string, role: string): Promise<User> {
