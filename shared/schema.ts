@@ -51,6 +51,12 @@ export const users = pgTable("users", {
   disabled: boolean("disabled").notNull().default(false), // Disabled users cannot login
   disabledBy: varchar("disabled_by"),
   disabledAt: timestamp("disabled_at"),
+  
+  // Permission toggles - Fine-grained access control
+  canAccessReports: boolean("can_access_reports").notNull().default(false), // Access to analytics and reports
+  canCloseContracts: boolean("can_close_contracts").notNull().default(false), // Close completed contracts
+  canViewAllContracts: boolean("can_view_all_contracts").notNull().default(false), // View all contracts (not just own)
+  
   lastPasswordChange: timestamp("last_password_change").defaultNow(),
   lastLoginAt: timestamp("last_login_at"), // Track last successful login for dashboard display
   createdAt: timestamp("created_at").defaultNow(),
