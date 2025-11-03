@@ -67,7 +67,7 @@ interface AppSidebarProps {
 export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const { t, i18n } = useTranslation();
   const [location] = useLocation();
-  const { user, isAdmin, isManager } = useAuth();
+  const { user, isAdmin, isManager, canAccessReports, canCloseContracts } = useAuth();
   const { toast } = useToast();
   const { toggleSidebar, state: sidebarState } = useSidebar();
   const { language, toggleLanguage } = useLanguage();
@@ -529,8 +529,8 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 </SidebarMenuItem>
               </Collapsible>
 
-              {/* Reports - Collapsible (Admin/Manager only) */}
-              {(isAdmin || isManager) && (
+              {/* Reports - Collapsible (Admin/Manager or users with canAccessReports) */}
+              {(isAdmin || isManager || canAccessReports) && (
                 <Collapsible open={reportsOpen} onOpenChange={handleReportsToggle} className="group/collapsible">
                   <SidebarMenuItem>
                     <Tooltip>

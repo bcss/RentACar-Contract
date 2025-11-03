@@ -50,7 +50,7 @@ import { generateContractPDF } from '@/utils/contractPDF';
 export default function ContractView() {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading: authLoading, isAdmin, isManager } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, isAdmin, isManager, canCloseContracts: hasClosePermission } = useAuth();
   const { currency } = useCurrency();
   const [, navigate] = useLocation();
   const params = useParams<{ id: string }>();
@@ -723,10 +723,10 @@ export default function ContractView() {
   const hirerType = contract.hirerType || 'direct';
   const canManageWorkflow = isAdmin || isManager;
 
-  // Check if close button should be shown (Admin only with payment verification)
+  // Check if close button should be shown (Admin/Manager or users with close permission + payment verification)
   const canCloseContract = contract.status === 'completed' && 
     (parseFloat(contract.outstandingBalance || '0') === 0 || contract.finalPaymentReceived) &&
-    isAdmin; // Only admins can close contracts
+    (isAdmin || isManager || hasClosePermission); // Admin/Manager or users with canCloseContracts permission
 
   // Get sponsor and company sponsor display data using helper functions
   const sponsorData = getSponsorDisplay(contract);
@@ -1423,9 +1423,9 @@ export default function ContractView() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Close Contract (Admin Only)</AlertDialogTitle>
+                  <AlertDialogTitle>Close Contract</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to close this contract? This action finalizes the contract and can only be performed by administrators after verifying all payments are settled.
+                    Are you sure you want to close this contract? This action finalizes the contract and requires all payments to be settled. This operation requires special permission.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
