@@ -1,7 +1,7 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor } from "./auth/localAuth";
+import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess } from "./auth/localAuth";
 import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
@@ -259,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/customers", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post("/api/customers", isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const customerData = insertCustomerSchema.parse(req.body);
       const customer = await storage.createCustomer({
@@ -278,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/customers/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.patch("/api/customers/:id", isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const customerData = insertCustomerSchema.partial().parse(req.body);
       const customer = await storage.updateCustomer(req.params.id, customerData);
@@ -409,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/vehicles", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post("/api/vehicles", isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const vehicleData = insertVehicleSchema.parse(req.body);
       const vehicle = await storage.createVehicle({
@@ -428,7 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/vehicles/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.patch("/api/vehicles/:id", isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const vehicleData = insertVehicleSchema.partial().parse(req.body);
       const vehicle = await storage.updateVehicle(req.params.id, vehicleData);
@@ -514,7 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/sponsors", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post("/api/sponsors", isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const sponsorData = insertSponsorSchema.parse(req.body);
       const sponsor = await storage.createSponsor({
@@ -533,7 +533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/sponsors/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.patch("/api/sponsors/:id", isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const sponsorData = insertSponsorSchema.partial().parse(req.body);
       const sponsor = await storage.updateSponsor(req.params.id, sponsorData);
@@ -619,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/companies", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post("/api/companies", isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const companyData = insertCompanySchema.parse(req.body);
       const company = await storage.createCompany({
@@ -638,7 +638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/companies/:id", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.patch("/api/companies/:id", isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const companyData = insertCompanySchema.partial().parse(req.body);
       const company = await storage.updateCompany(req.params.id, companyData);
@@ -939,7 +939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activate rental (confirmed → active)
-  app.post('/api/contracts/:id/activate', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/contracts/:id/activate', isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const { timeOut } = req.body; // Capture actual vehicle handover time
@@ -978,7 +978,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Complete rental with return data (active → completed)
-  app.post('/api/contracts/:id/complete', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/contracts/:id/complete', isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
@@ -1075,8 +1075,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Close contract (completed → closed) - ADMIN ONLY with payment verification
-  app.post('/api/contracts/:id/close', isAuthenticated, requireAdmin, async (req: any, res) => {
+  // Close contract (completed → closed) - Admin or users with canCloseContracts toggle with payment verification
+  app.post('/api/contracts/:id/close', isAuthenticated, requireContractCloseAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
@@ -1135,7 +1135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // They create payment records in the payments table with appropriate types
   
   // Record deposit payment
-  app.post('/api/contracts/:id/deposit', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/contracts/:id/deposit', isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
@@ -1171,7 +1171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Record final payment
-  app.post('/api/contracts/:id/final-payment', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/contracts/:id/final-payment', isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
@@ -1218,7 +1218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Record deposit refund
-  app.post('/api/contracts/:id/refund', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/contracts/:id/refund', isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const contract = await storage.getContract(req.params.id);
@@ -1692,8 +1692,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Analytics routes (Admin and Manager)
-  app.get('/api/analytics/revenue', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  // Analytics routes (Admin and Manager, or users with canAccessReports toggle)
+  app.get('/api/analytics/revenue', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const analytics = await storage.getRevenueAnalytics();
       res.json(analytics);
@@ -1703,7 +1703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/analytics/operations', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.get('/api/analytics/operations', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const analytics = await storage.getOperationalAnalytics();
       res.json(analytics);
@@ -1713,7 +1713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/analytics/customers', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.get('/api/analytics/customers', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const analytics = await storage.getCustomerAnalytics();
       res.json(analytics);
@@ -1723,8 +1723,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Reports routes (Admin and Manager) with date range support
-  app.get('/api/reports/financial', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  // Reports routes (Admin and Manager, or users with canAccessReports toggle) with date range support
+  app.get('/api/reports/financial', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
       const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
@@ -1736,7 +1736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/reports/operational', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.get('/api/reports/operational', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
       const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
@@ -1748,7 +1748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/reports/customers', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.get('/api/reports/customers', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
       const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
@@ -1760,7 +1760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/reports/audit', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.get('/api/reports/audit', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
       const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
@@ -1772,8 +1772,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Export endpoints
-  app.post('/api/reports/financial/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  // Export endpoints (requires reports access)
+  app.post('/api/reports/financial/export', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
       const { charts = [] } = req.body;
@@ -1906,7 +1906,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/reports/operational/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/reports/operational/export', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang, activeTab } = req.query; // Task 14: Get active tab
       const { charts = [] } = req.body;
@@ -2100,7 +2100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/reports/customers/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.post('/api/reports/customers/export', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
       const { charts = [] } = req.body;
@@ -2218,7 +2218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/reports/audit/export', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  app.get('/api/reports/audit/export', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
       const startDate = startDateParam ? new Date(startDateParam as string) : undefined;

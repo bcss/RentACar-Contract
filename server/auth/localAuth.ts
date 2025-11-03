@@ -213,3 +213,35 @@ export const requireEditor: RequestHandler = async (req, res, next) => {
   
   next();
 };
+
+// Permission toggle middleware - Check if user can access reports
+export const requireReportsAccess: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+  
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  // Admins and Managers have access by default, OR users with the toggle enabled
+  if (user.role === 'admin' || user.role === 'manager' || user.canAccessReports === true) {
+    return next();
+  }
+  
+  return res.status(403).json({ message: "Forbidden: Reports access required" });
+};
+
+// Permission toggle middleware - Check if user can close contracts
+export const requireContractCloseAccess: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+  
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  // Only Admins by default, OR users with the toggle enabled
+  if (user.role === 'admin' || user.canCloseContracts === true) {
+    return next();
+  }
+  
+  return res.status(403).json({ message: "Forbidden: Contract closure access required" });
+};
