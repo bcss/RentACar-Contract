@@ -60,11 +60,29 @@ Preferred communication style: Simple, everyday language.
 - **Payment Method Validation:** Conditional required fields based on payment method - cheque number for cheques, last 4 digits for cards, reference number for bank transfers. Enforced via Zod superRefine validation.
 - **Contract Closure Enforcement:** Final payment must be recorded before contract can be closed - backend verifies total paid equals total due (rounded to currency precision) before allowing closure.
 
-### Role-Based Permissions
-- **Admin:** Full system access including user management, company settings, financial settings, contract closure, disable/enable operations.
-- **Manager:** Business operations access - can confirm/activate/complete contracts, view reports, manage customers/vehicles/sponsors/companies.
-- **Staff:** Editor-level access - can create drafts, confirm contracts (via `requireEditor` middleware), manage master data, record payments. Cannot close contracts or modify system settings.
-- **Viewer:** Read-only access to contracts, customers, vehicles, and reports. Cannot create or modify data.
+### Role-Based Permissions with Granular Toggles
+RCCMS implements a flexible role-based access control (RBAC) system with 4 core roles enhanced by 3 targeted permission toggles. This balance provides simplicity with flexibility, allowing administrators to grant additional capabilities as needed.
+
+**Permission Toggles:**
+- `canAccessReports`: Grants access to reports and analytics pages
+- `canCloseContracts`: Grants permission to close completed contracts
+- `canViewAllContracts`: Grants ability to view all contracts (not just own)
+
+**Core Roles:**
+- **Admin:** Full system access including user management, company settings, financial settings, permission toggle management, disable/enable operations. All toggles enabled by default.
+- **Manager:** Business operations manager - full contract lifecycle, reports access, master data management, audit logs. All toggles enabled by default. Cannot manage users or modify settings.
+- **Staff:** Operational staff with full workflow capability - create/edit/confirm/activate/complete contracts, record payments, manage master data, vehicle inspections. Toggles disabled by default but can be granted: +reports for analytics access, +close for contract closure, +viewAll for system-wide contract visibility.
+- **Viewer:** Read-only access to contracts (own by default), customers, vehicles, master data. Toggles can be granted for audit/compliance roles (typically +reports and +viewAll).
+
+**Enhanced Staff Permissions (New):**
+Staff role significantly expanded to handle full operational workflow including contract activation, completion, and payment recording. This allows day-to-day rental operations without manager intervention. Permission toggles provide granular elevation of Staff/Viewer capabilities without creating additional roles.
+
+**Implementation:**
+- Backend: Role-based middleware (`requireAdmin`, `requireAdminOrManager`, `requireEditor`) + toggle-based middleware (`requireReportsAccess`, `requireContractCloseAccess`)
+- Frontend: useAuth hook exposes toggles for conditional rendering (Reports menu, Close button)
+- Database: Boolean columns with role-based defaults (Admin/Manager=true, Staff/Viewer=false)
+
+See `ROLE_PERMISSIONS.md` for comprehensive role matrix, permission combinations, workflow examples, and configuration guide.
 
 ### Dual Audit System Architecture
 - **System Audit Logs:** System-wide security and compliance logging for all operations (user auth, business ops, system errors, config changes). Accessed by Admin/Manager.
