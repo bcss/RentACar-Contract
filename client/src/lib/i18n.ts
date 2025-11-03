@@ -703,6 +703,10 @@ const resources = {
       "users.currentPassword": "Current Password",
       "users.newPassword": "New Password",
       "users.passwordChanged": "Password changed successfully",
+      "users.permissions": "Permissions",
+      "users.canAccessReports": "Can access reports and analytics",
+      "users.canCloseContracts": "Can close contracts",
+      "users.canViewAllContracts": "Can view all contracts (not just own)",
       
       // Settings
       "settings.title": "Company Settings",
@@ -1536,6 +1540,10 @@ const resources = {
       "users.currentPassword": "كلمة المرور الحالية",
       "users.newPassword": "كلمة المرور الجديدة",
       "users.passwordChanged": "تم تغيير كلمة المرور بنجاح",
+      "users.permissions": "الصلاحيات",
+      "users.canAccessReports": "يمكنه الوصول إلى التقارير والتحليلات",
+      "users.canCloseContracts": "يمكنه إغلاق العقود",
+      "users.canViewAllContracts": "يمكنه عرض جميع العقود (وليس فقط عقوده)",
       
       // Settings
       "settings.title": "إعدادات الشركة",

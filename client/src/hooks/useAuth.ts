@@ -10,6 +10,10 @@ interface UseAuthReturn {
   isManager: boolean;
   isStaff: boolean;
   isViewer: boolean;
+  // Permission toggles
+  canAccessReports: boolean;
+  canCloseContracts: boolean;
+  canViewAllContracts: boolean;
 }
 
 export function useAuth(): UseAuthReturn {
@@ -27,5 +31,9 @@ export function useAuth(): UseAuthReturn {
     isManager: user?.role === 'manager',
     isStaff: user?.role === 'staff',
     isViewer: user?.role === 'viewer',
+    // Permission toggles - default to false if not set
+    canAccessReports: user?.canAccessReports ?? false,
+    canCloseContracts: user?.canCloseContracts ?? false,
+    canViewAllContracts: user?.canViewAllContracts ?? false,
   };
 }

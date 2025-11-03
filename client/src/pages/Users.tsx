@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -77,6 +78,9 @@ export default function Users() {
     lastName: '',
     email: '',
     role: 'staff',
+    canAccessReports: false,
+    canCloseContracts: false,
+    canViewAllContracts: false,
   });
 
   const { data: users = [], isLoading } = useQuery<User[]>({
@@ -184,6 +188,9 @@ export default function Users() {
       lastName: '',
       email: '',
       role: 'staff',
+      canAccessReports: false,
+      canCloseContracts: false,
+      canViewAllContracts: false,
     });
     setSelectedUser(null);
   };
@@ -209,6 +216,9 @@ export default function Users() {
       lastName: formData.lastName,
       email: formData.email,
       role: formData.role,
+      canAccessReports: formData.canAccessReports,
+      canCloseContracts: formData.canCloseContracts,
+      canViewAllContracts: formData.canViewAllContracts,
     };
 
     if (formData.password) {
@@ -241,6 +251,9 @@ export default function Users() {
       lastName: user.lastName || '',
       email: user.email || '',
       role: user.role,
+      canAccessReports: user.canAccessReports ?? false,
+      canCloseContracts: user.canCloseContracts ?? false,
+      canViewAllContracts: user.canViewAllContracts ?? false,
     });
     setIsEditDialogOpen(true);
   };
@@ -557,6 +570,54 @@ export default function Users() {
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Permission Toggles */}
+            <div className="space-y-3 border-t pt-3">
+              <Label className="text-sm font-semibold">{t('users.permissions')}</Label>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="canAccessReports"
+                  checked={formData.canAccessReports}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, canAccessReports: checked as boolean })
+                  }
+                  data-testid="checkbox-can-access-reports"
+                />
+                <Label htmlFor="canAccessReports" className="text-sm font-normal cursor-pointer">
+                  {t('users.canAccessReports')}
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="canCloseContracts"
+                  checked={formData.canCloseContracts}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, canCloseContracts: checked as boolean })
+                  }
+                  data-testid="checkbox-can-close-contracts"
+                />
+                <Label htmlFor="canCloseContracts" className="text-sm font-normal cursor-pointer">
+                  {t('users.canCloseContracts')}
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="canViewAllContracts"
+                  checked={formData.canViewAllContracts}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, canViewAllContracts: checked as boolean })
+                  }
+                  data-testid="checkbox-can-view-all-contracts"
+                />
+                <Label htmlFor="canViewAllContracts" className="text-sm font-normal cursor-pointer">
+                  {t('users.canViewAllContracts')}
+                </Label>
+              </div>
+            </div>
+            
             <div className="space-y-2">
               <Label htmlFor="edit-password">{t('users.password')} (optional)</Label>
               <Input
