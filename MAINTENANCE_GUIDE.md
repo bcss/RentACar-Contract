@@ -1512,6 +1512,143 @@ sudo ntpdate -s time.nist.gov
 
 ---
 
+### Permission Toggle Issues (Production System - November 2025)
+
+**Issue**: User cannot access features despite correct role
+
+**Diagnosis Steps:**
+
+1. **Verify Permission Toggle State:**
+```sql
+-- Check user's current permissions
+SELECT username, role, can_access_reports, can_close_contracts, can_view_all_contracts
+FROM users
+WHERE username = 'affected_username';
+```
+
+2. **Check Frontend Session:**
+```javascript
+// Ask user to check browser console
+// Logged user object should show permissions:
+{
+  canAccessReports: true/false,
+  canCloseContracts: true/false,
+  canViewAllContracts: true/false
+}
+```
+
+3. **Verify Backend Middleware:**
+```bash
+# Check server logs for 403 Forbidden responses
+grep "403" logs/app.log | tail -20
+
+# Common 403 patterns:
+# "Forbidden: You do not have permission to access reports"
+# "Forbidden: You do not have permission to close contracts"
+# "Forbidden: You can only view your own contracts"
+```
+
+**Common Scenarios:**
+
+**Scenario 1: User sees menu item but gets 403 on access**
+- **Cause**: Frontend cache not refreshed after permission grant
+- **Solution**: User logout → clear browser cache → login again
+
+**Scenario 2: Permission toggle granted but user still denied**
+- **Cause**: Session still has old user object
+- **Solution**: User must logout and login again to refresh session
+
+**Scenario 3: Close Contract button not visible**
+- **Diagnosis**: Check contract status and payment status
+```sql
+-- Contract must be:
+-- 1. status = 'completed'
+-- 2. totalPaid >= totalDue
+SELECT id, status, total_amount, total_extra_charges, outstanding_balance
+FROM contracts
+WHERE id = 'contract_id';
+```
+
+**Scenario 4: Staff can see other users' contracts unexpectedly**
+- **Diagnosis**: Check canViewAllContracts toggle
+```sql
+SELECT username, role, can_view_all_contracts
+FROM users
+WHERE username = 'staff_username';
+```
+- **Fix**: If toggle incorrectly set, revoke via Admin panel or SQL:
+```sql
+UPDATE users
+SET can_view_all_contracts = false
+WHERE username = 'staff_username' AND role = 'staff';
+```
+
+**Scenario 5: Permission toggle won't save**
+- **Cause**: Attempting to edit immutable user (superadmin)
+- **Solution**: Check isImmutable flag:
+```sql
+SELECT username, is_immutable FROM users WHERE username = 'username';
+```
+- Immutable users cannot have permissions edited
+
+**Scenario 6: Self-escalation security test**
+- **Expected**: Staff PATCH /api/users/:id should return 403 Forbidden
+- **Diagnosis**: Check requireAdmin middleware is active
+```bash
+# Test via curl:
+curl -X PATCH https://your-domain.com/api/users/user-id \
+  -H "Content-Type: application/json" \
+  -d '{"canCloseContracts": true}' \
+  --cookie "session-cookie"
+
+# Expected: 403 Forbidden
+# Message: "Forbidden: Admin access required"
+```
+
+**Prevention:**
+- ✅ Always log permission changes in audit trail
+- ✅ Require users to re-login after permission changes
+- ✅ Use Admin panel UI instead of direct SQL updates
+- ✅ Document permission changes in change log
+
+**Emergency Reset:**
+```sql
+-- Reset all Staff toggles to defaults (all false)
+UPDATE users
+SET can_access_reports = false,
+    can_close_contracts = false,
+    can_view_all_contracts = false
+WHERE role = 'staff' AND is_immutable = false;
+
+-- Grant specific permission to user
+UPDATE users
+SET can_close_contracts = true
+WHERE username = 'senior_staff_username';
+```
+
+**Verification Query:**
+```sql
+-- Check all non-default permission configurations
+SELECT 
+  username, 
+  role,
+  can_access_reports,
+  can_close_contracts,
+  can_view_all_contracts
+FROM users
+WHERE 
+  (role = 'staff' AND (can_access_reports = true OR can_close_contracts = true OR can_view_all_contracts = true))
+  OR (role = 'viewer' AND (can_access_reports = true OR can_close_contracts = true OR can_view_all_contracts = true))
+ORDER BY username;
+```
+
+**Documentation References:**
+- **ROLE_PERMISSIONS.md** - Complete permission matrix and business scenarios
+- **OPERATIONAL_RUNBOOK.md** - Step-by-step permission management procedures
+- **QA_COMPREHENSIVE_REPORT.md** - Test cases for permission validation
+
+---
+
 ## Appendix A: Useful Commands
 
 ### Database

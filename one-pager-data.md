@@ -133,6 +133,7 @@ Advanced frontend optimization with route-based lazy loading. Login page appears
 
 ## Everything You Need in One System
 
+- ✅ **Flexible Permission Toggles**: 4 core roles + 3 granular toggles (canAccessReports, canCloseContracts, canViewAllContracts) for right-sized access control
 - ✅ Role-based access: Admin, Manager, Staff, Viewer
 - ✅ Real-time vehicle availability tracking
 - ✅ Comprehensive reporting: Financial, Operational, Customer analytics

@@ -1421,13 +1421,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updated = await storage.updateUser(userId, updates);
 
       // Create audit log - only log fields that were explicitly supplied AND changed
+      // Include before/after values for complete audit trail
       const changes = [];
-      if (email !== undefined && email !== existingUser.email) changes.push(`email to ${email}`);
-      if (role !== undefined && role !== existingUser.role) changes.push(`role to ${role}`);
-      if (password && password.trim().length > 0) changes.push('password');
-      if (canAccessReports !== undefined && canAccessReports !== existingUser.canAccessReports) changes.push(`canAccessReports to ${canAccessReports}`);
-      if (canCloseContracts !== undefined && canCloseContracts !== existingUser.canCloseContracts) changes.push(`canCloseContracts to ${canCloseContracts}`);
-      if (canViewAllContracts !== undefined && canViewAllContracts !== existingUser.canViewAllContracts) changes.push(`canViewAllContracts to ${canViewAllContracts}`);
+      if (email !== undefined && email !== existingUser.email) changes.push(`email from "${existingUser.email}" to "${email}"`);
+      if (role !== undefined && role !== existingUser.role) changes.push(`role from "${existingUser.role}" to "${role}"`);
+      if (password && password.trim().length > 0) changes.push('password (updated)');
+      if (canAccessReports !== undefined && canAccessReports !== existingUser.canAccessReports) {
+        changes.push(`canAccessReports from ${existingUser.canAccessReports} to ${canAccessReports}`);
+      }
+      if (canCloseContracts !== undefined && canCloseContracts !== existingUser.canCloseContracts) {
+        changes.push(`canCloseContracts from ${existingUser.canCloseContracts} to ${canCloseContracts}`);
+      }
+      if (canViewAllContracts !== undefined && canViewAllContracts !== existingUser.canViewAllContracts) {
+        changes.push(`canViewAllContracts from ${existingUser.canViewAllContracts} to ${canViewAllContracts}`);
+      }
       
       if (changes.length > 0) {
         await createAuditLog(adminId, 'edit', undefined, req, `Updated user ${existingUser.username}: ${changes.join(', ')}`);
