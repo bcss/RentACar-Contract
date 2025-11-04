@@ -128,9 +128,9 @@ export default function SupportHelpPage() {
       }
     }
 
-    // Status filter
-    if (statusFilter === 'pending' && error.sentToSupport) return false;
-    if (statusFilter === 'sent' && !error.sentToSupport) return false;
+    // Status filter - three-state workflow: pending → sent → acknowledged
+    if (statusFilter === 'pending' && (error.sentToSupport || error.acknowledged)) return false;
+    if (statusFilter === 'sent' && (!error.sentToSupport || error.acknowledged)) return false;
     if (statusFilter === 'acknowledged' && !error.acknowledged) return false;
 
     // Search filter
