@@ -66,8 +66,10 @@ Preferred communication style: Simple, everyday language.
 - **Business Operations Audit:** Focuses on business operations (contract lifecycle, master data, payments, inspections, contract field modifications).
 
 ### Error Logging & Enhanced Error Reporter System
-- **Automatic Error Capture:** All errors logged to `systemErrors` table with full context.
-- **Enhanced Error Reporter:** Comprehensive error management UI with filtering, search, email workflow, screenshot capture, and status tracking.
+- **Automatic Error Capture:** All errors logged to `systemErrors` table with full context including automatic screenshot capture.
+- **Automatic Screenshot Capture:** When critical errors occur, screenshots are automatically captured using html2canvas and stored as Base64 in database.
+- **Enhanced Error Reporter:** Comprehensive error management UI with filtering, search, email workflow, automatic screenshot display, and status tracking.
+- **Error Logging Utility:** `client/src/utils/errorLogger.ts` provides `captureErrorWithScreenshot()` for automatic error documentation.
 
 ### Dynamic System Health Monitoring
 - **Real-Time Metrics:** Version from package.json, dynamic database health checks, webserver status (running/degraded based on uptime and memory), hardware info (CPU, memory).
