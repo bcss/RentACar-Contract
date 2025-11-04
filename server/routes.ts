@@ -10,6 +10,10 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGeolocation } from "./services/geolocation";
 import { format } from "date-fns";
+import os from "os";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -121,6 +125,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // System health endpoint
   app.get('/api/system/health', isAuthenticated, async (req: any, res) => {
     try {
+      // Get version from package.json
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+      const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
+      const appVersion = packageJson.version || '1.0.0';
+
       // Check database health
       let dbStatus = 'healthy';
       let dbMessage = 'Database connection is healthy';
@@ -137,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         dbMessage = 'Database connection error';
       }
 
-      // Get record counts
+      // Get record counts including vehicle inspections
       const [users, customers, vehicles, contracts, companies, sponsors] = await Promise.all([
         storage.getAllUsers(),
         storage.getCustomers(true),
@@ -147,18 +157,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getSponsors(true),
       ]);
 
+      // Get all vehicle inspections from all contracts
+      let vehicleInspections: any[] = [];
+      for (const contract of contracts) {
+        const inspections = await storage.getVehicleInspectionsByContract(contract.id);
+        vehicleInspections.push(...inspections);
+      }
+
       const activeContracts = contracts.filter((c: any) => c.status === 'active').length;
+      
+      // Count photos from vehicle inspections
+      let totalPhotos = 0;
+      vehicleInspections.forEach((inspection: any) => {
+        if (inspection.photos && Array.isArray(inspection.photos)) {
+          totalPhotos += inspection.photos.length;
+        }
+      });
+
       const totalRecords = 
         users.length + 
         customers.length + 
         vehicles.length + 
         contracts.length + 
         companies.length + 
-        sponsors.length;
+        sponsors.length +
+        vehicleInspections.length;
 
-      // Estimate database size (rough calculation)
+      // Estimate database size including photos
       const avgRecordSize = 2; // KB per record (rough estimate)
-      const estimatedSizeKB = totalRecords * avgRecordSize;
+      const avgPhotoSize = 150; // KB per photo (compressed)
+      const estimatedSizeKB = (totalRecords * avgRecordSize) + (totalPhotos * avgPhotoSize);
       const estimatedSizeMB = estimatedSizeKB / 1024;
       
       let estimatedSize = '';
@@ -170,10 +198,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         estimatedSize = `${(estimatedSizeMB / 1024).toFixed(2)} GB`;
       }
 
+      // Get system information
+      const totalMemoryGB = (os.totalmem() / (1024 ** 3)).toFixed(2);
+      const freeMemoryGB = (os.freemem() / (1024 ** 3)).toFixed(2);
+      const usedMemoryGB = ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2);
+      const memoryUsagePercent = (((os.totalmem() - os.freemem()) / os.totalmem()) * 100).toFixed(1);
+      
+      const uptimeSeconds = process.uptime();
+      const uptimeHours = Math.floor(uptimeSeconds / 3600);
+      const uptimeMinutes = Math.floor((uptimeSeconds % 3600) / 60);
+      const uptimeFormatted = `${uptimeHours}h ${uptimeMinutes}m`;
+
+      // Determine webserver status dynamically
+      // Server is running if we're responding to this request
+      // Check if uptime is reasonable (> 0) and memory usage is not critical (< 95%)
+      const memoryUsageNum = parseFloat(memoryUsagePercent);
+      const webserverStatus = uptimeSeconds > 0 && memoryUsageNum < 95 ? 'running' : 'degraded';
+
       res.json({
+        version: appVersion,
         database: {
           status: dbStatus,
           message: dbMessage,
+        },
+        webserver: {
+          status: webserverStatus,
+          nodeVersion: process.version,
+          platform: os.platform(),
+          architecture: os.arch(),
+          hostname: os.hostname(),
+          uptime: uptimeFormatted,
+          uptimeSeconds: Math.floor(uptimeSeconds),
+        },
+        system: {
+          totalMemory: `${totalMemoryGB} GB`,
+          usedMemory: `${usedMemoryGB} GB`,
+          freeMemory: `${freeMemoryGB} GB`,
+          memoryUsage: `${memoryUsagePercent}%`,
+          cpuCores: os.cpus().length,
+          cpuModel: os.cpus()[0]?.model || 'Unknown',
         },
         counts: {
           users: users.length,
@@ -183,9 +246,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           activeContracts,
           companies: companies.length,
           sponsors: sponsors.length,
+          vehicleInspections: vehicleInspections.length,
+          photos: totalPhotos,
         },
         storage: {
           totalRecords,
+          totalPhotos,
           estimatedSize,
         },
       });

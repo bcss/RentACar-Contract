@@ -22,9 +22,27 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
 
 interface SystemHealth {
+  version: string;
   database: {
     status: 'healthy' | 'error';
     message: string;
+  };
+  webserver: {
+    status: string;
+    nodeVersion: string;
+    platform: string;
+    architecture: string;
+    hostname: string;
+    uptime: string;
+    uptimeSeconds: number;
+  };
+  system: {
+    totalMemory: string;
+    usedMemory: string;
+    freeMemory: string;
+    memoryUsage: string;
+    cpuCores: number;
+    cpuModel: string;
   };
   counts: {
     users: number;
@@ -34,9 +52,12 @@ interface SystemHealth {
     activeContracts: number;
     companies: number;
     sponsors: number;
+    vehicleInspections: number;
+    photos: number;
   };
   storage: {
     totalRecords: number;
+    totalPhotos: number;
     estimatedSize: string;
   };
 }
@@ -329,32 +350,90 @@ Please attach a screenshot if available.
       </div>
 
       {/* System Information Section */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* System Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5 text-primary" />
-              System Information
+              System Info
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex justify-between items-center text-sm">
-              <span className="font-medium">Product</span>
-              <span className="text-muted-foreground">RCCMS</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="font-medium">Version</span>
-              <Badge variant="outline">1.0.0</Badge>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="font-medium">Release</span>
-              <span className="text-muted-foreground">December 2025</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="font-medium">Architecture</span>
-              <span className="text-muted-foreground">React + Express</span>
-            </div>
+            {healthLoading ? (
+              <Skeleton className="h-20 w-full" />
+            ) : (
+              <>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Product</span>
+                  <span className="text-muted-foreground">RCCMS</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Version</span>
+                  <Badge variant="outline">{healthData?.version || '1.0.0'}</Badge>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Platform</span>
+                  <span className="text-muted-foreground text-xs">{healthData?.webserver.platform || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Arch</span>
+                  <span className="text-muted-foreground text-xs">{healthData?.webserver.architecture || 'N/A'}</span>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Webserver Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-primary" />
+              Webserver
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {healthLoading ? (
+              <Skeleton className="h-20 w-full" />
+            ) : (
+              <>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">Status</span>
+                  <div className="flex items-center gap-2">
+                    {healthData?.webserver.status === 'running' ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
+                          Running
+                        </Badge>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-4 w-4 text-yellow-500" />
+                        <Badge className="bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20">
+                          Degraded
+                        </Badge>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Node.js</span>
+                  <span className="text-muted-foreground text-xs">{healthData?.webserver.nodeVersion || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Uptime</span>
+                  <span className="text-muted-foreground text-xs">{healthData?.webserver.uptime || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Host</span>
+                  <span className="text-muted-foreground text-xs truncate max-w-[120px]" title={healthData?.webserver.hostname || 'N/A'}>
+                    {healthData?.webserver.hostname || 'N/A'}
+                  </span>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -363,7 +442,7 @@ Please attach a screenshot if available.
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5 text-primary" />
-              Database Health
+              Database
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -390,8 +469,8 @@ Please attach a screenshot if available.
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="font-medium">Database</span>
-                  <span className="text-muted-foreground">PostgreSQL</span>
+                  <span className="font-medium">Type</span>
+                  <span className="text-muted-foreground text-xs">PostgreSQL</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {healthData?.database.message}
@@ -401,12 +480,12 @@ Please attach a screenshot if available.
           </CardContent>
         </Card>
 
-        {/* Storage & Records */}
+        {/* System Hardware */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <HardDrive className="h-5 w-5 text-primary" />
-              Storage & Records
+              Hardware
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -415,36 +494,96 @@ Please attach a screenshot if available.
             ) : (
               <>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="font-medium">Total Records</span>
-                  <Badge variant="secondary">{healthData?.storage.totalRecords.toLocaleString() || '0'}</Badge>
+                  <span className="font-medium">CPU Cores</span>
+                  <Badge variant="secondary">{healthData?.system.cpuCores || 0}</Badge>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="font-medium">Est. Size</span>
-                  <span className="text-muted-foreground">{healthData?.storage.estimatedSize || 'N/A'}</span>
+                  <span className="font-medium">Memory</span>
+                  <span className="text-muted-foreground text-xs">{healthData?.system.totalMemory || 'N/A'}</span>
                 </div>
-                <div className="pt-2 border-t grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Users className="h-3 w-3 text-muted-foreground" />
-                    <span>{healthData?.counts.users || 0} Users</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-3 w-3 text-muted-foreground" />
-                    <span>{healthData?.counts.customers || 0} Customers</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Car className="h-3 w-3 text-muted-foreground" />
-                    <span>{healthData?.counts.vehicles || 0} Vehicles</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <FileText className="h-3 w-3 text-muted-foreground" />
-                    <span>{healthData?.counts.contracts || 0} Contracts</span>
-                  </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Used</span>
+                  <span className="text-muted-foreground text-xs">{healthData?.system.usedMemory || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Usage</span>
+                  <Badge variant="outline">{healthData?.system.memoryUsage || 'N/A'}</Badge>
                 </div>
               </>
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Storage & Records - Full Width */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <HardDrive className="h-5 w-5 text-primary" />
+            Storage & Records
+          </CardTitle>
+          <CardDescription>Database records and photo storage information</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {healthLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : (
+            <>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-md">
+                  <span className="font-medium">Total Records</span>
+                  <Badge variant="secondary" className="text-base">{healthData?.storage.totalRecords.toLocaleString() || '0'}</Badge>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-md">
+                  <span className="font-medium">Photos Stored</span>
+                  <Badge variant="secondary" className="text-base">{healthData?.storage.totalPhotos.toLocaleString() || '0'}</Badge>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-md">
+                  <span className="font-medium">Est. Size</span>
+                  <Badge variant="outline" className="text-base">{healthData?.storage.estimatedSize || 'N/A'}</Badge>
+                </div>
+              </div>
+              <div className="pt-3 border-t grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 text-sm">
+                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    <span className="text-xs">Users</span>
+                  </div>
+                  <span className="font-semibold">{healthData?.counts.users || 0}</span>
+                </div>
+                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    <span className="text-xs">Customers</span>
+                  </div>
+                  <span className="font-semibold">{healthData?.counts.customers || 0}</span>
+                </div>
+                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Car className="h-3 w-3" />
+                    <span className="text-xs">Vehicles</span>
+                  </div>
+                  <span className="font-semibold">{healthData?.counts.vehicles || 0}</span>
+                </div>
+                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <FileText className="h-3 w-3" />
+                    <span className="text-xs">Contracts</span>
+                  </div>
+                  <span className="font-semibold">{healthData?.counts.contracts || 0}</span>
+                </div>
+                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Camera className="h-3 w-3" />
+                    <span className="text-xs">Inspections</span>
+                  </div>
+                  <span className="font-semibold">{healthData?.counts.vehicleInspections || 0}</span>
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Documentation & Common Questions Side by Side */}
       <div className="grid gap-6 md:grid-cols-2">
