@@ -692,7 +692,8 @@ Please attach a screenshot if available.
                       <li><strong>Edit Reasons:</strong> Required explanations for post-confirmation edits</li>
                     </ul>
                   </section>
-                </DialogContent>
+                </div>
+              </DialogContent>
               </Dialog>
 
               {(user?.role === 'admin' || user?.role === 'manager') && (

@@ -41,7 +41,7 @@ Preferred communication style: Simple, everyday language.
 - **Complete Audit Logging:** Comprehensive audit trail for CRUD operations and contract lifecycle events.
 - **System Error Logging:** Automatic error logging to database with full context.
 - **Company Settings Management:** Admin-only configuration for bilingual company information and contract clauses.
-- **Support & Help Center:** Unified page for system health, documentation, and error reporting.
+- **Support & Help Center:** Unified page with dynamic system health monitoring, comprehensive documentation modals with navigation links, 20 FAQs in dropdown format, and error reporting system.
 - **Legal Compliance Pages:** Professional Privacy Policy and Terms of Service pages.
 - **Dashboard with Context-Aware Navigation:** Critical metrics with deep-link filtering.
 - **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality.
@@ -68,6 +68,14 @@ Preferred communication style: Simple, everyday language.
 ### Error Logging & Enhanced Error Reporter System
 - **Automatic Error Capture:** All errors logged to `systemErrors` table with full context.
 - **Enhanced Error Reporter:** Comprehensive error management UI with filtering, search, email workflow, screenshot capture, and status tracking.
+
+### Dynamic System Health Monitoring
+- **Real-Time Metrics:** Version from package.json, dynamic database health checks, webserver status (running/degraded based on uptime and memory), hardware info (CPU, memory).
+- **Comprehensive Storage Tracking:** Total records count, vehicle inspection photos count, estimated storage size calculations.
+- **Status Indicators:** Color-coded badges for database (healthy/error), webserver (running/degraded), with conditional rendering.
+- **System Information Cards:** Four-card responsive grid displaying System Info, Webserver Status, Database Health, and Hardware metrics.
+- **Documentation System:** Extensive modal-based guides (User Guide, Admin Guide, Feature List) with clickable navigation links to relevant pages.
+- **FAQ System:** 20 comprehensive frequently asked questions in searchable dropdown format.
 
 ## External Dependencies
 
