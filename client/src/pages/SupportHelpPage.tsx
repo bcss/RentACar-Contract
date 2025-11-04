@@ -12,11 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Link } from 'wouter';
 import { 
   CheckCircle, XCircle, Database, HardDrive, Users, Car, FileText, Building, Package, 
-  Book, HelpCircle, Bug, Mail, AlertCircle, Download, Filter, Check, Camera, BookOpen, Shield, List,
+  Book, HelpCircle, Bug, Mail, AlertCircle, Download, Filter, Check, BookOpen, Shield, List,
   Zap, Code, ShieldCheck, Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
-import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
 import { DatePicker } from '@/components/ui/date-picker';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -254,25 +253,6 @@ export default function SupportHelpPage() {
     return true;
   }) || [];
 
-  const captureScreenshot = async () => {
-    try {
-      const canvas = await html2canvas(document.body);
-      const link = document.createElement('a');
-      link.download = `rccms-screenshot-${format(new Date(), 'yyyy-MM-dd-HHmmss')}.png`;
-      link.href = canvas.toDataURL();
-      link.click();
-      toast({
-        title: 'Screenshot captured',
-        description: 'Screenshot saved to downloads folder',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Screenshot failed',
-        description: 'Unable to capture screenshot',
-      });
-    }
-  };
 
   const generateEmailBody = (error: SystemError, reason?: string) => {
     const body = `
@@ -330,24 +310,12 @@ Please attach a screenshot if available.
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Page Header with Actions */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Support & Help</h1>
-          <p className="text-muted-foreground">
-            System information, documentation, and technical support
-          </p>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={captureScreenshot} 
-          data-testid="button-capture-screenshot"
-          className="flex items-center gap-2"
-        >
-          <Camera className="h-4 w-4" />
-          Capture Screenshot
-        </Button>
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Support & Help</h1>
+        <p className="text-muted-foreground">
+          System information, documentation, and technical support
+        </p>
       </div>
 
       {/* System Information Section */}
