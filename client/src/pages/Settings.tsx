@@ -23,7 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import AboutPage from "@/pages/AboutPage.tsx";
+import AboutPage from "@/pages/AboutPage";
 
 export default function Settings() {
   const { t } = useTranslation();
