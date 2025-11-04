@@ -72,6 +72,7 @@ interface SystemError {
   userId?: string;
   ipAddress?: string;
   userAgent?: string;
+  screenshot?: string; // Base64-encoded screenshot automatically captured
   createdAt?: string;
   acknowledged: boolean;
   acknowledgedBy?: string;
@@ -535,14 +536,14 @@ Please attach a screenshot if available.
                 </div>
                 <div className="flex flex-col gap-1 p-3 bg-muted/20 rounded-md">
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <Camera className="h-4 w-4" />
+                    <FileText className="h-4 w-4" />
                     <span className="text-xs">Inspections</span>
                   </div>
                   <span className="font-semibold text-lg">{healthData?.counts.vehicleInspections || 0}</span>
                 </div>
                 <div className="flex flex-col gap-1 p-3 bg-muted/20 rounded-md">
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <Camera className="h-4 w-4" />
+                    <FileText className="h-4 w-4" />
                     <span className="text-xs">Photos</span>
                   </div>
                   <span className="font-semibold text-lg">{healthData?.storage.totalPhotos.toLocaleString() || '0'}</span>
@@ -1558,6 +1559,24 @@ Please attach a screenshot if available.
                             <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto">
                               {error.stackTrace}
                             </pre>
+                          </details>
+                        )}
+                        {error.screenshot && (
+                          <details className="text-xs">
+                            <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                              View screenshot (auto-captured)
+                            </summary>
+                            <div className="mt-2 p-2 bg-muted rounded">
+                              <img 
+                                src={error.screenshot} 
+                                alt="Error screenshot" 
+                                className="max-w-full h-auto rounded border border-border"
+                                loading="lazy"
+                              />
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Screenshot automatically captured when error occurred
+                              </p>
+                            </div>
                           </details>
                         )}
                       </div>
