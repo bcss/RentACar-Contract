@@ -12,7 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Link } from 'wouter';
 import { 
   CheckCircle, XCircle, Database, HardDrive, Users, Car, FileText, Building, Package, 
-  Book, HelpCircle, Bug, Mail, AlertCircle, Download, Filter, Check, Camera, BookOpen, Shield, List
+  Book, HelpCircle, Bug, Mail, AlertCircle, Download, Filter, Check, Camera, BookOpen, Shield, List,
+  Zap, Code, ShieldCheck, Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
@@ -529,55 +530,54 @@ Please attach a screenshot if available.
             <Skeleton className="h-32 w-full" />
           ) : (
             <>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-md">
-                  <span className="font-medium">Total Records</span>
-                  <Badge variant="secondary" className="text-base">{healthData?.storage.totalRecords.toLocaleString() || '0'}</Badge>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-md">
-                  <span className="font-medium">Photos Stored</span>
-                  <Badge variant="secondary" className="text-base">{healthData?.storage.totalPhotos.toLocaleString() || '0'}</Badge>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-md">
-                  <span className="font-medium">Est. Size</span>
-                  <Badge variant="outline" className="text-base">{healthData?.storage.estimatedSize || 'N/A'}</Badge>
+              <div className="flex justify-end mb-2">
+                <div className="flex items-center gap-2 px-3 py-1 bg-muted/30 rounded-md">
+                  <span className="text-sm text-muted-foreground">Est. Size:</span>
+                  <Badge variant="outline">{healthData?.storage.estimatedSize || 'N/A'}</Badge>
                 </div>
               </div>
-              <div className="pt-3 border-t grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 text-sm">
-                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="flex flex-col gap-1 p-3 bg-muted/20 rounded-md">
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <Users className="h-3 w-3" />
+                    <Users className="h-4 w-4" />
                     <span className="text-xs">Users</span>
                   </div>
-                  <span className="font-semibold">{healthData?.counts.users || 0}</span>
+                  <span className="font-semibold text-lg">{healthData?.counts.users || 0}</span>
                 </div>
-                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                <div className="flex flex-col gap-1 p-3 bg-muted/20 rounded-md">
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <Users className="h-3 w-3" />
+                    <Users className="h-4 w-4" />
                     <span className="text-xs">Customers</span>
                   </div>
-                  <span className="font-semibold">{healthData?.counts.customers || 0}</span>
+                  <span className="font-semibold text-lg">{healthData?.counts.customers || 0}</span>
                 </div>
-                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                <div className="flex flex-col gap-1 p-3 bg-muted/20 rounded-md">
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <Car className="h-3 w-3" />
+                    <Car className="h-4 w-4" />
                     <span className="text-xs">Vehicles</span>
                   </div>
-                  <span className="font-semibold">{healthData?.counts.vehicles || 0}</span>
+                  <span className="font-semibold text-lg">{healthData?.counts.vehicles || 0}</span>
                 </div>
-                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                <div className="flex flex-col gap-1 p-3 bg-muted/20 rounded-md">
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <FileText className="h-3 w-3" />
+                    <FileText className="h-4 w-4" />
                     <span className="text-xs">Contracts</span>
                   </div>
-                  <span className="font-semibold">{healthData?.counts.contracts || 0}</span>
+                  <span className="font-semibold text-lg">{healthData?.counts.contracts || 0}</span>
                 </div>
-                <div className="flex flex-col gap-1 p-2 bg-muted/20 rounded">
+                <div className="flex flex-col gap-1 p-3 bg-muted/20 rounded-md">
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <Camera className="h-3 w-3" />
+                    <Camera className="h-4 w-4" />
                     <span className="text-xs">Inspections</span>
                   </div>
-                  <span className="font-semibold">{healthData?.counts.vehicleInspections || 0}</span>
+                  <span className="font-semibold text-lg">{healthData?.counts.vehicleInspections || 0}</span>
+                </div>
+                <div className="flex flex-col gap-1 p-3 bg-muted/20 rounded-md">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Camera className="h-4 w-4" />
+                    <span className="text-xs">Photos</span>
+                  </div>
+                  <span className="font-semibold text-lg">{healthData?.storage.totalPhotos.toLocaleString() || '0'}</span>
                 </div>
               </div>
             </>
@@ -791,6 +791,91 @@ Please attach a screenshot if available.
 
               <Dialog>
                 <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start" data-testid="button-open-quick-start">
+                    <Zap className="h-4 w-4 mr-2" />
+                    Quick Start Guide
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Quick Start Guide</DialogTitle>
+                    <DialogDescription>Get started with RCCMS in 5 minutes</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 text-sm">
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Step 1: Initial Login & Setup</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Login with credentials provided by your administrator</li>
+                        <li>Change your password immediately (Profile → Change Password)</li>
+                        <li>Select your preferred language (English/Arabic) and theme (Light/Dark)</li>
+                        <li>Familiarize yourself with the sidebar navigation menu</li>
+                      </ul>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Step 2: Add Your First Vehicle</h3>
+                      <p className="text-muted-foreground mb-2">Navigate to <Link href="/vehicles" className="text-primary hover:underline">Vehicles</Link> and click "Add Vehicle"</p>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Enter registration number, make, model, year</li>
+                        <li>Set daily rental rate and fuel type</li>
+                        <li>Vehicle status automatically set to "available"</li>
+                        <li>Click "Create Vehicle" to save</li>
+                      </ul>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Step 3: Add Your First Customer</h3>
+                      <p className="text-muted-foreground mb-2">Navigate to <Link href="/customers" className="text-primary hover:underline">Customers</Link> and click "Add Customer"</p>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Fill customer name (English & Arabic)</li>
+                        <li>Enter National ID, nationality, phone, email</li>
+                        <li>Add license number and expiry date</li>
+                        <li>Provide address details</li>
+                        <li>Click "Create Customer" to save</li>
+                      </ul>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Step 4: Create Your First Contract</h3>
+                      <p className="text-muted-foreground mb-2">Navigate to <Link href="/contracts" className="text-primary hover:underline">Contracts</Link> and click "New Contract"</p>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Select customer and vehicle from dropdowns</li>
+                        <li>Set rental start and end dates</li>
+                        <li>Enter initial odometer reading and fuel level</li>
+                        <li>Add any addons (GPS, insurance, etc.)</li>
+                        <li>Select hirer type (Direct, with sponsor, or from company)</li>
+                        <li>Review calculated rental amount</li>
+                        <li>Click "Create Contract" - Status will be "Draft"</li>
+                      </ul>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Step 5: Process the Contract</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li><strong>Confirm:</strong> Click "Confirm Contract" to finalize terms</li>
+                        <li><strong>Inspect:</strong> Click "Pre-Delivery Inspection" to capture vehicle condition (6 photos required)</li>
+                        <li><strong>Activate:</strong> Click "Activate Contract" to start the rental (vehicle status → rented)</li>
+                        <li><strong>Payment:</strong> Record initial payment (click "Record Payment" button)</li>
+                        <li><strong>Print:</strong> Generate PDF contract for customer signature</li>
+                      </ul>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Next Steps</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Explore <Link href="/" className="text-primary hover:underline">Dashboard</Link> for quick metrics and insights</li>
+                        <li>Check <Link href="/reports" className="text-primary hover:underline">Reports</Link> for analytics and exports</li>
+                        <li>Review <Link href="/audit-logs" className="text-primary hover:underline">Audit Logs</Link> for all system activities</li>
+                        <li>Configure <Link href="/settings/company" className="text-primary hover:underline">Company Settings</Link> and <Link href="/settings/financial" className="text-primary hover:underline">Financial Settings</Link> (Admin only)</li>
+                        <li>Read the full User Guide for detailed feature explanations</li>
+                      </ul>
+                    </section>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog>
+                <DialogTrigger asChild>
                   <Button variant="outline" className="w-full justify-start" data-testid="button-open-feature-list">
                     <List className="h-4 w-4 mr-2" />
                     Feature List
@@ -883,6 +968,461 @@ Please attach a screenshot if available.
                   </div>
                 </DialogContent>
               </Dialog>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start" data-testid="button-open-troubleshooting">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Troubleshooting Guide
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Troubleshooting Guide</DialogTitle>
+                    <DialogDescription>Common issues and solutions</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 text-sm">
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Login & Authentication Issues</h3>
+                      <div className="space-y-2">
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Cannot login / "Invalid credentials" error</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Verify username is correct (usernames are case-sensitive)</li>
+                            <li>Check if account is disabled (contact administrator)</li>
+                            <li>Request password reset from administrator</li>
+                            <li>Clear browser cache and cookies, then try again</li>
+                          </ul>
+                        </div>
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Session expires too quickly</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Sessions expire after 24 hours of inactivity</li>
+                            <li>Logout and login again to refresh session</li>
+                            <li>Contact administrator to adjust session timeout</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Contract Issues</h3>
+                      <div className="space-y-2">
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Cannot edit a contract</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Confirmed contracts require edit reason - provide explanation before editing</li>
+                            <li>Active/Completed/Closed contracts may have limited edit permissions</li>
+                            <li>Check your user role has edit permissions</li>
+                            <li>View Timeline to see contract status and history</li>
+                          </ul>
+                        </div>
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Cannot activate contract</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Contract must be confirmed first</li>
+                            <li>Pre-delivery inspection must be completed (6 photos required)</li>
+                            <li>Vehicle must be in "available" status</li>
+                            <li>Verify all required fields are filled</li>
+                          </ul>
+                        </div>
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Cannot close contract</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Contract must be in "completed" status first</li>
+                            <li>Final payment must be recorded before closure</li>
+                            <li>Post-return inspection must be completed</li>
+                            <li>Check your user has "Close Contracts" permission</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Vehicle Inspection Issues</h3>
+                      <div className="space-y-2">
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Photo upload fails</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Ensure photos are in JPG, PNG, or WebP format</li>
+                            <li>Check file size is under 10MB per photo</li>
+                            <li>All 6 photos are required (Front, Back, Left, Right, Top, Dashboard)</li>
+                            <li>Check internet connection stability</li>
+                            <li>Try using a different browser if issue persists</li>
+                          </ul>
+                        </div>
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Cannot view inspection photos</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Photos are Base64 encoded in database - may load slowly</li>
+                            <li>Clear browser cache if photos don't display</li>
+                            <li>Try refreshing the page</li>
+                            <li>Check browser console for errors (press F12)</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Payment & Financial Issues</h3>
+                      <div className="space-y-2">
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Payment amount validation error</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Payment amount cannot exceed total contract amount</li>
+                            <li>Cannot record negative payment amounts</li>
+                            <li>Check calculation includes addons and extra charges</li>
+                            <li>Verify payment method-specific fields are filled correctly</li>
+                          </ul>
+                        </div>
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Financial settings not saving</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Only admins can modify financial settings</li>
+                            <li>All price fields must be positive numbers</li>
+                            <li>Check form validation errors before submitting</li>
+                            <li>Refresh page and verify settings were saved</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Report & Export Issues</h3>
+                      <div className="space-y-2">
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Reports not loading / showing no data</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Check date range filter - adjust to include relevant dates</li>
+                            <li>Verify you have "Access Reports" permission</li>
+                            <li>Ensure there is data for the selected period</li>
+                            <li>Try removing all filters and apply one at a time</li>
+                          </ul>
+                        </div>
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">PDF export fails</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Disable browser popup blocker for this site</li>
+                            <li>Check browser allows downloads from this domain</li>
+                            <li>Try using a different browser (Chrome/Firefox recommended)</li>
+                            <li>Check browser console for detailed error messages</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Performance Issues</h3>
+                      <div className="space-y-2">
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Application loading slowly</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>Check internet connection speed</li>
+                            <li>Clear browser cache and reload (Ctrl+Shift+R / Cmd+Shift+R)</li>
+                            <li>Close unnecessary browser tabs</li>
+                            <li>Disable browser extensions temporarily</li>
+                            <li>Contact administrator if issue persists</li>
+                          </ul>
+                        </div>
+                        <div className="p-3 bg-muted/30 rounded-md">
+                          <p className="font-medium mb-1">Database timeout errors</p>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
+                            <li>System may be under heavy load - try again in a few minutes</li>
+                            <li>Check database health in Support & Help page</li>
+                            <li>Report error via Error Reporter if it persists</li>
+                            <li>Contact system administrator for server-side issues</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Getting Additional Help</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Check Common Questions section for quick answers</li>
+                        <li>Use Error Reporter to log system errors with screenshots</li>
+                        <li>Contact your system administrator with error details</li>
+                        <li>Review Audit Logs to trace what happened before the issue</li>
+                        <li>Include browser name, version, and error messages when reporting</li>
+                      </ul>
+                    </section>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {(user?.role === 'admin' || user?.role === 'manager') && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start" data-testid="button-open-system-architecture">
+                      <Code className="h-4 w-4 mr-2" />
+                      System Architecture
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>System Architecture</DialogTitle>
+                      <DialogDescription>Technical overview for IT teams and administrators</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 text-sm">
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Technology Stack</h3>
+                        <div className="grid gap-2">
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">Frontend:</span>
+                            <span className="text-muted-foreground ml-2">React 18, TypeScript, Vite, TailwindCSS, Shadcn/ui, Radix UI</span>
+                          </div>
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">Backend:</span>
+                            <span className="text-muted-foreground ml-2">Node.js 20, Express.js, TypeScript</span>
+                          </div>
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">Database:</span>
+                            <span className="text-muted-foreground ml-2">PostgreSQL (Neon serverless), Drizzle ORM</span>
+                          </div>
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">Authentication:</span>
+                            <span className="text-muted-foreground ml-2">Passport.js (local strategy), Bcrypt, express-session</span>
+                          </div>
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">State Management:</span>
+                            <span className="text-muted-foreground ml-2">TanStack Query (React Query v5)</span>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Database Schema</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Core Tables:</strong> users, customers, vehicles, sponsors, companies, contracts</li>
+                          <li><strong>Transaction Tables:</strong> payments, vehicleInspections</li>
+                          <li><strong>Audit Tables:</strong> auditLogs (system), contractEdits (business operations)</li>
+                          <li><strong>System Tables:</strong> systemErrors, companySettings, financialSettings</li>
+                          <li><strong>Session Table:</strong> sessions (PostgreSQL-backed express-session)</li>
+                          <li><strong>Primary Keys:</strong> Serial auto-increment for all core entities</li>
+                          <li><strong>Foreign Keys:</strong> Enforced at database level with ON DELETE constraints</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Application Architecture</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Single-Page Application (SPA):</strong> Client-side routing with Wouter</li>
+                          <li><strong>Route-Based Code Splitting:</strong> React.lazy() for performance optimization</li>
+                          <li><strong>RESTful API Design:</strong> Standard HTTP methods (GET, POST, PATCH, DELETE)</li>
+                          <li><strong>Backend Middleware:</strong> Role-based access control, session validation, error handling</li>
+                          <li><strong>Data Validation:</strong> Zod schemas shared between frontend and backend</li>
+                          <li><strong>ORM Layer:</strong> Drizzle ORM with type-safe queries and migrations</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Security Implementation</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Password Hashing:</strong> Bcrypt with salt rounds (cost factor 10)</li>
+                          <li><strong>Session Storage:</strong> PostgreSQL with connect-pg-simple, httpOnly cookies</li>
+                          <li><strong>Session Secret:</strong> Environment variable SESSION_SECRET (change in production)</li>
+                          <li><strong>CSRF Protection:</strong> SameSite cookie attribute, origin validation</li>
+                          <li><strong>SQL Injection Prevention:</strong> Parameterized queries via Drizzle ORM</li>
+                          <li><strong>XSS Protection:</strong> React's built-in escaping, Content-Security-Policy headers</li>
+                          <li><strong>Role-Based Authorization:</strong> Middleware checks on all protected routes</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Data Flow</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Client Request:</strong> React component triggers TanStack Query mutation/query</li>
+                          <li><strong>API Call:</strong> HTTP request to Express backend with session cookie</li>
+                          <li><strong>Authentication:</strong> Passport.js validates session, loads user context</li>
+                          <li><strong>Authorization:</strong> Role-based middleware checks permissions</li>
+                          <li><strong>Validation:</strong> Zod schemas validate request body/params</li>
+                          <li><strong>Business Logic:</strong> Route handlers process request, interact with database via Drizzle</li>
+                          <li><strong>Audit Logging:</strong> Automatic logging to auditLogs/contractEdits tables</li>
+                          <li><strong>Response:</strong> JSON response sent to client, TanStack Query updates cache</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">File Storage</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Inspection Photos:</strong> Base64 encoded and stored in vehicleInspections table</li>
+                          <li><strong>Compression:</strong> Client-side image compression before upload (HTML5 Canvas)</li>
+                          <li><strong>Size Limits:</strong> 10MB per photo, automatic compression target ~500KB</li>
+                          <li><strong>Format Support:</strong> JPEG, PNG, WebP (converted to JPEG for storage)</li>
+                          <li><strong>Storage Location:</strong> PostgreSQL BYTEA/TEXT column (Base64)</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Deployment Considerations</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Environment Variables:</strong> DATABASE_URL, SESSION_SECRET, NODE_ENV</li>
+                          <li><strong>Production Build:</strong> npm run build (Vite production build)</li>
+                          <li><strong>Database Migrations:</strong> npm run db:push (Drizzle schema sync)</li>
+                          <li><strong>Static Assets:</strong> Vite bundles to dist/ directory</li>
+                          <li><strong>Server:</strong> Express serves both API and static frontend</li>
+                          <li><strong>Port Configuration:</strong> Default 5000, configurable via PORT environment variable</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Monitoring & Maintenance</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>System Health API:</strong> /api/system/health provides real-time status checks</li>
+                          <li><strong>Database Health:</strong> Connection pooling, query timeout monitoring</li>
+                          <li><strong>Error Logging:</strong> Automatic capture to systemErrors table with full context</li>
+                          <li><strong>Audit Trails:</strong> Comprehensive logging in auditLogs and contractEdits tables</li>
+                          <li><strong>Session Cleanup:</strong> Automatic expiration after 24 hours inactivity</li>
+                          <li><strong>Performance Metrics:</strong> Server uptime, memory usage, CPU info via health endpoint</li>
+                        </ul>
+                      </section>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+
+              {(user?.role === 'admin' || user?.role === 'manager') && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start" data-testid="button-open-security-compliance">
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      Security & Compliance
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Security & Compliance Guide</DialogTitle>
+                      <DialogDescription>Data protection and audit policies</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 text-sm">
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Authentication & Access Control</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Password Policy:</strong> Minimum 8 characters (enforced in form validation)</li>
+                          <li><strong>Password Storage:</strong> Bcrypt hashing with salting (never stored as plaintext)</li>
+                          <li><strong>Session Duration:</strong> 24 hours of inactivity before automatic logout</li>
+                          <li><strong>Session Storage:</strong> PostgreSQL-backed sessions (not vulnerable to memory-based attacks)</li>
+                          <li><strong>Cookie Security:</strong> HttpOnly flag prevents JavaScript access, Secure flag in production</li>
+                          <li><strong>Failed Login Protection:</strong> User account can be disabled by administrators</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Role-Based Access Control (RBAC)</h3>
+                        <div className="grid gap-2">
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">Admin:</span>
+                            <span className="text-muted-foreground ml-2">Full system access, user management, settings configuration</span>
+                          </div>
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">Manager:</span>
+                            <span className="text-muted-foreground ml-2">Business operations, reports, contract management (with toggles)</span>
+                          </div>
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">Staff:</span>
+                            <span className="text-muted-foreground ml-2">Daily operations, contract creation, customer management</span>
+                          </div>
+                          <div className="p-2 bg-muted/20 rounded">
+                            <span className="font-medium">Viewer:</span>
+                            <span className="text-muted-foreground ml-2">Read-only access to contracts and master data</span>
+                          </div>
+                        </div>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                          Additional permission toggles: Access Reports, Close Contracts, View All Contracts
+                        </p>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Data Protection & Privacy</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Personal Data:</strong> Customer names, IDs, contact info stored with encryption at rest (PostgreSQL)</li>
+                          <li><strong>No Data Deletion:</strong> Disable-only architecture preserves audit trail and compliance</li>
+                          <li><strong>Data Retention:</strong> All records retained indefinitely for legal and audit purposes</li>
+                          <li><strong>Access Logging:</strong> Every data access logged with user, timestamp, action</li>
+                          <li><strong>Data Minimization:</strong> Only collect data necessary for rental operations</li>
+                          <li><strong>Right to Access:</strong> Audit logs provide complete user activity history</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Audit Trail & Compliance</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Dual Audit System:</strong> System logs (security) + Business logs (operations)</li>
+                          <li><strong>System Audit Logs:</strong> Login/logout, user creation/modification, role changes, setting updates</li>
+                          <li><strong>Business Audit Logs:</strong> Contract lifecycle, payments, inspections, master data changes</li>
+                          <li><strong>Field-Level Tracking:</strong> contractEdits table logs every field change with old/new values</li>
+                          <li><strong>Immutable Logs:</strong> Audit logs cannot be deleted or modified (append-only)</li>
+                          <li><strong>User Attribution:</strong> All actions tagged with userId, username, timestamp</li>
+                          <li><strong>Export Capability:</strong> Audit logs can be exported for compliance reporting</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Contract Immutability & Change Control</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Draft Contracts:</strong> Freely editable before confirmation</li>
+                          <li><strong>Confirmed Contracts:</strong> Require edit reason (logged to contractEdits)</li>
+                          <li><strong>Active Contracts:</strong> Limited modifications to prevent fraud</li>
+                          <li><strong>Completed/Closed:</strong> Most fields locked, only status changes allowed</li>
+                          <li><strong>Edit Justification:</strong> Mandatory reason field for all post-confirmation edits</li>
+                          <li><strong>Timeline View:</strong> Complete audit trail visible to all authorized users</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Payment & Financial Security</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Payment Validation:</strong> Amount cannot exceed total contract value</li>
+                          <li><strong>Payment Audit:</strong> Every payment logged with user, timestamp, method, reference</li>
+                          <li><strong>Method-Specific Fields:</strong> Card last 4 digits, check number, bank reference tracked</li>
+                          <li><strong>Final Payment Enforcement:</strong> Contract cannot close without final payment</li>
+                          <li><strong>Financial Settings:</strong> Admin-only access to pricing and rates</li>
+                          <li><strong>Refund Tracking:</strong> Separate tracking for security deposits and refunds</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">System Security Best Practices</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>HTTPS Enforcement:</strong> Always use HTTPS in production (TLS 1.2+)</li>
+                          <li><strong>Environment Variables:</strong> Sensitive config in .env, never in source code</li>
+                          <li><strong>Database Credentials:</strong> Stored in environment variables, rotated regularly</li>
+                          <li><strong>Session Secret Rotation:</strong> Change SESSION_SECRET periodically (invalidates all sessions)</li>
+                          <li><strong>SQL Injection Prevention:</strong> Parameterized queries via Drizzle ORM (never string concatenation)</li>
+                          <li><strong>XSS Protection:</strong> React auto-escaping, Content-Security-Policy headers</li>
+                          <li><strong>Regular Updates:</strong> Keep dependencies updated for security patches</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Compliance Recommendations</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Regular Audits:</strong> Review audit logs monthly for suspicious activity</li>
+                          <li><strong>User Access Reviews:</strong> Quarterly review of user roles and permissions</li>
+                          <li><strong>Backup Strategy:</strong> Daily automated PostgreSQL backups with 30-day retention</li>
+                          <li><strong>Disaster Recovery:</strong> Test backup restoration process quarterly</li>
+                          <li><strong>Security Training:</strong> Train users on password security and phishing awareness</li>
+                          <li><strong>Incident Response:</strong> Use Error Reporter and audit logs for security incident investigation</li>
+                          <li><strong>Documentation:</strong> Maintain system documentation (this guide) and update as needed</li>
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h3 className="font-semibold text-base mb-2">Data Breach Response</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li><strong>Step 1:</strong> Immediately disable affected user accounts</li>
+                          <li><strong>Step 2:</strong> Review audit logs to identify scope and timeline of breach</li>
+                          <li><strong>Step 3:</strong> Export complete audit trail for forensic analysis</li>
+                          <li><strong>Step 4:</strong> Reset SESSION_SECRET to invalidate all sessions</li>
+                          <li><strong>Step 5:</strong> Force password reset for all users</li>
+                          <li><strong>Step 6:</strong> Notify affected parties per regulatory requirements</li>
+                          <li><strong>Step 7:</strong> Document incident and preventive measures taken</li>
+                        </ul>
+                      </section>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </CardContent>
           </Card>
 
