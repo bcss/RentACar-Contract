@@ -802,6 +802,7 @@ export const systemErrors = pgTable("system_errors", {
   ipAddress: varchar("ip_address"),
   userAgent: text("user_agent"),
   additionalData: text("additional_data"), // JSON string for extra context
+  screenshot: text("screenshot"), // Base64-encoded screenshot automatically captured when error occurs
   acknowledged: boolean("acknowledged").notNull().default(false),
   acknowledgedBy: varchar("acknowledged_by").references(() => users.id),
   acknowledgedAt: timestamp("acknowledged_at"),
