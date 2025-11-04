@@ -7,16 +7,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Textarea } from '@/components/ui/textarea';
 import { Link } from 'wouter';
 import { 
   CheckCircle, XCircle, Database, HardDrive, Users, Car, FileText, Building, Package, 
-  Book, HelpCircle, Bug, Mail, AlertCircle, Download, Filter, Check
+  Book, HelpCircle, Bug, Mail, AlertCircle, Download, Filter, Check, Camera, BookOpen, Shield, List
 } from 'lucide-react';
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
 import { DatePicker } from '@/components/ui/date-picker';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SystemHealth {
   database: {
@@ -58,10 +62,13 @@ interface SystemError {
 export default function SupportHelpPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [resendReason, setResendReason] = useState('');
+  const [resendErrorId, setResendErrorId] = useState<string | null>(null);
 
   const { data: healthData, isLoading: healthLoading } = useQuery<SystemHealth>({
     queryKey: ['/api/system/health'],
@@ -166,11 +173,11 @@ export default function SupportHelpPage() {
     }
   };
 
-  const generateEmailBody = (error: SystemError) => {
+  const generateEmailBody = (error: SystemError, reason?: string) => {
     const body = `
-[RCCMS Error Report]
+[RCCMS Error Report${reason ? ' - RESEND' : ''}]
 
-Error Type: ${error.errorType}
+${reason ? `RESEND REASON: ${reason}\n\n` : ''}Error Type: ${error.errorType}
 Error Message: ${error.errorMessage}
 Endpoint: ${error.endpoint || 'N/A'}
 Method: ${error.method || 'N/A'}
@@ -195,13 +202,51 @@ Please attach a screenshot if available.
     setSearchQuery('');
   };
 
+  const handleResendWithReason = () => {
+    if (!resendErrorId || !resendReason.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please provide a reason for resending',
+      });
+      return;
+    }
+
+    const error = errors?.find(e => e.id === resendErrorId);
+    if (!error) return;
+
+    const mailtoLink = `mailto:support@rccms.com?subject=${encodeURIComponent(`[RCCMS Error - RESEND] ${error.errorType} - ${error.createdAt ? format(new Date(error.createdAt), 'yyyy-MM-dd HH:mm') : ''}`)}&body=${generateEmailBody(error, resendReason)}`;
+    window.location.href = mailtoLink;
+
+    setResendReason('');
+    setResendErrorId(null);
+
+    toast({
+      title: 'Email Prepared',
+      description: 'Error re-sent with reason to support',
+    });
+  };
+
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Support & Help</h1>
-        <p className="text-muted-foreground">
-          System information, documentation, and technical support
-        </p>
+      {/* Page Header with Actions */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Support & Help</h1>
+          <p className="text-muted-foreground">
+            System information, documentation, and technical support
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={captureScreenshot} 
+          data-testid="button-capture-screenshot"
+          className="flex items-center gap-2"
+        >
+          <Camera className="h-4 w-4" />
+          Capture Screenshot
+        </Button>
       </div>
 
       {/* System Information Section */}
@@ -324,6 +369,7 @@ Please attach a screenshot if available.
 
       {/* Documentation & FAQs */}
       <div className="grid gap-6 md:grid-cols-2">
+        {/* Documentation with Role-Based Modals */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -333,20 +379,176 @@ Please attach a screenshot if available.
             <CardDescription>Access comprehensive guides and documentation</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="space-y-2 text-sm">
-              <p>
-                <strong>User Guide:</strong> Detailed instructions on using RCCMS features
-              </p>
-              <p>
-                <strong>Admin Guide:</strong> Administrative tasks and system configuration
-              </p>
-              <p>
-                <strong>Feature List:</strong> Complete inventory of all system capabilities
-              </p>
-            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full justify-start" data-testid="button-open-user-guide">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  User Guide
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>RCCMS User Guide</DialogTitle>
+                  <DialogDescription>Comprehensive guide for using RCCMS features</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 text-sm">
+                  <section>
+                    <h3 className="font-semibold text-base mb-2">Getting Started</h3>
+                    <p className="text-muted-foreground mb-2">Welcome to RCCMS - Your comprehensive rental car contract management system.</p>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Login with your credentials provided by your administrator</li>
+                      <li>Navigate using the sidebar menu on the left</li>
+                      <li>Dashboard provides quick overview of active rentals and metrics</li>
+                    </ul>
+                  </section>
+                  <section>
+                    <h3 className="font-semibold text-base mb-2">Managing Contracts</h3>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li><strong>Creating:</strong> Click "New Contract" from dashboard or Contracts page</li>
+                      <li><strong>Editing:</strong> Contracts can be edited in draft status only</li>
+                      <li><strong>Workflow:</strong> Draft → Confirmed → Active → Completed → Closed</li>
+                      <li><strong>Timeline:</strong> View full contract history and audit trail</li>
+                    </ul>
+                  </section>
+                  <section>
+                    <h3 className="font-semibold text-base mb-2">Payments & Invoicing</h3>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Record payments with multiple methods (Cash, Card, Check, Bank Transfer)</li>
+                      <li>Track payment history for each contract</li>
+                      <li>Final payment required before closing contracts</li>
+                    </ul>
+                  </section>
+                  <section>
+                    <h3 className="font-semibold text-base mb-2">Vehicle Inspections</h3>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Pre-delivery inspection required before activating contract</li>
+                      <li>Post-return inspection required before completing contract</li>
+                      <li>6 mandatory photos from different angles</li>
+                      <li>Record odometer, fuel level, and condition notes</li>
+                    </ul>
+                  </section>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {(user?.role === 'admin' || user?.role === 'manager') && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start" data-testid="button-open-admin-guide">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin Guide
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>RCCMS Admin Guide</DialogTitle>
+                    <DialogDescription>Administrative tasks and system configuration</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 text-sm">
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">User Management</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Create and manage user accounts with role-based access</li>
+                        <li>Roles: Admin, Manager, Staff, Viewer</li>
+                        <li>Permission toggles: Reports Access, Close Contracts, View All Contracts</li>
+                        <li>Disable/enable users without deleting data</li>
+                      </ul>
+                    </section>
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Company Settings</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Configure bilingual company information (English/Arabic)</li>
+                        <li>Set default contract clauses and terms</li>
+                        <li>Manage company logo and branding</li>
+                      </ul>
+                    </section>
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Financial Settings</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Configure rental rates and pricing tiers</li>
+                        <li>Set addon fees (GPS, child seat, insurance, etc.)</li>
+                        <li>Fuel pricing configuration per type</li>
+                        <li>Mileage limits and extra charges</li>
+                      </ul>
+                    </section>
+                    <section>
+                      <h3 className="font-semibold text-base mb-2">Audit & Compliance</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>System audit logs for security tracking</li>
+                        <li>Business operations audit for contract changes</li>
+                        <li>Enhanced error reporter with email workflow</li>
+                        <li>Export audit logs for compliance reporting</li>
+                      </ul>
+                    </section>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full justify-start" data-testid="button-open-feature-list">
+                  <List className="h-4 w-4 mr-2" />
+                  Feature List
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>RCCMS Feature List</DialogTitle>
+                  <DialogDescription>Complete inventory of all system capabilities</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 text-sm">
+                  <section>
+                    <h3 className="font-semibold text-base mb-2">Core Features</h3>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Bilingual support (English/Arabic) with RTL/LTR layouts</li>
+                      <li>Comprehensive contract lifecycle management</li>
+                      <li>Role-based access control with granular permissions</li>
+                      <li>Payment tracking with multiple methods</li>
+                      <li>Vehicle inspection with photo documentation</li>
+                      <li>Master data management (Customers, Vehicles, Sponsors, Companies)</li>
+                    </ul>
+                  </section>
+                  <section>
+                    <h3 className="font-semibold text-base mb-2">Advanced Features</h3>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Automatic fuel charge calculation</li>
+                      <li>Vehicle status synchronization with contract lifecycle</li>
+                      <li>Early closure with reason tracking</li>
+                      <li>Duplicate phone validation for customers</li>
+                      <li>Contract timeline with full edit history</li>
+                      <li>Professional PDF generation for contracts</li>
+                    </ul>
+                  </section>
+                  <section>
+                    <h3 className="font-semibold text-base mb-2">Reporting & Analytics</h3>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Dashboard with context-aware navigation</li>
+                      <li>Vehicle utilization reports</li>
+                      <li>Contract status analytics</li>
+                      <li>Extra charges reporting</li>
+                      <li>PDF and Excel export functionality</li>
+                      <li>Chart visualization with Recharts</li>
+                    </ul>
+                  </section>
+                  <section>
+                    <h3 className="font-semibold text-base mb-2">System Features</h3>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Dual audit trail system (System & Business Operations)</li>
+                      <li>Enhanced error reporter with email workflow</li>
+                      <li>System health monitoring</li>
+                      <li>Dark/Light theme support</li>
+                      <li>Responsive design for all devices</li>
+                      <li>Route-based lazy loading for performance</li>
+                    </ul>
+                  </section>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
 
+        {/* Common Questions with Accordion */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -355,21 +557,80 @@ Please attach a screenshot if available.
             </div>
             <CardDescription>Quick answers to frequently asked questions</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-2 text-sm">
-              <div>
-                <strong>Q: How do I create a new contract?</strong>
-                <p className="text-muted-foreground">Click "New Contract" on the dashboard and follow the form workflow.</p>
-              </div>
-              <div>
-                <strong>Q: Can I delete a contract?</strong>
-                <p className="text-muted-foreground">No, contracts can only be disabled for data integrity.</p>
-              </div>
-              <div>
-                <strong>Q: How do I export reports?</strong>
-                <p className="text-muted-foreground">Use the PDF or Excel export buttons on any report page.</p>
-              </div>
-            </div>
+          <CardContent>
+            <Accordion type="multiple" defaultValue={["critical-1", "critical-2", "critical-3"]} className="w-full">
+              <AccordionItem value="critical-1">
+                <AccordionTrigger className="text-sm font-semibold">
+                  How do I create a new contract?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  Click "New Contract" from the dashboard or Contracts page. Fill in customer details, select a vehicle, set rental dates, configure addons, and save as draft. You can edit it until you confirm the contract.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="critical-2">
+                <AccordionTrigger className="text-sm font-semibold">
+                  Can I delete a contract?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  No, contracts cannot be deleted for data integrity and compliance. Instead, you can disable contracts which hides them from active views while preserving the audit trail.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="critical-3">
+                <AccordionTrigger className="text-sm font-semibold">
+                  How do I export reports?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  Navigate to Reports section, select your report type, apply filters if needed, then use the PDF or Excel export buttons. Each report exports with descriptive filenames.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q4">
+                <AccordionTrigger className="text-sm font-semibold">
+                  What payment methods are supported?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  RCCMS supports Cash, Credit/Debit Card, Check, and Bank Transfer. Each method has specific required fields (e.g., cheque number for checks, last 4 digits for cards).
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q5">
+                <AccordionTrigger className="text-sm font-semibold">
+                  How do vehicle inspections work?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  Two inspections are required: pre-delivery (before activating contract) and post-return (before completing contract). Each requires 6 photos from different angles, odometer reading, fuel level, and condition notes.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q6">
+                <AccordionTrigger className="text-sm font-semibold">
+                  What are the user roles and permissions?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  Four roles: Admin (full access), Manager (business operations), Staff (daily operations), Viewer (read-only). Additional toggles available: Reports Access, Close Contracts, View All Contracts.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q7">
+                <AccordionTrigger className="text-sm font-semibold">
+                  How do I switch between English and Arabic?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  Use the language toggle button in the header. The system supports full bilingual display with automatic RTL/LTR layout switching.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q8">
+                <AccordionTrigger className="text-sm font-semibold">
+                  What happens when a contract is completed early?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground">
+                  If you complete a contract before the rental end date, a dialog will appear asking for the early closure reason. This is logged in the contract timeline for audit purposes.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </CardContent>
         </Card>
       </div>
@@ -377,17 +638,9 @@ Please attach a screenshot if available.
       {/* Critical Error Reporter */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bug className="h-5 w-5 text-destructive" />
-              <CardTitle>Report System Errors</CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={captureScreenshot} data-testid="button-capture-screenshot">
-                <Download className="h-4 w-4 mr-2" />
-                Capture Screenshot
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
+            <Bug className="h-5 w-5 text-destructive" />
+            <CardTitle>Report System Errors</CardTitle>
           </div>
           <CardDescription>
             View and report critical system errors to RCCMS support
@@ -499,20 +752,77 @@ Please attach a screenshot if available.
                         )}
                       </div>
                       <div className="flex flex-col gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            markSentMutation.mutate(error.id);
-                            const mailtoLink = `mailto:support@rccms.com?subject=${encodeURIComponent(`[RCCMS Error] ${error.errorType} - ${error.createdAt ? format(new Date(error.createdAt), 'yyyy-MM-dd HH:mm') : ''}`)}&body=${generateEmailBody(error)}`;
-                            window.location.href = mailtoLink;
-                          }}
-                          disabled={markSentMutation.isPending || error.sentToSupport}
-                          data-testid={`button-email-error-${error.id}`}
-                        >
-                          <Mail className="h-4 w-4 mr-2" />
-                          {error.sentToSupport ? 'Sent' : 'Email & Mark Sent'}
-                        </Button>
+                        {!error.sentToSupport ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              markSentMutation.mutate(error.id);
+                              const mailtoLink = `mailto:support@rccms.com?subject=${encodeURIComponent(`[RCCMS Error] ${error.errorType} - ${error.createdAt ? format(new Date(error.createdAt), 'yyyy-MM-dd HH:mm') : ''}`)}&body=${generateEmailBody(error)}`;
+                              window.location.href = mailtoLink;
+                            }}
+                            disabled={markSentMutation.isPending}
+                            data-testid={`button-email-error-${error.id}`}
+                          >
+                            <Mail className="h-4 w-4 mr-2" />
+                            Email & Mark Sent
+                          </Button>
+                        ) : (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setResendErrorId(error.id)}
+                                data-testid={`button-resend-error-${error.id}`}
+                              >
+                                <Mail className="h-4 w-4 mr-2" />
+                                Re-send with Reason
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Re-send Error Report</DialogTitle>
+                                <DialogDescription>
+                                  Please provide a reason for re-sending this error to support
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="text-sm font-medium">Reason for Re-send</label>
+                                  <Textarea
+                                    placeholder="e.g., Additional context discovered, error recurred, new information..."
+                                    value={resendReason}
+                                    onChange={(e) => setResendReason(e.target.value)}
+                                    rows={4}
+                                    className="mt-1"
+                                    data-testid="textarea-resend-reason"
+                                  />
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setResendReason('');
+                                    setResendErrorId(null);
+                                  }}
+                                  data-testid="button-cancel-resend"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  onClick={handleResendWithReason}
+                                  disabled={!resendReason.trim()}
+                                  data-testid="button-confirm-resend"
+                                >
+                                  <Mail className="h-4 w-4 mr-2" />
+                                  Send
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        )}
                         {!error.acknowledged && (
                           <Button
                             variant="secondary"
