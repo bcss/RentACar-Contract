@@ -135,6 +135,7 @@ export interface IStorage {
   getAllSystemErrors(): Promise<SystemError[]>;
   getUnacknowledgedSystemErrors(): Promise<SystemError[]>;
   acknowledgeSystemError(id: string, acknowledgedBy: string): Promise<SystemError>;
+  markErrorSentToSupport(id: string): Promise<SystemError>;
   
   // Analytics operations
   getRevenueAnalytics(): Promise<{
@@ -1089,6 +1090,18 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return acknowledged;
+  }
+
+  async markErrorSentToSupport(id: string): Promise<SystemError> {
+    const [updated] = await db
+      .update(systemErrors)
+      .set({
+        sentToSupport: true,
+      })
+      .where(eq(systemErrors.id, id))
+      .returning();
+    
+    return updated;
   }
 
   // Analytics operations

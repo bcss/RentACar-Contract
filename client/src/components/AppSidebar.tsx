@@ -83,6 +83,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const [reportsOpen, setReportsOpen] = useState(false);
   const [auditOpen, setAuditOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [helpLegalOpen, setHelpLegalOpen] = useState(false);
   
   // Track which submenu should open after sidebar expands
   const [pendingSubmenuOpen, setPendingSubmenuOpen] = useState<string | null>(null);
@@ -93,11 +94,13 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     const savedReports = localStorage.getItem('sidebar_reports_open');
     const savedAudit = localStorage.getItem('sidebar_audit_open');
     const savedSettings = localStorage.getItem('sidebar_settings_open');
+    const savedHelpLegal = localStorage.getItem('sidebar_helplegal_open');
 
     if (savedMasters !== null) setMastersOpen(savedMasters === 'true');
     if (savedReports !== null) setReportsOpen(savedReports === 'true');
     if (savedAudit !== null) setAuditOpen(savedAudit === 'true');
     if (savedSettings !== null) setSettingsOpen(savedSettings === 'true');
+    if (savedHelpLegal !== null) setHelpLegalOpen(savedHelpLegal === 'true');
   }, []);
 
   // When sidebar expands and there's a pending submenu, open it
@@ -120,6 +123,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
         case 'settings':
           setSettingsOpen(true);
           localStorage.setItem('sidebar_settings_open', 'true');
+          break;
+        case 'helplegal':
+          setHelpLegalOpen(true);
+          localStorage.setItem('sidebar_helplegal_open', 'true');
           break;
       }
       setPendingSubmenuOpen(null); // Clear pending state
@@ -173,6 +180,18 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     }
     setSettingsOpen(open);
     localStorage.setItem('sidebar_settings_open', String(open));
+  };
+
+  const handleHelpLegalToggle = (open: boolean) => {
+    // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
+    // and defer opening the submenu until after expansion completes
+    if (open && sidebarState === 'collapsed') {
+      setPendingSubmenuOpen('helplegal');
+      toggleSidebar();
+      return; // Don't open submenu yet - wait for sidebar to expand
+    }
+    setHelpLegalOpen(open);
+    localStorage.setItem('sidebar_helplegal_open', String(open));
   };
   
   const { data: settings } = useQuery<CompanySettings>({
@@ -230,6 +249,27 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       icon: 'people',
       url: '/users',
       show: isAdmin,
+    },
+  ];
+
+  const helpLegalItems = [
+    {
+      title: 'Support & Help',
+      icon: 'support',
+      url: '/settings/support',
+      show: true,
+    },
+    {
+      title: 'Privacy Policy',
+      icon: 'privacy_tip',
+      url: '/settings/privacy',
+      show: true,
+    },
+    {
+      title: 'Terms of Service',
+      icon: 'gavel',
+      url: '/settings/terms-of-service',
+      show: true,
     },
   ];
 
@@ -649,6 +689,37 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
+                        
+                        {/* Help & Legal - Nested Collapsible */}
+                        <SidebarMenuSubItem>
+                          <Collapsible open={helpLegalOpen} onOpenChange={handleHelpLegalToggle} className="group/helplegal">
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuSubButton data-testid="nav-help-legal">
+                                <span className="material-icons">help_center</span>
+                                {sidebarState === 'expanded' && <span>Help & Legal</span>}
+                                {sidebarState === 'expanded' && (
+                                  <span className="material-icons ml-auto text-xs group-data-[state=open]/helplegal:rotate-90 transition-transform">
+                                    chevron_right
+                                  </span>
+                                )}
+                              </SidebarMenuSubButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <SidebarMenuSub className="ml-4">
+                                {helpLegalItems.filter(item => item.show).map((item) => (
+                                  <SidebarMenuSubItem key={item.title}>
+                                    <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.split('/').pop()}`}>
+                                      <Link href={item.url}>
+                                        <span className="material-icons text-sm">{item.icon}</span>
+                                        {sidebarState === 'expanded' && <span className="text-sm">{item.title}</span>}
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -714,25 +785,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Professional Footer - Version and Links */}
+        {/* Professional Footer - Version Only */}
         {sidebarState === 'expanded' && (
           <div className="mt-4 pt-4 border-t">
-            <div className="text-center space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">RCCMS Rental Management System</p>
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">RCCMS</p>
               <p className="text-xs text-muted-foreground">Version 1.0.0</p>
-              <div className="flex items-center justify-center gap-2 text-xs">
-                <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground hover:underline" data-testid="link-privacy">
-                  Privacy Policy
-                </Link>
-                <span className="text-muted-foreground">•</span>
-                <Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground hover:underline" data-testid="link-terms">
-                  Terms of Service
-                </Link>
-                <span className="text-muted-foreground">•</span>
-                <Link href="/support" className="text-muted-foreground hover:text-foreground hover:underline" data-testid="link-support">
-                  Support
-                </Link>
-              </div>
             </div>
           </div>
         )}

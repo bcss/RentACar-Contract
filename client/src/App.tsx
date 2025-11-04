@@ -38,10 +38,9 @@ const OperationalReports = lazy(() => import("@/pages/OperationalReports"));
 const CustomerReports = lazy(() => import("@/pages/CustomerReports"));
 const AuditReports = lazy(() => import("@/pages/AuditReports"));
 const UserActivity = lazy(() => import("@/pages/UserActivity"));
-const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
-const SupportPage = lazy(() => import("@/pages/SupportPage"));
-const AboutPage = lazy(() => import("@/pages/AboutPage"));
+const SupportHelpPage = lazy(() => import("@/pages/SupportHelpPage"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -152,17 +151,14 @@ function Router() {
       <Route path="/reports/user-activity">
         {() => <ProtectedRoute component={UserActivity} />}
       </Route>
-      <Route path="/privacy-policy">
-        {() => <ProtectedRoute component={PrivacyPolicy} />}
+      <Route path="/settings/support">
+        {() => <ProtectedRoute component={SupportHelpPage} />}
       </Route>
-      <Route path="/terms-of-service">
+      <Route path="/settings/privacy">
+        {() => <ProtectedRoute component={PrivacyPolicyPage} />}
+      </Route>
+      <Route path="/settings/terms-of-service">
         {() => <ProtectedRoute component={TermsOfServicePage} />}
-      </Route>
-      <Route path="/support">
-        {() => <ProtectedRoute component={SupportPage} />}
-      </Route>
-      <Route path="/settings/about">
-        {() => <ProtectedRoute component={AboutPage} />}
       </Route>
       <Route component={() => <NotFound />} />
       </Switch>

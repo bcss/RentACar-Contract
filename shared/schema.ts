@@ -805,6 +805,7 @@ export const systemErrors = pgTable("system_errors", {
   acknowledged: boolean("acknowledged").notNull().default(false),
   acknowledgedBy: varchar("acknowledged_by").references(() => users.id),
   acknowledgedAt: timestamp("acknowledged_at"),
+  sentToSupport: boolean("sent_to_support").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

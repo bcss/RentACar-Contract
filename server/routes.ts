@@ -1754,7 +1754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         'acknowledge_error',
         undefined,
-        req.ip,
+        req,
         `Acknowledged system error ${error.id} (${error.errorType})`
       );
       
@@ -1762,6 +1762,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error acknowledging system error:", error);
       res.status(400).json({ message: error.message || "Failed to acknowledge system error" });
+    }
+  });
+
+  app.post('/api/system-errors/:id/mark-sent', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const error = await storage.markErrorSentToSupport(req.params.id);
+      res.json(error);
+    } catch (error: any) {
+      console.error("Error marking system error as sent:", error);
+      res.status(400).json({ message: error.message || "Failed to mark error as sent" });
     }
   });
 
