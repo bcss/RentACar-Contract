@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { CompanySettings as CompanySettingsType } from "@shared/schema";
 import { Loader2 } from "lucide-react";
+import { setupGlobalErrorHandler } from "@/utils/errorLogger";
 
 // Lazy load all pages except Login (needed immediately for initial load)
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -220,6 +221,11 @@ function AppContent() {
 }
 
 function App() {
+  // Setup global error handler on mount
+  useEffect(() => {
+    setupGlobalErrorHandler();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

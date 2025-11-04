@@ -1841,6 +1841,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Log system error with automatic screenshot (public endpoint for client-side error logging)
+  app.post('/api/system-errors/log', async (req: any, res) => {
+    try {
+      const { errorType, errorMessage, errorStack, endpoint, method, userAgent, additionalData, screenshot } = req.body;
+      
+      const userId = req.user?.id; // May be null if user not authenticated
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      
+      const errorData = {
+        errorType: errorType || 'ClientError',
+        errorMessage: errorMessage || 'Unknown error',
+        errorStack,
+        userId,
+        endpoint,
+        method,
+        ipAddress,
+        userAgent,
+        additionalData,
+        screenshot, // Automatically captured screenshot from client
+        acknowledged: false,
+        sentToSupport: false,
+      };
+      
+      const error = await storage.createSystemError(errorData);
+      res.json({ success: true, errorId: error.id });
+    } catch (error: any) {
+      console.error("Error logging system error:", error);
+      res.status(500).json({ message: error.message || "Failed to log error" });
+    }
+  });
+
   // Analytics routes (Admin and Manager, or users with canAccessReports toggle)
   app.get('/api/analytics/revenue', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
