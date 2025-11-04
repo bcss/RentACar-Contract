@@ -784,16 +784,6 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Professional Footer - Version Only */}
-        {sidebarState === 'expanded' && (
-          <div className="mt-4 pt-4 border-t">
-            <div className="text-center space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">RCCMS</p>
-              <p className="text-xs text-muted-foreground">Version 1.0.0</p>
-            </div>
-          </div>
-        )}
       </SidebarFooter>
 
       <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>

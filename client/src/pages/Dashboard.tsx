@@ -287,7 +287,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
             <Badge variant="outline" className="font-normal" data-testid="badge-user-role">
-              {user?.role ? t(`users.roles.${user.role}`) : 'User'}
+              {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
             </Badge>
             <span>•</span>
             <span data-testid="text-last-login">{t('greeting.lastLogin')}: {lastLoginText}</span>
