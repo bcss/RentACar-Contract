@@ -161,6 +161,12 @@ function Router() {
       <Route path="/settings/terms-of-service">
         {() => <ProtectedRoute component={TermsOfServicePage} />}
       </Route>
+      <Route path="/privacy">
+        {() => <ProtectedRoute component={PrivacyPolicyPage} />}
+      </Route>
+      <Route path="/terms">
+        {() => <ProtectedRoute component={TermsOfServicePage} />}
+      </Route>
       <Route component={() => <NotFound />} />
       </Switch>
     </Suspense>
