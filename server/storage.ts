@@ -664,11 +664,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(customers)
       .where(
-        or(
-          ilike(customers.nameEn, searchTerm),
-          ilike(customers.nameAr, searchTerm),
-          ilike(customers.phone, searchTerm),
-          ilike(customers.nationalId, searchTerm)
+        and(
+          eq(customers.disabled, false),
+          or(
+            ilike(customers.nameEn, searchTerm),
+            ilike(customers.nameAr, searchTerm),
+            ilike(customers.phone, searchTerm),
+            ilike(customers.nationalId, searchTerm)
+          )
         )
       )
       .orderBy(desc(customers.createdAt));
@@ -768,10 +771,13 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(vehicles)
       .where(
-        or(
-          ilike(vehicles.registration, searchTerm),
-          ilike(vehicles.make, searchTerm),
-          ilike(vehicles.model, searchTerm)
+        and(
+          eq(vehicles.disabled, false),
+          or(
+            ilike(vehicles.registration, searchTerm),
+            ilike(vehicles.make, searchTerm),
+            ilike(vehicles.model, searchTerm)
+          )
         )
       )
       .orderBy(desc(vehicles.createdAt));
@@ -834,11 +840,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(sponsors)
       .where(
-        or(
-          ilike(sponsors.nameEn, searchTerm),
-          ilike(sponsors.nameAr, searchTerm),
-          ilike(sponsors.passportId, searchTerm),
-          ilike(sponsors.mobile, searchTerm)
+        and(
+          eq(sponsors.disabled, false),
+          or(
+            ilike(sponsors.nameEn, searchTerm),
+            ilike(sponsors.nameAr, searchTerm),
+            ilike(sponsors.passportId, searchTerm),
+            ilike(sponsors.mobile, searchTerm)
+          )
         )
       )
       .orderBy(desc(sponsors.createdAt));
@@ -901,13 +910,16 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(companies)
       .where(
-        or(
-          ilike(companies.nameEn, searchTerm),
-          ilike(companies.nameAr, searchTerm),
-          ilike(companies.registrationNumber, searchTerm),
-          ilike(companies.taxId, searchTerm),
-          ilike(companies.contactPerson, searchTerm),
-          ilike(companies.phone, searchTerm)
+        and(
+          eq(companies.disabled, false),
+          or(
+            ilike(companies.nameEn, searchTerm),
+            ilike(companies.nameAr, searchTerm),
+            ilike(companies.registrationNumber, searchTerm),
+            ilike(companies.taxId, searchTerm),
+            ilike(companies.contactPerson, searchTerm),
+            ilike(companies.phone, searchTerm)
+          )
         )
       )
       .orderBy(desc(companies.createdAt));
