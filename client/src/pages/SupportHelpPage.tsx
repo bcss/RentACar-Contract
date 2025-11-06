@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from 'wouter';
 import { 
@@ -1630,16 +1630,18 @@ Please attach a screenshot if available.
                                 </div>
                               </div>
                               <DialogFooter>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => {
-                                    setResendReason('');
-                                    setResendErrorId(null);
-                                  }}
-                                  data-testid="button-cancel-resend"
-                                >
-                                  Cancel
-                                </Button>
+                                <DialogClose asChild>
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                      setResendReason('');
+                                      setResendErrorId(null);
+                                    }}
+                                    data-testid="button-cancel-resend"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </DialogClose>
                                 <Button
                                   onClick={handleResendWithReason}
                                   disabled={!resendReason.trim()}

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
-import { ArrowLeft, Shield, Database, Lock, Users, Eye, FileText, Globe, Cookie, Scale, Mail } from 'lucide-react';
+import { Shield, Database, Lock, Users, Eye, FileText, Globe, Cookie, Scale, Mail } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -60,16 +60,9 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" size="icon" asChild data-testid="button-back">
-            <Link href="/dashboard">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold" data-testid="text-page-title">Privacy Policy</h1>
-            <p className="text-sm text-muted-foreground mt-1">Last updated: December 2025</p>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold" data-testid="text-page-title">Privacy Policy</h1>
+          <p className="text-sm text-muted-foreground mt-1">Last updated: December 2025</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
