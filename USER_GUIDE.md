@@ -9,14 +9,15 @@
 
 1. [Introduction](#introduction)
 2. [Getting Started](#getting-started)
-3. [Dashboard Overview](#dashboard-overview)
-4. [Managing Customers](#managing-customers)
-5. [Managing Vehicles](#managing-vehicles)
-6. [Creating Contracts](#creating-contracts)
-7. [Contract Lifecycle](#contract-lifecycle)
-8. [Payment Management](#payment-management)
-9. [Reports](#reports)
-10. [Tips & Best Practices](#tips--best-practices)
+3. [Legal Information & Your Rights](#legal-information--your-rights)
+4. [Dashboard Overview](#dashboard-overview)
+5. [Managing Customers](#managing-customers)
+6. [Managing Vehicles](#managing-vehicles)
+7. [Creating Contracts](#creating-contracts)
+8. [Contract Lifecycle](#contract-lifecycle)
+9. [Payment Management](#payment-management)
+10. [Reports](#reports)
+11. [Tips & Best Practices](#tips--best-practices)
 
 ---
 
@@ -270,6 +271,574 @@ The system features a professional Microsoft 365 Admin-style sidebar with icon-o
 **Main Content Area**
 - Pages display here based on sidebar selection
 - Tables, forms, and reports appear in this area
+
+---
+
+## Legal Information & Your Rights
+
+### Introduction
+
+As a user of RCCMS, it's important to understand your rights and responsibilities when using the system. The system provides two comprehensive legal documents:
+
+- **Privacy Policy**: Explains how we collect, use, and protect your personal information
+- **Terms of Service**: Outlines the rules, responsibilities, and legal agreements for using RCCMS
+
+**Why Read These Documents?**
+- 📋 Understand what data we collect and how we use it
+- 🔒 Know your privacy rights and how to exercise them
+- ✅ Learn your responsibilities as a system user
+- ⚖️ Be aware of prohibited activities and legal requirements
+- 💬 Know how to contact support for legal questions
+
+These documents are written in clear, accessible language and designed to be user-friendly. This section will help you navigate and understand them.
+
+---
+
+### Accessing Legal Information
+
+You can access the Privacy Policy and Terms of Service pages through **multiple convenient methods**:
+
+#### Method 1: Footer Links (All Pages)
+
+Every page in RCCMS has a footer with quick links:
+
+1. Scroll to the bottom of any page
+2. Look for the footer section
+3. Click either:
+   - **"Privacy Policy"** link (left side of footer)
+   - **"Terms of Service"** link (right side of footer)
+4. The legal page opens in the same browser tab
+
+**Tip**: The footer is always available, making legal information accessible from anywhere in the system.
+
+#### Method 2: Direct URLs (Bookmarking)
+
+You can access legal pages directly using these URLs:
+
+- **Privacy Policy**: `https://your-system-url.com/privacy`
+- **Terms of Service**: `https://your-system-url.com/terms`
+
+**How to Use:**
+1. Type or paste the URL in your browser
+2. Press Enter to load the page
+3. Bookmark these URLs for quick future access
+
+**Pro Tip**: Save these links as browser bookmarks for instant access anytime.
+
+#### Method 3: Settings Menu (Admin Only)
+
+System administrators can also access legal pages through the Settings menu:
+
+1. Open the sidebar
+2. Click **Settings** (Admin role required)
+3. Find **Terms & Conditions** menu item
+4. Click to view and manage legal documents
+
+**Note**: This method is primarily for administrators who need to review or update legal documents.
+
+#### Method 4: Support & Help Page
+
+The Support page also provides links to legal information:
+
+1. Navigate to **Support & Help** from sidebar (if available)
+2. Look for "Legal Information" section
+3. Click links to Privacy Policy or Terms of Service
+
+---
+
+### Understanding the Privacy Policy
+
+The Privacy Policy is your guide to understanding how RCCMS protects your personal information.
+
+#### What the Privacy Policy Covers
+
+**13 Comprehensive Sections:**
+
+1. **Introduction**: Overview of our privacy commitment
+2. **Information Collection**: What data we collect and why
+3. **How We Use Information**: Purposes for data processing
+4. **Data Security**: How we protect your information
+5. **Data Retention**: How long we keep your data
+6. **Your Rights**: Your privacy rights and how to exercise them
+7. **Cookies & Tracking**: Technologies we use
+8. **Data Sharing**: When and why we share data
+9. **International Transfers**: Cross-border data handling
+10. **Children's Privacy**: Protection for minors
+11. **GDPR Compliance**: European data protection compliance
+12. **Policy Updates**: How we communicate changes
+13. **Contact Us**: How to reach us with questions
+
+#### Key Sections to Review
+
+**Most Important for Daily Users:**
+
+📊 **Information Collection** (Section 2)
+- What personal data we collect from you
+- What customer and business data you enter
+- What technical data the system collects automatically
+- **Why it matters**: Know what information is stored about you
+
+🔒 **Data Security** (Section 4)
+- How passwords are protected (bcrypt hashing)
+- Role-based access controls
+- Audit logging and monitoring
+- Backup and recovery procedures
+- **Why it matters**: Understand how your data is kept safe
+
+👥 **Your Rights** (Section 6)
+- Right to access your personal data
+- Right to correct inaccurate information
+- Right to request account deactivation
+- Right to export your data (PDF/Excel)
+- Right to review audit logs
+- **Why it matters**: Know what you can request from administrators
+
+**For Compliance & Audit Roles:**
+
+⚖️ **GDPR Compliance** (Section 11)
+- Legal basis for data processing
+- Data protection officer information
+- EU citizen rights
+- Cross-border data transfer safeguards
+- **Why it matters**: Ensure regulatory compliance
+
+#### How to Navigate the Privacy Policy
+
+**Using the Table of Contents (Desktop & Tablet):**
+
+1. **Access the page** using any method above
+2. **Look at the left sidebar** - You'll see a sticky "Contents" card
+3. **Sections are organized** with icons and titles:
+   - 🛡️ Introduction
+   - 💾 Information Collection
+   - 👁️ How We Use Information
+   - 🔒 Data Security
+   - (and 9 more sections)
+4. **Click any section** to jump directly to that content
+5. **Active section highlights** in primary color (blue) as you scroll
+6. **Contents stay visible** - The sidebar is "sticky" and follows you as you scroll down
+
+**Tip**: The active section highlighting helps you track where you are in the document.
+
+**Using the Table of Contents (Mobile):**
+
+1. On mobile devices, the table of contents appears **at the top** of the page
+2. Scroll through the contents list
+3. Tap any section to jump to that content
+4. The contents list collapses after selection to save screen space
+
+#### Working with Accordion Sections
+
+Many sections use **accordion panels** to organize detailed information:
+
+**What are Accordions?**
+- Collapsible panels that hide/show content when clicked
+- Indicated by a ▼ arrow icon on the right
+- Keeps the page organized and easier to scan
+
+**How to Use Accordions:**
+
+1. **Identify accordion sections**: Look for items with ▼ arrows
+   - Example: "Information Collection" section has 5 accordion items
+2. **Click the header** to expand: Arrow rotates to ▲
+3. **Read the content** inside the expanded panel
+4. **Click again to collapse** the panel
+5. **Multiple panels** can be open simultaneously
+
+**Example - "Information Collection" Accordions:**
+- ▼ Personal Information (click to see user account data we collect)
+- ▼ Customer & Business Data (click to see contract and customer data)
+- ▼ Contract & Financial Data (click to see payment and transaction data)
+- ▼ Vehicle & Inspection Data (click to see vehicle photos and odometer data)
+- ▼ Technical & System Data (click to see IP addresses and session logs)
+
+**Tip**: Click multiple accordions to compare related sections side-by-side.
+
+#### Mobile vs. Desktop Experience
+
+**Desktop View (Large Screens):**
+- Table of contents is **sticky on the left** (always visible)
+- Main content takes up **75% of screen width**
+- Smooth scrolling with visual section tracking
+- Multiple accordions can be open simultaneously
+
+**Tablet View (Medium Screens):**
+- Similar to desktop layout
+- Contents sidebar slightly narrower
+- Content area adjusts for optimal reading
+
+**Mobile View (Small Screens):**
+- Table of contents at **top of page** (scrolls away)
+- Full-width content for easier reading
+- Tap to navigate, swipe to scroll
+- Accordions collapse automatically after reading
+
+---
+
+### Understanding the Terms of Service
+
+The Terms of Service outlines the rules, responsibilities, and legal agreements governing your use of RCCMS.
+
+#### What the Terms of Service Covers
+
+**14 Essential Sections:**
+
+1. **Acceptance of Terms**: Agreement to use the system
+2. **License & Usage**: Your rights to use RCCMS
+3. **User Accounts**: Account security and management
+4. **User Responsibilities**: Your obligations as a user
+5. **Data Accuracy**: Responsibility for data quality
+6. **System Availability**: Service level and maintenance
+7. **Prohibited Activities**: What you must not do
+8. **Intellectual Property**: Ownership and copyright
+9. **Limitation of Liability**: Legal disclaimers
+10. **Legal Compliance**: Regulatory requirements
+11. **Termination**: Account suspension and closure
+12. **Dispute Resolution**: How conflicts are handled
+13. **Modifications**: How terms can change
+14. **Contact**: How to reach us
+
+#### Key Sections to Review
+
+**Critical for All Users:**
+
+⚠️ **User Responsibilities** (Section 4)
+- Data integrity requirements
+- Security compliance obligations
+- Legal compliance duties
+- Professional conduct standards
+- **Why it matters**: Know what's expected of you daily
+
+🚫 **Prohibited Activities** (Section 7)
+- Security violations (hacking, bypassing controls)
+- Illegal activities (fraud, money laundering)
+- Data misuse (unauthorized access, data theft)
+- System abuse (overloading, spamming)
+- **Why it matters**: Understand what can get your account suspended
+
+🔐 **User Accounts** (Section 3)
+- Account creation and security
+- Password requirements
+- Role-based permissions (Admin, Manager, Staff, Viewer)
+- Account sharing prohibition
+- **Why it matters**: Protect your account and credentials
+
+**For Management & Compliance:**
+
+⚖️ **Legal Compliance** (Section 10)
+- Data protection regulations (GDPR, local laws)
+- Financial record keeping
+- Anti-fraud requirements
+- Privacy law adherence
+- **Why it matters**: Ensure business regulatory compliance
+
+🔧 **System Availability** (Section 6)
+- 99.9% uptime target
+- Planned maintenance windows
+- Unplanned interruption scenarios
+- Your backup responsibilities
+- **Why it matters**: Plan for system downtime
+
+#### How to Navigate the Terms of Service
+
+**Using the Table of Contents:**
+
+The Terms of Service page has the **same navigation system** as the Privacy Policy:
+
+1. **Sticky sidebar** (desktop/tablet) or top section (mobile)
+2. **14 sections** with icons and clear titles
+3. **Click to jump** to any section instantly
+4. **Active highlighting** shows your current location
+
+**Example Navigation:**
+- Click 🚫 "Prohibited Activities" to see what's not allowed
+- Click 👥 "User Accounts" to understand role permissions
+- Click ⚖️ "Legal Compliance" to review regulatory requirements
+
+#### Working with Accordion Sections
+
+The Terms of Service also uses accordions for detailed content:
+
+**Example - "License & Usage" Accordions:**
+1. **▼ License Grant**: What you're allowed to do
+   - Create and manage rental contracts
+   - Store customer and vehicle information
+   - Process payments and generate reports
+2. **▼ Usage Restrictions**: What you must NOT do
+   - Reverse engineering the software
+   - Sharing login credentials
+   - Circumventing security measures
+3. **▼ Scope of Use**: Authorized use cases only
+
+**How to Read Efficiently:**
+1. Scan accordion headers to find relevant topics
+2. Expand only sections that apply to your role
+3. Keep critical sections open for reference
+4. Collapse after reading to keep page organized
+
+---
+
+### Interactive Features Guide
+
+Both legal pages offer advanced interactive features to improve your reading experience.
+
+#### Using the Sticky Table of Contents
+
+**What "Sticky" Means:**
+The table of contents follows you as you scroll down the page, staying visible at all times (on desktop/tablet).
+
+**How to Use:**
+
+1. **Start reading** any section of the legal page
+2. **Scroll down** through the content
+3. **Notice the sidebar** stays in view on the left
+4. **Active section highlights** automatically as you scroll
+5. **Click different sections** to jump around without scrolling
+6. **Return to top** by clicking earlier sections
+
+**Benefits:**
+- ✅ Never lose your place in long documents
+- ✅ Quick navigation without endless scrolling
+- ✅ See document structure at a glance
+- ✅ Track progress through the document
+
+**Mobile Note**: On mobile, the table of contents scrolls away with the page (due to screen size), but you can scroll back to top to access it.
+
+#### Expanding and Collapsing Accordions
+
+**Opening Multiple Accordions:**
+
+1. Click **first accordion header** - Panel expands
+2. Click **second accordion header** - Both panels now open
+3. Click **third accordion header** - All three panels open
+4. **Compare information** across multiple open sections
+
+**Example Use Case**:
+In Privacy Policy → "Information Collection", open all 5 accordions to see the complete picture of data we collect:
+- Personal Information (user data)
+- Customer Data (customer records)
+- Contract Data (financial transactions)
+- Vehicle Data (inspection photos)
+- Technical Data (system logs)
+
+**Closing Accordions:**
+
+1. Click **expanded accordion header** - Panel collapses
+2. Arrow icon rotates from ▲ to ▼
+3. Content hides to save screen space
+
+**Pro Tip**: Expand all accordions in a section to get the full picture, then collapse ones you've read to stay organized.
+
+#### Mobile vs. Desktop Viewing Experience
+
+**Optimized for Each Device:**
+
+**📱 Mobile (Phones)**
+- **Layout**: Single column, full width
+- **Table of Contents**: At top, scrolls with page
+- **Font Size**: Larger for easy reading
+- **Touch Targets**: Bigger buttons and accordions
+- **Best For**: Quick reference, reading on the go
+
+**📱 Tablet (iPads)**
+- **Layout**: Two columns (sidebar + content)
+- **Table of Contents**: Sticky sidebar (stays visible)
+- **Font Size**: Medium, balanced
+- **Touch Targets**: Optimized for tablet taps
+- **Best For**: Detailed review, comparison reading
+
+**💻 Desktop (Computers)**
+- **Layout**: Wide two-column with sticky sidebar
+- **Table of Contents**: Always visible on left
+- **Font Size**: Optimal reading size
+- **Mouse Hover**: Hover effects on buttons
+- **Best For**: Comprehensive reading, printing
+
+**Responsive Behavior:**
+The page automatically detects your device and adjusts layout, font sizes, and spacing for optimal reading experience.
+
+#### Printing or Saving Legal Pages
+
+**To Print the Privacy Policy or Terms of Service:**
+
+**Method 1: Browser Print**
+
+1. Open the legal page (Privacy Policy or Terms)
+2. Press `Ctrl + P` (Windows) or `Cmd + P` (Mac)
+3. **Expand all accordions first** (optional, for complete printout)
+4. In print dialog:
+   - Select printer or "Save as PDF"
+   - Choose orientation (Portrait recommended)
+   - Adjust margins if needed
+5. Click **Print** or **Save**
+
+**Tip**: Expand all accordion sections before printing to include all content in the printout.
+
+**Method 2: Save as PDF**
+
+1. Open the legal page
+2. Press `Ctrl + P` (Windows) or `Cmd + P` (Mac)
+3. In print dialog, select **"Save as PDF"** as the printer
+4. Choose save location on your computer
+5. Click **Save**
+
+**Result**: You'll have a permanent PDF copy of the legal document that you can:
+- 📎 Attach to emails
+- 📁 Store in company compliance folder
+- 📋 Print later offline
+- 🔍 Search with PDF reader
+
+**Method 3: Browser Bookmarks**
+
+1. Navigate to Privacy Policy (`/privacy`) or Terms of Service (`/terms`)
+2. Press `Ctrl + D` (Windows) or `Cmd + D` (Mac)
+3. Save bookmark with a descriptive name
+4. Access instantly from bookmarks bar
+
+**What Prints:**
+- ✅ All section headings and content
+- ✅ Accordion content (if expanded before printing)
+- ✅ Table of contents (appears at start of print)
+- ❌ Sidebar navigation (hidden in print view)
+- ❌ Back button and header controls (print-optimized)
+
+---
+
+### Why This Matters
+
+Understanding the Privacy Policy and Terms of Service is crucial for both legal compliance and effective system use.
+
+#### Importance of Reading Legal Documentation
+
+**For Your Protection:**
+- 🛡️ **Know your rights**: Understand what you can request (data access, corrections, exports)
+- 🔒 **Protect your data**: Learn how we safeguard your personal information
+- ⚖️ **Legal awareness**: Be aware of legal obligations and compliance requirements
+- 📋 **Informed consent**: Make informed decisions about using the system
+
+**For Business Operations:**
+- ✅ **Regulatory compliance**: Meet GDPR, data protection, and privacy laws
+- 📊 **Audit readiness**: Understand what's logged and tracked for audits
+- 🚨 **Avoid violations**: Know prohibited activities to prevent account suspension
+- 💼 **Professional standards**: Maintain data integrity and security best practices
+
+**For Customer Trust:**
+- 🤝 **Transparency**: Show customers you understand and follow privacy laws
+- 💬 **Explain policies**: Answer customer questions about data handling confidently
+- 📸 **Photo consent**: Understand why vehicle inspection photos are required
+- 🔐 **Data protection**: Assure customers their information is secure
+
+#### User Rights and Responsibilities
+
+**Your Rights** (From Privacy Policy, Section 6):
+
+1. **Right to Access**
+   - Request to see what personal data we have about you
+   - Review your account information
+   - **How to exercise**: Contact your system administrator
+
+2. **Right to Rectification**
+   - Request corrections to inaccurate data
+   - Update outdated information
+   - **How to exercise**: Use edit features or contact admin
+
+3. **Right to Erasure**
+   - Request account deactivation
+   - **Note**: Subject to legal retention requirements (contracts kept 7 years)
+   - **How to exercise**: Contact system administrator
+
+4. **Right to Portability**
+   - Export your data in PDF or Excel format
+   - **How to exercise**: Use export buttons in Reports section
+
+5. **Right to Object**
+   - Object to certain data processing activities
+   - **How to exercise**: Contact system administrator with concerns
+
+6. **Right to Audit**
+   - Review audit logs of activities involving your data
+   - **Note**: Subject to your role permissions (Admin/Manager)
+   - **How to exercise**: Navigate to Audit Logs page
+
+**Your Responsibilities** (From Terms of Service, Section 4):
+
+1. **Data Integrity**
+   - ✅ Enter accurate and complete information
+   - ✅ Verify data before submission
+   - ✅ Update outdated information promptly
+   - ✅ Maintain data quality standards
+
+2. **Security Compliance**
+   - ✅ Follow security protocols
+   - ✅ Report security incidents immediately
+   - ✅ Protect login credentials
+   - ✅ Log out when leaving workstation
+
+3. **Legal Compliance**
+   - ✅ Adhere to applicable laws and regulations
+   - ✅ Respect customer privacy rights
+   - ✅ Maintain confidentiality
+   - ✅ Follow anti-fraud procedures
+
+4. **Professional Conduct**
+   - ✅ Use the system respectfully
+   - ✅ Cooperate with administrators
+   - ✅ Report issues promptly
+   - ✅ Assist with audits when requested
+
+#### How to Contact Support with Legal Questions
+
+**If you have questions about Privacy Policy or Terms of Service:**
+
+**Option 1: Contact System Administrator**
+
+Your system administrator is your first point of contact:
+1. Click your profile in the sidebar
+2. Find administrator contact information
+3. Send email or call with your question
+4. Administrators can escalate to legal if needed
+
+**Option 2: Use Support Page**
+
+1. Navigate to **Support & Help** from sidebar
+2. Fill out the support form
+3. Select category: "Legal / Privacy Question"
+4. Describe your question or concern
+5. Submit the form
+
+**Option 3: Email Direct Contact**
+
+From the Privacy Policy or Terms of Service page:
+1. Scroll to the **"Contact Us"** section (last section)
+2. Find the email address: `support@rccms-system.com` (example)
+3. Send your question via email
+4. Expect response within 48 hours
+
+**What to Include in Your Question:**
+- 📝 Specific section or topic you're asking about
+- 🔍 Reference the Privacy Policy or Terms section number
+- ❓ Clear description of your question or concern
+- 👤 Your role in the system (if relevant)
+
+**Example Questions:**
+- "Privacy Policy Section 6 - How do I request a data export?"
+- "Terms Section 7 - Is using a shared computer a prohibited activity?"
+- "Privacy Policy Section 11 - Does RCCMS comply with Saudi data laws?"
+
+**Response Time:**
+- ⏱️ General questions: 24-48 hours
+- 🚨 Urgent security concerns: Same day
+- 📋 Complex legal questions: 3-5 business days
+
+**Escalation:**
+If your question isn't answered satisfactorily:
+1. Request escalation to privacy officer
+2. Request escalation to legal department
+3. Reference specific sections you need clarification on
+
+---
+
+**Remember**: Reading and understanding these legal documents is not just a formality—it's an essential part of using RCCMS responsibly and protecting both your rights and the privacy of your customers.
 
 ---
 

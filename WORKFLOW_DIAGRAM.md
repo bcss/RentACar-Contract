@@ -68,6 +68,12 @@ For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 │  👨‍💼 Users             → User management (Admin only)                          │
 │  📋 Audit Logs        → System audit trail (Admin/Manager)                   │
 │  ⚙️ Settings          → Company settings (Admin only)                        │
+│                                                                              │
+│  ──────────────────── LEGAL & COMPLIANCE ─────────────────────              │
+│  📜 Privacy Policy    → Data protection & privacy practices                  │
+│  📋 Terms of Service  → User agreement & legal terms                         │
+│  ℹ️ About             → System information & version                         │
+│  ❓ Support/Help      → User assistance & documentation                      │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -1178,6 +1184,318 @@ Security Benefit:
 ✅ Frontend validation cannot be bypassed
 ✅ API tools blocked by backend enforcement
 ✅ 100% complete records guaranteed
+```
+
+---
+
+## 13. Legal & Compliance Pages
+
+### 13.1 Privacy Policy Page
+```
+┌─────────────────┐
+│ Privacy Policy  │
+│      Page       │
+└────────┬────────┘
+         │
+         ├─→ Route: /privacy (primary)
+         │   Route: /settings/privacy (alternate)
+         │
+         ├─→ Access: Public (no authentication required)
+         │
+         └─→ Page Features:
+             ┌────────────────────────────────────────────────────────┐
+             │ PRIVACY POLICY INTERACTIVE LAYOUT                      │
+             ├────────────────────────────────────────────────────────┤
+             │                                                        │
+             │  ┌──────────────┐  ┌──────────────────────────────┐  │
+             │  │ STICKY TOC   │  │ MAIN CONTENT                 │  │
+             │  │              │  │                              │  │
+             │  │ 1. Info      │  │ ┌──────────────────────────┐ │  │
+             │  │    Collection│  │ │ 1. Information Collection│ │  │
+             │  │              │  │ │ ▼ (Expanded)             │ │  │
+             │  │ 2. How We    │  │ │ We collect the following │ │  │
+             │  │    Use Data  │  │ │ types of information...  │ │  │
+             │  │              │  │ └──────────────────────────┘ │  │
+             │  │ 3. Data      │  │                              │  │
+             │  │    Sharing   │  │ ┌──────────────────────────┐ │  │
+             │  │              │  │ │ 2. How We Use Your Data  │ │  │
+             │  │ ...          │  │ │ ▶ (Collapsed)            │ │  │
+             │  │              │  │ └──────────────────────────┘ │  │
+             │  │ 13. Contact  │  │                              │  │
+             │  │              │  │ (10 more sections...)        │  │
+             │  └──────────────┘  └──────────────────────────────┘  │
+             │  Left: 240px       Right: Flexible width            │
+             │  Scrolls with page Accordion interaction            │
+             │                                                        │
+             └────────────────────────────────────────────────────────┘
+```
+
+**Privacy Policy Content Structure (13 Sections):**
+1. Information We Collect
+2. How We Use Your Data
+3. Data Sharing and Disclosure
+4. Data Security
+5. Your Rights and Choices
+6. Cookies and Tracking
+7. Third-Party Services
+8. International Data Transfers
+9. Children's Privacy
+10. Data Retention
+11. Changes to This Policy
+12. Compliance and Legal Basis
+13. Contact Us
+
+**Technical Implementation:**
+- **Accordion Component**: Radix UI Accordion (controlled expansion)
+- **Sticky TOC**: Fixed position (lg: sticky top-20) with auto-scroll to section
+- **Responsive Design**: 
+  - Mobile: Single column, TOC collapses to top dropdown
+  - Tablet: Sticky TOC moves to left sidebar
+  - Desktop: Split-pane layout with fixed TOC width
+- **Bilingual Support**: 
+  - Full English/Arabic translations
+  - RTL layout support for Arabic
+  - Language toggle in header
+
+### 13.2 Terms of Service Page
+```
+┌─────────────────────┐
+│ Terms of Service    │
+│        Page         │
+└──────────┬──────────┘
+           │
+           ├─→ Route: /terms (primary)
+           │   Route: /settings/terms-of-service (alternate)
+           │
+           ├─→ Access: Public (no authentication required)
+           │
+           └─→ Page Features:
+               ┌────────────────────────────────────────────────────────┐
+               │ TERMS OF SERVICE INTERACTIVE LAYOUT                    │
+               ├────────────────────────────────────────────────────────┤
+               │                                                        │
+               │  ┌──────────────┐  ┌──────────────────────────────┐  │
+               │  │ STICKY TOC   │  │ MAIN CONTENT                 │  │
+               │  │              │  │                              │  │
+               │  │ 1. Acceptance│  │ ┌──────────────────────────┐ │  │
+               │  │    of Terms  │  │ │ 1. Acceptance of Terms   │ │  │
+               │  │              │  │ │ ▼ (Expanded)             │ │  │
+               │  │ 2. Service   │  │ │ By accessing this rental │ │  │
+               │  │    Description│ │ │ car management system... │ │  │
+               │  │              │  │ └──────────────────────────┘ │  │
+               │  │ 3. User      │  │                              │  │
+               │  │    Accounts  │  │ ┌──────────────────────────┐ │  │
+               │  │              │  │ │ 2. Service Description   │ │  │
+               │  │ ...          │  │ │ ▶ (Collapsed)            │ │  │
+               │  │              │  │ └──────────────────────────┘ │  │
+               │  │ 15. Governing│  │                              │  │
+               │  │     Law      │  │ (13 more sections...)        │  │
+               │  └──────────────┘  └──────────────────────────────┘  │
+               │  Left: 240px       Right: Flexible width            │
+               │  Scrolls with page Accordion interaction            │
+               │                                                        │
+               └────────────────────────────────────────────────────────┘
+```
+
+**Terms of Service Content Structure (15 Sections):**
+1. Acceptance of Terms
+2. Service Description
+3. User Accounts and Registration
+4. User Responsibilities
+5. Prohibited Activities
+6. Intellectual Property
+7. Payment Terms
+8. Service Availability
+9. Limitation of Liability
+10. Indemnification
+11. Dispute Resolution
+12. Termination
+13. Privacy and Data Protection
+14. Modifications to Terms
+15. Governing Law and Jurisdiction
+
+**Technical Implementation:**
+- **Accordion Component**: Radix UI Accordion (controlled expansion)
+- **Sticky TOC**: Fixed position (lg: sticky top-20) with smooth scroll
+- **Responsive Design**: 
+  - Mobile: Stacked layout, TOC as expandable menu at top
+  - Tablet: Side-by-side with collapsible TOC
+  - Desktop: Full split-pane with sticky navigation
+- **Bilingual Support**: 
+  - Complete English/Arabic content
+  - Automatic RTL/LTR switching
+  - Language preference persistence
+
+### 13.3 Navigation & Access Patterns
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                  LEGAL PAGES NAVIGATION FLOWS                     │
+└──────────────────────────────────────────────────────────────────┘
+
+PATTERN 1: Footer Links (Landing Page)
+┌─────────────┐
+│   Landing   │ → Footer section with:
+│    Page     │   • Privacy Policy link → /privacy
+└──────┬──────┘   • Terms of Service link → /terms
+       │          • About link → /about
+       │          • Support/Help link → /support-help
+       │
+       ├──→ Click "Privacy Policy"
+       │
+       v
+┌─────────────┐
+│  Privacy    │ → Full policy with TOC and accordion
+│   Policy    │ → Public access (no login required)
+└─────────────┘
+
+PATTERN 2: Settings Menu (Authenticated Users)
+┌─────────────┐
+│  Settings   │ → Settings page with tabs/sections:
+│    Page     │   • Company Settings
+└──────┬──────┘   • Financial Settings
+       │          • Legal & Compliance section
+       │            ├─→ Privacy Policy → /settings/privacy
+       │            └─→ Terms of Service → /settings/terms-of-service
+       │
+       ├──→ Click "Privacy Policy"
+       │
+       v
+┌─────────────┐
+│  Privacy    │ → Same component, different route
+│   Policy    │ → Accessible from settings context
+└─────────────┘
+
+PATTERN 3: Sidebar Navigation (Authenticated Users)
+┌─────────────┐
+│  Dashboard  │ → Sidebar menu includes:
+│             │   Legal & Compliance section
+└──────┬──────┘   ├─→ 📜 Privacy Policy → /privacy
+       │          └─→ 📋 Terms of Service → /terms
+       │
+       ├──→ Click sidebar link
+       │
+       v
+┌─────────────┐
+│  Legal Page │ → Direct navigation from sidebar
+└─────────────┘ → Available to all authenticated users
+
+PATTERN 4: Direct URL Access
+User enters: https://example.com/privacy
+         or: https://example.com/terms
+         or: https://example.com/settings/privacy
+         or: https://example.com/settings/terms-of-service
+      │
+      v
+┌─────────────┐
+│  Legal Page │ → Loads directly
+└─────────────┘ → SEO-friendly URLs
+                → Shareable links
+                → Bookmarkable
+```
+
+### 13.4 Route Definitions & Components
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    LEGAL PAGES ROUTE MAP                          │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│ Route: /privacy                                                   │
+│ Component: PrivacyPolicyPage.tsx                                  │
+│ Access: Public (no authentication)                                │
+│ Features:                                                         │
+│   • 13 sections in accordion format                               │
+│   • Sticky table of contents (240px width)                        │
+│   • Smooth scroll to section on TOC click                         │
+│   • Responsive layout (mobile: stacked, desktop: split)           │
+│   • Bilingual: English/Arabic with RTL support                    │
+│   • SEO: Meta description, title, Open Graph tags                 │
+│                                                                   │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│ Route: /terms                                                     │
+│ Component: TermsOfServicePage.tsx                                 │
+│ Access: Public (no authentication)                                │
+│ Features:                                                         │
+│   • 15 sections in accordion format                               │
+│   • Sticky table of contents (240px width)                        │
+│   • Interactive accordion (expand/collapse sections)              │
+│   • Responsive design with mobile-first approach                  │
+│   • Bilingual: Full English/Arabic translations                   │
+│   • SEO: Optimized meta tags and structured data                  │
+│                                                                   │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│ Route: /settings/privacy                                          │
+│ Component: PrivacyPolicyPage.tsx (same as /privacy)               │
+│ Access: Authenticated users only                                  │
+│ Context: Accessed from Settings page                              │
+│ Behavior: Identical to /privacy route (alternate path)            │
+│                                                                   │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│ Route: /settings/terms-of-service                                 │
+│ Component: TermsOfServicePage.tsx (same as /terms)                │
+│ Access: Authenticated users only                                  │
+│ Context: Accessed from Settings page                              │
+│ Behavior: Identical to /terms route (alternate path)              │
+│                                                                   │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│ Route: /about                                                     │
+│ Component: AboutPage.tsx                                          │
+│ Access: Public                                                    │
+│ Features: System information, version, company details            │
+│                                                                   │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│ Route: /support-help                                              │
+│ Component: SupportHelpPage.tsx                                    │
+│ Access: Public                                                    │
+│ Features: FAQ, contact information, documentation links           │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### 13.5 Complete Application Sitemap
+```
+┌──────────────────────────────────────────────────────────────────┐
+│              COMPLETE APPLICATION SITEMAP                         │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│ PUBLIC ROUTES (No Authentication Required)                        │
+│ ├─ /                    → Landing Page                            │
+│ ├─ /login               → Login Page                              │
+│ ├─ /privacy             → Privacy Policy (Public)                 │
+│ ├─ /terms               → Terms of Service (Public)               │
+│ ├─ /about               → About Page                              │
+│ └─ /support-help        → Support & Help                          │
+│                                                                   │
+│ AUTHENTICATED ROUTES (Login Required)                             │
+│ ├─ /dashboard           → Dashboard (All roles)                   │
+│ ├─ /customers           → Customers Management                    │
+│ ├─ /vehicles            → Vehicles Management                     │
+│ ├─ /persons             → Individual Sponsors (Admin/Manager)     │
+│ ├─ /companies           → Corporate Sponsors (Admin/Manager)      │
+│ ├─ /contracts           → Contract Management                     │
+│ │  ├─ /contracts/new                → Create Contract             │
+│ │  └─ /contracts/:id                → View/Edit Contract          │
+│ ├─ /users               → User Management (Admin only)            │
+│ ├─ /audit-logs          → Audit Logs (Admin/Manager)              │
+│ │  ├─ /audit-logs/contract-history  → Contract Timeline           │
+│ │  ├─ /audit-logs/user-activity     → User Activity Logs          │
+│ │  ├─ /audit-logs/system-errors     → System Error Logs           │
+│ │  └─ /audit-logs/reports           → Audit Reports               │
+│ ├─ /settings            → Company Settings (Admin only)           │
+│ │  ├─ /settings/company             → Company Details             │
+│ │  ├─ /settings/financial           → Financial Settings          │
+│ │  ├─ /settings/privacy             → Privacy Policy (Alt)        │
+│ │  └─ /settings/terms-of-service    → Terms of Service (Alt)      │
+│ └─ /reports             → Reports Section                         │
+│    ├─ /reports/financial            → Financial Reports           │
+│    ├─ /reports/operational          → Operational Reports         │
+│    └─ /reports/customers            → Customer Reports            │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---

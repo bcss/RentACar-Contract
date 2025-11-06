@@ -32,6 +32,7 @@ For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 10. [Security Hardening](#security-hardening)
 11. [Monitoring & Maintenance](#monitoring--maintenance)
 12. [Troubleshooting](#troubleshooting)
+13. [Post-Deployment Verification](#post-deployment-verification)
 
 ---
 
@@ -1166,6 +1167,332 @@ pm2 restart rccms-app
 # Reduce PM2 instances if needed
 pm2 scale rccms-app 1
 ```
+
+---
+
+## Post-Deployment Verification
+
+After completing deployment, perform these comprehensive verification tests to ensure all features are working correctly, including the legal pages.
+
+### 1. Legal Pages Accessibility Verification
+
+**Test all Privacy Policy and Terms of Service routes:**
+
+```bash
+# Test Privacy Policy primary route
+curl -I https://your-domain.com/privacy
+# Should return: HTTP/2 200
+
+# Test Terms of Service primary route
+curl -I https://your-domain.com/terms
+# Should return: HTTP/2 200
+
+# Test Privacy Policy alternate route
+curl -I https://your-domain.com/settings/privacy
+# Should return: HTTP/2 200
+
+# Test Terms of Service alternate route
+curl -I https://your-domain.com/settings/terms-of-service
+# Should return: HTTP/2 200
+```
+
+**Browser Testing Checklist:**
+
+Open your deployed application in a browser and verify:
+
+- [ ] Navigate to `/privacy` - Privacy Policy page loads successfully
+- [ ] Navigate to `/terms` - Terms of Service page loads successfully
+- [ ] Navigate to `/settings/privacy` - Redirects or displays Privacy Policy
+- [ ] Navigate to `/settings/terms-of-service` - Redirects or displays Terms of Service
+- [ ] Check footer on home page - Privacy Policy link is present and clickable
+- [ ] Check footer on dashboard - Terms of Service link is present and clickable
+- [ ] Click footer links from various pages (Dashboard, Contracts, Customers) - Links work correctly
+- [ ] Verify links open in same tab (not new tab) for consistent UX
+
+### 2. Functional Testing Checklist
+
+**Privacy Policy Page (`/privacy`):**
+
+- [ ] Privacy Policy page loads without errors (check browser console: F12)
+- [ ] Page title displays correctly in browser tab
+- [ ] Last updated date is visible and accurate
+- [ ] Table of contents (TOC) renders on the left side (desktop) or top (mobile)
+- [ ] All 13 Privacy Policy sections render properly:
+  1. [ ] Introduction section
+  2. [ ] Information We Collect section
+  3. [ ] How We Use Your Information section
+  4. [ ] Data Storage and Security section
+  5. [ ] Data Sharing and Disclosure section
+  6. [ ] Your Rights section
+  7. [ ] Cookies and Tracking section
+  8. [ ] Third-Party Services section
+  9. [ ] International Data Transfers section
+  10. [ ] Children's Privacy section
+  11. [ ] Changes to Privacy Policy section
+  12. [ ] Contact Us section
+  13. [ ] Legal Compliance section (if applicable)
+- [ ] TOC navigation links scroll to correct sections
+- [ ] Sticky TOC remains visible when scrolling down the page
+- [ ] Accordion sections expand when clicked
+- [ ] Accordion sections collapse when clicked again
+- [ ] Only one accordion section open at a time (if applicable)
+- [ ] Text is readable (font size, contrast, line spacing)
+
+**Terms of Service Page (`/terms`):**
+
+- [ ] Terms of Service page loads without errors (check browser console: F12)
+- [ ] Page title displays correctly in browser tab
+- [ ] Last updated date is visible and accurate
+- [ ] Table of contents (TOC) renders on the left side (desktop) or top (mobile)
+- [ ] All 15 Terms of Service sections render properly:
+  1. [ ] Acceptance of Terms section
+  2. [ ] Service Description section
+  3. [ ] User Accounts section
+  4. [ ] Rental Agreement section
+  5. [ ] Payment Terms section
+  6. [ ] Vehicle Use and Restrictions section
+  7. [ ] Insurance and Liability section
+  8. [ ] Damage and Loss section
+  9. [ ] Termination section
+  10. [ ] Intellectual Property section
+  11. [ ] Disclaimers section
+  12. [ ] Limitation of Liability section
+  13. [ ] Dispute Resolution section
+  14. [ ] Governing Law section
+  15. [ ] Changes to Terms section
+- [ ] TOC navigation links scroll to correct sections
+- [ ] Sticky TOC remains visible when scrolling down the page
+- [ ] Accordion sections expand when clicked
+- [ ] Accordion sections collapse when clicked again
+- [ ] Only one accordion section open at a time (if applicable)
+- [ ] Text is readable (font size, contrast, line spacing)
+
+### 3. Responsive Design Verification
+
+**Desktop Layout (1920x1080 and 1366x768):**
+
+- [ ] Privacy Policy displays in multi-column layout (TOC left, content right)
+- [ ] Terms of Service displays in multi-column layout (TOC left, content right)
+- [ ] TOC is sticky and remains visible when scrolling
+- [ ] Content width is readable (not too wide)
+- [ ] Margins and padding are appropriate
+- [ ] No horizontal scrolling required
+- [ ] Footer displays correctly at bottom
+
+**Tablet Layout (768x1024 iPad, 820x1180 iPad Air):**
+
+- [ ] Privacy Policy layout adapts appropriately
+- [ ] Terms of Service layout adapts appropriately
+- [ ] TOC switches to top position or collapsible menu (if designed)
+- [ ] All sections remain readable
+- [ ] Touch targets are adequately sized (min 44x44px)
+- [ ] No content overflow or cut-off text
+
+**Mobile Layout (375x667 iPhone SE, 390x844 iPhone 12/13):**
+
+- [ ] Privacy Policy displays in single-column stacked layout
+- [ ] Terms of Service displays in single-column stacked layout
+- [ ] TOC collapses into mobile menu or moves to top
+- [ ] Text is readable without zooming
+- [ ] Accordion sections work with touch
+- [ ] All interactive elements work on touch devices
+- [ ] No horizontal scrolling required
+- [ ] Footer links are touch-friendly
+
+**Test on actual devices or browser DevTools:**
+
+```bash
+# Chrome DevTools: F12 → Toggle Device Toolbar (Ctrl+Shift+M)
+# Test responsive breakpoints:
+# - Mobile: 375px, 390px, 414px
+# - Tablet: 768px, 820px
+# - Desktop: 1366px, 1920px
+```
+
+### 4. Browser Compatibility Testing
+
+**Desktop Browsers:**
+
+- [ ] **Chrome/Edge (Chromium)** - Version 120+
+  - Privacy Policy renders correctly
+  - Terms of Service renders correctly
+  - Sticky TOC works
+  - Accordion animations smooth
+- [ ] **Firefox** - Version 120+
+  - Privacy Policy renders correctly
+  - Terms of Service renders correctly
+  - Sticky TOC works
+  - Accordion animations smooth
+- [ ] **Safari** - Version 17+ (macOS)
+  - Privacy Policy renders correctly
+  - Terms of Service renders correctly
+  - Sticky TOC works
+  - Accordion animations smooth
+
+**Mobile Browsers:**
+
+- [ ] **Chrome Mobile** (Android)
+  - Privacy Policy mobile layout works
+  - Terms of Service mobile layout works
+  - Touch interactions work smoothly
+- [ ] **Safari Mobile** (iOS)
+  - Privacy Policy mobile layout works
+  - Terms of Service mobile layout works
+  - Touch interactions work smoothly
+- [ ] **Samsung Internet** (if applicable)
+  - Privacy Policy mobile layout works
+  - Terms of Service mobile layout works
+
+### 5. Performance Testing
+
+**Page Load Performance:**
+
+```bash
+# Test Privacy Policy load time
+curl -w "@-" -o /dev/null -s https://your-domain.com/privacy <<'EOF'
+    time_namelookup:  %{time_namelookup}s\n
+       time_connect:  %{time_connect}s\n
+    time_appconnect:  %{time_appconnect}s\n
+   time_pretransfer:  %{time_pretransfer}s\n
+      time_redirect:  %{time_redirect}s\n
+ time_starttransfer:  %{time_starttransfer}s\n
+                    ----------\n
+         time_total:  %{time_total}s\n
+EOF
+
+# Test Terms of Service load time
+curl -w "@-" -o /dev/null -s https://your-domain.com/terms <<'EOF'
+    time_namelookup:  %{time_namelookup}s\n
+       time_connect:  %{time_connect}s\n
+    time_appconnect:  %{time_appconnect}s\n
+   time_pretransfer:  %{time_pretransfer}s\n
+      time_redirect:  %{time_redirect}s\n
+ time_starttransfer:  %{time_starttransfer}s\n
+                    ----------\n
+         time_total:  %{time_total}s\n
+EOF
+```
+
+**Performance Benchmarks:**
+
+- [ ] Privacy Policy loads in < 2 seconds (first visit)
+- [ ] Privacy Policy loads in < 500ms (cached visit)
+- [ ] Terms of Service loads in < 2 seconds (first visit)
+- [ ] Terms of Service loads in < 500ms (cached visit)
+- [ ] No console errors in browser DevTools
+- [ ] Lazy-loaded content appears smoothly
+
+**Browser Performance Check:**
+
+1. Open DevTools (F12)
+2. Go to Network tab
+3. Navigate to `/privacy`
+4. Check:
+   - [ ] Total page size < 500KB (with lazy loading)
+   - [ ] No 404 errors for assets
+   - [ ] All resources load successfully
+5. Repeat for `/terms`
+
+### 6. SEO and Metadata Verification
+
+**Privacy Policy Page:**
+
+```bash
+# Check meta tags
+curl -s https://your-domain.com/privacy | grep -i "<title>"
+curl -s https://your-domain.com/privacy | grep -i "meta.*description"
+```
+
+- [ ] Page has unique `<title>` tag (e.g., "Privacy Policy | RCCMS")
+- [ ] Page has meta description
+- [ ] Heading hierarchy is correct (H1 → H2 → H3)
+- [ ] No duplicate H1 tags
+
+**Terms of Service Page:**
+
+```bash
+# Check meta tags
+curl -s https://your-domain.com/terms | grep -i "<title>"
+curl -s https://your-domain.com/terms | grep -i "meta.*description"
+```
+
+- [ ] Page has unique `<title>` tag (e.g., "Terms of Service | RCCMS")
+- [ ] Page has meta description
+- [ ] Heading hierarchy is correct (H1 → H2 → H3)
+- [ ] No duplicate H1 tags
+
+### 7. Accessibility Testing
+
+**Keyboard Navigation:**
+
+- [ ] Privacy Policy is fully navigable with Tab key
+- [ ] Terms of Service is fully navigable with Tab key
+- [ ] Focus indicators are visible (outline/ring around focused elements)
+- [ ] Enter key activates accordion sections
+- [ ] Escape key closes expanded sections (if applicable)
+- [ ] TOC links can be activated with keyboard
+
+**Screen Reader Testing (if available):**
+
+- [ ] ARIA labels present on interactive elements
+- [ ] Headings are properly structured
+- [ ] Links have descriptive text (not "click here")
+- [ ] Section content is announced when expanded
+
+**Color Contrast:**
+
+- [ ] Text meets WCAG AA standards (4.5:1 contrast ratio minimum)
+- [ ] Links are distinguishable from regular text
+- [ ] Interactive elements have sufficient contrast
+
+### 8. Content Verification
+
+**Privacy Policy Content:**
+
+- [ ] Company name is correct throughout
+- [ ] Contact email/phone number is correct
+- [ ] Address information is accurate
+- [ ] Last updated date is current
+- [ ] Legal jurisdiction is specified correctly
+- [ ] No placeholder text (e.g., "[Company Name]", "TODO")
+
+**Terms of Service Content:**
+
+- [ ] Company name is correct throughout
+- [ ] Contact information is correct
+- [ ] Rental terms match company policies
+- [ ] Payment terms are accurate
+- [ ] Last updated date is current
+- [ ] Legal jurisdiction is specified correctly
+- [ ] No placeholder text
+
+### 9. Link Integrity Check
+
+```bash
+# Check for broken links on Privacy Policy
+curl -s https://your-domain.com/privacy | grep -o 'href="[^"]*"' | wc -l
+# Count should match expected number of internal/external links
+
+# Check for broken links on Terms of Service
+curl -s https://your-domain.com/terms | grep -o 'href="[^"]*"' | wc -l
+```
+
+- [ ] All internal links work (e.g., links to other sections)
+- [ ] All external links open correctly (if any)
+- [ ] Email links (mailto:) work if present
+- [ ] No broken anchor links (#section-id)
+
+### 10. Bilingual Support Verification (if applicable)
+
+If your application supports multiple languages (English/Arabic):
+
+- [ ] Language toggle works on Privacy Policy page
+- [ ] Language toggle works on Terms of Service page
+- [ ] Arabic text displays RTL (right-to-left) correctly
+- [ ] English text displays LTR (left-to-right) correctly
+- [ ] TOC translates when language changes
+- [ ] Section headings translate correctly
+- [ ] Content is properly translated (no mixed languages)
 
 ---
 
