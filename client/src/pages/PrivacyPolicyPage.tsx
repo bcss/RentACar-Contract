@@ -8,28 +8,48 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function PrivacyPolicyPage() {
   const [activeSection, setActiveSection] = useState<string>('intro');
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const sections = document.querySelectorAll('[data-section]');
+    const visibleSections = new Set<string>();
     
     const observer = new IntersectionObserver(
       (entries) => {
+        // Don't update during programmatic scrolling
+        if (isScrollingRef.current) return;
+        
         entries.forEach((entry) => {
+          const sectionId = entry.target.getAttribute('data-section');
+          if (!sectionId) return;
+          
           if (entry.isIntersecting) {
-            const sectionId = entry.target.getAttribute('data-section');
-            if (sectionId) {
-              setActiveSection(sectionId);
-            }
+            visibleSections.add(sectionId);
+          } else {
+            visibleSections.delete(sectionId);
           }
         });
+
+        // Find the topmost visible section
+        if (visibleSections.size > 0) {
+          const sectionsArray = Array.from(sections);
+          for (const section of sectionsArray) {
+            const id = section.getAttribute('data-section');
+            if (id && visibleSections.has(id)) {
+              setActiveSection(id);
+              break;
+            }
+          }
+        }
       },
       {
-        rootMargin: '-100px 0px -50% 0px',
-        threshold: 0,
+        rootMargin: '-20% 0px -35% 0px',
+        threshold: [0, 0.25, 0.5, 0.75, 1],
       }
     );
 
@@ -37,13 +57,30 @@ export default function PrivacyPolicyPage() {
     
     return () => {
       sections.forEach((section) => observer.unobserve(section));
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
     };
   }, []);
 
   const scrollToSection = (id: string) => {
     const element = document.querySelector(`[data-section="${id}"]`);
     if (element) {
+      // Set the target section immediately
+      setActiveSection(id);
+      
+      // Prevent observer updates during scroll
+      isScrollingRef.current = true;
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      // Re-enable observer after scroll completes
+      scrollTimeoutRef.current = setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 1000);
     }
   };
 
