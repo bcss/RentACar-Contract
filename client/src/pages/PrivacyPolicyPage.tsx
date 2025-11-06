@@ -11,33 +11,39 @@ import {
 import { useEffect, useState } from 'react';
 
 export default function PrivacyPolicyPage() {
-  const [activeSection, setActiveSection] = useState<string>('');
+  const [activeSection, setActiveSection] = useState<string>('intro');
 
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = document.querySelectorAll('[data-section]');
-      let current = '';
-      
-      sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= 150) {
-          current = section.getAttribute('data-section') || '';
-        }
-      });
-      
-      setActiveSection(current);
-    };
+    const sections = document.querySelectorAll('[data-section]');
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const sectionId = entry.target.getAttribute('data-section');
+            if (sectionId) {
+              setActiveSection(sectionId);
+            }
+          }
+        });
+      },
+      {
+        rootMargin: '-100px 0px -50% 0px',
+        threshold: 0,
+      }
+    );
 
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    sections.forEach((section) => observer.observe(section));
+    
+    return () => {
+      sections.forEach((section) => observer.unobserve(section));
+    };
   }, []);
 
   const scrollToSection = (id: string) => {
     const element = document.querySelector(`[data-section="${id}"]`);
     if (element) {
-      const top = element.getBoundingClientRect().top + window.pageYOffset - 100;
-      window.scrollTo({ top, behavior: 'smooth' });
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
