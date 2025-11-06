@@ -40,7 +40,7 @@ Every contract change is tracked with timestamps, user names, edit reasons, and 
 - ✅ Track who did what, when, and why
 - ✅ Immutable contracts after finalization
 - ✅ **Professional Privacy Policy** (13 comprehensive sections) - GDPR/CCPA ready
-- ✅ **Professional Terms of Service** (15 detailed sections) - legally vetted coverage
+- ✅ **Professional Terms of Service** (14 detailed sections) - legally vetted coverage
 - ✅ **Interactive legal pages** with accordion sections and sticky table of contents
 - ✅ **Multiple access routes** - footer links, About page, customer-facing visibility
 
@@ -145,7 +145,7 @@ Advanced frontend optimization with route-based lazy loading. Login page appears
 - ✅ Master data management: Customers, Vehicles, Sponsors, Companies
 - ✅ Payment tracking with full transaction history
 - ✅ Vehicle return workflow with damage assessment
-- ✅ **Legal Compliance Pages**: Professional Privacy Policy (13 sections) + Terms of Service (15 sections) with bilingual support, accordion navigation, responsive design
+- ✅ **Legal Compliance Pages**: Professional Privacy Policy (13 sections) + Terms of Service (14 sections) with bilingual support, accordion navigation, responsive design
 
 ---
 
@@ -341,7 +341,7 @@ Customer disputes AED 1,200 scratch:
 - Automatic financial calculations
 - Bilingual support with RTL/LTR layouts
 - Professional PDF generation
-- **Legal compliance framework**: Privacy Policy (13 sections covering data collection, usage, rights, GDPR/CCPA) + Terms of Service (15 sections covering agreements, warranties, liability, dispute resolution)
+- **Legal compliance framework**: Privacy Policy (13 sections covering data collection, usage, rights, GDPR/CCPA) + Terms of Service (14 sections covering agreements, warranties, liability, dispute resolution)
 - **Interactive legal UI**: Accordion-based navigation, sticky table of contents, mobile-responsive, bilingual English/Arabic
 
 **What You Pay:** One-time license fee
@@ -446,7 +446,7 @@ Customer disputes AED 1,200 scratch:
 
 ### Legal Compliance & Data Protection
 - **Professional Privacy Policy Page**: 13 comprehensive sections covering data collection, usage, storage, user rights, GDPR/CCPA compliance
-- **Professional Terms of Service Page**: 15 detailed sections covering user agreements, service terms, warranties, liability, dispute resolution, intellectual property
+- **Professional Terms of Service Page**: 14 detailed sections covering user agreements, service terms, warranties, liability, dispute resolution, intellectual property
 - **Interactive UI Features**: Accordion-based section navigation for easy browsing, sticky table of contents for quick access, responsive design for all devices
 - **Bilingual Legal Content**: Full English and Arabic translations with proper RTL/LTR layouts, professionally formatted legal terminology
 - **Multiple Access Routes**: Footer links on all pages, About page references, Support/Help page integration, customer-facing visibility for transparency

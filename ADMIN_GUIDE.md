@@ -147,7 +147,7 @@ RCCMS includes comprehensive Privacy Policy and Terms of Service pages designed 
 
 **Key Features:**
 - ✅ **13 Privacy Policy Sections**: Comprehensive data protection documentation
-- ✅ **15 Terms of Service Sections**: Complete usage terms and conditions
+- ✅ **14 Terms of Service Sections**: Complete usage terms and conditions
 - ✅ **Multiple Access Routes**: Direct links and settings integration
 - ✅ **Interactive UI**: Accordion sections and sticky navigation
 - ✅ **Bilingual Support**: Full English and Arabic interface
@@ -295,7 +295,7 @@ The Privacy Policy page contains **13 comprehensive sections** covering all aspe
 
 #### Content Structure
 
-The Terms of Service page contains **15 comprehensive sections** governing system usage:
+The Terms of Service page contains **14 comprehensive sections** governing system usage:
 
 **1. Acceptance of Terms**
 - Agreement acknowledgment
@@ -384,7 +384,7 @@ The Terms of Service page contains **15 comprehensive sections** governing syste
 
 **Sticky Table of Contents:**
 - **Same Design**: Consistent with Privacy Policy page
-- **15 Sections**: All terms sections accessible
+- **14 Sections**: All terms sections accessible
 - **Visual Icons**: Legal-themed icons for each section
 - **Responsive**: Adapts to all screen sizes
 

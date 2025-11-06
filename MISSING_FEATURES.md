@@ -21,12 +21,11 @@ For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 
 **✅ Privacy Policy and Terms of Service Pages - Production Ready**
 - **13 comprehensive Privacy Policy sections** with full GDPR/CCPA compliance
-- **15 comprehensive Terms of Service sections** covering all legal requirements
+- **14 comprehensive Terms of Service sections** covering all legal requirements
 - **Interactive accordion UI** with sticky table of contents for easy navigation
 - **Full responsive design** optimized for all device types (desktop, tablet, mobile)
 - **Multiple access routes** for user convenience:
   - `/privacy` and `/terms` (primary routes)
-  - `/privacy-policy` and `/terms-of-service` (legacy support)
   - `/settings/privacy` and `/settings/terms-of-service` (settings integration)
 - **Bilingual support** (English/Arabic) with proper RTL/LTR layout
 - **Professional formatting** with clear section hierarchy and print-friendly layout
@@ -849,12 +848,11 @@ export const loyaltyPoints = pgTable("loyalty_points", {
 
 **What Was Delivered:**
 - ✅ **13 comprehensive Privacy Policy sections** with GDPR/CCPA compliance
-- ✅ **15 comprehensive Terms of Service sections** covering all legal requirements
+- ✅ **14 comprehensive Terms of Service sections** covering all legal requirements
 - ✅ **Interactive accordion UI** with sticky table of contents for easy navigation
 - ✅ **Full responsive design** optimized for desktop, tablet, and mobile
 - ✅ **Multiple access routes** for user convenience:
   - Primary routes: `/privacy` and `/terms`
-  - Legacy routes: `/privacy-policy` and `/terms-of-service`
   - Settings integration: `/settings/privacy` and `/settings/terms-of-service`
 - ✅ **Bilingual support** (English/Arabic) with proper RTL/LTR layout
 - ✅ **Accessible from** footer navigation, settings page, and legal compliance sections
@@ -876,7 +874,7 @@ export const loyaltyPoints = pgTable("loyalty_points", {
 12. Contact Information
 13. Legal Basis for Processing
 
-**Terms of Service Sections (15):**
+**Terms of Service Sections (14):**
 1. Acceptance of Terms
 2. Service Description
 3. User Accounts
@@ -890,8 +888,7 @@ export const loyaltyPoints = pgTable("loyalty_points", {
 11. Intellectual Property
 12. Limitation of Liability
 13. Dispute Resolution
-14. Termination
-15. Changes to Terms
+14. Changes to Terms
 
 **Implementation:**
 - React components: `PrivacyPolicyPage.tsx` and `TermsOfServicePage.tsx`

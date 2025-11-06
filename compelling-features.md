@@ -537,7 +537,7 @@ RCCMS includes professionally crafted Privacy Policy and Terms of Service pages 
 - **Policy Updates:** Change notification procedures
 - **Contact Information:** How to reach your data protection team
 
-#### 2. Comprehensive Terms of Service (15 Sections)
+#### 2. Comprehensive Terms of Service (14 Sections)
 *Legal protection through clear user agreements*
 
 **Coverage:**
@@ -697,7 +697,7 @@ RCCMS includes professionally crafted Privacy Policy and Terms of Service pages 
 | Feature | RCCMS | Competitor A | Competitor B | Competitor C |
 |---------|-------|--------------|--------------|--------------|
 | **Privacy Policy** | ✅ 13 sections | ❌ None | ⚠️ Generic template | ❌ None |
-| **Terms of Service** | ✅ 15 sections | ❌ None | ⚠️ Basic | ❌ None |
+| **Terms of Service** | ✅ 14 sections | ❌ None | ⚠️ Basic | ❌ None |
 | **Interactive UI** | ✅ Accordion + TOC | ❌ Static PDF | ⚠️ Plain HTML | ❌ N/A |
 | **GDPR Compliance** | ✅ Full coverage | ❌ No | ⚠️ Partial | ❌ No |
 | **CCPA Ready** | ✅ Yes | ❌ No | ❌ No | ❌ No |

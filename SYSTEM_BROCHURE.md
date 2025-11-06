@@ -296,7 +296,7 @@ Eliminate the need for expensive legal consultations with our professionally cra
 - ✅ **Policy Updates**: Change notification procedures
 - ✅ **Contact Information**: Easy access to privacy officer/DPO
 
-**Terms of Service - 15 Detailed Sections**
+**Terms of Service - 14 Detailed Sections**
 - ✅ **Service Description**: Clear definition of platform capabilities
 - ✅ **User Responsibilities**: Account security and proper usage guidelines
 - ✅ **Acceptable Use Policy**: Prohibited activities and enforcement
@@ -577,7 +577,7 @@ Eliminate the need for expensive legal consultations with our professionally cra
 ✅ **Data Integrity**: Immutable contracts prevent fraud  
 ✅ **Geolocation Tracking**: Know where actions originated  
 ✅ **Session Management**: Secure user authentication  
-✅ **Built-In Legal Documentation**: Privacy Policy (13 sections) + Terms of Service (15 sections) - GDPR/CCPA compliant  
+✅ **Built-In Legal Documentation**: Privacy Policy (13 sections) + Terms of Service (14 sections) - GDPR/CCPA compliant  
 ✅ **AED 30k-60k Legal Cost Savings**: Professional legal documents included - no lawyer fees required  
 ✅ **Enterprise Compliance Ready**: Meets corporate client legal requirements for B2B contracts  
 

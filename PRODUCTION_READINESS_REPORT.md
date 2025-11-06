@@ -139,7 +139,7 @@ RCCMS is **100% production-ready** for deployment on VPS/Docker environments. Th
   - ✅ Policy Updates (versioning, change notification)
   - ✅ Contact Information (support escalation paths)
   
-- ✅ **Terms of Service Page (15 Detailed Sections)**
+- ✅ **Terms of Service Page (14 Detailed Sections)**
   - ✅ Acceptance of Terms (binding agreement notice)
   - ✅ System License and Usage Rights (3 sub-sections via accordions)
     - License Grant (permitted use cases)

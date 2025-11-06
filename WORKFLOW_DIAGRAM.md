@@ -1288,8 +1288,8 @@ Security Benefit:
                │  │              │  │ │ 2. Service Description   │ │  │
                │  │ ...          │  │ │ ▶ (Collapsed)            │ │  │
                │  │              │  │ └──────────────────────────┘ │  │
-               │  │ 15. Governing│  │                              │  │
-               │  │     Law      │  │ (13 more sections...)        │  │
+               │  │ 14. Governing│  │                              │  │
+               │  │     Law      │  │ (12 more sections...)        │  │
                │  └──────────────┘  └──────────────────────────────┘  │
                │  Left: 240px       Right: Flexible width            │
                │  Scrolls with page Accordion interaction            │
@@ -1297,7 +1297,7 @@ Security Benefit:
                └────────────────────────────────────────────────────────┘
 ```
 
-**Terms of Service Content Structure (15 Sections):**
+**Terms of Service Content Structure (14 Sections):**
 1. Acceptance of Terms
 2. Service Description
 3. User Accounts and Registration
@@ -1311,8 +1311,7 @@ Security Benefit:
 11. Dispute Resolution
 12. Termination
 13. Privacy and Data Protection
-14. Modifications to Terms
-15. Governing Law and Jurisdiction
+14. Governing Law and Jurisdiction
 
 **Technical Implementation:**
 - **Accordion Component**: Radix UI Accordion (controlled expansion)
