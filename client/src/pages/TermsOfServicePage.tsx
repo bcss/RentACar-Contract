@@ -821,7 +821,12 @@ export default function TermsOfServicePage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="p-4 rounded-lg bg-muted">
                     <h4 className="font-semibold mb-2">Technical Support</h4>
-                    <p className="text-muted-foreground text-sm">Visit the Support & Help page within the system</p>
+                    <p className="text-muted-foreground text-sm">
+                      Visit the{' '}
+                      <Link href="/settings/support" className="text-primary hover:underline font-medium">
+                        Support & Help page
+                      </Link>
+                    </p>
                     <p className="text-muted-foreground text-sm">Email: support@rccms.com</p>
                   </div>
                   <div className="p-4 rounded-lg bg-muted">
