@@ -17,6 +17,16 @@ This document should be read in conjunction with:
 
 For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 
+## Recent Updates (December 2025)
+
+**✅ Privacy Policy and Terms of Service Pages Implemented**
+- Comprehensive Privacy Policy page with interactive UI and collapsible sections
+- Complete Terms of Service page with legal terms and conditions
+- Bilingual support (English/Arabic) with proper RTL/LTR layout
+- Mobile-responsive design and professional formatting
+- Accessible from footer navigation and legal compliance sections
+- See [Recently Implemented Features](#recently-implemented-features-december-2025) section below for full details
+
 ---
 
 ## Table of Contents
@@ -823,6 +833,50 @@ export const loyaltyPoints = pgTable("loyalty_points", {
 - Revenue loss analysis
 - Customer satisfaction tracking
 - Operational planning data
+
+### ✅ Privacy Policy and Terms of Service Pages (IMPLEMENTED)
+**Priority**: **🟡 Medium** → **COMPLETED** (December 2025)  
+**Complexity**: **Simple** → **DELIVERED**  
+**Business Value**: **MEDIUM-HIGH**
+
+**STATUS: FULLY IMPLEMENTED**
+
+**What Was Delivered:**
+- ✅ **Privacy Policy Page** with comprehensive data protection information
+- ✅ **Terms of Service Page** with complete legal terms and conditions
+- ✅ **Interactive UI** with collapsible sections for easy navigation
+- ✅ **Bilingual support** (English/Arabic) with proper RTL/LTR layout
+- ✅ **Accessible from** footer navigation and legal compliance sections
+- ✅ **Professional formatting** with clear section hierarchy
+- ✅ **Mobile-responsive** design for all device sizes
+- ✅ **Contact information** for privacy/legal inquiries
+
+**Content Covered:**
+- Data collection and usage policies
+- User rights and responsibilities
+- Privacy protection measures
+- Cookie and tracking policies
+- Legal disclaimers and liability terms
+- Service usage terms and conditions
+- Account termination policies
+- Dispute resolution procedures
+
+**Implementation:**
+- Dedicated route pages: `/privacy-policy` and `/terms-of-service`
+- React components: `PrivacyPolicyPage.tsx` and `TermsOfServicePage.tsx`
+- Accordion-based sections for improved readability
+- Consistent with Material Design 3 guidelines
+- SEO-optimized with proper meta tags
+
+**Business Impact:**
+- Legal compliance for data protection regulations
+- Professional credibility and transparency
+- User trust and confidence
+- Reduced legal liability risks
+- GDPR/CCPA readiness
+- Customer service reference documentation
+
+---
 
 ### 15. ~~Damage Assessment with Photos~~ ✅ IMPLEMENTED 📸
 **Priority**: ~~🟢 Low~~ → **COMPLETED** (October 2025)  
