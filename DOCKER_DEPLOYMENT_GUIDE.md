@@ -2053,6 +2053,12 @@ Use this checklist for every production deployment:
 
 - [ ] Monitor logs for 1 hour
 - [ ] Test critical workflows (create contract, process payment)
+- [ ] Verify Privacy Policy page accessible at /privacy
+- [ ] Verify Terms of Service page accessible at /terms
+- [ ] Test accordion sections expand/collapse correctly
+- [ ] Verify table of contents navigation works
+- [ ] Test responsive design on mobile viewport
+- [ ] Confirm bilingual content displays properly
 - [ ] Monitor database performance
 - [ ] Check error rates
 - [ ] Notify team of successful deployment

@@ -15,7 +15,8 @@
 6. [Troubleshooting](#troubleshooting)
 7. [Security Maintenance](#security-maintenance)
 8. [Update & Upgrade Procedures](#update--upgrade-procedures)
-9. [Common Issues & Solutions](#common-issues--solutions)
+9. [Legal Documentation Maintenance](#legal-documentation-maintenance)
+10. [Common Issues & Solutions](#common-issues--solutions)
 
 ---
 
@@ -1434,6 +1435,317 @@ sudo apt-get install -y nodejs
 node --version
 npm --version
 ```
+
+---
+
+## Legal Documentation Maintenance
+
+### Overview
+
+The RCCMS system includes comprehensive legal documentation accessible to all users through dedicated pages for Privacy Policy and Terms of Service. These documents are critical for regulatory compliance, user transparency, and legal protection. This section provides maintenance procedures for keeping these documents current, accurate, and compliant with evolving regulations and system features.
+
+**File Locations:**
+- Privacy Policy: `client/src/pages/PrivacyPolicyPage.tsx`
+- Terms of Service: `client/src/pages/TermsOfServicePage.tsx`
+
+**Current Version Date:** December 2025
+
+### Document Structure & Architecture
+
+Both legal documents follow a consistent architectural pattern designed for maintainability and user experience. Each document is structured using Shadcn/UI's Accordion component system, which allows for organized, collapsible sections that improve readability while maintaining comprehensive coverage.
+
+**Privacy Policy Structure:**
+The Privacy Policy page contains 13 major sections including Introduction, Information Collection (with sub-accordions for Personal Information, Customer & Business Data, Contract & Financial Data, and Vehicle & Inspection Data), How We Use Information, Data Security, Data Retention, User Rights (with sub-accordions for access, correction, deletion, and data portability rights), Cookies & Tracking, Data Sharing, International Transfers, Children's Privacy, GDPR Compliance, Policy Updates, and Contact information. The accordion-based design allows users to expand only the sections relevant to their inquiry while maintaining full disclosure compliance.
+
+**Terms of Service Structure:**
+The Terms of Service page includes 14 comprehensive sections covering Acceptance of Terms, System License and Usage Rights (with sub-accordions for License Grant, Usage Restrictions, and Scope of Use), User Accounts, User Responsibilities, Data Accuracy, System Availability, Prohibited Activities, Intellectual Property, Limitation of Liability, Legal Compliance, Termination, Dispute Resolution, Modifications, and Contact information. Each section uses AccordionItem components with descriptive AccordionTrigger elements for easy navigation.
+
+**Technical Implementation:**
+Both pages implement a sticky table of contents (TOC) on desktop layouts, scroll-spy functionality to highlight the active section, smooth scrolling to sections on TOC click, and responsive design that adapts for mobile devices. The pages use Material Design 3 icons from lucide-react, follow the application's bilingual design patterns (though currently English-only for legal precision), and maintain consistent styling with the rest of the RCCMS interface.
+
+### Annual Review Schedule
+
+Legal documentation must be reviewed annually to ensure ongoing compliance with regulations, accuracy regarding system features, and alignment with industry best practices. The annual review cycle ensures proactive maintenance rather than reactive updates during regulatory audits or user complaints.
+
+**Recommended Review Schedule:**
+
+**Q1 (January-March):** Conduct comprehensive annual review of both Privacy Policy and Terms of Service. This timing aligns with New Year regulatory updates in many jurisdictions and allows implementation of any required changes before the busy rental season. Review should include verification of data collection practices against actual system implementation, confirmation that all new features from the previous year are reflected in documentation, assessment of regulatory changes (GDPR, CCPA, local privacy laws), and benchmarking against industry standards and competitor policies.
+
+**Q2 (April-June):** Mid-year compliance check focusing on any new features deployed in Q1-Q2. Verify that vehicle inspection photo storage practices match Privacy Policy disclosures, confirm payment processing descriptions remain accurate, and review audit logging practices against stated retention policies. This is also the time to verify that bilingual consistency is maintained if Arabic translations are added.
+
+**Q3 (July-September):** Review of system availability and service level expectations in Terms of Service. Assess whether stated system availability metrics match actual uptime, review any incidents or service disruptions from H1 and determine if policy updates are needed, and verify that support contact information remains current and responsive.
+
+**Q4 (October-December):** Year-end review and preparation for upcoming annual cycle. Document all changes made throughout the year in audit logs, schedule legal review for Q1 of following year, prepare summary of policy changes for stakeholder review, and verify version dating is accurate across all legal pages.
+
+### Compliance Update Triggers
+
+Beyond annual reviews, certain events should trigger immediate review and potential updates to legal documentation. These triggers ensure the system remains compliant as regulations evolve and features change.
+
+**Regulatory Triggers:**
+
+**New Privacy Regulations:** When new data protection laws are enacted or existing laws are amended (e.g., changes to GDPR enforcement guidelines, new state privacy laws in jurisdictions where customers operate, or industry-specific regulations affecting car rental businesses), legal documentation must be reviewed within 30 days of the regulation taking effect. Common regulatory changes affecting rental car systems include data retention requirements, right-to-deletion procedures, cross-border data transfer rules, and consent management for marketing communications.
+
+**Data Breach or Security Incident:** If the system experiences a security incident, even if no data was compromised, the Privacy Policy's Data Security section and incident response procedures must be reviewed to ensure accuracy. The Audit Logs section should be updated to reflect any enhanced monitoring implemented post-incident.
+
+**Legal Action or Complaint:** If the organization receives legal complaints, regulatory inquiries, or customer disputes citing the Privacy Policy or Terms of Service, immediate review is required to identify gaps, ambiguities, or inaccuracies that may have contributed to the issue.
+
+**Feature Change Triggers:**
+
+**New Data Collection:** Any feature that collects new types of personal data requires immediate Privacy Policy updates. Examples include adding biometric data collection, implementing GPS tracking for vehicles, collecting social media account information, or introducing credit scoring or risk assessment features. The Information We Collect section must be updated before the feature is deployed to production.
+
+**New Third-Party Integrations:** When integrating with external services (payment processors, mapping services, analytics platforms, marketing tools), the Data Sharing and Cookies & Tracking sections must be updated to disclose these integrations, the data shared with third parties, and the purpose of sharing.
+
+**Changes to Data Retention:** If database cleanup policies change, backup retention periods are modified, or audit log retention is adjusted, the Data Retention section must be updated to reflect new timelines and provide clear justification for retention periods.
+
+**New User Roles or Permissions:** Adding new user roles (e.g., regional managers, franchise operators) or changing access control policies requires updates to the User Accounts and User Responsibilities sections of the Terms of Service.
+
+**Pricing or Billing Changes:** Modifications to subscription models, pricing structures, or billing practices trigger updates to the System License and Usage Rights sections, even if the core license terms remain unchanged.
+
+### Updating Document Content
+
+The accordion-based architecture of both legal documents makes updates straightforward but requires careful attention to structure and consistency. This section provides step-by-step procedures for common update scenarios.
+
+**Updating Accordion Content:**
+
+To modify existing accordion content, first identify the specific AccordionItem by its data-testid attribute (e.g., `data-testid="accordion-personal-info"` for Personal Information section in Privacy Policy). Each AccordionItem contains an AccordionTrigger (the clickable header) and AccordionContent (the expandable content area). Most updates will modify the AccordionContent section.
+
+**Example: Adding a new data collection practice to Privacy Policy:**
+
+```typescript
+<AccordionItem value="personal" data-testid="accordion-personal-info">
+  <AccordionTrigger>Personal Information</AccordionTrigger>
+  <AccordionContent className="space-y-3 text-sm">
+    <p>We collect the following personal information:</p>
+    <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
+      <li>User account credentials (username, email, password hash)</li>
+      <li>Full name and contact details</li>
+      <li>Role and permission levels</li>
+      <li>Last login timestamps and session information</li>
+      {/* ADD NEW DATA COLLECTION HERE */}
+      <li>Two-factor authentication preferences and backup codes</li>
+    </ul>
+  </AccordionContent>
+</AccordionItem>
+```
+
+When adding new list items, maintain consistent formatting with existing entries, use clear, non-technical language for user understanding, and be specific about what data is collected and why.
+
+**Adding New Accordion Sections:**
+
+If a new major policy section is needed (e.g., "Artificial Intelligence Usage Policy" or "Video Surveillance Disclosure"), create a new AccordionItem following the established pattern. Add a corresponding entry to the sections array at the top of the component file, assign a unique icon from lucide-react, create a unique data-section attribute for scroll-spy functionality, and add the section to the table of contents navigation array.
+
+**Example: Adding a new section for AI/ML usage:**
+
+```typescript
+// 1. Add to sections array (around line 30-50)
+const sections = [
+  // ... existing sections
+  { id: 'ai-usage', title: 'AI & Machine Learning', icon: Brain },
+  { id: 'contact', title: 'Contact Us', icon: Mail },
+];
+
+// 2. Add new Card component with accordion
+<Card data-section="ai-usage">
+  <CardHeader>
+    <CardTitle className="flex items-center gap-2">
+      <Brain className="h-5 w-5 text-primary" />
+      AI & Machine Learning Usage
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <Accordion type="multiple" className="w-full">
+      <AccordionItem value="ai-predictions" data-testid="accordion-ai-predictions">
+        <AccordionTrigger>Predictive Analytics</AccordionTrigger>
+        <AccordionContent className="space-y-3 text-sm">
+          <p>RCCMS uses machine learning algorithms to...</p>
+          {/* Additional content */}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  </CardContent>
+</Card>
+```
+
+**Updating Introduction or Static Content:**
+
+Non-accordion sections like the Introduction are simpler to update. Modify the CardContent directly while maintaining consistent paragraph spacing and text hierarchy. Update the "Last updated" date in the page header whenever any content changes are made.
+
+**Updating Table of Contents:**
+
+The table of contents automatically updates based on the sections array. When adding or removing sections, update this array with the correct id (matching data-section attribute), title (display name in TOC), and icon (from lucide-react). The scroll-spy functionality and navigation will update automatically.
+
+### Best Practices for Legal Documentation Updates
+
+Maintaining legal documentation requires a disciplined approach that balances legal accuracy, user readability, and technical precision. These best practices ensure updates are thorough, compliant, and professionally executed.
+
+**Legal Review Requirements:**
+
+**Never deploy legal document changes without legal counsel review.** All substantive changes to Privacy Policy or Terms of Service must be reviewed by qualified legal counsel familiar with data protection law, contract law, and the jurisdictions where the system operates. Legal review should assess regulatory compliance, contract enforceability, clarity and comprehensibility for average users, and risk exposure from ambiguous or overly broad language.
+
+**Minor vs. Major Changes:** Minor changes (typo corrections, contact information updates, clarifications that don't change meaning) may be made without full legal review but should still be documented. Major changes (new data collection practices, new limitations of liability, changes to dispute resolution, modifications to user rights) always require legal counsel approval before deployment.
+
+**Legal Review Documentation:** Maintain records of all legal reviews including date of review, reviewing attorney name and credentials, version reviewed (git commit hash or date), approval status, and any recommended modifications. This documentation is critical for regulatory audits and demonstrates due diligence.
+
+**Version Dating and Change Tracking:**
+
+Every update to legal documentation must include updating the "Last updated" date prominently displayed on the page header. The format should be consistent (e.g., "Last updated: January 2026") and reflect the month and year of the most recent substantive change. Version dating is legally significant as it establishes when users were on notice of policy terms.
+
+**Change Tracking in Git:** Use descriptive commit messages that summarize the nature of changes. Examples of good commit messages include "Update Privacy Policy: Add disclosure for new GPS vehicle tracking feature (legal review approved 2026-01-15)" or "Terms of Service: Update dispute resolution section per new arbitration clause (counsel review: J. Smith, 2026-02-10)." Tag releases with version numbers following semantic versioning for legal documents (e.g., v2.0.0 for major policy overhaul, v2.1.0 for new section addition, v2.1.1 for minor clarification).
+
+**Maintain Version History:** Consider keeping a separate LEGAL_CHANGELOG.md file that documents all substantive changes to legal documents with dates, nature of change, reason for change, and legal reviewer approval. This provides an audit trail separate from git commit history.
+
+**User Notification of Changes:** When making substantive changes to Terms of Service, users should be notified and may need to re-accept terms. The Modifications section of the Terms of Service specifies the notification procedure. Privacy Policy changes may require notification depending on jurisdiction and materiality of changes. GDPR requires notification for significant privacy policy changes.
+
+**Bilingual Consistency Requirements:**
+
+While the current legal documents are English-only for legal precision, if Arabic translations are added in the future, strict bilingual consistency procedures must be implemented. Both language versions must be legally reviewed by counsel fluent in both languages, maintain identical substantive meaning (not just literal translation), and be updated simultaneously to prevent version drift.
+
+**Translation Best Practices:** Use professional legal translators, not automated translation. Legal terminology requires expertise in both languages and legal systems. Both versions should state which language version controls in case of discrepancy (typically English for international software). Version dates must match exactly between English and Arabic versions. If translations lag behind English updates, display a notice indicating the Arabic version is pending update.
+
+**Audit Logging of Changes:**
+
+All changes to legal documentation should be logged in the system's audit_logs table even though these are code changes rather than database changes. This creates a permanent, timestamped record of policy modifications.
+
+**Manual Audit Log Entry:** After deploying legal documentation updates, create an audit log entry documenting the change:
+
+```sql
+INSERT INTO audit_logs (action, entity_type, entity_id, user_name, details, ip_address, created_at)
+VALUES (
+  'update_legal_documents',
+  'privacy_policy', -- or 'terms_of_service'
+  'privacy_policy_page',
+  'admin_username',
+  '{
+    "sections_modified": ["Data Collection", "Third-Party Sharing"],
+    "change_summary": "Added disclosure for new payment processor integration",
+    "legal_review_date": "2026-01-15",
+    "legal_reviewer": "Jane Smith, General Counsel",
+    "version": "2.1.0",
+    "git_commit": "a7f3e9c2"
+  }'::jsonb,
+  '192.168.1.100',
+  NOW()
+);
+```
+
+This audit log entry provides compliance evidence showing when policies were updated, who approved changes, what was modified, and the business justification for changes.
+
+### Testing Procedures After Updates
+
+After making any changes to legal documentation, comprehensive testing ensures the updates render correctly, function properly, and maintain user experience quality. Never deploy legal document changes directly to production without testing.
+
+**Pre-Deployment Testing Checklist:**
+
+**Visual Rendering Tests:** Verify all accordion sections expand and collapse correctly without JavaScript errors. Check that scroll-spy functionality correctly highlights active sections in the table of contents. Confirm smooth scrolling to sections when clicking TOC links. Ensure icons display correctly next to section headings. Verify text formatting, spacing, and alignment match design guidelines. Test on multiple screen sizes (mobile, tablet, desktop) to ensure responsive design works correctly.
+
+**Content Accuracy Tests:** Proofread all modified content for typos, grammatical errors, and formatting inconsistencies. Verify all internal references are accurate (e.g., "see Section 4 above" still points to correct section). Confirm all data-testid attributes are unique and descriptive. Check that list items use consistent punctuation and capitalization. Ensure legal terminology is used consistently throughout the document.
+
+**Functional Tests:** Test navigation between Privacy Policy and Terms of Service pages. Verify the "Back to Dashboard" button returns users to the correct location. Confirm all external links (if any) open in new tabs and use correct URLs. Test keyboard navigation through accordion sections for accessibility. Verify that the table of contents remains sticky on desktop and scrolls appropriately on mobile.
+
+**Cross-Browser Testing:** Test on major browsers including Chrome, Firefox, Safari, and Edge. Verify that accordion animations work smoothly in all browsers. Check that Shadcn/UI components render correctly across browsers. Confirm that CSS custom properties are supported and display correctly.
+
+**Accessibility Testing:** Run automated accessibility testing tools (e.g., axe DevTools, WAVE) to identify WCAG violations. Test keyboard navigation through all interactive elements. Verify screen reader compatibility by testing with NVDA or JAWS. Ensure sufficient color contrast for all text elements. Confirm that accordion states are announced correctly to assistive technologies.
+
+**Performance Testing:** Verify page load time is acceptable (target: <2 seconds). Check that no JavaScript errors appear in browser console. Confirm that smooth scrolling doesn't cause performance issues on low-end devices. Test with browser DevTools Network throttling to simulate slow connections.
+
+**Bilingual Testing (if applicable):** If Arabic translations are added, verify text direction (RTL) is correctly applied. Confirm Arabic text renders correctly in all accordion sections. Test language switching functionality. Verify that dates format correctly in both languages. Ensure both versions have identical content structure.
+
+**Regression Testing:** After updates, verify that no unrelated functionality broke. Test that the sidebar navigation still works correctly. Confirm that the theme toggle (dark/light mode) still affects legal pages appropriately. Verify that user authentication state is maintained when navigating to/from legal pages.
+
+### Compliance Documentation and Record Keeping
+
+Maintaining thorough documentation of legal policy updates is essential for regulatory compliance, audit readiness, and liability protection. This documentation demonstrates organizational diligence and provides evidence of good-faith compliance efforts.
+
+**Required Documentation Records:**
+
+**Legal Review Records:** For each legal document update, maintain a file containing the document version reviewed (PDF or git commit hash), date submitted for legal review, name and credentials of reviewing attorney, date of legal approval, any concerns or modifications requested by counsel, and final approval signature or email confirmation. Store these records in a secure location separate from the git repository (e.g., secure document management system, encrypted cloud storage, or legal department files).
+
+**Change Justification Records:** Document the business or regulatory reason for each change. Examples include "Added GPS tracking disclosure due to new fleet management feature deployment (feature spec: FT-2026-045)" or "Updated GDPR compliance section to reflect 2026 EU Court of Justice ruling on data retention (case reference: C-123/2026)." These justifications demonstrate that changes were made proactively to maintain compliance rather than reactively after incidents.
+
+**User Notification Records:** If users were notified of policy changes (via email, in-app notifications, or required re-acceptance), maintain records showing the date notifications were sent, content of notification message, list of users notified (or SQL query used to generate list), and evidence of delivery (email delivery logs, notification system logs). For Terms of Service changes requiring re-acceptance, maintain logs of which users accepted new terms and when.
+
+**Regulatory Compliance Mapping:** Maintain a document mapping each section of the Privacy Policy and Terms of Service to specific regulatory requirements. Examples include "Section 2.3 (Information Collection - Customer Data) satisfies GDPR Article 13 disclosure requirements" or "Section 7 (User Rights) satisfies CCPA consumer rights disclosure per Cal. Civ. Code § 1798.100." This mapping demonstrates systematic compliance and facilitates regulatory audits.
+
+**Version Archive:** Maintain an archive of all previous versions of legal documents with version number, effective dates (when version was live in production), superseded date (when replaced by newer version), and git commit hash or tagged release. This archive is legally significant as it establishes what terms were in effect during any given time period, which is critical for contractual disputes or regulatory inquiries.
+
+**Audit Trail Integration:**
+
+Legal documentation updates should be integrated into the system's comprehensive audit logging infrastructure. While code changes are tracked in git, creating corresponding audit log entries provides a queryable, timestamped record accessible to compliance officers and auditors without requiring git access.
+
+**Query Historical Legal Changes:**
+
+```sql
+-- Retrieve all legal documentation updates
+SELECT 
+  action,
+  entity_type,
+  details->>'sections_modified' as sections,
+  details->>'change_summary' as summary,
+  details->>'legal_reviewer' as reviewer,
+  details->>'version' as version,
+  user_name,
+  created_at
+FROM audit_logs
+WHERE action = 'update_legal_documents'
+ORDER BY created_at DESC;
+
+-- Generate compliance report for specific time period
+SELECT 
+  TO_CHAR(created_at, 'YYYY-MM') as month,
+  COUNT(*) as legal_updates,
+  jsonb_agg(
+    jsonb_build_object(
+      'type', entity_type,
+      'summary', details->>'change_summary',
+      'reviewer', details->>'legal_reviewer'
+    )
+  ) as changes
+FROM audit_logs
+WHERE action = 'update_legal_documents'
+  AND created_at >= '2025-01-01'
+GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+ORDER BY month DESC;
+```
+
+These queries provide compliance officers with quick access to legal documentation change history without requiring technical knowledge of git or code repositories.
+
+### Emergency Update Procedures
+
+In rare situations, legal documentation may require emergency updates outside the normal review cycle. Examples include discovery of material inaccuracy, regulatory enforcement action, imminent legal threat, or critical security incident disclosure. Emergency updates require expedited procedures while maintaining compliance standards.
+
+**Emergency Update Protocol:**
+
+**Assessment (0-2 hours):** Immediately assess the severity and legal risk of the issue. Contact legal counsel immediately if issue involves regulatory non-compliance, potential legal liability, or security incident disclosure. Determine if issue requires immediate policy update or can wait for next scheduled review cycle. Document the issue and assessment in audit logs.
+
+**Legal Review (2-24 hours):** For true emergencies, request expedited legal review from counsel. Provide clear description of issue and proposed policy language changes. Obtain written approval (email acceptable) before proceeding. If counsel is unavailable and issue is critical, consult with senior management and document decision-making process.
+
+**Implementation (24-48 hours):** Make minimum necessary changes to address the emergency issue. Update "Last updated" date. Create detailed git commit message explaining emergency nature and approval chain. Deploy to production following abbreviated testing procedures (visual check, basic functionality only). Full regression testing can occur post-deployment for genuine emergencies.
+
+**User Notification (48 hours):** Notify affected users of policy changes if legally required or materially affecting their rights. Use in-app notifications, email, or account login notices as appropriate. Document notification method and reach.
+
+**Post-Emergency Review (1 week):** Conduct comprehensive testing of emergency changes. Schedule follow-up legal review to confirm emergency changes are sufficient. Document lessons learned and update emergency procedures if needed. Consider whether emergency change should be refined or expanded in next scheduled review.
+
+**Emergency Contact Information:**
+
+Maintain an emergency contact list for legal documentation issues including primary legal counsel (name, phone, email), backup legal counsel, senior management approvals (CEO, CTO), compliance officer (if applicable), and technical deployment contacts (DevOps, system administrator). This list should be accessible 24/7 to authorized personnel.
+
+### Localization and International Compliance
+
+As RCCMS expands to serve customers in multiple jurisdictions, legal documentation may require localization beyond simple translation. Different countries have varying privacy laws, contractual requirements, and consumer protection standards that may necessitate jurisdiction-specific policy variations.
+
+**Jurisdiction-Specific Requirements:**
+
+**European Union (GDPR):** The Privacy Policy must include specific GDPR disclosures: legal basis for processing (consent, contract, legitimate interest), data protection officer contact (if appointed), right to lodge complaint with supervisory authority, existence of automated decision-making, and data transfer safeguards for non-EU processing. The Terms of Service must comply with EU consumer protection directives if serving EU consumers.
+
+**California (CCPA/CPRA):** For California users, Privacy Policy must disclose categories of personal information collected, categories of sources, business purposes for collection, categories of third parties with whom data is shared, and specific consumer rights under CCPA. A "Do Not Sell My Personal Information" link may be required depending on data practices.
+
+**United Kingdom (UK GDPR):** Post-Brexit UK maintains GDPR-like requirements with minor variations. Privacy Policy should specify compliance with UK GDPR and identify UK data protection registration if applicable.
+
+**Middle East (Saudi Arabia, UAE):** These jurisdictions have emerging data protection laws that may require specific disclosures about data localization, cross-border transfers, and government access to data. Arabic translations are essential for serving customers in these markets.
+
+**Managing Multi-Jurisdiction Policies:**
+
+For organizations serving multiple jurisdictions, consider implementing jurisdiction-specific policy versions or a comprehensive global policy with jurisdiction-specific sections. Use geolocation or user account settings to display appropriate policy version. Maintain separate legal review for each jurisdiction by local counsel. Document compliance with each jurisdiction's requirements in the regulatory compliance mapping.
 
 ---
 

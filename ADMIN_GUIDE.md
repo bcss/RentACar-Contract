@@ -11,12 +11,13 @@
 2. [System Access](#system-access)
 3. [User Management](#user-management)
 4. [System Settings](#system-settings)
-5. [Master Data Management](#master-data-management)
-6. [Audit Logs & Monitoring](#audit-logs--monitoring)
-7. [System Errors](#system-errors)
-8. [Security Best Practices](#security-best-practices)
-9. [Troubleshooting](#troubleshooting)
-10. [Planned Enterprise Features](#planned-enterprise-features)
+5. [Legal Compliance Pages](#legal-compliance-pages)
+6. [Master Data Management](#master-data-management)
+7. [Audit Logs & Monitoring](#audit-logs--monitoring)
+8. [System Errors](#system-errors)
+9. [Security Best Practices](#security-best-practices)
+10. [Troubleshooting](#troubleshooting)
+11. [Planned Enterprise Features](#planned-enterprise-features)
 
 ---
 
@@ -129,6 +130,487 @@ The Dashboard has been enhanced with complete bilingual support for all user-fac
 
 **Administrative Action Required:**
 ✅ None - Bilingual improvements are automatic. Arabic-speaking users will immediately see properly translated dashboard elements.
+
+---
+
+## Legal Compliance Pages
+
+### Overview
+
+RCCMS includes comprehensive Privacy Policy and Terms of Service pages designed to meet international legal requirements, support bilingual users, and provide transparent information about data handling and system usage policies.
+
+**Purpose:**
+- **Legal Compliance**: Meet GDPR, CCPA, and regional privacy regulations
+- **User Transparency**: Clear communication about data collection and usage
+- **Professional Credibility**: Enterprise-grade legal documentation
+- **Risk Mitigation**: Protect your organization through clearly defined terms
+
+**Key Features:**
+- ✅ **13 Privacy Policy Sections**: Comprehensive data protection documentation
+- ✅ **15 Terms of Service Sections**: Complete usage terms and conditions
+- ✅ **Multiple Access Routes**: Direct links and settings integration
+- ✅ **Interactive UI**: Accordion sections and sticky navigation
+- ✅ **Bilingual Support**: Full English and Arabic interface
+- ✅ **Responsive Design**: Professional layout on all devices
+- ✅ **GDPR/CCPA Compliance**: Industry-standard privacy framework
+
+### Access Routes
+
+Users can access legal compliance pages through multiple convenient routes:
+
+**Privacy Policy Access:**
+1. **Direct URL**: `/privacy` - Direct link from anywhere
+2. **Settings Integration**: `/settings/privacy` - Accessible from Settings menu
+3. **Footer Links**: Available in application footer (when implemented)
+4. **Dashboard**: Quick access link from main dashboard
+
+**Terms of Service Access:**
+1. **Direct URL**: `/terms` - Direct link from anywhere
+2. **Settings Integration**: `/settings/terms-of-service` - Accessible from Settings menu
+3. **Footer Links**: Available in application footer (when implemented)
+4. **Registration Flow**: Displayed during user signup (when implemented)
+
+**Navigation:**
+- **Back Button**: Returns users to Dashboard
+- **Internal Navigation**: Sticky table of contents for quick section jumping
+- **Breadcrumbs**: Clear location awareness within the system
+
+### Privacy Policy Page
+
+#### Content Structure
+
+The Privacy Policy page contains **13 comprehensive sections** covering all aspects of data protection:
+
+**1. Introduction**
+- Welcome message and policy purpose
+- Agreement to terms
+- Effective date (December 2025)
+
+**2. Information Collection**
+- Personal information (credentials, contact details)
+- Customer & business data (IDs, licenses, company info)
+- Contract & financial data (transactions, payments)
+- Vehicle & inspection data (fleet information, damage reports)
+- System usage data (login history, audit logs)
+- Technical data (IP addresses, browser info)
+
+**3. How We Use Information**
+- System functionality and services
+- Business operations and analytics
+- Legal compliance and security
+
+**4. Data Security**
+- Encryption methods (bcrypt password hashing)
+- Access controls and role-based permissions
+- Session management and security monitoring
+- Regular security audits
+
+**5. Data Retention**
+- Active contract data policies
+- Completed contract archival (7-year minimum)
+- Audit log retention (indefinite for compliance)
+- User account data handling
+
+**6. Your Rights**
+- Access to personal information
+- Correction of inaccurate data
+- Data portability (CSV/XLSX export)
+- Account deletion requests
+- Complaint procedures
+
+**7. Cookies & Tracking**
+- Session cookies for authentication
+- Preference storage (theme, language)
+- No third-party tracking
+
+**8. Data Sharing**
+- Internal access (role-based only)
+- Third-party services (none currently)
+- Legal disclosure requirements
+
+**9. International Transfers**
+- Data storage location
+- Cross-border compliance
+
+**10. Children's Privacy**
+- Age restrictions (18+ business users only)
+
+**11. GDPR Compliance**
+- Lawful basis for processing
+- Data subject rights
+- Data Protection Officer contact
+- EU representative information
+
+**12. Policy Updates**
+- Version control and change notifications
+- User notification procedures
+
+**13. Contact Us**
+- Data protection inquiries
+- Privacy concerns
+- Support contact information
+
+#### Interactive Features
+
+**Sticky Table of Contents:**
+- **Left Sidebar**: Always visible on desktop (lg screens)
+- **Active Section Highlighting**: Auto-highlights current section while scrolling
+- **Quick Navigation**: Click any section to jump instantly
+- **Icon System**: Each section has visual icon for quick recognition
+- **Scroll Tracking**: Real-time indication of reading position
+
+**Accordion Sections:**
+- **Expandable Content**: Detailed subsections hidden until needed
+- **Multiple Open**: Users can expand multiple accordions simultaneously
+- **Smooth Animations**: Professional expand/collapse transitions
+- **Organized Information**: Complex topics broken into digestible chunks
+
+**Responsive Design:**
+- **Mobile**: Single column, compact navigation
+- **Tablet**: Optimized spacing and touch targets
+- **Desktop**: Full 4-column layout (1 sidebar + 3 content)
+- **4K/Large Screens**: Contained max-width for readability
+
+#### Visual Elements
+
+**Icons Used:**
+- 🛡️ Shield - Introduction, Security, GDPR
+- 💾 Database - Information Collection
+- 👁️ Eye - How We Use Information
+- 🔒 Lock - Data Security, Termination
+- 📄 FileText - Data Retention, Policy Updates
+- 👥 Users - Your Rights, Children's Privacy
+- 🍪 Cookie - Cookies & Tracking
+- 🌍 Globe - Data Sharing, International Transfers
+- ⚖️ Scale - GDPR Compliance, Legal
+- 📧 Mail - Contact Us
+
+**Card Layout:**
+- Professional Material Design 3 cards
+- Clear section headers with icons
+- Consistent spacing and typography
+- High contrast for readability
+
+### Terms of Service Page
+
+#### Content Structure
+
+The Terms of Service page contains **15 comprehensive sections** governing system usage:
+
+**1. Acceptance of Terms**
+- Agreement acknowledgment
+- Binding nature of terms
+- Applicability to all user roles
+
+**2. License & Usage**
+- License grant for internal use
+- Usage restrictions (no reverse engineering, reselling)
+- Scope of permitted use
+
+**3. User Accounts**
+- Account creation and management
+- Credential security responsibilities
+- Account suspension/termination policies
+
+**4. User Responsibilities**
+- Professional conduct requirements
+- Data accuracy obligations
+- Security compliance
+
+**5. Data Accuracy**
+- User obligation to maintain accurate records
+- Update procedures
+- Consequences of inaccurate data
+
+**6. System Availability**
+- Service level expectations
+- Scheduled maintenance windows
+- Uptime commitments (no guarantees)
+- Emergency downtime procedures
+
+**7. Prohibited Activities**
+- Unauthorized access attempts
+- Data manipulation or deletion
+- System abuse or misuse
+- Sharing credentials
+- Automated scraping/harvesting
+
+**8. Intellectual Property**
+- Ownership of RCCMS software
+- Ownership of your business data
+- Usage restrictions on system code
+- Trademark and branding rights
+
+**9. Limitation of Liability**
+- Disclaimer of warranties
+- Limitation of damages
+- Indemnification clauses
+- Force majeure provisions
+
+**10. Legal Compliance**
+- Adherence to local laws
+- Data protection regulations
+- Industry-specific requirements
+- User responsibility for compliance
+
+**11. Termination**
+- Account termination rights
+- Data retention after termination
+- Effect on existing contracts
+- Survival of certain provisions
+
+**12. Dispute Resolution**
+- Governing law
+- Arbitration procedures
+- Jurisdiction
+- Legal fees
+
+**13. Modifications**
+- Right to update terms
+- Notification procedures
+- Continued use as acceptance
+- Material changes handling
+
+**14. Severability**
+- Invalid provision handling
+- Remaining terms enforcement
+
+**15. Contact**
+- Legal inquiries
+- Terms questions
+- Support contact
+
+#### Interactive Features
+
+**Sticky Table of Contents:**
+- **Same Design**: Consistent with Privacy Policy page
+- **15 Sections**: All terms sections accessible
+- **Visual Icons**: Legal-themed icons for each section
+- **Responsive**: Adapts to all screen sizes
+
+**Accordion Sections:**
+- **Detailed Subsections**: Complex legal topics organized logically
+- **Examples Included**: Real-world scenarios for clarity
+- **Highlighted Warnings**: Important restrictions in colored boxes
+- **Professional Formatting**: Lists, emphasis, and structure
+
+**Professional Elements:**
+- **Warning Boxes**: Highlighted critical information
+- **Important Notices**: Color-coded alerts
+- **Bullet Lists**: Easy-to-scan content
+- **Code Blocks**: Examples of prohibited activities
+
+### Administrator Responsibilities
+
+**⚠️ Critical Administrator Duties:**
+
+**1. Annual Legal Review**
+- **Frequency**: Review pages at least once per year
+- **Triggers**: Changes in regulations, business operations, or data handling
+- **Documentation**: Maintain revision history of all changes
+- **Legal Counsel**: Consult with attorney for material changes
+
+**2. Content Accuracy**
+- **Company Information**: Ensure contact details are current
+- **Data Practices**: Verify that policies match actual data handling
+- **Third-Party Services**: Update if new integrations are added
+- **Regulatory Compliance**: Stay current with GDPR, CCPA, and local laws
+
+**3. Version Control**
+- **Update Dates**: Change "Last updated" timestamp when modifying
+- **Change Log**: Maintain internal record of all policy changes
+- **User Notification**: Notify users of material policy changes
+- **Archive**: Keep copies of all previous versions
+
+**4. User Communication**
+- **New Users**: Ensure new users review terms during onboarding
+- **Material Changes**: Send email notifications for significant updates
+- **Access**: Make pages easily discoverable from all parts of the system
+- **Languages**: Maintain both English and Arabic versions
+
+**5. Integration Points**
+- **User Registration**: Consider adding "I agree to Terms" checkbox (future feature)
+- **Footer Links**: Add persistent footer links to legal pages
+- **Settings Menu**: Ensure legal pages accessible from Settings
+- **Help Documentation**: Reference legal pages in user guides
+
+### How to Update Legal Pages
+
+**⚠️ IMPORTANT**: These pages are currently **static React components**. Content updates require code changes by developers.
+
+**Current Update Process:**
+
+1. **Identify Changes Needed**
+   - Review current content
+   - Note outdated or incorrect information
+   - Consult with legal counsel for compliance
+
+2. **Prepare Updated Content**
+   - Draft new text for affected sections
+   - Ensure bilingual consistency (if applicable)
+   - Maintain professional tone and clarity
+
+3. **Developer Update Required**
+   - **Privacy Policy**: `client/src/pages/PrivacyPolicyPage.tsx`
+   - **Terms of Service**: `client/src/pages/TermsOfServicePage.tsx`
+   - Contact technical team to modify component code
+   - Update "Last updated" date in header
+
+4. **Testing**
+   - Verify all sections render correctly
+   - Test accordion functionality
+   - Check responsive design on mobile/tablet
+   - Confirm navigation and scrolling behavior
+
+5. **Deployment**
+   - Deploy updated code to production
+   - Notify users of material changes
+   - Update internal documentation
+
+**Future Enhancement Recommendation:**
+- **CMS Integration**: Consider adding database-backed legal content management
+- **Version History**: Implement automated version tracking
+- **Change Notifications**: Build system for notifying users of updates
+- **Bilingual CMS**: Allow editing both English and Arabic versions through UI
+
+### Best Practices
+
+**For Administrators:**
+
+**Annual Review Checklist:**
+- ✅ Verify all contact information is current
+- ✅ Review data collection practices match actual system behavior
+- ✅ Check compliance with latest GDPR/CCPA requirements
+- ✅ Ensure third-party integrations are documented
+- ✅ Update retention periods if business policies changed
+- ✅ Confirm user rights section matches system capabilities
+- ✅ Review with legal counsel if significant business changes occurred
+
+**Before Major System Changes:**
+- ✅ Review if new features require policy updates
+- ✅ Document new data collection or processing
+- ✅ Update third-party service listings if adding integrations
+- ✅ Revise user obligations if new features add responsibilities
+- ✅ Check if changes affect GDPR/CCPA compliance
+
+**Communication Best Practices:**
+- ✅ Notify users 30 days before material changes take effect
+- ✅ Provide summary of changes in plain language
+- ✅ Maintain accessible archive of previous versions
+- ✅ Respond promptly to user questions about policies
+- ✅ Keep legal pages easily discoverable from all system areas
+
+**Compliance Monitoring:**
+- ✅ Track user data access requests and respond within legal timeframes
+- ✅ Maintain audit logs of who accesses legal pages
+- ✅ Document all policy change decisions and rationale
+- ✅ Review user feedback about clarity of legal pages
+- ✅ Stay informed about privacy law changes in your jurisdiction
+
+**Recommended Update Schedule:**
+- **Quarterly**: Quick review of contact information and basic facts
+- **Semi-Annual**: Review of data practices and system capabilities
+- **Annual**: Comprehensive review with legal counsel
+- **As Needed**: Immediate updates for regulatory changes or major system updates
+
+### GDPR/CCPA Compliance Features
+
+The legal pages are designed to support compliance with major data protection regulations:
+
+**GDPR (General Data Protection Regulation):**
+- ✅ Clear lawful basis for data processing
+- ✅ Data subject rights clearly explained
+- ✅ Data retention policies specified
+- ✅ Data security measures documented
+- ✅ Data Protection Officer contact provided
+- ✅ Right to erasure explained
+- ✅ Data portability mentioned
+- ✅ Consent mechanisms described
+
+**CCPA (California Consumer Privacy Act):**
+- ✅ Categories of personal information collected
+- ✅ Business purposes for collection
+- ✅ Third-party sharing disclosure
+- ✅ Consumer rights clearly stated
+- ✅ Non-discrimination policy
+- ✅ Opt-out mechanisms described
+
+**Additional Compliance:**
+- ✅ International data transfer policies
+- ✅ Children's privacy protections
+- ✅ Cookie usage transparency
+- ✅ Security breach notification procedures
+- ✅ User rights request procedures
+
+### Bilingual Support
+
+**Current Implementation:**
+- **Interface**: Full bilingual UI controls (English/Arabic toggle)
+- **Navigation**: RTL/LTR support for proper Arabic display
+- **Content**: Currently in English only
+
+**Future Bilingual Content:**
+- **Privacy Policy Arabic**: Full translation recommended
+- **Terms of Service Arabic**: Full translation recommended
+- **Legal Review**: Both versions should be legally equivalent
+- **Synchronization**: Update both versions simultaneously
+- **Professional Translation**: Use qualified legal translators
+
+**Why Bilingual Legal Content Matters:**
+- 📝 **Legal Enforceability**: Terms in user's native language more defensible
+- 📝 **User Comprehension**: Better understanding = fewer disputes
+- 📝 **Regulatory Compliance**: Some jurisdictions require native language terms
+- 📝 **Professional Image**: Demonstrates commitment to all users
+
+### Integration with System Features
+
+**Data Export Functions:**
+- Privacy Policy references data portability rights
+- System provides CSV/XLSX export capabilities
+- Users can download their data per GDPR requirements
+
+**Audit Logs:**
+- Terms reference system monitoring for compliance
+- Audit logs provide evidence of proper usage
+- Administrators can track policy violations
+
+**User Roles & Permissions:**
+- Terms explain role-based access controls
+- Privacy Policy documents who accesses what data
+- Clear alignment between policies and system implementation
+
+**Session Management:**
+- Cookie policy explains session storage
+- 7-day session duration documented
+- Security measures align with stated policies
+
+**Data Retention:**
+- 7-year minimum retention for completed contracts
+- Indefinite audit log retention
+- Documented in both Privacy Policy and system settings
+
+### Support & Maintenance
+
+**User Questions:**
+- Direct users to appropriate section using table of contents
+- Reference specific accordion sections for detailed answers
+- Escalate complex legal questions to legal counsel
+
+**Content Issues:**
+- Report inaccuracies immediately to technical team
+- Document requested changes with justification
+- Track all change requests for annual review
+
+**Technical Issues:**
+- Test page functionality after system updates
+- Verify responsive design on new devices
+- Ensure accessibility standards maintained
+
+**Future Enhancements:**
+- Consider searchable legal content
+- Add FAQ section addressing common questions
+- Implement change notification system
+- Create admin UI for content management
 
 ---
 
