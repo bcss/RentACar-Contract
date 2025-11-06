@@ -1118,6 +1118,15 @@ rccms/
 - [ ] Create initial user accounts with appropriate roles
 - [ ] Test backup and restore procedures
 
+**Legal Compliance:**
+- [ ] Privacy Policy accessible and functional
+- [ ] Terms of Service accessible and functional
+- [ ] Legal pages tested on desktop and mobile
+- [ ] Interactive elements working correctly (accordions, TOC navigation)
+- [ ] Footer links to legal pages verified on all pages
+- [ ] Support page legal links verified
+- [ ] Direct URL access tested (/privacy-policy, /terms-of-service)
+
 **Monitoring:**
 - [ ] Set up server monitoring (CPU, RAM, disk)
 - [ ] Configure database monitoring
@@ -1131,12 +1140,16 @@ rccms/
 - [ ] Review audit logs for unusual activity
 - [ ] Verify backup automation
 - [ ] Train users on system features
+- [ ] Verify legal compliance pages are accessible (Privacy Policy, Terms of Service)
+- [ ] Test footer links and support page legal links on all devices
 
 **Month 1:**
 - [ ] Gather user feedback
 - [ ] Optimize database queries based on usage patterns
 - [ ] Review and tune performance settings
 - [ ] Document any custom workflows
+- [ ] Ensure legal pages are discoverable by users
+- [ ] Review legal compliance page analytics (if tracking enabled)
 
 ### 10.3 Future Enhancements
 
@@ -1342,6 +1355,11 @@ The system is ready for production use by any rental car company. Default sample
 4. Verify dashboard navigation to filtered views
 5. Export all three operational report tabs
 6. Test early closure reason dialog
+7. Verify Privacy Policy accessible at /privacy-policy and via footer links
+8. Verify Terms of Service accessible at /terms-of-service and via footer links
+9. Test legal pages on desktop, tablet, and mobile devices
+10. Verify accordion interactions and sticky TOC navigation on legal pages
+11. Test support page legal links functionality
 
 **Rollback Plan**:
 - No database changes - code rollback is sufficient
