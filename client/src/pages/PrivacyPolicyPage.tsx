@@ -403,7 +403,10 @@ export default function PrivacyPolicyPage() {
                   </div>
                 </div>
                 <p className="text-muted-foreground mt-4">
-                  To exercise any of these rights, please contact your system administrator or use the Support page.
+                  To exercise any of these rights, please contact your system administrator or visit the{' '}
+                  <Link href="/settings/support" className="text-primary hover:underline font-medium">
+                    Support & Help page
+                  </Link>.
                 </p>
               </CardContent>
             </Card>
@@ -637,7 +640,11 @@ export default function PrivacyPolicyPage() {
                   <div className="p-4 rounded-lg bg-muted">
                     <h4 className="font-semibold mb-2">General Privacy Inquiries</h4>
                     <p className="text-muted-foreground">Email: privacy@rccms.com</p>
-                    <p className="text-muted-foreground">Support Page: Available in-system</p>
+                    <p className="text-muted-foreground">
+                      <Link href="/settings/support" className="text-primary hover:underline font-medium">
+                        Support & Help Page
+                      </Link>
+                    </p>
                   </div>
                   <div className="p-4 rounded-lg bg-muted">
                     <h4 className="font-semibold mb-2">System Administrator</h4>
