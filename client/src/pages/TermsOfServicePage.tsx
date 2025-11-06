@@ -84,10 +84,10 @@ export default function TermsOfServicePage() {
                       key={section.id}
                       onClick={() => scrollToSection(section.id)}
                       data-testid={`toc-${section.id}`}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2 hover-elevate active-elevate-2 ${
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2 cursor-pointer hover-elevate active-elevate-2 ${
                         activeSection === section.id
                           ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <Icon className="h-3 w-3 flex-shrink-0" />
