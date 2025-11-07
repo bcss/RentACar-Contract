@@ -22,6 +22,7 @@ import {
   type InsertContractEdit,
   type ContractEdit,
   type SystemError,
+  type InsertSystemError,
   type CompanySettings,
   type InsertCompanySettings,
   type Customer,
