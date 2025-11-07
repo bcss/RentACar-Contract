@@ -106,6 +106,16 @@ const contractFormSchema = z.object({
   salikCharge: z.string().nullable().optional(),
   trafficFineCharge: z.string().nullable().optional(),
   
+  // Delivery Service fields
+  dropOffEnabled: z.boolean().nullable().optional(),
+  dropOffCharge: z.string().nullable().optional(),
+  dropOffAddressEn: z.string().nullable().optional(),
+  dropOffAddressAr: z.string().nullable().optional(),
+  pickUpEnabled: z.boolean().nullable().optional(),
+  pickUpCharge: z.string().nullable().optional(),
+  pickUpAddressEn: z.string().nullable().optional(),
+  pickUpAddressAr: z.string().nullable().optional(),
+  
   notes: z.string().nullable().optional(),
   createdBy: z.string(),
   status: z.string().nullable().optional(),
@@ -247,6 +257,14 @@ export default function ContractForm() {
       inspectionDamageNotes: '',
       salikCharge: '',
       trafficFineCharge: '',
+      dropOffEnabled: false,
+      dropOffCharge: '',
+      dropOffAddressEn: '',
+      dropOffAddressAr: '',
+      pickUpEnabled: false,
+      pickUpCharge: '',
+      pickUpAddressEn: '',
+      pickUpAddressAr: '',
       notes: '',
       createdBy: '',
     },
@@ -315,6 +333,13 @@ export default function ContractForm() {
       }
       if (!form.getValues('securityDeposit')) {
         form.setValue('securityDeposit', settings.defaultSecurityDeposit);
+      }
+      // Auto-populate delivery service defaults
+      if (!form.getValues('dropOffCharge')) {
+        form.setValue('dropOffCharge', settings.defaultDropOffCharge || '0');
+      }
+      if (!form.getValues('pickUpCharge')) {
+        form.setValue('pickUpCharge', settings.defaultPickUpCharge || '0');
       }
     }
   }, [isEditing, settings, isAuthenticated, form]);
@@ -475,15 +500,24 @@ export default function ContractForm() {
     return () => subscription.unsubscribe();
   }, [form, settings]);
 
-  // Auto-calculate totalAmount from subtotal and vatAmount
+  // Auto-calculate totalAmount from subtotal, vatAmount, and delivery charges
   useEffect(() => {
     const subscription = form.watch((value: any, { name }: any) => {
-      if (name === 'subtotal' || name === 'vatAmount') {
+      if (name === 'subtotal' || name === 'vatAmount' || name === 'dropOffEnabled' || name === 'dropOffCharge' || name === 'pickUpEnabled' || name === 'pickUpCharge') {
         const subtotalValue = parseFloat(value.subtotal || '0');
         const vatAmountValue = parseFloat(value.vatAmount || '0');
         
+        // Add delivery charges if enabled
+        let deliveryCharges = 0;
+        if (value.dropOffEnabled) {
+          deliveryCharges += parseFloat(value.dropOffCharge || '0');
+        }
+        if (value.pickUpEnabled) {
+          deliveryCharges += parseFloat(value.pickUpCharge || '0');
+        }
+        
         if (!isNaN(subtotalValue) && !isNaN(vatAmountValue)) {
-          const total = subtotalValue + vatAmountValue;
+          const total = subtotalValue + vatAmountValue + deliveryCharges;
           form.setValue('totalAmount', total.toFixed(2), { shouldValidate: true });
         }
       }
@@ -1906,6 +1940,193 @@ export default function ContractForm() {
                   </FormItem>
                 )}
               />
+            </CardContent>
+          </Card>
+
+          {/* Delivery Service */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="material-icons">local_shipping</span>
+                Delivery Service
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Drop-Off Service */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="dropOffEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value || false}
+                          onCheckedChange={field.onChange}
+                          data-testid="checkbox-drop-off-enabled"
+                        />
+                      </FormControl>
+                      <FormLabel className="font-medium">Drop-Off Service (Deliver vehicle to customer)</FormLabel>
+                    </FormItem>
+                  )}
+                />
+                
+                {form.watch('dropOffEnabled') && (
+                  <div className="ml-6 space-y-4 pl-4 border-l-2 border-primary/20">
+                    <FormField
+                      control={form.control}
+                      name="dropOffCharge"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Drop-Off Charge
+                            {field.value && parseFloat(field.value) === 0 && (
+                              <Badge variant="secondary" className="ml-2">Free</Badge>
+                            )}
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              value={field.value || ''} 
+                              type="number" 
+                              step="0.01" 
+                              placeholder="0.00" 
+                              data-testid="input-drop-off-charge" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="dropOffAddressEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Drop-Off Address (English)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              value={field.value || ''} 
+                              placeholder="Enter delivery address in English..." 
+                              data-testid="input-drop-off-address-en" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="dropOffAddressAr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Drop-Off Address (Arabic)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              value={field.value || ''} 
+                              placeholder="أدخل عنوان التسليم بالعربية..." 
+                              className="font-arabic text-right"
+                              dir="rtl"
+                              data-testid="input-drop-off-address-ar" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Pick-Up Service */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="pickUpEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value || false}
+                          onCheckedChange={field.onChange}
+                          data-testid="checkbox-pick-up-enabled"
+                        />
+                      </FormControl>
+                      <FormLabel className="font-medium">Pick-Up Service (Collect vehicle from customer)</FormLabel>
+                    </FormItem>
+                  )}
+                />
+                
+                {form.watch('pickUpEnabled') && (
+                  <div className="ml-6 space-y-4 pl-4 border-l-2 border-primary/20">
+                    <FormField
+                      control={form.control}
+                      name="pickUpCharge"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Pick-Up Charge
+                            {field.value && parseFloat(field.value) === 0 && (
+                              <Badge variant="secondary" className="ml-2">Free</Badge>
+                            )}
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              value={field.value || ''} 
+                              type="number" 
+                              step="0.01" 
+                              placeholder="0.00" 
+                              data-testid="input-pick-up-charge" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="pickUpAddressEn"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pick-Up Address (English)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              value={field.value || ''} 
+                              placeholder="Enter pickup address in English..." 
+                              data-testid="input-pick-up-address-en" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="pickUpAddressAr"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pick-Up Address (Arabic)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              value={field.value || ''} 
+                              placeholder="أدخل عنوان الاستلام بالعربية..." 
+                              className="font-arabic text-right"
+                              dir="rtl"
+                              data-testid="input-pick-up-address-ar" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 

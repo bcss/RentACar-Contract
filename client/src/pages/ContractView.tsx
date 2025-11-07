@@ -1282,6 +1282,38 @@ export default function ContractView() {
                 <span className="text-[10px] font-mono">{contract.vatAmount || '0'} {currency}</span>
               </div>
 
+              {contract.dropOffEnabled && (
+                <>
+                  <div className="border-r border-b border-black p-1.5">
+                    <span className="text-[10px] font-semibold">Drop-Off Service</span>
+                    <span className="text-[9px] font-arabic block">خدمة التوصيل</span>
+                  </div>
+                  <div className="border-b border-black p-1.5 text-right">
+                    <span className="text-[10px] font-mono">
+                      {contract.dropOffCharge && parseFloat(contract.dropOffCharge) > 0 
+                        ? `${contract.dropOffCharge} ${currency}` 
+                        : 'Free'}
+                    </span>
+                  </div>
+                </>
+              )}
+
+              {contract.pickUpEnabled && (
+                <>
+                  <div className="border-r border-b border-black p-1.5">
+                    <span className="text-[10px] font-semibold">Pick-Up Service</span>
+                    <span className="text-[9px] font-arabic block">خدمة الاستلام</span>
+                  </div>
+                  <div className="border-b border-black p-1.5 text-right">
+                    <span className="text-[10px] font-mono">
+                      {contract.pickUpCharge && parseFloat(contract.pickUpCharge) > 0 
+                        ? `${contract.pickUpCharge} ${currency}` 
+                        : 'Free'}
+                    </span>
+                  </div>
+                </>
+              )}
+
               <div className="border-r border-b border-black p-1.5">
                 <span className="text-[10px] font-semibold">SALIK</span>
                 <span className="text-[9px] font-arabic block">سالك</span>
@@ -1910,6 +1942,95 @@ export default function ContractView() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Delivery Service */}
+        {(contract.dropOffEnabled || contract.pickUpEnabled) && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="material-icons">local_shipping</span>
+                Delivery Service
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {contract.dropOffEnabled && (
+                <div className="space-y-2 pb-4 border-b">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="default" className="flex items-center gap-1">
+                      <span className="material-icons text-sm">drive_eta</span>
+                      Drop-Off Service
+                    </Badge>
+                    {contract.dropOffCharge && parseFloat(contract.dropOffCharge) === 0 && (
+                      <Badge variant="secondary">Free</Badge>
+                    )}
+                  </div>
+                  {contract.dropOffCharge && parseFloat(contract.dropOffCharge) > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Charge</p>
+                      <p className="font-medium font-mono" data-testid="text-drop-off-charge">
+                        {contract.dropOffCharge} {currency}
+                      </p>
+                    </div>
+                  )}
+                  {contract.dropOffAddressEn && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Drop-Off Address (English)</p>
+                      <p className="font-medium whitespace-pre-wrap" data-testid="text-drop-off-address-en">
+                        {contract.dropOffAddressEn}
+                      </p>
+                    </div>
+                  )}
+                  {contract.dropOffAddressAr && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Drop-Off Address (Arabic)</p>
+                      <p className="font-medium font-arabic text-right whitespace-pre-wrap" dir="rtl" data-testid="text-drop-off-address-ar">
+                        {contract.dropOffAddressAr}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {contract.pickUpEnabled && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="default" className="flex items-center gap-1">
+                      <span className="material-icons text-sm">local_shipping</span>
+                      Pick-Up Service
+                    </Badge>
+                    {contract.pickUpCharge && parseFloat(contract.pickUpCharge) === 0 && (
+                      <Badge variant="secondary">Free</Badge>
+                    )}
+                  </div>
+                  {contract.pickUpCharge && parseFloat(contract.pickUpCharge) > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Charge</p>
+                      <p className="font-medium font-mono" data-testid="text-pick-up-charge">
+                        {contract.pickUpCharge} {currency}
+                      </p>
+                    </div>
+                  )}
+                  {contract.pickUpAddressEn && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pick-Up Address (English)</p>
+                      <p className="font-medium whitespace-pre-wrap" data-testid="text-pick-up-address-en">
+                        {contract.pickUpAddressEn}
+                      </p>
+                    </div>
+                  )}
+                  {contract.pickUpAddressAr && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pick-Up Address (Arabic)</p>
+                      <p className="font-medium font-arabic text-right whitespace-pre-wrap" dir="rtl" data-testid="text-pick-up-address-ar">
+                        {contract.pickUpAddressAr}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Pricing */}
         <Card>
