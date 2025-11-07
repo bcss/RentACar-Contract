@@ -6,6 +6,7 @@ import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, in
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
+import { sanitizeRequestData } from "./index";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGeolocation } from "./services/geolocation";
@@ -24,35 +25,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Seed company settings on startup
   await seedCompanySettings();
-
-  // Sanitize request data to remove sensitive fields before logging
-  function sanitizeRequestData(data: any): any {
-    if (!data || typeof data !== 'object') return data;
-    
-    const sensitiveFields = [
-      'password', 'passwordhash', 'newpassword', 'currentpassword', 'confirmpassword',
-      'token', 'accesstoken', 'refreshtoken', 'apikey', 'secret',
-      'creditcard', 'cvv', 'ssn', 'pin', 'authorization', 'bearer'
-    ];
-    
-    const sanitized: any = Array.isArray(data) ? [] : {};
-    
-    for (const key in data) {
-      // Normalize key name by removing underscores, hyphens, and converting to lowercase
-      // This catches: password, PASSWORD, pass_word, pass-word, etc.
-      const normalizedKey = key.toLowerCase().replace(/[_-]/g, '');
-      
-      if (sensitiveFields.some(field => normalizedKey.includes(field))) {
-        sanitized[key] = '[REDACTED]';
-      } else if (typeof data[key] === 'object' && data[key] !== null) {
-        sanitized[key] = sanitizeRequestData(data[key]);
-      } else {
-        sanitized[key] = data[key];
-      }
-    }
-    
-    return sanitized;
-  }
 
   // Helper function to create audit log with enhanced tracking
   async function createAuditLog(userId: string, action: string, contractId: string | undefined, req: Request, details?: string) {

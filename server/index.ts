@@ -4,7 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 
 // Sanitize request data to remove sensitive fields before logging
-function sanitizeRequestData(data: any): any {
+export function sanitizeRequestData(data: any): any {
   if (!data || typeof data !== 'object') return data;
   
   const sensitiveFields = [
@@ -56,10 +56,7 @@ app.use((req, res, next) => {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
+      // No truncation - log full information for debugging
       log(logLine);
     }
   });
