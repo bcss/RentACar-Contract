@@ -33,7 +33,8 @@ Preferred communication style: Simple, everyday language.
 - **Comprehensive Rental Lifecycle:** `draft` → `confirmed` → `active` → `completed` → `closed`.
 - **Contract Timeline:** Displays full history of field edits and lifecycle events.
 - **Automatic Fuel Charge Calculation:** Based on tank capacity, fuel type, and configurable pricing.
-- **Comprehensive Financial Settings:** Admin-only centralized configuration for rental rates, addon fees, and fuel pricing.
+- **Comprehensive Financial Settings:** Admin-only centralized configuration for rental rates, addon fees, fuel pricing, and delivery service charges.
+- **Vehicle Delivery & Pickup Service:** Optional drop-off to customer location and pick-up from customer location with configurable charges, bilingual address support, and automatic inclusion in contract totals and PDF.
 - **Automatic Vehicle Status Synchronization:** Real-time vehicle availability integrated with contract lifecycle.
 - **Vehicle Return Workflow:** Captures odometer, fuel, condition, calculates extra charges.
 - **Enhanced Payment Tracking System:** Comprehensive payment history with conditional validation, mandatory final payment before contract closure.
