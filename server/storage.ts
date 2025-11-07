@@ -39,7 +39,7 @@ import {
   type InsertVehicleInspection,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike } from "drizzle-orm";
+import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -302,7 +302,7 @@ export class DatabaseStorage implements IStorage {
   async getContractWithDetails(id: string): Promise<ContractWithDetails | undefined> {
     const [result] = await db
       .select({
-        ...contracts,
+        ...getTableColumns(contracts),
         customerNameEn: customers.nameEn,
         customerNameAr: customers.nameAr,
         vehicleRegistration: vehicles.registration,
@@ -328,7 +328,7 @@ export class DatabaseStorage implements IStorage {
   async getAllContracts(): Promise<ContractWithDetails[]> {
     const results = await db
       .select({
-        ...contracts,
+        ...getTableColumns(contracts),
         customerNameEn: customers.nameEn,
         customerNameAr: customers.nameAr,
         vehicleRegistration: vehicles.registration,
@@ -355,7 +355,7 @@ export class DatabaseStorage implements IStorage {
   async getDisabledContracts(): Promise<ContractWithDetails[]> {
     const results = await db
       .select({
-        ...contracts,
+        ...getTableColumns(contracts),
         customerNameEn: customers.nameEn,
         customerNameAr: customers.nameAr,
         vehicleRegistration: vehicles.registration,
@@ -797,8 +797,8 @@ export class DatabaseStorage implements IStorage {
     return sponsor;
   }
 
-  async createSponsor(sponsorData: InsertSponsor): Promise<Sponsor> {
-    const [sponsor] = await db.insert(sponsors).values(sponsorData).returning();
+  async createSponsor(sponsorData: InsertSponsor & { createdBy: string }): Promise<Sponsor> {
+    const [sponsor] = await db.insert(sponsors).values([sponsorData]).returning();
     return sponsor;
   }
 
@@ -867,8 +867,8 @@ export class DatabaseStorage implements IStorage {
     return company;
   }
 
-  async createCompany(companyData: InsertCompany): Promise<Company> {
-    const [company] = await db.insert(companies).values(companyData).returning();
+  async createCompany(companyData: InsertCompany & { createdBy: string }): Promise<Company> {
+    const [company] = await db.insert(companies).values([companyData]).returning();
     return company;
   }
 
@@ -927,8 +927,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Payment operations
-  async createPayment(paymentData: InsertPayment): Promise<Payment> {
-    const [payment] = await db.insert(payments).values(paymentData).returning();
+  async createPayment(paymentData: InsertPayment & { createdBy: string }): Promise<Payment> {
+    const [payment] = await db.insert(payments).values([paymentData]).returning();
     return payment;
   }
 
@@ -954,10 +954,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Vehicle inspection operations
-  async createVehicleInspection(inspectionData: InsertVehicleInspection): Promise<VehicleInspection> {
+  async createVehicleInspection(inspectionData: InsertVehicleInspection & { createdBy: string }): Promise<VehicleInspection> {
     const [inspection] = await db
       .insert(vehicleInspections)
-      .values(inspectionData)
+      .values([inspectionData])
       .returning();
     return inspection;
   }
