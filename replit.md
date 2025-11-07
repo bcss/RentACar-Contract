@@ -24,6 +24,7 @@ Preferred communication style: Simple, everyday language.
 - **Security:** Role-based middleware, client-side role checks, environment variable for session secret, CSRF protection.
 - **Audit Trails:** `contractEdits` for field-level modifications; `auditLogs` for lifecycle events.
 - **API Implementation Details:** Real-time outstanding balance calculation in GET /api/contracts/:id (totalAmount + totalExtraCharges - sum(payments)), role-based filtering in GET /api/contracts (Staff see only own contracts), vehicle availability check in POST /api/contracts/:id/confirm, edit reason requirement in PATCH /api/contracts/:id.
+- **Drizzle ORM Patterns:** Storage methods accept `createdBy` via intersection types (`InsertType & { createdBy: string }`); `.insert().values()` requires array format `[data]`; complex `.select()` queries use `getTableColumns(table)` instead of spread operator for type safety; all create operations enforce audit trail via `createdBy` from authenticated context.
 
 ### Data Storage
 - **Database:** PostgreSQL (via Neon serverless).
