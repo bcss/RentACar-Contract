@@ -56,11 +56,18 @@ const fuelPricingSchema = z.object({
   dieselPricePerLiter: z.string().min(1, "Diesel price per liter is required"),
 });
 
+// Schema for delivery service
+const deliveryServiceSchema = z.object({
+  defaultDropOffCharge: z.string().min(1, "Default drop-off charge is required"),
+  defaultPickUpCharge: z.string().min(1, "Default pick-up charge is required"),
+});
+
 type CurrencySettingsForm = z.infer<typeof currencySettingsSchema>;
 type RentalRatesForm = z.infer<typeof rentalRatesSchema>;
 type AddonPricingForm = z.infer<typeof addonPricingSchema>;
 type ExtraChargesForm = z.infer<typeof extraChargesSchema>;
 type FuelPricingForm = z.infer<typeof fuelPricingSchema>;
+type DeliveryServiceForm = z.infer<typeof deliveryServiceSchema>;
 
 export default function FinancialSettings() {
   const { t } = useTranslation();
@@ -116,6 +123,14 @@ export default function FinancialSettings() {
     },
   });
 
+  const deliveryServiceForm = useForm<DeliveryServiceForm>({
+    resolver: zodResolver(deliveryServiceSchema),
+    defaultValues: {
+      defaultDropOffCharge: "0",
+      defaultPickUpCharge: "0",
+    },
+  });
+
   useEffect(() => {
     if (settings) {
       currencyForm.reset({
@@ -141,8 +156,12 @@ export default function FinancialSettings() {
         petrolPricePerLiter: settings.petrolPricePerLiter,
         dieselPricePerLiter: settings.dieselPricePerLiter,
       });
+      deliveryServiceForm.reset({
+        defaultDropOffCharge: settings.defaultDropOffCharge || "0",
+        defaultPickUpCharge: settings.defaultPickUpCharge || "0",
+      });
     }
-  }, [settings, currencyForm, rentalRatesForm, addonPricingForm, extraChargesForm, fuelPricingForm]);
+  }, [settings, currencyForm, rentalRatesForm, addonPricingForm, extraChargesForm, fuelPricingForm, deliveryServiceForm]);
 
   // Individual mutation for each form
   const createUpdateMutation = (successMessage: string) => useMutation({
@@ -171,6 +190,7 @@ export default function FinancialSettings() {
   const addonPricingMutation = createUpdateMutation('Add-on pricing saved successfully');
   const extraChargesMutation = createUpdateMutation('Extra charges saved successfully');
   const fuelPricingMutation = createUpdateMutation('Fuel pricing saved successfully');
+  const deliveryServiceMutation = createUpdateMutation('Delivery service settings saved successfully');
 
   if (authLoading || isLoading) {
     return (
@@ -577,6 +597,72 @@ export default function FinancialSettings() {
                     data-testid="button-save-fuel-pricing"
                   >
                     {fuelPricingMutation.isPending ? t('common.saving') : t('common.save')}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </Card>
+
+          {/* Delivery Service Pricing */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Delivery Service Pricing</CardTitle>
+            </CardHeader>
+            <Form {...deliveryServiceForm}>
+              <form onSubmit={deliveryServiceForm.handleSubmit((data) => deliveryServiceMutation.mutate(data))}>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={deliveryServiceForm.control}
+                      name="defaultDropOffCharge"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{`Default Drop-Off Charge${currency ? ` (${currency})` : ''}`}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0" 
+                              data-testid="input-default-drop-off-charge" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={deliveryServiceForm.control}
+                      name="defaultPickUpCharge"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{`Default Pick-Up Charge${currency ? ` (${currency})` : ''}`}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0" 
+                              data-testid="input-default-pick-up-charge" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Configure default charges for delivering vehicle to customer (drop-off) and picking up vehicle from customer (pick-up). Set to 0 for free service. These values will be used as defaults when creating new contracts.
+                  </p>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button
+                    type="submit"
+                    disabled={deliveryServiceMutation.isPending}
+                    data-testid="button-save-delivery-service"
+                  >
+                    {deliveryServiceMutation.isPending ? t('common.saving') : t('common.save')}
                   </Button>
                 </CardFooter>
               </form>
