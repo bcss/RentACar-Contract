@@ -449,6 +449,16 @@ export const contracts = pgTable("contracts", {
   otherCharges: varchar("other_charges"), // Any additional charges
   totalExtraCharges: varchar("total_extra_charges"), // Sum of all extra charges
   
+  // Delivery Service (Drop-off and Pick-up)
+  dropOffEnabled: boolean("drop_off_enabled").notNull().default(false),
+  dropOffCharge: varchar("drop_off_charge"), // Charge for delivering vehicle to customer
+  dropOffAddressEn: text("drop_off_address_en"), // Drop-off address in English
+  dropOffAddressAr: text("drop_off_address_ar"), // Drop-off address in Arabic
+  pickUpEnabled: boolean("pick_up_enabled").notNull().default(false),
+  pickUpCharge: varchar("pick_up_charge"), // Charge for picking up vehicle from customer
+  pickUpAddressEn: text("pick_up_address_en"), // Pick-up address in English
+  pickUpAddressAr: text("pick_up_address_ar"), // Pick-up address in Arabic
+  
   // Additional Information
   notes: text("notes"),
   termsAccepted: boolean("terms_accepted").notNull().default(false),
@@ -858,6 +868,10 @@ export const companySettings = pgTable("company_settings", {
   // Fuel Pricing
   petrolPricePerLiter: varchar("petrol_price_per_liter").notNull().default("3.5"),
   dieselPricePerLiter: varchar("diesel_price_per_liter").notNull().default("3.2"),
+  
+  // Delivery Service Pricing
+  defaultDropOffCharge: varchar("default_drop_off_charge").notNull().default("0"),
+  defaultPickUpCharge: varchar("default_pick_up_charge").notNull().default("0"),
   
   // Terms & Conditions Sections (bilingual)
   termsSection1En: text("terms_section_1_en").notNull().default(""),
