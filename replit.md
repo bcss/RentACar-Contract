@@ -15,6 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **Key Features:** Context-based theme/language, custom authentication hooks, shared Zod schemas, print functionality, contract lifecycle management, comprehensive timeline visualization, route protection.
 - **Performance Optimizations:** Route-based lazy loading, professional loading skeletons, optimized bundle splitting.
 - **Personalized User Experience:** Dashboard features time-based greeting, role badge, last login timestamp tracking, and non-obtrusive system errors banner.
+- **Microsoft 365-Style Sidebar:** Responsive header controls (flex-row when expanded, flex-col when collapsed), deferred submenu opening with pendingSubmenuOpen state pattern, complete tooltip coverage for all main menu items, tooltip positioning based on language direction (left for Arabic, right for English), dynamic aria-label updates based on sidebar state, useEffect coordination for expansion and submenu opening, localStorage persistence for collapsible section states.
 
 ### Backend
 - **Technology Stack:** Node.js with TypeScript, Express.js, Drizzle ORM, internal username/password authentication with Passport.js, express-session with PostgreSQL store.
@@ -22,6 +23,7 @@ Preferred communication style: Simple, everyday language.
 - **Authentication & Authorization:** Internal username/password system, Passport.js, PostgreSQL-backed sessions, httpOnly/secure cookies, role-based access (Admin, Manager, Staff, Viewer).
 - **Security:** Role-based middleware, client-side role checks, environment variable for session secret, CSRF protection.
 - **Audit Trails:** `contractEdits` for field-level modifications; `auditLogs` for lifecycle events.
+- **API Implementation Details:** Real-time outstanding balance calculation in GET /api/contracts/:id (totalAmount + totalExtraCharges - sum(payments)), role-based filtering in GET /api/contracts (Staff see only own contracts), vehicle availability check in POST /api/contracts/:id/confirm, edit reason requirement in PATCH /api/contracts/:id.
 
 ### Data Storage
 - **Database:** PostgreSQL (via Neon serverless).
@@ -45,11 +47,11 @@ Preferred communication style: Simple, everyday language.
 - **Support & Help Center:** Unified page with dynamic system health monitoring, comprehensive documentation modals with navigation links, 20 FAQs in dropdown format, and error reporting system.
 - **Legal Compliance Pages:** Professional Privacy Policy and Terms of Service pages.
 - **Dashboard with Context-Aware Navigation:** Critical metrics with deep-link filtering.
-- **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality.
+- **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality with chart visualization embedding (html2canvas → base64 → backend → PDF/Excel workflow), 10MB request body limit for chart image uploads.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
 - **Professional PDF Integration:** Professional, bilingual PDF generation for rental contracts.
-- **Vehicle Inspection System:** Two-stage workflow (pre-delivery, post-return) with mandatory photo documentation, strict validation, and full history view.
+- **Vehicle Inspection System:** Two-stage workflow (pre-delivery gates activation, post-return gates completion) with mandatory 6-photo documentation (front, back, left, right, top, dashboard), image compression (1920x1080, 0.85 quality, JPEG), strict validation, and full history view.
 
 ### Data Validation & Business Rules
 - **Mandatory Fields:** Enforced at both frontend (Zod schema) and backend for Customer (National ID, Nationality, Phone, License Number) and Company (TAX ID, Contact Person, Phone, Email).

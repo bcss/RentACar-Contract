@@ -69,8 +69,8 @@
 - `GET /api/companies/:id` - Individual company
 - `POST /api/companies` - Create (Manager/Admin)
 - `PATCH /api/companies/:id` - Update (Manager/Admin)
-- `PATCH /api/companies/:id/disable` - Disable (Manager/Admin)
-- `PATCH /api/companies/:id/enable` - Enable (Manager/Admin)
+- `POST /api/companies/:id/disable` - Disable (Manager/Admin)
+- `POST /api/companies/:id/enable` - Enable (Manager/Admin)
 
 ### Contracts (17 endpoints)
 - `GET /api/contracts` - List all (role-based filtering: Staff see only their own)

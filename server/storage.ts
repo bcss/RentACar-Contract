@@ -1394,7 +1394,7 @@ export class DatabaseStorage implements IStorage {
         amount,
       }));
 
-    // Recent payments (last 10)
+    // Recent payments (all payments sorted by date)
     const recentPayments = allPayments
       .filter(p => {
         const contract = filteredContracts.find(c => c.id === p.contractId);
@@ -1405,7 +1405,6 @@ export class DatabaseStorage implements IStorage {
         const dateB = new Date(b.paidAt || b.createdAt || 0);
         return dateB.getTime() - dateA.getTime();
       })
-      .slice(0, 10)
       .map(payment => {
         const contract = allContracts.find(c => c.id === payment.contractId);
         return {
@@ -1764,8 +1763,7 @@ export class DatabaseStorage implements IStorage {
     
     const mostModifiedContracts = Array.from(contractModCounts.entries())
       .map(([contractId, count]) => ({ contractId, modificationCount: count }))
-      .sort((a, b) => b.modificationCount - a.modificationCount)
-      .slice(0, 10); // Top 10
+      .sort((a, b) => b.modificationCount - a.modificationCount);
     
     // User activity breakdown - COMPLETE VERSION: Count from BOTH modifications AND audit logs
     const userActivityMap = new Map<string, { modifications: number; auditActions: number; total: number }>();

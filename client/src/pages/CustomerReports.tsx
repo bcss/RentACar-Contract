@@ -233,9 +233,9 @@ export default function CustomerReports() {
             <>
               <Card data-testid="card-top-customers-chart">
                 <CardHeader>
-                  <CardTitle>Top 10 Customers by Revenue</CardTitle>
+                  <CardTitle>Customers by Revenue</CardTitle>
                   <CardDescription>
-                    Highest revenue generating customers
+                    All customers ranked by revenue
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -246,7 +246,7 @@ export default function CustomerReports() {
                   ) : (
                     <div id="customer-chart-top-customers">
                       <ResponsiveContainer width="100%" minHeight={300}>
-                        <BarChart data={report.customerActivity.slice(0, 10)}>
+                        <BarChart data={report.customerActivity}>
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                           <XAxis 
                             dataKey="nameEn" 

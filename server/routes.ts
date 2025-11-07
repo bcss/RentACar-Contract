@@ -692,7 +692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/companies/:id/disable", isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post("/api/companies/:id/disable", isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
       await storage.disableCompany(req.params.id, req.user!.id);
       
@@ -704,7 +704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/companies/:id/enable", isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post("/api/companies/:id/enable", isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
       await storage.enableCompany(req.params.id);
       
@@ -2296,8 +2296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           doc.setFont('helvetica', 'bold');
           doc.text('Top Customers by Revenue', 14, currentY);
           
-          const topCustomers = report.customerActivity.slice(0, 10);
-          const customerData = topCustomers.map(item => [
+          const customerData = report.customerActivity.map(item => [
             item.nameEn || item.nameAr || 'N/A',
             item.contractCount.toString(),
             formatCurrency(item.totalRevenue, currency),
