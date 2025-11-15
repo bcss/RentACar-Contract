@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ContractTimeline } from '@/components/ContractTimeline';
 import { VehicleInspectionForm } from '@/components/VehicleInspectionForm';
+import { EditReasonDialog } from '@/components/EditReasonDialog';
 import {
   Select,
   SelectContent,
@@ -65,6 +66,7 @@ export default function ContractView() {
   const [showPostReturnInspectionDialog, setShowPostReturnInspectionDialog] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+  const [showEditReasonDialog, setShowEditReasonDialog] = useState(false);
 
   // Activation workflow - capture actual vehicle handover time
   const [timeOut, setTimeOut] = useState(() => {
@@ -1381,6 +1383,7 @@ export default function ContractView() {
             <span className="material-icons">arrow_back</span>
             <span>{t('common.back')}</span>
           </Button>
+          {/* Edit button logic based on status */}
           {contract.status === 'draft' && (
             <>
               <Button variant="outline" onClick={() => navigate(`/contracts/${params.id}/edit`)} data-testid="button-edit">
@@ -1395,6 +1398,18 @@ export default function ContractView() {
               )}
             </>
           )}
+          {/* Active and Completed contracts: Edit button requires edit reason dialog */}
+          {(contract.status === 'active' || contract.status === 'completed') && (
+            <Button 
+              variant="outline" 
+              onClick={() => setShowEditReasonDialog(true)} 
+              data-testid="button-edit"
+            >
+              <span className="material-icons">edit</span>
+              <span>{t('common.edit')}</span>
+            </Button>
+          )}
+          {/* Closed contracts: No edit button (immutable) */}
           {contract.status === 'active' && canManageWorkflow && (
             <Button onClick={() => setShowPostReturnInspectionDialog(true)} data-testid="button-complete-rental">
               <span className="material-icons">assignment_turned_in</span>
@@ -2772,6 +2787,15 @@ export default function ContractView() {
         pdfBlob={pdfBlob}
         title={`${t('contracts.contract')} #${contract?.contractNumber || ''}`}
         filename={`Contract_${contract?.contractNumber || 'Unknown'}.pdf`}
+      />
+
+      {/* Edit Reason Dialog - for Active and Completed contracts */}
+      <EditReasonDialog
+        open={showEditReasonDialog}
+        onOpenChange={setShowEditReasonDialog}
+        contractId={params.id || ''}
+        contractNumber={contract?.contractNumber}
+        contractStatus={contract?.status}
       />
     </div>
   );

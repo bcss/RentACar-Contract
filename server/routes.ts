@@ -10,6 +10,7 @@ import { sanitizeRequestData } from "./index";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGeolocation } from "./services/geolocation";
+import { validateEditReason } from "./utils/validation";
 import { format } from "date-fns";
 import os from "os";
 import { readFileSync } from "fs";
@@ -866,22 +867,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { editReason, ...contractData } = req.body;
       
-      // Require edit reason for all contract edits
-      if (!editReason || editReason.trim() === '') {
-        return res.status(400).json({ message: "Edit reason is required" });
-      }
-      
       const contract = await storage.getContract(req.params.id);
       
       if (!contract) {
         return res.status(404).json({ message: "Contract not found" });
       }
 
-      // Phase 1-2: Only allow editing draft contracts - protect lifecycle integrity
-      if (contract.status !== 'draft') {
+      // Block edits to closed contracts completely - they are immutable
+      if (contract.status === 'closed') {
         return res.status(403).json({ 
-          message: `Cannot edit ${contract.status} contract. Only draft contracts can be edited. Use state transition endpoints to advance the contract.` 
+          message: "Cannot edit closed contract. Closed contracts are immutable and cannot be modified." 
         });
+      }
+
+      // Validate edit reason based on contract status
+      if (contract.status === 'active' || contract.status === 'completed') {
+        // Active and Completed contracts require validated edit reason
+        if (!editReason || editReason.trim() === '') {
+          return res.status(400).json({ 
+            message: "Edit reason is required for active and completed contracts" 
+          });
+        }
+        
+        const validation = validateEditReason(editReason);
+        if (!validation.valid) {
+          return res.status(400).json({ 
+            message: validation.error,
+            wordCount: validation.wordCount
+          });
+        }
+      } else if (contract.status === 'draft') {
+        // Draft contracts: require edit reason but with minimal validation
+        if (!editReason || editReason.trim() === '') {
+          return res.status(400).json({ message: "Edit reason is required" });
+        }
       }
 
       // Check if user has permission to edit
@@ -893,8 +912,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Capture state before edit
       const fieldsBefore = { ...contract };
       
-      // Update the contract
-      const updated = await storage.updateContract(req.params.id, contractData);
+      // Update the contract including editReason field
+      const updated = await storage.updateContract(req.params.id, {
+        ...contractData,
+        editReason: editReason.trim(),
+      });
       
       // Capture state after edit
       const fieldsAfter = { ...updated };
