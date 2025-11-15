@@ -44,6 +44,7 @@ const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
 const SupportHelpPage = lazy(() => import("@/pages/SupportHelpPage"));
 const InsuranceClaims = lazy(() => import("@/pages/InsuranceClaims"));
 const InsuranceClaimForm = lazy(() => import("@/pages/InsuranceClaimForm"));
+const InsuranceReports = lazy(() => import("@/pages/InsuranceReports"));
 const UnclosedContractsReport = lazy(() => import("@/pages/UnclosedContractsReport"));
 
 // Professional loading skeleton
@@ -155,6 +156,9 @@ function Router() {
       </Route>
       <Route path="/reports/audit">
         {() => <ProtectedRoute component={AuditReports} />}
+      </Route>
+      <Route path="/reports/insurance">
+        {() => <ProtectedRoute component={InsuranceReports} />}
       </Route>
       <Route path="/reports/user-activity">
         {() => <ProtectedRoute component={UserActivity} />}

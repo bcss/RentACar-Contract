@@ -3559,6 +3559,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Insurance Report routes (requireReportsAccess)
+  app.get('/api/reports/insurance', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const report = await storage.getInsuranceReport(startDate, endDate);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching insurance report:", error);
+      res.status(500).json({ message: "Failed to fetch insurance report" });
+    }
+  });
+
+  app.post('/api/reports/insurance/export', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const { format: exportFormat, startDate: startDateParam, endDate: endDateParam, lang } = req.query;
+      const { charts = [] } = req.body;
+      const startDate = startDateParam ? new Date(startDateParam as string) : undefined;
+      const endDate = endDateParam ? new Date(endDateParam as string) : undefined;
+      const isRTL = lang === 'ar';
+      
+      const report = await storage.getInsuranceReport(startDate, endDate);
+      const settings = await storage.getCompanySettings();
+      const currency = isRTL ? settings.currencyAr : settings.currencyEn;
+      
+      const { 
+        createPDF, 
+        addPDFSummarySection, 
+        addPDFTable, 
+        addPDFChartImages,
+        createExcelWorkbook, 
+        addExcelSheet,
+        addExcelChartSheet,
+        exportExcelToBuffer,
+        formatCurrency,
+        formatDate 
+      } = await import('./utils/exportHelpers');
+
+      if (exportFormat === 'pdf') {
+        const doc = createPDF(
+          'Insurance Claims Report',
+          {
+            nameEn: settings.companyNameEn,
+            nameAr: settings.companyNameAr,
+            phone: settings.phone || undefined,
+            email: settings.email || undefined,
+          },
+          isRTL
+        );
+
+        // Add summary section
+        let currentY = addPDFSummarySection(doc, 'Summary', [
+          { label: 'Total Claims', value: report.summary.totalClaims.toString() },
+          { label: 'Pending Claims', value: report.summary.pendingClaims.toString() },
+          { label: 'Approved Claims', value: report.summary.approvedClaims.toString() },
+          { label: 'Settled Claims', value: report.summary.settledClaims.toString() },
+          { label: 'Total Claim Amount', value: formatCurrency(report.summary.totalClaimAmount, currency) },
+          { label: 'Total Settled Amount', value: formatCurrency(report.summary.totalSettledAmount, currency) },
+        ], 55);
+
+        // Add claims by status table
+        if (report.claimsByStatus.length > 0) {
+          currentY += 5;
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Claims by Status', 14, currentY);
+          
+          const statusData = report.claimsByStatus.map(item => [
+            item.status.charAt(0).toUpperCase() + item.status.slice(1),
+            item.count.toString(),
+            formatCurrency(item.totalAmount, currency)
+          ]);
+          
+          addPDFTable(doc, ['Status', 'Count', 'Total Amount'], statusData, currentY + 5);
+        }
+        
+        // Add charts if available
+        if (charts && charts.length > 0) {
+          const docWithTable = doc as any;
+          addPDFChartImages(doc, charts, docWithTable.lastAutoTable ? docWithTable.lastAutoTable.finalY + 10 : currentY + 10);
+        }
+
+        // Send PDF
+        const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="insurance-report-${format(new Date(), 'yyyy-MM-dd')}.pdf"`);
+        res.send(pdfBuffer);
+      } else if (exportFormat === 'excel') {
+        const wb = createExcelWorkbook();
+        
+        // Summary sheet
+        const summaryData = [
+          { Metric: 'Total Claims', Value: report.summary.totalClaims },
+          { Metric: 'Pending Claims', Value: report.summary.pendingClaims },
+          { Metric: 'Approved Claims', Value: report.summary.approvedClaims },
+          { Metric: 'Rejected Claims', Value: report.summary.rejectedClaims },
+          { Metric: 'Settled Claims', Value: report.summary.settledClaims },
+          { Metric: 'Total Claim Amount', Value: formatCurrency(report.summary.totalClaimAmount, currency) },
+          { Metric: 'Total Approved Amount', Value: formatCurrency(report.summary.totalApprovedAmount, currency) },
+          { Metric: 'Total Settled Amount', Value: formatCurrency(report.summary.totalSettledAmount, currency) },
+        ];
+        addExcelSheet(wb, 'Summary', summaryData);
+        
+        // Claims by status sheet
+        const statusData = report.claimsByStatus.map(item => ({
+          Status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
+          Count: item.count,
+          'Total Amount': formatCurrency(item.totalAmount, currency)
+        }));
+        addExcelSheet(wb, 'By Status', statusData);
+        
+        // Monthly trend sheet
+        if (report.monthlyTrend.length > 0) {
+          const trendData = report.monthlyTrend.map(item => ({
+            Month: item.month,
+            'Claim Count': item.claimCount,
+            'Claim Amount': formatCurrency(item.claimAmount, currency)
+          }));
+          addExcelSheet(wb, 'Monthly Trend', trendData);
+        }
+        
+        // Claims by insurer sheet
+        if (report.claimsByInsurer.length > 0) {
+          const insurerData = report.claimsByInsurer.map(item => ({
+            'Insurance Company': item.insuranceCompany,
+            'Claim Count': item.claimCount,
+            'Total Amount': formatCurrency(item.totalAmount, currency)
+          }));
+          addExcelSheet(wb, 'By Insurer', insurerData);
+        }
+        
+        // Recent claims sheet
+        if (report.recentClaims.length > 0) {
+          const claimsData = report.recentClaims.map(claim => ({
+            'Claim Number': claim.claimNumber,
+            'Contract': `#${claim.contractNumber}`,
+            'Claimant': claim.claimantName,
+            'Insurer': claim.insuranceCompany,
+            Amount: formatCurrency(claim.claimAmount, currency),
+            Status: claim.claimStatus,
+            'Claim Date': formatDate(new Date(claim.claimDate)),
+            'Incident Date': formatDate(new Date(claim.incidentDate))
+          }));
+          addExcelSheet(wb, 'Recent Claims', claimsData);
+        }
+        
+        // Add chart images if available
+        if (charts && charts.length > 0) {
+          addExcelChartSheet(wb, 'Charts', charts);
+        }
+        
+        const buffer = exportExcelToBuffer(wb);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="insurance-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx"`);
+        res.send(buffer);
+      } else {
+        res.status(400).json({ message: 'Invalid export format. Use "pdf" or "excel".' });
+      }
+    } catch (error) {
+      console.error("Error exporting insurance report:", error);
+      res.status(500).json({ message: "Failed to export insurance report" });
+    }
+  });
+
   // Company settings routes (Admin only)
   app.get('/api/settings', isAuthenticated, async (req: any, res) => {
     try {

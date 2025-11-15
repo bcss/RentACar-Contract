@@ -1926,6 +1926,131 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  // Insurance Report operations
+  async getInsuranceReport(startDate?: Date, endDate?: Date) {
+    const allClaims = await db.select().from(insuranceClaims).where(eq(insuranceClaims.disabled, false));
+    const allContracts = await db.select().from(contracts);
+    
+    // Filter by date range if provided (using claimDate)
+    const filteredClaims = allClaims.filter(c => {
+      if (!startDate && !endDate) return true;
+      if (!c.claimDate) return false;
+      const claimDate = new Date(c.claimDate);
+      if (startDate && claimDate < startDate) return false;
+      if (endDate && claimDate > endDate) return false;
+      return true;
+    });
+
+    // Summary statistics
+    const totalClaims = filteredClaims.length;
+    const pendingClaims = filteredClaims.filter(c => c.claimStatus === 'pending').length;
+    const approvedClaims = filteredClaims.filter(c => c.claimStatus === 'approved').length;
+    const rejectedClaims = filteredClaims.filter(c => c.claimStatus === 'rejected').length;
+    const settledClaims = filteredClaims.filter(c => c.claimStatus === 'settled').length;
+    
+    const totalClaimAmount = filteredClaims.reduce((sum, c) => sum + parseFloat(c.claimAmount), 0);
+    const totalApprovedAmount = filteredClaims
+      .filter(c => c.approvedAmount)
+      .reduce((sum, c) => sum + parseFloat(c.approvedAmount || '0'), 0);
+    const totalSettledAmount = filteredClaims
+      .filter(c => c.settledAmount)
+      .reduce((sum, c) => sum + parseFloat(c.settledAmount || '0'), 0);
+
+    // Claims by status
+    const statusMap = new Map<string, { count: number; totalAmount: number }>();
+    filteredClaims.forEach(claim => {
+      const existing = statusMap.get(claim.claimStatus) || { count: 0, totalAmount: 0 };
+      statusMap.set(claim.claimStatus, {
+        count: existing.count + 1,
+        totalAmount: existing.totalAmount + parseFloat(claim.claimAmount),
+      });
+    });
+
+    const claimsByStatus = Array.from(statusMap.entries()).map(([status, data]) => ({
+      status,
+      count: data.count,
+      totalAmount: data.totalAmount,
+    }));
+
+    // Monthly trend
+    const monthlyMap = new Map<string, { claimCount: number; claimAmount: number }>();
+    filteredClaims.forEach(claim => {
+      if (claim.claimDate) {
+        const date = new Date(claim.claimDate);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const existing = monthlyMap.get(monthKey) || { claimCount: 0, claimAmount: 0 };
+        monthlyMap.set(monthKey, {
+          claimCount: existing.claimCount + 1,
+          claimAmount: existing.claimAmount + parseFloat(claim.claimAmount),
+        });
+      }
+    });
+
+    const monthlyTrend = Array.from(monthlyMap.entries())
+      .map(([month, data]) => ({
+        month,
+        claimCount: data.claimCount,
+        claimAmount: data.claimAmount,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    // Claims by insurance company
+    const insurerMap = new Map<string, { claimCount: number; totalAmount: number }>();
+    filteredClaims.forEach(claim => {
+      const existing = insurerMap.get(claim.insuranceCompany) || { claimCount: 0, totalAmount: 0 };
+      insurerMap.set(claim.insuranceCompany, {
+        claimCount: existing.claimCount + 1,
+        totalAmount: existing.totalAmount + parseFloat(claim.claimAmount),
+      });
+    });
+
+    const claimsByInsurer = Array.from(insurerMap.entries())
+      .map(([insuranceCompany, data]) => ({
+        insuranceCompany,
+        claimCount: data.claimCount,
+        totalAmount: data.totalAmount,
+      }))
+      .sort((a, b) => b.totalAmount - a.totalAmount);
+
+    // Recent claims with contract information
+    const contractMap = new Map(allContracts.map(c => [c.id, c]));
+    const recentClaims = filteredClaims
+      .slice(0, 20)
+      .map(claim => {
+        const contract = contractMap.get(claim.contractId);
+        return {
+          id: claim.id,
+          claimNumber: claim.claimNumber,
+          contractNumber: contract?.contractNumber || 0,
+          contractId: claim.contractId,
+          claimDate: claim.claimDate.toISOString(),
+          incidentDate: claim.incidentDate.toISOString(),
+          claimStatus: claim.claimStatus,
+          claimAmount: parseFloat(claim.claimAmount),
+          insuranceCompany: claim.insuranceCompany,
+          claimantName: claim.claimantName,
+        };
+      })
+      .sort((a, b) => new Date(b.claimDate).getTime() - new Date(a.claimDate).getTime());
+
+    return {
+      summary: {
+        totalClaims,
+        pendingClaims,
+        approvedClaims,
+        rejectedClaims,
+        settledClaims,
+        totalClaimAmount,
+        totalApprovedAmount,
+        totalSettledAmount,
+      },
+      claimsByStatus,
+      monthlyTrend,
+      claimsByInsurer,
+      recentClaims,
+    };
+  }
+
   // Insurance Claims operations
   async getInsuranceClaims(filters?: { contractId?: string; vehicleId?: string; status?: string }): Promise<InsuranceClaim[]> {
     const conditions: any[] = [eq(insuranceClaims.disabled, false)];
