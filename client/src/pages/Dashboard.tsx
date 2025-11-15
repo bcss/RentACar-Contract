@@ -129,7 +129,6 @@ export default function Dashboard() {
 
   // Phase 3.1: Enhanced dashboard metrics
   const draftContracts = contracts.filter(c => c.status === 'draft').length;
-  const confirmedContracts = contracts.filter(c => c.status === 'confirmed').length;
   const activeContracts = contracts.filter(c => c.status === 'active').length;
   const completedContracts = contracts.filter(c => c.status === 'completed').length;
   const closedContracts = contracts.filter(c => c.status === 'closed').length;
@@ -508,7 +507,7 @@ export default function Dashboard() {
       </div>
 
       {/* Additional Status Cards - Clickable */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Tooltip>
           <TooltipTrigger asChild>
             <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=draft')} data-testid="card-status-draft">
@@ -527,27 +526,6 @@ export default function Dashboard() {
           </TooltipTrigger>
           <TooltipContent>
             <p>Click to view draft contracts</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=confirmed')} data-testid="card-status-confirmed">
-              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
-                <span className="material-icons text-muted-foreground text-sm">check</span>
-              </CardHeader>
-              <CardContent>
-                {contractsLoading ? (
-                  <Skeleton className="h-8 w-16" />
-                ) : (
-                  <div className="text-2xl font-bold" data-testid="stat-confirmed-contracts">{confirmedContracts}</div>
-                )}
-              </CardContent>
-            </Card>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Click to view confirmed contracts</p>
           </TooltipContent>
         </Tooltip>
 

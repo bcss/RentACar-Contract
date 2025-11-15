@@ -30,7 +30,6 @@ interface FinancialReport {
     contractCount: number;
   }>;
   revenueByStatus: {
-    confirmed: number;
     active: number;
     completed: number;
     closed: number;
@@ -178,7 +177,6 @@ export default function FinancialReports() {
 
   const getStatusBadgeVariant = (status: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'outline'> = {
-      confirmed: 'secondary',
       active: 'default',
       completed: 'default',
       closed: 'outline',
@@ -434,7 +432,6 @@ export default function FinancialReports() {
                     <PieChart>
                       <Pie
                         data={[
-                          { name: t('financialReports.confirmed'), value: report.revenueByStatus.confirmed, color: 'hsl(207, 90%, 54%)' },
                           { name: t('financialReports.active'), value: report.revenueByStatus.active, color: 'hsl(142, 71%, 45%)' },
                           { name: t('financialReports.completed'), value: report.revenueByStatus.completed, color: 'hsl(199, 89%, 48%)' },
                           { name: t('financialReports.closed'), value: report.revenueByStatus.closed, color: 'hsl(220, 9%, 46%)' },
@@ -448,7 +445,6 @@ export default function FinancialReports() {
                         dataKey="value"
                       >
                         {[
-                          { name: t('financialReports.confirmed'), value: report.revenueByStatus.confirmed, color: 'hsl(207, 90%, 54%)' },
                           { name: t('financialReports.active'), value: report.revenueByStatus.active, color: 'hsl(142, 71%, 45%)' },
                           { name: t('financialReports.completed'), value: report.revenueByStatus.completed, color: 'hsl(199, 89%, 48%)' },
                           { name: t('financialReports.closed'), value: report.revenueByStatus.closed, color: 'hsl(220, 9%, 46%)' },

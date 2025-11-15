@@ -272,29 +272,8 @@ export default function ContractView() {
     },
   });
 
-  // Legacy finalize removed - use new state machine (confirm → activate → complete → close)
-
+  // New contract lifecycle: Draft → Active → Completed → Closed
   // State transition mutations
-  const confirmMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest('POST', `/api/contracts/${params.id}/confirm`, {});
-    },
-    onSuccess: () => {
-      toast({
-        title: t('common.success'),
-        description: 'Contract confirmed successfully',
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: t('common.error'),
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
   const activateMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('POST', `/api/contracts/${params.id}/activate`, { timeOut });
@@ -687,10 +666,11 @@ export default function ContractView() {
     const statusMap: Record<string, { color: string; icon: string; label: string }> = {
       draft: { color: 'bg-chart-4 hover:bg-chart-4 text-white', icon: 'edit', label: t('contracts.draft') },
       finalized: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'lock', label: t('contracts.finalized') },
-      confirmed: { color: 'bg-chart-3 hover:bg-chart-3 text-white', icon: 'check_circle', label: 'Confirmed' },
       active: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'local_shipping', label: 'Active' },
       completed: { color: 'bg-chart-5 hover:bg-chart-5 text-white', icon: 'assignment_turned_in', label: 'Completed' },
       closed: { color: 'bg-secondary hover:bg-secondary text-secondary-foreground', icon: 'lock', label: 'Closed' },
+      // Legacy confirmed status (backward compatibility)
+      confirmed: { color: 'bg-chart-3 hover:bg-chart-3 text-white', icon: 'check_circle', label: 'Confirmed (Legacy)' },
     };
 
     const statusInfo = statusMap[status] || statusMap.draft;
@@ -1408,36 +1388,12 @@ export default function ContractView() {
                 <span>{t('common.edit')}</span>
               </Button>
               {canManageWorkflow && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button data-testid="button-confirm-contract">
-                      <span className="material-icons">check_circle</span>
-                      <span>Confirm Contract</span>
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirm Contract</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to confirm this contract? This will lock the contract details.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => confirmMutation.mutate()}>
-                        Confirm
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button onClick={() => setShowInspectionDialog(true)} data-testid="button-activate-rental">
+                  <span className="material-icons">local_shipping</span>
+                  <span>Activate Contract (Pre-Delivery Inspection)</span>
+                </Button>
               )}
             </>
-          )}
-          {contract.status === 'confirmed' && canManageWorkflow && (
-            <Button onClick={() => setShowInspectionDialog(true)} data-testid="button-activate-rental">
-              <span className="material-icons">local_shipping</span>
-              <span>Activate Rental (Pre-Delivery Inspection)</span>
-            </Button>
           )}
           {contract.status === 'active' && canManageWorkflow && (
             <Button onClick={() => setShowPostReturnInspectionDialog(true)} data-testid="button-complete-rental">
@@ -1477,7 +1433,7 @@ export default function ContractView() {
       </div>
 
       {/* Payment Recording Section */}
-      {(contract.status === 'confirmed' || contract.status === 'active' || contract.status === 'completed' || contract.status === 'closed') && canManageWorkflow && (
+      {(contract.status === 'active' || contract.status === 'completed' || contract.status === 'closed') && canManageWorkflow && (
         <Card className="no-print">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -1509,7 +1465,7 @@ export default function ContractView() {
       )}
 
       {/* Payment Status Card */}
-      {(contract.status === 'confirmed' || contract.status === 'active' || contract.status === 'completed' || contract.status === 'closed') && (
+      {(contract.status === 'active' || contract.status === 'completed' || contract.status === 'closed') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-between">

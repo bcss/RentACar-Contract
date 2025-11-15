@@ -69,7 +69,6 @@ interface OperationalReport {
   }>;
   statusSummary: {
     draft: number;
-    confirmed: number;
     active: number;
     completed: number;
     closed: number;
@@ -212,7 +211,6 @@ export default function OperationalReports() {
   const getStatusBadgeVariant = (status: string): 'default' | 'secondary' | 'outline' => {
     const variants: Record<string, 'default' | 'secondary' | 'outline'> = {
       draft: 'outline',
-      confirmed: 'secondary',
       active: 'default',
       completed: 'default',
       closed: 'outline',
@@ -260,7 +258,6 @@ export default function OperationalReports() {
   // Calculate contract status summary
   const totalContracts = report ? 
     report.statusSummary.draft + 
-    report.statusSummary.confirmed + 
     report.statusSummary.active + 
     report.statusSummary.completed + 
     report.statusSummary.closed : 0;
@@ -270,12 +267,6 @@ export default function OperationalReports() {
       status: 'draft',
       count: report.statusSummary.draft,
       percentage: totalContracts > 0 ? (report.statusSummary.draft / totalContracts) * 100 : 0,
-      averageDuration: 0,
-    },
-    {
-      status: 'confirmed',
-      count: report.statusSummary.confirmed,
-      percentage: totalContracts > 0 ? (report.statusSummary.confirmed / totalContracts) * 100 : 0,
       averageDuration: 0,
     },
     {
@@ -611,7 +602,6 @@ export default function OperationalReports() {
                           {contractStatusData.filter(item => item.count > 0).map((item, index) => {
                             const colors: Record<string, string> = {
                               draft: 'hsl(38, 92%, 50%)',
-                              confirmed: 'hsl(207, 90%, 54%)',
                               active: 'hsl(142, 71%, 45%)',
                               completed: 'hsl(199, 89%, 48%)',
                               closed: 'hsl(220, 9%, 46%)',

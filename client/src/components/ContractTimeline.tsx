@@ -37,7 +37,7 @@ interface ContractAuditLog {
 
 interface TimelineEvent {
   id: string;
-  type: 'created' | 'edited' | 'confirm' | 'activate' | 'complete' | 'close' | 'print' | 'other';
+  type: 'created' | 'edited' | 'activate' | 'complete' | 'close' | 'print' | 'other';
   timestamp: Date;
   user: string;
   username: string;
@@ -137,8 +137,9 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
       // Map audit log actions to timeline event types
       switch (log.action) {
         case 'confirm':
-          eventType = 'confirm';
-          description = t('Contract Confirmed');
+          // Legacy confirm action - treat as activation event
+          eventType = 'activate';
+          description = t('Contract Activated (Legacy Confirm)');
           break;
         case 'activate':
           eventType = 'activate';
@@ -206,8 +207,6 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
         return <FileText className="w-5 h-5 text-primary" />;
       case 'edited':
         return <Edit className="w-5 h-5 text-amber-600" />;
-      case 'confirm':
-        return <CheckCircle className="w-5 h-5 text-blue-600" />;
       case 'activate':
         return <PlayCircle className="w-5 h-5 text-green-600" />;
       case 'complete':
@@ -224,7 +223,6 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
   const getEventBadgeVariant = (type: TimelineEvent['type']): 'default' | 'secondary' | 'outline' => {
     switch (type) {
       case 'created':
-      case 'confirm':
       case 'activate':
         return 'default';
       case 'edited':

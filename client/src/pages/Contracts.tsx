@@ -228,10 +228,11 @@ export default function Contracts() {
     const statusMap: Record<string, { color: string; icon: string; label: string }> = {
       draft: { color: 'bg-chart-4 hover:bg-chart-4 text-white', icon: 'edit', label: t('contracts.draft') },
       finalized: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'lock', label: t('contracts.finalized') },
-      confirmed: { color: 'bg-chart-3 hover:bg-chart-3 text-white', icon: 'check_circle', label: 'Confirmed' },
       active: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'local_shipping', label: 'Active' },
       completed: { color: 'bg-chart-5 hover:bg-chart-5 text-white', icon: 'assignment_turned_in', label: 'Completed' },
       closed: { color: 'bg-secondary hover:bg-secondary text-secondary-foreground', icon: 'lock', label: 'Closed' },
+      // Legacy confirmed status (backward compatibility)
+      confirmed: { color: 'bg-chart-3 hover:bg-chart-3 text-white', icon: 'check_circle', label: 'Confirmed (Legacy)' },
     };
 
     const statusInfo = statusMap[status] || statusMap.draft;
@@ -294,7 +295,6 @@ export default function Contracts() {
                 <SelectContent>
                   <SelectItem value="all">{t('common.all')}</SelectItem>
                   <SelectItem value="draft">{t('contracts.draft')}</SelectItem>
-                  <SelectItem value="confirmed">{t('contracts.confirmed')}</SelectItem>
                   <SelectItem value="active">{t('contracts.active')}</SelectItem>
                   <SelectItem value="completed">{t('contracts.completed')}</SelectItem>
                   <SelectItem value="closed">{t('contracts.closed')}</SelectItem>
