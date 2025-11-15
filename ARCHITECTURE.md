@@ -9,7 +9,7 @@ RCCMS (Rental Car Contract Management System) is a production-ready, bilingual (
 
 ## 2. DATABASE SCHEMA (shared/schema.ts)
 
-### **Core Tables (19 Total)**
+### **Core Tables (20 Total)**
 
 #### **Authentication & Authorization**
 - **`sessions`** - Passport.js session storage (lines 30-38)
@@ -113,9 +113,12 @@ RCCMS (Rental Car Contract Management System) is a production-ready, bilingual (
 - **`supportTickets`** (lines 1203-1263) - Customer/staff support system with auto-generated ticket numbers `TKT-YYYY-NNNN`
 - **`pushNotificationTokens`** (lines 1266-1310) - FCM/APNS tokens for mobile push notifications
 
+#### **Additional Support Table**
+- **`damageAssessments`** - Vehicle damage documentation and assessment tracking (linked to contracts)
+
 ---
 
-## 3. BACKEND API (server/routes.ts - 4,887 lines)
+## 3. BACKEND API (server/routes.ts - 5,050 lines, 143 endpoints)
 
 ### **Authentication Endpoints**
 ```typescript
@@ -223,10 +226,112 @@ GET    /api/reports/audit/export         // Export audit CSV (line 3470)
 
 ### **Configuration Endpoints**
 ```typescript
-GET    /api/settings              // Get company settings (line 3729)
-PUT    /api/settings              // Update company settings (line 3573, requireAdmin)
-GET    /api/settings/financial    // Get financial settings (line 3599)
-PUT    /api/settings/financial    // Update financial settings (line 3628, requireAdmin)
+GET    /api/settings              // Get company settings
+PUT    /api/settings              // Update company settings (requireAdmin)
+GET    /api/settings/financial    // Get financial settings
+PUT    /api/settings/financial    // Update financial settings (requireAdmin)
+```
+
+### **Sponsor & Company Endpoints**
+```typescript
+GET    /api/sponsors              // List sponsors
+GET    /api/sponsors/search       // Search sponsors
+GET    /api/sponsors/:id          // Get sponsor details
+POST   /api/sponsors              // Create sponsor (requireEditor)
+PATCH  /api/sponsors/:id          // Update sponsor (requireEditor)
+POST   /api/sponsors/:id/disable  // Disable sponsor (requireAdmin)
+POST   /api/sponsors/:id/enable   // Enable sponsor (requireAdmin)
+
+GET    /api/companies             // List companies
+GET    /api/companies/search      // Search companies
+GET    /api/companies/:id         // Get company details
+POST   /api/companies             // Create company (requireEditor)
+PATCH  /api/companies/:id         // Update company (requireEditor)
+POST   /api/companies/:id/disable // Disable company (requireAdmin)
+POST   /api/companies/:id/enable  // Enable company (requireAdmin)
+```
+
+### **Payment Endpoints**
+```typescript
+POST   /api/contracts/:contractId/payments // Add payment (requireManagerOrAdmin)
+GET    /api/contracts/:contractId/payments // Get contract payments
+DELETE /api/payments/:id                    // Delete payment (requireAdmin)
+POST   /api/contracts/:id/deposit          // Record deposit payment (requireEditor)
+POST   /api/contracts/:id/final-payment    // Record final payment (requireEditor)
+POST   /api/contracts/:id/refund           // Record deposit refund (requireEditor)
+```
+
+### **Inspection Endpoints**
+```typescript
+POST   /api/contracts/:contractId/inspections // Create inspection (requireEditor)
+GET    /api/contracts/:contractId/inspections // Get contract inspections
+GET    /api/inspections/:id                    // Get inspection details
+```
+
+### **Renewal & Document Approval Endpoints**
+```typescript
+GET    /api/renewal-requests       // List renewal requests
+GET    /api/renewal-requests/:id   // Get renewal request
+POST   /api/renewal-requests       // Create renewal request (requireEditor)
+PATCH  /api/renewal-requests/:id   // Update renewal request (requireEditor)
+DELETE /api/renewal-requests/:id   // Delete renewal request (requireAdmin)
+POST   /api/renewal-requests/:id/approve // Approve request (requireManagerOrAdmin)
+POST   /api/renewal-requests/:id/reject  // Reject request (requireManagerOrAdmin)
+
+GET    /api/document-approvals     // List document approvals
+GET    /api/document-approvals/:id // Get document approval
+POST   /api/document-approvals     // Create document approval (requireEditor)
+PATCH  /api/document-approvals/:id // Update document approval (requireEditor)
+DELETE /api/document-approvals/:id // Delete document approval (requireAdmin)
+POST   /api/document-approvals/:id/approve // Approve document (requireManagerOrAdmin)
+POST   /api/document-approvals/:id/reject  // Reject document (requireManagerOrAdmin)
+```
+
+### **Support Ticket Endpoints**
+```typescript
+GET    /api/support-tickets        // List support tickets
+GET    /api/support-tickets/:id    // Get support ticket
+POST   /api/support-tickets        // Create support ticket (requireEditor)
+PATCH  /api/support-tickets/:id    // Update support ticket (requireEditor)
+DELETE /api/support-tickets/:id    // Delete support ticket (requireAdmin)
+POST   /api/support-tickets/:id/assign  // Assign ticket (requireManagerOrAdmin)
+POST   /api/support-tickets/:id/resolve // Resolve ticket (requireEditor)
+```
+
+### **User Management Endpoints**
+```typescript
+GET    /api/users                  // List users (requireAdmin)
+GET    /api/users/:id              // Get user details
+PATCH  /api/users/:id/role         // Update user role (requireAdmin)
+POST   /api/users                  // Create user (requireAdmin)
+PATCH  /api/users/:id              // Update user (requireAdmin)
+POST   /api/users/:id/disable      // Disable user (requireAdmin)
+POST   /api/users/:id/enable       // Enable user (requireAdmin)
+GET    /api/users/disabled         // List disabled users (requireAdmin)
+POST   /api/users/change-password  // Change own password (isAuthenticated)
+```
+
+### **Audit & Error Management Endpoints**
+```typescript
+GET    /api/audit-logs             // Get all audit logs (requireManagerOrAdmin)
+GET    /api/audit-logs/recent      // Get 10 most recent audit logs
+
+GET    /api/system-errors          // Get all system errors (requireAdmin)
+GET    /api/system-errors/unacknowledged // Get unacknowledged errors (requireAdmin)
+POST   /api/system-errors/:id/acknowledge // Acknowledge error (requireAdmin)
+POST   /api/system-errors/:id/mark-sent   // Mark error sent to support (requireAdmin)
+POST   /api/system-errors/log             // Log client-side error
+```
+
+### **Push Notification Endpoints**
+```typescript
+GET    /api/push-tokens            // Get push tokens (with filters)
+GET    /api/push-tokens/:id        // Get push token
+POST   /api/push-tokens            // Register push token
+PATCH  /api/push-tokens/:id        // Update push token
+DELETE /api/push-tokens/:id        // Delete push token
+POST   /api/push-tokens/:id/activate   // Activate push token
+POST   /api/push-tokens/:id/deactivate // Deactivate push token
 ```
 
 ### **Mobile Backend Endpoints** (Phase 3 PREP - ALL BLOCKED)
@@ -250,7 +355,22 @@ POST   /api/mobile/customer/change-password    // (line 4495, BLOCKED)
 POST   /api/mobile/customer/push-token         // (line 4523, BLOCKED)
 
 // Staff Mobile APIs (16 endpoints, ACTIVE)
-// Similar endpoints for staff users (requireEditor middleware)
+GET    /api/mobile/staff/dashboard         // Staff dashboard summary (requireEditor)
+GET    /api/mobile/staff/tasks             // Staff task list (requireEditor)
+POST   /api/mobile/staff/quick-inspection  // Quick vehicle inspection (requireEditor)
+GET    /api/mobile/staff/contracts         // Staff contracts list (requireEditor)
+GET    /api/mobile/staff/contracts/:id     // Staff contract details (requireEditor)
+POST   /api/mobile/staff/contract/:id/activate   // Activate contract (requireEditor)
+POST   /api/mobile/staff/contract/:id/complete   // Complete contract (requireEditor)
+GET    /api/mobile/staff/vehicles          // Staff vehicles list (requireEditor)
+GET    /api/mobile/staff/vehicles/:id      // Staff vehicle details (requireEditor)
+GET    /api/mobile/staff/customers         // Staff customers list (requireEditor)
+GET    /api/mobile/staff/customers/:id     // Staff customer details (requireEditor)
+GET    /api/mobile/staff/notifications     // Staff notifications (requireEditor)
+POST   /api/mobile/staff/notifications/:id/mark-read // Mark notification read (requireEditor)
+GET    /api/mobile/staff/profile           // Staff profile (requireEditor)
+PATCH  /api/mobile/staff/profile           // Update staff profile (requireEditor)
+POST   /api/mobile/staff/push-token        // Register staff push token (requireEditor)
 ```
 
 ### **Security Hardening Implementations**
@@ -276,7 +396,7 @@ const requireCustomerAuth = (req, res, next) => {
 
 ---
 
-## 4. FRONTEND UI SCREENS (client/src/pages/)
+## 4. FRONTEND UI SCREENS (client/src/pages/ - 31 pages)
 
 ### **Authentication**
 - **Login.tsx** - Username/password authentication, language/theme toggles
@@ -351,6 +471,12 @@ const requireCustomerAuth = (req, res, next) => {
 #### **AuditLogs.tsx** - System-wide audit trail
 #### **SystemErrors.tsx** - Error log viewer with screenshots (Admin only)
 
+### **Additional Pages**
+
+#### **AboutPage.tsx** - Application information and version details
+#### **Landing.tsx** - Initial landing page (pre-authentication)
+#### **not-found.tsx** - 404 error page for undefined routes
+
 ---
 
 ## 5. OVERALL ARCHITECTURE SUMMARY
@@ -383,7 +509,7 @@ const requireCustomerAuth = (req, res, next) => {
 - **Error Handling**: Centralized error logging to database with automatic screenshot capture
 
 ### **Database (PostgreSQL via Neon)**
-- **19 tables** with strict schema validation
+- **20 tables** with strict schema validation (sessions, users, customers, vehicles, sponsors, companies, contracts, contractCounter, payments, vehicleInspections, auditLogs, contractEdits, systemErrors, companySettings, insuranceClaims, renewalRequests, documentApprovals, supportTickets, pushNotificationTokens, damageAssessments)
 - **Soft-delete architecture**: disabled flags instead of DELETE operations
 - **Auto-incrementing counters**: contractNumber, claimNumber, ticketNumber
 - **JSONB storage**: Photos, field snapshots, settings
