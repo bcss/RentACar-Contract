@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { PanelLeft } from 'lucide-react';
+import { Icon } from '@/components/Icon';
 
 export function Header() {
   const { t } = useTranslation();
@@ -47,9 +48,7 @@ export function Header() {
               data-testid="button-theme-toggle"
               className="hover-elevate active-elevate-2"
             >
-              <span className="material-icons">
-                {theme === 'dark' ? 'light_mode' : 'dark_mode'}
-              </span>
+              <Icon name={theme === 'dark' ? 'light_mode' : 'dark_mode'} className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">

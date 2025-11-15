@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Icon } from '@/components/Icon';
 
 export default function Landing() {
   const { t } = useTranslation();
@@ -11,9 +12,7 @@ export default function Landing() {
         <CardContent className="p-12 text-center space-y-8">
           <div className="flex justify-center">
             <div className="bg-primary/10 p-6 rounded-full">
-              <span className="material-icons text-6xl text-primary">
-                directions_car
-              </span>
+              <Icon name="directions_car" className="text-6xl text-primary" />
             </div>
           </div>
           
@@ -34,7 +33,7 @@ export default function Landing() {
               data-testid="button-login"
             >
               <a href="/api/login" className="flex items-center justify-center gap-2">
-                <span className="material-icons">login</span>
+                <Icon name="login" className="" />
                 <span>{t('landing.loginButton')}</span>
               </a>
             </Button>
@@ -43,17 +42,17 @@ export default function Landing() {
           <div className="pt-8 border-t">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
               <div className="space-y-2">
-                <span className="material-icons text-2xl text-primary">language</span>
+                <Icon name="language" className=" text-2xl text-primary" />
                 <p className="font-medium">Bilingual Support</p>
                 <p className="text-muted-foreground">English & Arabic</p>
               </div>
               <div className="space-y-2">
-                <span className="material-icons text-2xl text-primary">security</span>
+                <Icon name="security" className=" text-2xl text-primary" />
                 <p className="font-medium">Role-Based Access</p>
                 <p className="text-muted-foreground">Admin, Manager, Staff, Viewer</p>
               </div>
               <div className="space-y-2">
-                <span className="material-icons text-2xl text-primary">assignment</span>
+                <Icon name="assignment" className=" text-2xl text-primary" />
                 <p className="font-medium">Contract Management</p>
                 <p className="text-muted-foreground">Draft to Finalized</p>
               </div>

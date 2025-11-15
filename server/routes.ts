@@ -1,8 +1,10 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, vehicleInspections } from "@shared/schema";
+import { count, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -317,22 +319,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getSponsors(true),
       ]);
 
-      // Get all vehicle inspections from all contracts
-      let vehicleInspections: any[] = [];
-      for (const contract of contracts) {
-        const inspections = await storage.getVehicleInspectionsByContract(contract.id);
-        vehicleInspections.push(...inspections);
-      }
+      // PERFORMANCE FIX: Count inspections and photos using database aggregation
+      // Old approach: Load all inspections with photos (huge memory usage)
+      // New approach: Aggregate counts only
+      const [inspectionStats] = await db
+        .select({
+          inspectionCount: count(),
+          totalPhotos: sql<string>`COALESCE(SUM(CASE WHEN ${vehicleInspections.photos} IS NOT NULL THEN array_length(${vehicleInspections.photos}, 1) ELSE 0 END), 0)`,
+        })
+        .from(vehicleInspections);
 
       const activeContracts = contracts.filter((c: any) => c.status === 'active').length;
       
-      // Count photos from vehicle inspections
-      let totalPhotos = 0;
-      vehicleInspections.forEach((inspection: any) => {
-        if (inspection.photos && Array.isArray(inspection.photos)) {
-          totalPhotos += inspection.photos.length;
-        }
-      });
+      const totalPhotos = parseInt(inspectionStats.totalPhotos) || 0;
+      const inspectionCount = inspectionStats.inspectionCount || 0;
 
       const totalRecords = 
         users.length + 
@@ -341,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contracts.length + 
         companies.length + 
         sponsors.length +
-        vehicleInspections.length;
+        inspectionCount;
 
       // Estimate database size including photos
       const avgRecordSize = 2; // KB per record (rough estimate)

@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { Icon } from '@/components/Icon';
 
 export default function SystemErrors() {
   const { t } = useTranslation();
@@ -152,7 +153,7 @@ export default function SystemErrors() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="material-icons">filter_list</span>
+            <Icon name="filter_list" className="" />
             {t('common.filter')}
           </CardTitle>
         </CardHeader>
@@ -211,7 +212,7 @@ export default function SystemErrors() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="material-icons">error</span>
+            <Icon name="error" className="" />
             {t('audit.systemErrors')}
           </CardTitle>
         </CardHeader>
@@ -222,7 +223,7 @@ export default function SystemErrors() {
             </div>
           ) : filteredSystemErrors.length === 0 ? (
             <div className="p-12 text-center">
-              <span className="material-icons text-6xl text-muted-foreground">error</span>
+              <Icon name="error" className=" text-6xl text-muted-foreground" />
               <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
             </div>
           ) : (
@@ -245,7 +246,7 @@ export default function SystemErrors() {
                         variant="destructive"
                         className="flex items-center gap-1 w-fit"
                       >
-                        <span className="material-icons text-sm">dangerous</span>
+                        <Icon name="dangerous" className=" text-sm" />
                         {error.errorType}
                       </Badge>
                     </TableCell>
@@ -261,12 +262,12 @@ export default function SystemErrors() {
                     <TableCell>
                       {error.acknowledged ? (
                         <Badge variant="outline" className="flex items-center gap-1 w-fit">
-                          <span className="material-icons text-sm">check_circle</span>
+                          <Icon name="check_circle" className=" text-sm" />
                           Acknowledged
                         </Badge>
                       ) : (
                         <Badge variant="secondary" className="flex items-center gap-1 w-fit">
-                          <span className="material-icons text-sm">pending</span>
+                          <Icon name="pending" className=" text-sm" />
                           Pending
                         </Badge>
                       )}
@@ -279,7 +280,7 @@ export default function SystemErrors() {
                           onClick={() => openAcknowledgeDialog(error)}
                           data-testid={`button-acknowledge-${error.id}`}
                         >
-                          <span className="material-icons text-sm">check</span>
+                          <Icon name="check" className=" text-sm" />
                           <span>Acknowledge</span>
                         </Button>
                       )}

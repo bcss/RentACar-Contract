@@ -8,6 +8,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Icon } from '@/components/Icon';
 
 interface UserActivity {
   userId: string;
@@ -115,7 +116,7 @@ export default function UserActivity() {
               disabled={!startDate && !endDate}
               data-testid="button-clear-filters"
             >
-              <span className="material-icons mr-2">clear</span>
+              <Icon name="clear" className=" mr-2" />
               Clear Filters
             </Button>
           </div>
@@ -247,7 +248,7 @@ export default function UserActivity() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <span className="material-icons text-primary">edit_note</span>
+                    <Icon name="edit_note" className=" text-primary" />
                     <div>
                       <p className="font-medium">Contract Modifications</p>
                       <p className="text-sm text-muted-foreground">Field-level contract changes</p>
@@ -267,7 +268,7 @@ export default function UserActivity() {
 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <span className="material-icons text-primary">business</span>
+                    <Icon name="business" className=" text-primary" />
                     <div>
                       <p className="font-medium">Business Operations</p>
                       <p className="text-sm text-muted-foreground">CRUD operations, lifecycle events</p>

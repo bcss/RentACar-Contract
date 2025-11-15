@@ -43,6 +43,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { Icon } from '@/components/Icon';
 
 export default function Users() {
   const { t } = useTranslation();
@@ -304,7 +305,7 @@ export default function Users() {
         <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">{t('users.title')}</CardTitle>
           <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="button-add-user">
-            <span className="material-icons mr-2">add</span>
+            <Icon name="add" className=" mr-2" />
             {t('users.addUser')}
           </Button>
         </CardHeader>
@@ -381,7 +382,7 @@ export default function Users() {
                             onClick={() => openEditDialog(user)}
                             data-testid={`button-edit-user-${user.id}`}
                           >
-                            <span className="material-icons text-base">edit</span>
+                            <Icon name="edit" className=" text-base" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -390,7 +391,7 @@ export default function Users() {
                             disabled={user.isImmutable}
                             data-testid={`button-disable-user-${user.id}`}
                           >
-                            <span className="material-icons text-base">block</span>
+                            <Icon name="block" className=" text-base" />
                           </Button>
                         </>
                       ) : (
@@ -400,7 +401,7 @@ export default function Users() {
                           onClick={() => openEnableDialog(user)}
                           data-testid={`button-enable-user-${user.id}`}
                         >
-                          <span className="material-icons text-base">check_circle</span>
+                          <Icon name="check_circle" className=" text-base" />
                         </Button>
                       )}
                     </TableCell>

@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { format } from 'date-fns';
+import { Icon } from '@/components/Icon';
 
 export default function Contracts() {
   const { t } = useTranslation();
@@ -219,7 +220,7 @@ export default function Contracts() {
     if (disabled) {
       return (
         <Badge variant="default" className="bg-secondary hover:bg-secondary text-secondary-foreground flex items-center gap-1 w-fit" data-testid="badge-status-disabled">
-          <span className="material-icons text-sm">block</span>
+          <Icon name="block" className=" text-sm" />
           {t('common.disabled')}
         </Badge>
       );
@@ -237,7 +238,7 @@ export default function Contracts() {
 
     return (
       <Badge variant="default" className={`${statusInfo.color} flex items-center gap-1 w-fit`} data-testid={`badge-status-${status}`}>
-        <span className="material-icons text-sm">{statusInfo.icon}</span>
+        <Icon name="{statusInfo.icon}" className=" text-sm" />
         {statusInfo.label}
       </Badge>
     );
@@ -260,7 +261,7 @@ export default function Contracts() {
         </div>
         <Button asChild data-testid="button-new-contract">
           <Link href="/contracts/new">
-            <span className="material-icons">add</span>
+            <Icon name="add" className="" />
             <span>{t('contracts.newContract')}</span>
           </Link>
         </Button>
@@ -269,7 +270,7 @@ export default function Contracts() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="material-icons">filter_list</span>
+            <Icon name="filter_list" className="" />
             {t('common.filter')}
           </CardTitle>
         </CardHeader>
@@ -325,7 +326,7 @@ export default function Contracts() {
                 onClick={clearDateFilters}
                 data-testid="button-clear-dates"
               >
-                <span className="material-icons text-sm mr-1">clear</span>
+                <Icon name="clear" className=" text-sm mr-1" />
                 {t('contracts.clearDateFilter')}
               </Button>
             </div>
@@ -339,7 +340,7 @@ export default function Contracts() {
             <div className="text-center py-8">{t('common.loading')}</div>
           ) : filteredContracts.length === 0 ? (
             <div className="p-12 text-center">
-              <span className="material-icons text-6xl text-muted-foreground">description</span>
+              <Icon name="description" className=" text-6xl text-muted-foreground" />
               <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
             </div>
           ) : (
@@ -395,7 +396,7 @@ export default function Contracts() {
                                 data-testid={`button-view-${contract.id}`}
                               >
                                 <Link href={`/contracts/${contract.id}`}>
-                                  <span className="material-icons">visibility</span>
+                                  <Icon name="visibility" className="" />
                                 </Link>
                               </Button>
                               {contract.status === 'draft' && !isViewer && (
@@ -408,7 +409,7 @@ export default function Contracts() {
                                   }}
                                   data-testid={`button-edit-${contract.id}`}
                                 >
-                                  <span className="material-icons">edit</span>
+                                  <Icon name="edit" className="" />
                                 </Button>
                               )}
                               <Button
@@ -418,7 +419,7 @@ export default function Contracts() {
                                 data-testid={`button-print-${contract.id}`}
                               >
                                 <Link href={`/contracts/${contract.id}`}>
-                                  <span className="material-icons">print</span>
+                                  <Icon name="print" className="" />
                                 </Link>
                               </Button>
                               {isAdmin && (
@@ -428,7 +429,7 @@ export default function Contracts() {
                                   onClick={() => openDisableDialog(contract)}
                                   data-testid={`button-disable-contract-${contract.id}`}
                                 >
-                                  <span className="material-icons">block</span>
+                                  <Icon name="block" className="" />
                                 </Button>
                               )}
                             </>
@@ -440,7 +441,7 @@ export default function Contracts() {
                               onClick={() => openEnableDialog(contract)}
                               data-testid={`button-enable-contract-${contract.id}`}
                             >
-                              <span className="material-icons">check_circle</span>
+                              <Icon name="check_circle" className="" />
                             </Button>
                           )}
                         </div>

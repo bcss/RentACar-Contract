@@ -47,6 +47,7 @@ import { isUnauthorizedError } from '@/lib/authUtils';
 import { ZoomIn } from 'lucide-react';
 import { PDFPreviewModal } from '@/components/PDFPreviewModal';
 import { generateContractPDF } from '@/utils/contractPDF';
+import { Icon } from '@/components/Icon';
 
 export default function ContractView() {
   const { t, i18n } = useTranslation();
@@ -489,7 +490,7 @@ export default function ContractView() {
   if (!contract) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
-        <span className="material-icons text-6xl text-muted-foreground">description</span>
+        <Icon name="description" className=" text-6xl text-muted-foreground" />
         <p className="text-muted-foreground">{t('common.noResults')}</p>
         <Button onClick={() => navigate('/contracts')} data-testid="button-back">
           {t('common.back')}
@@ -689,7 +690,7 @@ export default function ContractView() {
 
     return (
       <Badge variant="default" className={`${statusInfo.color} flex items-center gap-1 w-fit text-base px-3 py-1`}>
-        <span className="material-icons text-sm">{statusInfo.icon}</span>
+        <Icon name="{statusInfo.icon}" className=" text-sm" />
         {statusInfo.label}
       </Badge>
     );
@@ -1576,19 +1577,19 @@ export default function ContractView() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="ghost" onClick={() => navigate('/contracts')} data-testid="button-back">
-            <span className="material-icons">arrow_back</span>
+            <Icon name="arrow_back" className="" />
             <span>{t('common.back')}</span>
           </Button>
           {/* Edit button logic based on status */}
           {contract.status === 'draft' && (
             <>
               <Button variant="outline" onClick={() => navigate(`/contracts/${params.id}/edit`)} data-testid="button-edit">
-                <span className="material-icons">edit</span>
+                <Icon name="edit" className="" />
                 <span>{t('common.edit')}</span>
               </Button>
               {canManageWorkflow && (
                 <Button onClick={() => setShowInspectionDialog(true)} data-testid="button-activate-rental">
-                  <span className="material-icons">local_shipping</span>
+                  <Icon name="local_shipping" className="" />
                   <span>Activate Contract (Pre-Delivery Inspection)</span>
                 </Button>
               )}
@@ -1601,14 +1602,14 @@ export default function ContractView() {
               onClick={() => setShowEditReasonDialog(true)} 
               data-testid="button-edit"
             >
-              <span className="material-icons">edit</span>
+              <Icon name="edit" className="" />
               <span>{t('common.edit')}</span>
             </Button>
           )}
           {/* Closed contracts: No edit button (immutable) */}
           {contract.status === 'active' && canManageWorkflow && (
             <Button onClick={() => setShowPostReturnInspectionDialog(true)} data-testid="button-complete-rental">
-              <span className="material-icons">assignment_turned_in</span>
+              <Icon name="assignment_turned_in" className="" />
               <span>Complete Rental (Vehicle Returned)</span>
             </Button>
           )}
@@ -1616,7 +1617,7 @@ export default function ContractView() {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button data-testid="button-close-contract">
-                  <span className="material-icons">lock</span>
+                  <Icon name="lock" className="" />
                   <span>Close Contract</span>
                 </Button>
               </AlertDialogTrigger>
@@ -1638,18 +1639,18 @@ export default function ContractView() {
           )}
           {canCloseContract && hasOutstandingBalance && isAdmin && (
             <Button onClick={handleCloseContract} data-testid="button-close-contract-with-balance">
-              <span className="material-icons">lock</span>
+              <Icon name="lock" className="" />
               <span>Close Contract (Admin Override)</span>
             </Button>
           )}
           {canCloseContract && hasOutstandingBalance && !isAdmin && (
             <Button disabled data-testid="button-close-contract-disabled">
-              <span className="material-icons">lock</span>
+              <Icon name="lock" className="" />
               <span>Close Contract (Outstanding Balance)</span>
             </Button>
           )}
           <Button variant="outline" onClick={handlePrint} data-testid="button-print">
-            <span className="material-icons">print</span>
+            <Icon name="print" className="" />
             <span>{t('common.print')}</span>
           </Button>
         </div>
@@ -1660,26 +1661,26 @@ export default function ContractView() {
         <Card className="no-print">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">payment</span>
+              <Icon name="payment" className="" />
               Payment Actions
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {!contract.depositPaid && contract.status !== 'closed' && (
               <Button onClick={() => setShowDepositDialog(true)} variant="outline" data-testid="button-record-deposit">
-                <span className="material-icons">account_balance_wallet</span>
+                <Icon name="account_balance_wallet" className="" />
                 <span>Record Deposit Payment</span>
               </Button>
             )}
             {!contract.finalPaymentReceived && contract.status !== 'closed' && (
               <Button onClick={() => setShowFinalPaymentDialog(true)} variant="outline" data-testid="button-record-final-payment">
-                <span className="material-icons">payments</span>
+                <Icon name="payments" className="" />
                 <span>Record Final Payment</span>
               </Button>
             )}
             {contract.depositPaid && !contract.depositRefunded && contract.status === 'closed' && (
               <Button onClick={() => setShowRefundDialog(true)} variant="outline" data-testid="button-record-refund">
-                <span className="material-icons">undo</span>
+                <Icon name="undo" className="" />
                 <span>Record Deposit Refund</span>
               </Button>
             )}
@@ -1693,7 +1694,7 @@ export default function ContractView() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-icons">account_balance</span>
+                <Icon name="account_balance" className="" />
                 Payment Status
               </div>
               {getPaymentStatusBadge(contract.paymentStatus || 'pending')}
@@ -1706,14 +1707,14 @@ export default function ContractView() {
                 <p className="font-medium" data-testid="text-deposit-status">
                   {contract.depositPaid ? (
                     <span className="text-green-600 flex items-center gap-1">
-                      <span className="material-icons text-sm">check_circle</span>
+                      <Icon name="check_circle" className=" text-sm" />
                       Paid
                       {contract.depositPaidDate && ` on ${format(new Date(contract.depositPaidDate), 'PP')}`}
                       {contract.depositPaidMethod && ` via ${contract.depositPaidMethod}`}
                     </span>
                   ) : (
                     <span className="text-yellow-600 flex items-center gap-1">
-                      <span className="material-icons text-sm">pending</span>
+                      <Icon name="pending" className=" text-sm" />
                       Pending
                     </span>
                   )}
@@ -1724,14 +1725,14 @@ export default function ContractView() {
                 <p className="font-medium" data-testid="text-final-payment-status">
                   {contract.finalPaymentReceived ? (
                     <span className="text-green-600 flex items-center gap-1">
-                      <span className="material-icons text-sm">check_circle</span>
+                      <Icon name="check_circle" className=" text-sm" />
                       Received
                       {contract.finalPaymentDate && ` on ${format(new Date(contract.finalPaymentDate), 'PP')}`}
                       {contract.finalPaymentMethod && ` via ${contract.finalPaymentMethod}`}
                     </span>
                   ) : (
                     <span className="text-yellow-600 flex items-center gap-1">
-                      <span className="material-icons text-sm">pending</span>
+                      <Icon name="pending" className=" text-sm" />
                       Pending
                     </span>
                   )}
@@ -1743,13 +1744,13 @@ export default function ContractView() {
                   <p className="font-medium" data-testid="text-refund-status">
                     {contract.depositRefunded ? (
                       <span className="text-blue-600 flex items-center gap-1">
-                        <span className="material-icons text-sm">check_circle</span>
+                        <Icon name="check_circle" className=" text-sm" />
                         Refunded
                         {contract.depositRefundedDate && ` on ${format(new Date(contract.depositRefundedDate), 'PP')}`}
                       </span>
                     ) : (
                       <span className="text-muted-foreground flex items-center gap-1">
-                        <span className="material-icons text-sm">schedule</span>
+                        <Icon name="schedule" className=" text-sm" />
                         Not Refunded
                       </span>
                     )}
@@ -1775,12 +1776,12 @@ export default function ContractView() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-icons">history</span>
+                <Icon name="history" className="" />
                 Payment History
               </div>
               {canManageWorkflow && contract.status !== 'closed' && (
                 <Button onClick={() => setShowPaymentDialog(true)} size="sm" data-testid="button-add-payment">
-                  <span className="material-icons text-sm">add</span>
+                  <Icon name="add" className=" text-sm" />
                   <span>Add Payment</span>
                 </Button>
               )}
@@ -1820,7 +1821,7 @@ export default function ContractView() {
                         }}
                         data-testid={`button-delete-payment-${payment.id}`}
                       >
-                        <span className="material-icons text-sm">delete</span>
+                        <Icon name="delete" className=" text-sm" />
                       </Button>
                     )}
                   </div>
@@ -1841,7 +1842,7 @@ export default function ContractView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">receipt_long</span>
+              <Icon name="receipt_long" className="" />
               Extra Charges & Final Breakdown
             </CardTitle>
           </CardHeader>
@@ -1930,11 +1931,11 @@ export default function ContractView() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-2">
-              <span className="material-icons">local_hospital</span>
+              <Icon name="local_hospital" className="" />
               Insurance Claims
             </div>
             <Button onClick={() => navigate('/insurance-claims/new')} size="sm" data-testid="button-add-insurance-claim">
-              <span className="material-icons text-sm">add</span>
+              <Icon name="add" className=" text-sm" />
               <span>New Claim</span>
             </Button>
           </CardTitle>
@@ -2033,7 +2034,7 @@ export default function ContractView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">person</span>
+              <Icon name="person" className="" />
               {t('form.customerInfo')}
             </CardTitle>
           </CardHeader>
@@ -2107,7 +2108,7 @@ export default function ContractView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">directions_car</span>
+              <Icon name="directions_car" className="" />
               {t('form.vehicleInfo')}
             </CardTitle>
           </CardHeader>
@@ -2185,7 +2186,7 @@ export default function ContractView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">event</span>
+              <Icon name="event" className="" />
               {t('form.rentalDetails')}
             </CardTitle>
           </CardHeader>
@@ -2230,7 +2231,7 @@ export default function ContractView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">local_shipping</span>
+                <Icon name="local_shipping" className="" />
                 Delivery Service
               </CardTitle>
             </CardHeader>
@@ -2239,7 +2240,7 @@ export default function ContractView() {
                 <div className="space-y-2 pb-4 border-b">
                   <div className="flex items-center gap-2">
                     <Badge variant="default" className="flex items-center gap-1">
-                      <span className="material-icons text-sm">drive_eta</span>
+                      <Icon name="drive_eta" className=" text-sm" />
                       Drop-Off Service
                     </Badge>
                     {contract.dropOffCharge && parseFloat(contract.dropOffCharge) === 0 && (
@@ -2277,7 +2278,7 @@ export default function ContractView() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Badge variant="default" className="flex items-center gap-1">
-                      <span className="material-icons text-sm">local_shipping</span>
+                      <Icon name="local_shipping" className=" text-sm" />
                       Pick-Up Service
                     </Badge>
                     {contract.pickUpCharge && parseFloat(contract.pickUpCharge) === 0 && (
@@ -2318,7 +2319,7 @@ export default function ContractView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">attach_money</span>
+              <Icon name="attach_money" className="" />
               {t('form.pricing')}
             </CardTitle>
           </CardHeader>
@@ -2387,7 +2388,7 @@ export default function ContractView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">account_balance</span>
+                <Icon name="account_balance" className="" />
                 Financial Summary
               </CardTitle>
             </CardHeader>
@@ -2441,7 +2442,7 @@ export default function ContractView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">info</span>
+              <Icon name="info" className="" />
               {t('form.notes')}
             </CardTitle>
           </CardHeader>
@@ -2456,7 +2457,7 @@ export default function ContractView() {
         <Card className="border-destructive/50 bg-destructive/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
-              <span className="material-icons">warning</span>
+              <Icon name="warning" className="" />
               Closure Remark (Admin Override)
             </CardTitle>
           </CardHeader>
@@ -2479,7 +2480,7 @@ export default function ContractView() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-icons">assignment_late</span>
+                <Icon name="assignment_late" className="" />
                 Insurance Claims
               </div>
               <Button
@@ -2489,7 +2490,7 @@ export default function ContractView() {
                 className="hover-elevate active-elevate-2"
                 data-testid="button-new-claim"
               >
-                <span className="material-icons mr-1 text-sm">add</span>
+                <Icon name="add" className=" mr-1 text-sm" />
                 New Claim
               </Button>
             </CardTitle>
@@ -2593,7 +2594,7 @@ export default function ContractView() {
         <Card className="print-hidden">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons">camera_alt</span>
+              <Icon name="camera_alt" className="" />
               {t('inspection.history')}
             </CardTitle>
           </CardHeader>
@@ -2621,7 +2622,7 @@ export default function ContractView() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <Badge variant={badgeVariant} className="flex items-center gap-1">
-                            <span className="material-icons text-sm">{inspectionIcon}</span>
+                            <Icon name="{inspectionIcon}" className=" text-sm" />
                             {inspectionTypeLabel}
                           </Badge>
                           <span className="text-sm text-muted-foreground">
@@ -2807,7 +2808,7 @@ export default function ContractView() {
                 {t('contracts.vehicleReturnTime')} *
               </Label>
               <div className="flex items-center gap-2 mt-2">
-                <span className="material-icons text-muted-foreground">schedule</span>
+                <Icon name="schedule" className=" text-muted-foreground" />
                 <Input
                   id="timeIn"
                   type="time"
@@ -2866,7 +2867,7 @@ export default function ContractView() {
             {contract?.rentalEndDate && new Date() < new Date(contract.rentalEndDate) && (
               <div className="border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 p-4 rounded">
                 <h4 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-2 flex items-center gap-2">
-                  <span className="material-icons text-sm">warning</span>
+                  <Icon name="warning" className=" text-sm" />
                   Early Rental Completion
                 </h4>
                 <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-3">
@@ -2942,7 +2943,7 @@ export default function ContractView() {
 
                 <div>
                   <Label htmlFor="traffic-fine-charge" className="flex items-center gap-2">
-                    <span className="material-icons text-sm">local_police</span>
+                    <Icon name="local_police" className=" text-sm" />
                     {t('contracts.trafficFineCharge')} ({currency})
                   </Label>
                   <Input
@@ -3276,7 +3277,7 @@ export default function ContractView() {
               {t('contracts.vehicleHandoverTime')} *
             </Label>
             <div className="flex items-center gap-2">
-              <span className="material-icons text-muted-foreground">schedule</span>
+              <Icon name="schedule" className=" text-muted-foreground" />
               <Input
                 id="timeOut"
                 type="time"
@@ -3341,7 +3342,7 @@ export default function ContractView() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
-              <span className="material-icons">warning</span>
+              <Icon name="warning" className="" />
               Admin Override: Close Contract with Outstanding Balance
             </DialogTitle>
             <DialogDescription>
@@ -3352,7 +3353,7 @@ export default function ContractView() {
           <div className="space-y-4">
             <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
               <div className="flex items-start gap-2">
-                <span className="material-icons text-destructive mt-0.5">info</span>
+                <Icon name="info" className=" text-destructive mt-0.5" />
                 <div className="flex-1 text-sm">
                   <p className="font-medium text-destructive mb-2">Warning: Outstanding Balance Detected</p>
                   <p className="text-muted-foreground">

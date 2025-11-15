@@ -54,7 +54,7 @@ import {
   type InsertPushNotificationToken,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns } from "drizzle-orm";
+import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -1159,57 +1159,64 @@ export class DatabaseStorage implements IStorage {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-    // Get all contracts with revenue (active, completed, closed - not draft)
-    const allContracts = await db.select().from(contracts);
-    const revenueContracts = allContracts.filter(c => 
-      c.status === 'active' || c.status === 'completed' || c.status === 'closed'
-    );
-
-    // Calculate total revenue including extra charges
-    const totalRevenue = revenueContracts.reduce((sum, contract) => {
-      const amount = parseFloat(contract.totalAmount) || 0;
-      const extras = parseFloat(contract.totalExtraCharges || '0') || 0;
-      return sum + amount + extras;
-    }, 0);
-
-    // Calculate average contract value
-    const averageContractValue = revenueContracts.length > 0 
-      ? totalRevenue / revenueContracts.length 
-      : 0;
-
-    // Calculate monthly revenue (based on createdAt for this month)
-    const monthlyRevenue = revenueContracts
-      .filter(contract => contract.createdAt && new Date(contract.createdAt) >= startOfMonth)
-      .reduce((sum, contract) => {
-        const amount = parseFloat(contract.totalAmount) || 0;
-        const extras = parseFloat(contract.totalExtraCharges || '0') || 0;
-        return sum + amount + extras;
-      }, 0);
-
-    // Calculate last month revenue
-    const lastMonthRevenue = revenueContracts
-      .filter(contract => {
-        if (!contract.createdAt) return false;
-        const date = new Date(contract.createdAt);
-        return date >= startOfLastMonth && date <= endOfLastMonth;
+    // PERFORMANCE FIX: Use database aggregation with conditional SUM using CASE
+    const [result] = await db
+      .select({
+        totalRevenue: sql<string>`
+          COALESCE(
+            SUM(
+              CAST(${contracts.totalAmount} AS DECIMAL) + 
+              COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0)
+            ), 
+            0
+          )
+        `,
+        contractCount: count(),
+        monthlyRevenue: sql<string>`
+          COALESCE(
+            SUM(
+              CASE 
+                WHEN ${contracts.createdAt} >= ${startOfMonth} 
+                THEN CAST(${contracts.totalAmount} AS DECIMAL) + COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0)
+                ELSE 0 
+              END
+            ),
+            0
+          )
+        `,
+        lastMonthRevenue: sql<string>`
+          COALESCE(
+            SUM(
+              CASE 
+                WHEN ${contracts.createdAt} >= ${startOfLastMonth} AND ${contracts.createdAt} <= ${endOfLastMonth}
+                THEN CAST(${contracts.totalAmount} AS DECIMAL) + COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0)
+                ELSE 0 
+              END
+            ),
+            0
+          )
+        `,
       })
-      .reduce((sum, contract) => {
-        const amount = parseFloat(contract.totalAmount) || 0;
-        const extras = parseFloat(contract.totalExtraCharges || '0') || 0;
-        return sum + amount + extras;
-      }, 0);
+      .from(contracts)
+      .where(or(
+        eq(contracts.status, 'active'),
+        eq(contracts.status, 'completed'),
+        eq(contracts.status, 'closed')
+      ));
 
-    // Calculate growth percentage
-    const revenueGrowth = lastMonthRevenue > 0 
-      ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
-      : 0;
+    const totalRevenue = parseFloat(result.totalRevenue) || 0;
+    const contractCount = result.contractCount || 0;
+    const monthlyRevenue = parseFloat(result.monthlyRevenue) || 0;
+    const lastMonthRevenue = parseFloat(result.lastMonthRevenue) || 0;
 
     return {
       totalRevenue,
-      averageContractValue,
+      averageContractValue: contractCount > 0 ? totalRevenue / contractCount : 0,
       monthlyRevenue,
       lastMonthRevenue,
-      revenueGrowth,
+      revenueGrowth: lastMonthRevenue > 0 
+        ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
+        : 0,
     };
   }
 
@@ -1219,49 +1226,49 @@ export class DatabaseStorage implements IStorage {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-    // Get all contracts
-    const allContracts = await db.select().from(contracts);
+    // PERFORMANCE FIX: Use database aggregation
+    const [result] = await db
+      .select({
+        totalDays: sum(contracts.totalDays),
+        contractCount: count(),
+        contractsThisMonth: sql<string>`
+          COALESCE(SUM(CASE WHEN ${contracts.createdAt} >= ${startOfMonth} THEN 1 ELSE 0 END), 0)
+        `,
+        contractsLastMonth: sql<string>`
+          COALESCE(SUM(CASE WHEN ${contracts.createdAt} >= ${startOfLastMonth} AND ${contracts.createdAt} <= ${endOfLastMonth} THEN 1 ELSE 0 END), 0)
+        `,
+      })
+      .from(contracts);
 
-    // Calculate average rental duration
-    const totalDays = allContracts.reduce((sum, contract) => sum + (contract.totalDays || 0), 0);
-    const averageRentalDuration = allContracts.length > 0 ? totalDays / allContracts.length : 0;
+    const totalDays = parseInt(result.totalDays || '0') || 0;
+    const contractCount = result.contractCount || 0;
+    const contractsThisMonth = parseInt(result.contractsThisMonth) || 0;
+    const contractsLastMonth = parseInt(result.contractsLastMonth) || 0;
 
-    // Count contracts this month
-    const contractsThisMonth = allContracts.filter(
-      contract => contract.createdAt && new Date(contract.createdAt) >= startOfMonth
-    ).length;
-
-    // Count contracts last month
-    const contractsLastMonth = allContracts.filter(contract => {
-      if (!contract.createdAt) return false;
-      const date = new Date(contract.createdAt);
-      return date >= startOfLastMonth && date <= endOfLastMonth;
-    }).length;
-
-    // Calculate growth
+    const averageRentalDuration = contractCount > 0 ? totalDays / contractCount : 0;
     const contractGrowth = contractsLastMonth > 0 
       ? ((contractsThisMonth - contractsLastMonth) / contractsLastMonth) * 100 
       : 0;
 
-    // Find most active user
-    const userCounts = new Map<string, number>();
-    allContracts.forEach(contract => {
-      const count = userCounts.get(contract.createdBy) || 0;
-      userCounts.set(contract.createdBy, count + 1);
-    });
+    // Find most active user using GROUP BY
+    const mostActiveResult = await db
+      .select({
+        userId: contracts.createdBy,
+        contractCount: count(),
+      })
+      .from(contracts)
+      .groupBy(contracts.createdBy)
+      .orderBy(desc(count()))
+      .limit(1);
 
     let mostActiveUser: { name: string; count: number } | null = null;
-    let maxCount = 0;
-    for (const [userId, count] of Array.from(userCounts.entries())) {
-      if (count > maxCount) {
-        const user = await this.getUser(userId);
-        if (user) {
-          mostActiveUser = {
-            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
-            count
-          };
-          maxCount = count;
-        }
+    if (mostActiveResult.length > 0) {
+      const user = await this.getUser(mostActiveResult[0].userId);
+      if (user) {
+        mostActiveUser = {
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
+          count: mostActiveResult[0].contractCount
+        };
       }
     }
 
@@ -1278,35 +1285,39 @@ export class DatabaseStorage implements IStorage {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // Get all contracts
-    const allContracts = await db.select().from(contracts);
+    // PERFORMANCE FIX: Use database aggregation
+    // Count total unique customers
+    const [totalResult] = await db
+      .select({
+        totalCustomers: sql<string>`COUNT(DISTINCT ${contracts.customerId})`,
+      })
+      .from(contracts);
 
-    // Count unique customers by customerId
-    const customerIds = new Set(allContracts.map(c => c.customerId));
-    const totalCustomers = customerIds.size;
+    const totalCustomers = parseInt(totalResult.totalCustomers) || 0;
 
     // Count repeat customers (customers with 2+ contracts)
-    const customerContractCounts = new Map<string, number>();
-    allContracts.forEach(contract => {
-      const customerId = contract.customerId;
-      customerContractCounts.set(customerId, (customerContractCounts.get(customerId) || 0) + 1);
-    });
+    const repeatResult = await db
+      .select({
+        customerId: contracts.customerId,
+      })
+      .from(contracts)
+      .groupBy(contracts.customerId)
+      .having(sql`COUNT(*) >= 2`);
 
-    const repeatCustomers = Array.from(customerContractCounts.values()).filter(count => count >= 2).length;
+    const repeatCustomers = repeatResult.length;
     const repeatCustomerRate = totalCustomers > 0 ? (repeatCustomers / totalCustomers) * 100 : 0;
 
-    // Count new customers this month (customers whose first contract was this month)
-    const customersThisMonth = new Set(
-      allContracts
-        .filter(contract => contract.createdAt && new Date(contract.createdAt) >= startOfMonth)
-        .map(c => c.customerId)
-    );
+    // Find new customers this month (customers whose first contract was this month)
+    const newCustomersResult = await db
+      .select({
+        customerId: contracts.customerId,
+        firstContractDate: sql<Date>`MIN(${contracts.createdAt})`,
+      })
+      .from(contracts)
+      .groupBy(contracts.customerId)
+      .having(sql`MIN(${contracts.createdAt}) >= ${startOfMonth}`);
 
-    // Find customers who only appear in contracts created this month
-    const newCustomersThisMonth = Array.from(customersThisMonth).filter(customerId => {
-      const allCustomerContracts = allContracts.filter(c => c.customerId === customerId);
-      return allCustomerContracts.every(c => c.createdAt && new Date(c.createdAt) >= startOfMonth);
-    }).length;
+    const newCustomersThisMonth = newCustomersResult.length;
 
     return {
       totalCustomers,

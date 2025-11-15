@@ -58,11 +58,74 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Menu, Sun, Moon, Globe } from 'lucide-react';
+import {
+  Menu,
+  Sun,
+  Moon,
+  Globe,
+  Car,
+  LayoutDashboard,
+  FileText,
+  Hospital,
+  Folder,
+  BarChart3,
+  ChevronRight,
+  Settings,
+  Building2,
+  BarChart,
+  Users,
+  ShieldCheck,
+  Clock,
+  UserSearch,
+  AlertTriangle,
+  ChevronDown,
+  HelpCircle,
+  FileCheck,
+  Scale,
+  UserCog,
+  Building,
+  Shield,
+  DollarSign,
+  Lock,
+  LogOut,
+  Info,
+} from 'lucide-react';
 
 interface AppSidebarProps {
   side?: 'left' | 'right';
 }
+
+// Helper function to map icon names to lucide-react components
+const getIconComponent = (iconName: string) => {
+  const iconMap: Record<string, any> = {
+    // Masters
+    'people_outline': Users,
+    'directions_car': Car,
+    'business': Building,
+    'people': Users,
+    // Reports
+    'account_balance': DollarSign,
+    'bar_chart': BarChart,
+    'assessment': BarChart3,
+    // Audit
+    'timeline': Clock,
+    'warning_amber': AlertTriangle,
+    'person_search': UserSearch,
+    // Settings
+    'settings': Settings,
+    'business_center': Building2,
+    'description': FileText,
+    // Help & Legal
+    'help_outline': HelpCircle,
+    'gavel': Scale,
+    'shield': Shield,
+    'info': HelpCircle,
+    // Default
+    'default': FileText,
+  };
+  
+  return iconMap[iconName] || FileText;
+};
 
 export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const { t, i18n } = useTranslation();
@@ -335,11 +398,15 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
+      case 'super_admin':
+        return 'default';
       case 'admin':
         return 'default';
       case 'manager':
         return 'secondary';
       case 'staff':
+        return 'outline';
+      case 'viewer':
         return 'outline';
       default:
         return 'outline';
@@ -472,30 +539,18 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
         {/* Company branding - below controls */}
         {sidebarState === 'expanded' && (
-          <div className="flex items-center gap-3">
-            <span className="material-icons text-3xl text-primary shrink-0">
-              directions_car
-            </span>
-            <div className="overflow-hidden">
-              <h2 className="text-base font-semibold truncate">
-                {settings 
-                  ? i18n.language === 'ar' 
-                    ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
-                    : settings.companyNameEn || settings.companyNameAr || t('landing.title')
-                  : t('landing.title')
-                }
-              </h2>
-              <p className="text-xs text-muted-foreground truncate">
-                {t('landing.title')}
-              </p>
-            </div>
-          </div>
-        )}
-        {sidebarState === 'collapsed' && (
-          <div className="flex items-center justify-center">
-            <span className="material-icons text-2xl text-primary">
-              directions_car
-            </span>
+          <div className="overflow-hidden">
+            <h2 className="text-base font-semibold truncate">
+              {settings 
+                ? i18n.language === 'ar' 
+                  ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
+                  : settings.companyNameEn || settings.companyNameAr || t('landing.title')
+                : t('landing.title')
+              }
+            </h2>
+            <p className="text-xs text-muted-foreground truncate">
+              {t('landing.title')}
+            </p>
           </div>
         )}
       </SidebarHeader>
@@ -517,7 +572,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   }}
                 >
                   <Link href="/">
-                    <span className="material-icons">dashboard</span>
+                    <LayoutDashboard className="h-4 w-4" />
                     {sidebarState === 'expanded' && <span>{t('nav.dashboard')}</span>}
                   </Link>
                 </SidebarMenuButton>
@@ -535,7 +590,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   }}
                 >
                   <Link href="/contracts">
-                    <span className="material-icons">description</span>
+                    <FileText className="h-4 w-4" />
                     {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
                   </Link>
                 </SidebarMenuButton>
@@ -553,7 +608,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   }}
                 >
                   <Link href="/insurance-claims">
-                    <span className="material-icons">local_hospital</span>
+                    <Hospital className="h-4 w-4" />
                     {sidebarState === 'expanded' && <span>Insurance Claims</span>}
                   </Link>
                 </SidebarMenuButton>
@@ -566,12 +621,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     <TooltipTrigger asChild>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton data-testid="nav-masters">
-                          <span className="material-icons">folder</span>
+                          <Folder className="h-4 w-4" />
                           {sidebarState === 'expanded' && <span>{t('nav.masters')}</span>}
                           {sidebarState === 'expanded' && (
-                            <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                              chevron_right
-                            </span>
+                            <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                           )}
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
@@ -584,16 +637,19 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   </Tooltip>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {masterItems.filter(item => item.show).map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
-                            <Link href={item.url}>
-                              <span className="material-icons">{item.icon}</span>
-                              {sidebarState === 'expanded' && <span>{item.title}</span>}
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
+                      {masterItems.filter(item => item.show).map((item) => {
+                        const IconComponent = getIconComponent(item.icon);
+                        return (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                              <Link href={item.url}>
+                                <IconComponent className="h-4 w-4" />
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -607,12 +663,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                       <TooltipTrigger asChild>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton data-testid="nav-reports">
-                            <span className="material-icons">assessment</span>
+                            <BarChart3 className="h-4 w-4" />
                             {sidebarState === 'expanded' && <span>{t('nav.reports')}</span>}
                             {sidebarState === 'expanded' && (
-                              <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                                chevron_right
-                              </span>
+                              <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                             )}
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -625,16 +679,19 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {reportItems.filter(item => item.show).map((item) => (
-                          <SidebarMenuSubItem key={item.title}>
-                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/reports/', '')}-reports`}>
-                              <Link href={item.url}>
-                                <span className="material-icons">{item.icon}</span>
-                                {sidebarState === 'expanded' && <span>{item.title}</span>}
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
+                        {reportItems.filter(item => item.show).map((item) => {
+                          const IconComponent = getIconComponent(item.icon);
+                          return (
+                            <SidebarMenuSubItem key={item.title}>
+                              <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/reports/', '')}-reports`}>
+                                <Link href={item.url}>
+                                  <IconComponent className="h-4 w-4" />
+                                  {sidebarState === 'expanded' && <span>{item.title}</span>}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -649,12 +706,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                       <TooltipTrigger asChild>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton data-testid="nav-audit-parent">
-                            <span className="material-icons">assessment</span>
+                            <ShieldCheck className="h-4 w-4" />
                             {sidebarState === 'expanded' && <span>{t('nav.auditLogsAndErrors')}</span>}
                             {sidebarState === 'expanded' && (
-                              <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                                chevron_right
-                              </span>
+                              <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                             )}
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -667,16 +722,19 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {auditItems.filter(item => item.show).map((item) => (
-                          <SidebarMenuSubItem key={item.title}>
-                            <SidebarMenuSubButton asChild isActive={location.startsWith('/audit-logs') && window.location.search.includes(item.url.split('=')[1])} data-testid={`nav-${item.url.split('?')[0].replace('/', '')}-${item.url.split('=')[1]}`}>
-                              <Link href={item.url}>
-                                <span className="material-icons">{item.icon}</span>
-                                {sidebarState === 'expanded' && <span>{item.title}</span>}
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
+                        {auditItems.filter(item => item.show).map((item) => {
+                          const IconComponent = getIconComponent(item.icon);
+                          return (
+                            <SidebarMenuSubItem key={item.title}>
+                              <SidebarMenuSubButton asChild isActive={location.startsWith('/audit-logs') && window.location.search.includes(item.url.split('=')[1])} data-testid={`nav-${item.url.split('?')[0].replace('/', '')}-${item.url.split('=')[1]}`}>
+                                <Link href={item.url}>
+                                  <IconComponent className="h-4 w-4" />
+                                  {sidebarState === 'expanded' && <span>{item.title}</span>}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -691,12 +749,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                       <TooltipTrigger asChild>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton data-testid="nav-settings">
-                            <span className="material-icons">settings</span>
+                            <Settings className="h-4 w-4" />
                             {sidebarState === 'expanded' && <span>{t('nav.settings')}</span>}
                             {sidebarState === 'expanded' && (
-                              <span className="material-icons ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform">
-                                chevron_right
-                              </span>
+                              <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                             )}
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -709,43 +765,47 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {settingsItems.filter(item => item.show).map((item) => (
-                          <SidebarMenuSubItem key={item.title}>
-                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
-                              <Link href={item.url}>
-                                <span className="material-icons">{item.icon}</span>
-                                {sidebarState === 'expanded' && <span>{item.title}</span>}
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
+                        {settingsItems.filter(item => item.show).map((item) => {
+                          const IconComponent = getIconComponent(item.icon);
+                          return (
+                            <SidebarMenuSubItem key={item.title}>
+                              <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                                <Link href={item.url}>
+                                  <IconComponent className="h-4 w-4" />
+                                  {sidebarState === 'expanded' && <span>{item.title}</span>}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
                         
                         {/* Help & Legal - Nested Collapsible */}
                         <SidebarMenuSubItem>
                           <Collapsible open={helpLegalOpen} onOpenChange={handleHelpLegalToggle} className="group/helplegal">
                             <CollapsibleTrigger asChild>
                               <SidebarMenuSubButton data-testid="nav-help-legal">
-                                <span className="material-icons">help_center</span>
+                                <HelpCircle className="h-4 w-4" />
                                 {sidebarState === 'expanded' && <span>Help & Legal</span>}
                                 {sidebarState === 'expanded' && (
-                                  <span className="material-icons ml-auto text-xs group-data-[state=open]/helplegal:rotate-90 transition-transform">
-                                    chevron_right
-                                  </span>
+                                  <ChevronRight className="ml-auto h-3 w-3 group-data-[state=open]/helplegal:rotate-90 transition-transform" />
                                 )}
                               </SidebarMenuSubButton>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <SidebarMenuSub className="ml-4">
-                                {helpLegalItems.filter(item => item.show).map((item) => (
-                                  <SidebarMenuSubItem key={item.title}>
-                                    <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.split('/').pop()}`}>
-                                      <Link href={item.url}>
-                                        <span className="material-icons text-sm">{item.icon}</span>
-                                        {sidebarState === 'expanded' && <span className="text-sm">{item.title}</span>}
-                                      </Link>
-                                    </SidebarMenuSubButton>
-                                  </SidebarMenuSubItem>
-                                ))}
+                                {helpLegalItems.filter(item => item.show).map((item) => {
+                                  const IconComponent = getIconComponent(item.icon);
+                                  return (
+                                    <SidebarMenuSubItem key={item.title}>
+                                      <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.split('/').pop()}`}>
+                                        <Link href={item.url}>
+                                          <IconComponent className="h-3 w-3" />
+                                          {sidebarState === 'expanded' && <span className="text-sm">{item.title}</span>}
+                                        </Link>
+                                      </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                  );
+                                })}
                               </SidebarMenuSub>
                             </CollapsibleContent>
                           </Collapsible>
@@ -782,7 +842,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                         {t(`role.${user?.role || 'staff'}`)}
                       </Badge>
                     </div>
-                    <span className="material-icons text-muted-foreground">expand_more</span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </button>
                 ) : (
                   <button className="flex items-center justify-center w-full hover-elevate p-2 rounded-md" data-testid="button-user-menu">
@@ -804,12 +864,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             <DropdownMenuLabel>{t('auth.myAccount')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setIsPasswordDialogOpen(true)} data-testid="button-change-password">
-              <span className="material-icons mr-2">lock</span>
+              <Lock className="mr-2 h-4 w-4" />
               {t('users.changePassword')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
-              <span className="material-icons mr-2">logout</span>
+              <LogOut className="mr-2 h-4 w-4" />
               {t('auth.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>

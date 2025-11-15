@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { queryClient } from '@/lib/queryClient';
 import { Eye, EyeOff } from 'lucide-react';
+import { Icon } from '@/components/Icon';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -53,9 +54,7 @@ export default function Login() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="bg-primary/10 p-4 rounded-full">
-              <span className="material-icons text-5xl text-primary">
-                directions_car
-              </span>
+              <Icon name="directions_car" className="text-5xl text-primary" />
             </div>
           </div>
           <CardTitle className="text-2xl">{t('landing.title')}</CardTitle>

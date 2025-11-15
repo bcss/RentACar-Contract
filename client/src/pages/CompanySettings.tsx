@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { insertCompanySettingsSchema, type CompanySettings } from "@shared/schema";
 import { z } from "zod";
 import {
+import { Icon } from '@/components/Icon';
   Form,
   FormControl,
   FormField,
@@ -292,7 +293,7 @@ export default function CompanySettings() {
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
-        <span className="material-icons text-6xl text-muted-foreground">lock</span>
+        <Icon name="lock" className=" text-6xl text-muted-foreground" />
         <p className="text-muted-foreground">{t('msg.noPermission')}</p>
       </div>
     );

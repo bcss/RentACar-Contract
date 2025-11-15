@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import {
+import { Icon } from '@/components/Icon';
   Select,
   SelectContent,
   SelectItem,
@@ -158,11 +159,11 @@ export function DateSelector({
       {value && !disabled && (
         <button
           onClick={handleClear}
-          className="material-icons text-muted-foreground hover:text-foreground text-sm cursor-pointer"
+          className="text-muted-foreground hover:text-foreground text-sm cursor-pointer"
           data-testid={`${testId}-clear`}
           type="button"
         >
-          close
+          <Icon name="close" className="text-sm" />
         </button>
       )}
     </div>

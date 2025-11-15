@@ -15,6 +15,7 @@ import { Link } from 'wouter';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { captureMultipleCharts } from '@/utils/chartExport';
 import { useToast } from '@/hooks/use-toast';
+import { Icon } from '@/components/Icon';
 
 interface VehicleUtilization {
   vehicleId: string;
@@ -302,11 +303,11 @@ export default function OperationalReports() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => handleExport('pdf')} data-testid="button-export-pdf">
-            <span className="material-icons mr-2">picture_as_pdf</span>
+            <Icon name="picture_as_pdf" className=" mr-2" />
             Export PDF
           </Button>
           <Button variant="outline" onClick={() => handleExport('excel')} data-testid="button-export-excel">
-            <span className="material-icons mr-2">table_chart</span>
+            <Icon name="table_chart" className=" mr-2" />
             Export Excel
           </Button>
         </div>
@@ -342,7 +343,7 @@ export default function OperationalReports() {
               disabled={!startDate && !endDate}
               data-testid="button-clear-filters"
             >
-              <span className="material-icons mr-2">clear</span>
+              <Icon name="clear" className=" mr-2" />
               {t('operationalReports.clearFilters')}
             </Button>
           </div>

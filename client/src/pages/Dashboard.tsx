@@ -26,6 +26,7 @@ import { format } from 'date-fns';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { getTimeBasedGreeting, getTimeAgo } from '@/utils/timeGreeting';
 import { AlertCircle, X, AlertTriangle } from 'lucide-react';
+import { Icon } from '@/components/Icon';
 
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
@@ -301,7 +302,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-2">
           <Button asChild data-testid="button-new-contract">
             <Link href="/contracts/new">
-              <span className="material-icons">add</span>
+              <Icon name="add" className="" />
               <span>{t('contracts.newContract')}</span>
             </Link>
           </Button>
@@ -317,7 +318,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   Active Rentals
                 </CardTitle>
-                <span className="material-icons text-primary">directions_car</span>
+                <Icon name="directions_car" className=" text-primary" />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -341,7 +342,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   Monthly Revenue
                 </CardTitle>
-                <span className="material-icons text-chart-1">payments</span>
+                <Icon name="payments" className=" text-chart-1" />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -367,9 +368,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   Overdue Returns
                 </CardTitle>
-                <span className={`material-icons ${overdueContracts.length > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                  warning
-                </span>
+                <Icon name="warning" className={overdueContracts.length > 0 ? 'text-destructive' : 'text-muted-foreground'} />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -395,9 +394,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   Pending Refunds
                 </CardTitle>
-                <span className={`material-icons ${pendingRefunds.length > 0 ? 'text-chart-3' : 'text-muted-foreground'}`}>
-                  account_balance_wallet
-                </span>
+                <Icon name="account_balance_wallet" className={pendingRefunds.length > 0 ? 'text-chart-3' : 'text-muted-foreground'} />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -426,7 +423,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   Vehicle Utilization
                 </CardTitle>
-                <span className="material-icons text-chart-2">local_shipping</span>
+                <Icon name="local_shipping" className=" text-chart-2" />
               </CardHeader>
               <CardContent>
                 {contractsLoading || vehiclesLoading ? (
@@ -456,9 +453,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   Payment Collection Rate
                 </CardTitle>
-                <span className={`material-icons ${paymentCollectionRate >= 90 ? 'text-chart-2' : paymentCollectionRate >= 70 ? 'text-chart-3' : 'text-destructive'}`}>
-                  account_balance
-                </span>
+                <Icon name="account_balance" className={paymentCollectionRate >= 90 ? 'text-chart-2' : paymentCollectionRate >= 70 ? 'text-chart-3' : 'text-destructive'} />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -488,7 +483,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   Avg. Extra Charges
                 </CardTitle>
-                <span className="material-icons text-chart-5">receipt_long</span>
+                <Icon name="receipt_long" className=" text-chart-5" />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -563,7 +558,7 @@ export default function Dashboard() {
             <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=draft')} data-testid="card-status-draft">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Draft</CardTitle>
-                <span className="material-icons text-muted-foreground text-sm">edit_note</span>
+                <Icon name="edit_note" className=" text-muted-foreground text-sm" />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -584,7 +579,7 @@ export default function Dashboard() {
             <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=active')} data-testid="card-status-active">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active</CardTitle>
-                <span className="material-icons text-muted-foreground text-sm">directions_car</span>
+                <Icon name="directions_car" className=" text-muted-foreground text-sm" />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -605,7 +600,7 @@ export default function Dashboard() {
             <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=completed')} data-testid="card-status-completed">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Completed</CardTitle>
-                <span className="material-icons text-muted-foreground text-sm">done_all</span>
+                <Icon name="done_all" className=" text-muted-foreground text-sm" />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -626,7 +621,7 @@ export default function Dashboard() {
             <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=closed')} data-testid="card-status-closed">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Closed</CardTitle>
-                <span className="material-icons text-muted-foreground text-sm">archive</span>
+                <Icon name="archive" className=" text-muted-foreground text-sm" />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -647,7 +642,7 @@ export default function Dashboard() {
             <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?status=all')} data-testid="card-status-total">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total</CardTitle>
-                <span className="material-icons text-muted-foreground text-sm">description</span>
+                <Icon name="description" className=" text-muted-foreground text-sm" />
               </CardHeader>
               <CardContent>
                 {contractsLoading ? (
@@ -669,7 +664,7 @@ export default function Dashboard() {
         <Card className="border-destructive">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="flex items-center gap-2">
-              <span className="material-icons text-destructive">error</span>
+              <Icon name="error" className=" text-destructive" />
               Unacknowledged System Errors
             </CardTitle>
             <div className="flex items-center gap-2">
@@ -682,7 +677,7 @@ export default function Dashboard() {
                 onClick={() => setIsAcknowledgeAllDialogOpen(true)}
                 data-testid="button-acknowledge-all"
               >
-                <span className="material-icons text-sm">done_all</span>
+                <Icon name="done_all" className=" text-sm" />
                 <span>Acknowledge All</span>
               </Button>
             </div>
@@ -691,7 +686,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               {unacknowledgedErrors.slice(0, 3).map((error) => (
                 <div key={error.id} className="flex items-start gap-3 p-3 rounded-md hover-elevate border border-destructive/30" data-testid={`error-item-${error.id}`}>
-                  <span className="material-icons text-destructive mt-0.5">dangerous</span>
+                  <Icon name="dangerous" className=" text-destructive mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="destructive" className="text-xs">
@@ -736,7 +731,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   {t('analytics.revenueMetrics')}
                 </CardTitle>
-                <span className="material-icons text-muted-foreground">monetization_on</span>
+                <Icon name="monetization_on" className=" text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 {revenueLoading ? (
@@ -756,9 +751,10 @@ export default function Dashboard() {
                       <p className="text-xs text-muted-foreground">{t('analytics.avgContractValue')}</p>
                     </div>
                     <div className="flex items-center gap-2 pt-2 border-t">
-                      <span className={`material-icons text-sm ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-                        {revenueAnalytics.revenueGrowth >= 0 ? 'trending_up' : 'trending_down'}
-                      </span>
+                      <Icon 
+                        name={revenueAnalytics.revenueGrowth >= 0 ? 'trending_up' : 'trending_down'}
+                        className={`text-sm ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}
+                      />
                       <span className={`text-sm font-medium ${revenueAnalytics.revenueGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`} data-testid="stat-revenue-growth">
                         {revenueAnalytics.revenueGrowth >= 0 ? '+' : ''}{revenueAnalytics.revenueGrowth.toFixed(1)}%
                       </span>
@@ -784,7 +780,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   {t('analytics.operationalMetrics')}
                 </CardTitle>
-                <span className="material-icons text-muted-foreground">assessment</span>
+                <Icon name="assessment" className=" text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 {operationalLoading ? (
@@ -804,9 +800,10 @@ export default function Dashboard() {
                       <p className="text-xs text-muted-foreground">{t('analytics.contractsThisMonth')}</p>
                     </div>
                     <div className="flex items-center gap-2 pt-2 border-t">
-                      <span className={`material-icons text-sm ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}>
-                        {operationalAnalytics.contractGrowth >= 0 ? 'trending_up' : 'trending_down'}
-                      </span>
+                      <Icon 
+                        name={operationalAnalytics.contractGrowth >= 0 ? 'trending_up' : 'trending_down'}
+                        className={`text-sm ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`}
+                      />
                       <span className={`text-sm font-medium ${operationalAnalytics.contractGrowth >= 0 ? 'text-chart-2' : 'text-destructive'}`} data-testid="stat-contract-growth">
                         {operationalAnalytics.contractGrowth >= 0 ? '+' : ''}{operationalAnalytics.contractGrowth.toFixed(1)}%
                       </span>
@@ -832,7 +829,7 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium">
                   {t('analytics.customerInsights')}
                 </CardTitle>
-                <span className="material-icons text-muted-foreground">people</span>
+                <Icon name="people" className=" text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 {customerLoading ? (
@@ -852,7 +849,7 @@ export default function Dashboard() {
                       <p className="text-xs text-muted-foreground">{t('analytics.repeatCustomerRate')}</p>
                     </div>
                     <div className="flex items-center gap-2 pt-2 border-t">
-                      <span className="material-icons text-sm text-chart-2">person_add</span>
+                      <Icon name="person_add" className=" text-sm text-chart-2" />
                       <span className="text-sm font-medium" data-testid="stat-new-customers">
                         {customerAnalytics.newCustomersThisMonth} {t('analytics.newCustomers')}
                       </span>

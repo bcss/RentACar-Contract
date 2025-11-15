@@ -61,7 +61,11 @@ export const users = pgTable("users", {
   lastLoginAt: timestamp("last_login_at"), // Track last successful login for dashboard display
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_users_username").on(table.username),
+  index("idx_users_disabled").on(table.disabled),
+  index("idx_users_created_at").on(table.createdAt),
+]);
 
 // P1-3: Password complexity validation
 export const passwordSchema = z.string()
@@ -136,7 +140,12 @@ export const customers = pgTable("customers", {
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_customers_disabled").on(table.disabled),
+  index("idx_customers_created_at").on(table.createdAt),
+  index("idx_customers_national_id").on(table.nationalId),
+  index("idx_customers_phone").on(table.phone),
+]);
 
 export const customersRelations = relations(customers, ({ one }) => ({
   creator: one(users, {
@@ -231,7 +240,12 @@ export const vehicles = pgTable("vehicles", {
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_vehicles_registration").on(table.registration),
+  index("idx_vehicles_status").on(table.status),
+  index("idx_vehicles_disabled").on(table.disabled),
+  index("idx_vehicles_created_at").on(table.createdAt),
+]);
 
 export const vehiclesRelations = relations(vehicles, ({ one }) => ({
   creator: one(users, {
@@ -293,7 +307,10 @@ export const sponsors = pgTable("sponsors", {
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_sponsors_disabled").on(table.disabled),
+  index("idx_sponsors_created_at").on(table.createdAt),
+]);
 
 export const sponsorsRelations = relations(sponsors, ({ one }) => ({
   creator: one(users, {
@@ -346,7 +363,10 @@ export const companies = pgTable("companies", {
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_companies_disabled").on(table.disabled),
+  index("idx_companies_created_at").on(table.createdAt),
+]);
 
 export const companiesRelations = relations(companies, ({ one }) => ({
   creator: one(users, {
@@ -550,7 +570,16 @@ export const contracts = pgTable("contracts", {
   disabledAt: timestamp("disabled_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_contracts_customer_id").on(table.customerId),
+  index("idx_contracts_vehicle_id").on(table.vehicleId),
+  index("idx_contracts_created_by").on(table.createdBy),
+  index("idx_contracts_status").on(table.status),
+  index("idx_contracts_disabled").on(table.disabled),
+  index("idx_contracts_created_at").on(table.createdAt),
+  index("idx_contracts_status_disabled").on(table.status, table.disabled),
+  index("idx_contracts_contract_number").on(table.contractNumber),
+]);
 
 export const contractsRelations = relations(contracts, ({ one }) => ({
   customer: one(customers, {
@@ -660,7 +689,10 @@ export const payments = pgTable("payments", {
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_payments_contract_id").on(table.contractId),
+  index("idx_payments_created_at").on(table.createdAt),
+]);
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
   contract: one(contracts, {
@@ -751,7 +783,10 @@ export const vehicleInspections = pgTable("vehicle_inspections", {
   // Audit fields
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_vehicle_inspections_contract_id").on(table.contractId),
+  index("idx_vehicle_inspections_vehicle_id").on(table.vehicleId),
+]);
 
 export const vehicleInspectionsRelations = relations(vehicleInspections, ({ one }) => ({
   contract: one(contracts, {
@@ -813,7 +848,12 @@ export const auditLogs = pgTable("audit_logs", {
   region: varchar("region", { length: 100 }),
   details: text("details"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_audit_logs_user_id").on(table.userId),
+  index("idx_audit_logs_contract_id").on(table.contractId),
+  index("idx_audit_logs_action").on(table.action),
+  index("idx_audit_logs_created_at").on(table.createdAt),
+]);
 
 export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
   user: one(users, {
@@ -840,7 +880,11 @@ export const contractEdits = pgTable("contract_edits", {
   fieldsBefore: jsonb("fields_before"), // JSON snapshot of contract state before edit
   fieldsAfter: jsonb("fields_after"), // JSON snapshot of contract state after edit
   ipAddress: varchar("ip_address"),
-});
+}, (table) => [
+  index("idx_contract_edits_contract_id").on(table.contractId),
+  index("idx_contract_edits_edited_by").on(table.editedBy),
+  index("idx_contract_edits_edited_at").on(table.editedAt),
+]);
 
 export const contractEditsRelations = relations(contractEdits, ({ one }) => ({
   contract: one(contracts, {
@@ -887,7 +931,10 @@ export const systemErrors = pgTable("system_errors", {
   acknowledgedAt: timestamp("acknowledged_at"),
   sentToSupport: boolean("sent_to_support").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_system_errors_acknowledged").on(table.acknowledged),
+  index("idx_system_errors_created_at").on(table.createdAt),
+]);
 
 export type InsertSystemError = typeof systemErrors.$inferInsert;
 export type SystemError = typeof systemErrors.$inferSelect;
@@ -1067,7 +1114,12 @@ export const insuranceClaims = pgTable("insurance_claims", {
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_insurance_claims_contract_id").on(table.contractId),
+  index("idx_insurance_claims_status").on(table.claimStatus),
+  index("idx_insurance_claims_created_at").on(table.createdAt),
+  index("idx_insurance_claims_disabled").on(table.disabled),
+]);
 
 export const insuranceClaimsRelations = relations(insuranceClaims, ({ one }) => ({
   contract: one(contracts, {

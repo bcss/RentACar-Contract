@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from 'date-fns';
+import { Icon } from '@/components/Icon';
 
 export default function AuditLogs() {
   const { t } = useTranslation();
@@ -131,7 +132,7 @@ export default function AuditLogs() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="material-icons">filter_list</span>
+            <Icon name="filter_list" className="" />
             {t('common.filter')}
           </CardTitle>
         </CardHeader>
@@ -190,14 +191,14 @@ export default function AuditLogs() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="material-icons">history</span>
+            <Icon name="history" className="" />
             {t('audit.auditTrail')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {filteredLogs.length === 0 ? (
             <div className="p-12 text-center">
-              <span className="material-icons text-6xl text-muted-foreground">history</span>
+              <Icon name="history" className=" text-6xl text-muted-foreground" />
               <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
             </div>
           ) : (
@@ -217,7 +218,7 @@ export default function AuditLogs() {
                   <TableRow key={log.id} className="hover-elevate" data-testid={`row-log-${log.id}`}>
                     <TableCell>
                       <Badge variant={getActionBadge(log.action)} className="flex items-center gap-1 w-fit">
-                        <span className="material-icons text-sm">{getActionIcon(log.action)}</span>
+                        <Icon name="{getActionIcon(log.action)}" className=" text-sm" />
                         {t(`action.${log.action}`)}
                       </Badge>
                     </TableCell>
@@ -232,7 +233,7 @@ export default function AuditLogs() {
                     <TableCell className="text-sm">
                       {log.city || log.country ? (
                         <div className="flex items-center gap-1" data-testid={`text-log-location-${log.id}`}>
-                          <span className="material-icons text-xs text-muted-foreground">location_on</span>
+                          <Icon name="location_on" className=" text-xs text-muted-foreground" />
                           <span>
                             {[log.city, log.region, log.country].filter(Boolean).join(', ') || 'N/A'}
                           </span>

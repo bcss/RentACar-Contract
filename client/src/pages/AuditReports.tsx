@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Link } from 'wouter';
+import { Icon } from '@/components/Icon';
 
 interface Modification {
   id: string;
@@ -186,11 +187,11 @@ export default function AuditReports() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => handleExport('pdf')} data-testid="button-export-pdf">
-            <span className="material-icons mr-2">picture_as_pdf</span>
+            <Icon name="picture_as_pdf" className=" mr-2" />
             Export PDF
           </Button>
           <Button variant="outline" onClick={() => handleExport('excel')} data-testid="button-export-excel">
-            <span className="material-icons mr-2">table_chart</span>
+            <Icon name="table_chart" className=" mr-2" />
             Export Excel
           </Button>
         </div>
@@ -226,7 +227,7 @@ export default function AuditReports() {
               disabled={!startDate && !endDate}
               data-testid="button-clear-filters"
             >
-              <span className="material-icons mr-2">clear</span>
+              <Icon name="clear" className=" mr-2" />
               Clear Filters
             </Button>
           </div>
@@ -648,7 +649,7 @@ export default function AuditReports() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <span className="material-icons text-primary">description</span>
+                        <Icon name="description" className=" text-primary" />
                         <div>
                           <p className="font-medium">Contract Operations</p>
                           <p className="text-sm text-muted-foreground">Lifecycle events</p>
@@ -659,7 +660,7 @@ export default function AuditReports() {
 
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <span className="material-icons text-primary">storage</span>
+                        <Icon name="storage" className=" text-primary" />
                         <div>
                           <p className="font-medium">Master Data Operations</p>
                           <p className="text-sm text-muted-foreground">Customers, vehicles, sponsors, companies</p>
@@ -670,7 +671,7 @@ export default function AuditReports() {
 
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <span className="material-icons text-primary">payments</span>
+                        <Icon name="payments" className=" text-primary" />
                         <div>
                           <p className="font-medium">Payment Operations</p>
                           <p className="text-sm text-muted-foreground">Payment recordings</p>
@@ -681,7 +682,7 @@ export default function AuditReports() {
 
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <span className="material-icons text-primary">edit_note</span>
+                        <Icon name="edit_note" className=" text-primary" />
                         <div>
                           <p className="font-medium">Contract Modifications</p>
                           <p className="text-sm text-muted-foreground">Field-level changes</p>
@@ -692,7 +693,7 @@ export default function AuditReports() {
 
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <span className="material-icons text-primary">check_circle</span>
+                        <Icon name="check_circle" className=" text-primary" />
                         <div>
                           <p className="font-medium">Vehicle Inspections</p>
                           <p className="text-sm text-muted-foreground">Pre/post inspections</p>

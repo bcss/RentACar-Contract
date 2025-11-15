@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import AboutPage from "@/pages/AboutPage";
+import { Icon } from '@/components/Icon';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -394,7 +395,7 @@ export default function Settings() {
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
-        <span className="material-icons text-6xl text-muted-foreground">lock</span>
+        <Icon name="lock" className=" text-6xl text-muted-foreground" />
         <p className="text-muted-foreground">{t('msg.noPermission')}</p>
       </div>
     );

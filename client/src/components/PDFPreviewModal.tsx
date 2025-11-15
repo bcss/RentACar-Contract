@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Icon } from '@/components/Icon';
 
 interface PDFPreviewModalProps {
   open: boolean;
@@ -104,7 +105,7 @@ export function PDFPreviewModal({
       <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className="material-icons">picture_as_pdf</span>
+            <Icon name="picture_as_pdf" className="" />
             <span>{title}</span>
           </DialogTitle>
         </DialogHeader>
@@ -120,9 +121,7 @@ export function PDFPreviewModal({
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center space-y-2">
-                <span className="material-icons text-4xl text-muted-foreground">
-                  description
-                </span>
+                <Icon name="description" className="text-4xl text-muted-foreground" />
                 <p className="text-muted-foreground">{t('pdf.noPdfLoaded')}</p>
               </div>
             </div>
@@ -135,7 +134,7 @@ export function PDFPreviewModal({
             onClick={() => onOpenChange(false)}
             data-testid="button-close-pdf"
           >
-            <span className="material-icons text-sm">close</span>
+            <Icon name="close" className=" text-sm" />
             <span>{t('common.close')}</span>
           </Button>
           <Button
@@ -144,7 +143,7 @@ export function PDFPreviewModal({
             disabled={!pdfUrl}
             data-testid="button-print-pdf"
           >
-            <span className="material-icons text-sm">print</span>
+            <Icon name="print" className=" text-sm" />
             <span>{t('common.print')}</span>
           </Button>
           <Button
@@ -152,7 +151,7 @@ export function PDFPreviewModal({
             disabled={!pdfUrl}
             data-testid="button-save-pdf"
           >
-            <span className="material-icons text-sm">download</span>
+            <Icon name="download" className=" text-sm" />
             <span>{t('pdf.saveAsPDF')}</span>
           </Button>
         </DialogFooter>

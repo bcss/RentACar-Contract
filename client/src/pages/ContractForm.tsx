@@ -39,6 +39,7 @@ import { isUnauthorizedError } from '@/lib/authUtils';
 import { Check, ChevronsUpDown, Plus, Search, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
+import { Icon } from '@/components/Icon';
 
 // Extended validation schema with customerId and vehicleId
 const contractFormSchema = z.object({
@@ -864,7 +865,7 @@ export default function ContractForm() {
           </p>
         </div>
         <Button variant="ghost" onClick={() => navigate('/contracts')} data-testid="button-back">
-          <span className="material-icons">arrow_back</span>
+          <Icon name="arrow_back" className="" />
           <span>{t('common.back')}</span>
         </Button>
       </div>
@@ -1121,7 +1122,7 @@ export default function ContractForm() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">person</span>
+                <Icon name="person" className="" />
                 {t('form.hirerTypeTitle')}
               </CardTitle>
             </CardHeader>
@@ -1156,7 +1157,7 @@ export default function ContractForm() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="material-icons">badge</span>
+                  <Icon name="badge" className="" />
                   {t('form.sponsorInfo')}
                 </CardTitle>
               </CardHeader>
@@ -1190,7 +1191,7 @@ export default function ContractForm() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="material-icons">business</span>
+                  <Icon name="business" className="" />
                   {t('companies.companySponsor')}
                 </CardTitle>
                 <CardDescription>
@@ -1222,7 +1223,7 @@ export default function ContractForm() {
                 {selectedCompany && (
                   <div className="p-4 bg-muted rounded-md space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="material-icons text-muted-foreground">business</span>
+                      <Icon name="business" className=" text-muted-foreground" />
                       <div>
                         <p className="font-medium">{selectedCompany.nameEn}</p>
                         {selectedCompany.nameAr && (
@@ -1554,7 +1555,7 @@ export default function ContractForm() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">event</span>
+                <Icon name="event" className="" />
                 Rental Details
               </CardTitle>
             </CardHeader>
@@ -1663,7 +1664,7 @@ export default function ContractForm() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">payments</span>
+                <Icon name="payments" className="" />
                 Pricing & Charges
               </CardTitle>
             </CardHeader>
@@ -1792,7 +1793,7 @@ export default function ContractForm() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">checklist</span>
+                <Icon name="checklist" className="" />
                 {t('form.vehicleInspection')}
               </CardTitle>
             </CardHeader>
@@ -1909,7 +1910,7 @@ export default function ContractForm() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">receipt_long</span>
+                <Icon name="receipt_long" className="" />
                 {t('form.extraCharges')}
               </CardTitle>
             </CardHeader>
@@ -1947,7 +1948,7 @@ export default function ContractForm() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="material-icons">local_shipping</span>
+                <Icon name="local_shipping" className="" />
                 Delivery Service
               </CardTitle>
             </CardHeader>
