@@ -472,6 +472,7 @@ export const contracts = pgTable("contracts", {
   completedAt: timestamp("completed_at"),
   closedBy: varchar("closed_by"),
   closedAt: timestamp("closed_at"),
+  closureRemark: text("closure_remark"), // Admin override remark when closing with outstanding balance
   earlyClosureReason: text("early_closure_reason"), // Task 11: Optional reason for early completion
   editReason: text("edit_reason"), // Reason for edits made in Active/Completed stages
   

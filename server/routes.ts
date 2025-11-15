@@ -1131,6 +1131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/contracts/:id/close', isAuthenticated, requireContractCloseAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      const userRole = req.user.role;
       const contract = await storage.getContract(req.params.id);
       
       if (!contract) {
@@ -1156,8 +1157,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalDueRounded = Math.round(totalDue * 100) / 100;
       const computedOutstanding = totalDueRounded - totalPaidRounded;
       
-      // Block closing if there's any outstanding balance (using minimal threshold for precision)
-      if (computedOutstanding > 0.001) { // 0.001 threshold ensures even 1 fils (0.01 AED/100) is caught
+      // Check if there's outstanding balance
+      const hasOutstandingBalance = computedOutstanding > 0.001;
+      
+      // Admin override: Allow closing with outstanding balance if closureRemark is provided
+      if (userRole === 'admin' && hasOutstandingBalance) {
+        const { closureRemark } = req.body;
+        
+        // Validate closure remark using the same validation as edit reason
+        const validation = validateEditReason(closureRemark);
+        if (!validation.valid) {
+          return res.status(400).json({ 
+            message: validation.error || "Closure remark is required when closing with outstanding balance"
+          });
+        }
+        
+        // Close contract with closure remark
+        const closed = await storage.closeContract(req.params.id, userId, closureRemark);
+        
+        // Ensure vehicle status is "available" after closing
+        await storage.updateVehicle(closed.vehicleId, { status: "available" });
+        
+        // Create audit log with closure remark details
+        await createAuditLog(
+          userId, 
+          'close', 
+          closed.id, 
+          req, 
+          `Admin override: Closed contract #${closed.contractNumber} with outstanding balance of ${computedOutstanding.toFixed(2)} AED. Remark: ${closureRemark}`
+        );
+        
+        return res.json(closed);
+      }
+      
+      // Non-admin users OR admin with zero balance: Standard payment verification
+      if (hasOutstandingBalance) {
         return res.status(400).json({ 
           message: `Cannot close contract with outstanding balance of ${computedOutstanding.toFixed(2)} AED. Total due: ${totalDueRounded.toFixed(2)} AED, Total paid: ${totalPaidRounded.toFixed(2)} AED. Please record remaining payment first.` 
         });

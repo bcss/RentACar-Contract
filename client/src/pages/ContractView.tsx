@@ -107,6 +107,10 @@ export default function ContractView() {
   
   // Task 11: Early closure reason
   const [earlyClosureReason, setEarlyClosureReason] = useState('');
+  
+  // Closure remark for admin override
+  const [showClosureRemarkDialog, setShowClosureRemarkDialog] = useState(false);
+  const [closureRemark, setClosureRemark] = useState('');
 
   // Update payment currency when system currency changes
   useEffect(() => {
@@ -381,8 +385,8 @@ export default function ContractView() {
   });
 
   const closeMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest('POST', `/api/contracts/${params.id}/close`, {});
+    mutationFn: async (closureRemark?: string) => {
+      return await apiRequest('POST', `/api/contracts/${params.id}/close`, { closureRemark });
     },
     onSuccess: () => {
       toast({
@@ -390,6 +394,8 @@ export default function ContractView() {
         description: 'Contract closed successfully',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
+      setShowClosureRemarkDialog(false);
+      setClosureRemark('');
     },
     onError: (error: Error) => {
       toast({
@@ -705,10 +711,50 @@ export default function ContractView() {
   const hirerType = contract.hirerType || 'direct';
   const canManageWorkflow = isAdmin || isManager;
 
-  // Check if close button should be shown (Admin/Manager or users with close permission + payment verification)
+  // Calculate outstanding balance for close contract feature
+  const calculateOutstandingBalance = () => {
+    if (!contract) return 0;
+    const totalDue = parseFloat(contract.totalAmount || '0') + parseFloat(contract.totalExtraCharges || '0');
+    const totalPaid = payments.reduce((sum, payment) => sum + parseFloat(payment.amount || '0'), 0);
+    return Math.round((totalDue - totalPaid) * 100) / 100; // Round to 2 decimals
+  };
+
+  const outstandingBalance = calculateOutstandingBalance();
+  const hasOutstandingBalance = outstandingBalance > 0.001;
+
+  // Validate closure remark word count
+  const validateClosureRemarkWordCount = (text: string) => {
+    const words = text.trim().split(/\s+/).filter(word => word.length >= 3);
+    return words.length;
+  };
+
+  const closureRemarkWordCount = validateClosureRemarkWordCount(closureRemark);
+  const isClosureRemarkValid = closureRemarkWordCount >= 10;
+
+  // Handle close contract click
+  const handleCloseContract = () => {
+    if (isAdmin && hasOutstandingBalance) {
+      setShowClosureRemarkDialog(true);
+    } else {
+      closeMutation.mutate();
+    }
+  };
+
+  const handleClosureRemarkSubmit = () => {
+    if (!isClosureRemarkValid) {
+      toast({
+        title: t('common.error'),
+        description: `Closure remark must contain at least 10 meaningful words (3+ characters each). Currently: ${closureRemarkWordCount} word${closureRemarkWordCount === 1 ? '' : 's'}.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    closeMutation.mutate(closureRemark);
+  };
+
+  // Check if close button should be shown
   const canCloseContract = contract.status === 'completed' && 
-    (parseFloat(contract.outstandingBalance || '0') === 0 || contract.finalPaymentReceived) &&
-    (isAdmin || isManager || hasClosePermission); // Admin/Manager or users with canCloseContracts permission
+    (isAdmin || isManager || hasClosePermission); // Admin can close with balance, others need zero balance
 
   // Get sponsor and company sponsor display data using helper functions
   const sponsorData = getSponsorDisplay(contract);
@@ -1416,7 +1462,7 @@ export default function ContractView() {
               <span>Complete Rental (Vehicle Returned)</span>
             </Button>
           )}
-          {canCloseContract && (
+          {canCloseContract && !hasOutstandingBalance && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button data-testid="button-close-contract">
@@ -1428,17 +1474,29 @@ export default function ContractView() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Close Contract</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to close this contract? This action finalizes the contract and requires all payments to be settled. This operation requires special permission.
+                    Are you sure you want to close this contract? This action finalizes the contract and all payments have been settled. This operation requires special permission.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => closeMutation.mutate()} data-testid="button-confirm-close">
+                  <AlertDialogAction onClick={handleCloseContract} data-testid="button-confirm-close">
                     Close Contract
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          )}
+          {canCloseContract && hasOutstandingBalance && isAdmin && (
+            <Button onClick={handleCloseContract} data-testid="button-close-contract-with-balance">
+              <span className="material-icons">lock</span>
+              <span>Close Contract (Admin Override)</span>
+            </Button>
+          )}
+          {canCloseContract && hasOutstandingBalance && !isAdmin && (
+            <Button disabled data-testid="button-close-contract-disabled">
+              <span className="material-icons">lock</span>
+              <span>Close Contract (Outstanding Balance)</span>
+            </Button>
           )}
           <Button variant="outline" onClick={handlePrint} data-testid="button-print">
             <span className="material-icons">print</span>
@@ -2083,6 +2141,28 @@ export default function ContractView() {
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap" data-testid="text-notes">{contract.notes}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Closure Remark Display - Admin Override */}
+      {contract.closureRemark && contract.status === 'closed' && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <span className="material-icons">warning</span>
+              Closure Remark (Admin Override)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-destructive">
+                This contract was closed by an administrator with an outstanding balance. Closure remark:
+              </p>
+              <p className="whitespace-pre-wrap p-3 bg-background rounded-md border border-destructive/20" data-testid="text-closure-remark">
+                {contract.closureRemark}
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -2797,6 +2877,81 @@ export default function ContractView() {
         contractNumber={contract?.contractNumber}
         contractStatus={contract?.status}
       />
+
+      {/* Closure Remark Dialog - Admin override with outstanding balance */}
+      <Dialog open={showClosureRemarkDialog} onOpenChange={setShowClosureRemarkDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <span className="material-icons">warning</span>
+              Admin Override: Close Contract with Outstanding Balance
+            </DialogTitle>
+            <DialogDescription>
+              You are closing this contract with an outstanding balance of <strong className="text-destructive">{outstandingBalance.toFixed(2)} {currency}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <div className="flex items-start gap-2">
+                <span className="material-icons text-destructive mt-0.5">info</span>
+                <div className="flex-1 text-sm">
+                  <p className="font-medium text-destructive mb-2">Warning: Outstanding Balance Detected</p>
+                  <p className="text-muted-foreground">
+                    Please provide a detailed closure remark explaining the situation. Examples: pending legal settlement, payment plan agreed, debt write-off approved, customer bankruptcy, etc.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="closureRemark" className="text-base font-medium">
+                  Closure Remark <span className="text-destructive">*</span>
+                </Label>
+                <span className={`text-sm ${isClosureRemarkValid ? 'text-chart-2' : 'text-destructive'}`}>
+                  {closureRemarkWordCount} / 10 words minimum
+                </span>
+              </div>
+              <Textarea
+                id="closureRemark"
+                placeholder="Enter detailed closure remark explaining why this contract is being closed with an outstanding balance (minimum 10 meaningful words, 3+ characters each)..."
+                value={closureRemark}
+                onChange={(e) => setClosureRemark(e.target.value)}
+                rows={6}
+                className={!isClosureRemarkValid && closureRemark ? 'border-destructive' : ''}
+                data-testid="textarea-closure-remark"
+              />
+              {!isClosureRemarkValid && closureRemark && (
+                <p className="text-sm text-destructive">
+                  Need {10 - closureRemarkWordCount} more meaningful word{10 - closureRemarkWordCount === 1 ? '' : 's'} (3+ characters each)
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowClosureRemarkDialog(false);
+                setClosureRemark('');
+              }}
+              data-testid="button-cancel-closure-remark"
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button 
+              onClick={handleClosureRemarkSubmit}
+              disabled={!isClosureRemarkValid || closeMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90"
+              data-testid="button-submit-closure-remark"
+            >
+              {closeMutation.isPending ? 'Closing...' : 'Close Contract with Override'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

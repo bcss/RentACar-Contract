@@ -472,13 +472,14 @@ export class DatabaseStorage implements IStorage {
     return completed;
   }
 
-  async closeContract(id: string, userId: string): Promise<Contract> {
+  async closeContract(id: string, userId: string, closureRemark?: string): Promise<Contract> {
     const [closed] = await db
       .update(contracts)
       .set({
         status: 'closed',
         closedBy: userId,
         closedAt: new Date(),
+        closureRemark: closureRemark || null,
         paymentStatus: 'paid', // Mark as fully paid when closing
         updatedAt: new Date(),
       })
