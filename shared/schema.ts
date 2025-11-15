@@ -139,10 +139,16 @@ export const insertCustomerSchema = createInsertSchema(customers).omit({
   disabledAt: true,
   disabled: true,
 }).extend({
-  phone: z.string().min(1, "Phone number is required"),
-  nationalId: z.string().min(1, "National ID is required"),
-  nationality: z.string().min(1, "Nationality is required"),
-  licenseNumber: z.string().min(1, "License number is required"),
+  // P0-6: Add max string length validation (using actual field names from schema)
+  nameEn: z.string().max(200, "Name too long"),
+  nameAr: z.string().max(200, "Name too long").optional(),
+  phone: z.string().min(1, "Phone number is required").max(20, "Phone number too long"),
+  email: z.string().email().max(255, "Email too long").optional(),
+  nationalId: z.string().min(1, "National ID is required").max(50, "National ID too long"),
+  nationality: z.string().min(1, "Nationality is required").max(100, "Nationality too long"),
+  licenseNumber: z.string().min(1, "License number is required").max(50, "License number too long"),
+  address: z.string().max(500, "Address too long").optional(),
+  notes: z.string().max(2000, "Notes too long").optional(),
   dateOfBirth: z.coerce.date().optional(),
   licenseIssueDate: z.coerce.date().optional(),
   licenseExpiryDate: z.coerce.date().optional(),
@@ -228,6 +234,14 @@ export const insertVehicleSchema = createInsertSchema(vehicles).omit({
   disabledAt: true,
   disabled: true,
 }).extend({
+  // P0-6: Add max string length validation
+  registration: z.string().max(20, "Registration too long"),
+  vin: z.string().max(50, "VIN too long").optional(),
+  make: z.string().max(100, "Make too long"),
+  model: z.string().max(100, "Model too long"),
+  year: z.string().max(4, "Year invalid"),
+  color: z.string().max(50, "Color too long"),
+  notes: z.string().max(2000, "Notes too long").optional(),
   registrationExpiry: z.coerce.date().optional(),
   insuranceExpiry: z.coerce.date().optional(),
 });

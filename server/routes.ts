@@ -89,6 +89,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return parsed;
   }
 
+  // P0-1: Server-side file upload validation for vehicle inspection photos
+  function validateInspectionPhotos(photos: any[]): { valid: boolean; error?: string } {
+    if (!Array.isArray(photos)) {
+      return { valid: false, error: "Photos must be an array" };
+    }
+    
+    for (const photo of photos) {
+      if (!photo || typeof photo !== 'object') {
+        return { valid: false, error: "Invalid photo object" };
+      }
+      
+      if (!photo.data || typeof photo.data !== 'string') {
+        return { valid: false, error: "Photo data must be a string" };
+      }
+      
+      // 1. Check base64 size (10MB decoded = ~13.7MB in base64)
+      const base64Size = photo.data.length * 0.75; // Approximate decoded size
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (base64Size > maxSize) {
+        return { valid: false, error: `Photo ${photo.angle || 'unknown'} exceeds 10MB limit` };
+      }
+      
+      // 2. Verify base64 format and image header
+      if (!photo.data.startsWith('data:image/')) {
+        return { valid: false, error: `Invalid image format for ${photo.angle || 'unknown'}` };
+      }
+      
+      // 3. Check for valid JPEG/PNG/JPG
+      const validFormats = ['data:image/jpeg', 'data:image/png', 'data:image/jpg'];
+      const isValid = validFormats.some(format => photo.data.startsWith(format));
+      if (!isValid) {
+        return { valid: false, error: `${photo.angle || 'Photo'} must be JPEG or PNG format` };
+      }
+    }
+    
+    return { valid: true };
+  }
+
+  // P0-3: Query parameter validation functions
+  const MAX_PAGE_SIZE = 1000;
+  const MAX_SEARCH_LENGTH = 200;
+  
+  function validatePaginationParams(query: any): { limit: number; offset: number; error?: string } {
+    let limit = 100; // default
+    let offset = 0; // default
+    
+    if (query.limit !== undefined) {
+      const parsedLimit = parseInt(query.limit, 10);
+      if (isNaN(parsedLimit) || parsedLimit < 1) {
+        return { limit: 0, offset: 0, error: "Invalid limit: must be a positive integer" };
+      }
+      if (parsedLimit > MAX_PAGE_SIZE) {
+        return { limit: 0, offset: 0, error: `Limit cannot exceed ${MAX_PAGE_SIZE}` };
+      }
+      limit = parsedLimit;
+    }
+    
+    if (query.offset !== undefined) {
+      const parsedOffset = parseInt(query.offset, 10);
+      if (isNaN(parsedOffset) || parsedOffset < 0) {
+        return { limit: 0, offset: 0, error: "Invalid offset: must be a non-negative integer" };
+      }
+      offset = parsedOffset;
+    }
+    
+    return { limit, offset };
+  }
+  
+  function validateSearchQuery(query: string | undefined): { valid: boolean; error?: string } {
+    if (!query) return { valid: true };
+    
+    if (query.length > MAX_SEARCH_LENGTH) {
+      return { valid: false, error: `Search query cannot exceed ${MAX_SEARCH_LENGTH} characters` };
+    }
+    
+    return { valid: true };
+  }
+  
+  // P1-3: Enum validation for status fields (combined with P0-3)
+  const VALID_CONTRACT_STATUSES = ['draft', 'active', 'completed', 'closed'];
+  const VALID_VEHICLE_STATUSES = ['available', 'rented', 'maintenance', 'damaged'];
+  const VALID_CLAIM_STATUSES = ['pending', 'approved', 'rejected', 'settled'];
+  
+  function validateStatus(status: any, validStatuses: string[], fieldName: string): { valid: boolean; error?: string } {
+    if (!status) return { valid: true };
+    
+    if (!validStatuses.includes(status)) {
+      return { 
+        valid: false, 
+        error: `Invalid ${fieldName}: must be one of ${validStatuses.join(', ')}` 
+      };
+    }
+    
+    return { valid: true };
+  }
+  
+  // P0-4: Date range validation for reports
+  const MAX_DATE_RANGE_DAYS = 730; // 2 years
+  
+  function validateDateRange(startDateParam: any, endDateParam: any): { 
+    startDate?: Date; 
+    endDate?: Date; 
+    error?: string 
+  } {
+    let startDate: Date | undefined;
+    let endDate: Date | undefined;
+    
+    if (startDateParam) {
+      startDate = new Date(startDateParam as string);
+      if (isNaN(startDate.getTime())) {
+        return { error: "Invalid start date format" };
+      }
+    }
+    
+    if (endDateParam) {
+      endDate = new Date(endDateParam as string);
+      if (isNaN(endDate.getTime())) {
+        return { error: "Invalid end date format" };
+      }
+    }
+    
+    if (startDate && endDate) {
+      if (endDate < startDate) {
+        return { error: "End date must be after start date" };
+      }
+      
+      const daysDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysDiff > MAX_DATE_RANGE_DAYS) {
+        return { error: `Date range cannot exceed ${MAX_DATE_RANGE_DAYS} days (${Math.floor(MAX_DATE_RANGE_DAYS/365)} years)` };
+      }
+    }
+    
+    return { startDate, endDate };
+  }
+
   // SECURITY FIX 3: Middleware to block mobile customer endpoints until customer authentication is implemented
   // These endpoints are PREP work for Phase 3 mobile apps and require customer auth to function securely
   const requireCustomerAuth = (req: any, res: any, next: any) => {
@@ -813,9 +948,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // CRITICAL FIX: Calculate real-time outstanding balance based on actual payments
       // The stored outstandingBalance can become stale when payments are added
       const contractPayments = await storage.getPaymentsByContract(contract.id);
-      const totalPaid = contractPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount || '0'), 0);
-      const totalAmount = parseFloat(contract.totalAmount || '0');
-      const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
+      
+      // P0-2: Use validateFinancialInput for all financial calculations
+      const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
+        return sum + validateFinancialInput(payment.amount || '0', 'payment amount');
+      }, 0);
+      const totalAmount = validateFinancialInput(contract.totalAmount || '0', 'total amount');
+      const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
       const totalDue = totalAmount + totalExtraCharges;
       
       // Calculate precise outstanding balance
@@ -910,12 +1049,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Get payments for this contract
           const contractPayments = await storage.getPaymentsByContract(contract.id);
-          const totalPaid = contractPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount || '0'), 0);
+          
+          // P0-2: Use validateFinancialInput for all financial calculations
+          const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
+            return sum + validateFinancialInput(payment.amount || '0', 'payment amount');
+          }, 0);
           
           // Calculate outstanding balance
-          const totalAmount = parseFloat(contract.totalAmount || '0');
-          const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
-          const securityDeposit = parseFloat(contract.securityDeposit || '0');
+          const totalAmount = validateFinancialInput(contract.totalAmount || '0', 'total amount');
+          const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
+          const securityDeposit = validateFinancialInput(contract.securityDeposit || '0', 'security deposit');
           const outstandingBalance = (totalAmount + totalExtraCharges) - securityDeposit - totalPaid;
           
           // Get handler info
@@ -1223,9 +1366,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let calculatedFuelCharge = 0;
       let fuelChargeDetails = '';
       
-      // Parse fuel levels to numbers (they're stored as strings)
-      const fuelLevelStart = parseFloat(contract.fuelLevelStart || '0');
-      const fuelLevelEndNum = parseFloat(fuelLevelEnd || '0');
+      // P0-2: Parse fuel levels to numbers using validated parsing
+      const fuelLevelStart = validateFinancialInput(contract.fuelLevelStart || '0', 'fuel level start');
+      const fuelLevelEndNum = validateFinancialInput(fuelLevelEnd || '0', 'fuel level end');
       
       if (vehicle && settings && fuelLevelStart && fuelLevelEndNum < fuelLevelStart) {
         const tankCapacity = vehicle.tankCapacity || 0;
@@ -1235,8 +1378,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (tankCapacity > 0 && (fuelType === 'petrol' || fuelType === 'diesel')) {
           const fuelConsumed = (tankCapacity * (fuelLevelStart - fuelLevelEndNum)) / 100;
           const pricePerLiter = fuelType === 'diesel' 
-            ? parseFloat(settings.dieselPricePerLiter || '0')
-            : parseFloat(settings.petrolPricePerLiter || '0');
+            ? validateFinancialInput(settings.dieselPricePerLiter || '0', 'diesel price')
+            : validateFinancialInput(settings.petrolPricePerLiter || '0', 'petrol price');
           
           calculatedFuelCharge = Math.round(fuelConsumed * pricePerLiter * 100) / 100;
           fuelChargeDetails = `Fuel consumed: ${fuelConsumed.toFixed(2)}L × ${pricePerLiter} AED/L = ${calculatedFuelCharge.toFixed(2)} AED`;
@@ -1247,7 +1390,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let finalFuelCharge = calculatedFuelCharge.toString();
       let auditNote = `Completed contract #${contract.contractNumber} - vehicle returned`;
       
-      if (fuelChargeOverride && clientFuelCharge !== undefined && parseFloat(clientFuelCharge) !== calculatedFuelCharge) {
+      // P0-2: Validate client fuel charge if override is used
+      if (fuelChargeOverride && clientFuelCharge !== undefined && validateFinancialInput(clientFuelCharge, 'client fuel charge') !== calculatedFuelCharge) {
         finalFuelCharge = clientFuelCharge;
         auditNote += ` | FUEL CHARGE OVERRIDE: Backend calculated ${calculatedFuelCharge.toFixed(2)} AED (${fuelChargeDetails}), but manual override set to ${clientFuelCharge} AED`;
       } else if (calculatedFuelCharge > 0) {
@@ -1255,10 +1399,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // AUTO-ADJUST SECURITY DEPOSIT: Calculate outstanding balance with automatic deposit deduction
-      // CRITICAL FIX Phase 1: Validate financial data instead of defaulting to zero
-      const totalAmount = parseFloat(contract.totalAmount);
-      const totalExtraChargesNum = parseFloat(totalExtraCharges || '0');
-      const securityDeposit = parseFloat(contract.securityDeposit);
+      // P0-2: Use validateFinancialInput for all financial data
+      const totalAmount = validateFinancialInput(contract.totalAmount, 'total amount');
+      const totalExtraChargesNum = validateFinancialInput(totalExtraCharges || '0', 'extra charges');
+      const securityDeposit = validateFinancialInput(contract.securityDeposit, 'security deposit');
       
       // Validate all values are finite numbers - reject invalid data instead of defaulting to zero
       if (!isFinite(totalAmount)) {
@@ -1285,9 +1429,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get all payments made so far
       const contractPayments = await storage.getPaymentsByContract(contract.id);
+      
+      // P0-2: Use validateFinancialInput in payment reduce
       const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
-        const amount = parseFloat(payment.amount || '0');
-        return sum + (isNaN(amount) ? 0 : amount);
+        try {
+          const amount = validateFinancialInput(payment.amount || '0', 'payment amount');
+          return sum + amount;
+        } catch {
+          return sum; // Skip invalid payments
+        }
       }, 0);
       
       // Formula: outstandingBalance = (totalAmount + totalExtraCharges) - securityDeposit - sum(payments)
@@ -1377,18 +1527,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // PAYMENT VERIFICATION: Query new payments table to verify settlement
       const contractPayments = await storage.getPaymentsByContract(contract.id);
       
-      // CRITICAL FIX Phase 1: Validate financial data instead of defaulting to zero
+      // P0-2: Use validateFinancialInput for all payment calculations
       const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
-        const amount = parseFloat(payment.amount);
-        if (!isFinite(amount)) {
+        try {
+          const amount = validateFinancialInput(payment.amount, 'payment amount');
+          return sum + amount;
+        } catch (error) {
           console.error(`Invalid payment amount in payment record: ${JSON.stringify(payment)}`);
           return sum;
         }
-        return sum + amount;
       }, 0);
       
-      const totalAmount = parseFloat(contract.totalAmount);
-      const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
+      const totalAmount = validateFinancialInput(contract.totalAmount, 'total amount');
+      const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
       
       // Validate all values are finite numbers - reject invalid data instead of defaulting to zero
       if (!isFinite(totalAmount)) {
@@ -1532,14 +1683,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const settings = await storage.getCompanySettings();
       const currency = settings.currencyEn || 'AED';
       
-      // Calculate final payment amount (total amount + extra charges - already paid)
-      const totalAmount = parseFloat(contract.totalAmount || '0');
-      const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
+      // P0-2: Calculate final payment amount using validated inputs
+      const totalAmount = validateFinancialInput(contract.totalAmount || '0', 'total amount');
+      const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
       const totalDue = totalAmount + totalExtraCharges;
       
       // Get existing payments
       const existingPayments = await storage.getPaymentsByContract(contract.id);
-      const totalPaid = existingPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount || '0'), 0);
+      const totalPaid = existingPayments.reduce((sum: number, p: any) => {
+        return sum + validateFinancialInput(p.amount || '0', 'payment amount');
+      }, 0);
       
       const finalPaymentAmount = Math.max(0, totalDue - totalPaid);
       
@@ -1986,6 +2139,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inspectorName = user.firstName && user.lastName 
         ? `${user.firstName} ${user.lastName}`.trim()
         : user.username;
+
+      // P0-1: Validate photos server-side before processing
+      if (req.body.photos && Array.isArray(req.body.photos)) {
+        const photoValidation = validateInspectionPhotos(req.body.photos);
+        if (!photoValidation.valid) {
+          return res.status(400).json({ message: photoValidation.error });
+        }
+      }
 
       // Validate inspection data
       const validatedData = insertVehicleInspectionSchema.parse({
@@ -3995,13 +4156,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerContracts = allContracts.filter(c => c.customerId === customerId && !c.disabled);
       const activeRentals = customerContracts.filter(c => c.status === 'active');
       
-      // Get payment history summary
+      // P0-2: Get payment history summary with validated inputs
       let totalPaid = 0;
       let totalOutstanding = 0;
       for (const contract of customerContracts) {
         const payments = await storage.getPaymentsByContract(contract.id);
-        totalPaid += payments.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0);
-        totalOutstanding += parseFloat(contract.outstandingBalance || '0');
+        totalPaid += payments.reduce((sum, p) => {
+          return sum + validateFinancialInput(p.amount || '0', 'payment amount');
+        }, 0);
+        totalOutstanding += validateFinancialInput(contract.outstandingBalance || '0', 'outstanding balance');
       }
       
       // Return optimized response with essential fields only
@@ -4064,7 +4227,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enrichedContracts = await Promise.all(paginatedContracts.map(async (contract) => {
         const vehicle = contract.vehicle;
         const payments = await storage.getPaymentsByContract(contract.id);
-        const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0);
+        
+        // P0-2: Validate payment amounts
+        const totalPaid = payments.reduce((sum, p) => {
+          return sum + validateFinancialInput(p.amount || '0', 'payment amount');
+        }, 0);
         
         return {
           id: contract.id,
