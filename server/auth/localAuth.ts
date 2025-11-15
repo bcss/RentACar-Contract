@@ -24,8 +24,8 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict', // P0-2: Add SameSite attribute for CSRF protection
+      secure: true, // P0-2: Always require HTTPS for session cookies
+      sameSite: 'strict', // P0-2: Prevent cross-site cookie transmission (CSRF protection)
       maxAge: sessionTtl,
     },
   });
