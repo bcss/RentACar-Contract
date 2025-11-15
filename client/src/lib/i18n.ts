@@ -483,6 +483,16 @@ const resources = {
       "inspection.comparison": "Inspection Comparison",
       "inspection.before": "Before (Pre-Delivery)",
       "inspection.after": "After (Post-Return)",
+      "inspection.mandatoryPhotos": "Mandatory Photos",
+      "inspection.additionalPhotos": "Additional Photos",
+      "inspection.extraPhoto": "Extra Photo",
+      "inspection.addExtraPhoto": "Add Extra Photo",
+      "inspection.description": "Description",
+      "inspection.descriptionPlaceholder": "Describe damage, issue, or special observation...",
+      "inspection.extraPhotosAdded": "extra photos added",
+      "inspection.optional": "Optional",
+      "inspection.required": "Required",
+      "inspection.errors.photoRequired": "Photo is required",
       
       // Sponsor Management
       "sponsors.title": "Sponsors Management",
@@ -1319,6 +1329,16 @@ const resources = {
       "inspection.comparison": "مقارنة الفحص",
       "inspection.before": "قبل (ما قبل التسليم)",
       "inspection.after": "بعد (ما بعد الإرجاع)",
+      "inspection.mandatoryPhotos": "الصور الإلزامية",
+      "inspection.additionalPhotos": "صور إضافية",
+      "inspection.extraPhoto": "صورة إضافية",
+      "inspection.addExtraPhoto": "إضافة صورة إضافية",
+      "inspection.description": "الوصف",
+      "inspection.descriptionPlaceholder": "صف الضرر أو المشكلة أو الملاحظة الخاصة...",
+      "inspection.extraPhotosAdded": "صور إضافية مضافة",
+      "inspection.optional": "اختياري",
+      "inspection.required": "مطلوب",
+      "inspection.errors.photoRequired": "الصورة مطلوبة",
       
       // Sponsor Management
       "sponsors.title": "إدارة الكفلاء",

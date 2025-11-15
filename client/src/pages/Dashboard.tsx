@@ -25,7 +25,7 @@ import {
 import { format } from 'date-fns';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { getTimeBasedGreeting, getTimeAgo } from '@/utils/timeGreeting';
-import { AlertCircle, X } from 'lucide-react';
+import { AlertCircle, X, AlertTriangle } from 'lucide-react';
 
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
@@ -99,6 +99,12 @@ export default function Dashboard() {
   const { data: unacknowledgedErrors = [] } = useQuery<SystemError[]>({
     queryKey: ['/api/system-errors', 'unacknowledged'],
     enabled: isAuthenticated && isAdmin,
+  });
+
+  // Query unclosed contracts for alert card (Admin and Manager only)
+  const { data: unclosedContracts = [] } = useQuery<any[]>({
+    queryKey: ['/api/contracts/unclosed-alerts'],
+    enabled: isAuthenticated && canViewAnalytics,
   });
 
   const acknowledgeAllMutation = useMutation({
@@ -505,6 +511,50 @@ export default function Dashboard() {
           </TooltipContent>
         </Tooltip>
       </div>
+
+      {/* Unclosed Contracts Alert Card - Admin/Manager only */}
+      {canViewAnalytics && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card 
+              className={`cursor-pointer hover-elevate active-elevate-2 ${unclosedContracts.length > 0 ? "border-destructive" : ""}`} 
+              onClick={() => setLocation('/unclosed-contracts-report')} 
+              data-testid="card-unclosed-contracts-alert"
+            >
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <AlertTriangle className={`h-4 w-4 ${unclosedContracts.length > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+                  Unclosed Contracts Alert
+                </CardTitle>
+                <Badge variant={unclosedContracts.length > 0 ? "destructive" : "secondary"} data-testid="badge-unclosed-count">
+                  {unclosedContracts.length}
+                </Badge>
+              </CardHeader>
+              <CardContent>
+                {contractsLoading ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : unclosedContracts.length > 0 ? (
+                  <>
+                    <div className="text-lg font-bold text-destructive mb-2" data-testid="text-unclosed-warning">
+                      {unclosedContracts.length} contract(s) completed 30+ days ago but not closed
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Click to view details and take action
+                    </p>
+                  </>
+                ) : (
+                  <div className="text-sm text-muted-foreground" data-testid="text-unclosed-ok">
+                    All completed contracts are properly closed
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View contracts that need to be closed</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
 
       {/* Additional Status Cards - Clickable */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

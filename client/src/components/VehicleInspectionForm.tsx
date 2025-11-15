@@ -14,11 +14,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type PhotoAngle = 'front' | 'back' | 'left' | 'right' | 'top' | 'dashboard';
+type PhotoAngle = 'front' | 'back' | 'left' | 'right' | 'top' | 'dashboard' | 'extra';
 
 interface Photo {
   angle: PhotoAngle;
   data: string;
+  description?: string;
 }
 
 interface VehicleInspectionFormProps {
@@ -60,6 +61,7 @@ export function VehicleInspectionForm({ inspectionType, onSubmit, onCancel, isPe
   const [fuelLevel, setFuelLevel] = useState('');
   const [conditionNotes, setConditionNotes] = useState('');
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [extraPhotos, setExtraPhotos] = useState<Array<{ id: string; data: string; description: string }>>([]);
   const [previewPhoto, setPreviewPhoto] = useState<Photo | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -142,6 +144,45 @@ export function VehicleInspectionForm({ inspectionType, onSubmit, onCancel, isPe
     return photos.find(p => p.angle === angle);
   };
 
+  const addExtraPhoto = () => {
+    const newId = `extra-${Date.now()}`;
+    setExtraPhotos(prev => [...prev, { id: newId, data: '', description: '' }]);
+  };
+
+  const removeExtraPhoto = (id: string) => {
+    setExtraPhotos(prev => prev.filter(p => p.id !== id));
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[`extra-${id}`];
+      return newErrors;
+    });
+  };
+
+  const handleExtraPhotoUpload = async (id: string, file: File) => {
+    try {
+      const compressedData = await compressImage(file);
+      setExtraPhotos(prev => prev.map(p => 
+        p.id === id ? { ...p, data: compressedData } : p
+      ));
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[`extra-${id}`];
+        return newErrors;
+      });
+    } catch (error) {
+      setErrors(prev => ({
+        ...prev,
+        [`extra-${id}`]: error instanceof Error ? error.message : t('inspection.errors.uploadFailed'),
+      }));
+    }
+  };
+
+  const updateExtraPhotoDescription = (id: string, description: string) => {
+    setExtraPhotos(prev => prev.map(p => 
+      p.id === id ? { ...p, description } : p
+    ));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -163,25 +204,36 @@ export function VehicleInspectionForm({ inspectionType, onSubmit, onCancel, isPe
     
     if (photos.length === 0) {
       newErrors.photos = t('inspection.errors.photosRequired');
-    } else if (photos.length < 6) {
-      newErrors.photos = t('inspection.errors.allPhotosRequired');
     } else {
-      const angles = photos.map(p => p.angle);
-      const uniqueAngles = new Set(angles);
-      if (uniqueAngles.size !== 6) {
-        newErrors.photos = t('inspection.errors.allPhotosRequired');
-      }
       const requiredAngles: PhotoAngle[] = ['front', 'back', 'left', 'right', 'top', 'dashboard'];
+      const angles = photos.map(p => p.angle);
       const missingAngles = requiredAngles.filter(angle => !angles.includes(angle));
       if (missingAngles.length > 0) {
         newErrors.photos = t('inspection.errors.allPhotosRequired');
       }
     }
     
+    extraPhotos.forEach((extraPhoto) => {
+      if (!extraPhoto.data) {
+        newErrors[`extra-${extraPhoto.id}`] = t('inspection.errors.photoRequired');
+      }
+    });
+    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
+    
+    const allPhotos = [
+      ...photos,
+      ...extraPhotos
+        .filter(p => p.data)
+        .map(p => ({
+          angle: 'extra' as PhotoAngle,
+          data: p.data,
+          description: p.description.trim() || undefined,
+        }))
+    ];
     
     onSubmit({
       inspectionType,
@@ -189,7 +241,7 @@ export function VehicleInspectionForm({ inspectionType, onSubmit, onCancel, isPe
       odometerReading: odometerValue,
       fuelLevel: fuelValue,
       conditionNotes: conditionNotes.trim(),
-      photos,
+      photos: allPhotos,
     });
   };
 
@@ -271,88 +323,215 @@ export function VehicleInspectionForm({ inspectionType, onSubmit, onCancel, isPe
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label data-testid="label-photos">{t('inspection.photos')} *</Label>
-          <span className="text-sm text-muted-foreground">
-            {photos.length} / {PHOTO_ANGLES.length}
-          </span>
-        </div>
-        {errors.photos && (
-          <p className="text-sm text-destructive" data-testid="error-photos">
-            {errors.photos}
-          </p>
-        )}
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {PHOTO_ANGLES.map(({ value, labelKey }) => {
-            const photo = getPhotoForAngle(value);
-            
-            return (
-              <Card key={value} className={cn(
-                'overflow-hidden',
-                errors[value] && 'border-destructive'
-              )}>
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium" data-testid={`label-photo-${value}`}>
-                      {t(labelKey)}
-                    </Label>
-                    
-                    {photo ? (
-                      <div className="relative aspect-video bg-muted rounded-md overflow-hidden group">
-                        <img
-                          src={photo.data}
-                          alt={t(labelKey)}
-                          className="w-full h-full object-cover"
-                          data-testid={`img-photo-${value}`}
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => setPreviewPhoto(photo)}
-                            data-testid={`button-preview-${value}`}
-                          >
-                            <ZoomIn className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => removePhoto(value)}
-                            data-testid={`button-remove-${value}`}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <Label data-testid="label-mandatory-photos" className="text-base font-semibold">
+              {t('inspection.mandatoryPhotos')} ({t('inspection.required')})
+            </Label>
+            <span className="text-sm text-muted-foreground">
+              {photos.length} / {PHOTO_ANGLES.length}
+            </span>
+          </div>
+          {errors.photos && (
+            <p className="text-sm text-destructive mb-2" data-testid="error-photos">
+              {errors.photos}
+            </p>
+          )}
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {PHOTO_ANGLES.map(({ value, labelKey }) => {
+              const photo = getPhotoForAngle(value);
+              
+              return (
+                <Card key={value} className={cn(
+                  'overflow-hidden',
+                  errors[value] && 'border-destructive'
+                )}>
+                  <CardContent className="p-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium" data-testid={`label-photo-${value}`}>
+                        {t(labelKey)}
+                      </Label>
+                      
+                      {photo ? (
+                        <div className="relative aspect-video bg-muted rounded-md overflow-hidden group">
+                          <img
+                            src={photo.data}
+                            alt={t(labelKey)}
+                            className="w-full h-full object-cover"
+                            data-testid={`img-photo-${value}`}
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => setPreviewPhoto(photo)}
+                              data-testid={`button-preview-${value}`}
+                            >
+                              <ZoomIn className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => removePhoto(value)}
+                              data-testid={`button-remove-${value}`}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center aspect-video bg-muted rounded-md border-2 border-dashed cursor-pointer hover-elevate transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleFileChange(value, e)}
+                            data-testid={`input-photo-${value}`}
+                          />
+                          <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                          <span className="text-sm text-muted-foreground text-center px-2">
+                            {t('inspection.uploadPhoto')}
+                          </span>
+                        </label>
+                      )}
+                      
+                      {errors[value] && (
+                        <p className="text-sm text-destructive" data-testid={`error-photo-${value}`}>
+                          {errors[value]}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-4 pt-4 border-t" data-testid="section-extra-photos">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-semibold" data-testid="label-extra-photos">
+              {t('inspection.additionalPhotos')} ({t('inspection.optional')})
+            </Label>
+            <span className="text-sm text-muted-foreground" data-testid="text-extra-count">
+              {extraPhotos.length} {t('inspection.extraPhotosAdded')}
+            </span>
+          </div>
+
+          {extraPhotos.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {extraPhotos.map((extraPhoto, index) => (
+                <Card key={extraPhoto.id} className={cn(
+                  'overflow-hidden',
+                  errors[`extra-${extraPhoto.id}`] && 'border-destructive'
+                )}>
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium" data-testid={`label-extra-photo-${index}`}>
+                          {t('inspection.extraPhoto')} {index + 1}
+                        </Label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeExtraPhoto(extraPhoto.id)}
+                          data-testid={`button-remove-extra-${index}`}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
                       </div>
-                    ) : (
-                      <label className="flex flex-col items-center justify-center aspect-video bg-muted rounded-md border-2 border-dashed cursor-pointer hover-elevate transition-colors">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => handleFileChange(value, e)}
-                          data-testid={`input-photo-${value}`}
+
+                      {extraPhoto.data ? (
+                        <div className="relative aspect-video bg-muted rounded-md overflow-hidden group">
+                          <img
+                            src={extraPhoto.data}
+                            alt={`Extra photo ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            data-testid={`img-extra-photo-${index}`}
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => setPreviewPhoto({ angle: 'extra', data: extraPhoto.data, description: extraPhoto.description })}
+                              data-testid={`button-preview-extra-${index}`}
+                            >
+                              <ZoomIn className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setExtraPhotos(prev => prev.map(p => p.id === extraPhoto.id ? { ...p, data: '' } : p))}
+                              data-testid={`button-clear-extra-${index}`}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center aspect-video bg-muted rounded-md border-2 border-dashed cursor-pointer hover-elevate transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleExtraPhotoUpload(extraPhoto.id, file);
+                              }
+                            }}
+                            data-testid={`input-extra-photo-${index}`}
+                          />
+                          <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                          <span className="text-sm text-muted-foreground text-center px-2">
+                            {t('inspection.uploadPhoto')}
+                          </span>
+                        </label>
+                      )}
+
+                      <div className="space-y-1">
+                        <Label htmlFor={`description-${extraPhoto.id}`} className="text-xs">
+                          {t('inspection.description')} ({t('inspection.optional')})
+                        </Label>
+                        <Textarea
+                          id={`description-${extraPhoto.id}`}
+                          value={extraPhoto.description}
+                          onChange={(e) => updateExtraPhotoDescription(extraPhoto.id, e.target.value)}
+                          placeholder={t('inspection.descriptionPlaceholder')}
+                          rows={2}
+                          className="text-sm"
+                          data-testid={`textarea-extra-description-${index}`}
                         />
-                        <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                        <span className="text-sm text-muted-foreground text-center px-2">
-                          {t('inspection.uploadPhoto')}
-                        </span>
-                      </label>
-                    )}
-                    
-                    {errors[value] && (
-                      <p className="text-sm text-destructive" data-testid={`error-photo-${value}`}>
-                        {errors[value]}
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                      </div>
+
+                      {errors[`extra-${extraPhoto.id}`] && (
+                        <p className="text-sm text-destructive" data-testid={`error-extra-photo-${index}`}>
+                          {errors[`extra-${extraPhoto.id}`]}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addExtraPhoto}
+            className="w-full"
+            data-testid="button-add-extra-photo"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            {t('inspection.addExtraPhoto')}
+          </Button>
         </div>
       </div>
 
@@ -380,15 +559,26 @@ export function VehicleInspectionForm({ inspectionType, onSubmit, onCancel, isPe
       <Dialog open={!!previewPhoto} onOpenChange={() => setPreviewPhoto(null)}>
         <DialogContent className="max-w-4xl">
           <DialogTitle>
-            {previewPhoto && t(`inspection.angles.${previewPhoto.angle}`)}
+            {previewPhoto && (
+              previewPhoto.angle === 'extra' 
+                ? t('inspection.extraPhoto')
+                : t(`inspection.angles.${previewPhoto.angle}`)
+            )}
           </DialogTitle>
           {previewPhoto && (
-            <img
-              src={previewPhoto.data}
-              alt={t(`inspection.angles.${previewPhoto.angle}`)}
-              className="w-full h-auto rounded-md"
-              data-testid="img-preview-full"
-            />
+            <div className="space-y-2">
+              <img
+                src={previewPhoto.data}
+                alt={previewPhoto.angle === 'extra' ? t('inspection.extraPhoto') : t(`inspection.angles.${previewPhoto.angle}`)}
+                className="w-full h-auto rounded-md"
+                data-testid="img-preview-full"
+              />
+              {previewPhoto.description && (
+                <p className="text-sm text-muted-foreground" data-testid="text-preview-description">
+                  {previewPhoto.description}
+                </p>
+              )}
+            </div>
           )}
         </DialogContent>
       </Dialog>

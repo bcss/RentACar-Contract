@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useParams } from 'wouter';
-import { Contract, ContractWithDetails, Sponsor, Company, CompanySettings, Customer, Vehicle, User, Payment, insertPaymentSchema } from '@shared/schema';
+import { Contract, ContractWithDetails, Sponsor, Company, CompanySettings, Customer, Vehicle, User, Payment, insertPaymentSchema, InsuranceClaim } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -164,6 +164,12 @@ export default function ContractView() {
   // Fetch inspections for this contract
   const { data: inspections = [], isLoading: isLoadingInspections } = useQuery<any[]>({
     queryKey: ['/api/contracts', params.id, 'inspections'],
+    enabled: isAuthenticated && !!params.id,
+  });
+
+  // Fetch insurance claims for this contract
+  const { data: insuranceClaims = [], isLoading: isLoadingClaims } = useQuery<InsuranceClaim[]>({
+    queryKey: ['/api/insurance-claims', { contractId: params.id }],
     enabled: isAuthenticated && !!params.id,
   });
 
@@ -1919,6 +1925,109 @@ export default function ContractView() {
         </Card>
       )}
 
+      {/* Insurance Claims Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-icons">local_hospital</span>
+              Insurance Claims
+            </div>
+            <Button onClick={() => navigate('/insurance-claims/new')} size="sm" data-testid="button-add-insurance-claim">
+              <span className="material-icons text-sm">add</span>
+              <span>New Claim</span>
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingClaims ? (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : insuranceClaims.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">No insurance claims for this contract</p>
+          ) : (
+            <div className="space-y-3">
+              {insuranceClaims.map((claim) => (
+                <div key={claim.id} className="p-4 border rounded-md hover-elevate" data-testid={`claim-${claim.id}`}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-semibold">{claim.claimNumber}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {claim.insuranceCompany} - Policy: {claim.policyNumber}
+                      </p>
+                    </div>
+                    <Badge
+                      className={
+                        claim.claimStatus === 'pending' ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
+                        claim.claimStatus === 'approved' ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
+                        claim.claimStatus === 'rejected' ? 'bg-red-500/10 text-red-700 dark:text-red-400' :
+                        'bg-gray-500/10 text-gray-700 dark:text-gray-400'
+                      }
+                    >
+                      {claim.claimStatus}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-2">
+                    <div>
+                      <p className="text-muted-foreground">Claimant</p>
+                      <p className="font-medium">{claim.claimantName}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Claim Amount</p>
+                      <p className="font-medium font-mono">{claim.claimAmount} {currency}</p>
+                    </div>
+                    {claim.approvedAmount && (
+                      <div>
+                        <p className="text-muted-foreground">Approved Amount</p>
+                        <p className="font-medium font-mono">{claim.approvedAmount} {currency}</p>
+                      </div>
+                    )}
+                    {claim.settledAmount && (
+                      <div>
+                        <p className="text-muted-foreground">Settled Amount</p>
+                        <p className="font-medium font-mono">{claim.settledAmount} {currency}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-muted-foreground">Incident Date</p>
+                      <p className="font-medium">{format(new Date(claim.incidentDate), 'PP')}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Claim Filed</p>
+                      <p className="font-medium">{format(new Date(claim.claimDate), 'PP')}</p>
+                    </div>
+                  </div>
+                  {claim.incidentDescription && (
+                    <div className="mt-2 p-2 bg-muted/50 rounded text-sm">
+                      <p className="text-muted-foreground">Incident Description:</p>
+                      <p>{claim.incidentDescription}</p>
+                    </div>
+                  )}
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/insurance-claims/${claim.id}`)}
+                      data-testid={`button-view-claim-${claim.id}`}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <div className="pt-3 border-t mt-3">
+                <p className="font-semibold">
+                  Total Claims: {insuranceClaims.length} | 
+                  Pending: {insuranceClaims.filter(c => c.claimStatus === 'pending').length} | 
+                  Settled: {insuranceClaims.filter(c => c.claimStatus === 'settled').length}
+                </p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Customer Information */}
         <Card>
@@ -2364,6 +2473,112 @@ export default function ContractView() {
         </Card>
       )}
 
+      {/* Insurance Claims Section */}
+      {insuranceClaims && insuranceClaims.length > 0 && (
+        <Card className="print-hidden">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-icons">assignment_late</span>
+                Insurance Claims
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/insurance-claims/new?contractId=${params.id}`)}
+                className="hover-elevate active-elevate-2"
+                data-testid="button-new-claim"
+              >
+                <span className="material-icons mr-1 text-sm">add</span>
+                New Claim
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {insuranceClaims.map((claim: InsuranceClaim) => (
+                <div key={claim.id} className="border rounded-lg p-4 space-y-2 hover-elevate" data-testid={`claim-${claim.id}`}>
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-mono font-semibold">{claim.claimNumber}</span>
+                        <Badge className={
+                          claim.status === 'pending' ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
+                          claim.status === 'under_review' ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400' :
+                          claim.status === 'approved' ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
+                          claim.status === 'rejected' ? 'bg-red-500/10 text-red-700 dark:text-red-400' :
+                          'bg-gray-500/10 text-gray-700 dark:text-gray-400'
+                        }>
+                          {claim.status === 'pending' ? 'Pending' :
+                           claim.status === 'under_review' ? 'Under Review' :
+                           claim.status === 'approved' ? 'Approved' :
+                           claim.status === 'rejected' ? 'Rejected' :
+                           'Settled'}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Incident Date:</span>{' '}
+                          <span className="font-medium">{format(new Date(claim.incidentDate), 'PP')}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Claim Date:</span>{' '}
+                          <span className="font-medium">{format(new Date(claim.claimDate), 'PP')}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Insurance:</span>{' '}
+                          <span className="font-medium">{claim.insuranceCompany}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Policy:</span>{' '}
+                          <span className="font-medium">{claim.policyNumber}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Claim Amount:</span>{' '}
+                          <span className="font-medium font-mono">{claim.claimAmount} {currency}</span>
+                        </div>
+                        {claim.approvedAmount && (
+                          <div>
+                            <span className="text-muted-foreground">Approved Amount:</span>{' '}
+                            <span className="font-medium font-mono">{claim.approvedAmount} {currency}</span>
+                          </div>
+                        )}
+                      </div>
+                      {claim.incidentDescription && (
+                        <div className="mt-2 pt-2 border-t">
+                          <p className="text-sm text-muted-foreground">Description:</p>
+                          <p className="text-sm">{claim.incidentDescription}</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/insurance-claims/${claim.id}`)}
+                        className="hover-elevate active-elevate-2"
+                        data-testid={`button-view-claim-${claim.id}`}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/insurance-claims/${claim.id}/edit`)}
+                        className="hover-elevate active-elevate-2"
+                        data-testid={`button-edit-claim-${claim.id}`}
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Contract Timeline - Not visible when printing */}
       <div className="print-hidden">
         <ContractTimeline 
@@ -2388,6 +2603,8 @@ export default function ContractView() {
                 const photos = typeof inspection.photos === 'string' 
                   ? JSON.parse(inspection.photos) 
                   : inspection.photos;
+                const mandatoryPhotos = photos.filter((p: any) => p.angle !== 'extra');
+                const extraPhotos = photos.filter((p: any) => p.angle === 'extra');
                 const inspectionTypeLabel = inspection.inspectionType === 'pre_delivery' 
                   ? t('inspection.preDelivery')
                   : t('inspection.postReturn');
@@ -2399,7 +2616,7 @@ export default function ContractView() {
                   : 'secondary';
                 
                 return (
-                  <div key={inspection.id} className="border rounded-lg p-4 space-y-3">
+                  <div key={inspection.id} className="border rounded-lg p-4 space-y-4" data-testid={`inspection-${inspection.id}`}>
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -2428,27 +2645,75 @@ export default function ContractView() {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-                      {photos.map((photo: any, index: number) => (
-                        <div key={index} className="group relative aspect-video bg-muted rounded overflow-hidden border">
-                          <img
-                            src={photo.data}
-                            alt={t(`inspection.angles.${photo.angle}`)}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button
-                              onClick={() => window.open(photo.data, '_blank')}
-                              className="text-white hover-elevate p-2 rounded"
-                            >
-                              <ZoomIn className="w-5 h-5" />
-                            </button>
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs px-2 py-1 text-center">
-                            {t(`inspection.angles.${photo.angle}`)}
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-semibold mb-2" data-testid="label-mandatory-photos-view">
+                          {t('inspection.mandatoryPhotos')}
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                          {mandatoryPhotos.map((photo: any, index: number) => (
+                            <div key={index} className="group relative aspect-video bg-muted rounded overflow-hidden border" data-testid={`photo-mandatory-${photo.angle}`}>
+                              <img
+                                src={photo.data}
+                                alt={t(`inspection.angles.${photo.angle}`)}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button
+                                  onClick={() => window.open(photo.data, '_blank')}
+                                  className="text-white hover-elevate p-2 rounded"
+                                >
+                                  <ZoomIn className="w-5 h-5" />
+                                </button>
+                              </div>
+                              <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs px-2 py-1 text-center">
+                                {t(`inspection.angles.${photo.angle}`)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {extraPhotos.length > 0 && (
+                        <div data-testid="section-extra-photos-view">
+                          <h4 className="text-sm font-semibold mb-2" data-testid="label-extra-photos-view">
+                            {t('inspection.additionalPhotos')} ({extraPhotos.length})
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {extraPhotos.map((photo: any, index: number) => (
+                              <div key={index} className="group relative bg-muted rounded overflow-hidden border" data-testid={`photo-extra-${index}`}>
+                                <div className="aspect-video relative">
+                                  <img
+                                    src={photo.data}
+                                    alt={`${t('inspection.extraPhoto')} ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button
+                                      onClick={() => window.open(photo.data, '_blank')}
+                                      className="text-white hover-elevate p-2 rounded"
+                                    >
+                                      <ZoomIn className="w-5 h-5" />
+                                    </button>
+                                  </div>
+                                  <div className="absolute top-2 left-2">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {t('inspection.extraPhoto')} {index + 1}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                {photo.description && (
+                                  <div className="p-2 bg-card border-t">
+                                    <p className="text-xs text-muted-foreground" data-testid={`text-extra-description-${index}`}>
+                                      {photo.description}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
                           </div>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 );

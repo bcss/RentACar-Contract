@@ -12,6 +12,11 @@ import {
   companies,
   payments,
   vehicleInspections,
+  insuranceClaims,
+  renewalRequests,
+  documentApprovals,
+  supportTickets,
+  pushNotificationTokens,
   type User,
   type UpsertUser,
   type Contract,
@@ -37,6 +42,16 @@ import {
   type InsertPayment,
   type VehicleInspection,
   type InsertVehicleInspection,
+  type InsuranceClaim,
+  type InsertInsuranceClaim,
+  type RenewalRequest,
+  type InsertRenewalRequest,
+  type DocumentApproval,
+  type InsertDocumentApproval,
+  type SupportTicket,
+  type InsertSupportTicket,
+  type PushNotificationToken,
+  type InsertPushNotificationToken,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns } from "drizzle-orm";
@@ -163,6 +178,41 @@ export interface IStorage {
   // Company settings operations
   getCompanySettings(): Promise<CompanySettings>;
   updateCompanySettings(settings: Partial<InsertCompanySettings>, updatedBy: string): Promise<CompanySettings>;
+  
+  // Insurance Claims operations
+  getInsuranceClaims(filters?: { contractId?: string; vehicleId?: string; status?: string }): Promise<InsuranceClaim[]>;
+  getInsuranceClaimById(id: string): Promise<InsuranceClaim | undefined>;
+  createInsuranceClaim(claim: InsertInsuranceClaim): Promise<InsuranceClaim>;
+  updateInsuranceClaim(id: string, claim: Partial<InsertInsuranceClaim>): Promise<InsuranceClaim>;
+  disableInsuranceClaim(id: string): Promise<void>;
+  
+  // Renewal Requests operations
+  getRenewalRequests(filters?: { status?: string; customerId?: string; contractId?: string }): Promise<RenewalRequest[]>;
+  getRenewalRequest(id: string): Promise<RenewalRequest | undefined>;
+  createRenewalRequest(request: InsertRenewalRequest): Promise<RenewalRequest>;
+  updateRenewalRequest(id: string, request: Partial<InsertRenewalRequest>): Promise<RenewalRequest>;
+  deleteRenewalRequest(id: string, disabledBy: string): Promise<void>;
+  
+  // Document Approvals operations
+  getDocumentApprovals(filters?: { status?: string; customerId?: string; documentType?: string }): Promise<DocumentApproval[]>;
+  getDocumentApproval(id: string): Promise<DocumentApproval | undefined>;
+  createDocumentApproval(approval: InsertDocumentApproval): Promise<DocumentApproval>;
+  updateDocumentApproval(id: string, approval: Partial<InsertDocumentApproval>): Promise<DocumentApproval>;
+  deleteDocumentApproval(id: string, disabledBy: string): Promise<void>;
+  
+  // Support Tickets operations
+  getSupportTickets(filters?: { status?: string; priority?: string; category?: string; customerId?: string; assignedTo?: string }): Promise<SupportTicket[]>;
+  getSupportTicket(id: string): Promise<SupportTicket | undefined>;
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  updateSupportTicket(id: string, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket>;
+  deleteSupportTicket(id: string, disabledBy: string): Promise<void>;
+  
+  // Push Notification Tokens operations
+  getPushNotificationTokens(filters?: { userId?: string; customerId?: string; platform?: string; isActive?: boolean }): Promise<PushNotificationToken[]>;
+  getPushNotificationToken(id: string): Promise<PushNotificationToken | undefined>;
+  createPushNotificationToken(token: InsertPushNotificationToken): Promise<PushNotificationToken>;
+  updatePushNotificationToken(id: string, token: Partial<InsertPushNotificationToken>): Promise<PushNotificationToken>;
+  deletePushNotificationToken(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1874,6 +1924,392 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updated;
+  }
+
+  // Insurance Claims operations
+  async getInsuranceClaims(filters?: { contractId?: string; vehicleId?: string; status?: string }): Promise<InsuranceClaim[]> {
+    const conditions: any[] = [eq(insuranceClaims.disabled, false)];
+    
+    if (filters?.contractId) {
+      conditions.push(eq(insuranceClaims.contractId, filters.contractId));
+    }
+    if (filters?.status) {
+      conditions.push(eq(insuranceClaims.claimStatus, filters.status));
+    }
+    
+    const results = await db
+      .select()
+      .from(insuranceClaims)
+      .where(and(...conditions))
+      .orderBy(desc(insuranceClaims.createdAt));
+    
+    return results;
+  }
+
+  async getInsuranceClaimById(id: string): Promise<InsuranceClaim | undefined> {
+    const [claim] = await db
+      .select()
+      .from(insuranceClaims)
+      .where(and(eq(insuranceClaims.id, id), eq(insuranceClaims.disabled, false)));
+    
+    return claim;
+  }
+
+  async createInsuranceClaim(claimData: InsertInsuranceClaim): Promise<InsuranceClaim> {
+    // Generate claim number: CLM-YYYY-NNNN
+    const year = new Date().getFullYear();
+    
+    // Get the count of claims for this year
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year, 11, 31, 23, 59, 59);
+    
+    const existingClaims = await db
+      .select()
+      .from(insuranceClaims)
+      .where(
+        and(
+          sql`${insuranceClaims.createdAt} >= ${yearStart}`,
+          sql`${insuranceClaims.createdAt} <= ${yearEnd}`
+        )
+      );
+    
+    const nextNumber = existingClaims.length + 1;
+    const claimNumber = `CLM-${year}-${nextNumber.toString().padStart(4, '0')}`;
+    
+    const [newClaim] = await db
+      .insert(insuranceClaims)
+      .values({
+        ...claimData,
+        claimNumber,
+      } as any)
+      .returning();
+    
+    return newClaim;
+  }
+
+  async updateInsuranceClaim(id: string, claimData: Partial<InsertInsuranceClaim>): Promise<InsuranceClaim> {
+    const [updated] = await db
+      .update(insuranceClaims)
+      .set({
+        ...claimData,
+        updatedAt: new Date(),
+      })
+      .where(eq(insuranceClaims.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async disableInsuranceClaim(id: string): Promise<void> {
+    await db
+      .update(insuranceClaims)
+      .set({
+        disabled: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(insuranceClaims.id, id));
+  }
+
+  async deleteInsuranceClaim(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(insuranceClaims)
+      .set({
+        disabled: true,
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(insuranceClaims.id, id));
+  }
+
+  // Renewal Requests operations
+  async getRenewalRequests(filters?: { status?: string; customerId?: string; contractId?: string }): Promise<RenewalRequest[]> {
+    const conditions: any[] = [eq(renewalRequests.disabled, false)];
+    
+    if (filters?.status) {
+      conditions.push(eq(renewalRequests.status, filters.status));
+    }
+    if (filters?.customerId) {
+      conditions.push(eq(renewalRequests.customerId, filters.customerId));
+    }
+    if (filters?.contractId) {
+      conditions.push(eq(renewalRequests.contractId, filters.contractId));
+    }
+    
+    const results = await db
+      .select()
+      .from(renewalRequests)
+      .where(and(...conditions))
+      .orderBy(desc(renewalRequests.createdAt));
+    
+    return results;
+  }
+
+  async getRenewalRequest(id: string): Promise<RenewalRequest | undefined> {
+    const [request] = await db
+      .select()
+      .from(renewalRequests)
+      .where(and(eq(renewalRequests.id, id), eq(renewalRequests.disabled, false)));
+    
+    return request;
+  }
+
+  async createRenewalRequest(requestData: InsertRenewalRequest): Promise<RenewalRequest> {
+    const [newRequest] = await db
+      .insert(renewalRequests)
+      .values(requestData)
+      .returning();
+    
+    return newRequest;
+  }
+
+  async updateRenewalRequest(id: string, requestData: Partial<InsertRenewalRequest>): Promise<RenewalRequest> {
+    const [updated] = await db
+      .update(renewalRequests)
+      .set({
+        ...requestData,
+        updatedAt: new Date(),
+      })
+      .where(eq(renewalRequests.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async deleteRenewalRequest(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(renewalRequests)
+      .set({
+        disabled: true,
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(renewalRequests.id, id));
+  }
+
+  // Document Approvals operations
+  async getDocumentApprovals(filters?: { status?: string; customerId?: string; documentType?: string }): Promise<DocumentApproval[]> {
+    const conditions: any[] = [eq(documentApprovals.disabled, false)];
+    
+    if (filters?.status) {
+      conditions.push(eq(documentApprovals.status, filters.status));
+    }
+    if (filters?.customerId) {
+      conditions.push(eq(documentApprovals.customerId, filters.customerId));
+    }
+    if (filters?.documentType) {
+      conditions.push(eq(documentApprovals.documentType, filters.documentType));
+    }
+    
+    const results = await db
+      .select()
+      .from(documentApprovals)
+      .where(and(...conditions))
+      .orderBy(desc(documentApprovals.createdAt));
+    
+    return results;
+  }
+
+  async getDocumentApproval(id: string): Promise<DocumentApproval | undefined> {
+    const [approval] = await db
+      .select()
+      .from(documentApprovals)
+      .where(and(eq(documentApprovals.id, id), eq(documentApprovals.disabled, false)));
+    
+    return approval;
+  }
+
+  async createDocumentApproval(approvalData: InsertDocumentApproval): Promise<DocumentApproval> {
+    const [newApproval] = await db
+      .insert(documentApprovals)
+      .values(approvalData)
+      .returning();
+    
+    return newApproval;
+  }
+
+  async updateDocumentApproval(id: string, approvalData: Partial<InsertDocumentApproval>): Promise<DocumentApproval> {
+    const [updated] = await db
+      .update(documentApprovals)
+      .set({
+        ...approvalData,
+        updatedAt: new Date(),
+      })
+      .where(eq(documentApprovals.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async deleteDocumentApproval(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(documentApprovals)
+      .set({
+        disabled: true,
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(documentApprovals.id, id));
+  }
+
+  // Support Tickets operations
+  async getSupportTickets(filters?: { status?: string; priority?: string; category?: string; customerId?: string; assignedTo?: string }): Promise<SupportTicket[]> {
+    const conditions: any[] = [eq(supportTickets.disabled, false)];
+    
+    if (filters?.status) {
+      conditions.push(eq(supportTickets.status, filters.status));
+    }
+    if (filters?.priority) {
+      conditions.push(eq(supportTickets.priority, filters.priority));
+    }
+    if (filters?.category) {
+      conditions.push(eq(supportTickets.category, filters.category));
+    }
+    if (filters?.customerId) {
+      conditions.push(eq(supportTickets.customerId, filters.customerId));
+    }
+    if (filters?.assignedTo) {
+      conditions.push(eq(supportTickets.assignedTo, filters.assignedTo));
+    }
+    
+    const results = await db
+      .select()
+      .from(supportTickets)
+      .where(and(...conditions))
+      .orderBy(desc(supportTickets.createdAt));
+    
+    return results;
+  }
+
+  async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    const [ticket] = await db
+      .select()
+      .from(supportTickets)
+      .where(and(eq(supportTickets.id, id), eq(supportTickets.disabled, false)));
+    
+    return ticket;
+  }
+
+  async createSupportTicket(ticketData: InsertSupportTicket): Promise<SupportTicket> {
+    // Generate ticket number: TKT-YYYY-NNNN
+    const year = new Date().getFullYear();
+    
+    // Get the count of tickets for this year
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year, 11, 31, 23, 59, 59);
+    
+    const existingTickets = await db
+      .select()
+      .from(supportTickets)
+      .where(
+        and(
+          sql`${supportTickets.createdAt} >= ${yearStart}`,
+          sql`${supportTickets.createdAt} <= ${yearEnd}`
+        )
+      );
+    
+    const nextNumber = existingTickets.length + 1;
+    const ticketNumber = `TKT-${year}-${nextNumber.toString().padStart(5, '0')}`;
+    
+    const [newTicket] = await db
+      .insert(supportTickets)
+      .values({
+        ...ticketData,
+        ticketNumber,
+      } as any)
+      .returning();
+    
+    return newTicket;
+  }
+
+  async updateSupportTicket(id: string, ticketData: Partial<InsertSupportTicket>): Promise<SupportTicket> {
+    const [updated] = await db
+      .update(supportTickets)
+      .set({
+        ...ticketData,
+        updatedAt: new Date(),
+      })
+      .where(eq(supportTickets.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async deleteSupportTicket(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(supportTickets)
+      .set({
+        disabled: true,
+        disabledBy,
+        disabledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(supportTickets.id, id));
+  }
+
+  // Push Notification Tokens operations
+  async getPushNotificationTokens(filters?: { userId?: string; customerId?: string; platform?: string; isActive?: boolean }): Promise<PushNotificationToken[]> {
+    const conditions: any[] = [];
+    
+    if (filters?.userId) {
+      conditions.push(eq(pushNotificationTokens.userId, filters.userId));
+    }
+    if (filters?.customerId) {
+      conditions.push(eq(pushNotificationTokens.customerId, filters.customerId));
+    }
+    if (filters?.platform) {
+      conditions.push(eq(pushNotificationTokens.platform, filters.platform));
+    }
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(pushNotificationTokens.isActive, filters.isActive));
+    }
+    
+    const results = await db
+      .select()
+      .from(pushNotificationTokens)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(pushNotificationTokens.createdAt));
+    
+    return results;
+  }
+
+  async getPushNotificationToken(id: string): Promise<PushNotificationToken | undefined> {
+    const [token] = await db
+      .select()
+      .from(pushNotificationTokens)
+      .where(eq(pushNotificationTokens.id, id));
+    
+    return token;
+  }
+
+  async createPushNotificationToken(tokenData: InsertPushNotificationToken): Promise<PushNotificationToken> {
+    const [newToken] = await db
+      .insert(pushNotificationTokens)
+      .values(tokenData)
+      .returning();
+    
+    return newToken;
+  }
+
+  async updatePushNotificationToken(id: string, tokenData: Partial<InsertPushNotificationToken>): Promise<PushNotificationToken> {
+    const [updated] = await db
+      .update(pushNotificationTokens)
+      .set({
+        ...tokenData,
+        updatedAt: new Date(),
+      })
+      .where(eq(pushNotificationTokens.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async deletePushNotificationToken(id: string): Promise<void> {
+    await db
+      .delete(pushNotificationTokens)
+      .where(eq(pushNotificationTokens.id, id));
   }
 }
 

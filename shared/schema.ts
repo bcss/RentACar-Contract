@@ -747,21 +747,23 @@ export const insertVehicleInspectionSchema = createInsertSchema(vehicleInspectio
   fuelLevel: z.number().min(0).max(100),
   odometerReading: z.number().min(0),
   photos: z.array(z.object({
-    angle: z.enum(['front', 'back', 'left', 'right', 'top', 'dashboard']),
+    angle: z.enum(['front', 'back', 'left', 'right', 'top', 'dashboard', 'extra']),
     data: z.string().min(1, "Photo data required"), // base64 encoded image
+    description: z.string().optional(), // Optional description for extra photos
   }))
-    .length(6, "Exactly 6 photos required (front, back, left, right, top, dashboard)")
-    .refine((photos) => {
-      const angles = photos.map(p => p.angle);
-      const uniqueAngles = new Set(angles);
-      return uniqueAngles.size === 6;
-    }, { message: "All 6 unique photo angles must be provided" })
+    .min(6, "At least 6 photos required (all mandatory angles must be covered)")
     .refine((photos) => {
       const requiredAngles: Array<'front' | 'back' | 'left' | 'right' | 'top' | 'dashboard'> = 
         ['front', 'back', 'left', 'right', 'top', 'dashboard'];
       const angles = photos.map(p => p.angle);
       return requiredAngles.every(angle => angles.includes(angle));
-    }, { message: "Missing required photo angles" }),
+    }, { message: "All 6 mandatory photo angles must be provided (front, back, left, right, top, dashboard)" })
+    .refine((photos) => {
+      const mandatoryAngles = photos.filter(p => p.angle !== 'extra');
+      const angles = mandatoryAngles.map(p => p.angle);
+      const uniqueAngles = new Set(angles);
+      return uniqueAngles.size === 6;
+    }, { message: "Each mandatory angle must be unique" }),
 });
 
 export type InsertVehicleInspection = z.infer<typeof insertVehicleInspectionSchema>;
@@ -991,3 +993,317 @@ export const insertCompanySettingsSchema = createInsertSchema(companySettings).o
 
 export type InsertCompanySettings = z.infer<typeof insertCompanySettingsSchema>;
 export type CompanySettings = typeof companySettings.$inferSelect;
+
+// Insurance Claims table - Track insurance claims linked to contract accidents
+export const insuranceClaims = pgTable("insurance_claims", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  claimNumber: varchar("claim_number").notNull().unique(),
+  
+  // Dates
+  claimDate: timestamp("claim_date").notNull(),
+  incidentDate: timestamp("incident_date").notNull(),
+  
+  // Status
+  claimStatus: varchar("claim_status", { length: 20 }).notNull().default("pending"),
+  
+  // Financial
+  claimAmount: varchar("claim_amount").notNull(),
+  approvedAmount: varchar("approved_amount"),
+  settledAmount: varchar("settled_amount"),
+  
+  // Insurance Details
+  insuranceCompany: varchar("insurance_company").notNull(),
+  policyNumber: varchar("policy_number").notNull(),
+  
+  // Incident Details
+  incidentDescription: text("incident_description").notNull(),
+  damageAssessment: text("damage_assessment"),
+  
+  // Claimant Information
+  claimantName: varchar("claimant_name").notNull(),
+  claimantContact: varchar("claimant_contact").notNull(),
+  
+  // Handler
+  handledBy: varchar("handled_by").references(() => users.id),
+  
+  // Notes
+  notes: text("notes"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insuranceClaimsRelations = relations(insuranceClaims, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [insuranceClaims.contractId],
+    references: [contracts.id],
+  }),
+  creator: one(users, {
+    fields: [insuranceClaims.createdBy],
+    references: [users.id],
+    relationName: "insuranceClaimCreator",
+  }),
+  handler: one(users, {
+    fields: [insuranceClaims.handledBy],
+    references: [users.id],
+    relationName: "insuranceClaimHandler",
+  }),
+}));
+
+export const insertInsuranceClaimSchema = createInsertSchema(insuranceClaims).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  claimNumber: true,
+  disabled: true,
+  disabledBy: true,
+  disabledAt: true,
+  createdBy: true,
+}).extend({
+  claimDate: z.coerce.date(),
+  incidentDate: z.coerce.date(),
+  claimAmount: z.string().min(1, "Claim amount is required"),
+  incidentDescription: z.string().min(10, "Incident description must be at least 10 characters"),
+  claimantName: z.string().min(1, "Claimant name is required"),
+  claimantContact: z.string().min(1, "Claimant contact is required"),
+});
+
+export type InsertInsuranceClaim = z.infer<typeof insertInsuranceClaimSchema>;
+export type InsuranceClaim = typeof insuranceClaims.$inferSelect;
+
+// Renewal Requests table - Track customer requests to renew existing contracts
+export const renewalRequests = pgTable("renewal_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  customerId: varchar("customer_id").notNull().references(() => customers.id),
+  vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  
+  // Requested rental period
+  requestedStartDate: timestamp("requested_start_date").notNull(),
+  requestedEndDate: timestamp("requested_end_date").notNull(),
+  
+  // Request details
+  requestedBy: varchar("requested_by").notNull(), // Can be user ID or customer ID
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, rejected
+  
+  // Review information
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  rejectionReason: text("rejection_reason"),
+  notes: text("notes"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const renewalRequestsRelations = relations(renewalRequests, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [renewalRequests.contractId],
+    references: [contracts.id],
+  }),
+  customer: one(customers, {
+    fields: [renewalRequests.customerId],
+    references: [customers.id],
+  }),
+  vehicle: one(vehicles, {
+    fields: [renewalRequests.vehicleId],
+    references: [vehicles.id],
+  }),
+  reviewer: one(users, {
+    fields: [renewalRequests.reviewedBy],
+    references: [users.id],
+    relationName: "renewalRequestReviewer",
+  }),
+}));
+
+export const insertRenewalRequestSchema = createInsertSchema(renewalRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  reviewedBy: true,
+  reviewedAt: true,
+  disabled: true,
+  disabledBy: true,
+  disabledAt: true,
+}).extend({
+  requestedStartDate: z.coerce.date(),
+  requestedEndDate: z.coerce.date(),
+});
+
+export type InsertRenewalRequest = z.infer<typeof insertRenewalRequestSchema>;
+export type RenewalRequest = typeof renewalRequests.$inferSelect;
+
+// Document Approvals table - Track customer document submissions for approval
+export const documentApprovals = pgTable("document_approvals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id").notNull().references(() => customers.id),
+  
+  // Document details
+  documentType: varchar("document_type", { length: 50 }).notNull(), // license, id_card, insurance_card, etc.
+  documentImage: text("document_image").notNull(), // Base64 encoded image
+  
+  // Approval status
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, rejected
+  submittedBy: varchar("submitted_by").notNull(), // Can be customer ID or user ID
+  
+  // Review information
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  rejectionReason: text("rejection_reason"),
+  notes: text("notes"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const documentApprovalsRelations = relations(documentApprovals, ({ one }) => ({
+  customer: one(customers, {
+    fields: [documentApprovals.customerId],
+    references: [customers.id],
+  }),
+  reviewer: one(users, {
+    fields: [documentApprovals.reviewedBy],
+    references: [users.id],
+    relationName: "documentApprovalReviewer",
+  }),
+}));
+
+export const insertDocumentApprovalSchema = createInsertSchema(documentApprovals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  reviewedBy: true,
+  reviewedAt: true,
+  disabled: true,
+  disabledBy: true,
+  disabledAt: true,
+}).extend({
+  documentType: z.string().min(1, "Document type is required"),
+  documentImage: z.string().min(1, "Document image is required"),
+});
+
+export type InsertDocumentApproval = z.infer<typeof insertDocumentApprovalSchema>;
+export type DocumentApproval = typeof documentApprovals.$inferSelect;
+
+// Support Tickets table - Customer and staff support ticket system
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ticketNumber: varchar("ticket_number").notNull().unique(), // TKT-YYYY-NNNN
+  
+  // Submitter (either customer or staff)
+  customerId: varchar("customer_id").references(() => customers.id),
+  userId: varchar("user_id").references(() => users.id),
+  
+  // Ticket details
+  subject: varchar("subject").notNull(),
+  description: text("description").notNull(),
+  category: varchar("category", { length: 30 }).notNull(), // billing, technical, vehicle_issue, account, other
+  priority: varchar("priority", { length: 20 }).notNull().default("medium"), // low, medium, high, urgent
+  status: varchar("status", { length: 20 }).notNull().default("open"), // open, in_progress, resolved, closed
+  
+  // Assignment and resolution
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const supportTicketsRelations = relations(supportTickets, ({ one }) => ({
+  customer: one(customers, {
+    fields: [supportTickets.customerId],
+    references: [customers.id],
+  }),
+  user: one(users, {
+    fields: [supportTickets.userId],
+    references: [users.id],
+    relationName: "supportTicketUser",
+  }),
+  assignee: one(users, {
+    fields: [supportTickets.assignedTo],
+    references: [users.id],
+    relationName: "supportTicketAssignee",
+  }),
+}));
+
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  ticketNumber: true,
+  createdAt: true,
+  updatedAt: true,
+  resolvedAt: true,
+  disabled: true,
+  disabledBy: true,
+  disabledAt: true,
+}).extend({
+  subject: z.string().min(1, "Subject is required"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+});
+
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+
+// Push Notification Tokens table - Store device tokens for mobile push notifications
+export const pushNotificationTokens = pgTable("push_notification_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Owner (either staff user or customer)
+  userId: varchar("user_id").references(() => users.id),
+  customerId: varchar("customer_id").references(() => customers.id),
+  
+  // Token details
+  token: varchar("token").notNull().unique(), // FCM or APNS token
+  platform: varchar("platform", { length: 20 }).notNull(), // ios, android, web
+  deviceId: varchar("device_id"), // Unique device identifier
+  
+  // Status
+  isActive: boolean("is_active").notNull().default(true),
+  lastUsedAt: timestamp("last_used_at").defaultNow(),
+  
+  // Audit fields
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const pushNotificationTokensRelations = relations(pushNotificationTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [pushNotificationTokens.userId],
+    references: [users.id],
+  }),
+  customer: one(customers, {
+    fields: [pushNotificationTokens.customerId],
+    references: [customers.id],
+  }),
+}));
+
+export const insertPushNotificationTokenSchema = createInsertSchema(pushNotificationTokens).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastUsedAt: true,
+}).extend({
+  token: z.string().min(1, "Token is required"),
+  platform: z.enum(["ios", "android", "web"]),
+});
+
+export type InsertPushNotificationToken = z.infer<typeof insertPushNotificationTokenSchema>;
+export type PushNotificationToken = typeof pushNotificationTokens.$inferSelect;

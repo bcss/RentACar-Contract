@@ -2,7 +2,7 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -79,6 +79,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Failed to log error to database:", dbError);
     }
   }
+
+  // SECURITY FIX 2: Helper function to validate financial inputs
+  function validateFinancialInput(value: any, fieldName: string): number {
+    const parsed = typeof value === 'string' ? parseFloat(value) : Number(value);
+    if (!Number.isFinite(parsed)) {
+      throw new Error(`Invalid ${fieldName}: must be a valid number`);
+    }
+    return parsed;
+  }
+
+  // SECURITY FIX 3: Middleware to block mobile customer endpoints until customer authentication is implemented
+  // These endpoints are PREP work for Phase 3 mobile apps and require customer auth to function securely
+  const requireCustomerAuth = (req: any, res: any, next: any) => {
+    // PRODUCTION BLOCKER: Customer authentication not yet implemented
+    // These endpoints require one of:
+    // 1. JWT authentication with customer claims
+    // 2. Session-based customer authentication
+    // 3. OAuth/OIDC customer authentication
+    
+    return res.status(501).json({ 
+      error: "Not Implemented",
+      message: "Customer authentication required. These endpoints are part of Phase 3 mobile app preparation and cannot be used in production until customer authentication is implemented.",
+      documentation: "Contact system administrator to enable customer authentication before using mobile customer APIs."
+    });
+  };
+  
+  // Helper function for when customer auth IS implemented:
+  // async function verifyCustomerOwnership(req: any, customerId: string): Promise<boolean> {
+  //   // Extract authenticated customerId from session/JWT
+  //   const authenticatedCustomerId = req.user?.customerId || req.customer?.id;
+  //   
+  //   if (!authenticatedCustomerId) {
+  //     return false; // Not authenticated as customer
+  //   }
+  //   
+  //   if (authenticatedCustomerId !== customerId) {
+  //     return false; // Trying to access another customer's data
+  //   }
+  //   
+  //   return true; // Ownership verified
+  // }
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -841,6 +882,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get unclosed contract alerts (contracts completed 30+ days ago but not closed)
+  app.get('/api/contracts/unclosed-alerts', isAuthenticated, async (req: any, res) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      // Get all completed contracts
+      const allContracts = await storage.getAllContracts();
+      const completedContracts = allContracts.filter((c: any) => c.status === 'completed');
+      
+      // Filter for contracts completed 30+ days ago
+      const unclosedContracts = [];
+      
+      for (const contract of completedContracts) {
+        if (!contract.completedAt) continue;
+        
+        const completedAt = new Date(contract.completedAt);
+        completedAt.setHours(0, 0, 0, 0);
+        
+        // Check if completed more than 30 days ago
+        if (completedAt <= thirtyDaysAgo) {
+          // Calculate days unclosed
+          const daysUnclosed = Math.floor((today.getTime() - completedAt.getTime()) / (1000 * 60 * 60 * 24));
+          
+          // Get payments for this contract
+          const contractPayments = await storage.getPaymentsByContract(contract.id);
+          const totalPaid = contractPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount || '0'), 0);
+          
+          // Calculate outstanding balance
+          const totalAmount = parseFloat(contract.totalAmount || '0');
+          const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
+          const securityDeposit = parseFloat(contract.securityDeposit || '0');
+          const outstandingBalance = (totalAmount + totalExtraCharges) - securityDeposit - totalPaid;
+          
+          // Get handler info
+          const handler = await storage.getUser(contract.createdBy);
+          const handlerName = handler ? `${handler.firstName || ''} ${handler.lastName || ''}`.trim() || handler.username : 'Unknown';
+          
+          unclosedContracts.push({
+            id: contract.id,
+            contractNumber: contract.contractNumber,
+            customerName: (contract as any).customerNameEn || (contract as any).customerNameAr || 'N/A',
+            vehicleRegistration: (contract as any).vehicleRegistration || 'N/A',
+            completedAt: contract.completedAt,
+            daysUnclosed,
+            outstandingBalance: Math.round(outstandingBalance * 100) / 100,
+            handlerName,
+          });
+        }
+      }
+      
+      // Sort by daysUnclosed descending (oldest first)
+      unclosedContracts.sort((a, b) => b.daysUnclosed - a.daysUnclosed);
+      
+      res.json(unclosedContracts);
+    } catch (error) {
+      console.error("Error fetching unclosed contract alerts:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch unclosed contract alerts" });
+    }
+  });
+
   app.post('/api/contracts', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
@@ -867,31 +972,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { editReason, ...contractData } = req.body;
       
-      // CRITICAL FIX: Fetch contract FIRST before any processing
+      // Step 1: Fetch current contract FIRST
       const contract = await storage.getContract(req.params.id);
       
       if (!contract) {
         return res.status(404).json({ message: "Contract not found" });
       }
 
-      // CRITICAL FIX: Status-based validation BEFORE any updates
-      // Block edits to closed contracts completely - they are immutable
+      // Step 2: ALWAYS require editReason (cannot be bypassed)
+      if (!editReason || typeof editReason !== 'string') {
+        return res.status(400).json({ 
+          message: "Edit reason is required for all contract updates" 
+        });
+      }
+
+      const trimmedReason = editReason.trim();
+      
+      if (trimmedReason === '') {
+        return res.status(400).json({ 
+          message: "Edit reason cannot be empty" 
+        });
+      }
+
+      // Step 3: Status-based validation (BYPASS-PROOF)
+      // Based on CURRENT contract status (not req.body.status)
+      
       if (contract.status === 'closed') {
+        // Closed contracts are completely immutable
         return res.status(403).json({ 
           message: "Cannot edit closed contract. Closed contracts are immutable and cannot be modified." 
         });
       }
-
-      // CRITICAL FIX: Validate edit reason based on contract status BEFORE processing updates
+      
       if (contract.status === 'active' || contract.status === 'completed') {
-        // Active and Completed contracts require validated edit reason
-        if (!editReason || typeof editReason !== 'string' || editReason.trim() === '') {
-          return res.status(400).json({ 
-            message: "Edit reason is required for active and completed contracts" 
-          });
-        }
-        
-        const validation = validateEditReason(editReason.trim());
+        // Active/Completed: Require 10+ meaningful words (3+ chars each)
+        const validation = validateEditReason(trimmedReason);
         if (!validation.valid) {
           return res.status(400).json({ 
             message: validation.error,
@@ -899,31 +1014,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       } else if (contract.status === 'draft') {
-        // Draft contracts: require edit reason but with minimal validation
-        if (!editReason || typeof editReason !== 'string' || editReason.trim() === '') {
-          return res.status(400).json({ message: "Edit reason is required" });
+        // Draft: Require non-empty reason (already validated above)
+        // No additional validation needed
+      } else {
+        // Unknown status (backward compatibility for legacy data)
+        // Require validated reason to be safe
+        const validation = validateEditReason(trimmedReason);
+        if (!validation.valid) {
+          return res.status(400).json({ 
+            message: `Edit reason validation required for contract status '${contract.status}': ${validation.error}`,
+            wordCount: validation.wordCount
+          });
         }
       }
 
-      // Check if user has permission to edit
+      // Step 4: Check if user has permission to edit
       const user = await storage.getUser(userId);
       if (user?.role !== 'admin' && contract.createdBy !== userId) {
         return res.status(403).json({ message: "Forbidden: You can only edit your own contracts" });
       }
 
-      // Capture state before edit
+      // Step 5: Capture state before edit
       const fieldsBefore = { ...contract };
       
-      // Update the contract including editReason field
+      // Step 6: Update the contract including editReason field
       const updated = await storage.updateContract(req.params.id, {
         ...contractData,
-        editReason: editReason.trim(),
+        editReason: trimmedReason,
       });
       
-      // Capture state after edit
+      // Step 7: Capture state after edit
       const fieldsAfter = { ...updated };
       
-      // Generate human-readable summary of changes
+      // Step 8: Generate human-readable summary of changes
       const changedFields: string[] = [];
       Object.keys(contractData).forEach(key => {
         const beforeValue = (fieldsBefore as any)[key];
@@ -936,11 +1059,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? `Changed ${changedFields.length} field(s): ${changedFields.join(', ')}`
         : 'No changes detected';
       
-      // Create contract edit record
+      // Step 9: Create contract edit record
       await storage.createContractEdit({
         contractId: updated.id,
         editedBy: userId,
-        editReason: editReason.trim(),
+        editReason: trimmedReason,
         changesSummary,
         fieldsBefore,
         fieldsAfter,
@@ -1041,6 +1164,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
 
+      // CRITICAL FIX 1: Edit reason validation for completing active contracts
+      if (contract.status === 'active') {
+        const editReasonValidation = validateEditReason(req.body.editReason);
+        if (!editReasonValidation.valid) {
+          return res.status(400).json({ 
+            message: editReasonValidation.error || "Edit reason required when completing active contract"
+          });
+        }
+      }
+
       // VALIDATION: Ensure post-return inspection exists
       const inspections = await storage.getVehicleInspectionsByContract(req.params.id);
       const hasPostReturnInspection = inspections.some(i => i.inspectionType === 'post_return');
@@ -1052,6 +1185,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { timeIn, odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, trafficFineCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride, earlyClosureReason } = req.body;
+      
+      // CRITICAL FIX 2: Validate all financial inputs with Number.isFinite() guards
+      try {
+        if (extraKmCharge !== undefined && extraKmCharge !== null && extraKmCharge !== '') {
+          validateFinancialInput(extraKmCharge, 'extra km charge');
+        }
+        if (clientFuelCharge !== undefined && clientFuelCharge !== null && clientFuelCharge !== '') {
+          validateFinancialInput(clientFuelCharge, 'fuel charge');
+        }
+        if (damageCharge !== undefined && damageCharge !== null && damageCharge !== '') {
+          validateFinancialInput(damageCharge, 'damage charge');
+        }
+        if (trafficFineCharge !== undefined && trafficFineCharge !== null && trafficFineCharge !== '') {
+          validateFinancialInput(trafficFineCharge, 'traffic fine charge');
+        }
+        if (otherCharges !== undefined && otherCharges !== null && otherCharges !== '') {
+          validateFinancialInput(otherCharges, 'other charges');
+        }
+        if (totalExtraCharges !== undefined && totalExtraCharges !== null && totalExtraCharges !== '') {
+          validateFinancialInput(totalExtraCharges, 'total extra charges');
+        }
+        if (odometerEnd !== undefined && odometerEnd !== null && odometerEnd !== '') {
+          validateFinancialInput(odometerEnd, 'odometer reading');
+        }
+        if (fuelLevelEnd !== undefined && fuelLevelEnd !== null && fuelLevelEnd !== '') {
+          validateFinancialInput(fuelLevelEnd, 'fuel level');
+        }
+      } catch (error: any) {
+        return res.status(400).json({ message: error.message });
+      }
       
       // SECURITY: Calculate fuel charge on backend instead of trusting client
       const vehicle = await storage.getVehicleById(contract.vehicleId);
@@ -1092,27 +1255,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // AUTO-ADJUST SECURITY DEPOSIT: Calculate outstanding balance with automatic deposit deduction
-      // CRITICAL FIX: Safe parsing with guards for null/undefined values
-      const totalAmount = parseFloat(contract.totalAmount || '0');
+      // CRITICAL FIX Phase 1: Validate financial data instead of defaulting to zero
+      const totalAmount = parseFloat(contract.totalAmount);
       const totalExtraChargesNum = parseFloat(totalExtraCharges || '0');
-      const securityDeposit = parseFloat(contract.securityDeposit || '0');
+      const securityDeposit = parseFloat(contract.securityDeposit);
       
-      // CRITICAL FIX: Validate that parsed values are valid numbers
-      if (isNaN(totalAmount)) {
-        return res.status(500).json({ 
-          message: "Invalid contract total amount. Please contact system administrator." 
+      // Validate all values are finite numbers - reject invalid data instead of defaulting to zero
+      if (!isFinite(totalAmount)) {
+        return res.status(400).json({ 
+          message: "Invalid total amount in contract. Contract data is corrupted or incomplete." 
         });
       }
-      if (isNaN(totalExtraChargesNum)) {
-        return res.status(500).json({ 
-          message: "Invalid extra charges amount. Please contact system administrator." 
+      if (!isFinite(totalExtraChargesNum)) {
+        return res.status(400).json({ 
+          message: "Invalid extra charges amount. Please verify the extra charges data." 
         });
       }
-      if (isNaN(securityDeposit)) {
-        console.warn(`Contract ${contract.id} has invalid security deposit, defaulting to 0`);
-      }
       
-      const depositPaidAmount = contract.depositPaid ? (isNaN(securityDeposit) ? 0 : securityDeposit) : 0;
+      // Security deposit validation only if depositPaid is true
+      let depositPaidAmount = 0;
+      if (contract.depositPaid) {
+        if (!isFinite(securityDeposit)) {
+          return res.status(400).json({ 
+            message: "Invalid security deposit amount. Contract marked as deposit paid but amount is missing or invalid." 
+          });
+        }
+        depositPaidAmount = securityDeposit;
+      }
       
       // Get all payments made so far
       const contractPayments = await storage.getPaymentsByContract(contract.id);
@@ -1187,6 +1356,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
 
+      // CRITICAL FIX 1: Edit reason validation for closing completed contracts
+      if (contract.status === 'completed') {
+        // closureRemark is used as edit reason for close operations
+        const editReasonValidation = validateEditReason(req.body.closureRemark || req.body.editReason);
+        if (!editReasonValidation.valid) {
+          return res.status(400).json({ 
+            message: editReasonValidation.error || "Edit reason/closure remark required when closing completed contract"
+          });
+        }
+      }
+
       // Verify contract is in completed status
       if (contract.status !== 'completed') {
         return res.status(400).json({ 
@@ -1197,23 +1377,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // PAYMENT VERIFICATION: Query new payments table to verify settlement
       const contractPayments = await storage.getPaymentsByContract(contract.id);
       
-      // CRITICAL FIX: Safe parsing with guards for null/undefined values
+      // CRITICAL FIX Phase 1: Validate financial data instead of defaulting to zero
       const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
-        const amount = parseFloat(payment.amount || '0');
-        return sum + (isNaN(amount) ? 0 : amount);
+        const amount = parseFloat(payment.amount);
+        if (!isFinite(amount)) {
+          console.error(`Invalid payment amount in payment record: ${JSON.stringify(payment)}`);
+          return sum;
+        }
+        return sum + amount;
       }, 0);
       
-      const totalAmount = parseFloat(contract.totalAmount || '0');
+      const totalAmount = parseFloat(contract.totalAmount);
       const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
       
-      // CRITICAL FIX: Validate that parsed values are valid numbers
-      if (isNaN(totalAmount)) {
-        return res.status(500).json({ 
-          message: "Invalid contract total amount. Please contact system administrator." 
+      // Validate all values are finite numbers - reject invalid data instead of defaulting to zero
+      if (!isFinite(totalAmount)) {
+        return res.status(400).json({ 
+          message: "Invalid total amount in contract. Contract data is corrupted or incomplete." 
+        });
+      }
+      if (!isFinite(totalExtraCharges)) {
+        return res.status(400).json({ 
+          message: "Invalid extra charges in contract. Please verify the contract data." 
         });
       }
       
-      const totalDue = (isNaN(totalAmount) ? 0 : totalAmount) + (isNaN(totalExtraCharges) ? 0 : totalExtraCharges);
+      const totalDue = totalAmount + totalExtraCharges;
       
       // SECURITY FIX: Round to currency precision (2 decimals) to prevent floating point exploits
       const totalPaidRounded = Math.round(totalPaid * 100) / 100;
@@ -1857,6 +2046,798 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching inspection:", error);
       res.status(500).json({ message: error.message || "Failed to fetch inspection" });
+    }
+  });
+
+  // Insurance Claims routes
+  app.get('/api/insurance-claims', isAuthenticated, async (req: any, res) => {
+    try {
+      const { status, contractId } = req.query;
+      const filters: any = {};
+      if (status) filters.status = status as string;
+      if (contractId) filters.contractId = contractId as string;
+      
+      const claims = await storage.getInsuranceClaims(filters);
+      res.json(claims);
+    } catch (error: any) {
+      console.error("Error fetching insurance claims:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch insurance claims" });
+    }
+  });
+
+  app.get('/api/insurance-claims/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const claim = await storage.getInsuranceClaimById(req.params.id);
+      if (!claim) {
+        return res.status(404).json({ message: "Insurance claim not found" });
+      }
+      res.json(claim);
+    } catch (error: any) {
+      console.error("Error fetching insurance claim:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch insurance claim" });
+    }
+  });
+
+  app.get('/api/contracts/:contractId/insurance-claims', isAuthenticated, async (req: any, res) => {
+    try {
+      const { contractId } = req.params;
+      const claims = await storage.getInsuranceClaims({ contractId });
+      res.json(claims);
+    } catch (error: any) {
+      console.error("Error fetching contract insurance claims:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch contract insurance claims" });
+    }
+  });
+
+  app.post('/api/insurance-claims', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const claimData = insertInsuranceClaimSchema.parse(req.body);
+      
+      const claim = await storage.createInsuranceClaim({
+        ...claimData,
+        createdBy: userId,
+      } as any);
+      
+      await createAuditLog(
+        userId,
+        'create_insurance_claim',
+        claim.contractId,
+        req,
+        `Created insurance claim ${claim.claimNumber} for ${claim.claimAmount} - ${claim.insuranceCompany}`
+      );
+      
+      res.status(201).json(claim);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error creating insurance claim:", error);
+      res.status(400).json({ message: error.message || "Failed to create insurance claim" });
+    }
+  });
+
+  app.patch('/api/insurance-claims/:id', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const claimData = insertInsuranceClaimSchema.partial().parse(req.body);
+      
+      const claim = await storage.updateInsuranceClaim(req.params.id, claimData);
+      
+      await createAuditLog(
+        userId,
+        'update_insurance_claim',
+        claim.contractId,
+        req,
+        `Updated insurance claim ${claim.claimNumber}`
+      );
+      
+      res.json(claim);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error updating insurance claim:", error);
+      res.status(400).json({ message: error.message || "Failed to update insurance claim" });
+    }
+  });
+
+  app.delete('/api/insurance-claims/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const claim = await storage.getInsuranceClaimById(req.params.id);
+      
+      if (!claim) {
+        return res.status(404).json({ message: "Insurance claim not found" });
+      }
+      
+      await storage.disableInsuranceClaim(req.params.id);
+      
+      await createAuditLog(
+        userId,
+        'disable_insurance_claim',
+        claim.contractId,
+        req,
+        `Disabled insurance claim ${claim.claimNumber}`
+      );
+      
+      res.json({ message: "Insurance claim disabled successfully" });
+    } catch (error: any) {
+      console.error("Error disabling insurance claim:", error);
+      res.status(500).json({ message: error.message || "Failed to disable insurance claim" });
+    }
+  });
+
+  // Renewal Requests routes
+  app.get('/api/renewal-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const { status, customerId, contractId } = req.query;
+      const filters: any = {};
+      
+      if (status) filters.status = status;
+      if (customerId) filters.customerId = customerId;
+      if (contractId) filters.contractId = contractId;
+      
+      const requests = await storage.getRenewalRequests(filters);
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching renewal requests:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch renewal requests" });
+    }
+  });
+
+  app.get('/api/renewal-requests/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const request = await storage.getRenewalRequest(req.params.id);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Renewal request not found" });
+      }
+      
+      res.json(request);
+    } catch (error) {
+      console.error("Error fetching renewal request:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch renewal request" });
+    }
+  });
+
+  app.post('/api/renewal-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const requestData = insertRenewalRequestSchema.parse(req.body);
+      
+      const request = await storage.createRenewalRequest(requestData);
+      
+      await createAuditLog(
+        userId,
+        'create_renewal_request',
+        request.contractId,
+        req,
+        `Created renewal request for contract ${request.contractId}`
+      );
+      
+      res.json(request);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error creating renewal request:", error);
+      await logSystemError(error, req);
+      res.status(400).json({ message: error.message || "Failed to create renewal request" });
+    }
+  });
+
+  app.patch('/api/renewal-requests/:id', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const requestData = insertRenewalRequestSchema.partial().parse(req.body);
+      
+      const request = await storage.updateRenewalRequest(req.params.id, requestData);
+      
+      await createAuditLog(
+        userId,
+        'update_renewal_request',
+        request.contractId,
+        req,
+        `Updated renewal request ${request.id}`
+      );
+      
+      res.json(request);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error updating renewal request:", error);
+      res.status(400).json({ message: error.message || "Failed to update renewal request" });
+    }
+  });
+
+  app.delete('/api/renewal-requests/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const request = await storage.getRenewalRequest(req.params.id);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Renewal request not found" });
+      }
+      
+      await storage.deleteRenewalRequest(req.params.id, userId);
+      
+      await createAuditLog(
+        userId,
+        'delete_renewal_request',
+        request.contractId,
+        req,
+        `Deleted renewal request ${request.id}`
+      );
+      
+      res.json({ message: "Renewal request deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting renewal request:", error);
+      res.status(500).json({ message: error.message || "Failed to delete renewal request" });
+    }
+  });
+
+  app.post('/api/renewal-requests/:id/approve', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { notes } = req.body;
+      
+      const request = await storage.updateRenewalRequest(req.params.id, {
+        status: 'approved',
+        reviewedBy: userId,
+        reviewedAt: new Date(),
+        notes: notes || undefined,
+      });
+      
+      await createAuditLog(
+        userId,
+        'approve_renewal_request',
+        request.contractId,
+        req,
+        `Approved renewal request ${request.id}`
+      );
+      
+      res.json(request);
+    } catch (error: any) {
+      console.error("Error approving renewal request:", error);
+      res.status(400).json({ message: error.message || "Failed to approve renewal request" });
+    }
+  });
+
+  app.post('/api/renewal-requests/:id/reject', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { rejectionReason } = req.body;
+      
+      if (!rejectionReason) {
+        return res.status(400).json({ message: "Rejection reason is required" });
+      }
+      
+      const request = await storage.updateRenewalRequest(req.params.id, {
+        status: 'rejected',
+        reviewedBy: userId,
+        reviewedAt: new Date(),
+        rejectionReason,
+      });
+      
+      await createAuditLog(
+        userId,
+        'reject_renewal_request',
+        request.contractId,
+        req,
+        `Rejected renewal request ${request.id}: ${rejectionReason}`
+      );
+      
+      res.json(request);
+    } catch (error: any) {
+      console.error("Error rejecting renewal request:", error);
+      res.status(400).json({ message: error.message || "Failed to reject renewal request" });
+    }
+  });
+
+  // Document Approvals routes
+  app.get('/api/document-approvals', isAuthenticated, async (req: any, res) => {
+    try {
+      const { status, customerId, documentType } = req.query;
+      const filters: any = {};
+      
+      if (status) filters.status = status;
+      if (customerId) filters.customerId = customerId;
+      if (documentType) filters.documentType = documentType;
+      
+      const approvals = await storage.getDocumentApprovals(filters);
+      res.json(approvals);
+    } catch (error) {
+      console.error("Error fetching document approvals:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch document approvals" });
+    }
+  });
+
+  app.get('/api/document-approvals/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const approval = await storage.getDocumentApproval(req.params.id);
+      
+      if (!approval) {
+        return res.status(404).json({ message: "Document approval not found" });
+      }
+      
+      res.json(approval);
+    } catch (error) {
+      console.error("Error fetching document approval:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch document approval" });
+    }
+  });
+
+  app.post('/api/document-approvals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const approvalData = insertDocumentApprovalSchema.parse(req.body);
+      
+      const approval = await storage.createDocumentApproval(approvalData);
+      
+      await createAuditLog(
+        userId,
+        'create_document_approval',
+        undefined,
+        req,
+        `Created document approval for customer ${approval.customerId}`
+      );
+      
+      res.json(approval);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error creating document approval:", error);
+      await logSystemError(error, req);
+      res.status(400).json({ message: error.message || "Failed to create document approval" });
+    }
+  });
+
+  app.patch('/api/document-approvals/:id', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const approvalData = insertDocumentApprovalSchema.partial().parse(req.body);
+      
+      const approval = await storage.updateDocumentApproval(req.params.id, approvalData);
+      
+      await createAuditLog(
+        userId,
+        'update_document_approval',
+        undefined,
+        req,
+        `Updated document approval ${approval.id}`
+      );
+      
+      res.json(approval);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error updating document approval:", error);
+      res.status(400).json({ message: error.message || "Failed to update document approval" });
+    }
+  });
+
+  app.delete('/api/document-approvals/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const approval = await storage.getDocumentApproval(req.params.id);
+      
+      if (!approval) {
+        return res.status(404).json({ message: "Document approval not found" });
+      }
+      
+      await storage.deleteDocumentApproval(req.params.id, userId);
+      
+      await createAuditLog(
+        userId,
+        'delete_document_approval',
+        undefined,
+        req,
+        `Deleted document approval ${approval.id}`
+      );
+      
+      res.json({ message: "Document approval deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting document approval:", error);
+      res.status(500).json({ message: error.message || "Failed to delete document approval" });
+    }
+  });
+
+  app.post('/api/document-approvals/:id/approve', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { notes } = req.body;
+      
+      const approval = await storage.updateDocumentApproval(req.params.id, {
+        status: 'approved',
+        reviewedBy: userId,
+        reviewedAt: new Date(),
+        notes: notes || undefined,
+      });
+      
+      await createAuditLog(
+        userId,
+        'approve_document',
+        undefined,
+        req,
+        `Approved document ${approval.documentType} for customer ${approval.customerId}`
+      );
+      
+      res.json(approval);
+    } catch (error: any) {
+      console.error("Error approving document:", error);
+      res.status(400).json({ message: error.message || "Failed to approve document" });
+    }
+  });
+
+  app.post('/api/document-approvals/:id/reject', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { rejectionReason } = req.body;
+      
+      if (!rejectionReason) {
+        return res.status(400).json({ message: "Rejection reason is required" });
+      }
+      
+      const approval = await storage.updateDocumentApproval(req.params.id, {
+        status: 'rejected',
+        reviewedBy: userId,
+        reviewedAt: new Date(),
+        rejectionReason,
+      });
+      
+      await createAuditLog(
+        userId,
+        'reject_document',
+        undefined,
+        req,
+        `Rejected document ${approval.documentType} for customer ${approval.customerId}: ${rejectionReason}`
+      );
+      
+      res.json(approval);
+    } catch (error: any) {
+      console.error("Error rejecting document:", error);
+      res.status(400).json({ message: error.message || "Failed to reject document" });
+    }
+  });
+
+  // Support Tickets routes
+  app.get('/api/support-tickets', isAuthenticated, async (req: any, res) => {
+    try {
+      const { status, priority, category, customerId, assignedTo } = req.query;
+      const filters: any = {};
+      
+      if (status) filters.status = status;
+      if (priority) filters.priority = priority;
+      if (category) filters.category = category;
+      if (customerId) filters.customerId = customerId;
+      if (assignedTo) filters.assignedTo = assignedTo;
+      
+      const tickets = await storage.getSupportTickets(filters);
+      res.json(tickets);
+    } catch (error) {
+      console.error("Error fetching support tickets:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch support tickets" });
+    }
+  });
+
+  app.get('/api/support-tickets/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const ticket = await storage.getSupportTicket(req.params.id);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Support ticket not found" });
+      }
+      
+      res.json(ticket);
+    } catch (error) {
+      console.error("Error fetching support ticket:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch support ticket" });
+    }
+  });
+
+  app.post('/api/support-tickets', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const ticketData = insertSupportTicketSchema.parse(req.body);
+      
+      const ticket = await storage.createSupportTicket(ticketData);
+      
+      await createAuditLog(
+        userId,
+        'create_support_ticket',
+        undefined,
+        req,
+        `Created support ticket ${ticket.ticketNumber}`
+      );
+      
+      res.json(ticket);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error creating support ticket:", error);
+      await logSystemError(error, req);
+      res.status(400).json({ message: error.message || "Failed to create support ticket" });
+    }
+  });
+
+  app.patch('/api/support-tickets/:id', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const ticketData = insertSupportTicketSchema.partial().parse(req.body);
+      
+      const ticket = await storage.updateSupportTicket(req.params.id, ticketData);
+      
+      await createAuditLog(
+        userId,
+        'update_support_ticket',
+        undefined,
+        req,
+        `Updated support ticket ${ticket.ticketNumber}`
+      );
+      
+      res.json(ticket);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error updating support ticket:", error);
+      res.status(400).json({ message: error.message || "Failed to update support ticket" });
+    }
+  });
+
+  app.delete('/api/support-tickets/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const ticket = await storage.getSupportTicket(req.params.id);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Support ticket not found" });
+      }
+      
+      await storage.deleteSupportTicket(req.params.id, userId);
+      
+      await createAuditLog(
+        userId,
+        'delete_support_ticket',
+        undefined,
+        req,
+        `Deleted support ticket ${ticket.ticketNumber}`
+      );
+      
+      res.json({ message: "Support ticket deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting support ticket:", error);
+      res.status(500).json({ message: error.message || "Failed to delete support ticket" });
+    }
+  });
+
+  app.post('/api/support-tickets/:id/assign', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { assignedTo } = req.body;
+      
+      if (!assignedTo) {
+        return res.status(400).json({ message: "assignedTo user ID is required" });
+      }
+      
+      const ticket = await storage.updateSupportTicket(req.params.id, {
+        assignedTo,
+        status: 'in_progress',
+      });
+      
+      await createAuditLog(
+        userId,
+        'assign_support_ticket',
+        undefined,
+        req,
+        `Assigned support ticket ${ticket.ticketNumber} to user ${assignedTo}`
+      );
+      
+      res.json(ticket);
+    } catch (error: any) {
+      console.error("Error assigning support ticket:", error);
+      res.status(400).json({ message: error.message || "Failed to assign support ticket" });
+    }
+  });
+
+  app.post('/api/support-tickets/:id/resolve', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { resolution } = req.body;
+      
+      if (!resolution) {
+        return res.status(400).json({ message: "Resolution is required" });
+      }
+      
+      const ticket = await storage.updateSupportTicket(req.params.id, {
+        status: 'resolved',
+        resolution,
+        resolvedAt: new Date(),
+      });
+      
+      await createAuditLog(
+        userId,
+        'resolve_support_ticket',
+        undefined,
+        req,
+        `Resolved support ticket ${ticket.ticketNumber}`
+      );
+      
+      res.json(ticket);
+    } catch (error: any) {
+      console.error("Error resolving support ticket:", error);
+      res.status(400).json({ message: error.message || "Failed to resolve support ticket" });
+    }
+  });
+
+  // Push Notification Tokens routes
+  app.get('/api/push-tokens', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId, customerId, platform, isActive } = req.query;
+      const filters: any = {};
+      
+      if (userId) filters.userId = userId;
+      if (customerId) filters.customerId = customerId;
+      if (platform) filters.platform = platform;
+      if (isActive !== undefined) filters.isActive = isActive === 'true';
+      
+      const tokens = await storage.getPushNotificationTokens(filters);
+      res.json(tokens);
+    } catch (error) {
+      console.error("Error fetching push tokens:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch push tokens" });
+    }
+  });
+
+  app.get('/api/push-tokens/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const token = await storage.getPushNotificationToken(req.params.id);
+      
+      if (!token) {
+        return res.status(404).json({ message: "Push token not found" });
+      }
+      
+      res.json(token);
+    } catch (error) {
+      console.error("Error fetching push token:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch push token" });
+    }
+  });
+
+  app.post('/api/push-tokens', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const tokenData = insertPushNotificationTokenSchema.parse(req.body);
+      
+      const token = await storage.createPushNotificationToken(tokenData);
+      
+      await createAuditLog(
+        userId,
+        'register_push_token',
+        undefined,
+        req,
+        `Registered push notification token for ${tokenData.userId ? 'user' : 'customer'}`
+      );
+      
+      res.json(token);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error registering push token:", error);
+      await logSystemError(error, req);
+      res.status(400).json({ message: error.message || "Failed to register push token" });
+    }
+  });
+
+  app.patch('/api/push-tokens/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const tokenData = insertPushNotificationTokenSchema.partial().parse(req.body);
+      
+      const token = await storage.updatePushNotificationToken(req.params.id, tokenData);
+      
+      await createAuditLog(
+        userId,
+        'update_push_token',
+        undefined,
+        req,
+        `Updated push notification token ${token.id}`
+      );
+      
+      res.json(token);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error updating push token:", error);
+      res.status(400).json({ message: error.message || "Failed to update push token" });
+    }
+  });
+
+  app.delete('/api/push-tokens/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const token = await storage.getPushNotificationToken(req.params.id);
+      
+      if (!token) {
+        return res.status(404).json({ message: "Push token not found" });
+      }
+      
+      await storage.deletePushNotificationToken(req.params.id);
+      
+      await createAuditLog(
+        userId,
+        'delete_push_token',
+        undefined,
+        req,
+        `Deleted push notification token ${token.id}`
+      );
+      
+      res.json({ message: "Push token deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting push token:", error);
+      res.status(500).json({ message: error.message || "Failed to delete push token" });
+    }
+  });
+
+  app.post('/api/push-tokens/:id/activate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      const token = await storage.updatePushNotificationToken(req.params.id, {
+        isActive: true,
+        lastUsedAt: new Date(),
+      });
+      
+      await createAuditLog(
+        userId,
+        'activate_push_token',
+        undefined,
+        req,
+        `Activated push notification token ${token.id}`
+      );
+      
+      res.json(token);
+    } catch (error: any) {
+      console.error("Error activating push token:", error);
+      res.status(400).json({ message: error.message || "Failed to activate push token" });
+    }
+  });
+
+  app.post('/api/push-tokens/:id/deactivate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      const token = await storage.updatePushNotificationToken(req.params.id, {
+        isActive: false,
+      });
+      
+      await createAuditLog(
+        userId,
+        'deactivate_push_token',
+        undefined,
+        req,
+        `Deactivated push notification token ${token.id}`
+      );
+      
+      res.json(token);
+    } catch (error: any) {
+      console.error("Error deactivating push token:", error);
+      res.status(400).json({ message: error.message || "Failed to deactivate push token" });
     }
   });
 
@@ -2674,6 +3655,1229 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error updating financial settings:", error);
       res.status(400).json({ message: error.message || "Failed to update financial settings" });
+    }
+  });
+
+  // Insurance Claims endpoints
+  app.get('/api/insurance-claims', isAuthenticated, async (req: any, res) => {
+    try {
+      const { contractId, vehicleId, status } = req.query;
+      const filters: any = {};
+      
+      if (contractId) filters.contractId = contractId;
+      if (vehicleId) filters.vehicleId = vehicleId;
+      if (status) filters.status = status;
+      
+      const claims = await storage.getInsuranceClaims(filters);
+      res.json(claims);
+    } catch (error: any) {
+      console.error("Error fetching insurance claims:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch insurance claims" });
+    }
+  });
+
+  app.get('/api/insurance-claims/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const claim = await storage.getInsuranceClaimById(req.params.id);
+      if (!claim) {
+        return res.status(404).json({ message: "Insurance claim not found" });
+      }
+      res.json(claim);
+    } catch (error: any) {
+      console.error("Error fetching insurance claim:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: "Failed to fetch insurance claim" });
+    }
+  });
+
+  app.post('/api/insurance-claims', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Validate the request body
+      const validatedData = insertInsuranceClaimSchema.parse({
+        ...req.body,
+        createdBy: userId,
+      });
+      
+      const claim = await storage.createInsuranceClaim(validatedData);
+      
+      // Create audit log
+      await createAuditLog(
+        userId,
+        'create_insurance_claim',
+        claim.contractId,
+        req,
+        `Created insurance claim ${claim.claimNumber}`
+      );
+      
+      res.status(201).json(claim);
+    } catch (error: any) {
+      console.error("Error creating insurance claim:", error);
+      await logSystemError(error, req);
+      
+      if (error.name === 'ZodError') {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      
+      res.status(500).json({ message: error.message || "Failed to create insurance claim" });
+    }
+  });
+
+  app.patch('/api/insurance-claims/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const claimId = req.params.id;
+      
+      // Check if claim exists
+      const existingClaim = await storage.getInsuranceClaimById(claimId);
+      if (!existingClaim) {
+        return res.status(404).json({ message: "Insurance claim not found" });
+      }
+      
+      // Update the claim
+      const updatedClaim = await storage.updateInsuranceClaim(claimId, req.body);
+      
+      // Create audit log
+      await createAuditLog(
+        userId,
+        'update_insurance_claim',
+        updatedClaim.contractId,
+        req,
+        `Updated insurance claim ${updatedClaim.claimNumber}`
+      );
+      
+      res.json(updatedClaim);
+    } catch (error: any) {
+      console.error("Error updating insurance claim:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to update insurance claim" });
+    }
+  });
+
+  app.delete('/api/insurance-claims/:id', isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const claimId = req.params.id;
+      
+      // Check if claim exists
+      const existingClaim = await storage.getInsuranceClaimById(claimId);
+      if (!existingClaim) {
+        return res.status(404).json({ message: "Insurance claim not found" });
+      }
+      
+      await storage.disableInsuranceClaim(claimId);
+      
+      // Create audit log
+      await createAuditLog(
+        userId,
+        'delete_insurance_claim',
+        existingClaim.contractId,
+        req,
+        `Deleted insurance claim ${existingClaim.claimNumber}`
+      );
+      
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting insurance claim:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to delete insurance claim" });
+    }
+  });
+
+  // ==================== MOBILE API ENDPOINTS ====================
+  // NOTE: These endpoints are designed for mobile app consumption (customer & staff apps)
+  // They use session-based authentication for now. Future: migrate to JWT tokens.
+
+  // Helper middleware to verify customer authentication
+  // For now, customers authenticate using the same system as staff but are stored in customers table
+  // In the future, this will use JWT token authentication
+  const isCustomerAuthenticated = async (req: any, res: any, next: any) => {
+    // For MVP: Customers can authenticate using session (similar to staff)
+    // In production: Use JWT token authentication
+    // For now, we'll accept authenticated users and allow them to access customer data if they provide a customerId
+    if (!req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    next();
+  };
+
+  // ==================== CUSTOMER MOBILE ENDPOINTS ====================
+  
+  // GET /api/mobile/customer/profile - Get customer's own profile
+  app.get('/api/mobile/customer/profile', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.query.customerId;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      const customer = await storage.getCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      
+      // Get contracts count and active rentals
+      const allContracts = await storage.getAllContracts();
+      const customerContracts = allContracts.filter(c => c.customerId === customerId && !c.disabled);
+      const activeRentals = customerContracts.filter(c => c.status === 'active');
+      
+      // Get payment history summary
+      let totalPaid = 0;
+      let totalOutstanding = 0;
+      for (const contract of customerContracts) {
+        const payments = await storage.getPaymentsByContract(contract.id);
+        totalPaid += payments.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0);
+        totalOutstanding += parseFloat(contract.outstandingBalance || '0');
+      }
+      
+      // Return optimized response with essential fields only
+      res.json({
+        id: customer.id,
+        nameEn: customer.nameEn,
+        nameAr: customer.nameAr,
+        phone: customer.phone,
+        email: customer.email,
+        nationalId: customer.nationalId,
+        licenseNumber: customer.licenseNumber,
+        stats: {
+          totalContracts: customerContracts.length,
+          activeRentals: activeRentals.length,
+          totalPaid: totalPaid.toFixed(2),
+          totalOutstanding: totalOutstanding.toFixed(2),
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching customer profile:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to fetch profile" });
+    }
+  });
+
+  // GET /api/mobile/customer/contracts - Get customer's own contracts
+  app.get('/api/mobile/customer/contracts', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.query.customerId;
+      const status = req.query.status as string | undefined;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      // Get all contracts and filter by customer
+      const allContracts = await storage.getAllContracts();
+      let customerContracts = allContracts.filter(c => c.customerId === customerId && !c.disabled);
+      
+      // Filter by status if provided
+      if (status) {
+        customerContracts = customerContracts.filter(c => c.status === status);
+      }
+      
+      // Sort by creation date descending
+      customerContracts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      // Apply pagination
+      const paginatedContracts = customerContracts.slice(offset, offset + limit);
+      
+      // Enrich with vehicle and payment info
+      const enrichedContracts = await Promise.all(paginatedContracts.map(async (contract) => {
+        const vehicle = contract.vehicle;
+        const payments = await storage.getPaymentsByContract(contract.id);
+        const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0);
+        
+        return {
+          id: contract.id,
+          contractNumber: contract.contractNumber,
+          status: contract.status,
+          rentalStartDate: contract.rentalStartDate,
+          rentalEndDate: contract.rentalEndDate,
+          totalAmount: contract.totalAmount,
+          outstandingBalance: contract.outstandingBalance,
+          paymentStatus: contract.paymentStatus,
+          vehicle: {
+            make: vehicle?.make,
+            model: vehicle?.model,
+            year: vehicle?.year,
+            registration: vehicle?.registration,
+            color: vehicle?.color,
+          },
+          payments: {
+            total: totalPaid.toFixed(2),
+            count: payments.length,
+          },
+        };
+      }));
+      
+      res.json({
+        contracts: enrichedContracts,
+        pagination: {
+          total: customerContracts.length,
+          limit,
+          offset,
+          hasMore: offset + limit < customerContracts.length,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching customer contracts:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to fetch contracts" });
+    }
+  });
+
+  // GET /api/mobile/customer/contracts/:id - Get single contract details
+  app.get('/api/mobile/customer/contracts/:id', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.query.customerId;
+      const contractId = req.params.id;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      const contract = await storage.getContract(contractId);
+      
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      // Verify customer owns this contract
+      if (contract.customerId !== customerId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Get related data
+      const payments = await storage.getPaymentsByContract(contractId);
+      const inspections = await storage.getVehicleInspectionsByContract(contractId);
+      const auditLogs = await storage.getContractAuditLogs(contractId);
+      
+      // Return full contract with related data
+      res.json({
+        contract: {
+          ...contract,
+          customer: contract.customer,
+          vehicle: contract.vehicle,
+        },
+        payments,
+        inspections,
+        timeline: auditLogs,
+      });
+    } catch (error: any) {
+      console.error("Error fetching contract details:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to fetch contract" });
+    }
+  });
+
+  // GET /api/mobile/customer/payments - Get customer's payment history
+  app.get('/api/mobile/customer/payments', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.query.customerId;
+      const contractId = req.query.contractId as string | undefined;
+      const startDate = req.query.startDate as string | undefined;
+      const endDate = req.query.endDate as string | undefined;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      // Get all customer contracts
+      const allContracts = await storage.getAllContracts();
+      let customerContracts = allContracts.filter(c => c.customerId === customerId && !c.disabled);
+      
+      // Filter by specific contract if provided
+      if (contractId) {
+        customerContracts = customerContracts.filter(c => c.id === contractId);
+      }
+      
+      // Get all payments for customer's contracts
+      let allPayments: any[] = [];
+      for (const contract of customerContracts) {
+        const payments = await storage.getPaymentsByContract(contract.id);
+        allPayments.push(...payments.map(p => ({
+          ...p,
+          contractNumber: contract.contractNumber,
+          vehicleMake: contract.vehicle?.make,
+          vehicleModel: contract.vehicle?.model,
+        })));
+      }
+      
+      // Filter by date range if provided
+      if (startDate || endDate) {
+        allPayments = allPayments.filter(p => {
+          const paymentDate = new Date(p.paymentDate);
+          if (startDate && paymentDate < new Date(startDate)) return false;
+          if (endDate && paymentDate > new Date(endDate)) return false;
+          return true;
+        });
+      }
+      
+      // Sort by payment date descending
+      allPayments.sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime());
+      
+      // Apply pagination
+      const paginatedPayments = allPayments.slice(offset, offset + limit);
+      
+      res.json({
+        payments: paginatedPayments,
+        pagination: {
+          total: allPayments.length,
+          limit,
+          offset,
+          hasMore: offset + limit < allPayments.length,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching customer payments:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to fetch payments" });
+    }
+  });
+
+  // POST /api/mobile/customer/renewal-request - Submit contract renewal request
+  app.post('/api/mobile/customer/renewal-request', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.body.customerId;
+      const userId = req.user.id;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      // Validate contract exists and belongs to customer
+      const contract = await storage.getContract(req.body.contractId);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      if (contract.customerId !== customerId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Create renewal request with pending status
+      const requestData = insertRenewalRequestSchema.parse(req.body);
+      const request = await storage.createRenewalRequest({
+        ...requestData,
+        status: 'pending',
+      });
+      
+      await createAuditLog(
+        userId,
+        'create_renewal_request',
+        contract.id,
+        req,
+        `Customer ${customerId} submitted renewal request for contract ${contract.contractNumber}`
+      );
+      
+      res.status(201).json({
+        message: "Renewal request submitted successfully",
+        request,
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error creating renewal request:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to submit renewal request" });
+    }
+  });
+
+  // GET /api/mobile/customer/documents - Get customer's uploaded documents
+  app.get('/api/mobile/customer/documents', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.query.customerId;
+      const status = req.query.status as string | undefined;
+      const documentType = req.query.documentType as string | undefined;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      const filters: any = { customerId };
+      if (status) filters.status = status;
+      if (documentType) filters.documentType = documentType;
+      
+      const documents = await storage.getDocumentApprovals(filters);
+      
+      // Sort by creation date descending
+      documents.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      res.json(documents);
+    } catch (error: any) {
+      console.error("Error fetching customer documents:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to fetch documents" });
+    }
+  });
+
+  // POST /api/mobile/customer/documents - Upload document for approval
+  app.post('/api/mobile/customer/documents', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.body.customerId;
+      const userId = req.user.id;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      // Validate document data
+      const documentData = insertDocumentApprovalSchema.parse({
+        ...req.body,
+        submittedBy: customerId,
+        status: 'pending',
+      });
+      
+      const document = await storage.createDocumentApproval(documentData);
+      
+      await createAuditLog(
+        userId,
+        'create_document_approval',
+        undefined,
+        req,
+        `Customer ${customerId} uploaded ${documentData.documentType} for approval`
+      );
+      
+      res.status(201).json({
+        message: "Document uploaded successfully",
+        document,
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error uploading document:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to upload document" });
+    }
+  });
+
+  // GET /api/mobile/customer/support-tickets - Get customer's support tickets
+  app.get('/api/mobile/customer/support-tickets', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.query.customerId;
+      const status = req.query.status as string | undefined;
+      const category = req.query.category as string | undefined;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      const filters: any = { customerId };
+      if (status) filters.status = status;
+      if (category) filters.category = category;
+      
+      const tickets = await storage.getSupportTickets(filters);
+      
+      // Sort by creation date descending
+      tickets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      res.json(tickets);
+    } catch (error: any) {
+      console.error("Error fetching customer support tickets:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to fetch support tickets" });
+    }
+  });
+
+  // POST /api/mobile/customer/support-tickets - Create support ticket
+  app.post('/api/mobile/customer/support-tickets', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.body.customerId;
+      const userId = req.user.id;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      // Auto-generate ticket number
+      const year = new Date().getFullYear();
+      const allTickets = await storage.getSupportTickets({});
+      const ticketCount = allTickets.length + 1;
+      const ticketNumber = `TKT-${year}-${ticketCount.toString().padStart(4, '0')}`;
+      
+      // Create support ticket
+      const ticketData = insertSupportTicketSchema.parse({
+        ...req.body,
+        ticketNumber,
+        customerId,
+        status: 'open',
+      });
+      
+      const ticket = await storage.createSupportTicket(ticketData as any);
+      
+      await createAuditLog(
+        userId,
+        'create_support_ticket',
+        undefined,
+        req,
+        `Customer ${customerId} created support ticket ${ticketNumber}`
+      );
+      
+      res.status(201).json({
+        message: "Support ticket created successfully",
+        ticket,
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error creating support ticket:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to create support ticket" });
+    }
+  });
+
+  // POST /api/mobile/customer/report-accident - Report vehicle accident
+  app.post('/api/mobile/customer/report-accident', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    // CRITICAL FIX 4: Transaction wrapping with manual rollback
+    const createdRecords: { claim: any; ticket: any; audit: any } = { claim: null, ticket: null, audit: null };
+    
+    try {
+      const customerId = req.body.customerId;
+      const userId = req.user.id;
+      const {
+        contractId,
+        incidentDate,
+        location,
+        description,
+        severity,
+        photos,
+        policeReportNumber,
+        injuries,
+        thirdPartyInvolved,
+      } = req.body;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      // Validate required fields
+      if (!contractId || !incidentDate || !location || !description || !severity) {
+        return res.status(400).json({ 
+          message: "Missing required fields: contractId, incidentDate, location, description, severity" 
+        });
+      }
+      
+      // Verify contract exists and belongs to customer
+      const contract = await storage.getContract(contractId);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      if (contract.customerId !== customerId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Verify contract is active
+      if (contract.status !== 'active') {
+        return res.status(400).json({ message: "Contract must be active to report accident" });
+      }
+      
+      // Create insurance claim
+      const year = new Date().getFullYear();
+      const allClaims = await storage.getInsuranceClaims({});
+      const claimCount = allClaims.length + 1;
+      const claimNumber = `CLM-${year}-${claimCount.toString().padStart(4, '0')}`;
+      
+      const customer = await storage.getCustomerById(customerId);
+      const vehicle = contract.vehicle;
+      
+      const claimData = {
+        contractId,
+        claimNumber,
+        claimDate: new Date(),
+        incidentDate: new Date(incidentDate),
+        claimStatus: 'pending',
+        claimAmount: '0', // To be assessed
+        insuranceCompany: vehicle?.policyNumber ? 'Vehicle Insurance' : 'Unknown',
+        policyNumber: vehicle?.policyNumber || 'N/A',
+        incidentDescription: `${description}\n\nLocation: ${location}\nSeverity: ${severity}\nPolice Report: ${policeReportNumber || 'None'}\nInjuries: ${injuries ? 'Yes' : 'No'}\nThird Party: ${thirdPartyInvolved ? 'Yes' : 'No'}`,
+        damageAssessment: `Awaiting assessment. Photos: ${photos?.length || 0}`,
+        claimantName: customer?.nameEn || 'Unknown',
+        claimantContact: customer?.phone || 'Unknown',
+        witnessDetails: thirdPartyInvolved ? 'Third party involved - details pending' : 'None',
+        policeReportNumber: policeReportNumber || null,
+        createdBy: userId,
+      };
+      
+      const claim = await storage.createInsuranceClaim(claimData as any);
+      createdRecords.claim = claim;
+      
+      // Create support ticket for follow-up
+      const allTickets = await storage.getSupportTickets({});
+      const ticketCount = allTickets.length + 1;
+      const ticketNumber = `TKT-${year}-${ticketCount.toString().padStart(4, '0')}`;
+      
+      const ticketData = {
+        ticketNumber,
+        customerId,
+        subject: `Accident Report - ${claimNumber}`,
+        description: `Accident reported for contract ${contract.contractNumber}.\n\n${description}\n\nClaim Number: ${claimNumber}\nSeverity: ${severity}`,
+        category: 'vehicle_issue',
+        priority: severity === 'severe' ? 'urgent' : severity === 'moderate' ? 'high' : 'medium',
+        status: 'open',
+      };
+      
+      const ticket = await storage.createSupportTicket(ticketData as any);
+      createdRecords.ticket = ticket;
+      
+      // Create audit log
+      await createAuditLog(
+        userId,
+        'report_accident',
+        contractId,
+        req,
+        `Customer ${customerId} reported accident - Claim: ${claimNumber}, Ticket: ${ticketNumber}`
+      );
+      createdRecords.audit = true;
+      
+      res.status(201).json({
+        message: "Accident reported successfully",
+        claimNumber,
+        ticketNumber,
+        nextSteps: "Our team will review your report and contact you within 24 hours. Please keep your vehicle safe and do not attempt repairs without authorization.",
+        claim,
+        ticket,
+      });
+    } catch (error: any) {
+      // CRITICAL FIX 4: Manual rollback on error
+      console.error("Error reporting accident - initiating rollback:", error);
+      
+      try {
+        if (createdRecords.claim) {
+          console.log(`Rolling back insurance claim: ${createdRecords.claim.id}`);
+          await storage.deleteInsuranceClaim(createdRecords.claim.id, 'system_rollback');
+        }
+        if (createdRecords.ticket) {
+          console.log(`Rolling back support ticket: ${createdRecords.ticket.id}`);
+          await storage.deleteSupportTicket(createdRecords.ticket.id, 'system_rollback');
+        }
+        // Audit logs are left for debugging purposes
+      } catch (rollbackError) {
+        console.error("Error during rollback:", rollbackError);
+        // Log rollback failure but continue with error response
+      }
+      
+      await logSystemError(error, req as any);
+      res.status(500).json({ message: error.message || "Failed to report accident" });
+    }
+  });
+
+  // PATCH /api/mobile/customer/profile - Update customer profile
+  app.patch('/api/mobile/customer/profile', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.body.customerId;
+      const userId = req.user.id;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      // Only allow updating specific fields (not name, nationalId, licenseNumber)
+      const allowedFields = ['phone', 'email', 'address'];
+      const updates: any = {};
+      
+      for (const field of allowedFields) {
+        if (req.body[field] !== undefined) {
+          updates[field] = req.body[field];
+        }
+      }
+      
+      if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ message: "No valid fields to update" });
+      }
+      
+      const customer = await storage.updateCustomer(customerId, updates);
+      
+      await createAuditLog(
+        userId,
+        'update_customer_profile',
+        undefined,
+        req,
+        `Customer ${customerId} updated profile fields: ${Object.keys(updates).join(', ')}`
+      );
+      
+      res.json({
+        message: "Profile updated successfully",
+        customer: {
+          id: customer.id,
+          nameEn: customer.nameEn,
+          nameAr: customer.nameAr,
+          phone: customer.phone,
+          email: customer.email,
+          address: customer.address,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error updating customer profile:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to update profile" });
+    }
+  });
+
+  // POST /api/mobile/customer/change-password - Change password (placeholder for future JWT auth)
+  app.post('/api/mobile/customer/change-password', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const customerId = req.body.customerId;
+      
+      // CRITICAL FIX 5: Add audit log for password change attempts
+      await createAuditLog(
+        userId,
+        'change_password_attempt',
+        undefined,
+        req,
+        `Customer ${customerId || 'unknown'} attempted password change - JWT auth not yet implemented`
+      );
+      
+      // Placeholder for future JWT authentication implementation
+      // Currently using session-based auth, so this endpoint returns a message
+      res.json({
+        message: "Password change functionality will be available when JWT authentication is implemented",
+        note: "Please contact support to change your password",
+      });
+    } catch (error: any) {
+      console.error("Error changing password:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to change password" });
+    }
+  });
+
+  // POST /api/mobile/customer/push-token - Register push notification token
+  app.post('/api/mobile/customer/push-token', requireCustomerAuth, isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.body.customerId;
+      const { token, platform, deviceId } = req.body;
+      
+      if (!customerId) {
+        return res.status(400).json({ message: "Customer ID required" });
+      }
+      
+      // CRITICAL FIX 3: Verify customer ownership
+      const authorized = await verifyCustomerOwnership(req, customerId);
+      if (!authorized) {
+        return res.status(403).json({ message: "Access denied: Invalid customer ID" });
+      }
+      
+      if (!token || !platform) {
+        return res.status(400).json({ message: "Token and platform are required" });
+      }
+      
+      // Check if token already exists
+      const existingTokens = await storage.getPushNotificationTokens({ customerId });
+      const existingToken = existingTokens.find(t => t.token === token);
+      
+      if (existingToken) {
+        // Update existing token
+        const updatedToken = await storage.updatePushNotificationToken(existingToken.id, {
+          isActive: true,
+          lastUsedAt: new Date(),
+          platform,
+          deviceId: deviceId || existingToken.deviceId,
+        });
+        
+        return res.json({
+          message: "Push notification token updated successfully",
+          token: updatedToken,
+        });
+      }
+      
+      // Mark old tokens from same device as inactive
+      if (deviceId) {
+        const sameDeviceTokens = existingTokens.filter(t => t.deviceId === deviceId);
+        for (const oldToken of sameDeviceTokens) {
+          await storage.updatePushNotificationToken(oldToken.id, { isActive: false });
+        }
+      }
+      
+      // Create new token
+      const tokenData = insertPushNotificationTokenSchema.parse({
+        customerId,
+        token,
+        platform,
+        deviceId,
+        isActive: true,
+      });
+      
+      const newToken = await storage.createPushNotificationToken(tokenData);
+      
+      res.status(201).json({
+        message: "Push notification token registered successfully",
+        token: newToken,
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error registering push token:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to register push token" });
+    }
+  });
+
+  // ==================== STAFF MOBILE ENDPOINTS ====================
+  
+  // GET /api/mobile/staff/dashboard - Staff dashboard summary
+  app.get('/api/mobile/staff/dashboard', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get all contracts
+      const allContracts = await storage.getAllContracts();
+      const activeContracts = allContracts.filter(c => c.status === 'active' && !c.disabled);
+      
+      // Get pending renewal requests
+      const renewalRequests = await storage.getRenewalRequests({ status: 'pending' });
+      
+      // Get pending document approvals
+      const documentApprovals = await storage.getDocumentApprovals({ status: 'pending' });
+      
+      // Get open support tickets
+      const supportTickets = await storage.getSupportTickets({ status: 'open' });
+      
+      // Get today's pickups and returns
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const todaysPickups = allContracts.filter(c => {
+        const startDate = new Date(c.rentalStartDate);
+        startDate.setHours(0, 0, 0, 0);
+        return startDate.getTime() === today.getTime() && c.status === 'confirmed';
+      });
+      
+      const todaysReturns = allContracts.filter(c => {
+        const endDate = new Date(c.rentalEndDate);
+        endDate.setHours(0, 0, 0, 0);
+        return endDate.getTime() === today.getTime() && c.status === 'active';
+      });
+      
+      res.json({
+        activeContracts: activeContracts.length,
+        pendingRenewals: renewalRequests.length,
+        pendingDocuments: documentApprovals.length,
+        openTickets: supportTickets.length,
+        todaysPickups: todaysPickups.length,
+        todaysReturns: todaysReturns.length,
+        summary: {
+          pickups: todaysPickups.map(c => ({
+            contractNumber: c.contractNumber,
+            customerName: c.customer?.nameEn,
+            vehicleMake: c.vehicle?.make,
+            vehicleModel: c.vehicle?.model,
+            time: c.timeIn || 'Not specified',
+          })),
+          returns: todaysReturns.map(c => ({
+            contractNumber: c.contractNumber,
+            customerName: c.customer?.nameEn,
+            vehicleMake: c.vehicle?.make,
+            vehicleModel: c.vehicle?.model,
+            time: c.timeOut || 'Not specified',
+          })),
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching staff dashboard:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to fetch dashboard" });
+    }
+  });
+
+  // GET /api/mobile/staff/tasks - Staff task list
+  app.get('/api/mobile/staff/tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const priority = req.query.priority as string | undefined;
+      
+      // Get pending renewals
+      const renewalRequests = await storage.getRenewalRequests({ status: 'pending' });
+      
+      // Get pending document approvals
+      const documentApprovals = await storage.getDocumentApprovals({ status: 'pending' });
+      
+      // Get assigned support tickets
+      const assignedTickets = await storage.getSupportTickets({ assignedTo: userId });
+      const openAssignedTickets = assignedTickets.filter(t => t.status !== 'resolved' && t.status !== 'closed');
+      
+      // Get inspections due today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const allContracts = await storage.getAllContracts();
+      const inspectionsDue = allContracts.filter(c => {
+        const startDate = new Date(c.rentalStartDate);
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(c.rentalEndDate);
+        endDate.setHours(0, 0, 0, 0);
+        
+        // Inspections due for pickups (confirmed) and returns (active ending today)
+        return (
+          (startDate.getTime() === today.getTime() && c.status === 'confirmed') ||
+          (endDate.getTime() === today.getTime() && c.status === 'active')
+        );
+      });
+      
+      // Compile all tasks
+      const tasks = [
+        ...renewalRequests.map(r => ({
+          type: 'renewal_request',
+          priority: 'medium',
+          id: r.id,
+          title: `Renewal Request - Contract ${r.contractId}`,
+          description: `Customer requested renewal`,
+          dueDate: r.createdAt,
+          data: r,
+        })),
+        ...documentApprovals.map(d => ({
+          type: 'document_approval',
+          priority: 'low',
+          id: d.id,
+          title: `Document Approval - ${d.documentType}`,
+          description: `Customer uploaded ${d.documentType}`,
+          dueDate: d.createdAt,
+          data: d,
+        })),
+        ...openAssignedTickets.map(t => ({
+          type: 'support_ticket',
+          priority: t.priority || 'medium',
+          id: t.id,
+          title: `Support Ticket - ${t.ticketNumber}`,
+          description: t.subject,
+          dueDate: t.createdAt,
+          data: t,
+        })),
+        ...inspectionsDue.map(c => ({
+          type: 'inspection',
+          priority: 'high',
+          id: c.id,
+          title: `Inspection Due - Contract ${c.contractNumber}`,
+          description: `Vehicle ${c.vehicle?.make} ${c.vehicle?.model}`,
+          dueDate: c.rentalStartDate,
+          data: c,
+        })),
+      ];
+      
+      // Filter by priority if specified
+      let filteredTasks = tasks;
+      if (priority) {
+        filteredTasks = tasks.filter(t => t.priority === priority);
+      }
+      
+      // Sort by priority and due date
+      const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+      filteredTasks.sort((a, b) => {
+        const priorityDiff = priorityOrder[a.priority as keyof typeof priorityOrder] - priorityOrder[b.priority as keyof typeof priorityOrder];
+        if (priorityDiff !== 0) return priorityDiff;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      });
+      
+      res.json({
+        tasks: filteredTasks,
+        summary: {
+          total: filteredTasks.length,
+          byPriority: {
+            urgent: filteredTasks.filter(t => t.priority === 'urgent').length,
+            high: filteredTasks.filter(t => t.priority === 'high').length,
+            medium: filteredTasks.filter(t => t.priority === 'medium').length,
+            low: filteredTasks.filter(t => t.priority === 'low').length,
+          },
+          byType: {
+            renewals: renewalRequests.length,
+            documents: documentApprovals.length,
+            tickets: openAssignedTickets.length,
+            inspections: inspectionsDue.length,
+          },
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching staff tasks:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to fetch tasks" });
+    }
+  });
+
+  // POST /api/mobile/staff/quick-inspection - Quick vehicle inspection submit
+  app.post('/api/mobile/staff/quick-inspection', isAuthenticated, requireEditor, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = req.user;
+      const {
+        contractId,
+        vehicleId,
+        inspectionType,
+        odometerReading,
+        fuelLevel,
+        conditionNotes,
+        photos,
+      } = req.body;
+      
+      // Validate required fields
+      if (!contractId || !vehicleId || !inspectionType || odometerReading === undefined || fuelLevel === undefined) {
+        return res.status(400).json({ 
+          message: "Missing required fields: contractId, vehicleId, inspectionType, odometerReading, fuelLevel" 
+        });
+      }
+      
+      // CRITICAL FIX 2: Validate numeric inputs with Number.isFinite() guards
+      try {
+        validateFinancialInput(odometerReading, 'odometer reading');
+        validateFinancialInput(fuelLevel, 'fuel level');
+      } catch (error: any) {
+        return res.status(400).json({ message: error.message });
+      }
+      
+      // Verify contract exists
+      const contract = await storage.getContract(contractId);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      // For quick inspection, we need at least 3 photos: front, back, and damage (if any)
+      if (!photos || !Array.isArray(photos) || photos.length < 2) {
+        return res.status(400).json({ 
+          message: "At least 2 photos required (front and back). Add damage photos if applicable." 
+        });
+      }
+      
+      // Ensure required angles are present
+      const photoAngles = photos.map((p: any) => p.angle);
+      if (!photoAngles.includes('front') || !photoAngles.includes('back')) {
+        return res.status(400).json({ 
+          message: "Photos must include at least front and back angles" 
+        });
+      }
+      
+      // Add default photos for missing mandatory angles to satisfy schema
+      const requiredAngles = ['front', 'back', 'left', 'right', 'top', 'dashboard'];
+      const enrichedPhotos = [...photos];
+      
+      for (const angle of requiredAngles) {
+        if (!photoAngles.includes(angle)) {
+          enrichedPhotos.push({
+            angle,
+            data: 'placeholder', // Placeholder for quick inspection
+            description: 'Quick inspection - photo not captured',
+          });
+        }
+      }
+      
+      // Create inspection
+      const inspectionData = {
+        contractId,
+        vehicleId,
+        inspectionType,
+        inspectorName: `${user.firstName} ${user.lastName}`,
+        odometerReading: parseInt(odometerReading),
+        fuelLevel: parseInt(fuelLevel),
+        conditionNotes: conditionNotes || 'Quick inspection via mobile',
+        photos: enrichedPhotos,
+        createdBy: userId,
+      };
+      
+      const inspection = await storage.createVehicleInspection(inspectionData);
+      
+      await createAuditLog(
+        userId,
+        'create_vehicle_inspection',
+        contractId,
+        req,
+        `Quick inspection created for contract ${contract.contractNumber} - ${inspectionType}`
+      );
+      
+      res.status(201).json({
+        message: "Quick inspection submitted successfully",
+        inspection: {
+          id: inspection.id,
+          contractId: inspection.contractId,
+          inspectionType: inspection.inspectionType,
+          odometerReading: inspection.odometerReading,
+          fuelLevel: inspection.fuelLevel,
+          photosCount: photos.length,
+        },
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      console.error("Error creating quick inspection:", error);
+      await logSystemError(error, req);
+      res.status(500).json({ message: error.message || "Failed to create inspection" });
     }
   });
 

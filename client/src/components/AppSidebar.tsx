@@ -304,6 +304,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/reports/user-activity',
       show: isAdmin || isManager,
     },
+    {
+      title: 'Unclosed Contracts',
+      icon: 'warning_amber',
+      url: '/unclosed-contracts-report',
+      show: isAdmin || isManager,
+    },
   ];
 
   const auditItems = [
@@ -525,6 +531,24 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   <Link href="/contracts">
                     <span className="material-icons">description</span>
                     {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Insurance Claims */}
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={location === '/insurance-claims'} 
+                  data-testid="nav-insurance-claims"
+                  tooltip={{
+                    children: 'Insurance Claims',
+                    side: language === 'ar' ? 'left' : 'right'
+                  }}
+                >
+                  <Link href="/insurance-claims">
+                    <span className="material-icons">local_hospital</span>
+                    {sidebarState === 'expanded' && <span>Insurance Claims</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

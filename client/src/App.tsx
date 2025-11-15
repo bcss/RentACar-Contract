@@ -42,6 +42,9 @@ const UserActivity = lazy(() => import("@/pages/UserActivity"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
 const SupportHelpPage = lazy(() => import("@/pages/SupportHelpPage"));
+const InsuranceClaims = lazy(() => import("@/pages/InsuranceClaims"));
+const InsuranceClaimForm = lazy(() => import("@/pages/InsuranceClaimForm"));
+const UnclosedContractsReport = lazy(() => import("@/pages/UnclosedContractsReport"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -116,6 +119,10 @@ function Router() {
       <Route path="/contracts/new" component={() => <ProtectedRoute component={ContractForm} />} />
       <Route path="/contracts/:id/edit" component={() => <ProtectedRoute component={ContractForm} />} />
       <Route path="/contracts/:id" component={() => <ProtectedRoute component={ContractView} />} />
+      <Route path="/insurance-claims" component={() => <ProtectedRoute component={InsuranceClaims} />} />
+      <Route path="/insurance-claims/new" component={() => <ProtectedRoute component={InsuranceClaimForm} />} />
+      <Route path="/insurance-claims/:id/edit" component={() => <ProtectedRoute component={InsuranceClaimForm} />} />
+      <Route path="/insurance-claims/:id" component={() => <ProtectedRoute component={InsuranceClaimForm} />} />
       <Route path="/users">
         {() => <ProtectedRoute component={Users} />}
       </Route>
@@ -151,6 +158,9 @@ function Router() {
       </Route>
       <Route path="/reports/user-activity">
         {() => <ProtectedRoute component={UserActivity} />}
+      </Route>
+      <Route path="/unclosed-contracts-report">
+        {() => <ProtectedRoute component={UnclosedContractsReport} />}
       </Route>
       <Route path="/settings/support">
         {() => <ProtectedRoute component={SupportHelpPage} />}
