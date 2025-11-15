@@ -60,6 +60,7 @@ Preferred communication style: Simple, everyday language.
 - **Legal Compliance Pages:** Professional Privacy Policy and Terms of Service pages.
 - **Dashboard with Context-Aware Navigation:** Critical metrics with deep-link filtering.
 - **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality with chart visualization embedding (html2canvas → base64 → backend → PDF/Excel workflow), 10MB request body limit for chart image uploads.
+- **Insurance Reports:** Dedicated analytics page with claims by status, monthly trend charts, financial summaries, filterable data tables, and PDF/Excel export with embedded visualizations (visible to users with canAccessReports permission).
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate).
 - **Professional PDF Integration:** Professional, bilingual PDF generation for rental contracts with RTA compliance fields.
