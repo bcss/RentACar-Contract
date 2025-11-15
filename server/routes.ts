@@ -933,50 +933,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Legacy /finalize route removed - use new state machine (confirm → activate → complete → close)
+  // Legacy /finalize route removed - use new state machine (draft → activate → complete → close)
 
   // Phase 2: State transition routes (Admin/Manager only)
   
-  // Confirm contract (draft → confirmed) - Task 13: Allow Staff to confirm
-  app.post('/api/contracts/:id/confirm', isAuthenticated, requireEditor, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const contract = await storage.getContract(req.params.id);
-      
-      if (!contract) {
-        return res.status(404).json({ message: "Contract not found" });
-      }
-
-      // DOUBLE-BOOKING PREVENTION: Check vehicle availability before confirming
-      const isAvailable = await storage.checkVehicleAvailability(
-        contract.vehicleId,
-        new Date(contract.rentalStartDate),
-        new Date(contract.rentalEndDate),
-        contract.id // Exclude current contract from availability check
-      );
-      
-      if (!isAvailable) {
-        return res.status(400).json({ 
-          message: "Vehicle is not available for the selected dates. Another confirmed, active, or completed contract exists for this period. Please choose different dates or another vehicle." 
-        });
-      }
-
-      const confirmed = await storage.confirmContract(req.params.id, userId);
-      
-      // Update vehicle status to "rented"
-      await storage.updateVehicle(confirmed.vehicleId, { status: "rented" });
-      
-      // Create audit log
-      await createAuditLog(userId, 'confirm', confirmed.id, req, `Confirmed contract #${confirmed.contractNumber}`);
-      
-      res.json(confirmed);
-    } catch (error: any) {
-      console.error("Error confirming contract:", error);
-      res.status(400).json({ message: error.message || "Failed to confirm contract" });
-    }
-  });
-
-  // Activate rental (confirmed → active)
+  // Activate rental (draft → active)
   app.post('/api/contracts/:id/activate', isAuthenticated, requireEditor, async (req: any, res) => {
     try {
       const userId = req.user.id;
@@ -986,6 +947,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!contract) {
         return res.status(404).json({ message: "Contract not found" });
+      }
+
+      // STATUS VALIDATION: Contract must be in draft status
+      if (contract.status !== 'draft') {
+        return res.status(400).json({ 
+          message: `Contract must be in draft status to activate. Current status: ${contract.status}` 
+        });
+      }
+
+      // INSPECTION VALIDATION: Ensure pre-delivery inspection exists
+      const inspections = await storage.getVehicleInspectionsByContract(req.params.id);
+      const hasPreDeliveryInspection = inspections.some(i => i.inspectionType === 'pre_delivery');
+      
+      if (!hasPreDeliveryInspection) {
+        return res.status(400).json({ 
+          message: "Pre-delivery vehicle inspection is required before activating the rental. Please complete the inspection first." 
+        });
+      }
+
+      // DOUBLE-BOOKING PREVENTION: Check vehicle availability
+      const isAvailable = await storage.checkVehicleAvailability(
+        contract.vehicleId,
+        new Date(contract.rentalStartDate),
+        new Date(contract.rentalEndDate),
+        contract.id // Exclude current contract from availability check
+      );
+      
+      if (!isAvailable) {
+        return res.status(400).json({ 
+          message: "Vehicle is not available for the selected dates. Another active or completed contract exists for this period. Please choose different dates or another vehicle." 
+        });
       }
 
       // DATE VALIDATION: Prevent activation before rental start date
@@ -1002,7 +994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const activated = await storage.activateContract(req.params.id, userId, timeOut);
       
-      // Update vehicle status to "rented" (in case it wasn't set during confirm)
+      // Update vehicle status to "rented"
       await storage.updateVehicle(activated.vehicleId, { status: "rented" });
       
       // Create audit log
@@ -2133,7 +2125,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Add contract status summary
           currentY = addPDFSummarySection(doc, 'Contract Status Distribution', [
             { label: 'Draft', value: report.statusSummary.draft.toString() },
-            { label: 'Confirmed', value: report.statusSummary.confirmed.toString() },
             { label: 'Active', value: report.statusSummary.active.toString() },
             { label: 'Completed', value: report.statusSummary.completed.toString() },
             { label: 'Closed', value: report.statusSummary.closed.toString() },
@@ -2206,7 +2197,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Contract status sheet only
           const statusData = [
             { Status: 'Draft', Count: report.statusSummary.draft },
-            { Status: 'Confirmed', Count: report.statusSummary.confirmed },
             { Status: 'Active', Count: report.statusSummary.active },
             { Status: 'Completed', Count: report.statusSummary.completed },
             { Status: 'Closed', Count: report.statusSummary.closed },

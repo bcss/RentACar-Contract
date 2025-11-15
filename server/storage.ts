@@ -431,21 +431,6 @@ export class DatabaseStorage implements IStorage {
   // Legacy finalizeContract method removed - use new state machine methods below
 
   // Phase 2.1: State transition methods
-  async confirmContract(id: string, userId: string): Promise<Contract> {
-    const [confirmed] = await db
-      .update(contracts)
-      .set({
-        status: 'confirmed',
-        confirmedBy: userId,
-        confirmedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(contracts.id, id))
-      .returning();
-    
-    return confirmed;
-  }
-
   async activateContract(id: string, userId: string, timeOut?: string): Promise<Contract> {
     const [activated] = await db
       .update(contracts)
@@ -742,7 +727,6 @@ export class DatabaseStorage implements IStorage {
     const baseConditions = and(
       eq(contracts.vehicleId, vehicleId),
       or(
-        eq(contracts.status, 'confirmed'),
         eq(contracts.status, 'active'),
         eq(contracts.status, 'completed')
       ),
@@ -1529,7 +1513,6 @@ export class DatabaseStorage implements IStorage {
     // Contract status summary
     const statusSummary = {
       draft: filteredContracts.filter(c => c.status === 'draft').length,
-      confirmed: filteredContracts.filter(c => c.status === 'confirmed').length,
       active: filteredContracts.filter(c => c.status === 'active').length,
       completed: filteredContracts.filter(c => c.status === 'completed').length,
       closed: filteredContracts.filter(c => c.status === 'closed').length,

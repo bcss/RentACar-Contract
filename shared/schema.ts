@@ -357,7 +357,7 @@ export type DamageAssessment = typeof damageAssessments.$inferSelect;
 export const contracts = pgTable("contracts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractNumber: integer("contract_number").notNull().unique(),
-  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, confirmed, active, completed, closed
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, active, completed, closed
   
   // Foreign Keys to Master Data
   customerId: varchar("customer_id").notNull().references(() => customers.id),
@@ -473,6 +473,7 @@ export const contracts = pgTable("contracts", {
   closedBy: varchar("closed_by"),
   closedAt: timestamp("closed_at"),
   earlyClosureReason: text("early_closure_reason"), // Task 11: Optional reason for early completion
+  editReason: text("edit_reason"), // Reason for edits made in Active/Completed stages
   
   // Audit fields
   createdBy: varchar("created_by").notNull(),
