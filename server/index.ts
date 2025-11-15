@@ -3,6 +3,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
 
 // Sanitize request data to remove sensitive fields before logging
 export function sanitizeRequestData(data: any): any {
@@ -34,6 +36,37 @@ export function sanitizeRequestData(data: any): any {
 }
 
 const app = express();
+
+// P2-1: Add security headers with Helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"], // unsafe-inline needed for Vite in dev
+      styleSrc: ["'self'", "'unsafe-inline'"], // unsafe-inline needed for styled components
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+  frameguard: {
+    action: 'deny', // Prevent clickjacking
+  },
+  noSniff: true, // Prevent MIME sniffing
+  xssFilter: true, // Enable XSS filter (legacy browsers)
+}));
+
+// Cookie parser for CSRF token validation
+app.use(cookieParser());
+
 // Increase payload limit for chart exports (base64 images can be large)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));

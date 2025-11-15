@@ -63,11 +63,27 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// P1-3: Password complexity validation
+export const passwordSchema = z.string()
+  .min(12, 'Password must be at least 12 characters')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number')
+  .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character')
+  .refine((pwd) => {
+    // Check against common passwords
+    const commonPasswords = ['password', '12345678', 'admin123', 'qwerty', 'letmein'];
+    return !commonPasswords.some(common => pwd.toLowerCase().includes(common));
+  }, 'Password is too common. Please choose a stronger password');
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   lastPasswordChange: true,
+}).extend({
+  // P1-3: Add password validation when creating users
+  password: passwordSchema.optional(), // Optional because we use passwordHash in actual schema
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

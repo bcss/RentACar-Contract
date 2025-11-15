@@ -8,7 +8,8 @@ import { verifyPassword } from "./passwordUtils";
 import { getGeolocation } from "../services/geolocation";
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  // P1-1: Reduce session lifetime from 7 days to 1 hour for better security
+  const sessionTtl = 60 * 60 * 1000; // 1 hour (reduced from 1 week)
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -24,6 +25,7 @@ export function getSession() {
     cookie: {
       httpOnly: true,
       secure: true,
+      sameSite: 'strict', // P0-2: Add SameSite attribute for CSRF protection
       maxAge: sessionTtl,
     },
   });
@@ -34,6 +36,36 @@ export async function setupAuth(app: Express) {
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
+
+  // P1-2: Add idle timeout middleware (15 minutes)
+  const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  
+  app.use((req, res, next) => {
+    if (req.session && req.user) {
+      const now = Date.now();
+      const lastActivity = (req.session as any).lastActivity || now;
+      
+      // Check if session has been idle for too long
+      if (now - lastActivity > IDLE_TIMEOUT) {
+        // Session expired due to inactivity
+        req.logout((err) => {
+          if (err) console.error('Logout error during idle timeout:', err);
+          req.session.destroy((err) => {
+            if (err) console.error('Session destroy error:', err);
+            res.status(401).json({ 
+              message: 'Session expired due to inactivity. Please log in again.',
+              sessionExpired: true
+            });
+          });
+        });
+        return;
+      }
+      
+      // Update last activity timestamp (rolling expiration)
+      (req.session as any).lastActivity = now;
+    }
+    next();
+  });
 
   // Local Strategy for username/password authentication
   passport.use(
@@ -80,48 +112,56 @@ export async function setupAuth(app: Express) {
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
 
-      req.login(user, async (err) => {
-        if (err) {
+      // P0-1: CRITICAL FIX - Regenerate session on login to prevent session fixation
+      req.session.regenerate((regenerateErr) => {
+        if (regenerateErr) {
+          console.error("Session regeneration error:", regenerateErr);
           return res.status(500).json({ message: "Login failed" });
         }
 
-        // Update last login timestamp
-        try {
-          await storage.updateLastLogin(user.id);
-        } catch (error) {
-          console.error("Error updating last login:", error);
-        }
+        req.login(user, async (loginErr) => {
+          if (loginErr) {
+            return res.status(500).json({ message: "Login failed" });
+          }
 
-        // Create audit log for login
-        try {
-          const ipAddress = req.ip;
-          const userAgent = req.get('user-agent');
-          const sessionId = req.session?.id;
-          const geolocation = ipAddress ? await getGeolocation(ipAddress) : {};
-          
-          await storage.createAuditLog({
-            userId: user.id,
-            action: 'login',
-            ipAddress,
-            userAgent,
-            sessionId,
-            country: geolocation.country,
-            city: geolocation.city,
-            region: geolocation.region,
-            details: `User ${user.username} logged in`,
+          // Update last login timestamp
+          try {
+            await storage.updateLastLogin(user.id);
+          } catch (error) {
+            console.error("Error updating last login:", error);
+          }
+
+          // Create audit log for login
+          try {
+            const ipAddress = req.ip;
+            const userAgent = req.get('user-agent');
+            const sessionId = req.session?.id;
+            const geolocation = ipAddress ? await getGeolocation(ipAddress) : {};
+            
+            await storage.createAuditLog({
+              userId: user.id,
+              action: 'login',
+              ipAddress,
+              userAgent,
+              sessionId,
+              country: geolocation.country,
+              city: geolocation.city,
+              region: geolocation.region,
+              details: `User ${user.username} logged in`,
+            });
+          } catch (error) {
+            console.error("Error creating audit log:", error);
+          }
+
+          return res.json({ 
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            isImmutable: user.isImmutable,
           });
-        } catch (error) {
-          console.error("Error creating audit log:", error);
-        }
-
-        return res.json({ 
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          isImmutable: user.isImmutable,
         });
       });
     })(req, res, next);

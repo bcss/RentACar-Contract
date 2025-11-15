@@ -2,7 +2,7 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company } from "@shared/schema";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
@@ -16,6 +16,7 @@ import os from "os";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { csrfTokenGenerator, csrfProtection } from "./middleware/csrf";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -255,6 +256,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   //   
   //   return true; // Ownership verified
   // }
+
+  // P0-3: CSRF Protection - Token generation endpoint (PUBLIC - no authentication required)
+  // This endpoint MUST be accessible before authentication to obtain CSRF token
+  // The token is then included in all subsequent state-changing requests
+  app.get('/api/csrf-token', csrfTokenGenerator);
+
+  // P0-3: Apply CSRF protection to all state-changing endpoints AFTER this point
+  // This middleware validates CSRF tokens on POST/PATCH/DELETE/PUT requests
+  // Skip paths: /api/login, /api/csrf-token, /api/system-errors/log
+  app.use(csrfProtection);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
