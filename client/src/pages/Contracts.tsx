@@ -231,8 +231,6 @@ export default function Contracts() {
       active: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'local_shipping', label: 'Active' },
       completed: { color: 'bg-chart-5 hover:bg-chart-5 text-white', icon: 'assignment_turned_in', label: 'Completed' },
       closed: { color: 'bg-secondary hover:bg-secondary text-secondary-foreground', icon: 'lock', label: 'Closed' },
-      // Legacy confirmed status (backward compatibility)
-      confirmed: { color: 'bg-chart-3 hover:bg-chart-3 text-white', icon: 'check_circle', label: 'Confirmed (Legacy)' },
     };
 
     const statusInfo = statusMap[status] || statusMap.draft;

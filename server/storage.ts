@@ -1109,10 +1109,10 @@ export class DatabaseStorage implements IStorage {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-    // Get all contracts with revenue (confirmed, active, completed, closed - not draft)
+    // Get all contracts with revenue (active, completed, closed - not draft)
     const allContracts = await db.select().from(contracts);
     const revenueContracts = allContracts.filter(c => 
-      c.status === 'confirmed' || c.status === 'active' || c.status === 'completed' || c.status === 'closed'
+      c.status === 'active' || c.status === 'completed' || c.status === 'closed'
     );
 
     // Calculate total revenue including extra charges
@@ -1350,7 +1350,6 @@ export class DatabaseStorage implements IStorage {
 
     // Revenue by contract status
     const revenueByStatus = {
-      confirmed: 0,
       active: 0,
       completed: 0,
       closed: 0,
@@ -1404,7 +1403,7 @@ export class DatabaseStorage implements IStorage {
       });
 
     // Outstanding payments list - CRITICAL FIX: Only show completed and closed contracts
-    // Active contracts are still ongoing, confirmed haven't started yet
+    // Active contracts are still ongoing
     const outstandingPayments = finalizedContracts.map(contract => {
       const contractRevenue = parseFloat(contract.totalAmount) + parseFloat(contract.totalExtraCharges || '0');
       const contractPayments = allPayments

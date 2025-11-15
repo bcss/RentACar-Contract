@@ -135,7 +135,7 @@ export default function SupportHelpPage() {
     },
     q11: {
       question: 'What is the contract lifecycle?',
-      answer: 'Contracts follow this workflow: Draft (editable) → Confirmed (locked, pre-delivery inspection required) → Active (vehicle out, rental in progress) → Completed (vehicle returned, final charges calculated) → Closed (all payments settled, no further changes).'
+      answer: 'Contracts follow this workflow: Draft (editable) → Active (vehicle out, pre-delivery inspection required, rental in progress) → Completed (vehicle returned, post-return inspection required, final charges calculated) → Closed (all payments settled, no further changes).'
     },
     q12: {
       question: 'How do I record a payment?',
@@ -150,8 +150,8 @@ export default function SupportHelpPage() {
       answer: 'Admin and Manager users can access audit logs from the Audit Logs page in the sidebar. The system maintains two audit trails: System Audit Logs (security and system events) and Business Operations Audit (contract changes, payments, inspections).'
     },
     q15: {
-      question: 'Can I edit a confirmed contract?',
-      answer: 'No, once a contract is confirmed, it becomes immutable for data integrity. If changes are needed, you must contact an administrator who can provide an edit reason, which will be logged in the audit trail for compliance.'
+      question: 'Can I edit an active contract?',
+      answer: 'Active and completed contracts require a valid edit reason for data integrity. All edits are tracked in the audit trail. Draft contracts can be edited freely. Closed contracts are completely immutable and cannot be modified.'
     },
     q16: {
       question: 'What is the difference between Sponsors and Companies?',
@@ -596,11 +596,11 @@ Please attach a screenshot if available.
                     <p className="text-muted-foreground mb-2">Navigate to <Link href="/contracts" className="text-primary hover:underline">Contracts</Link> to manage rental agreements.</p>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li><strong>Creating:</strong> Click "New Contract" button to start a new rental. Fill customer, vehicle, dates, and addon selections</li>
-                      <li><strong>Editing:</strong> Contracts can only be edited in Draft status. Provide edit reason for confirmed contracts</li>
-                      <li><strong>Contract Lifecycle:</strong> Draft → Confirmed → Active → Completed → Closed</li>
+                      <li><strong>Editing:</strong> Draft contracts freely editable. Active/completed contracts require edit reason (tracked in audit log)</li>
+                      <li><strong>Contract Lifecycle:</strong> Draft → Active → Completed → Closed</li>
                       <li><strong>Timeline View:</strong> See complete contract history with all field edits and status changes</li>
                       <li><strong>Search & Filter:</strong> Use contract number, customer name, status, or date range filters</li>
-                      <li><strong>PDF Generation:</strong> Professional bilingual contract PDFs available for confirmed contracts</li>
+                      <li><strong>PDF Generation:</strong> Professional bilingual contract PDFs available for all contracts</li>
                     </ul>
                   </section>
 
@@ -860,7 +860,7 @@ Please attach a screenshot if available.
                       <h3 className="font-semibold text-base mb-2">Core Features</h3>
                       <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                         <li><strong>Bilingual Support:</strong> Full English/Arabic interface with RTL/LTR layouts</li>
-                        <li><strong>Contract Lifecycle:</strong> Draft → Confirmed → Active → Completed → Closed workflow</li>
+                        <li><strong>Contract Lifecycle:</strong> Draft → Active → Completed → Closed workflow</li>
                         <li><strong>Role-Based Access:</strong> Admin, Manager, Staff, Viewer with granular permission toggles</li>
                         <li><strong>Payment Tracking:</strong> Cash, Card, Check, Bank Transfer with complete history</li>
                         <li><strong>Vehicle Inspections:</strong> Pre-delivery and post-return with 6-photo documentation</li>
@@ -878,7 +878,7 @@ Please attach a screenshot if available.
                         <li><strong>Contract Timeline:</strong> Complete audit trail with field-level change tracking</li>
                         <li><strong>Professional PDF:</strong> Bilingual contract generation for printing and archiving</li>
                         <li><strong>Three Hirer Types:</strong> Direct, with sponsor (individual), from company (corporate)</li>
-                        <li><strong>Immutable Contracts:</strong> Confirmed contracts locked to prevent unauthorized changes</li>
+                        <li><strong>Edit Reason Validation:</strong> Active/completed contracts require validated edit reasons with audit logging</li>
                       </ul>
                     </section>
 
@@ -980,8 +980,8 @@ Please attach a screenshot if available.
                         <div className="p-3 bg-muted/30 rounded-md">
                           <p className="font-medium mb-1">Cannot edit a contract</p>
                           <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
-                            <li>Confirmed contracts require edit reason - provide explanation before editing</li>
-                            <li>Active/Completed/Closed contracts may have limited edit permissions</li>
+                            <li>Active/completed contracts require edit reason - provide explanation before editing</li>
+                            <li>Closed contracts are completely immutable and cannot be edited</li>
                             <li>Check your user role has edit permissions</li>
                             <li>View Timeline to see contract status and history</li>
                           </ul>
@@ -989,7 +989,7 @@ Please attach a screenshot if available.
                         <div className="p-3 bg-muted/30 rounded-md">
                           <p className="font-medium mb-1">Cannot activate contract</p>
                           <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs">
-                            <li>Contract must be confirmed first</li>
+                            <li>Contract must be in draft status</li>
                             <li>Pre-delivery inspection must be completed (6 photos required)</li>
                             <li>Vehicle must be in "available" status</li>
                             <li>Verify all required fields are filled</li>
@@ -1329,11 +1329,11 @@ Please attach a screenshot if available.
                       <section>
                         <h3 className="font-semibold text-base mb-2">Contract Immutability & Change Control</h3>
                         <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                          <li><strong>Draft Contracts:</strong> Freely editable before confirmation</li>
-                          <li><strong>Confirmed Contracts:</strong> Require edit reason (logged to contractEdits)</li>
-                          <li><strong>Active Contracts:</strong> Limited modifications to prevent fraud</li>
-                          <li><strong>Completed/Closed:</strong> Most fields locked, only status changes allowed</li>
-                          <li><strong>Edit Justification:</strong> Mandatory reason field for all post-confirmation edits</li>
+                          <li><strong>Draft Contracts:</strong> Freely editable before activation</li>
+                          <li><strong>Active Contracts:</strong> Require validated edit reason (logged to contractEdits)</li>
+                          <li><strong>Completed Contracts:</strong> Require validated edit reason (logged to contractEdits)</li>
+                          <li><strong>Closed Contracts:</strong> Completely immutable, no edits allowed</li>
+                          <li><strong>Edit Justification:</strong> Mandatory reason field with minimum word count for active/completed contracts</li>
                           <li><strong>Timeline View:</strong> Complete audit trail visible to all authorized users</li>
                         </ul>
                       </section>
@@ -1426,7 +1426,7 @@ Please attach a screenshot if available.
                   <SelectItem value="q12">How do I record a payment?</SelectItem>
                   <SelectItem value="q13">What are extra charges?</SelectItem>
                   <SelectItem value="q14">How do I view audit logs?</SelectItem>
-                  <SelectItem value="q15">Can I edit a confirmed contract?</SelectItem>
+                  <SelectItem value="q15">Can I edit an active contract?</SelectItem>
                   <SelectItem value="q16">What is the difference between Sponsors and Companies?</SelectItem>
                   <SelectItem value="q17">How do I configure company settings?</SelectItem>
                   <SelectItem value="q18">How do I configure financial settings?</SelectItem>
@@ -1694,7 +1694,7 @@ Please attach a screenshot if available.
             </div>
             <div>
               <p className="font-medium">Contract Lifecycle</p>
-              <p className="text-xs text-muted-foreground">Draft → Confirmed → Active → Completed → Closed</p>
+              <p className="text-xs text-muted-foreground">Draft → Active → Completed → Closed</p>
             </div>
             <div>
               <p className="font-medium">Comprehensive Audit</p>

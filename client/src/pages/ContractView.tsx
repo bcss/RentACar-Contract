@@ -677,8 +677,6 @@ export default function ContractView() {
       active: { color: 'bg-chart-2 hover:bg-chart-2 text-white', icon: 'local_shipping', label: 'Active' },
       completed: { color: 'bg-chart-5 hover:bg-chart-5 text-white', icon: 'assignment_turned_in', label: 'Completed' },
       closed: { color: 'bg-secondary hover:bg-secondary text-secondary-foreground', icon: 'lock', label: 'Closed' },
-      // Legacy confirmed status (backward compatibility)
-      confirmed: { color: 'bg-chart-3 hover:bg-chart-3 text-white', icon: 'check_circle', label: 'Confirmed (Legacy)' },
     };
 
     const statusInfo = statusMap[status] || statusMap.draft;
@@ -1239,6 +1237,152 @@ export default function ContractView() {
         </div>
       )}
 
+      {/* RTA Vehicle Registration & Insurance Details - Print Only */}
+      {companySettings && vehicle && (
+        <div className="print-only border-2 border-black mb-6">
+          <div className="bg-gray-50 border-b-2 border-black p-2 text-center">
+            <h3 className="text-sm font-bold text-red-600">VEHICLE REGISTRATION & INSURANCE DETAILS / <span className="font-arabic">تفاصيل تسجيل وتأمين المركبة</span></h3>
+          </div>
+          <div className="grid grid-cols-3 gap-0">
+            {/* Traffic Plate No. (TC Number) */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Traffic Plate No. (TC)</p>
+              <p className="text-xs font-mono">{vehicle.tcNumber || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">رقم اللوحة المرورية</p>
+            </div>
+            
+            {/* Engine Number */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Engine Number</p>
+              <p className="text-xs font-mono">{vehicle.engineNo || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">رقم المحرك</p>
+            </div>
+            
+            {/* Chassis Number */}
+            <div className="border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Chassis Number</p>
+              <p className="text-xs font-mono">{vehicle.chassisNo || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">رقم الهيكل</p>
+            </div>
+            
+            {/* Insurance Expiry Date */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Insurance Expiry Date</p>
+              <p className="text-xs">{vehicle.insuranceExpiry ? format(new Date(vehicle.insuranceExpiry), 'PP') : 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">تاريخ انتهاء التأمين</p>
+            </div>
+            
+            {/* Policy Number */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Policy Number</p>
+              <p className="text-xs font-mono">{vehicle.policyNumber || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">رقم البوليصة</p>
+            </div>
+            
+            {/* Licensing Authority */}
+            <div className="border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Licensing Authority</p>
+              <p className="text-xs">{vehicle.licensingAuthority || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">سلطة الترخيص</p>
+            </div>
+            
+            {/* Vehicle Type */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Vehicle Type</p>
+              <p className="text-xs">{vehicle.vehicleType || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">نوع المركبة</p>
+            </div>
+            
+            {/* Model Origin */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Model Origin</p>
+              <p className="text-xs">{vehicle.modelOrigin || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">أصل الموديل</p>
+            </div>
+            
+            {/* Gross Vehicle Weight */}
+            <div className="border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Gross Vehicle Weight</p>
+              <p className="text-xs">{vehicle.grossVehicleWeight ? `${vehicle.grossVehicleWeight} ${vehicle.grossVehicleWeightType || 'kg'}` : 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">الوزن الإجمالي للمركبة</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Driver License Details - Print Only */}
+      {companySettings && customer && (
+        <div className="print-only border-2 border-black mb-6">
+          <div className="bg-gray-50 border-b-2 border-black p-2 text-center">
+            <h3 className="text-sm font-bold text-red-600">DRIVER LICENSE DETAILS / <span className="font-arabic">تفاصيل رخصة القيادة</span></h3>
+          </div>
+          <div className="grid grid-cols-3 gap-0">
+            {/* Permitted Vehicles */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Permitted Vehicles</p>
+              <p className="text-xs">{customer.licensePermittedVehicles || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">المركبات المسموح بها</p>
+            </div>
+            
+            {/* Transmission Type */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Transmission Type</p>
+              <p className="text-xs capitalize">{customer.licenseTransmissionType || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">نوع ناقل الحركة</p>
+            </div>
+            
+            {/* Wearing Glasses */}
+            <div className="border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Wearing Glasses</p>
+              <p className="text-xs">{customer.licenseWearingGlasses !== null && customer.licenseWearingGlasses !== undefined ? (customer.licenseWearingGlasses ? 'Yes / نعم' : 'No / لا') : 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">يرتدي نظارات</p>
+            </div>
+            
+            {/* Place of Issue */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Place of Issue</p>
+              <p className="text-xs">{customer.licensePlaceOfIssue || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">مكان الإصدار</p>
+            </div>
+            
+            {/* Date of Birth (from license) */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Date of Birth</p>
+              <p className="text-xs">{customer.licenseDateOfBirth ? format(new Date(customer.licenseDateOfBirth), 'PP') : (customer.dateOfBirth ? format(new Date(customer.dateOfBirth), 'PP') : 'N/A')}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">تاريخ الميلاد</p>
+            </div>
+            
+            {/* License Issue Date */}
+            <div className="border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">License Issue Date</p>
+              <p className="text-xs">{customer.licenseDateOfIssue ? format(new Date(customer.licenseDateOfIssue), 'PP') : (customer.licenseIssueDate ? format(new Date(customer.licenseIssueDate), 'PP') : 'N/A')}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">تاريخ إصدار الرخصة</p>
+            </div>
+            
+            {/* License Expiry Date */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">License Expiry Date</p>
+              <p className="text-xs">{customer.licenseDateOfExpiry ? format(new Date(customer.licenseDateOfExpiry), 'PP') : (customer.licenseExpiryDate ? format(new Date(customer.licenseExpiryDate), 'PP') : 'N/A')}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">تاريخ انتهاء الرخصة</p>
+            </div>
+            
+            {/* Licensing Authority */}
+            <div className="border-r border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Licensing Authority</p>
+              <p className="text-xs">{customer.licenseLicensingAuthority || customer.licenseIssuedBy || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">سلطة الترخيص</p>
+            </div>
+            
+            {/* Traffic Code No */}
+            <div className="border-b border-black p-2">
+              <p className="text-[10px] font-semibold text-muted-foreground">Traffic Code No.</p>
+              <p className="text-xs font-mono">{customer.licenseTrafficCodeNo || 'N/A'}</p>
+              <p className="text-[9px] font-arabic text-muted-foreground mt-1">رقم رمز المرور</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Vehicle Inspection and Payment Breakdown - Print Only */}
       {companySettings && (
         <div className="print-only grid grid-cols-2 gap-3 mb-6">
@@ -1620,7 +1764,7 @@ export default function ContractView() {
       )}
 
       {/* Payment History Card */}
-      {(contract.status === 'confirmed' || contract.status === 'active' || contract.status === 'completed' || contract.status === 'closed') && (
+      {(contract.status === 'active' || contract.status === 'completed' || contract.status === 'closed') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-between">
@@ -2128,6 +2272,59 @@ export default function ContractView() {
             )}
           </CardContent>
         </Card>
+
+        {/* Financial Summary - Shows advance payment auto-adjustment */}
+        {(contract.status === 'completed' || contract.status === 'closed') && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="material-icons">account_balance</span>
+                Financial Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-muted-foreground">Total Due</p>
+                  <p className="font-bold font-mono text-lg" data-testid="text-total-due">
+                    {(parseFloat(contract.totalAmount || '0') + parseFloat(contract.totalExtraCharges || '0')).toFixed(2)} {currency}
+                  </p>
+                </div>
+                
+                {contract.depositPaid && contract.securityDeposit && (
+                  <div className="flex justify-between items-center border-t pt-2">
+                    <p className="text-sm text-muted-foreground">Advance Paid (Security Deposit)</p>
+                    <p className="font-medium font-mono text-green-600" data-testid="text-advance-paid">
+                      - {contract.securityDeposit} {currency}
+                    </p>
+                  </div>
+                )}
+                
+                {payments.length > 0 && (
+                  <div className="flex justify-between items-center border-t pt-2">
+                    <p className="text-sm text-muted-foreground">Additional Payments</p>
+                    <p className="font-medium font-mono text-green-600" data-testid="text-additional-payments">
+                      - {payments.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0).toFixed(2)} {currency}
+                    </p>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center border-t-2 pt-3">
+                  <p className="text-base font-semibold">Outstanding Balance</p>
+                  <p className="font-bold font-mono text-xl" data-testid="text-outstanding-balance">
+                    {outstandingBalance.toFixed(2)} {currency}
+                  </p>
+                </div>
+                
+                {contract.depositPaid && contract.securityDeposit && (
+                  <p className="text-xs text-muted-foreground italic mt-2">
+                    * Security deposit automatically deducted from total due
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Additional Information */}
@@ -2295,38 +2492,34 @@ export default function ContractView() {
             </div>
           )}
 
-          {/* Signature Section */}
-          <div className={`mt-8 border-t pt-4 grid gap-4 ${(hirerType === 'with_sponsor' || hirerType === 'from_company') ? 'grid-cols-3' : 'grid-cols-2'}`}>
-            <div className="border-2 border-black p-3 text-center">
-              <div className="h-12 mb-2"></div>
-              <p className="text-xs font-semibold font-arabic mb-1">مسؤول المكتب</p>
-              <p className="text-xs font-semibold">Office In-charge</p>
-              <p className="text-xs mt-2">Date: ________________</p>
-            </div>
+          {/* Signature Section - Manual Signature Spaces */}
+          <div className="mt-8 border-t-2 border-black pt-6">
+            <h3 className="text-sm font-bold text-center mb-6 text-red-600">
+              SIGNATURES / <span className="font-arabic">التوقيعات</span>
+            </h3>
             
-            {hirerType === 'with_sponsor' && contract.sponsor && (
-              <div className="border-2 border-black p-3 text-center">
-                <div className="h-12 mb-2"></div>
-                <p className="text-xs font-semibold font-arabic mb-1">توقيع الكفيل</p>
-                <p className="text-xs font-semibold">Sponsor Signature</p>
-                <p className="text-xs mt-2">Date: ________________</p>
+            <div className="grid grid-cols-2 gap-6">
+              {/* Customer Signature */}
+              <div className="border-2 border-black p-4">
+                <p className="text-xs font-semibold mb-1 text-red-600">Customer Signature:</p>
+                <p className="text-xs font-semibold font-arabic mb-3 text-right">توقيع العميل:</p>
+                <div className="border-b-2 border-black h-16 mb-3"></div>
+                <div className="mt-2">
+                  <p className="text-xs font-semibold">Date / التاريخ:</p>
+                  <div className="border-b border-black mt-1">________________</div>
+                </div>
               </div>
-            )}
-            
-            {hirerType === 'from_company' && contract.companySponsor && (
-              <div className="border-2 border-black p-3 text-center">
-                <div className="h-12 mb-2"></div>
-                <p className="text-xs font-semibold font-arabic mb-1">توقيع ممثل الشركة</p>
-                <p className="text-xs font-semibold">Company Representative Signature</p>
-                <p className="text-xs mt-2">Date: ________________</p>
+              
+              {/* Staff Signature */}
+              <div className="border-2 border-black p-4">
+                <p className="text-xs font-semibold mb-1 text-red-600">Staff Signature:</p>
+                <p className="text-xs font-semibold font-arabic mb-3 text-right">توقيع الموظف:</p>
+                <div className="border-b-2 border-black h-16 mb-3"></div>
+                <div className="mt-2">
+                  <p className="text-xs font-semibold">Date / التاريخ:</p>
+                  <div className="border-b border-black mt-1">________________</div>
+                </div>
               </div>
-            )}
-            
-            <div className="border-2 border-black p-3 text-center">
-              <div className="h-12 mb-2"></div>
-              <p className="text-xs font-semibold font-arabic mb-1">توقيع المستأجر</p>
-              <p className="text-xs font-semibold">Hirer Signature</p>
-              <p className="text-xs mt-2">Date: ________________</p>
             </div>
           </div>
         </div>

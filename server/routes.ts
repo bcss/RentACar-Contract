@@ -867,12 +867,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { editReason, ...contractData } = req.body;
       
+      // CRITICAL FIX: Fetch contract FIRST before any processing
       const contract = await storage.getContract(req.params.id);
       
       if (!contract) {
         return res.status(404).json({ message: "Contract not found" });
       }
 
+      // CRITICAL FIX: Status-based validation BEFORE any updates
       // Block edits to closed contracts completely - they are immutable
       if (contract.status === 'closed') {
         return res.status(403).json({ 
@@ -880,16 +882,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Validate edit reason based on contract status
+      // CRITICAL FIX: Validate edit reason based on contract status BEFORE processing updates
       if (contract.status === 'active' || contract.status === 'completed') {
         // Active and Completed contracts require validated edit reason
-        if (!editReason || editReason.trim() === '') {
+        if (!editReason || typeof editReason !== 'string' || editReason.trim() === '') {
           return res.status(400).json({ 
             message: "Edit reason is required for active and completed contracts" 
           });
         }
         
-        const validation = validateEditReason(editReason);
+        const validation = validateEditReason(editReason.trim());
         if (!validation.valid) {
           return res.status(400).json({ 
             message: validation.error,
@@ -898,7 +900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } else if (contract.status === 'draft') {
         // Draft contracts: require edit reason but with minimal validation
-        if (!editReason || editReason.trim() === '') {
+        if (!editReason || typeof editReason !== 'string' || editReason.trim() === '') {
           return res.status(400).json({ message: "Edit reason is required" });
         }
       }
@@ -1089,7 +1091,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         auditNote += ` | Fuel charge auto-calculated: ${fuelChargeDetails}`;
       }
       
-      // Prepare charge data
+      // AUTO-ADJUST SECURITY DEPOSIT: Calculate outstanding balance with automatic deposit deduction
+      // CRITICAL FIX: Safe parsing with guards for null/undefined values
+      const totalAmount = parseFloat(contract.totalAmount || '0');
+      const totalExtraChargesNum = parseFloat(totalExtraCharges || '0');
+      const securityDeposit = parseFloat(contract.securityDeposit || '0');
+      
+      // CRITICAL FIX: Validate that parsed values are valid numbers
+      if (isNaN(totalAmount)) {
+        return res.status(500).json({ 
+          message: "Invalid contract total amount. Please contact system administrator." 
+        });
+      }
+      if (isNaN(totalExtraChargesNum)) {
+        return res.status(500).json({ 
+          message: "Invalid extra charges amount. Please contact system administrator." 
+        });
+      }
+      if (isNaN(securityDeposit)) {
+        console.warn(`Contract ${contract.id} has invalid security deposit, defaulting to 0`);
+      }
+      
+      const depositPaidAmount = contract.depositPaid ? (isNaN(securityDeposit) ? 0 : securityDeposit) : 0;
+      
+      // Get all payments made so far
+      const contractPayments = await storage.getPaymentsByContract(contract.id);
+      const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
+        const amount = parseFloat(payment.amount || '0');
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
+      
+      // Formula: outstandingBalance = (totalAmount + totalExtraCharges) - securityDeposit - sum(payments)
+      const calculatedOutstandingBalance = Math.max(0, totalAmount + totalExtraChargesNum - depositPaidAmount - totalPaid);
+      const roundedOutstandingBalance = Math.round(calculatedOutstandingBalance * 100) / 100;
+      
+      // CRITICAL FIX: Validate outstanding balance is a valid number
+      if (isNaN(roundedOutstandingBalance)) {
+        console.error(`NaN outstanding balance detected for contract ${contract.id}. totalAmount: ${totalAmount}, totalExtra: ${totalExtraChargesNum}, deposit: ${depositPaidAmount}, paid: ${totalPaid}`);
+        return res.status(500).json({ 
+          message: "Error calculating outstanding balance. Please contact system administrator." 
+        });
+      }
+      
+      // Update audit note with deposit auto-adjustment
+      if (depositPaidAmount > 0) {
+        auditNote += ` | Security deposit (${depositPaidAmount.toFixed(2)} AED) automatically deducted from outstanding balance`;
+      }
+      
+      // Prepare charge data with backend-calculated outstanding balance
       const chargeData = {
         extraKmCharge,
         extraKmDriven,
@@ -1098,7 +1147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         trafficFineCharge,
         otherCharges,
         totalExtraCharges,
-        outstandingBalance,
+        outstandingBalance: roundedOutstandingBalance.toString(),
       };
 
       // Update contract with return inspection data, timeIn, and early closure reason (Task 11)
@@ -1147,15 +1196,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // PAYMENT VERIFICATION: Query new payments table to verify settlement
       const contractPayments = await storage.getPaymentsByContract(contract.id);
-      const totalPaid = contractPayments.reduce((sum: number, payment: any) => sum + parseFloat(payment.amount || '0'), 0);
+      
+      // CRITICAL FIX: Safe parsing with guards for null/undefined values
+      const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
+        const amount = parseFloat(payment.amount || '0');
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
+      
       const totalAmount = parseFloat(contract.totalAmount || '0');
       const totalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
-      const totalDue = totalAmount + totalExtraCharges;
+      
+      // CRITICAL FIX: Validate that parsed values are valid numbers
+      if (isNaN(totalAmount)) {
+        return res.status(500).json({ 
+          message: "Invalid contract total amount. Please contact system administrator." 
+        });
+      }
+      
+      const totalDue = (isNaN(totalAmount) ? 0 : totalAmount) + (isNaN(totalExtraCharges) ? 0 : totalExtraCharges);
       
       // SECURITY FIX: Round to currency precision (2 decimals) to prevent floating point exploits
       const totalPaidRounded = Math.round(totalPaid * 100) / 100;
       const totalDueRounded = Math.round(totalDue * 100) / 100;
       const computedOutstanding = totalDueRounded - totalPaidRounded;
+      
+      // CRITICAL FIX: Validate outstanding balance is a valid number
+      if (isNaN(computedOutstanding)) {
+        console.error(`NaN outstanding balance detected for contract ${contract.id}. totalDue: ${totalDue}, totalPaid: ${totalPaid}`);
+        return res.status(500).json({ 
+          message: "Error calculating outstanding balance. Please contact system administrator." 
+        });
+      }
       
       // Check if there's outstanding balance
       const hasOutstandingBalance = computedOutstanding > 0.001;
