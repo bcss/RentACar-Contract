@@ -58,6 +58,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 // Extend the shared schema to handle nullable fields for forms
 const vehicleFormSchema = insertVehicleSchema.extend({
@@ -258,6 +264,257 @@ const VehicleForm = ({ form, t, onSubmit, isPending }: VehicleFormProps) => (
           </FormItem>
         )}
       />
+      
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="rta-fields">
+          <AccordionTrigger>RTA Information / معلومات هيئة الطرق والمواصلات</AccordionTrigger>
+          <AccordionContent className="space-y-4 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="tcNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>TC Number / رقم TC</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-tc-number" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="placeOfIssue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Place of Issue / مكان الإصدار</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-place-of-issue" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="trafficCodeNo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Traffic Code No / رقم كود المرور</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-traffic-code" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="licensingAuthority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Licensing Authority / سلطة الترخيص</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-licensing-authority" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="ownerName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Owner Name / اسم المالك</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-owner-name" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ownerNationality"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Owner Nationality / جنسية المالك</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-owner-nationality" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="engineNo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Engine Number / رقم المحرك</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-engine-no" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="chassisNo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chassis Number / رقم الهيكل</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-chassis-no" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="vehicleType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Vehicle Type / نوع المركبة</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} placeholder="e.g., Sedan, SUV" data-testid="input-vehicle-type" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="modelOrigin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Model Origin / بلد المنشأ</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} placeholder="e.g., Japanese, German" data-testid="input-vehicle-model-origin" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="grossVehicleWeight"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gross Vehicle Weight / الوزن الإجمالي</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-gross-weight" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="grossVehicleWeightType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Weight Unit / وحدة الوزن</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                        <SelectTrigger data-testid="select-vehicle-weight-unit">
+                          <SelectValue placeholder="Select unit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="kg">kg (كجم)</SelectItem>
+                          <SelectItem value="lbs">lbs (رطل)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="registrationExpiry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Registration Expiry / انتهاء التسجيل</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                        data-testid="input-vehicle-registration-expiry"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="insuranceExpiry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Insurance Expiry / انتهاء التأمين</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                        data-testid="input-vehicle-insurance-expiry"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="policyNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Policy Number / رقم البوليصة</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-vehicle-policy-number" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="mortgagedBy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mortgaged By / مرهونة لدى</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} placeholder="If applicable" data-testid="input-vehicle-mortgaged-by" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      
       <DialogFooter>
         <Button type="submit" disabled={isPending} data-testid="button-submit-vehicle">
           {isPending ? t('common.saving') : t('common.save')}

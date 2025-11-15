@@ -99,6 +99,17 @@ export const customers = pgTable("customers", {
   licenseExpiryDate: timestamp("license_expiry_date"),
   nationality: varchar("nationality"), // Required by form validation
   
+  // RTA License Fields (from RTA license document)
+  licensePermittedVehicles: varchar("license_permitted_vehicles"), // Types of vehicles allowed
+  licenseTransmissionType: varchar("license_transmission_type"), // "automatic", "manual", or "both"
+  licenseWearingGlasses: boolean("license_wearing_glasses"), // Whether glasses required
+  licensePlaceOfIssue: varchar("license_place_of_issue"), // Where license was issued
+  licenseLicensingAuthority: varchar("license_licensing_authority"), // Licensing authority
+  licenseTrafficCodeNo: varchar("license_traffic_code_no"), // Traffic code number on license
+  licenseDateOfBirth: timestamp("license_date_of_birth"), // Date of birth from license
+  licenseDateOfIssue: timestamp("license_date_of_issue"), // License issue date
+  licenseDateOfExpiry: timestamp("license_date_of_expiry"), // License expiry date
+  
   // Additional Information
   notes: text("notes"),
   
@@ -135,6 +146,9 @@ export const insertCustomerSchema = createInsertSchema(customers).omit({
   dateOfBirth: z.coerce.date().optional(),
   licenseIssueDate: z.coerce.date().optional(),
   licenseExpiryDate: z.coerce.date().optional(),
+  licenseDateOfBirth: z.coerce.date().optional(),
+  licenseDateOfIssue: z.coerce.date().optional(),
+  licenseDateOfExpiry: z.coerce.date().optional(),
 });
 
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
@@ -170,6 +184,24 @@ export const vehicles = pgTable("vehicles", {
   // Additional Information
   notes: text("notes"),
   
+  // RTA (Roads & Transport Authority) Fields
+  tcNumber: varchar("tc_number"), // Traffic plate number
+  placeOfIssue: varchar("place_of_issue"), // Where registration was issued
+  trafficCodeNo: varchar("traffic_code_no"), // Traffic code number
+  ownerName: varchar("owner_name"), // Vehicle owner name
+  ownerNationality: varchar("owner_nationality"), // Owner nationality
+  registrationExpiry: timestamp("registration_expiry"), // Registration expiry date
+  insuranceExpiry: timestamp("insurance_expiry"), // Insurance expiry date
+  policyNumber: varchar("policy_number"), // Insurance policy number
+  mortgagedBy: varchar("mortgaged_by"), // Mortgaged by (if applicable)
+  modelOrigin: varchar("model_origin"), // Model origin (e.g., "Japanese", "German")
+  vehicleType: varchar("vehicle_type"), // Vehicle type (e.g., "Sedan", "SUV")
+  grossVehicleWeight: varchar("gross_vehicle_weight"), // Gross weight
+  grossVehicleWeightType: varchar("gross_vehicle_weight_type"), // Weight unit (e.g., "kg", "lbs")
+  engineNo: varchar("engine_no"), // Engine number
+  chassisNo: varchar("chassis_no"), // Chassis number
+  licensingAuthority: varchar("licensing_authority"), // Licensing authority
+  
   // Audit fields
   disabled: boolean("disabled").notNull().default(false),
   disabledBy: varchar("disabled_by").references(() => users.id),
@@ -195,6 +227,9 @@ export const insertVehicleSchema = createInsertSchema(vehicles).omit({
   disabledBy: true,
   disabledAt: true,
   disabled: true,
+}).extend({
+  registrationExpiry: z.coerce.date().optional(),
+  insuranceExpiry: z.coerce.date().optional(),
 });
 
 export type InsertVehicle = z.infer<typeof insertVehicleSchema>;

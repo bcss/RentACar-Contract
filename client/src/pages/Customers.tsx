@@ -59,6 +59,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 // Extend the shared schema to handle nullable fields for forms
 const customerFormSchema = insertCustomerSchema.extend({
@@ -301,6 +307,172 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
           </FormItem>
         )}
       />
+      
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="rta-license-fields">
+          <AccordionTrigger>RTA License Details / تفاصيل رخصة القيادة</AccordionTrigger>
+          <AccordionContent className="space-y-4 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="licensePermittedVehicles"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Permitted Vehicles / المركبات المسموح بها</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} placeholder="e.g., Light vehicles" data-testid="input-customer-permitted-vehicles" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="licenseTransmissionType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Transmission Type / نوع ناقل الحركة</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                        <SelectTrigger data-testid="select-customer-transmission-type">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="automatic">Automatic / أوتوماتيك</SelectItem>
+                          <SelectItem value="manual">Manual / يدوي</SelectItem>
+                          <SelectItem value="both">Both / كلاهما</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="licenseWearingGlasses"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Wearing Glasses / نظارات طبية</FormLabel>
+                      <div className="text-sm text-muted-foreground">Required to wear glasses while driving</div>
+                    </div>
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value ?? false}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        className="h-4 w-4"
+                        data-testid="checkbox-customer-wearing-glasses"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="licensePlaceOfIssue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>License Place of Issue / مكان الإصدار</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-customer-license-place-of-issue" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="licenseLicensingAuthority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Licensing Authority / سلطة الترخيص</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-customer-licensing-authority" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="licenseTrafficCodeNo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Traffic Code No / رقم كود المرور</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ''} data-testid="input-customer-license-traffic-code" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="licenseDateOfBirth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>License DOB / تاريخ الميلاد</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                        data-testid="input-customer-license-dob"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="licenseDateOfIssue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>License Issue Date / تاريخ الإصدار</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                        data-testid="input-customer-license-issue-date-rta"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="licenseDateOfExpiry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>License Expiry / تاريخ الانتهاء</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                        data-testid="input-customer-license-expiry-rta"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      
       <DialogFooter>
         <Button type="submit" disabled={isPending} data-testid="button-submit-customer">
           {isPending ? t('common.saving') : t('common.save')}
