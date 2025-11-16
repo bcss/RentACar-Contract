@@ -362,8 +362,32 @@ export default function ImportData() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Format Requirements</CardTitle>
-                  <CardDescription>Required and optional fields for {entity} import</CardDescription>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle>Format Requirements & Sample Files</CardTitle>
+                      <CardDescription>Field definitions with data types for {entity} import</CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/samples/${entity}_sample.json`, '_blank')}
+                        data-testid={`button-download-json-sample-${entity}`}
+                      >
+                        <Icon name="download" className="mr-2 h-4 w-4" />
+                        JSON Sample
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/samples/${entity}_sample.csv`, '_blank')}
+                        data-testid={`button-download-csv-sample-${entity}`}
+                      >
+                        <Icon name="download" className="mr-2 h-4 w-4" />
+                        CSV Sample
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4 text-sm">
@@ -371,15 +395,28 @@ export default function ImportData() {
                       <>
                         <div>
                           <strong className="text-foreground">Required Fields:</strong>
-                          <p className="text-muted-foreground">nameEn, nationality, passportId, mobile, type (individual/corporate)</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nameEn</code> (string) - Customer name in English</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">phone</code> (string) - Contact phone number with country code</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nationalId</code> (string) - National ID or passport (must be unique)</li>
+                          </ul>
                         </div>
                         <div>
                           <strong className="text-foreground">Optional Fields:</strong>
-                          <p className="text-muted-foreground">nameAr, licenseNumber, email, address, tradeLicenseNo (corporate only), registrationNumber (corporate only)</p>
-                        </div>
-                        <div>
-                          <strong className="text-foreground">Unique Identifier:</strong>
-                          <p className="text-muted-foreground">passportId (must be unique across all customers)</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nameAr</code> (string) - Customer name in Arabic</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">gender</code> (enum: "male" | "female") - Gender</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">dateOfBirth</code> (date: YYYY-MM-DD) - Date of birth</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">email</code> (string) - Email address</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">address</code> (string) - Full address</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">licenseNumber</code> (string) - Driver license number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">licenseIssuedBy</code> (string) - License issuing authority</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">licenseIssueDate</code> (date: YYYY-MM-DD) - License issue date</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">licenseExpiryDate</code> (date: YYYY-MM-DD) - License expiry date</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nationality</code> (string) - Nationality</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">licensePermittedVehicles</code> (string) - Vehicle types permitted</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">licenseSignedBy</code> (string) - License authority signature</li>
+                          </ul>
                         </div>
                       </>
                     )}
@@ -387,15 +424,32 @@ export default function ImportData() {
                       <>
                         <div>
                           <strong className="text-foreground">Required Fields:</strong>
-                          <p className="text-muted-foreground">registration, make, model, year, status (available/rented/maintenance/damaged)</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">registration</code> (string) - License plate number (must be unique)</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">make</code> (string) - Vehicle manufacturer (e.g., Toyota, Honda)</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">model</code> (string) - Vehicle model (e.g., Camry, Accord)</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">year</code> (string) - Manufacturing year</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">color</code> (string) - Vehicle color</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">dailyRate</code> (string) - Daily rental rate in AED</li>
+                          </ul>
                         </div>
                         <div>
                           <strong className="text-foreground">Optional Fields:</strong>
-                          <p className="text-muted-foreground">color, plateCode, chassisNo, licensingAuthority</p>
-                        </div>
-                        <div>
-                          <strong className="text-foreground">Unique Identifier:</strong>
-                          <p className="text-muted-foreground">registration (must be unique across all vehicles)</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">vin</code> (string) - Vehicle Identification Number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">fuelType</code> (enum: "petrol" | "diesel" | "electric" | "hybrid") - Fuel type</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">tankCapacity</code> (number) - Fuel tank capacity in liters</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">odometer</code> (number) - Current mileage in kilometers</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">weeklyRate</code> (string) - Weekly rental rate in AED</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">monthlyRate</code> (string) - Monthly rental rate in AED</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">status</code> (enum: "available" | "rented" | "maintenance" | "damaged") - Vehicle status (default: "available")</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">notes</code> (string) - Additional notes</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">tcNumber</code> (string) - Traffic plate number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">ownershipCardNumber</code> (string) - Vehicle ownership card number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">rtaCodeNumber</code> (string) - RTA code number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">insurancePolicyNumber</code> (string) - Insurance policy number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">insuranceExpiryDate</code> (date: YYYY-MM-DD) - Insurance expiry date</li>
+                          </ul>
                         </div>
                       </>
                     )}
@@ -403,15 +457,22 @@ export default function ImportData() {
                       <>
                         <div>
                           <strong className="text-foreground">Required Fields:</strong>
-                          <p className="text-muted-foreground">nameEn, nationality, passportId, mobile</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nameEn</code> (string) - Sponsor name in English</li>
+                          </ul>
                         </div>
                         <div>
                           <strong className="text-foreground">Optional Fields:</strong>
-                          <p className="text-muted-foreground">nameAr, licenseNumber, address, relation, notes</p>
-                        </div>
-                        <div>
-                          <strong className="text-foreground">Unique Identifier:</strong>
-                          <p className="text-muted-foreground">passportId (must be unique across all sponsors)</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nameAr</code> (string) - Sponsor name in Arabic</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nationality</code> (string) - Nationality</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">passportId</code> (string) - Passport or National ID</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">licenseNumber</code> (string) - Driver license number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">mobile</code> (string) - Mobile phone number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">address</code> (string) - Full address</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">relation</code> (string) - Relationship to hirer (e.g., "Employer", "Family Member")</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">notes</code> (string) - Additional notes</li>
+                          </ul>
                         </div>
                       </>
                     )}
@@ -419,15 +480,24 @@ export default function ImportData() {
                       <>
                         <div>
                           <strong className="text-foreground">Required Fields:</strong>
-                          <p className="text-muted-foreground">nameEn, registrationNumber, mobile</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nameEn</code> (string) - Company name in English</li>
+                          </ul>
                         </div>
                         <div>
                           <strong className="text-foreground">Optional Fields:</strong>
-                          <p className="text-muted-foreground">nameAr, tradeLicenseNo, contactPerson, email, address, notes</p>
-                        </div>
-                        <div>
-                          <strong className="text-foreground">Unique Identifier:</strong>
-                          <p className="text-muted-foreground">registrationNumber (must be unique across all companies)</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">nameAr</code> (string) - Company name in Arabic</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">registrationNumber</code> (string) - Business registration number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">registrationValidity</code> (date: YYYY-MM-DD) - Registration expiry date</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">taxId</code> (string) - Tax registration number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">taxValidity</code> (date: YYYY-MM-DD) - Tax registration expiry date</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">contactPerson</code> (string) - Primary contact person</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">phone</code> (string) - Company phone number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">email</code> (string) - Company email address</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">address</code> (string) - Company address</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">notes</code> (string) - Additional notes</li>
+                          </ul>
                         </div>
                       </>
                     )}
@@ -435,15 +505,41 @@ export default function ImportData() {
                       <>
                         <div>
                           <strong className="text-foreground">Required Fields:</strong>
-                          <p className="text-muted-foreground">customerPassportId, vehicleRegistration, rentalType, rentalStartDate (YYYY-MM-DD), rentalEndDate (YYYY-MM-DD), dailyRate, pickupLocation, dropoffLocation</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">contractNumber</code> (number) - Unique contract number</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">customerId</code> (string) - Customer UUID or use lookup fields</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">vehicleId</code> (string) - Vehicle UUID or use lookup fields</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">rentalType</code> (enum: "daily" | "weekly" | "monthly") - Rental period type</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">rentalStartDate</code> (datetime: ISO 8601) - Rental start date and time</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">rentalEndDate</code> (datetime: ISO 8601) - Rental end date and time</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">dailyRate</code> (string) - Daily rental rate</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">pickupLocation</code> (string) - Vehicle pickup location</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">dropoffLocation</code> (string) - Vehicle dropoff location</li>
+                          </ul>
                         </div>
                         <div>
                           <strong className="text-foreground">Optional Fields:</strong>
-                          <p className="text-muted-foreground">hirerType (default: direct), sponsorPassportId (if hirerType = with_sponsor), companyRegistrationNumber (if hirerType = from_company), weeklyRate, monthlyRate, mileageLimit, extraKmRate, securityDeposit, notes</p>
+                          <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">hirerType</code> (enum: "direct" | "with_sponsor" | "from_company") - Hirer type (default: "direct")</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">sponsorId</code> (string) - Sponsor UUID (required if hirerType = "with_sponsor")</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">weeklyRate</code> (string) - Weekly rental rate</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">monthlyRate</code> (string) - Monthly rental rate</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">totalDays</code> (number) - Total rental days</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">subtotal</code> (string) - Subtotal amount</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">vatAmount</code> (string) - VAT amount</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">totalAmount</code> (string) - Total amount including VAT</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">securityDeposit</code> (string) - Security deposit amount</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">inspectionTools</code> (boolean) - Tools present</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">inspectionSpareTyre</code> (boolean) - Spare tyre present</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">inspectionGps</code> (boolean) - GPS present</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">inspectionFuelPercentage</code> (number: 0-100) - Fuel percentage at start</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">odometerStart</code> (number) - Starting odometer reading</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">notes</code> (string) - Additional notes</li>
+                          </ul>
                         </div>
                         <div>
                           <strong className="text-foreground">Important:</strong>
-                          <p className="text-muted-foreground">Customers and vehicles must exist before importing contracts. Contracts are created in DRAFT status only.</p>
+                          <p className="text-muted-foreground mt-2">Customers, vehicles, and sponsors (if applicable) must exist before importing contracts. All contracts are created in DRAFT status.</p>
                         </div>
                       </>
                     )}
