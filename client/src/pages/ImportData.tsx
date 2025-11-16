@@ -12,6 +12,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Icon } from '@/components/Icon';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
+import { downloadSampleJSON, downloadSampleCSV, type EntityType } from '@/utils/sampleDataGenerator';
 
 type EntityType = 'customers' | 'vehicles' | 'sponsors' | 'companies' | 'contracts';
 type FileFormat = 'json' | 'csv';
@@ -595,7 +596,7 @@ export default function ImportData() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(`/samples/${entity}_sample.json`, '_blank')}
+                        onClick={() => downloadSampleJSON(entity as EntityType)}
                         data-testid={`button-download-json-sample-${entity}`}
                       >
                         <Icon name="download" className="mr-2 h-4 w-4" />
@@ -604,7 +605,7 @@ export default function ImportData() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(`/samples/${entity}_sample.csv`, '_blank')}
+                        onClick={() => downloadSampleCSV(entity as EntityType)}
                         data-testid={`button-download-csv-sample-${entity}`}
                       >
                         <Icon name="download" className="mr-2 h-4 w-4" />
@@ -694,7 +695,7 @@ export default function ImportData() {
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">licenseNumber</code> (string) - Driver license number</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">mobile</code> (string) - Mobile phone number</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">address</code> (string) - Full address</li>
-                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">relation</code> (string) - Relationship to hirer (e.g., "Employer", "Family Member")</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">relation</code> (string) - Relationship to hirer (e.g., "Father", "Spouse", "Friend", "Brother")</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">notes</code> (string) - Additional notes</li>
                           </ul>
                         </div>
@@ -744,11 +745,21 @@ export default function ImportData() {
                         <div>
                           <strong className="text-foreground">Optional Fields:</strong>
                           <ul className="mt-2 space-y-1 text-muted-foreground ml-4">
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">status</code> (enum: "draft" | "active" | "completed" | "closed") - Contract status (default: "draft")</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">hirerType</code> (enum: "direct" | "with_sponsor" | "from_company") - Hirer type (default: "direct")</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">sponsorId</code> (string) - Sponsor UUID (required if hirerType = "with_sponsor")</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">weeklyRate</code> (string) - Weekly rental rate</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">monthlyRate</code> (string) - Monthly rental rate</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">totalDays</code> (number) - Total rental days</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">odometerStart</code> (number) - Starting odometer reading (for active/completed/closed contracts)</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">odometerEnd</code> (number) - Ending odometer reading (for completed/closed contracts)</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">extraKmDriven</code> (number) - Extra kilometers driven beyond limit</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">extraKmCharge</code> (string) - Charges for extra kilometers</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">fuelCharge</code> (string) - Fuel charges</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">totalExtraCharges</code> (string) - Total extra charges</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">depositPaid</code> (boolean) - Whether deposit is paid</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">depositRefunded</code> (boolean) - Whether deposit is refunded (for closed contracts)</li>
+                            <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">paymentStatus</code> (enum: "pending" | "partial" | "paid") - Payment status</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">subtotal</code> (string) - Subtotal amount</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">vatAmount</code> (string) - VAT amount</li>
                             <li>• <code className="text-xs bg-muted px-1 py-0.5 rounded">totalAmount</code> (string) - Total amount including VAT</li>
@@ -763,7 +774,10 @@ export default function ImportData() {
                         </div>
                         <div>
                           <strong className="text-foreground">Important:</strong>
-                          <p className="text-muted-foreground mt-2">Customers, vehicles, and sponsors (if applicable) must exist before importing contracts. All contracts are created in DRAFT status.</p>
+                          <p className="text-muted-foreground mt-2">
+                            <strong>Important:</strong> Customers, vehicles, and sponsors (if applicable) must exist before importing contracts. 
+                            Contracts can be imported with any status (draft, active, completed, closed) - use appropriate fields for each status.
+                          </p>
                         </div>
                       </>
                     )}
