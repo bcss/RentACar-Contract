@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Icon } from '@/components/Icon';
 import { format } from 'date-fns';
-import { FileText, DollarSign, CheckCircle, Clock, Plus } from 'lucide-react';
+import { FileText, DollarSign, CheckCircle, Clock, Plus, TrendingUp, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 
 export function MyDayTab() {
   const { t, i18n } = useTranslation();
@@ -68,62 +68,90 @@ export function MyDayTab() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight" data-testid="text-my-day-title">
+      {/* Welcome Section - Modern MD3 Typography */}
+      <div className="space-y-1">
+        <h2 className="text-3xl font-semibold tracking-tight" data-testid="text-my-day-title">
           {t('dashboard.myDay')}
         </h2>
-        <p className="text-sm text-muted-foreground mt-1" data-testid="text-my-day-subtitle">
+        <p className="text-sm text-muted-foreground leading-6" data-testid="text-my-day-subtitle">
           {t('dashboard.myDaySubtitle')}
         </p>
       </div>
 
-      {/* Quick Actions - Moved to Top */}
-      <Card data-testid="card-quick-actions">
-        <CardHeader>
-          <CardTitle>{t('dashboard.quickActions')}</CardTitle>
+      {/* Quick Actions - Modern MD3 Assist Chips with Tonal Containers */}
+      <Card className="shadow-lg border-transparent ring-1 ring-[hsl(var(--primary)/0.2)]" data-testid="card-quick-actions">
+        <CardHeader className="p-6">
+          <CardTitle className="text-base font-medium uppercase tracking-[0.08em]">{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6 pt-0">
           <div className="flex gap-3 flex-wrap">
-            {/* Primary Action - Create Contract */}
+            {/* Primary Action - Filled Style */}
             <Link href="/contracts/create">
-              <Button data-testid="button-create-contract">
+              <Button 
+                className="transition-all duration-200 ease-out shadow-md"
+                data-testid="button-create-contract"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 {t('contract.createContract')}
               </Button>
             </Link>
 
-            {/* Contextual Actions - Show if there are pending items */}
+            {/* Contextual Actions - Tonal MD3 Style with Better Visual Hierarchy */}
             {myOverdueReturns.length > 0 && (
-              <Link href="/contracts?status=active">
-                <Button variant="destructive" data-testid="button-view-overdue">
-                  <Clock className="h-4 w-4 mr-2" />
-                  {t('dashboard.overdueReturns')} ({myOverdueReturns.length})
+              <Link href="/contracts?status=active&overdue=true">
+                <Button 
+                  variant="destructive" 
+                  className="transition-all duration-200 ease-out"
+                  data-testid="button-view-overdue"
+                >
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  {t('dashboard.overdueReturns')} 
+                  <Badge variant="outline" className="ml-2 bg-background/50">
+                    {myOverdueReturns.length}
+                  </Badge>
                 </Button>
               </Link>
             )}
 
             {myPendingRefunds.length > 0 && (
-              <Link href="/contracts?status=completed">
-                <Button variant="secondary" data-testid="button-view-refunds">
+              <Link href="/contracts?status=completed&needsRefund=true">
+                <Button 
+                  variant="secondary" 
+                  className="transition-all duration-200 ease-out"
+                  data-testid="button-view-refunds"
+                >
                   <DollarSign className="h-4 w-4 mr-2" />
-                  {t('dashboard.pendingRefunds')} ({myPendingRefunds.length})
+                  {t('dashboard.pendingRefunds')} 
+                  <Badge variant="outline" className="ml-2">
+                    {myPendingRefunds.length}
+                  </Badge>
                 </Button>
               </Link>
             )}
 
             {myUnclosedContracts.length > 0 && (
-              <Link href="/contracts?status=completed">
-                <Button variant="secondary" data-testid="button-view-unclosed">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {t('dashboard.unclosedContracts')} ({myUnclosedContracts.length})
+              <Link href="/contracts?status=completed&needsClosure=true">
+                <Button 
+                  variant="secondary" 
+                  className="transition-all duration-200 ease-out"
+                  data-testid="button-view-unclosed"
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  {t('dashboard.unclosedContracts')} 
+                  <Badge variant="outline" className="ml-2">
+                    {myUnclosedContracts.length}
+                  </Badge>
                 </Button>
               </Link>
             )}
 
-            {/* General Navigation Actions */}
+            {/* General Navigation - Outline Style */}
             <Link href="/contracts">
-              <Button variant="outline" data-testid="button-view-all-contracts">
+              <Button 
+                variant="outline" 
+                className="transition-all duration-200 ease-out"
+                data-testid="button-view-all-contracts"
+              >
                 <FileText className="h-4 w-4 mr-2" />
                 {t('dashboard.viewAllMyContracts')}
               </Button>
@@ -132,116 +160,152 @@ export function MyDayTab() {
         </CardContent>
       </Card>
 
-      {/* Quick Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card data-testid="card-my-contracts-total">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('dashboard.myContracts')}</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-my-contracts-count">{myContracts.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {myContractsThisMonth.length} {t('dashboard.thisMonth')}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card data-testid="card-my-revenue">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('dashboard.myRevenue')}</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-my-revenue-total">
-              {currency} {myTotalRevenue.toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      {/* Hero KPI Rail - Modern MD3 3-Column Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* My Contracts - Primary Tonal Container */}
+        <Card className="bg-[hsl(var(--primary)/0.08)] shadow-lg border-transparent hover-elevate transition-all duration-200" data-testid="card-my-contracts-total">
+          <CardHeader className="flex flex-row items-center justify-between gap-4 p-6 pb-4">
+            <div className="flex-1">
+              <CardTitle className="text-base font-medium uppercase tracking-[0.08em] text-muted-foreground">{t('dashboard.myContracts')}</CardTitle>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {currency} {myRevenueThisMonth.toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {t('dashboard.thisMonth')}
-            </p>
+            <div className="h-12 w-12 rounded-full bg-[hsl(var(--primary)/0.15)] flex items-center justify-center">
+              <FileText className="h-6 w-6 text-primary" />
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 pt-0">
+            <div className="text-4xl font-semibold tabular-nums tracking-tight" data-testid="text-my-contracts-count">
+              {myContracts.length}
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <Badge variant="secondary" className="text-xs font-medium">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                +{myContractsThisMonth.length} {t('dashboard.thisMonth')}
+              </Badge>
+            </div>
           </CardContent>
         </Card>
 
-        <Card data-testid="card-my-active">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('dashboard.activeRentals')}</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+        {/* My Revenue - Success Tonal Container */}
+        <Card className="bg-[hsl(var(--primary)/0.08)] shadow-lg border-transparent hover-elevate transition-all duration-200" data-testid="card-my-revenue">
+          <CardHeader className="flex flex-row items-center justify-between gap-4 p-6 pb-4">
+            <div className="flex-1">
+              <CardTitle className="text-base font-medium uppercase tracking-[0.08em] text-muted-foreground">{t('dashboard.myRevenue')}</CardTitle>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-[hsl(var(--primary)/0.15)] flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-primary" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-my-active-count">{myActiveContracts.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {myOverdueReturns.length} {t('dashboard.overdue')}
-            </p>
+          <CardContent className="p-6 pt-0">
+            <div className="text-3xl font-semibold tabular-nums tracking-tight" data-testid="text-my-revenue-total">
+              {currency} {myTotalRevenue.toLocaleString(i18n.language, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <span className="text-sm text-muted-foreground leading-6">
+                {currency} {myRevenueThisMonth.toLocaleString(i18n.language, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} {t('dashboard.thisMonth')}
+              </span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card data-testid="card-my-pending-tasks">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('dashboard.pendingTasks')}</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+        {/* Pending Tasks - Warning/Alert Tonal Container */}
+        <Card 
+          className={`${
+            (myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0
+              ? 'bg-[hsl(var(--destructive)/0.08)] border-[hsl(var(--destructive)/0.2)]'
+              : 'bg-[hsl(var(--muted))]'
+          } shadow-lg hover-elevate transition-all duration-200`}
+          data-testid="card-my-pending-tasks"
+        >
+          <CardHeader className="flex flex-row items-center justify-between gap-4 p-6 pb-4">
+            <div className="flex-1">
+              <CardTitle className="text-base font-medium uppercase tracking-[0.08em] text-muted-foreground">{t('dashboard.pendingTasks')}</CardTitle>
+            </div>
+            <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+              (myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0
+                ? 'bg-[hsl(var(--destructive)/0.15)]'
+                : 'bg-[hsl(var(--muted)/0.15)]'
+            }`}>
+              {(myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0 ? (
+                <AlertCircle className="h-6 w-6 text-destructive" />
+              ) : (
+                <CheckCircle2 className="h-6 w-6 text-muted-foreground" />
+              )}
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-my-pending-count">
+          <CardContent className="p-6 pt-0">
+            <div className="text-4xl font-semibold tabular-nums tracking-tight" data-testid="text-my-pending-count">
               {myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t('dashboard.actionRequired')}
-            </p>
+            <div className="flex items-center gap-2 mt-3">
+              {(myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0 ? (
+                <span className="text-sm text-destructive font-medium leading-6">
+                  {t('dashboard.actionRequired')}
+                </span>
+              ) : (
+                <span className="text-sm text-muted-foreground leading-6">
+                  All caught up!
+                </span>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* My Contracts Status Breakdown */}
-      <Card data-testid="card-my-contracts-breakdown">
-        <CardHeader>
-          <CardTitle>{t('dashboard.myContractsBreakdown')}</CardTitle>
+      {/* My Contracts Status Breakdown - Modern Grid with Better Visuals */}
+      <Card className="shadow-lg" data-testid="card-my-contracts-breakdown">
+        <CardHeader className="p-6">
+          <CardTitle className="text-xl font-semibold tracking-tight">{t('dashboard.myContractsBreakdown')}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6 pt-0">
           <div className="grid gap-4 md:grid-cols-4">
             <Link href="/contracts?status=draft">
-              <div className="p-4 rounded-lg border hover-elevate active-elevate-2 cursor-pointer" data-testid="button-my-draft-contracts">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{t('contract.status.draft')}</p>
-                    <p className="text-2xl font-bold mt-1">{myDraftContracts.length}</p>
+              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-draft-contracts">
+                <div className="absolute top-0 left-0 w-1 h-full bg-muted-foreground group-hover:bg-primary transition-colors" />
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.draft')}</p>
+                    <Badge variant="secondary" className="text-xs">{t('contract.status.draft')}</Badge>
                   </div>
-                  <Badge variant="secondary">{t('contract.status.draft')}</Badge>
+                  <p className="text-3xl font-semibold tabular-nums">{myDraftContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=active">
-              <div className="p-4 rounded-lg border hover-elevate active-elevate-2 cursor-pointer" data-testid="button-my-active-contracts">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{t('contract.status.active')}</p>
-                    <p className="text-2xl font-bold mt-1">{myActiveContracts.length}</p>
+              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-active-contracts">
+                <div className="absolute top-0 left-0 w-1 h-full bg-primary group-hover:bg-primary transition-colors" />
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.active')}</p>
+                    <Badge variant="default" className="text-xs">{t('contract.status.active')}</Badge>
                   </div>
-                  <Badge variant="default">{t('contract.status.active')}</Badge>
+                  <p className="text-3xl font-semibold tabular-nums text-primary">{myActiveContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=completed">
-              <div className="p-4 rounded-lg border hover-elevate active-elevate-2 cursor-pointer" data-testid="button-my-completed-contracts">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{t('contract.status.completed')}</p>
-                    <p className="text-2xl font-bold mt-1">{myCompletedContracts.length}</p>
+              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-completed-contracts">
+                <div className="absolute top-0 left-0 w-1 h-full bg-green-500 group-hover:bg-primary transition-colors" />
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.completed')}</p>
+                    <Badge className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">{t('contract.status.completed')}</Badge>
                   </div>
-                  <Badge>{t('contract.status.completed')}</Badge>
+                  <p className="text-3xl font-semibold tabular-nums">{myCompletedContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=closed">
-              <div className="p-4 rounded-lg border hover-elevate active-elevate-2 cursor-pointer" data-testid="button-my-closed-contracts">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{t('contract.status.closed')}</p>
-                    <p className="text-2xl font-bold mt-1">{myClosedContracts.length}</p>
+              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-closed-contracts">
+                <div className="absolute top-0 left-0 w-1 h-full bg-muted group-hover:bg-primary transition-colors" />
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.closed')}</p>
+                    <Badge variant="outline" className="text-xs">{t('contract.status.closed')}</Badge>
                   </div>
-                  <Badge variant="outline">{t('contract.status.closed')}</Badge>
+                  <p className="text-3xl font-semibold tabular-nums">{myClosedContracts.length}</p>
                 </div>
               </div>
             </Link>
@@ -249,56 +313,80 @@ export function MyDayTab() {
         </CardContent>
       </Card>
 
-      {/* My Pending Tasks Details */}
+      {/* My Pending Tasks Details - Modern Task Command Center */}
       {(myOverdueReturns.length > 0 || myPendingRefunds.length > 0 || myUnclosedContracts.length > 0) && (
-        <Card data-testid="card-my-pending-tasks-details">
-          <CardHeader>
-            <CardTitle>{t('dashboard.myPendingTasks')}</CardTitle>
+        <Card className="shadow-lg border-[hsl(var(--destructive)/0.2)]" data-testid="card-my-pending-tasks-details">
+          <CardHeader className="p-6 bg-[hsl(var(--destructive)/0.05)]">
+            <CardTitle className="text-xl font-semibold tracking-tight flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              {t('dashboard.myPendingTasks')}
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-6">
+            <div className="space-y-6">
               {myOverdueReturns.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold mb-2 text-destructive">
+                  <h4 className="text-sm font-bold mb-3 text-destructive uppercase tracking-wide flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
                     {t('dashboard.overdueReturns')} ({myOverdueReturns.length})
                   </h4>
                   <div className="space-y-2">
-                    {myOverdueReturns.slice(0, 3).map(contract => (
-                      <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                        <div className="p-3 rounded-lg border hover-elevate cursor-pointer" data-testid={`row-overdue-${contract.id}`}>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">#{contract.contractNumber}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {t('dashboard.dueDate')}: {contract.rentalEndDate ? format(new Date(contract.rentalEndDate), 'PPP', { locale: i18n.language === 'ar' ? undefined : undefined }) : '-'}
-                              </p>
+                    {myOverdueReturns.slice(0, 3).map(contract => {
+                      const daysOverdue = contract.rentalEndDate 
+                        ? Math.floor((now.getTime() - new Date(contract.rentalEndDate).getTime()) / (1000 * 60 * 60 * 24))
+                        : 0;
+                      return (
+                        <Link key={contract.id} href={`/contracts/${contract.id}`}>
+                          <div className="relative p-4 rounded-xl border-2 border-destructive/20 bg-destructive/5 hover:border-destructive hover:shadow-md transition-all duration-200 cursor-pointer" data-testid={`row-overdue-${contract.id}`}>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex-1">
+                                <p className="font-semibold text-base">#{contract.contractNumber}</p>
+                                <p className="text-sm text-muted-foreground mt-1 leading-6">
+                                  {contract.customerNameEn || 'N/A'} • {contract.vehicleRegistration}
+                                </p>
+                              </div>
+                              <div className="flex flex-col items-end gap-2">
+                                <Badge variant="destructive" className="font-medium">
+                                  {daysOverdue} {t('dashboard.daysOverdue')}
+                                </Badge>
+                                {contract.rentalEndDate && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {format(new Date(contract.rentalEndDate), 'PPP')}
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <Badge variant="destructive">{t('dashboard.overdue')}</Badge>
                           </div>
-                        </div>
-                      </Link>
-                    ))}
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
               {myPendingRefunds.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold mb-2">
+                  <h4 className="text-sm font-bold mb-3 uppercase tracking-wide flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                    <DollarSign className="h-4 w-4" />
                     {t('dashboard.pendingRefunds')} ({myPendingRefunds.length})
                   </h4>
                   <div className="space-y-2">
                     {myPendingRefunds.slice(0, 3).map(contract => (
                       <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                        <div className="p-3 rounded-lg border hover-elevate cursor-pointer" data-testid={`row-refund-${contract.id}`}>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">#{contract.contractNumber}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {t('dashboard.deposit')}: {currency} {parseFloat(contract.securityDeposit || '0').toLocaleString(i18n.language)}
+                        <div className="p-4 rounded-xl border-2 border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20 hover:border-blue-400 hover:shadow-md transition-all duration-200 cursor-pointer" data-testid={`row-refund-${contract.id}`}>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex-1">
+                              <p className="font-semibold text-base">#{contract.contractNumber}</p>
+                              <p className="text-sm text-muted-foreground mt-1 leading-6">
+                                {contract.customerNameEn || 'N/A'}
                               </p>
                             </div>
-                            <Badge>{t('dashboard.refundPending')}</Badge>
+                            <div className="flex flex-col items-end gap-2">
+                              <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 font-semibold">
+                                {currency} {parseFloat(contract.securityDeposit || '0').toLocaleString(i18n.language)}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">{t('dashboard.refundPending')}</span>
+                            </div>
                           </div>
                         </div>
                       </Link>
@@ -309,21 +397,22 @@ export function MyDayTab() {
 
               {myUnclosedContracts.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold mb-2">
+                  <h4 className="text-sm font-bold mb-3 uppercase tracking-wide flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4" />
                     {t('dashboard.unclosedContracts')} ({myUnclosedContracts.length})
                   </h4>
                   <div className="space-y-2">
                     {myUnclosedContracts.slice(0, 3).map(contract => (
                       <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                        <div className="p-3 rounded-lg border hover-elevate cursor-pointer" data-testid={`row-unclosed-${contract.id}`}>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">#{contract.contractNumber}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {t('contract.status.completed')}
+                        <div className="p-4 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer" data-testid={`row-unclosed-${contract.id}`}>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex-1">
+                              <p className="font-semibold text-base">#{contract.contractNumber}</p>
+                              <p className="text-sm text-muted-foreground mt-1 leading-6">
+                                {contract.customerNameEn || 'N/A'} • {contract.vehicleRegistration}
                               </p>
                             </div>
-                            <Badge variant="outline">{t('dashboard.needsClosure')}</Badge>
+                            <Badge variant="outline" className="font-medium">{t('dashboard.needsClosure')}</Badge>
                           </div>
                         </div>
                       </Link>
