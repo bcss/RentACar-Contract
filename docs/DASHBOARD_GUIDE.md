@@ -142,23 +142,37 @@ These advanced analytics are only visible to Admin and Manager roles.
 ---
 
 ## New Dashboard Analytics Cards
+*Last Updated: November 16, 2025 - Enhanced with Material Design 3 Professional Styling*
 
 ### Fleet Status Distribution
 **Available to**: All users
 
-Visual breakdown of your fleet by status:
-- **Available**: Ready to rent
-- **Rented**: Currently on contract
-- **Maintenance**: Under repair or service
-- **Damaged**: Awaiting damage assessment or repair
+**Visual Design**: Professional concentric donut chart with Material Design 3 styling featuring:
+- **Dual-layer visualization**: Outer ring shows distribution, inner hub displays total utilization percentage
+- **Color-coded status chips**: Each status has distinct color mapping (Available: cyan, Rented: blue, Maintenance: yellow, Damaged: red)
+- **Trend indicators**: Up/down arrows show status changes with contextual colors
+- **Interactive legend**: Hover over segments for detailed counts
+- **Accessible color palette**: Adapts beautifully to both light and dark modes
 
-**Visualization**: Donut chart with color coding
+**Fleet Status Breakdown**:
+- **Available** (Cyan): Vehicles ready to rent
+- **Rented** (Blue): Currently on active contracts
+- **Maintenance** (Yellow): Under repair or service
+- **Damaged** (Red): Awaiting damage assessment or repair
+
+**Professional Features**:
+- 55% inner radius for optimal readability
+- Tokenized chart colors using `hsl(var(--chart-1..5))` for consistent theming
+- Enhanced empty state with engaging illustration
+- Eyebrow text (text-xs uppercase) + title (text-sm semibold) hierarchy
+- Metrics displayed with text-2xl tracking-tight for visual impact
 
 **How to use**:
 - Click the card to drill down to the **Fleet Performance Report** (if you have permission)
 - Monitor maintenance and damaged vehicles - high percentages indicate fleet health issues
 - Ensure enough available vehicles for upcoming reservations
 - Plan maintenance during low-demand periods
+- Watch trend indicators for early warning signs
 
 **Action Items**:
 - Maintenance > 15% of fleet: Review maintenance scheduling, consider preventive maintenance
@@ -168,73 +182,144 @@ Visual breakdown of your fleet by status:
 ### Geographic Distribution
 **Available to**: All users
 
-Shows where your customers and vehicles are concentrated by licensing authority/region.
+**Visual Design**: Professional two-column layout with Material Design 3 styling featuring:
+- **Dual horizontal bar charts**: Side-by-side comparison of customer vs vehicle distribution
+- **Ranked visualization**: Top 10 regions displayed with horizontal bars and percentage metrics
+- **Mini KPI strip**: Quick-glance counts for total customers and vehicles
+- **Enhanced empty state**: Engaging map icon with clear call-to-action for first data entry
+- **RTL-aware layout**: Automatically adapts for Arabic interface with reversed column order
 
 **Data Shown**:
-- Top 10 customer regions (by license licensing authority)
-- Top 10 vehicle regions (by licensing authority)
+- **Left Panel**: Top 10 customer regions (by license licensing authority) with counts and percentages
+- **Right Panel**: Top 10 vehicle regions (by licensing authority) with counts and percentages
+- **Summary Strip**: Total customers and total vehicles displayed prominently
+
+**Professional Features**:
+- Horizontal bar charts with rounded corners for modern aesthetic
+- Tokenized colors adapting to light/dark themes
+- Consistent p-6 card padding with gap-4 grid spacing
+- Text hierarchy: eyebrow (text-xs) → titles (text-sm semibold) → metrics (text-lg font-bold)
+- Empty states with icon + headline + supporting copy + CTA pattern
 
 **How to use**:
-- Identify underserved markets for expansion
-- Ensure vehicle availability matches customer concentration
-- Plan regional marketing campaigns
-- Optimize pickup/delivery service coverage
+- **Market Analysis**: Compare customer locations vs vehicle inventory distribution
+- **Expansion Planning**: Identify underserved markets with high customer concentration but low vehicle availability
+- **Fleet Redistribution**: Align vehicle placement with customer demand hotspots
+- **Regional Marketing**: Target campaigns to top customer regions
+- **Service Optimization**: Plan pickup/delivery routes based on geographic clusters
 
 **Strategic Insights**:
 - Customer concentration in one region: Opportunity for branch office or regional partnerships
 - Vehicle-customer geographic mismatch: Redistribute fleet or adjust delivery pricing
+- Balanced distribution: Indicates well-optimized fleet deployment
+- New region emergence: Early signal for market expansion opportunities
 
 ### Pending Actions
 **Available to**: All users
 
-**Critical action items requiring attention**:
-- **Overdue Returns**: Vehicles not returned by rental end date
-- **Pending Refunds**: Security deposits awaiting refund
-- **Unclosed Contracts**: Completed rentals not yet administratively closed
+**Visual Design**: Professional three-column severity grid with Material Design 3 styling featuring:
+- **Priority-based layout**: High → Medium → Normal severity columns with distinct visual treatments
+- **Pill-style counters**: Large text-2xl metrics with semantic color coding (red for high, amber for medium, neutral for normal)
+- **Priority badges**: Visual severity indicators (High/Medium/Normal) with matching backgrounds
+- **Action item list**: Expandable list showing recent items with icons, truncated descriptions, and status badges
+- **Enhanced empty state**: "All Clear!" celebration state with success icon when no actions pending
+
+**Critical Action Categories**:
+- **Overdue Returns** (High Priority - Red): Vehicles not returned by rental end date
+- **Pending Refunds** (Medium Priority - Amber): Security deposits awaiting refund
+- **Unclosed Contracts** (Normal Priority - Neutral): Completed rentals not yet administratively closed
+
+**Professional Features**:
+- Three-column grid (grid-cols-3 gap-3) for balanced visual hierarchy
+- Semantic color backgrounds: destructive/5 (high), chart-3/5 (medium), chart-5/5 (normal)
+- Contextual icons: schedule (overdue), account_balance_wallet (refunds), assignment_late (unclosed)
+- Click-through navigation to detailed contract views
+- Hover-elevate interactions for all clickable elements
+- Shows top 3 overdue items + top 2 refund items with truncated contract details
 
 **How to use**:
-- **Daily Review**: Check this card at start of business day
-- **Overdue Returns**: 
-  - Contact customers immediately
+- **Daily Review**: Check this card at start of business day - it's your operational to-do list
+- **Priority Triage**: Address high-priority items (overdue returns) first
+- **Overdue Returns** (High Priority): 
+  - Contact customers immediately - click item to view full contract
   - Check for communication issues or vehicle problems
   - Consider late fees per company policy
-- **Pending Refunds**:
+  - Days overdue displayed prominently in badges
+- **Pending Refunds** (Medium Priority):
   - Process within 48-72 hours of contract completion
   - Verify no outstanding charges first
   - Document refund transactions
-- **Unclosed Contracts**:
-  - Click to view detailed list (if you have Manager+ access)
+  - Deposit amounts shown for quick reference
+- **Unclosed Contracts** (Normal Priority):
+  - Click counter to view detailed unclosed contracts report (if you have Manager+ access)
   - Complete final billing and deposit processing
   - Generate final invoices
+  - Track count to ensure timely administrative closure
 
 **Best Practices**:
-- Set internal SLAs (e.g., close contracts within 24 hours of return)
-- Assign responsibility for each action type
-- Track resolution time trends
+- Set internal SLAs (e.g., close contracts within 24 hours of return, refunds within 48 hours)
+- Assign responsibility for each action type to specific staff members
+- Track resolution time trends using the audit logs
+- Celebrate "All Clear!" states - recognize team when all actions are resolved
+- Use click-through navigation to access full contract details for resolution
 
 ### Top Performers
 **Available to**: All users
 
+**Visual Design**: Professional split-card layout with Material Design 3 styling featuring:
+- **Dual-section design**: Separate panels for top vehicles and top staff with clear visual separation
+- **Rank badges**: Color-coded circular badges (#1 gold, #2 silver, #3 bronze, #4-5 neutral) for visual ranking
+- **Avatar integration**: Vehicle icons and staff initials in rounded containers
+- **Revenue KPIs**: Prominent display of total revenue with currency formatting
+- **Interactive cards**: Hover-elevate on each performer row with click-through to detailed views
+
 **Top 5 Vehicles by Revenue**:
-- Vehicle registration, make, model
-- Total revenue generated (all-time)
+- **Rank visualization**: Numbered badges with semantic colors (top 3 highlighted)
+- **Vehicle identity**: Registration number (primary), make/model (secondary)
+- **Vehicle icon**: Branded car icon in primary color background
+- **Revenue metric**: Total lifetime revenue with full currency formatting
+- **Click-through**: Navigate to individual vehicle details page
 
 **Most Active Staff (Top 5)**:
-- Staff member name
-- Total contracts created
+- **Rank visualization**: Numbered badges with semantic colors (top 3 highlighted)
+- **Staff identity**: Full name (primary), @username (secondary)
+- **Avatar display**: Initials in rounded avatar with primary color background
+- **Performance metric**: Total contracts created with "contracts" label
+- **Click-through**: Navigate to users management page
+
+**Professional Features**:
+- Two-section layout with section headers (text-xs uppercase tracking-wide)
+- Consistent spacing: p-3 for items, gap-2/3 for grids
+- Rank badge colors: #1 chart-1, #2 chart-3, #3 chart-4, #4-5 muted
+- Min-w-0 with truncate to prevent text overflow
+- Enhanced empty states with category-specific icons (car for vehicles, person for staff)
+- Hover-elevate + cursor-pointer for all interactive rows
 
 **How to use**:
 - **Fleet Optimization**:
-  - Top performers: Acquire similar vehicle types
+  - Top performers: Acquire similar vehicle types to replicate success
   - Compare revenue vs maintenance costs for ROI analysis
   - Consider preferential placement or marketing for top vehicles
+  - Monitor if top performers correlate with specific vehicle types or age ranges
 - **Staff Recognition**:
-  - Acknowledge high performers
-  - Analyze successful sales techniques
-  - Set performance benchmarks
+  - Acknowledge high performers publicly - share rankings in team meetings
+  - Analyze successful sales techniques from top staff
+  - Set performance benchmarks based on top performer metrics
   - Identify training opportunities for lower performers
+  - Use for commission calculations or performance bonuses
+- **Strategic Planning**:
+  - Click vehicle rows to view detailed performance history
+  - Examine if top revenue vehicles have seasonal patterns
+  - Check if most active staff have specific customer segments or regions
+  - Use insights for fleet expansion decisions (buy more of what works)
 
-**Warning**: Revenue alone doesn't indicate profitability. High revenue vehicle with high maintenance costs may have lower ROI than moderate revenue vehicle with minimal costs.
+**Warning**: Revenue alone doesn't indicate profitability. High revenue vehicle with high maintenance costs may have lower ROI than moderate revenue vehicle with minimal costs. Always cross-reference with Fleet Performance Report for complete picture.
+
+**Interpreting Rankings**:
+- **Consistent top performers**: Indicates reliable revenue sources - protect and replicate
+- **Frequent ranking changes**: May indicate seasonal demand or vehicle rotation
+- **New entries**: Emerging opportunities or recently added high-demand vehicles
+- **Missing expected vehicles**: Investigate why certain vehicles aren't performing
 
 ---
 

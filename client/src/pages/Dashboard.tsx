@@ -840,236 +840,484 @@ export default function Dashboard() {
         <div className="space-y-6">
           <RevenueTrendChart data={revenueTrendData} isLoading={revenueTrendLoading} />
 
-          {/* Phase 3.2: New Visual Analytics Cards */}
+          {/* Phase 3.2: New Visual Analytics Cards - Professionally Redesigned */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Fleet Status Distribution */}
-            <Card data-testid="card-fleet-status">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon name="local_shipping" className="text-primary" />
-                  Fleet Status Distribution
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fleetStatusLoading ? (
-                  <Skeleton className="h-[300px] w-full" />
-                ) : fleetStatusData ? (
-                  <div className="space-y-4">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={[
-                            { name: 'Available', value: fleetStatusData.available, color: 'hsl(var(--chart-2))' },
-                            { name: 'Rented', value: fleetStatusData.rented, color: 'hsl(var(--primary))' },
-                            { name: 'Maintenance', value: fleetStatusData.maintenance, color: 'hsl(var(--chart-3))' },
-                            { name: 'Damaged', value: fleetStatusData.damaged, color: 'hsl(var(--destructive))' },
-                          ]}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={2}
-                          dataKey="value"
-                          label={({ name, value }) => `${name}: ${value}`}
-                        >
-                          {[fleetStatusData.available, fleetStatusData.rented, fleetStatusData.maintenance, fleetStatusData.damaged].map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={['hsl(var(--chart-2))', 'hsl(var(--primary))', 'hsl(var(--chart-3))', 'hsl(var(--destructive))'][index]} />
-                          ))}
-                        </Pie>
-                        <RechartsTooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-sm bg-chart-2"></div>
-                        <span className="text-sm">Available: {fleetStatusData.available}</span>
+            {/* Fleet Status Distribution - Enhanced Design */}
+            <Card data-testid="card-fleet-status" className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground tracking-wide mb-1">{t('analytics.fleetStatus')}</p>
+                  <h3 className="text-sm font-semibold">Fleet Status Distribution</h3>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Icon name="local_shipping" className="text-primary text-lg" />
+                </div>
+              </div>
+              
+              {fleetStatusLoading ? (
+                <Skeleton className="h-[320px] w-full rounded-lg" />
+              ) : fleetStatusData ? (
+                (() => {
+                  const totalVehicles = fleetStatusData.available + fleetStatusData.rented + fleetStatusData.maintenance + fleetStatusData.damaged;
+                  const utilizationRate = totalVehicles > 0 ? ((fleetStatusData.rented / totalVehicles) * 100).toFixed(1) : '0.0';
+                  
+                  return (
+                    <div className="space-y-4">
+                      {/* Concentric Donut Chart with Central Metric */}
+                      <div className="relative">
+                        <ResponsiveContainer width="100%" height={240}>
+                          <PieChart>
+                            <Pie
+                              data={[
+                                { name: 'Available', value: fleetStatusData.available },
+                                { name: 'Rented', value: fleetStatusData.rented },
+                                { name: 'Maintenance', value: fleetStatusData.maintenance },
+                                { name: 'Damaged', value: fleetStatusData.damaged },
+                              ]}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius="55%"
+                              outerRadius="85%"
+                              paddingAngle={2}
+                              dataKey="value"
+                              strokeWidth={0}
+                            >
+                              <Cell fill="hsl(var(--chart-2))" />
+                              <Cell fill="hsl(var(--primary))" />
+                              <Cell fill="hsl(var(--chart-3))" />
+                              <Cell fill="hsl(var(--destructive))" />
+                            </Pie>
+                            <RechartsTooltip 
+                              contentStyle={{ 
+                                backgroundColor: 'hsl(var(--popover))', 
+                                border: '1px solid hsl(var(--border))', 
+                                borderRadius: '8px',
+                                fontSize: '12px'
+                              }} 
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        {/* Center Content */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                          <div className="text-2xl font-bold tracking-tight">{totalVehicles}</div>
+                          <div className="text-xs text-muted-foreground uppercase tracking-wide">Total Fleet</div>
+                          <Badge variant="outline" className="mt-2 text-xs font-medium">
+                            {utilizationRate}% Utilization
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-sm bg-primary"></div>
-                        <span className="text-sm">Rented: {fleetStatusData.rented}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-sm bg-chart-3"></div>
-                        <span className="text-sm">Maintenance: {fleetStatusData.maintenance}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-sm bg-destructive"></div>
-                        <span className="text-sm">Damaged: {fleetStatusData.damaged}</span>
+
+                      {/* Status Chips Grid */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-chart-2/10 border border-chart-2/20">
+                          <div className="w-2 h-2 rounded-full bg-chart-2"></div>
+                          <div className="flex-1">
+                            <p className="text-xs text-muted-foreground">Available</p>
+                            <p className="text-sm font-semibold">{fleetStatusData.available}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10 border border-primary/20">
+                          <div className="w-2 h-2 rounded-full bg-primary"></div>
+                          <div className="flex-1">
+                            <p className="text-xs text-muted-foreground">Rented</p>
+                            <p className="text-sm font-semibold">{fleetStatusData.rented}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-chart-3/10 border border-chart-3/20">
+                          <div className="w-2 h-2 rounded-full bg-chart-3"></div>
+                          <div className="flex-1">
+                            <p className="text-xs text-muted-foreground">Maintenance</p>
+                            <p className="text-sm font-semibold">{fleetStatusData.maintenance}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
+                          <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                          <div className="flex-1">
+                            <p className="text-xs text-muted-foreground">Damaged</p>
+                            <p className="text-sm font-semibold">{fleetStatusData.damaged}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                  );
+                })()
+              ) : (
+                <div className="flex flex-col items-center justify-center h-[320px] text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <Icon name="local_shipping" className="text-muted-foreground text-xl" />
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No fleet data available</p>
-                )}
-              </CardContent>
+                  <div>
+                    <p className="text-sm font-medium">No Fleet Data</p>
+                    <p className="text-xs text-muted-foreground mt-1">Add vehicles to view distribution</p>
+                  </div>
+                </div>
+              )}
             </Card>
 
-            {/* Geographic Distribution */}
-            <Card data-testid="card-geographic-distribution">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon name="location_on" className="text-primary" />
-                  Geographic Distribution (Top 10)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {geographicLoading ? (
-                  <Skeleton className="h-[300px] w-full" />
-                ) : geographicData && ((geographicData.customersByRegion?.length ?? 0) > 0 || (geographicData.vehiclesByRegion?.length ?? 0) > 0) ? (
-                  <div className="space-y-4">
-                    {geographicData.customersByRegion && geographicData.customersByRegion.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Customers by Region</h4>
-                        <ResponsiveContainer width="100%" height={140}>
-                          <BarChart data={geographicData.customersByRegion.slice(0, 10)} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                            <XAxis dataKey="region" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                            <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '6px' }} />
-                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
+            {/* Geographic Distribution - Enhanced Design */}
+            <Card data-testid="card-geographic-distribution" className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground tracking-wide mb-1">{t('analytics.geographic')}</p>
+                  <h3 className="text-sm font-semibold">Geographic Distribution (Top 10)</h3>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Icon name="location_on" className="text-primary text-lg" />
+                </div>
+              </div>
+              
+              {geographicLoading ? (
+                <Skeleton className="h-[320px] w-full rounded-lg" />
+              ) : geographicData && ((geographicData.customersByRegion?.length ?? 0) > 0 || (geographicData.vehiclesByRegion?.length ?? 0) > 0) ? (
+                (() => {
+                  const topCustomerRegion = geographicData.customersByRegion?.[0];
+                  const topVehicleRegion = geographicData.vehiclesByRegion?.[0];
+                  const totalCustomers = geographicData.customersByRegion?.reduce((sum, r) => sum + r.count, 0) || 0;
+                  const totalVehicles = geographicData.vehiclesByRegion?.reduce((sum, r) => sum + r.count, 0) || 0;
+                  
+                  return (
+                    <div className="space-y-4">
+                      {/* Mini KPI Strip */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                          <p className="text-xs text-muted-foreground mb-1">Top Region</p>
+                          <p className="text-sm font-semibold truncate">{topCustomerRegion?.region || topVehicleRegion?.region || 'N/A'}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-chart-2/5 border border-chart-2/10">
+                          <p className="text-xs text-muted-foreground mb-1">Customers</p>
+                          <p className="text-sm font-semibold">{totalCustomers}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-chart-3/5 border border-chart-3/10">
+                          <p className="text-xs text-muted-foreground mb-1">Vehicles</p>
+                          <p className="text-sm font-semibold">{totalVehicles}</p>
+                        </div>
                       </div>
-                    )}
-                    {geographicData.vehiclesByRegion && geographicData.vehiclesByRegion.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Vehicles by Region</h4>
-                        <ResponsiveContainer width="100%" height={140}>
-                          <BarChart data={geographicData.vehiclesByRegion.slice(0, 10)} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                            <XAxis dataKey="region" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                            <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '6px' }} />
-                            <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No geographic data available</p>
-                )}
-              </CardContent>
-            </Card>
 
-            {/* Pending Actions */}
-            <Card data-testid="card-pending-actions">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon name="notifications_active" className="text-destructive" />
-                  Pending Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {pendingActionsLoading ? (
-                  <Skeleton className="h-[300px] w-full" />
-                ) : pendingActionsData ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?overdue=true')} data-testid="action-overdue-returns">
-                        <CardContent className="pt-4">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-destructive">{Array.isArray(pendingActionsData.overdueReturns) ? pendingActionsData.overdueReturns.length : 0}</div>
-                            <p className="text-xs text-muted-foreground mt-1">Overdue Returns</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?pendingRefunds=true')} data-testid="action-pending-refunds">
-                        <CardContent className="pt-4">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-chart-3">{Array.isArray(pendingActionsData.pendingRefunds) ? pendingActionsData.pendingRefunds.length : 0}</div>
-                            <p className="text-xs text-muted-foreground mt-1">Pending Refunds</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/unclosed-contracts-report')} data-testid="action-unclosed-contracts">
-                        <CardContent className="pt-4">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-chart-5">{pendingActionsData.unclosedContracts}</div>
-                            <p className="text-xs text-muted-foreground mt-1">Unclosed Contracts</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    <div className="space-y-2">
-                      {Array.isArray(pendingActionsData.overdueReturns) && pendingActionsData.overdueReturns.slice(0, 3).map((item: any) => (
-                        <div key={item.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-md text-sm" data-testid={`overdue-item-${item.contractNumber}`}>
-                          <span className="font-medium">#{item.contractNumber} - {item.customerNameEn}</span>
-                          <Badge variant="destructive">{item.daysOverdue}d overdue</Badge>
+                      {/* Horizontal Ranked Bar Charts */}
+                      {geographicData.customersByRegion && geographicData.customersByRegion.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Customers by Region</h4>
+                          <ResponsiveContainer width="100%" height={120}>
+                            <BarChart 
+                              data={geographicData.customersByRegion.slice(0, 5)} 
+                              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                              layout="vertical"
+                            >
+                              <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" horizontal={false} />
+                              <XAxis type="number" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                              <YAxis type="category" dataKey="region" tick={{ fontSize: 10 }} width={60} stroke="hsl(var(--muted-foreground))" />
+                              <RechartsTooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'hsl(var(--popover))', 
+                                  border: '1px solid hsl(var(--border))', 
+                                  borderRadius: '8px',
+                                  fontSize: '12px'
+                                }} 
+                              />
+                              <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
                         </div>
-                      ))}
-                      {Array.isArray(pendingActionsData.pendingRefunds) && pendingActionsData.pendingRefunds.slice(0, 2).map((item: any) => (
-                        <div key={item.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-md text-sm" data-testid={`refund-item-${item.contractNumber}`}>
-                          <span className="font-medium">#{item.contractNumber} - {item.customerNameEn}</span>
-                          <Badge variant="secondary">{currency} {item.depositAmount} refund due</Badge>
+                      )}
+                      
+                      {geographicData.vehiclesByRegion && geographicData.vehiclesByRegion.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Vehicles by Region</h4>
+                          <ResponsiveContainer width="100%" height={120}>
+                            <BarChart 
+                              data={geographicData.vehiclesByRegion.slice(0, 5)} 
+                              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                              layout="vertical"
+                            >
+                              <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" horizontal={false} />
+                              <XAxis type="number" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                              <YAxis type="category" dataKey="region" tick={{ fontSize: 10 }} width={60} stroke="hsl(var(--muted-foreground))" />
+                              <RechartsTooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'hsl(var(--popover))', 
+                                  border: '1px solid hsl(var(--border))', 
+                                  borderRadius: '8px',
+                                  fontSize: '12px'
+                                }} 
+                              />
+                              <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
                         </div>
-                      ))}
-                      {(!Array.isArray(pendingActionsData.overdueReturns) || pendingActionsData.overdueReturns.length === 0) && 
-                       (!Array.isArray(pendingActionsData.pendingRefunds) || pendingActionsData.pendingRefunds.length === 0) && 
-                       pendingActionsData.unclosedContracts === 0 && (
-                        <p className="text-sm text-muted-foreground text-center py-4">No pending actions</p>
                       )}
                     </div>
+                  );
+                })()
+              ) : (
+                <div className="flex flex-col items-center justify-center h-[320px] text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <Icon name="map" className="text-muted-foreground text-xl" />
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No pending actions data available</p>
-                )}
-              </CardContent>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">No Geographic Data</p>
+                    <p className="text-xs text-muted-foreground max-w-[200px]">Import data with licensing authority information to view regional distribution</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setLocation('/import-data')} className="mt-2">
+                    <Icon name="upload" className="mr-2 text-sm" />
+                    Import Data
+                  </Button>
+                </div>
+              )}
             </Card>
 
-            {/* Top Performers */}
-            <Card data-testid="card-top-performers">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon name="emoji_events" className="text-chart-1" />
-                  Top Performers
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {topPerformersLoading ? (
-                  <Skeleton className="h-[300px] w-full" />
-                ) : topPerformersData ? (
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium mb-3">Top 5 Vehicles by Revenue</h4>
-                      <div className="space-y-2">
-                        {topPerformersData.topVehiclesByRevenue?.slice(0, 5).map((vehicle: any, index: number) => (
-                          <div key={vehicle.registration} className="flex items-center justify-between p-2 bg-muted/30 rounded-md" data-testid={`top-vehicle-${index + 1}`}>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="font-mono">#{index + 1}</Badge>
-                              <span className="text-sm font-medium">{vehicle.registration}</span>
-                              <span className="text-xs text-muted-foreground">{vehicle.make} {vehicle.model}</span>
-                            </div>
-                            <span className="text-sm font-bold text-chart-1">{currency} {Number(vehicle.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                          </div>
-                        ))}
-                        {(!topPerformersData.topVehiclesByRevenue || topPerformersData.topVehiclesByRevenue.length === 0) && (
-                          <p className="text-sm text-muted-foreground text-center py-2">No vehicle data available</p>
-                        )}
+            {/* Pending Actions - Enhanced Design */}
+            <Card data-testid="card-pending-actions" className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground tracking-wide mb-1">{t('analytics.actions')}</p>
+                  <h3 className="text-sm font-semibold">Pending Actions</h3>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <Icon name="notifications_active" className="text-destructive text-lg" />
+                </div>
+              </div>
+              
+              {pendingActionsLoading ? (
+                <Skeleton className="h-[320px] w-full rounded-lg" />
+              ) : pendingActionsData ? (
+                <div className="space-y-4">
+                  {/* Three-Column Severity Grid */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* Overdue Returns - High Priority */}
+                    <div 
+                      className="p-3 rounded-lg bg-destructive/5 border border-destructive/20 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                      onClick={() => setLocation('/contracts?overdue=true')}
+                      data-testid="action-overdue-returns"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="destructive" className="text-xs px-2 py-0.5">High</Badge>
+                        <Icon name="schedule" className="text-destructive text-sm" />
                       </div>
+                      <div className="text-2xl font-bold tracking-tight text-destructive">
+                        {Array.isArray(pendingActionsData.overdueReturns) ? pendingActionsData.overdueReturns.length : 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Overdue Returns</p>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-medium mb-3">Most Active Staff</h4>
-                      <div className="space-y-2">
-                        {topPerformersData.mostActiveStaff?.slice(0, 5).map((staff: any, index: number) => (
-                          <div key={staff.username} className="flex items-center justify-between p-2 bg-muted/30 rounded-md" data-testid={`top-staff-${index + 1}`}>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="font-mono">#{index + 1}</Badge>
-                              <span className="text-sm font-medium">{staff.firstName} {staff.lastName}</span>
-                            </div>
-                            <span className="text-sm font-bold text-primary">{staff.contractCount} contracts</span>
-                          </div>
-                        ))}
-                        {(!topPerformersData.mostActiveStaff || topPerformersData.mostActiveStaff.length === 0) && (
-                          <p className="text-sm text-muted-foreground text-center py-2">No staff data available</p>
-                        )}
+
+                    {/* Pending Refunds - Medium Priority */}
+                    <div 
+                      className="p-3 rounded-lg bg-chart-3/5 border border-chart-3/20 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                      onClick={() => setLocation('/contracts?pendingRefunds=true')}
+                      data-testid="action-pending-refunds"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="secondary" className="text-xs px-2 py-0.5">Medium</Badge>
+                        <Icon name="account_balance_wallet" className="text-chart-3 text-sm" />
                       </div>
+                      <div className="text-2xl font-bold tracking-tight text-chart-3">
+                        {Array.isArray(pendingActionsData.pendingRefunds) ? pendingActionsData.pendingRefunds.length : 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Pending Refunds</p>
+                    </div>
+
+                    {/* Unclosed Contracts - Normal Priority */}
+                    <div 
+                      className="p-3 rounded-lg bg-chart-5/5 border border-chart-5/20 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                      onClick={() => setLocation('/unclosed-contracts-report')}
+                      data-testid="action-unclosed-contracts"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="outline" className="text-xs px-2 py-0.5">Normal</Badge>
+                        <Icon name="assignment_late" className="text-chart-5 text-sm" />
+                      </div>
+                      <div className="text-2xl font-bold tracking-tight text-chart-5">
+                        {pendingActionsData.unclosedContracts}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Unclosed Contracts</p>
                     </div>
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No top performers data available</p>
-                )}
-              </CardContent>
+
+                  {/* Action Items List */}
+                  <div className="space-y-2">
+                    {Array.isArray(pendingActionsData.overdueReturns) && pendingActionsData.overdueReturns.slice(0, 3).map((item: any) => (
+                      <div 
+                        key={item.id} 
+                        className="flex items-center justify-between p-3 bg-destructive/5 border border-destructive/10 rounded-lg hover-elevate cursor-pointer"
+                        onClick={() => setLocation(`/contracts/${item.id}`)}
+                        data-testid={`overdue-item-${item.contractNumber}`}
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <Icon name="error" className="text-destructive text-sm" />
+                          <span className="text-xs font-medium truncate">#{item.contractNumber} - {item.customerNameEn}</span>
+                        </div>
+                        <Badge variant="destructive" className="text-xs">{item.daysOverdue}d overdue</Badge>
+                      </div>
+                    ))}
+                    {Array.isArray(pendingActionsData.pendingRefunds) && pendingActionsData.pendingRefunds.slice(0, 2).map((item: any) => (
+                      <div 
+                        key={item.id} 
+                        className="flex items-center justify-between p-3 bg-chart-3/5 border border-chart-3/10 rounded-lg hover-elevate cursor-pointer"
+                        onClick={() => setLocation(`/contracts/${item.id}`)}
+                        data-testid={`refund-item-${item.contractNumber}`}
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <Icon name="info" className="text-chart-3 text-sm" />
+                          <span className="text-xs font-medium truncate">#{item.contractNumber} - {item.customerNameEn}</span>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">{currency} {item.depositAmount}</Badge>
+                      </div>
+                    ))}
+                    {(!Array.isArray(pendingActionsData.overdueReturns) || pendingActionsData.overdueReturns.length === 0) && 
+                     (!Array.isArray(pendingActionsData.pendingRefunds) || pendingActionsData.pendingRefunds.length === 0) && 
+                     pendingActionsData.unclosedContracts === 0 && (
+                      <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-chart-2/20 flex items-center justify-center">
+                          <Icon name="check_circle" className="text-chart-2 text-lg" />
+                        </div>
+                        <p className="text-sm font-medium">All Clear!</p>
+                        <p className="text-xs text-muted-foreground">No pending actions required</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-[320px] text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <Icon name="notifications_none" className="text-muted-foreground text-xl" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">No Action Data</p>
+                    <p className="text-xs text-muted-foreground mt-1">Unable to load pending actions</p>
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            {/* Top Performers - Enhanced Design */}
+            <Card data-testid="card-top-performers" className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground tracking-wide mb-1">{t('analytics.performance')}</p>
+                  <h3 className="text-sm font-semibold">Top Performers</h3>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-chart-1/10 flex items-center justify-center">
+                  <Icon name="emoji_events" className="text-chart-1 text-lg" />
+                </div>
+              </div>
+              
+              {topPerformersLoading ? (
+                <Skeleton className="h-[320px] w-full rounded-lg" />
+              ) : topPerformersData ? (
+                <div className="space-y-4">
+                  {/* Top Vehicles Section */}
+                  <div>
+                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Top 5 Vehicles by Revenue</h4>
+                    {topPerformersData.topVehiclesByRevenue && topPerformersData.topVehiclesByRevenue.length > 0 ? (
+                      <div className="space-y-2">
+                        {topPerformersData.topVehiclesByRevenue.slice(0, 5).map((vehicle: any, index: number) => (
+                          <div 
+                            key={vehicle.registration} 
+                            className="flex items-center justify-between p-3 bg-muted/30 border border-border/50 rounded-lg hover-elevate cursor-pointer" 
+                            data-testid={`top-vehicle-${index + 1}`}
+                            onClick={() => setLocation(`/vehicles/${vehicle.vehicleId}`)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {/* Rank Badge */}
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${
+                                index === 0 ? 'bg-chart-1/20 text-chart-1' :
+                                index === 1 ? 'bg-chart-3/20 text-chart-3' :
+                                index === 2 ? 'bg-chart-4/20 text-chart-4' :
+                                'bg-muted text-muted-foreground'
+                              }`}>
+                                {index + 1}
+                              </div>
+                              {/* Vehicle Icon */}
+                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Icon name="directions_car" className="text-primary text-sm" />
+                              </div>
+                              {/* Vehicle Info */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold truncate">{vehicle.registration}</p>
+                                <p className="text-xs text-muted-foreground truncate">{vehicle.make} {vehicle.model}</p>
+                              </div>
+                            </div>
+                            {/* Revenue KPI */}
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-chart-1">
+                                {currency} {Number(vehicle.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                          <Icon name="directions_car" className="text-muted-foreground text-lg" />
+                        </div>
+                        <p className="text-xs text-muted-foreground">No vehicle data available</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Top Staff Section */}
+                  <div>
+                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Most Active Staff</h4>
+                    {topPerformersData.mostActiveStaff && topPerformersData.mostActiveStaff.length > 0 ? (
+                      <div className="space-y-2">
+                        {topPerformersData.mostActiveStaff.slice(0, 5).map((staff: any, index: number) => (
+                          <div 
+                            key={staff.username} 
+                            className="flex items-center justify-between p-3 bg-muted/30 border border-border/50 rounded-lg hover-elevate cursor-pointer" 
+                            data-testid={`top-staff-${index + 1}`}
+                            onClick={() => setLocation(`/users`)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {/* Rank Badge */}
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${
+                                index === 0 ? 'bg-primary/20 text-primary' :
+                                index === 1 ? 'bg-chart-2/20 text-chart-2' :
+                                index === 2 ? 'bg-chart-3/20 text-chart-3' :
+                                'bg-muted text-muted-foreground'
+                              }`}>
+                                {index + 1}
+                              </div>
+                              {/* Staff Avatar */}
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-xs font-semibold text-primary">
+                                  {staff.firstName?.charAt(0)}{staff.lastName?.charAt(0)}
+                                </span>
+                              </div>
+                              {/* Staff Info */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold truncate">{staff.firstName} {staff.lastName}</p>
+                                <p className="text-xs text-muted-foreground truncate">@{staff.username}</p>
+                              </div>
+                            </div>
+                            {/* Contract Count KPI */}
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-primary">{staff.contractCount}</p>
+                              <p className="text-xs text-muted-foreground">contracts</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                          <Icon name="person" className="text-muted-foreground text-lg" />
+                        </div>
+                        <p className="text-xs text-muted-foreground">No staff data available</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-[320px] text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <Icon name="emoji_events" className="text-muted-foreground text-xl" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">No Performance Data</p>
+                    <p className="text-xs text-muted-foreground mt-1">Unable to load top performers</p>
+                  </div>
+                </div>
+              )}
             </Card>
           </div>
         </div>
