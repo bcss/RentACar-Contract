@@ -54,7 +54,8 @@ export function MyDayTab() {
            parseFloat(c.securityDeposit || '0') > 0;
   });
   
-  const myUnclosedContracts = myCompletedContracts.filter(c => c.status === 'completed');
+  // Unclosed contracts: completed but not yet closed (missing closedAt timestamp)
+  const myUnclosedContracts = myCompletedContracts.filter(c => !c.closedAt);
 
   if (contractsLoading) {
     return (
