@@ -1,0 +1,24 @@
+[
+  {
+    "nameEn": "Ahmed Hassan",
+    "nameAr": "أحمد حسن",
+    "nationality": "UAE",
+    "passportId": "N123456789",
+    "licenseNumber": "DL-AUH-12345",
+    "mobile": "+971501112222",
+    "address": "Abu Dhabi, Al Khalidiyah",
+    "relation": "Employer",
+    "notes": "Company sponsor for expatriate employees"
+  },
+  {
+    "nameEn": "Fatima Al Mansouri",
+    "nameAr": "فاطمة المنصوري",
+    "nationality": "UAE",
+    "passportId": "N987654321",
+    "licenseNumber": "DL-DXB-98765",
+    "mobile": "+971509998888",
+    "address": "Dubai, Jumeirah",
+    "relation": "Family Member",
+    "notes": "Family sponsor"
+  }
+]

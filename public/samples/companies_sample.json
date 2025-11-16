@@ -1,0 +1,28 @@
+[
+  {
+    "nameEn": "Emirates Business Solutions LLC",
+    "nameAr": "حلول الأعمال الإماراتية ذ.م.م",
+    "registrationNumber": "REG-2023-12345",
+    "registrationValidity": "2025-12-31",
+    "taxId": "TAX-100234567890003",
+    "taxValidity": "2025-12-31",
+    "contactPerson": "Mohammed Al Ali",
+    "phone": "+971505554444",
+    "email": "info@emirates-business.ae",
+    "address": "Dubai Silicon Oasis, Building A, Office 301",
+    "notes": "Corporate client with bulk rental agreement"
+  },
+  {
+    "nameEn": "Gulf Trading Company",
+    "nameAr": "شركة التجارة الخليجية",
+    "registrationNumber": "REG-2022-67890",
+    "registrationValidity": "2026-06-30",
+    "taxId": "TAX-100987654321003",
+    "taxValidity": "2026-06-30",
+    "contactPerson": "Khalid Ibrahim",
+    "phone": "+971507776666",
+    "email": "contact@gulf-trading.com",
+    "address": "Abu Dhabi, Al Markaziya District",
+    "notes": "VIP corporate account"
+  }
+]

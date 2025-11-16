@@ -1,0 +1,36 @@
+[
+  {
+    "nameEn": "John Smith",
+    "nameAr": "جون سميث",
+    "nationalId": "784-1234-5678901-2",
+    "gender": "male",
+    "dateOfBirth": "1990-05-15",
+    "phone": "+971501234567",
+    "email": "john.smith@example.com",
+    "address": "Dubai Marina, Tower 1, Apt 501",
+    "licenseNumber": "DL123456",
+    "licenseIssuedBy": "Dubai RTA",
+    "licenseIssueDate": "2018-03-10",
+    "licenseExpiryDate": "2028-03-10",
+    "nationality": "UAE",
+    "licensePermittedVehicles": "Light Motor Vehicles",
+    "licenseSignedBy": "RTA Dubai"
+  },
+  {
+    "nameEn": "Sarah Ahmed",
+    "nameAr": "سارة أحمد",
+    "nationalId": "784-9876-5432109-8",
+    "gender": "female",
+    "dateOfBirth": "1985-11-22",
+    "phone": "+971509876543",
+    "email": "sarah.ahmed@example.com",
+    "address": "Abu Dhabi, Al Reem Island, Gate Tower",
+    "licenseNumber": "DL987654",
+    "licenseIssuedBy": "Abu Dhabi",
+    "licenseIssueDate": "2015-07-20",
+    "licenseExpiryDate": "2025-07-20",
+    "nationality": "UAE",
+    "licensePermittedVehicles": "Light Motor Vehicles, Motorcycles",
+    "licenseSignedBy": "RTA Abu Dhabi"
+  }
+]

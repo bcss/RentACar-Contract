@@ -1,0 +1,3 @@
+nameEn,nameAr,nationalId,gender,dateOfBirth,phone,email,address,licenseNumber,licenseIssuedBy,licenseIssueDate,licenseExpiryDate,nationality,licensePermittedVehicles,licenseSignedBy
+John Smith,جون سميث,784-1234-5678901-2,male,1990-05-15,+971501234567,john.smith@example.com,"Dubai Marina, Tower 1, Apt 501",DL123456,Dubai RTA,2018-03-10,2028-03-10,UAE,Light Motor Vehicles,RTA Dubai
+Sarah Ahmed,سارة أحمد,784-9876-5432109-8,female,1985-11-22,+971509876543,sarah.ahmed@example.com,"Abu Dhabi, Al Reem Island, Gate Tower",DL987654,Abu Dhabi,2015-07-20,2025-07-20,UAE,"Light Motor Vehicles, Motorcycles",RTA Abu Dhabi
