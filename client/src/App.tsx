@@ -52,6 +52,7 @@ const FleetPerformanceReport = lazy(() => import("@/pages/FleetPerformanceReport
 const ContractAnalyticsReport = lazy(() => import("@/pages/ContractAnalyticsReport"));
 const CollectionPerformanceReport = lazy(() => import("@/pages/CollectionPerformanceReport"));
 const ImportData = lazy(() => import("@/pages/ImportData"));
+const DashboardSamples = lazy(() => import("@/pages/DashboardSamples"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -204,6 +205,9 @@ function Router() {
       </Route>
       <Route path="/terms">
         {() => <ProtectedRoute component={TermsOfServicePage} />}
+      </Route>
+      <Route path="/dashboard-samples">
+        {() => <ProtectedRoute component={DashboardSamples} />}
       </Route>
       <Route component={() => <NotFound />} />
       </Switch>

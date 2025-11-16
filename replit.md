@@ -45,12 +45,20 @@ Preferred communication style: Simple, everyday language.
 - **Company Settings Management:** Admin-only configuration for bilingual company information and contract clauses.
 - **Support & Help Center:** Unified page with dynamic system health monitoring, documentation, FAQs, and error reporting.
 - **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality. Includes Revenue Trends, Fleet Performance, Contract Analytics, and Collection Performance reports.
-- **Enhanced Dashboard Analytics (NEW):** Four new visual analytics cards for comprehensive business monitoring:
-  - **Fleet Status Distribution:** Real-time vehicle status breakdown (Available, Rented, Maintenance, Damaged) with donut chart visualization
-  - **Geographic Distribution:** Top 10 customer and vehicle regions by licensing authority for market analysis
-  - **Pending Actions:** Critical action tracking (Overdue Returns, Pending Refunds, Unclosed Contracts) with drill-down capabilities
-  - **Top Performers:** Top 5 vehicles by revenue and most active staff by contract count for performance insights
-- **Dashboard Backend Analytics:** 4 new storage methods and API endpoints (`/api/analytics/fleet-status`, `/api/analytics/geographic-distribution`, `/api/analytics/pending-actions`, `/api/analytics/top-performers`) providing efficient database aggregations for dashboard cards.
+- **Enhanced Dashboard Analytics:** Four professionally redesigned visual analytics cards with Material Design 3 styling:
+  - **Fleet Status Distribution:** Real-time vehicle status breakdown (Available, Rented, Maintenance, Damaged) with concentric donut chart visualization
+  - **Geographic Distribution:** Top 10 customer and vehicle regions by licensing authority for market analysis *(planned enhancement: UAE 7 emirates)*
+  - **Pending Actions:** Critical action tracking (Overdue Returns, Pending Refunds, Unclosed Contracts) with severity-grid layout and priority badges
+  - **Top Performers:** Top 5 vehicles and staff by revenue with rank badges and avatar integration
+- **Dashboard Backend Analytics:** 4 storage methods and API endpoints (`/api/analytics/fleet-status`, `/api/analytics/geographic-distribution`, `/api/analytics/pending-actions`, `/api/analytics/top-performers`) providing efficient database aggregations.
+- **Tabbed Dashboard Architecture (PROPOSED):** Three-tab interface planned for different user perspectives:
+  - **My Day Tab:** Personal performance dashboard (visible to all users) - individual contracts, revenue vs targets, pending tasks, performance metrics
+  - **Company Today Tab:** Real-time operational snapshot (Manager/Admin only) - live fleet status, same-day operations, pending actions, activity feed
+  - **Executive Overview Tab:** Strategic analytics (Manager/Admin only) - revenue trends, top performers, UAE 7 emirates geographic distribution, forecasts
+  - **UAE Emirates Integration:** New `emirate` enum field for Customers, Vehicles, Sponsors, Companies supporting all 7 emirates (Abu Dhabi, Dubai, Sharjah, Ajman, Umm Al Quwain, Ras Al Khaimah, Fujairah)
+  - **Role-Based Visibility:** Staff/Viewer see only "My Day"; Manager/Admin see all three tabs
+  - **Design Samples:** Five design style options available at `/dashboard-samples` for selection
+  - **Documentation:** Full architectural spec in `docs/DASHBOARD_TABBED_ARCHITECTURE.md`
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor, from_company.
 - **Professional PDF Integration:** Bilingual PDF generation for rental contracts with RTA compliance fields.

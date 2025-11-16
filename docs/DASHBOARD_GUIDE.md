@@ -3,6 +3,8 @@
 ## Overview
 The RCCMS Dashboard is your command center for monitoring rental operations, financial performance, and fleet health at a glance. This guide explains each metric, card, and visualization available on the dashboard.
 
+> **🚀 UPCOMING ENHANCEMENT**: A new three-tab dashboard interface is being designed! See `DASHBOARD_TABBED_ARCHITECTURE.md` for the proposed structure featuring **My Day** (personal metrics), **Company Today** (operations), and **Executive Overview** (strategic analytics) with UAE-specific geographic distribution for all 7 emirates. **View design samples** by navigating to `/dashboard-samples` and selecting your preferred style.
+
 ---
 
 ## Dashboard Layout
