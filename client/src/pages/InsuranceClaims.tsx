@@ -48,14 +48,14 @@ export default function InsuranceClaims() {
   const isArabic = i18n.language === 'ar';
 
   // Filter states
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [claimToDelete, setClaimToDelete] = useState<InsuranceClaim | null>(null);
 
   // Fetch claims
   const { data: claims = [], isLoading } = useQuery<InsuranceClaim[]>({
-    queryKey: ['/api/insurance-claims', { status: statusFilter }],
+    queryKey: ['/api/insurance-claims', { status: statusFilter === 'all' ? '' : statusFilter }],
     enabled: isAuthenticated,
   });
 
@@ -188,7 +188,7 @@ export default function InsuranceClaims() {
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
@@ -212,10 +212,10 @@ export default function InsuranceClaims() {
           ) : filteredClaims.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>No insurance claims found</p>
-              {statusFilter && (
+              {statusFilter !== 'all' && (
                 <Button
                   variant="link"
-                  onClick={() => setStatusFilter('')}
+                  onClick={() => setStatusFilter('all')}
                   className="mt-2"
                 >
                   Clear filters
