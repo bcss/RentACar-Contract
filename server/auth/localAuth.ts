@@ -8,8 +8,10 @@ import { verifyPassword } from "./passwordUtils";
 import { getGeolocation } from "../services/geolocation";
 
 export function getSession() {
-  // P1-1: Reduce session lifetime from 7 days to 1 hour for better security
-  const sessionTtl = 60 * 60 * 1000; // 1 hour (reduced from 1 week)
+  // Session TTL is configurable via SESSION_MAX_AGE environment variable
+  // Default: 1 hour for security (3600000 ms)
+  // Common values: 1 hour (3600000), 8 hours (28800000), 24 hours (86400000), 7 days (604800000)
+  const sessionTtl = parseInt(process.env.SESSION_MAX_AGE || '3600000', 10);
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,

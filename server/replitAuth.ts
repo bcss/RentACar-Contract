@@ -23,7 +23,10 @@ const getOidcConfig = memoize(
 );
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  // Session TTL is configurable via SESSION_MAX_AGE environment variable
+  // Default: 1 hour for security (3600000 ms)
+  // Common values: 1 hour (3600000), 8 hours (28800000), 24 hours (86400000), 7 days (604800000)
+  const sessionTtl = parseInt(process.env.SESSION_MAX_AGE || '3600000', 10);
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
