@@ -29,6 +29,7 @@ const ContractForm = lazy(() => import("@/pages/ContractForm"));
 const ContractView = lazy(() => import("@/pages/ContractView"));
 const Users = lazy(() => import("@/pages/Users"));
 const AuditLogs = lazy(() => import("@/pages/AuditLogs"));
+const AccessReport = lazy(() => import("@/pages/AccessReport"));
 const SystemErrors = lazy(() => import("@/pages/SystemErrors"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const CompanySettings = lazy(() => import("@/pages/CompanySettings"));
@@ -134,6 +135,9 @@ function Router() {
       </Route>
       <Route path="/audit-logs">
         {() => <ProtectedRoute component={AuditLogs} />}
+      </Route>
+      <Route path="/access-report">
+        {() => <ProtectedRoute component={AccessReport} />}
       </Route>
       <Route path="/system-errors">
         {() => <ProtectedRoute component={SystemErrors} />}

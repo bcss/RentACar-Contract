@@ -439,6 +439,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       show: isAdmin || isManager,
     },
     {
+      title: 'Access Report',
+      icon: 'verified_user',
+      url: '/access-report',
+      show: isAdmin || isManager || user?.canAccessAppAccessReport === true,
+    },
+    {
       title: t('nav.systemErrors'),
       icon: 'error_outline',
       url: '/system-errors',

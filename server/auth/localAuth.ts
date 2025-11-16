@@ -120,11 +120,34 @@ export async function setupAuth(app: Express) {
 
   // Login route
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: any, info: any) => {
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+      const ipAddress = req.ip;
+      const userAgent = req.get('user-agent');
+      const username = req.body.username;
+      
       if (err) {
         return res.status(500).json({ message: "Internal server error" });
       }
+      
       if (!user) {
+        // Log failed login attempt
+        try {
+          const geolocation = ipAddress ? await getGeolocation(ipAddress) : null;
+          
+          await storage.createAccessLog({
+            outcome: 'failure',
+            username: username || 'unknown',
+            userId: null,
+            ipAddress: ipAddress || null,
+            userAgent: userAgent || null,
+            country: geolocation?.country || null,
+            city: geolocation?.city || null,
+            failureReason: info?.message || 'Authentication failed',
+          });
+        } catch (error) {
+          console.error("Error creating access log for failed login:", error);
+        }
+        
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
 
@@ -149,24 +172,34 @@ export async function setupAuth(app: Express) {
 
           // Create audit log for login
           try {
-            const ipAddress = req.ip;
-            const userAgent = req.get('user-agent');
             const sessionId = req.session?.id;
-            const geolocation = ipAddress ? await getGeolocation(ipAddress) : {};
+            const geolocation = ipAddress ? await getGeolocation(ipAddress) : null;
             
             await storage.createAuditLog({
               userId: user.id,
               action: 'login',
-              ipAddress,
-              userAgent,
-              sessionId,
-              country: geolocation.country,
-              city: geolocation.city,
-              region: geolocation.region,
+              ipAddress: ipAddress || null,
+              userAgent: userAgent || null,
+              sessionId: sessionId || null,
+              country: geolocation?.country || null,
+              city: geolocation?.city || null,
+              region: geolocation?.region || null,
               details: `User ${user.username} logged in`,
             });
+
+            // Log successful login attempt in access logs
+            await storage.createAccessLog({
+              outcome: 'success',
+              username: user.username,
+              userId: user.id,
+              ipAddress: ipAddress || null,
+              userAgent: userAgent || null,
+              country: geolocation?.country || null,
+              city: geolocation?.city || null,
+              failureReason: null,
+            });
           } catch (error) {
-            console.error("Error creating audit log:", error);
+            console.error("Error creating audit/access log:", error);
           }
 
           return res.json({ 
@@ -300,4 +333,20 @@ export const requireContractCloseAccess: RequestHandler = async (req, res, next)
   }
   
   return res.status(403).json({ message: "Forbidden: Contract closure access required" });
+};
+
+// Permission toggle middleware - Check if user can access app access reports
+export const requireAppAccessReportAccess: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+  
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  // Admin or Manager roles, OR users with the toggle enabled
+  if (user.role === 'admin' || user.role === 'manager' || user.canAccessAppAccessReport === true) {
+    return next();
+  }
+  
+  return res.status(403).json({ message: "Forbidden: Access report permission required" });
 };

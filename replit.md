@@ -63,6 +63,15 @@ Preferred communication style: Simple, everyday language.
   - Inline field type documentation (string, number, date, enum, boolean)
   - User-friendly error tables with drill-down capabilities
   - All imported contracts created in DRAFT status only
+- **App Access Logging System:** Comprehensive security monitoring system tracking all login attempts with IP geolocation and country tracking. Features include:
+  - Automatic logging of successful and failed login attempts with geolocation data
+  - IP address tracking with country and city resolution
+  - User agent logging for device and browser identification
+  - Access Report interface with advanced filtering (date range, outcome, username, IP address, country)
+  - Pagination support for efficient handling of large log volumes
+  - Excel export functionality for security audits and compliance reporting
+  - Admin-controlled purge functionality for log retention management
+  - Permission-based access via `canAccessAppAccessReport` toggle (Admin/Manager by default)
 
 ### Role-Based Permissions
 - **Core Roles:** Admin, Manager, Staff, Viewer.

@@ -1180,6 +1180,78 @@ export class DatabaseStorage implements IStorage {
     return logs;
   }
 
+  // Access log operations
+  async createAccessLog(log: InsertAccessLog): Promise<AccessLog> {
+    const [newLog] = await db
+      .insert(accessLogs)
+      .values(log)
+      .returning();
+    
+    return newLog;
+  }
+
+  async getAccessLogs(filters?: {
+    startDate?: Date;
+    endDate?: Date;
+    outcome?: string;
+    username?: string;
+    ipAddress?: string;
+    country?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ logs: AccessLog[]; total: number }> {
+    const conditions = [];
+    
+    if (filters?.startDate) {
+      conditions.push(gte(accessLogs.createdAt, filters.startDate));
+    }
+    if (filters?.endDate) {
+      conditions.push(lte(accessLogs.createdAt, filters.endDate));
+    }
+    if (filters?.outcome) {
+      conditions.push(eq(accessLogs.outcome, filters.outcome));
+    }
+    if (filters?.username) {
+      conditions.push(ilike(accessLogs.usernameAttempted, `%${filters.username}%`));
+    }
+    if (filters?.ipAddress) {
+      conditions.push(eq(accessLogs.ipAddress, filters.ipAddress));
+    }
+    if (filters?.country) {
+      conditions.push(ilike(accessLogs.country, `%${filters.country}%`));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Get total count
+    const [{ count: total }] = await db
+      .select({ count: count() })
+      .from(accessLogs)
+      .where(whereClause);
+
+    // Get logs with pagination
+    const logs = await db
+      .select()
+      .from(accessLogs)
+      .where(whereClause)
+      .orderBy(desc(accessLogs.createdAt))
+      .limit(filters?.limit || 100)
+      .offset(filters?.offset || 0);
+
+    return {
+      logs,
+      total: Number(total),
+    };
+  }
+
+  async purgeAccessLogs(beforeDate: Date): Promise<number> {
+    const result = await db
+      .delete(accessLogs)
+      .where(lt(accessLogs.createdAt, beforeDate));
+    
+    return result.rowCount || 0;
+  }
+
   // System error operations
   async createSystemError(error: InsertSystemError): Promise<SystemError> {
     const [newError] = await db.insert(systemErrors).values(error).returning();
@@ -1477,25 +1549,43 @@ export class DatabaseStorage implements IStorage {
   async getPendingActions() {
     const now = new Date();
 
-    // Overdue returns: active contracts where rentalEndDate has passed
-    const [overdueResult] = await db
+    // Overdue returns: active contracts where rentalEndDate has passed (with details)
+    const overdueReturns = await db
       .select({
-        count: count(),
+        id: contracts.id,
+        contractNumber: contracts.contractNumber,
+        customerNameEn: customers.nameEn,
+        rentalEndDate: contracts.rentalEndDate,
+        vehicleRegistration: vehicles.registration,
       })
       .from(contracts)
+      .leftJoin(customers, eq(contracts.customerId, customers.id))
+      .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
       .where(
         and(
           eq(contracts.status, 'active'),
           lt(contracts.rentalEndDate, now)
         )
-      );
+      )
+      .orderBy(contracts.rentalEndDate)
+      .limit(10);
 
-    // Pending refunds: completed contracts with deposit not yet refunded
-    const [refundsResult] = await db
+    // Calculate days overdue
+    const overdueWithDays = overdueReturns.map(contract => ({
+      ...contract,
+      daysOverdue: Math.floor((now.getTime() - new Date(contract.rentalEndDate).getTime()) / (1000 * 60 * 60 * 24))
+    }));
+
+    // Pending refunds: contracts with deposit not yet refunded (with details)
+    const pendingRefunds = await db
       .select({
-        count: count(),
+        id: contracts.id,
+        contractNumber: contracts.contractNumber,
+        customerNameEn: customers.nameEn,
+        securityDeposit: contracts.securityDeposit,
       })
       .from(contracts)
+      .leftJoin(customers, eq(contracts.customerId, customers.id))
       .where(
         and(
           or(
@@ -1505,9 +1595,11 @@ export class DatabaseStorage implements IStorage {
           eq(contracts.depositRefunded, false),
           sql`CAST(${contracts.securityDeposit} AS DECIMAL) > 0`
         )
-      );
+      )
+      .orderBy(desc(contracts.securityDeposit))
+      .limit(10);
 
-    // Unclosed contracts: completed contracts not yet closed
+    // Unclosed contracts: completed contracts not yet closed (just count)
     const [unclosedResult] = await db
       .select({
         count: count(),
@@ -1516,8 +1608,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contracts.status, 'completed'));
 
     return {
-      overdueReturns: Number(overdueResult.count),
-      pendingRefunds: Number(refundsResult.count),
+      overdueReturns: overdueWithDays,
+      pendingRefunds: pendingRefunds.map(r => ({
+        ...r,
+        depositAmount: r.securityDeposit,
+      })),
       unclosedContracts: Number(unclosedResult.count),
     };
   }

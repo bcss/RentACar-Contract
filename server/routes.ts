@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess } from "./auth/localAuth";
+import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess, requireAppAccessReportAccess } from "./auth/localAuth";
 import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
 import { count, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
@@ -3191,6 +3191,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error logging system error:", error);
       res.status(500).json({ message: error.message || "Failed to log error" });
+    }
+  });
+
+  // Access log routes (Admin, Manager, or users with canAccessAppAccessReport toggle)
+  app.get('/api/access-logs', isAuthenticated, requireAppAccessReportAccess, async (req: any, res) => {
+    try {
+      // Validate query parameters with Zod
+      const accessLogFiltersSchema = z.object({
+        startDate: z.string().datetime().optional(),
+        endDate: z.string().datetime().optional(),
+        outcome: z.enum(['success', 'failure']).optional(),
+        username: z.string().min(1).max(100).optional(),
+        ipAddress: z.string().ip().optional(),
+        country: z.string().min(1).max(100).optional(),
+        limit: z.coerce.number().int().min(1).max(100).default(50),
+        offset: z.coerce.number().int().min(0).default(0),
+      });
+
+      const validation = accessLogFiltersSchema.safeParse(req.query);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid query parameters",
+          errors: fromZodError(validation.error).toString()
+        });
+      }
+
+      const { startDate, endDate, outcome, username, ipAddress, country, limit, offset } = validation.data;
+
+      const filters: any = {
+        limit,
+        offset,
+      };
+      
+      if (startDate) filters.startDate = new Date(startDate);
+      if (endDate) filters.endDate = new Date(endDate);
+      if (outcome) filters.outcome = outcome;
+      if (username) filters.username = username;
+      if (ipAddress) filters.ipAddress = ipAddress;
+      if (country) filters.country = country;
+
+      const result = await storage.getAccessLogs(filters);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching access logs:", error);
+      res.status(500).json({ message: "Failed to fetch access logs" });
+    }
+  });
+
+  app.delete('/api/access-logs/purge', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { beforeDate } = req.body;
+      
+      if (!beforeDate) {
+        return res.status(400).json({ message: "beforeDate is required" });
+      }
+
+      const deleted = await storage.purgeAccessLogs(new Date(beforeDate));
+      
+      // Log the purge action
+      await storage.createAuditLog({
+        userId: req.user.id,
+        action: 'purge_access_logs',
+        ipAddress: req.ip || req.connection.remoteAddress,
+        details: `Purged ${deleted} access log entries before ${beforeDate}`,
+      });
+
+      res.json({ success: true, deleted });
+    } catch (error: any) {
+      console.error("Error purging access logs:", error);
+      res.status(500).json({ message: error.message || "Failed to purge access logs" });
     }
   });
 

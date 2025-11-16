@@ -969,7 +969,7 @@ export default function Dashboard() {
                       <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?overdue=true')} data-testid="action-overdue-returns">
                         <CardContent className="pt-4">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-destructive">{pendingActionsData.overdueReturns.length}</div>
+                            <div className="text-2xl font-bold text-destructive">{Array.isArray(pendingActionsData.overdueReturns) ? pendingActionsData.overdueReturns.length : 0}</div>
                             <p className="text-xs text-muted-foreground mt-1">Overdue Returns</p>
                           </div>
                         </CardContent>
@@ -977,7 +977,7 @@ export default function Dashboard() {
                       <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/contracts?pendingRefunds=true')} data-testid="action-pending-refunds">
                         <CardContent className="pt-4">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-chart-3">{pendingActionsData.pendingRefunds.length}</div>
+                            <div className="text-2xl font-bold text-chart-3">{Array.isArray(pendingActionsData.pendingRefunds) ? pendingActionsData.pendingRefunds.length : 0}</div>
                             <p className="text-xs text-muted-foreground mt-1">Pending Refunds</p>
                           </div>
                         </CardContent>
@@ -985,26 +985,28 @@ export default function Dashboard() {
                       <Card className="cursor-pointer hover-elevate active-elevate-2" onClick={() => setLocation('/unclosed-contracts-report')} data-testid="action-unclosed-contracts">
                         <CardContent className="pt-4">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-chart-5">{pendingActionsData.unclosedContracts.length}</div>
+                            <div className="text-2xl font-bold text-chart-5">{pendingActionsData.unclosedContracts}</div>
                             <p className="text-xs text-muted-foreground mt-1">Unclosed Contracts</p>
                           </div>
                         </CardContent>
                       </Card>
                     </div>
                     <div className="space-y-2">
-                      {pendingActionsData.overdueReturns.slice(0, 3).map((item) => (
+                      {Array.isArray(pendingActionsData.overdueReturns) && pendingActionsData.overdueReturns.slice(0, 3).map((item: any) => (
                         <div key={item.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-md text-sm" data-testid={`overdue-item-${item.contractNumber}`}>
                           <span className="font-medium">#{item.contractNumber} - {item.customerNameEn}</span>
                           <Badge variant="destructive">{item.daysOverdue}d overdue</Badge>
                         </div>
                       ))}
-                      {pendingActionsData.pendingRefunds.slice(0, 2).map((item) => (
+                      {Array.isArray(pendingActionsData.pendingRefunds) && pendingActionsData.pendingRefunds.slice(0, 2).map((item: any) => (
                         <div key={item.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-md text-sm" data-testid={`refund-item-${item.contractNumber}`}>
                           <span className="font-medium">#{item.contractNumber} - {item.customerNameEn}</span>
                           <Badge variant="secondary">{currency} {item.depositAmount} refund due</Badge>
                         </div>
                       ))}
-                      {pendingActionsData.overdueReturns.length === 0 && pendingActionsData.pendingRefunds.length === 0 && pendingActionsData.unclosedContracts.length === 0 && (
+                      {(!Array.isArray(pendingActionsData.overdueReturns) || pendingActionsData.overdueReturns.length === 0) && 
+                       (!Array.isArray(pendingActionsData.pendingRefunds) || pendingActionsData.pendingRefunds.length === 0) && 
+                       pendingActionsData.unclosedContracts === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">No pending actions</p>
                       )}
                     </div>
@@ -1031,17 +1033,17 @@ export default function Dashboard() {
                     <div>
                       <h4 className="text-sm font-medium mb-3">Top 5 Vehicles by Revenue</h4>
                       <div className="space-y-2">
-                        {topPerformersData.topVehicles.slice(0, 5).map((vehicle, index) => (
+                        {topPerformersData.topVehiclesByRevenue?.slice(0, 5).map((vehicle: any, index: number) => (
                           <div key={vehicle.registration} className="flex items-center justify-between p-2 bg-muted/30 rounded-md" data-testid={`top-vehicle-${index + 1}`}>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="font-mono">#{index + 1}</Badge>
                               <span className="text-sm font-medium">{vehicle.registration}</span>
                               <span className="text-xs text-muted-foreground">{vehicle.make} {vehicle.model}</span>
                             </div>
-                            <span className="text-sm font-bold text-chart-1">{currency} {vehicle.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            <span className="text-sm font-bold text-chart-1">{currency} {Number(vehicle.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </div>
                         ))}
-                        {topPerformersData.topVehicles.length === 0 && (
+                        {(!topPerformersData.topVehiclesByRevenue || topPerformersData.topVehiclesByRevenue.length === 0) && (
                           <p className="text-sm text-muted-foreground text-center py-2">No vehicle data available</p>
                         )}
                       </div>
@@ -1049,16 +1051,16 @@ export default function Dashboard() {
                     <div>
                       <h4 className="text-sm font-medium mb-3">Most Active Staff</h4>
                       <div className="space-y-2">
-                        {topPerformersData.topStaff.slice(0, 5).map((staff, index) => (
-                          <div key={staff.name} className="flex items-center justify-between p-2 bg-muted/30 rounded-md" data-testid={`top-staff-${index + 1}`}>
+                        {topPerformersData.mostActiveStaff?.slice(0, 5).map((staff: any, index: number) => (
+                          <div key={staff.username} className="flex items-center justify-between p-2 bg-muted/30 rounded-md" data-testid={`top-staff-${index + 1}`}>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="font-mono">#{index + 1}</Badge>
-                              <span className="text-sm font-medium">{staff.name}</span>
+                              <span className="text-sm font-medium">{staff.firstName} {staff.lastName}</span>
                             </div>
                             <span className="text-sm font-bold text-primary">{staff.contractCount} contracts</span>
                           </div>
                         ))}
-                        {topPerformersData.topStaff.length === 0 && (
+                        {(!topPerformersData.mostActiveStaff || topPerformersData.mostActiveStaff.length === 0) && (
                           <p className="text-sm text-muted-foreground text-center py-2">No staff data available</p>
                         )}
                       </div>
