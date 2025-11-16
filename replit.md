@@ -45,13 +45,24 @@ Preferred communication style: Simple, everyday language.
 - **Company Settings Management:** Admin-only configuration for bilingual company information and contract clauses.
 - **Support & Help Center:** Unified page with dynamic system health monitoring, documentation, FAQs, and error reporting.
 - **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality. Includes Revenue Trends, Fleet Performance, Contract Analytics, and Collection Performance reports.
+- **Enhanced Dashboard Analytics (NEW):** Four new visual analytics cards for comprehensive business monitoring:
+  - **Fleet Status Distribution:** Real-time vehicle status breakdown (Available, Rented, Maintenance, Damaged) with donut chart visualization
+  - **Geographic Distribution:** Top 10 customer and vehicle regions by licensing authority for market analysis
+  - **Pending Actions:** Critical action tracking (Overdue Returns, Pending Refunds, Unclosed Contracts) with drill-down capabilities
+  - **Top Performers:** Top 5 vehicles by revenue and most active staff by contract count for performance insights
+- **Dashboard Backend Analytics:** 4 new storage methods and API endpoints (`/api/analytics/fleet-status`, `/api/analytics/geographic-distribution`, `/api/analytics/pending-actions`, `/api/analytics/top-performers`) providing efficient database aggregations for dashboard cards.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor, from_company.
 - **Professional PDF Integration:** Bilingual PDF generation for rental contracts with RTA compliance fields.
 
 ### Role-Based Permissions
 - **Core Roles:** Admin, Manager, Staff, Viewer.
-- **Granular Toggles:** e.g., `canAccessReports`, `canCloseContracts`.
+- **Core Permission Toggles:** `canAccessReports` (legacy), `canCloseContracts`, `canViewAllContracts`.
+- **Granular Report Permissions (NEW):** 10 fine-grained permission flags for individual report access. Admin and Manager roles automatically bypass all granular permission checks and have full report access. Granular permissions only restrict Staff and Viewer roles.
+  - **Analytical Reports:** `canAccessRevenueTrends`, `canAccessFleetPerformance`, `canAccessContractAnalytics`, `canAccessCollectionPerformance`
+  - **Standard Reports:** `canAccessFinancialReports`, `canAccessOperationalReports`, `canAccessCustomerReports`, `canAccessInsuranceReports`, `canAccessAuditReports`, `canAccessUserActivityReports`
+- **Permission UI:** Users.tsx provides grouped permission toggles (Analytical Reports + Standard Reports) in both Create and Edit dialogs for intuitive permission management.
+- **Permission Enforcement:** AppSidebar dynamically shows/hides report navigation based on user's granular permissions. useAuth hook implements Admin/Manager bypass logic consistently across the application.
 
 ### Dynamic System Health Monitoring
 - Real-time metrics including version, database health, webserver status, hardware info, and storage tracking.

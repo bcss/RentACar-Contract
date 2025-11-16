@@ -34,28 +34,32 @@ export function useAuth(): UseAuthReturn {
     retry: false,
   });
 
+  const isAdmin = user?.role === 'admin';
+  const isManager = user?.role === 'manager';
+  const hasElevatedAccess = isAdmin || isManager;
+
   return {
     user: user || undefined,
     isLoading,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin',
-    isManager: user?.role === 'manager',
+    isAdmin,
+    isManager,
     isStaff: user?.role === 'staff',
     isViewer: user?.role === 'viewer',
     // Permission toggles - default to false if not set
     canAccessReports: user?.canAccessReports ?? false,
     canCloseContracts: user?.canCloseContracts ?? false,
     canViewAllContracts: user?.canViewAllContracts ?? false,
-    // Granular report permissions - default to false if not set
-    canAccessRevenueTrends: user?.canAccessRevenueTrends ?? false,
-    canAccessFleetPerformance: user?.canAccessFleetPerformance ?? false,
-    canAccessContractAnalytics: user?.canAccessContractAnalytics ?? false,
-    canAccessCollectionPerformance: user?.canAccessCollectionPerformance ?? false,
-    canAccessFinancialReports: user?.canAccessFinancialReports ?? false,
-    canAccessOperationalReports: user?.canAccessOperationalReports ?? false,
-    canAccessCustomerReports: user?.canAccessCustomerReports ?? false,
-    canAccessInsuranceReports: user?.canAccessInsuranceReports ?? false,
-    canAccessAuditReports: user?.canAccessAuditReports ?? false,
-    canAccessUserActivityReports: user?.canAccessUserActivityReports ?? false,
+    // Granular report permissions - Admin/Manager have full access, others check their flags
+    canAccessRevenueTrends: hasElevatedAccess || (user?.canAccessRevenueTrends ?? false),
+    canAccessFleetPerformance: hasElevatedAccess || (user?.canAccessFleetPerformance ?? false),
+    canAccessContractAnalytics: hasElevatedAccess || (user?.canAccessContractAnalytics ?? false),
+    canAccessCollectionPerformance: hasElevatedAccess || (user?.canAccessCollectionPerformance ?? false),
+    canAccessFinancialReports: hasElevatedAccess || (user?.canAccessFinancialReports ?? false),
+    canAccessOperationalReports: hasElevatedAccess || (user?.canAccessOperationalReports ?? false),
+    canAccessCustomerReports: hasElevatedAccess || (user?.canAccessCustomerReports ?? false),
+    canAccessInsuranceReports: hasElevatedAccess || (user?.canAccessInsuranceReports ?? false),
+    canAccessAuditReports: hasElevatedAccess || (user?.canAccessAuditReports ?? false),
+    canAccessUserActivityReports: hasElevatedAccess || (user?.canAccessUserActivityReports ?? false),
   };
 }
