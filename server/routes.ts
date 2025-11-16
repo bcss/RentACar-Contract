@@ -4117,6 +4117,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for company branding (no auth required)
+  app.get('/api/branding', async (req, res) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      // Return only safe branding information
+      res.json({
+        companyNameEn: settings.companyNameEn,
+        companyNameAr: settings.companyNameAr,
+        logoUrl: settings.logoUrl,
+      });
+    } catch (error) {
+      console.error("Error fetching company branding:", error);
+      res.status(500).json({ message: "Failed to fetch company branding" });
+    }
+  });
+
   // Company settings routes (Admin only)
   app.get('/api/settings', isAuthenticated, async (req: any, res) => {
     try {

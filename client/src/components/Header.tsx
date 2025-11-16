@@ -4,18 +4,24 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { PanelLeft } from 'lucide-react';
-import { Icon } from '@/components/Icon';
+import { PanelLeft, Sun, Moon } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { CompanySettings } from '@shared/schema';
 
 export function Header() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { toggleSidebar } = useSidebar();
+  
+  // Fetch company settings for branding
+  const { data: settings } = useQuery<CompanySettings>({
+    queryKey: ['/api/settings'],
+  });
 
   return (
     <header className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-10">
-      {/* Sidebar Toggle */}
+      {/* Sidebar Toggle & Company Name */}
       <div className="flex items-center gap-4">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -34,6 +40,18 @@ export function Header() {
             <p>{t('header.toggleSidebar')}</p>
           </TooltipContent>
         </Tooltip>
+        
+        {/* Company Name */}
+        <div className="hidden md:block">
+          <h1 className="text-base font-semibold text-foreground" data-testid="text-company-name">
+            {settings 
+              ? i18n.language === 'ar'
+                ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
+                : settings.companyNameEn || settings.companyNameAr || t('landing.title')
+              : t('landing.title')
+            }
+          </h1>
+        </div>
       </div>
       
       {/* Theme & Language Toggles */}
@@ -48,7 +66,7 @@ export function Header() {
               data-testid="button-theme-toggle"
               className="hover-elevate active-elevate-2"
             >
-              <Icon name={theme === 'dark' ? 'light_mode' : 'dark_mode'} className="h-4 w-4" />
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">

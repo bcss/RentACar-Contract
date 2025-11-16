@@ -3,8 +3,28 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@/components/Icon';
 import { useTranslation } from 'react-i18next';
+import { 
+  CheckCircle, 
+  Check, 
+  DollarSign, 
+  Car, 
+  Calendar,
+  Truck,
+  MoreVertical,
+  TrendingUp,
+  BarChart3,
+  MoreHorizontal,
+  Users,
+  CreditCard,
+  ArrowUp,
+  Filter,
+  ShoppingBag,
+  Receipt,
+  Package,
+  UserPlus,
+  Info
+} from 'lucide-react';
 
 export default function DashboardSamples() {
   const { t } = useTranslation();
@@ -27,7 +47,7 @@ export default function DashboardSamples() {
         <Card className="p-4 bg-primary/5 border-primary/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Icon name="check_circle" className="text-primary text-2xl" />
+              <CheckCircle className="h-6 w-6 text-primary" />
               <div>
                 <p className="font-semibold">Selected Design: {selectedDesign}</p>
                 <p className="text-xs text-muted-foreground">Click "Confirm Selection" below to proceed with implementation</p>
@@ -87,7 +107,7 @@ export default function DashboardSamples() {
               <p className="text-sm text-muted-foreground">Inspired by modern car rental platforms - spacious layout with soft rounded corners</p>
             </div>
             <Button onClick={() => setSelectedDesign('Clean Modern')} variant={selectedDesign === 'Clean Modern' ? 'default' : 'outline'} data-testid="button-select-clean-modern">
-              {selectedDesign === 'Clean Modern' ? <Icon name="check" className="mr-2" /> : null}
+              {selectedDesign === 'Clean Modern' ? <Check className="mr-2 h-4 w-4" /> : null}
               Select This Design
             </Button>
           </div>
@@ -97,7 +117,7 @@ export default function DashboardSamples() {
             <Card className="p-6 rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 border-0">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-white dark:bg-blue-900 flex items-center justify-center">
-                  <Icon name="sell" className="text-blue-600 text-xl" />
+                  <DollarSign className="h-5 w-5 text-blue-600" />
                 </div>
                 <Badge className="bg-green-100 text-green-700 border-0 rounded-full px-3">+8.2%</Badge>
               </div>
@@ -109,7 +129,7 @@ export default function DashboardSamples() {
             <Card className="p-6 rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-0">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-white dark:bg-purple-900 flex items-center justify-center">
-                  <Icon name="directions_car" className="text-purple-600 text-xl" />
+                  <Car className="h-5 w-5 text-purple-600" />
                 </div>
                 <Badge className="bg-green-100 text-green-700 border-0 rounded-full px-3">+12.5%</Badge>
               </div>
@@ -121,7 +141,7 @@ export default function DashboardSamples() {
             <Card className="p-6 rounded-3xl bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950 border-0">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-white dark:bg-orange-900 flex items-center justify-center">
-                  <Icon name="event_note" className="text-orange-600 text-xl" />
+                  <Calendar className="h-5 w-5 text-orange-600" />
                 </div>
                 <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full px-3">+5.4%</Badge>
               </div>
@@ -133,7 +153,7 @@ export default function DashboardSamples() {
             <Card className="p-6 rounded-3xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-0">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-white dark:bg-green-900 flex items-center justify-center">
-                  <Icon name="local_shipping" className="text-green-600 text-xl" />
+                  <Truck className="h-5 w-5 text-green-600" />
                 </div>
                 <Badge className="bg-green-100 text-green-700 border-0 rounded-full px-3">+9.3%</Badge>
               </div>
@@ -152,7 +172,7 @@ export default function DashboardSamples() {
                   <p className="text-sm text-muted-foreground">Last 6 months</p>
                 </div>
                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <Icon name="more_vert" />
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
               </div>
               {/* Placeholder for chart */}
@@ -168,7 +188,7 @@ export default function DashboardSamples() {
                   <p className="text-sm text-muted-foreground">Current distribution</p>
                 </div>
                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <Icon name="more_vert" />
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
               </div>
               {/* Placeholder for donut chart */}
@@ -187,7 +207,7 @@ export default function DashboardSamples() {
               <p className="text-sm text-muted-foreground">Maximum information density - perfect for power users and managers</p>
             </div>
             <Button onClick={() => setSelectedDesign('Data Dense')} variant={selectedDesign === 'Data Dense' ? 'default' : 'outline'} data-testid="button-select-data-dense">
-              {selectedDesign === 'Data Dense' ? <Icon name="check" className="mr-2" /> : null}
+              {selectedDesign === 'Data Dense' ? <Check className="mr-2 h-4 w-4" /> : null}
               Select This Design
             </Button>
           </div>
@@ -199,7 +219,7 @@ export default function DashboardSamples() {
                 <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{metric}</p>
                 <p className="text-2xl font-bold">1,234</p>
                 <div className="flex items-center gap-1 mt-1">
-                  <Icon name="trending_up" className="text-green-600 text-sm" />
+                  <TrendingUp className="h-4 w-4 text-green-600" />
                   <span className="text-xs text-green-600">+12%</span>
                 </div>
               </Card>
@@ -286,7 +306,7 @@ export default function DashboardSamples() {
               <p className="text-sm text-muted-foreground">Premium dark theme with gradients and depth - modern and sophisticated</p>
             </div>
             <Button onClick={() => setSelectedDesign('Dark Elegant')} variant={selectedDesign === 'Dark Elegant' ? 'default' : 'outline'} data-testid="button-select-dark-elegant">
-              {selectedDesign === 'Dark Elegant' ? <Icon name="check" className="mr-2" /> : null}
+              {selectedDesign === 'Dark Elegant' ? <Check className="mr-2 h-4 w-4" /> : null}
               Select This Design
             </Button>
           </div>
@@ -295,8 +315,8 @@ export default function DashboardSamples() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card className="p-6 bg-gradient-to-br from-blue-600 to-cyan-600 text-white border-0 shadow-lg">
               <div className="flex items-center justify-between mb-2">
-                <Icon name="auto_graph" className="text-3xl opacity-80" />
-                <Icon name="more_horiz" className="text-sm" />
+                <BarChart3 className="h-8 w-8 opacity-80" />
+                <MoreHorizontal className="h-4 w-4" />
               </div>
               <p className="text-xs opacity-80 uppercase tracking-wider mb-1">Sales Growth</p>
               <p className="text-4xl font-bold mb-1">+15%</p>
@@ -305,8 +325,8 @@ export default function DashboardSamples() {
 
             <Card className="p-6 bg-gradient-to-br from-purple-600 to-pink-600 text-white border-0 shadow-lg">
               <div className="flex items-center justify-between mb-2">
-                <Icon name="group" className="text-3xl opacity-80" />
-                <Icon name="more_horiz" className="text-sm" />
+                <Users className="h-8 w-8 opacity-80" />
+                <MoreHorizontal className="h-4 w-4" />
               </div>
               <p className="text-xs opacity-80 uppercase tracking-wider mb-1">New Customers</p>
               <p className="text-4xl font-bold mb-1">+3,082</p>
@@ -315,8 +335,8 @@ export default function DashboardSamples() {
 
             <Card className="p-6 bg-gradient-to-br from-orange-600 to-red-600 text-white border-0 shadow-lg">
               <div className="flex items-center justify-between mb-2">
-                <Icon name="analytics" className="text-3xl opacity-80" />
-                <Icon name="more_horiz" className="text-sm" />
+                <BarChart3 className="h-8 w-8 opacity-80" />
+                <MoreHorizontal className="h-4 w-4" />
               </div>
               <p className="text-xs opacity-80 uppercase tracking-wider mb-1">Conversion</p>
               <p className="text-4xl font-bold mb-1">9.3%</p>
@@ -325,8 +345,8 @@ export default function DashboardSamples() {
 
             <Card className="p-6 bg-gradient-to-br from-green-600 to-emerald-600 text-white border-0 shadow-lg">
               <div className="flex items-center justify-between mb-2">
-                <Icon name="payments" className="text-3xl opacity-80" />
-                <Icon name="more_horiz" className="text-sm" />
+                <CreditCard className="h-8 w-8 opacity-80" />
+                <MoreHorizontal className="h-4 w-4" />
               </div>
               <p className="text-xs opacity-80 uppercase tracking-wider mb-1">Revenue</p>
               <p className="text-4xl font-bold mb-1">$173K</p>
@@ -369,7 +389,7 @@ export default function DashboardSamples() {
               <p className="text-sm text-muted-foreground">Clean hierarchy with focus on essential information - perfect for quick glances</p>
             </div>
             <Button onClick={() => setSelectedDesign('Minimal Cards')} variant={selectedDesign === 'Minimal Cards' ? 'default' : 'outline'} data-testid="button-select-minimal-cards">
-              {selectedDesign === 'Minimal Cards' ? <Icon name="check" className="mr-2" /> : null}
+              {selectedDesign === 'Minimal Cards' ? <Check className="mr-2 h-4 w-4" /> : null}
               Select This Design
             </Button>
           </div>
@@ -390,7 +410,7 @@ export default function DashboardSamples() {
               <p className="text-4xl font-bold mb-2">$ 9460.00</p>
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-green-600 flex items-center gap-1">
-                  <Icon name="arrow_drop_up" className="text-lg" />
+                  <ArrowUp className="h-5 w-5" />
                   1.5%
                 </span>
                 <span className="text-muted-foreground">Compared to $9940 yesterday</span>
@@ -406,7 +426,7 @@ export default function DashboardSamples() {
               <p className="text-4xl font-bold mb-2">$ 5660.00</p>
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-green-600 flex items-center gap-1">
-                  <Icon name="arrow_drop_up" className="text-lg" />
+                  <ArrowUp className="h-5 w-5" />
                   2.5%
                 </span>
                 <span className="text-muted-foreground">Compared to $5240 yesterday</span>
@@ -453,7 +473,7 @@ export default function DashboardSamples() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Live Car Status</h3>
               <Button variant="outline" size="sm" className="gap-2">
-                <Icon name="filter_list" className="text-sm" />
+                <Filter className="h-4 w-4" />
                 Filter
               </Button>
             </div>
@@ -512,7 +532,7 @@ export default function DashboardSamples() {
               <p className="text-sm text-muted-foreground">Vibrant colors and playful charts - engaging and memorable</p>
             </div>
             <Button onClick={() => setSelectedDesign('Colorful Analytics')} variant={selectedDesign === 'Colorful Analytics' ? 'default' : 'outline'} data-testid="button-select-colorful">
-              {selectedDesign === 'Colorful Analytics' ? <Icon name="check" className="mr-2" /> : null}
+              {selectedDesign === 'Colorful Analytics' ? <Check className="mr-2 h-4 w-4" /> : null}
               Select This Design
             </Button>
           </div>
@@ -522,7 +542,7 @@ export default function DashboardSamples() {
             <Card className="p-5 bg-gradient-to-br from-pink-100 to-pink-50 dark:from-pink-900 dark:to-pink-950 border-pink-200">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-xl bg-pink-500 flex items-center justify-center">
-                  <Icon name="shopping_bag" className="text-white text-xl" />
+                  <ShoppingBag className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-pink-700">$1k</p>
@@ -535,7 +555,7 @@ export default function DashboardSamples() {
             <Card className="p-5 bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900 dark:to-orange-950 border-orange-200">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center">
-                  <Icon name="receipt" className="text-white text-xl" />
+                  <Receipt className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-orange-700">300</p>
@@ -548,7 +568,7 @@ export default function DashboardSamples() {
             <Card className="p-5 bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900 dark:to-green-950 border-green-200">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center">
-                  <Icon name="inventory_2" className="text-white text-xl" />
+                  <Package className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-green-700">5</p>
@@ -561,7 +581,7 @@ export default function DashboardSamples() {
             <Card className="p-5 bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900 dark:to-purple-950 border-purple-200">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center">
-                  <Icon name="person_add" className="text-white text-xl" />
+                  <UserPlus className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-purple-700">8</p>
@@ -636,7 +656,7 @@ export default function DashboardSamples() {
       {/* Footer Info */}
       <Card className="p-6 bg-muted/30">
         <div className="flex items-start gap-4">
-          <Icon name="info" className="text-primary text-2xl flex-shrink-0" />
+          <Info className="h-6 w-6 text-primary flex-shrink-0" />
           <div className="space-y-2">
             <h4 className="font-semibold">About These Design Samples</h4>
             <p className="text-sm text-muted-foreground">

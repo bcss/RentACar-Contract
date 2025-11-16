@@ -8,17 +8,23 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, fetchCsrfToken } from '@/lib/queryClient';
 import { queryClient } from '@/lib/queryClient';
-import { Eye, EyeOff } from 'lucide-react';
-import { Icon } from '@/components/Icon';
+import { Eye, EyeOff, Car } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { CompanySettings } from '@shared/schema';
 
 export default function Login() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Fetch company branding (public endpoint - no auth required)
+  const { data: branding } = useQuery<{companyNameEn: string | null, companyNameAr: string | null, logoUrl: string | null}>({
+    queryKey: ['/api/branding'],
+  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +63,17 @@ export default function Login() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="bg-primary/10 p-4 rounded-full">
-              <Icon name="directions_car" className="text-5xl text-primary" />
+              <Car className="h-12 w-12 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl">{t('landing.title')}</CardTitle>
+          <CardTitle className="text-2xl">
+            {branding 
+              ? i18n.language === 'ar'
+                ? branding.companyNameAr || branding.companyNameEn || t('landing.title')
+                : branding.companyNameEn || branding.companyNameAr || t('landing.title')
+              : t('landing.title')
+            }
+          </CardTitle>
           <p className="text-muted-foreground">{t('login.subtitle')}</p>
         </CardHeader>
         <CardContent>
