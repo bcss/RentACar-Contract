@@ -46,6 +46,10 @@ const InsuranceClaims = lazy(() => import("@/pages/InsuranceClaims"));
 const InsuranceClaimForm = lazy(() => import("@/pages/InsuranceClaimForm"));
 const InsuranceReports = lazy(() => import("@/pages/InsuranceReports"));
 const UnclosedContractsReport = lazy(() => import("@/pages/UnclosedContractsReport"));
+const RevenueTrendsReport = lazy(() => import("@/pages/RevenueTrendsReport"));
+const FleetPerformanceReport = lazy(() => import("@/pages/FleetPerformanceReport"));
+const ContractAnalyticsReport = lazy(() => import("@/pages/ContractAnalyticsReport"));
+const CollectionPerformanceReport = lazy(() => import("@/pages/CollectionPerformanceReport"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -165,6 +169,18 @@ function Router() {
       </Route>
       <Route path="/unclosed-contracts-report">
         {() => <ProtectedRoute component={UnclosedContractsReport} />}
+      </Route>
+      <Route path="/reports/revenue-trends">
+        {() => <ProtectedRoute component={RevenueTrendsReport} />}
+      </Route>
+      <Route path="/reports/fleet-performance">
+        {() => <ProtectedRoute component={FleetPerformanceReport} />}
+      </Route>
+      <Route path="/reports/contract-analytics">
+        {() => <ProtectedRoute component={ContractAnalyticsReport} />}
+      </Route>
+      <Route path="/reports/collection-performance">
+        {() => <ProtectedRoute component={CollectionPerformanceReport} />}
       </Route>
       <Route path="/settings/support">
         {() => <ProtectedRoute component={SupportHelpPage} />}

@@ -379,6 +379,30 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/unclosed-contracts-report',
       show: isAdmin || isManager || canAccessReports,
     },
+    {
+      title: 'Revenue Trends',
+      icon: 'trending_up',
+      url: '/reports/revenue-trends',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Fleet Performance',
+      icon: 'directions_car',
+      url: '/reports/fleet-performance',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Contract Analytics',
+      icon: 'analytics',
+      url: '/reports/contract-analytics',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Collection Performance',
+      icon: 'account_balance_wallet',
+      url: '/reports/collection-performance',
+      show: isAdmin || isManager || canAccessReports,
+    },
   ];
 
   const auditItems = [
