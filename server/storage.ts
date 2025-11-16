@@ -1166,7 +1166,9 @@ export class DatabaseStorage implements IStorage {
           COALESCE(
             SUM(
               CAST(${contracts.totalAmount} AS DECIMAL) + 
-              COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0)
+              COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0) +
+              COALESCE(CAST(${contracts.dropOffCharge} AS DECIMAL), 0) +
+              COALESCE(CAST(${contracts.pickUpCharge} AS DECIMAL), 0)
             ), 
             0
           )
@@ -1177,7 +1179,7 @@ export class DatabaseStorage implements IStorage {
             SUM(
               CASE 
                 WHEN ${contracts.createdAt} >= ${startOfMonth} 
-                THEN CAST(${contracts.totalAmount} AS DECIMAL) + COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0)
+                THEN CAST(${contracts.totalAmount} AS DECIMAL) + COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0) + COALESCE(CAST(${contracts.dropOffCharge} AS DECIMAL), 0) + COALESCE(CAST(${contracts.pickUpCharge} AS DECIMAL), 0)
                 ELSE 0 
               END
             ),
@@ -1189,7 +1191,7 @@ export class DatabaseStorage implements IStorage {
             SUM(
               CASE 
                 WHEN ${contracts.createdAt} >= ${startOfLastMonth} AND ${contracts.createdAt} <= ${endOfLastMonth}
-                THEN CAST(${contracts.totalAmount} AS DECIMAL) + COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0)
+                THEN CAST(${contracts.totalAmount} AS DECIMAL) + COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0) + COALESCE(CAST(${contracts.dropOffCharge} AS DECIMAL), 0) + COALESCE(CAST(${contracts.pickUpCharge} AS DECIMAL), 0)
                 ELSE 0 
               END
             ),
@@ -1327,6 +1329,79 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getRevenueTrend(months: number = 12) {
+    const now = new Date();
+    const monthsAgo = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
+    
+    const results = await db
+      .select({
+        month: sql<string>`TO_CHAR(${contracts.createdAt}, 'YYYY-MM')`,
+        totalRevenue: sql<string>`
+          COALESCE(
+            SUM(
+              CAST(${contracts.totalAmount} AS DECIMAL) + 
+              COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0) +
+              COALESCE(CAST(${contracts.dropOffCharge} AS DECIMAL), 0) +
+              COALESCE(CAST(${contracts.pickUpCharge} AS DECIMAL), 0)
+            ), 
+            0
+          )
+        `,
+        rentalFees: sql<string>`COALESCE(SUM(CAST(${contracts.totalAmount} AS DECIMAL)), 0)`,
+        extraCharges: sql<string>`COALESCE(SUM(CAST(${contracts.totalExtraCharges} AS DECIMAL)), 0)`,
+        deliveryFees: sql<string>`COALESCE(SUM(COALESCE(CAST(${contracts.dropOffCharge} AS DECIMAL), 0) + COALESCE(CAST(${contracts.pickUpCharge} AS DECIMAL), 0)), 0)`,
+        contractCount: count(),
+      })
+      .from(contracts)
+      .where(
+        and(
+          sql`${contracts.createdAt} >= ${monthsAgo}`,
+          or(
+            eq(contracts.status, 'active'),
+            eq(contracts.status, 'completed'),
+            eq(contracts.status, 'closed')
+          )
+        )
+      )
+      .groupBy(sql`TO_CHAR(${contracts.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${contracts.createdAt}, 'YYYY-MM')`);
+    
+    return results.map(row => ({
+      month: row.month,
+      totalRevenue: parseFloat(row.totalRevenue) || 0,
+      rentalFees: parseFloat(row.rentalFees) || 0,
+      extraCharges: parseFloat(row.extraCharges) || 0,
+      deliveryFees: parseFloat(row.deliveryFees) || 0,
+      contractCount: row.contractCount || 0,
+    }));
+  }
+
+  async getContractVolumeTrend(months: number = 6) {
+    const now = new Date();
+    const monthsAgo = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
+    
+    const results = await db
+      .select({
+        month: sql<string>`TO_CHAR(${contracts.createdAt}, 'YYYY-MM')`,
+        draft: sql<string>`SUM(CASE WHEN ${contracts.status} = 'draft' THEN 1 ELSE 0 END)`,
+        active: sql<string>`SUM(CASE WHEN ${contracts.status} = 'active' THEN 1 ELSE 0 END)`,
+        completed: sql<string>`SUM(CASE WHEN ${contracts.status} = 'completed' THEN 1 ELSE 0 END)`,
+        closed: sql<string>`SUM(CASE WHEN ${contracts.status} = 'closed' THEN 1 ELSE 0 END)`,
+      })
+      .from(contracts)
+      .where(sql`${contracts.createdAt} >= ${monthsAgo}`)
+      .groupBy(sql`TO_CHAR(${contracts.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${contracts.createdAt}, 'YYYY-MM')`);
+    
+    return results.map(row => ({
+      month: row.month,
+      draft: parseInt(row.draft) || 0,
+      active: parseInt(row.active) || 0,
+      completed: parseInt(row.completed) || 0,
+      closed: parseInt(row.closed) || 0,
+    }));
+  }
+
   // Reports - Financial
   async getFinancialReport(startDate?: Date, endDate?: Date) {
     const allContracts = await db.select().from(contracts);
@@ -1352,15 +1427,15 @@ export class DatabaseStorage implements IStorage {
       c.status === 'active' || c.status === 'completed' || c.status === 'closed'
     );
 
-    // Total revenue (contract amount + extra charges)
+    // Total revenue (contract amount + extra charges + delivery charges)
     const totalRevenue = revenueContracts.reduce((sum, c) => {
-      return sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0');
+      return sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0') + parseFloat(c.dropOffCharge || '0') + parseFloat(c.pickUpCharge || '0');
     }, 0);
     
     // All-time revenue (no date filter) - only active, completed, closed
     const allTimeRevenue = allContracts
       .filter(c => c.status === 'active' || c.status === 'completed' || c.status === 'closed')
-      .reduce((sum, c) => sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0'), 0);
+      .reduce((sum, c) => sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0') + parseFloat(c.dropOffCharge || '0') + parseFloat(c.pickUpCharge || '0'), 0);
 
     // Total payments collected
     const totalCollected = allPayments
@@ -1376,7 +1451,7 @@ export class DatabaseStorage implements IStorage {
     );
     
     const finalizedRevenue = finalizedContracts.reduce((sum, c) => {
-      return sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0');
+      return sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0') + parseFloat(c.dropOffCharge || '0') + parseFloat(c.pickUpCharge || '0');
     }, 0);
 
     // Outstanding amount (total revenue - total collected across all revenue-earning contracts)
@@ -1555,7 +1630,7 @@ export class DatabaseStorage implements IStorage {
       const vehicleContracts = filteredContracts.filter(c => c.vehicleId === vehicle.id);
       const totalRevenue = vehicleContracts
         .filter(c => c.status !== 'draft')
-        .reduce((sum, c) => sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0'), 0);
+        .reduce((sum, c) => sum + parseFloat(c.totalAmount) + parseFloat(c.totalExtraCharges || '0') + parseFloat(c.dropOffCharge || '0') + parseFloat(c.pickUpCharge || '0'), 0);
       const totalDays = vehicleContracts.reduce((sum, c) => sum + (c.totalDays || 0), 0);
       const isActive = activeContracts.some(c => c.vehicleId === vehicle.id);
 

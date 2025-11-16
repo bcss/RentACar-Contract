@@ -16,6 +16,8 @@ import { format } from 'date-fns';
 import { getTimeBasedGreeting, getTimeAgo } from '@/utils/timeGreeting';
 import { AlertCircle, X, AlertTriangle } from 'lucide-react';
 import { Icon } from '@/components/Icon';
+import { TrendIndicator } from '@/components/TrendIndicator';
+import { RevenueTrendChart } from '@/components/RevenueTrendChart';
 
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
@@ -93,6 +95,11 @@ export default function Dashboard() {
   // Query unclosed contracts for alert card (Admin and Manager only)
   const { data: unclosedContracts = [] } = useQuery<any[]>({
     queryKey: ['/api/contracts/unclosed-alerts'],
+    enabled: isAuthenticated && canViewAnalytics,
+  });
+
+  const { data: revenueTrendData = [], isLoading: revenueTrendLoading } = useQuery<any[]>({
+    queryKey: ['/api/analytics/revenue-trend'],
     enabled: isAuthenticated && canViewAnalytics,
   });
 
@@ -283,10 +290,20 @@ export default function Dashboard() {
                 <Icon name="directions_car" className=" text-primary" />
               </CardHeader>
               <CardContent>
-                {contractsLoading ? (
+                {contractsLoading || operationalLoading ? (
                   <Skeleton className="h-10 w-20" />
                 ) : (
-                  <div className="text-2xl sm:text-3xl xl:text-4xl font-bold text-primary truncate" data-testid="stat-active-contracts">{activeContracts}</div>
+                  <>
+                    <div className="text-2xl sm:text-3xl xl:text-4xl font-bold text-primary truncate" data-testid="stat-active-contracts">{activeContracts}</div>
+                    {operationalAnalytics && operationalAnalytics.contractsLastMonth > 0 && (
+                      <TrendIndicator 
+                        value={operationalAnalytics.contractsThisMonth}
+                        previousValue={operationalAnalytics.contractsLastMonth}
+                        format="number"
+                        className="mt-1"
+                      />
+                    )}
+                  </>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">Currently rented out</p>
               </CardContent>
@@ -307,12 +324,23 @@ export default function Dashboard() {
                 <Icon name="payments" className=" text-chart-1" />
               </CardHeader>
               <CardContent>
-                {contractsLoading ? (
+                {contractsLoading || revenueLoading ? (
                   <Skeleton className="h-10 w-32" />
                 ) : (
-                  <div className="text-2xl sm:text-3xl xl:text-4xl font-bold text-chart-1 truncate" data-testid="stat-monthly-revenue">
-                    {currency} {monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </div>
+                  <>
+                    <div className="text-2xl sm:text-3xl xl:text-4xl font-bold text-chart-1 truncate" data-testid="stat-monthly-revenue">
+                      {currency} {(revenueAnalytics?.monthlyRevenue || monthlyRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    {revenueAnalytics && revenueAnalytics.lastMonthRevenue > 0 && (
+                      <TrendIndicator 
+                        value={revenueAnalytics.monthlyRevenue}
+                        previousValue={revenueAnalytics.lastMonthRevenue}
+                        format="currency"
+                        currency={currency}
+                        className="mt-1"
+                      />
+                    )}
+                  </>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">This month</p>
               </CardContent>
@@ -767,6 +795,13 @@ export default function Dashboard() {
             <p>Click to view customer reports</p>
           </TooltipContent>
         </Tooltip>
+        </div>
+      )}
+
+      {/* Enhanced Analytics Charts - Admin/Manager only */}
+      {canViewAnalytics && (
+        <div className="space-y-6">
+          <RevenueTrendChart data={revenueTrendData} isLoading={revenueTrendLoading} />
         </div>
       )}
     </div>

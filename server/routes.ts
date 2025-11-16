@@ -3147,6 +3147,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/analytics/revenue-trend', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const months = parseInt(req.query.months as string) || 12;
+      const trend = await storage.getRevenueTrend(months);
+      res.json(trend);
+    } catch (error) {
+      console.error("Error fetching revenue trend:", error);
+      res.status(500).json({ message: "Failed to fetch revenue trend" });
+    }
+  });
+
+  app.get('/api/analytics/contract-volume', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const months = parseInt(req.query.months as string) || 6;
+      const volume = await storage.getContractVolumeTrend(months);
+      res.json(volume);
+    } catch (error) {
+      console.error("Error fetching contract volume:", error);
+      res.status(500).json({ message: "Failed to fetch contract volume" });
+    }
+  });
+
   // Reports routes (Admin and Manager, or users with canAccessReports toggle) with date range support
   app.get('/api/reports/financial', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {

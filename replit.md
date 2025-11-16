@@ -82,5 +82,51 @@ Preferred communication style: Simple, everyday language.
 
 ## Documentation
 
+### Recent Changes (November 16, 2025)
+
+#### Dashboard Visual Analytics Enhancement
+Implemented Phase 1 and Phase 2.1-2.3 of the Dashboard Enhancement Proposal to transform the dashboard from a static snapshot to a living analytics hub:
+
+**Phase 1 - Trend Indicators:**
+- Created `TrendIndicator` component displaying month-over-month changes with directional arrows and color coding
+- Added trend indicators to Dashboard KPI cards:
+  - Monthly Revenue card: Shows revenue growth percentage vs last month
+  - Active Rentals card: Shows contract volume growth percentage vs last month
+- Leveraged existing `revenueGrowth` and `contractGrowth` fields from analytics endpoints
+
+**Phase 2 - Revenue Trend Visualization:**
+- Backend: Created `getRevenueTrend(months)` and `getContractVolumeTrend(months)` storage methods with SQL aggregation
+- API Endpoints:
+  - `GET /api/analytics/revenue-trend?months=N` (default: 12 months)
+  - `GET /api/analytics/contract-volume?months=N` (default: 6 months)
+- Frontend: Created `RevenueTrendChart` component using recharts LineChart featuring:
+  - Interactive time range selector (3M/6M/12M)
+  - Multiple revenue breakdowns (total, rental fees, extra charges, delivery fees)
+  - Summary metrics (total contracts, avg revenue/month, highest/lowest performing months)
+  - Responsive design with bilingual support and dark mode compatibility
+- Integration: Added chart to Dashboard visible to Admin/Manager roles only
+
+#### Critical Revenue Calculation Bug Fix (November 16, 2025)
+**Issue Discovered:** All analytics methods were calculating revenue incompletely by excluding delivery charges (`dropOffCharge` and `pickUpCharge`), which are separate from `totalExtraCharges`.
+
+**Scope:** System-wide revenue calculations were underreporting actual revenue across all analytics endpoints.
+
+**Root Cause:** The formula `totalRevenue = totalAmount + totalExtraCharges` was missing delivery charges because:
+- `totalExtraCharges` = extraKmCharge + fuelCharge + damageCharge + trafficFineCharge + otherCharges
+- Delivery charges are stored separately and must be added explicitly
+
+**Corrected Formula:**
+```
+totalRevenue = totalAmount + totalExtraCharges + dropOffCharge + pickUpCharge
+```
+
+**Methods Fixed:**
+1. `getRevenueAnalytics()`: Fixed totalRevenue, monthlyRevenue, lastMonthRevenue calculations
+2. `getRevenueTrend()`: Fixed monthly totalRevenue aggregation
+3. `getFinancialReport()`: Fixed totalRevenue, allTimeRevenue, finalizedRevenue calculations
+4. `getOperationalReport()`: Fixed vehicleStats.totalRevenue calculation
+
+**Impact:** All analytics dashboards, reports, and trend charts now display accurate total revenue including delivery charges. This fix ensures data integrity across the entire reporting system.
+
 ### Enhancement Proposals
 - **Dashboard Enhancement Proposal** (`docs/DASHBOARD_ENHANCEMENT_PROPOSAL.md`): Comprehensive analysis of current dashboard against industry best practices, identifying gaps in visual data storytelling, trend analysis, and goal tracking. Proposes 3-phase implementation roadmap including trend indicators, time-series charts (revenue, contract volume, fleet utilization), interactive filters, and four new analytical report pages (Revenue Trends, Fleet Performance, Contract Analytics, Collection Performance). Based on research from 7 leading dashboard design resources.
