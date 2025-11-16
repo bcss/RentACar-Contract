@@ -54,6 +54,15 @@ Preferred communication style: Simple, everyday language.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor, from_company.
 - **Professional PDF Integration:** Bilingual PDF generation for rental contracts with RTA compliance fields.
+- **Import Data Functionality (Superadmin Only):** Bulk import system for master data (Customers, Vehicles, Sponsors, Companies) and Contracts from external systems. Features include:
+  - Transaction-based atomicity (all-or-nothing imports)
+  - Comprehensive validation with field-level error reporting (row, field, message)
+  - Support for JSON and CSV file formats
+  - Downloadable sample files for all entity types (JSON and CSV templates)
+  - In-app Import Data Guide modal with comprehensive documentation
+  - Inline field type documentation (string, number, date, enum, boolean)
+  - User-friendly error tables with drill-down capabilities
+  - All imported contracts created in DRAFT status only
 
 ### Role-Based Permissions
 - **Core Roles:** Admin, Manager, Staff, Viewer.

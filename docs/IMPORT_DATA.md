@@ -2,9 +2,31 @@
 
 ## Overview
 
-The Import Data feature allows superadmin users to bulk import master data and contracts from external systems into RCCMS. This feature supports importing Customers, Vehicles, Sponsors, Companies, and Contracts through standardized file formats.
+The Import Data feature allows superadmin users to bulk import master data and contracts from external systems into RCCMS. This feature supports importing Customers, Vehicles, Sponsors, Companies, and Contracts through standardized file formats with comprehensive validation and user-friendly error reporting.
 
 **Access:** Settings → Import Data (superadmin only)
+
+---
+
+## New Features (November 2025)
+
+### Sample Data Files
+- **Downloadable Templates:** Each entity tab includes "JSON Sample" and "CSV Sample" download buttons
+- **Pre-formatted Examples:** Sample files contain realistic data with proper formatting for all fields
+- **Available Entities:** Customers, Vehicles, Sponsors, Companies, and Contracts
+- **Location:** Accessible directly from the Import Data page UI and from `/public/samples/` directory
+
+### Import Data Guide Modal
+- **In-App Documentation:** Click "Import Data Guide" link to open comprehensive modal dialog
+- **No External Navigation:** All documentation accessible within the application
+- **Quick Sample Downloads:** Direct download buttons for all sample files within the modal
+- **Step-by-Step Process:** Detailed import workflow with best practices and troubleshooting
+
+### Field Type Documentation
+- **Comprehensive Type Annotations:** Each field displays its data type (string, number, date, enum, boolean)
+- **Inline Format Requirements:** Format requirements displayed directly on each entity tab
+- **Enum Value Lists:** Complete list of allowed values for status, type, and other enum fields
+- **Clear Examples:** Field descriptions include practical examples (e.g., "YYYY-MM-DD" for dates)
 
 ---
 
@@ -13,15 +35,24 @@ The Import Data feature allows superadmin users to bulk import master data and c
 - **JSON** (`.json`) - Recommended for complex data structures
 - **CSV** (`.csv`) - Best for simple tabular data
 
+Both formats support comprehensive field type validation including:
+- **string** - Text fields with maximum length validation
+- **number** - Numeric fields (integers and decimals)
+- **date** - Date fields (YYYY-MM-DD format)
+- **datetime** - Timestamp fields (ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ)
+- **enum** - Predefined values only (e.g., status: "available" | "rented" | "maintenance" | "damaged")
+- **boolean** - True/false values
+
 ---
 
 ## Important Rules
 
 1. **Validation First:** All files are validated before import. No data is imported if any validation error is found.
-2. **Atomic Import:** Either all records import successfully, or none do.
+2. **Atomic Import:** Either all records import successfully, or none do (transaction-based atomicity).
 3. **Duplicate Detection:** Records with duplicate unique identifiers will be rejected.
 4. **Draft Contracts:** Imported contracts are created in DRAFT status only.
-5. **User-Friendly Errors:** All validation errors show the exact row number, field name, and issue description.
+5. **User-Friendly Errors:** All validation errors show the exact row number, field name, and issue description in a tabular format.
+6. **Sample Files Available:** Download pre-formatted JSON and CSV templates directly from the UI for each entity type.
 
 ---
 
@@ -364,44 +395,66 @@ Found 4 validation errors:
 
 ## Step-by-Step Import Process
 
-### 1. Prepare Your Data File
-- Use the format specifications above
-- Ensure all required fields are present
-- Validate unique identifiers (passportId, registration, etc.)
-- Use correct date formats (YYYY-MM-DD)
-- Check enum values match exactly
+### 1. Download Sample Template (Recommended for First-Time Users)
+- Navigate to Settings → Import Data
+- Select the entity tab you want to import (Customers, Vehicles, etc.)
+- Click "JSON Sample" or "CSV Sample" to download a pre-formatted template
+- Open the downloaded file and review the example data format
+- **Alternatively:** Click "Import Data Guide" to access the modal with all sample downloads
 
-### 2. Access Import Data Page
+### 2. Prepare Your Data File
+- Use the downloaded sample template as a starting point
+- Replace example data with your actual data
+- Ensure all required fields are present (marked in the Format Requirements section)
+- Validate unique identifiers (passportId, registration, etc.)
+- Use correct date formats (YYYY-MM-DD for dates, ISO 8601 for datetimes)
+- Check enum values match exactly (refer to field type documentation on each tab)
+- Keep field names exactly as shown in the template (case-sensitive)
+
+### 3. Access Import Data Page
 - Log in as superadmin
 - Navigate to Settings → Import Data
-- Select the entity tab (Customers, Vehicles, etc.)
+- Select the entity tab matching your data type (Customers, Vehicles, etc.)
+- Review the "Format Requirements & Sample Files" section for field specifications
 
-### 3. Upload File
-- Click "Choose File" or drag-and-drop
-- Select format (JSON or CSV)
-- Click "Validate" to run validation
+### 4. Upload File
+- Select file format (JSON or CSV) from dropdown
+- Click "Choose File" and select your prepared data file
+- Review the file preview to ensure data is correctly loaded
+- Check that all columns/fields appear correctly
 
-### 4. Review Validation Results
-- **Success:** Green message showing number of valid records
-- **Errors:** Red message with detailed error list showing row numbers and issues
-- Fix errors in your source file and re-upload
+### 5. Review Validation Results
+- Click "Import Data" to start validation and import
+- **Success:** Green alert showing number of successfully imported records
+- **Errors:** Red alert with detailed error table showing:
+  - Row number (where the error occurred)
+  - Field name (which field has the issue)
+  - Error message (what's wrong and how to fix it)
+- If errors occur, download your original file, fix the issues, and re-upload
 
-### 5. Import Data
-- Once validation passes, click "Import"
-- Wait for confirmation message
-- Verify imported data in the respective section (Customers, Vehicles, etc.)
+### 6. Import Data & Verify
+- Once validation passes, records are automatically imported
+- Verify imported data in the respective master data section:
+  - Customers → Master Data → Customers
+  - Vehicles → Master Data → Vehicles
+  - Sponsors → Master Data → Sponsors
+  - Companies → Master Data → Companies
+  - Contracts → Contracts (all created in DRAFT status)
 
 ---
 
 ## Best Practices
 
-1. **Start Small:** Test with 5-10 records before importing hundreds
-2. **Use JSON for Complex Data:** Better structure validation and error messages
-3. **Validate External Data:** Clean data in source system before exporting
-4. **Master Data First:** Import Customers, Vehicles, Sponsors, Companies before Contracts
-5. **Check Unique Fields:** Verify passport IDs, registration numbers don't conflict with existing data
-6. **Keep Backups:** Export existing data before large imports
-7. **Use Draft Contracts:** Import contracts create DRAFT status only - activate through normal workflow
+1. **Download Sample Templates First:** Always download and review the JSON or CSV sample files before preparing your data
+2. **Start Small:** Test with 5-10 records before importing hundreds - use sample files as templates
+3. **Use JSON for Complex Data:** Better structure validation and error messages
+4. **Validate External Data:** Clean data in source system before exporting
+5. **Master Data First:** Import Customers, Vehicles, Sponsors, Companies before Contracts
+6. **Check Unique Fields:** Verify passport IDs, registration numbers don't conflict with existing data
+7. **Keep Backups:** Export existing data before large imports
+8. **Use Draft Contracts:** Import contracts create DRAFT status only - activate through normal workflow
+9. **Reference Field Types:** Check the inline field type documentation on each tab for data type requirements
+10. **Use Import Data Guide:** Click the "Import Data Guide" link for comprehensive in-app documentation and quick sample downloads
 
 ---
 
