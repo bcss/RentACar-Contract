@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Icon } from '@/components/Icon';
 import { format } from 'date-fns';
 import { FileText, DollarSign, CheckCircle, Clock, Plus, TrendingUp, AlertCircle, CheckCircle2, XCircle, ArrowRight, Calendar } from 'lucide-react';
+import { DashboardMetricCard } from '@/components/DashboardMetricCard';
 
 export function MyDayTab() {
   const { t, i18n } = useTranslation();
@@ -161,95 +162,50 @@ export function MyDayTab() {
         </CardContent>
       </Card>
 
-      {/* Hero KPI Rail - Modern MD3 3-Column Grid */}
+      {/* Hero KPI Rail - Compact MD3 Design */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* My Contracts - Primary Tonal Container */}
-        <Card className="bg-[hsl(var(--primary)/0.08)] shadow-lg border-transparent hover-elevate transition-all duration-200" data-testid="card-my-contracts-total">
-          <CardHeader className="flex flex-row items-center justify-between gap-4 p-6 pb-4">
-            <div className="flex-1">
-              <CardTitle className="text-base font-medium uppercase tracking-[0.08em] text-muted-foreground">{t('dashboard.myContracts')}</CardTitle>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-[hsl(var(--primary)/0.15)] flex items-center justify-center">
-              <FileText className="h-6 w-6 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="text-4xl font-semibold tabular-nums tracking-tight" data-testid="text-my-contracts-count">
-              {myContracts.length}
-            </div>
-            <div className="flex items-center gap-2 mt-3">
-              <Badge variant="secondary" className="text-xs font-medium">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +{myContractsThisMonth.length} {t('dashboard.thisMonth')}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+        <DashboardMetricCard
+          title={t('dashboard.myContracts')}
+          value={myContracts.length}
+          icon={FileText}
+          variant="primary"
+          testId="card-my-contracts-total"
+          valueTestId="text-my-contracts-count"
+          subtitle={
+            <Badge variant="secondary" className="text-xs font-medium">
+              <TrendingUp className="h-3 w-3 mr-1" />
+              +{myContractsThisMonth.length} {t('dashboard.thisMonth')}
+            </Badge>
+          }
+        />
 
-        {/* My Revenue - Success Tonal Container */}
-        <Card className="bg-[hsl(var(--primary)/0.08)] shadow-lg border-transparent hover-elevate transition-all duration-200" data-testid="card-my-revenue">
-          <CardHeader className="flex flex-row items-center justify-between gap-4 p-6 pb-4">
-            <div className="flex-1">
-              <CardTitle className="text-base font-medium uppercase tracking-[0.08em] text-muted-foreground">{t('dashboard.myRevenue')}</CardTitle>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-[hsl(var(--primary)/0.15)] flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="text-3xl font-semibold tabular-nums tracking-tight" data-testid="text-my-revenue-total">
-              {currency} {myTotalRevenue.toLocaleString(i18n.language, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-            </div>
-            <div className="flex items-center gap-2 mt-3">
-              <span className="text-sm text-muted-foreground leading-6">
-                {currency} {myRevenueThisMonth.toLocaleString(i18n.language, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} {t('dashboard.thisMonth')}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <DashboardMetricCard
+          title={t('dashboard.myRevenue')}
+          value={`${currency} ${myTotalRevenue.toLocaleString(i18n.language, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+          icon={DollarSign}
+          variant="primary"
+          testId="card-my-revenue"
+          valueTestId="text-my-revenue-total"
+          subtitle={`${currency} ${myRevenueThisMonth.toLocaleString(i18n.language, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ${t('dashboard.thisMonth')}`}
+        />
 
-        {/* Pending Tasks - Warning/Alert Tonal Container */}
-        <Card 
-          className={`${
-            (myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0
-              ? 'bg-[hsl(var(--destructive)/0.08)] border-[hsl(var(--destructive)/0.2)]'
-              : 'bg-[hsl(var(--muted))]'
-          } shadow-lg hover-elevate transition-all duration-200`}
-          data-testid="card-my-pending-tasks"
-        >
-          <CardHeader className="flex flex-row items-center justify-between gap-4 p-6 pb-4">
-            <div className="flex-1">
-              <CardTitle className="text-base font-medium uppercase tracking-[0.08em] text-muted-foreground">{t('dashboard.pendingTasks')}</CardTitle>
-            </div>
-            <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
-              (myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0
-                ? 'bg-[hsl(var(--destructive)/0.15)]'
-                : 'bg-[hsl(var(--muted)/0.15)]'
-            }`}>
-              {(myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0 ? (
-                <AlertCircle className="h-6 w-6 text-destructive" />
-              ) : (
-                <CheckCircle2 className="h-6 w-6 text-muted-foreground" />
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="text-4xl font-semibold tabular-nums tracking-tight" data-testid="text-my-pending-count">
-              {myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length}
-            </div>
-            <div className="flex items-center gap-2 mt-3">
-              {(myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0 ? (
-                <span className="text-sm text-destructive font-medium leading-6">
-                  {t('dashboard.actionRequired')}
-                </span>
-              ) : (
-                <span className="text-sm text-muted-foreground leading-6">
-                  All caught up!
-                </span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <DashboardMetricCard
+          title={t('dashboard.pendingTasks')}
+          value={myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length}
+          icon={(myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0 ? AlertCircle : CheckCircle2}
+          variant={(myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0 ? 'destructive' : 'default'}
+          testId="card-my-pending-tasks"
+          valueTestId="text-my-pending-count"
+          subtitle={(myOverdueReturns.length + myPendingRefunds.length + myUnclosedContracts.length) > 0 ? (
+            <span className="text-sm text-destructive font-medium leading-6">
+              {t('dashboard.actionRequired')}
+            </span>
+          ) : (
+            <span className="text-sm text-muted-foreground leading-6">
+              All caught up!
+            </span>
+          )}
+        />
       </div>
 
       {/* My Contracts Status Breakdown - Modern Grid with Better Visuals */}
