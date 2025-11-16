@@ -366,6 +366,7 @@ const resources = {
       // Contracts
       "contracts.title": "Contracts",
       "contracts.newContract": "New Contract",
+      "contract.createContract": "Create Contract",
       "contracts.contractNumber": "Contract Number",
       "contracts.customerName": "Customer Name",
       "contracts.status": "Status",
@@ -1276,6 +1277,7 @@ const resources = {
       // Contracts
       "contracts.title": "العقود",
       "contracts.newContract": "عقد جديد",
+      "contract.createContract": "إنشاء عقد",
       "contracts.contractNumber": "رقم العقد",
       "contracts.customerName": "اسم العميل",
       "contracts.status": "الحالة",

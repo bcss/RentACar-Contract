@@ -78,6 +78,60 @@ export function MyDayTab() {
         </p>
       </div>
 
+      {/* Quick Actions - Moved to Top */}
+      <Card data-testid="card-quick-actions">
+        <CardHeader>
+          <CardTitle>{t('dashboard.quickActions')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-3 flex-wrap">
+            {/* Primary Action - Create Contract */}
+            <Link href="/contracts/create">
+              <Button data-testid="button-create-contract">
+                <Plus className="h-4 w-4 mr-2" />
+                {t('contract.createContract')}
+              </Button>
+            </Link>
+
+            {/* Contextual Actions - Show if there are pending items */}
+            {myOverdueReturns.length > 0 && (
+              <Link href="/contracts?status=active">
+                <Button variant="destructive" data-testid="button-view-overdue">
+                  <Clock className="h-4 w-4 mr-2" />
+                  {t('dashboard.overdueReturns')} ({myOverdueReturns.length})
+                </Button>
+              </Link>
+            )}
+
+            {myPendingRefunds.length > 0 && (
+              <Link href="/contracts?status=completed">
+                <Button variant="secondary" data-testid="button-view-refunds">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  {t('dashboard.pendingRefunds')} ({myPendingRefunds.length})
+                </Button>
+              </Link>
+            )}
+
+            {myUnclosedContracts.length > 0 && (
+              <Link href="/contracts?status=completed">
+                <Button variant="secondary" data-testid="button-view-unclosed">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {t('dashboard.unclosedContracts')} ({myUnclosedContracts.length})
+                </Button>
+              </Link>
+            )}
+
+            {/* General Navigation Actions */}
+            <Link href="/contracts">
+              <Button variant="outline" data-testid="button-view-all-contracts">
+                <FileText className="h-4 w-4 mr-2" />
+                {t('dashboard.viewAllMyContracts')}
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Quick Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card data-testid="card-my-contracts-total">
@@ -281,28 +335,6 @@ export function MyDayTab() {
           </CardContent>
         </Card>
       )}
-
-      {/* Quick Actions */}
-      <Card data-testid="card-quick-actions">
-        <CardHeader>
-          <CardTitle>{t('dashboard.quickActions')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-3 flex-wrap">
-            <Link href="/contracts/create">
-              <Button data-testid="button-create-contract">
-                <Plus className="h-4 w-4 mr-2" />
-                {t('contract.createContract')}
-              </Button>
-            </Link>
-            <Link href="/contracts">
-              <Button variant="outline" data-testid="button-view-all-contracts">
-                {t('dashboard.viewAllMyContracts')}
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
