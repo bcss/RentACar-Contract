@@ -283,6 +283,70 @@ const resources = {
       "dashboard.clickToViewClosed": "Click to view closed contracts",
       "dashboard.clickToViewAll": "Click to view all contracts",
       
+      // Dashboard Tabs
+      "dashboard.myDay": "My Day",
+      "dashboard.companyToday": "Company Today",
+      "dashboard.executiveOverview": "Executive Overview",
+      "dashboard.myDaySubtitle": "Your personal performance and pending tasks",
+      "dashboard.companyTodaySubtitle": "Real-time operational snapshot",
+      "dashboard.executiveOverviewSubtitle": "Strategic analytics and insights",
+      
+      // My Day Tab
+      "dashboard.myContracts": "My Contracts",
+      "dashboard.myRevenue": "My Revenue",
+      "dashboard.pendingTasks": "Pending Tasks",
+      "dashboard.myContractsBreakdown": "My Contracts Breakdown",
+      "dashboard.myPendingTasks": "My Pending Tasks",
+      "dashboard.overdue": "overdue",
+      "dashboard.actionRequired": "action required",
+      "dashboard.quickActions": "Quick Actions",
+      "dashboard.createContract": "Create Contract",
+      "dashboard.viewAllMyContracts": "View All My Contracts",
+      "dashboard.deposit": "deposit",
+      "dashboard.needsClosure": "needs closure",
+      "dashboard.dueDate": "Due Date",
+      "dashboard.refundPending": "Refund Pending",
+      "dashboard.unclosedContracts": "Unclosed Contracts",
+      "dashboard.awaitingClosure": "awaiting closure",
+      "dashboard.requiresImmediateAttention": "Requires immediate attention",
+      "dashboard.daysOverdue": "days overdue",
+      
+      // Company Today Tab
+      "dashboard.fleetStatusDistribution": "Fleet Status Distribution",
+      "dashboard.totalFleet": "Total Fleet",
+      "dashboard.pendingActions": "Pending Actions",
+      "dashboard.overdueReturnDetails": "Overdue Return Details",
+      
+      // Executive Overview Tab
+      "dashboard.revenueTrends": "Revenue Trends",
+      "dashboard.totalRevenue": "Total Revenue",
+      "dashboard.growth": "Growth",
+      "dashboard.topPerformers": "Top Performers",
+      "dashboard.topVehicles": "Top Vehicles",
+      "dashboard.topStaff": "Top Staff",
+      "dashboard.geographicDistribution": "Geographic Distribution",
+      "dashboard.noEmirateData": "No emirate data available",
+      "dashboard.emirateDataHint": "Add emirate information to customers, vehicles, sponsors, and companies to see geographic distribution.",
+      "dashboard.contracts": "contracts",
+      
+      // Contract Status
+      "contract.status.draft": "Draft",
+      "contract.status.active": "Active",
+      "contract.status.completed": "Completed",
+      "contract.status.closed": "Closed",
+      
+      // Vehicle Status
+      "vehicle.status.available": "Available",
+      "vehicle.status.rented": "Rented",
+      "vehicle.status.maintenance": "Maintenance",
+      "vehicle.status.damaged": "Damaged",
+      
+      // Common Actions
+      "common.urgent": "Urgent",
+      "common.pending": "Pending",
+      "common.action": "Action",
+      "common.down": "Down",
+      
       // Analytics
       "analytics.revenueMetrics": "Revenue Metrics",
       "analytics.operationalMetrics": "Operational Metrics",
@@ -1128,6 +1192,70 @@ const resources = {
       "dashboard.clickToViewCompleted": "انقر لعرض العقود المكتملة",
       "dashboard.clickToViewClosed": "انقر لعرض العقود المغلقة",
       "dashboard.clickToViewAll": "انقر لعرض جميع العقود",
+      
+      // Dashboard Tabs
+      "dashboard.myDay": "يومي",
+      "dashboard.companyToday": "الشركة اليوم",
+      "dashboard.executiveOverview": "النظرة التنفيذية",
+      "dashboard.myDaySubtitle": "أدائك الشخصي والمهام المعلقة",
+      "dashboard.companyTodaySubtitle": "لمحة تشغيلية في الوقت الفعلي",
+      "dashboard.executiveOverviewSubtitle": "التحليلات والرؤى الاستراتيجية",
+      
+      // My Day Tab
+      "dashboard.myContracts": "عقودي",
+      "dashboard.myRevenue": "إيراداتي",
+      "dashboard.pendingTasks": "المهام المعلقة",
+      "dashboard.myContractsBreakdown": "تفصيل عقودي",
+      "dashboard.myPendingTasks": "مهامي المعلقة",
+      "dashboard.overdue": "متأخر",
+      "dashboard.actionRequired": "يتطلب إجراء",
+      "dashboard.quickActions": "إجراءات سريعة",
+      "dashboard.createContract": "إنشاء عقد",
+      "dashboard.viewAllMyContracts": "عرض جميع عقودي",
+      "dashboard.deposit": "تأمين",
+      "dashboard.needsClosure": "يحتاج إغلاق",
+      "dashboard.dueDate": "تاريخ الاستحقاق",
+      "dashboard.refundPending": "استرداد معلق",
+      "dashboard.unclosedContracts": "عقود غير مغلقة",
+      "dashboard.awaitingClosure": "في انتظار الإغلاق",
+      "dashboard.requiresImmediateAttention": "يتطلب اهتماماً فورياً",
+      "dashboard.daysOverdue": "أيام متأخرة",
+      
+      // Company Today Tab
+      "dashboard.fleetStatusDistribution": "توزيع حالة الأسطول",
+      "dashboard.totalFleet": "إجمالي الأسطول",
+      "dashboard.pendingActions": "الإجراءات المعلقة",
+      "dashboard.overdueReturnDetails": "تفاصيل الإرجاع المتأخر",
+      
+      // Executive Overview Tab
+      "dashboard.revenueTrends": "اتجاهات الإيرادات",
+      "dashboard.totalRevenue": "إجمالي الإيرادات",
+      "dashboard.growth": "النمو",
+      "dashboard.topPerformers": "أفضل الأداء",
+      "dashboard.topVehicles": "أفضل المركبات",
+      "dashboard.topStaff": "أفضل الموظفين",
+      "dashboard.geographicDistribution": "التوزيع الجغرافي",
+      "dashboard.noEmirateData": "لا توجد بيانات إمارات متاحة",
+      "dashboard.emirateDataHint": "أضف معلومات الإمارة للعملاء والمركبات والكفلاء والشركات لرؤية التوزيع الجغرافي.",
+      "dashboard.contracts": "عقود",
+      
+      // Contract Status
+      "contract.status.draft": "مسودة",
+      "contract.status.active": "نشط",
+      "contract.status.completed": "مكتمل",
+      "contract.status.closed": "مغلق",
+      
+      // Vehicle Status
+      "vehicle.status.available": "متاح",
+      "vehicle.status.rented": "مؤجر",
+      "vehicle.status.maintenance": "صيانة",
+      "vehicle.status.damaged": "تالف",
+      
+      // Common Actions
+      "common.urgent": "عاجل",
+      "common.pending": "معلق",
+      "common.action": "إجراء",
+      "common.down": "أسفل",
       
       // Analytics
       "analytics.revenueMetrics": "مقاييس الإيرادات",
