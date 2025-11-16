@@ -98,7 +98,7 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
   <Form {...form}>
     <form onSubmit={form.handleSubmit(onSubmit)}>
       <Tabs defaultValue="basic" className="w-full">
-        <div className="px-6">
+        <div className="px-6 pt-4">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="basic" data-testid="tab-customer-basic">Basic Info</TabsTrigger>
             <TabsTrigger value="contact" data-testid="tab-customer-contact">Contact</TabsTrigger>
@@ -207,43 +207,64 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
           )}
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('customers.phone')}</FormLabel>
-              <FormControl>
-                <Input {...field} data-testid="input-customer-phone" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('customers.email')}</FormLabel>
-              <FormControl>
-                <Input {...field} type="email" data-testid="input-customer-email" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      {phoneWarning && phoneWarning.hasDuplicate && (
-        <Alert variant="default" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20" data-testid="alert-phone-duplicate-warning">
-          <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
-          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-            ⚠️ Warning: This phone number is already used by customer(s): {phoneWarning.duplicateCustomers.map(c => c.nameEn || c.nameAr || 'Unknown').join(', ')}. You can still proceed if this is intentional.
-          </AlertDescription>
-        </Alert>
-      )}
-      <FormField
+          </TabsContent>
+
+          {/* Contact Tab */}
+          <TabsContent value="contact" className="mt-0 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('customers.phone')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} data-testid="input-customer-phone" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('customers.email')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" data-testid="input-customer-email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {phoneWarning && phoneWarning.hasDuplicate && (
+              <Alert variant="default" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20" data-testid="alert-phone-duplicate-warning">
+                <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+                <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+                  ⚠️ Warning: This phone number is already used by customer(s): {phoneWarning.duplicateCustomers.map(c => c.nameEn || c.nameAr || 'Unknown').join(', ')}. You can still proceed if this is intentional.
+                </AlertDescription>
+              </Alert>
+            )}
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('customers.address')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} data-testid="input-customer-address" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+
+          {/* License Tab */}
+          <TabsContent value="license" className="mt-0 space-y-4">
+            <FormField
         control={form.control}
         name="licenseNumber"
         render={({ field }) => (
@@ -307,21 +328,8 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
           </FormItem>
         )}
       />
-      <FormField
-        control={form.control}
-        name="address"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t('customers.address')}</FormLabel>
-            <FormControl>
-              <Input {...field} data-testid="input-customer-address" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
       
-      <Accordion type="single" collapsible className="w-full">
+            <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="rta-license-fields">
           <AccordionTrigger>RTA License Details / تفاصيل رخصة القيادة</AccordionTrigger>
           <AccordionContent className="space-y-4 pt-4">
@@ -484,13 +492,34 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
             </div>
           </AccordionContent>
         </AccordionItem>
-      </Accordion>
-      
-      <DialogFooter>
-        <Button type="submit" disabled={isPending} data-testid="button-submit-customer">
-          {isPending ? t('common.saving') : t('common.save')}
-        </Button>
-      </DialogFooter>
+            </Accordion>
+          </TabsContent>
+
+          {/* Additional Tab */}
+          <TabsContent value="additional" className="mt-0 space-y-4">
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes / ملاحظات</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value ?? ''} data-testid="input-customer-notes" placeholder="Additional notes..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+        </div>
+
+        {/* Fixed Footer */}
+        <div className="flex justify-end gap-2 px-6 py-4 border-t bg-muted/20">
+          <Button type="submit" disabled={isPending} data-testid="button-submit-customer">
+            {isPending ? t('common.saving') : t('common.save')}
+          </Button>
+        </div>
+      </Tabs>
     </form>
   </Form>
 );
@@ -874,8 +903,8 @@ export default function Customers() {
                     {t('customers.addCustomer')}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
+                <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+                  <DialogHeader className="px-6 pt-6 pb-4">
                     <DialogTitle>{t('customers.newCustomer')}</DialogTitle>
                     <DialogDescription>
                       {t('customers.addCustomer')}
@@ -936,8 +965,8 @@ export default function Customers() {
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={handleEditDialogChange}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+          <DialogHeader className="px-6 pt-6 pb-4">
             <DialogTitle>{t('customers.editCustomer')}</DialogTitle>
             <DialogDescription>
               {t('customers.editCustomer')}
