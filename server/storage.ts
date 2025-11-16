@@ -175,6 +175,27 @@ export interface IStorage {
     newCustomersThisMonth: number;
   }>;
   
+  // Dashboard analytics operations
+  getFleetStatusDistribution(): Promise<{
+    available: number;
+    rented: number;
+    maintenance: number;
+    damaged: number;
+  }>;
+  getGeographicDistribution(): Promise<{
+    customersByAuthority: { authority: string; count: number }[];
+    vehiclesByAuthority: { authority: string; count: number }[];
+  }>;
+  getPendingActions(): Promise<{
+    overdueReturns: number;
+    pendingRefunds: number;
+    unclosedContracts: number;
+  }>;
+  getTopPerformers(): Promise<{
+    topVehiclesByRevenue: { vehicleId: string; registration: string; make: string; model: string; totalRevenue: number }[];
+    mostActiveStaff: { userId: string; username: string; firstName: string; lastName: string; contractCount: number }[];
+  }>;
+  
   // Company settings operations
   getCompanySettings(): Promise<CompanySettings>;
   updateCompanySettings(settings: Partial<InsertCompanySettings>, updatedBy: string): Promise<CompanySettings>;
@@ -1326,6 +1347,193 @@ export class DatabaseStorage implements IStorage {
       repeatCustomers,
       repeatCustomerRate,
       newCustomersThisMonth,
+    };
+  }
+
+  async getFleetStatusDistribution() {
+    const results = await db
+      .select({
+        status: vehicles.status,
+        count: count(),
+      })
+      .from(vehicles)
+      .where(eq(vehicles.disabled, false))
+      .groupBy(vehicles.status);
+
+    const statusMap: Record<string, number> = {
+      available: 0,
+      rented: 0,
+      maintenance: 0,
+      damaged: 0,
+    };
+
+    results.forEach(row => {
+      if (row.status in statusMap) {
+        statusMap[row.status] = Number(row.count);
+      }
+    });
+
+    return statusMap;
+  }
+
+  async getGeographicDistribution() {
+    // Customer distribution by license licensing authority
+    const customerResults = await db
+      .select({
+        authority: customers.licenseLicensingAuthority,
+        count: count(),
+      })
+      .from(customers)
+      .where(
+        and(
+          eq(customers.disabled, false),
+          sql`${customers.licenseLicensingAuthority} IS NOT NULL AND ${customers.licenseLicensingAuthority} != ''`
+        )
+      )
+      .groupBy(customers.licenseLicensingAuthority)
+      .orderBy(desc(count()))
+      .limit(10);
+
+    // Vehicle distribution by licensing authority
+    const vehicleResults = await db
+      .select({
+        authority: vehicles.licensingAuthority,
+        count: count(),
+      })
+      .from(vehicles)
+      .where(
+        and(
+          eq(vehicles.disabled, false),
+          sql`${vehicles.licensingAuthority} IS NOT NULL AND ${vehicles.licensingAuthority} != ''`
+        )
+      )
+      .groupBy(vehicles.licensingAuthority)
+      .orderBy(desc(count()))
+      .limit(10);
+
+    return {
+      customersByAuthority: customerResults.map(r => ({
+        authority: r.authority || 'Unknown',
+        count: Number(r.count),
+      })),
+      vehiclesByAuthority: vehicleResults.map(r => ({
+        authority: r.authority || 'Unknown',
+        count: Number(r.count),
+      })),
+    };
+  }
+
+  async getPendingActions() {
+    const now = new Date();
+
+    // Overdue returns: active contracts where rentalEndDate has passed
+    const [overdueResult] = await db
+      .select({
+        count: count(),
+      })
+      .from(contracts)
+      .where(
+        and(
+          eq(contracts.status, 'active'),
+          lt(contracts.rentalEndDate, now)
+        )
+      );
+
+    // Pending refunds: completed contracts with deposit not yet refunded
+    const [refundsResult] = await db
+      .select({
+        count: count(),
+      })
+      .from(contracts)
+      .where(
+        and(
+          or(
+            eq(contracts.status, 'completed'),
+            eq(contracts.status, 'active')
+          ),
+          eq(contracts.depositRefunded, false),
+          sql`CAST(${contracts.securityDeposit} AS DECIMAL) > 0`
+        )
+      );
+
+    // Unclosed contracts: completed contracts not yet closed
+    const [unclosedResult] = await db
+      .select({
+        count: count(),
+      })
+      .from(contracts)
+      .where(eq(contracts.status, 'completed'));
+
+    return {
+      overdueReturns: Number(overdueResult.count),
+      pendingRefunds: Number(refundsResult.count),
+      unclosedContracts: Number(unclosedResult.count),
+    };
+  }
+
+  async getTopPerformers() {
+    // Top 5 vehicles by total revenue
+    const topVehicles = await db
+      .select({
+        vehicleId: contracts.vehicleId,
+        registration: vehicles.registration,
+        make: vehicles.make,
+        model: vehicles.model,
+        totalRevenue: sql<string>`
+          COALESCE(
+            SUM(
+              CAST(${contracts.totalAmount} AS DECIMAL) + 
+              COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0) +
+              COALESCE(CAST(${contracts.dropOffCharge} AS DECIMAL), 0) +
+              COALESCE(CAST(${contracts.pickUpCharge} AS DECIMAL), 0)
+            ), 
+            0
+          )
+        `,
+      })
+      .from(contracts)
+      .innerJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
+      .where(
+        or(
+          eq(contracts.status, 'active'),
+          eq(contracts.status, 'completed'),
+          eq(contracts.status, 'closed')
+        )
+      )
+      .groupBy(contracts.vehicleId, vehicles.registration, vehicles.make, vehicles.model)
+      .orderBy(desc(sql`SUM(CAST(${contracts.totalAmount} AS DECIMAL))`))
+      .limit(5);
+
+    // Most active staff by contract count
+    const topStaff = await db
+      .select({
+        userId: contracts.createdBy,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        contractCount: count(),
+      })
+      .from(contracts)
+      .innerJoin(users, eq(contracts.createdBy, users.id))
+      .groupBy(contracts.createdBy, users.username, users.firstName, users.lastName)
+      .orderBy(desc(count()))
+      .limit(5);
+
+    return {
+      topVehiclesByRevenue: topVehicles.map(v => ({
+        vehicleId: v.vehicleId,
+        registration: v.registration,
+        make: v.make,
+        model: v.model,
+        totalRevenue: parseFloat(v.totalRevenue),
+      })),
+      mostActiveStaff: topStaff.map(s => ({
+        userId: s.userId,
+        username: s.username,
+        firstName: s.firstName || '',
+        lastName: s.lastName || '',
+        contractCount: Number(s.contractCount),
+      })),
     };
   }
 

@@ -3169,6 +3169,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dashboard-specific analytics endpoints (requires authentication, no specific report permission)
+  app.get('/api/analytics/fleet-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const distribution = await storage.getFleetStatusDistribution();
+      res.json(distribution);
+    } catch (error) {
+      console.error("Error fetching fleet status distribution:", error);
+      res.status(500).json({ message: "Failed to fetch fleet status distribution" });
+    }
+  });
+
+  app.get('/api/analytics/geographic-distribution', isAuthenticated, async (req: any, res) => {
+    try {
+      const distribution = await storage.getGeographicDistribution();
+      res.json(distribution);
+    } catch (error) {
+      console.error("Error fetching geographic distribution:", error);
+      res.status(500).json({ message: "Failed to fetch geographic distribution" });
+    }
+  });
+
+  app.get('/api/analytics/pending-actions', isAuthenticated, async (req: any, res) => {
+    try {
+      const actions = await storage.getPendingActions();
+      res.json(actions);
+    } catch (error) {
+      console.error("Error fetching pending actions:", error);
+      res.status(500).json({ message: "Failed to fetch pending actions" });
+    }
+  });
+
+  app.get('/api/analytics/top-performers', isAuthenticated, async (req: any, res) => {
+    try {
+      const performers = await storage.getTopPerformers();
+      res.json(performers);
+    } catch (error) {
+      console.error("Error fetching top performers:", error);
+      res.status(500).json({ message: "Failed to fetch top performers" });
+    }
+  });
+
   // Reports routes (Admin and Manager, or users with canAccessReports toggle) with date range support
   app.get('/api/reports/financial', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
