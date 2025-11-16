@@ -3339,6 +3339,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/analytics/geographic-distribution-uae', isAuthenticated, async (req: any, res) => {
+    try {
+      const distribution = await storage.getGeographicDistributionUAE();
+      res.json(distribution);
+    } catch (error) {
+      console.error("Error fetching UAE geographic distribution:", error);
+      res.status(500).json({ message: "Failed to fetch UAE geographic distribution" });
+    }
+  });
+
   app.get('/api/analytics/pending-actions', isAuthenticated, async (req: any, res) => {
     try {
       const actions = await storage.getPendingActions();

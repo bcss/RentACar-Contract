@@ -8,6 +8,7 @@ import {
   text,
   integer,
   boolean,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -25,6 +26,28 @@ export type UserRoleType = typeof UserRole[keyof typeof UserRole];
 
 // Zod enum for validation
 export const userRoleEnum = z.enum([UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF, UserRole.VIEWER]);
+
+// UAE Emirates enum - For geographic distribution tracking
+export const emiratesEnum = pgEnum('emirate', [
+  'abu_dhabi',
+  'dubai',
+  'sharjah',
+  'ajman',
+  'umm_al_quwain',
+  'ras_al_khaimah',
+  'fujairah'
+]);
+
+// Emirate labels for UI display (bilingual)
+export const EmirateLabels: Record<string, { en: string; ar: string }> = {
+  abu_dhabi: { en: 'Abu Dhabi', ar: 'أبوظبي' },
+  dubai: { en: 'Dubai', ar: 'دبي' },
+  sharjah: { en: 'Sharjah', ar: 'الشارقة' },
+  ajman: { en: 'Ajman', ar: 'عجمان' },
+  umm_al_quwain: { en: 'Umm Al Quwain', ar: 'أم القيوين' },
+  ras_al_khaimah: { en: 'Ras Al Khaimah', ar: 'رأس الخيمة' },
+  fujairah: { en: 'Fujairah', ar: 'الفجيرة' },
+};
 
 // Session storage table - Required for Replit Auth
 export const sessions = pgTable(
@@ -130,6 +153,7 @@ export const customers = pgTable("customers", {
   licenseIssueDate: timestamp("license_issue_date"),
   licenseExpiryDate: timestamp("license_expiry_date"),
   nationality: varchar("nationality"), // Required by form validation
+  emirate: emiratesEnum("emirate"), // UAE Emirate for geographic distribution
   
   // RTA License Fields (from RTA license document)
   licensePermittedVehicles: varchar("license_permitted_vehicles"), // Types of vehicles allowed
@@ -244,6 +268,7 @@ export const vehicles = pgTable("vehicles", {
   engineNo: varchar("engine_no"), // Engine number
   chassisNo: varchar("chassis_no"), // Chassis number
   licensingAuthority: varchar("licensing_authority"), // Licensing authority
+  emirate: emiratesEnum("emirate"), // UAE Emirate for geographic distribution
   
   // Audit fields
   disabled: boolean("disabled").notNull().default(false),
@@ -307,6 +332,7 @@ export const sponsors = pgTable("sponsors", {
   // Contact Information
   mobile: varchar("mobile"),
   address: text("address"),
+  emirate: emiratesEnum("emirate"), // UAE Emirate for geographic distribution
   
   // Additional Information
   relation: varchar("relation"), // For sponsors: relationship to hirer (e.g., "Employer", "Family Member")
@@ -364,6 +390,7 @@ export const companies = pgTable("companies", {
   phone: varchar("phone"),
   email: varchar("email"),
   address: text("address"),
+  emirate: emiratesEnum("emirate"), // UAE Emirate for geographic distribution
   
   // Additional Information
   notes: text("notes"),

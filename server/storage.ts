@@ -193,6 +193,12 @@ export interface IStorage {
     customersByAuthority: { authority: string; count: number }[];
     vehiclesByAuthority: { authority: string; count: number }[];
   }>;
+  getGeographicDistributionUAE(): Promise<{
+    customersByEmirate: { emirate: string; count: number }[];
+    vehiclesByEmirate: { emirate: string; count: number }[];
+    sponsorsByEmirate: { emirate: string; count: number }[];
+    companiesByEmirate: { emirate: string; count: number }[];
+  }>;
   getPendingActions(): Promise<{
     overdueReturns: number;
     pendingRefunds: number;
@@ -1541,6 +1547,91 @@ export class DatabaseStorage implements IStorage {
       })),
       vehiclesByAuthority: vehicleResults.map(r => ({
         authority: r.authority || 'Unknown',
+        count: Number(r.count),
+      })),
+    };
+  }
+
+  async getGeographicDistributionUAE() {
+    // Customer distribution by UAE emirate
+    const customersByEmirate = await db
+      .select({
+        emirate: customers.emirate,
+        count: count(),
+      })
+      .from(customers)
+      .where(
+        and(
+          eq(customers.disabled, false),
+          sql`${customers.emirate} IS NOT NULL`
+        )
+      )
+      .groupBy(customers.emirate)
+      .orderBy(desc(count()));
+
+    // Vehicle distribution by UAE emirate
+    const vehiclesByEmirate = await db
+      .select({
+        emirate: vehicles.emirate,
+        count: count(),
+      })
+      .from(vehicles)
+      .where(
+        and(
+          eq(vehicles.disabled, false),
+          sql`${vehicles.emirate} IS NOT NULL`
+        )
+      )
+      .groupBy(vehicles.emirate)
+      .orderBy(desc(count()));
+
+    // Sponsor distribution by UAE emirate
+    const sponsorsByEmirate = await db
+      .select({
+        emirate: sponsors.emirate,
+        count: count(),
+      })
+      .from(sponsors)
+      .where(
+        and(
+          eq(sponsors.disabled, false),
+          sql`${sponsors.emirate} IS NOT NULL`
+        )
+      )
+      .groupBy(sponsors.emirate)
+      .orderBy(desc(count()));
+
+    // Company distribution by UAE emirate
+    const companiesByEmirate = await db
+      .select({
+        emirate: companies.emirate,
+        count: count(),
+      })
+      .from(companies)
+      .where(
+        and(
+          eq(companies.disabled, false),
+          sql`${companies.emirate} IS NOT NULL`
+        )
+      )
+      .groupBy(companies.emirate)
+      .orderBy(desc(count()));
+
+    return {
+      customersByEmirate: customersByEmirate.map(r => ({
+        emirate: r.emirate || 'Unknown',
+        count: Number(r.count),
+      })),
+      vehiclesByEmirate: vehiclesByEmirate.map(r => ({
+        emirate: r.emirate || 'Unknown',
+        count: Number(r.count),
+      })),
+      sponsorsByEmirate: sponsorsByEmirate.map(r => ({
+        emirate: r.emirate || 'Unknown',
+        count: Number(r.count),
+      })),
+      companiesByEmirate: companiesByEmirate.map(r => ({
+        emirate: r.emirate || 'Unknown',
         count: Number(r.count),
       })),
     };
