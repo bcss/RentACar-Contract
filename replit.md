@@ -57,11 +57,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Role-Based Permissions
 - **Core Roles:** Admin, Manager, Staff, Viewer.
-- **Core Permission Toggles:** `canAccessReports` (legacy), `canCloseContracts`, `canViewAllContracts`.
-- **Granular Report Permissions (NEW):** 10 fine-grained permission flags for individual report access. Admin and Manager roles automatically bypass all granular permission checks and have full report access. Granular permissions only restrict Staff and Viewer roles.
+- **Core Permission Toggles:** `canCloseContracts`, `canViewAllContracts`.
+- **Granular Report Permissions:** 10 fine-grained permission flags for individual report access. Admin and Manager roles automatically bypass all granular permission checks and have full report access. Granular permissions only restrict Staff and Viewer roles.
   - **Analytical Reports:** `canAccessRevenueTrends`, `canAccessFleetPerformance`, `canAccessContractAnalytics`, `canAccessCollectionPerformance`
   - **Standard Reports:** `canAccessFinancialReports`, `canAccessOperationalReports`, `canAccessCustomerReports`, `canAccessInsuranceReports`, `canAccessAuditReports`, `canAccessUserActivityReports`
-- **Permission UI:** Users.tsx provides grouped permission toggles (Analytical Reports + Standard Reports) in both Create and Edit dialogs for intuitive permission management.
+- **Permission UI:** Users.tsx features tabbed dialogs (Basic Info + Permissions) for Create and Edit User operations. The Permissions tab presents core permissions followed by grouped granular report permissions (Analytical Reports + Standard Reports) for intuitive permission management. Tabbed design solves screen overflow issues and improves UX.
 - **Permission Enforcement:** AppSidebar dynamically shows/hides report navigation based on user's granular permissions. useAuth hook implements Admin/Manager bypass logic consistently across the application.
 
 ### Dynamic System Health Monitoring

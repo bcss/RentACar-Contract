@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -79,7 +80,6 @@ export default function Users() {
     lastName: '',
     email: '',
     role: 'staff',
-    canAccessReports: false,
     canCloseContracts: false,
     canViewAllContracts: false,
     // Granular report permissions
@@ -200,7 +200,6 @@ export default function Users() {
       lastName: '',
       email: '',
       role: 'staff',
-      canAccessReports: false,
       canCloseContracts: false,
       canViewAllContracts: false,
       // Granular report permissions
@@ -239,9 +238,18 @@ export default function Users() {
       lastName: formData.lastName,
       email: formData.email,
       role: formData.role,
-      canAccessReports: formData.canAccessReports,
       canCloseContracts: formData.canCloseContracts,
       canViewAllContracts: formData.canViewAllContracts,
+      canAccessRevenueTrends: formData.canAccessRevenueTrends,
+      canAccessFleetPerformance: formData.canAccessFleetPerformance,
+      canAccessContractAnalytics: formData.canAccessContractAnalytics,
+      canAccessCollectionPerformance: formData.canAccessCollectionPerformance,
+      canAccessFinancialReports: formData.canAccessFinancialReports,
+      canAccessOperationalReports: formData.canAccessOperationalReports,
+      canAccessCustomerReports: formData.canAccessCustomerReports,
+      canAccessInsuranceReports: formData.canAccessInsuranceReports,
+      canAccessAuditReports: formData.canAccessAuditReports,
+      canAccessUserActivityReports: formData.canAccessUserActivityReports,
     };
 
     if (formData.password) {
@@ -274,7 +282,6 @@ export default function Users() {
       lastName: user.lastName || '',
       email: user.email || '',
       role: user.role,
-      canAccessReports: user.canAccessReports ?? false,
       canCloseContracts: user.canCloseContracts ?? false,
       canViewAllContracts: user.canViewAllContracts ?? false,
       // Granular report permissions
@@ -448,609 +455,601 @@ export default function Users() {
 
       {/* Create User Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent data-testid="dialog-create-user">
+        <DialogContent data-testid="dialog-create-user" className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('users.addUser')}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">{t('users.username')}</Label>
-              <Input
-                id="username"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                data-testid="input-create-username"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">{t('users.password')}</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                data-testid="input-create-password"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t('users.confirmPassword')}</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                data-testid="input-create-confirm-password"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="firstName">{t('users.firstName')}</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                data-testid="input-create-firstname"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">{t('users.lastName')}</Label>
-              <Input
-                id="lastName"
-                value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                data-testid="input-create-lastname"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('users.email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                data-testid="input-create-email"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">{t('users.role')}</Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value) => setFormData({ ...formData, role: value })}
-              >
-                <SelectTrigger data-testid="select-create-role">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">{t('role.admin')}</SelectItem>
-                  <SelectItem value="manager">{t('role.manager')}</SelectItem>
-                  <SelectItem value="staff">{t('role.staff')}</SelectItem>
-                  <SelectItem value="viewer">{t('role.viewer')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="basic" data-testid="tab-basic-info-create">Basic Info</TabsTrigger>
+              <TabsTrigger value="permissions" data-testid="tab-permissions-create">Permissions</TabsTrigger>
+            </TabsList>
             
-            {/* Core Permission Toggles */}
-            <div className="space-y-3 border-t pt-3">
-              <Label className="text-sm font-semibold">{t('users.permissions')}</Label>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="create-canAccessReports"
-                  checked={formData.canAccessReports}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, canAccessReports: checked as boolean })
-                  }
-                  data-testid="checkbox-create-can-access-reports"
+            <TabsContent value="basic" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">{t('users.username')}</Label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  data-testid="input-create-username"
                 />
-                <Label htmlFor="create-canAccessReports" className="text-sm font-normal cursor-pointer">
-                  {t('users.canAccessReports')}
-                </Label>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="create-canCloseContracts"
-                  checked={formData.canCloseContracts}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, canCloseContracts: checked as boolean })
-                  }
-                  data-testid="checkbox-create-can-close-contracts"
+              <div className="space-y-2">
+                <Label htmlFor="password">{t('users.password')}</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  data-testid="input-create-password"
                 />
-                <Label htmlFor="create-canCloseContracts" className="text-sm font-normal cursor-pointer">
-                  {t('users.canCloseContracts')}
-                </Label>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="create-canViewAllContracts"
-                  checked={formData.canViewAllContracts}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, canViewAllContracts: checked as boolean })
-                  }
-                  data-testid="checkbox-create-can-view-all-contracts"
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">{t('users.confirmPassword')}</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  data-testid="input-create-confirm-password"
                 />
-                <Label htmlFor="create-canViewAllContracts" className="text-sm font-normal cursor-pointer">
-                  {t('users.canViewAllContracts')}
-                </Label>
               </div>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="firstName">{t('users.firstName')}</Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  data-testid="input-create-firstname"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">{t('users.lastName')}</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  data-testid="input-create-lastname"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">{t('users.email')}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  data-testid="input-create-email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">{t('users.role')}</Label>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) => setFormData({ ...formData, role: value })}
+                >
+                  <SelectTrigger data-testid="select-create-role">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">{t('role.admin')}</SelectItem>
+                    <SelectItem value="manager">{t('role.manager')}</SelectItem>
+                    <SelectItem value="staff">{t('role.staff')}</SelectItem>
+                    <SelectItem value="viewer">{t('role.viewer')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
             
-            {/* Granular Report Permissions */}
-            <div className="space-y-3 border-t pt-3">
-              <Label className="text-sm font-semibold">Granular Report Permissions</Label>
-              <p className="text-xs text-muted-foreground">Grant access to specific reports individually (Admin/Manager always have full access)</p>
-              
-              {/* Analytical Reports Group */}
-              <div className="space-y-2 pl-2 border-l-2">
-                <Label className="text-xs font-medium text-muted-foreground">Analytical Reports</Label>
+            <TabsContent value="permissions" className="space-y-4 mt-4">
+              {/* Core Permissions */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold">{t('users.permissions')}</Label>
                 
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="create-canAccessRevenueTrends"
-                    checked={formData.canAccessRevenueTrends}
+                    id="create-canCloseContracts"
+                    checked={formData.canCloseContracts}
                     onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessRevenueTrends: checked as boolean })
+                      setFormData({ ...formData, canCloseContracts: checked as boolean })
                     }
-                    data-testid="checkbox-create-can-access-revenue-trends"
+                    data-testid="checkbox-create-can-close-contracts"
                   />
-                  <Label htmlFor="create-canAccessRevenueTrends" className="text-sm font-normal cursor-pointer">
-                    Revenue Trends Report
+                  <Label htmlFor="create-canCloseContracts" className="text-sm font-normal cursor-pointer">
+                    {t('users.canCloseContracts')}
                   </Label>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="create-canAccessFleetPerformance"
-                    checked={formData.canAccessFleetPerformance}
+                    id="create-canViewAllContracts"
+                    checked={formData.canViewAllContracts}
                     onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessFleetPerformance: checked as boolean })
+                      setFormData({ ...formData, canViewAllContracts: checked as boolean })
                     }
-                    data-testid="checkbox-create-can-access-fleet-performance"
+                    data-testid="checkbox-create-can-view-all-contracts"
                   />
-                  <Label htmlFor="create-canAccessFleetPerformance" className="text-sm font-normal cursor-pointer">
-                    Fleet Performance Report
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="create-canAccessContractAnalytics"
-                    checked={formData.canAccessContractAnalytics}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessContractAnalytics: checked as boolean })
-                    }
-                    data-testid="checkbox-create-can-access-contract-analytics"
-                  />
-                  <Label htmlFor="create-canAccessContractAnalytics" className="text-sm font-normal cursor-pointer">
-                    Contract Analytics Report
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="create-canAccessCollectionPerformance"
-                    checked={formData.canAccessCollectionPerformance}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessCollectionPerformance: checked as boolean })
-                    }
-                    data-testid="checkbox-create-can-access-collection-performance"
-                  />
-                  <Label htmlFor="create-canAccessCollectionPerformance" className="text-sm font-normal cursor-pointer">
-                    Collection Performance Report
+                  <Label htmlFor="create-canViewAllContracts" className="text-sm font-normal cursor-pointer">
+                    {t('users.canViewAllContracts')}
                   </Label>
                 </div>
               </div>
               
-              {/* Standard Reports Group */}
-              <div className="space-y-2 pl-2 border-l-2">
-                <Label className="text-xs font-medium text-muted-foreground">Standard Reports</Label>
+              {/* Granular Report Permissions */}
+              <div className="space-y-3 border-t pt-3">
+                <Label className="text-sm font-semibold">Granular Report Permissions</Label>
+                <p className="text-xs text-muted-foreground">Grant access to specific reports individually (Admin/Manager always have full access)</p>
                 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="create-canAccessFinancialReports"
-                    checked={formData.canAccessFinancialReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessFinancialReports: checked as boolean })
-                    }
-                    data-testid="checkbox-create-can-access-financial-reports"
-                  />
-                  <Label htmlFor="create-canAccessFinancialReports" className="text-sm font-normal cursor-pointer">
-                    Financial Reports
-                  </Label>
+                {/* Analytical Reports Group */}
+                <div className="space-y-2 pl-2 border-l-2">
+                  <Label className="text-xs font-medium text-muted-foreground">Analytical Reports</Label>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessRevenueTrends"
+                      checked={formData.canAccessRevenueTrends}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessRevenueTrends: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-revenue-trends"
+                    />
+                    <Label htmlFor="create-canAccessRevenueTrends" className="text-sm font-normal cursor-pointer">
+                      Revenue Trends Report
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessFleetPerformance"
+                      checked={formData.canAccessFleetPerformance}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessFleetPerformance: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-fleet-performance"
+                    />
+                    <Label htmlFor="create-canAccessFleetPerformance" className="text-sm font-normal cursor-pointer">
+                      Fleet Performance Report
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessContractAnalytics"
+                      checked={formData.canAccessContractAnalytics}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessContractAnalytics: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-contract-analytics"
+                    />
+                    <Label htmlFor="create-canAccessContractAnalytics" className="text-sm font-normal cursor-pointer">
+                      Contract Analytics Report
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessCollectionPerformance"
+                      checked={formData.canAccessCollectionPerformance}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessCollectionPerformance: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-collection-performance"
+                    />
+                    <Label htmlFor="create-canAccessCollectionPerformance" className="text-sm font-normal cursor-pointer">
+                      Collection Performance Report
+                    </Label>
+                  </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="create-canAccessOperationalReports"
-                    checked={formData.canAccessOperationalReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessOperationalReports: checked as boolean })
-                    }
-                    data-testid="checkbox-create-can-access-operational-reports"
-                  />
-                  <Label htmlFor="create-canAccessOperationalReports" className="text-sm font-normal cursor-pointer">
-                    Operational Reports
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="create-canAccessCustomerReports"
-                    checked={formData.canAccessCustomerReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessCustomerReports: checked as boolean })
-                    }
-                    data-testid="checkbox-create-can-access-customer-reports"
-                  />
-                  <Label htmlFor="create-canAccessCustomerReports" className="text-sm font-normal cursor-pointer">
-                    Customer Reports
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="create-canAccessInsuranceReports"
-                    checked={formData.canAccessInsuranceReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessInsuranceReports: checked as boolean })
-                    }
-                    data-testid="checkbox-create-can-access-insurance-reports"
-                  />
-                  <Label htmlFor="create-canAccessInsuranceReports" className="text-sm font-normal cursor-pointer">
-                    Insurance Reports
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="create-canAccessAuditReports"
-                    checked={formData.canAccessAuditReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessAuditReports: checked as boolean })
-                    }
-                    data-testid="checkbox-create-can-access-audit-reports"
-                  />
-                  <Label htmlFor="create-canAccessAuditReports" className="text-sm font-normal cursor-pointer">
-                    Audit Reports
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="create-canAccessUserActivityReports"
-                    checked={formData.canAccessUserActivityReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessUserActivityReports: checked as boolean })
-                    }
-                    data-testid="checkbox-create-can-access-user-activity-reports"
-                  />
-                  <Label htmlFor="create-canAccessUserActivityReports" className="text-sm font-normal cursor-pointer">
-                    User Activity Reports
-                  </Label>
+                {/* Standard Reports Group */}
+                <div className="space-y-2 pl-2 border-l-2">
+                  <Label className="text-xs font-medium text-muted-foreground">Standard Reports</Label>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessFinancialReports"
+                      checked={formData.canAccessFinancialReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessFinancialReports: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-financial-reports"
+                    />
+                    <Label htmlFor="create-canAccessFinancialReports" className="text-sm font-normal cursor-pointer">
+                      Financial Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessOperationalReports"
+                      checked={formData.canAccessOperationalReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessOperationalReports: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-operational-reports"
+                    />
+                    <Label htmlFor="create-canAccessOperationalReports" className="text-sm font-normal cursor-pointer">
+                      Operational Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessCustomerReports"
+                      checked={formData.canAccessCustomerReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessCustomerReports: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-customer-reports"
+                    />
+                    <Label htmlFor="create-canAccessCustomerReports" className="text-sm font-normal cursor-pointer">
+                      Customer Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessInsuranceReports"
+                      checked={formData.canAccessInsuranceReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessInsuranceReports: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-insurance-reports"
+                    />
+                    <Label htmlFor="create-canAccessInsuranceReports" className="text-sm font-normal cursor-pointer">
+                      Insurance Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessAuditReports"
+                      checked={formData.canAccessAuditReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessAuditReports: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-audit-reports"
+                    />
+                    <Label htmlFor="create-canAccessAuditReports" className="text-sm font-normal cursor-pointer">
+                      Audit Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="create-canAccessUserActivityReports"
+                      checked={formData.canAccessUserActivityReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessUserActivityReports: checked as boolean })
+                      }
+                      data-testid="checkbox-create-can-access-user-activity-reports"
+                    />
+                    <Label htmlFor="create-canAccessUserActivityReports" className="text-sm font-normal cursor-pointer">
+                      User Activity Reports
+                    </Label>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsCreateDialogOpen(false);
-                  resetForm();
-                }}
-                data-testid="button-cancel-create"
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                onClick={handleCreateUser}
-                disabled={createUserMutation.isPending}
-                data-testid="button-submit-create"
-              >
-                {t('common.create')}
-              </Button>
-            </div>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsCreateDialogOpen(false);
+                resetForm();
+              }}
+              data-testid="button-cancel-create"
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleCreateUser}
+              disabled={createUserMutation.isPending}
+              data-testid="button-submit-create"
+            >
+              {t('common.create')}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent data-testid="dialog-edit-user">
+        <DialogContent data-testid="dialog-edit-user" className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('users.editUser')}</DialogTitle>
             <DialogDescription>Username: {selectedUser?.username}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-firstName">{t('users.firstName')}</Label>
-              <Input
-                id="edit-firstName"
-                value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                data-testid="input-edit-firstname"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-lastName">{t('users.lastName')}</Label>
-              <Input
-                id="edit-lastName"
-                value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                data-testid="input-edit-lastname"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-email">{t('users.email')}</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                data-testid="input-edit-email"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-role">{t('users.role')}</Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value) => setFormData({ ...formData, role: value })}
-                disabled={selectedUser?.isImmutable}
-              >
-                <SelectTrigger data-testid="select-edit-role">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">{t('role.admin')}</SelectItem>
-                  <SelectItem value="manager">{t('role.manager')}</SelectItem>
-                  <SelectItem value="staff">{t('role.staff')}</SelectItem>
-                  <SelectItem value="viewer">{t('role.viewer')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="basic" data-testid="tab-basic-info-edit">Basic Info</TabsTrigger>
+              <TabsTrigger value="permissions" data-testid="tab-permissions-edit">Permissions</TabsTrigger>
+            </TabsList>
             
-            {/* Permission Toggles */}
-            <div className="space-y-3 border-t pt-3">
-              <Label className="text-sm font-semibold">{t('users.permissions')}</Label>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="canAccessReports"
-                  checked={formData.canAccessReports}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, canAccessReports: checked as boolean })
-                  }
-                  data-testid="checkbox-can-access-reports"
+            <TabsContent value="basic" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-firstName">{t('users.firstName')}</Label>
+                <Input
+                  id="edit-firstName"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  data-testid="input-edit-firstname"
                 />
-                <Label htmlFor="canAccessReports" className="text-sm font-normal cursor-pointer">
-                  {t('users.canAccessReports')}
-                </Label>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="canCloseContracts"
-                  checked={formData.canCloseContracts}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, canCloseContracts: checked as boolean })
-                  }
-                  data-testid="checkbox-can-close-contracts"
+              <div className="space-y-2">
+                <Label htmlFor="edit-lastName">{t('users.lastName')}</Label>
+                <Input
+                  id="edit-lastName"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  data-testid="input-edit-lastname"
                 />
-                <Label htmlFor="canCloseContracts" className="text-sm font-normal cursor-pointer">
-                  {t('users.canCloseContracts')}
-                </Label>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="canViewAllContracts"
-                  checked={formData.canViewAllContracts}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, canViewAllContracts: checked as boolean })
-                  }
-                  data-testid="checkbox-can-view-all-contracts"
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">{t('users.email')}</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  data-testid="input-edit-email"
                 />
-                <Label htmlFor="canViewAllContracts" className="text-sm font-normal cursor-pointer">
-                  {t('users.canViewAllContracts')}
-                </Label>
               </div>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-role">{t('users.role')}</Label>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) => setFormData({ ...formData, role: value })}
+                  disabled={selectedUser?.isImmutable}
+                >
+                  <SelectTrigger data-testid="select-edit-role">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">{t('role.admin')}</SelectItem>
+                    <SelectItem value="manager">{t('role.manager')}</SelectItem>
+                    <SelectItem value="staff">{t('role.staff')}</SelectItem>
+                    <SelectItem value="viewer">{t('role.viewer')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-password">{t('users.password')} (optional)</Label>
+                <Input
+                  id="edit-password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  data-testid="input-edit-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-confirmPassword">{t('users.confirmPassword')}</Label>
+                <Input
+                  id="edit-confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  data-testid="input-edit-confirm-password"
+                />
+              </div>
+            </TabsContent>
             
-            {/* Granular Report Permissions */}
-            <div className="space-y-3 border-t pt-3">
-              <Label className="text-sm font-semibold">Granular Report Permissions</Label>
-              <p className="text-xs text-muted-foreground">Grant access to specific reports individually (Admin/Manager always have full access)</p>
-              
-              {/* Analytical Reports Group */}
-              <div className="space-y-2 pl-2 border-l-2">
-                <Label className="text-xs font-medium text-muted-foreground">Analytical Reports</Label>
+            <TabsContent value="permissions" className="space-y-4 mt-4">
+              {/* Core Permissions */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold">{t('users.permissions')}</Label>
                 
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="canAccessRevenueTrends"
-                    checked={formData.canAccessRevenueTrends}
+                    id="edit-canCloseContracts"
+                    checked={formData.canCloseContracts}
                     onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessRevenueTrends: checked as boolean })
+                      setFormData({ ...formData, canCloseContracts: checked as boolean })
                     }
-                    data-testid="checkbox-can-access-revenue-trends"
+                    data-testid="checkbox-edit-can-close-contracts"
                   />
-                  <Label htmlFor="canAccessRevenueTrends" className="text-sm font-normal cursor-pointer">
-                    Revenue Trends Report
+                  <Label htmlFor="edit-canCloseContracts" className="text-sm font-normal cursor-pointer">
+                    {t('users.canCloseContracts')}
                   </Label>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="canAccessFleetPerformance"
-                    checked={formData.canAccessFleetPerformance}
+                    id="edit-canViewAllContracts"
+                    checked={formData.canViewAllContracts}
                     onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessFleetPerformance: checked as boolean })
+                      setFormData({ ...formData, canViewAllContracts: checked as boolean })
                     }
-                    data-testid="checkbox-can-access-fleet-performance"
+                    data-testid="checkbox-edit-can-view-all-contracts"
                   />
-                  <Label htmlFor="canAccessFleetPerformance" className="text-sm font-normal cursor-pointer">
-                    Fleet Performance Report
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="canAccessContractAnalytics"
-                    checked={formData.canAccessContractAnalytics}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessContractAnalytics: checked as boolean })
-                    }
-                    data-testid="checkbox-can-access-contract-analytics"
-                  />
-                  <Label htmlFor="canAccessContractAnalytics" className="text-sm font-normal cursor-pointer">
-                    Contract Analytics Report
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="canAccessCollectionPerformance"
-                    checked={formData.canAccessCollectionPerformance}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessCollectionPerformance: checked as boolean })
-                    }
-                    data-testid="checkbox-can-access-collection-performance"
-                  />
-                  <Label htmlFor="canAccessCollectionPerformance" className="text-sm font-normal cursor-pointer">
-                    Collection Performance Report
+                  <Label htmlFor="edit-canViewAllContracts" className="text-sm font-normal cursor-pointer">
+                    {t('users.canViewAllContracts')}
                   </Label>
                 </div>
               </div>
               
-              {/* Standard Reports Group */}
-              <div className="space-y-2 pl-2 border-l-2">
-                <Label className="text-xs font-medium text-muted-foreground">Standard Reports</Label>
+              {/* Granular Report Permissions */}
+              <div className="space-y-3 border-t pt-3">
+                <Label className="text-sm font-semibold">Granular Report Permissions</Label>
+                <p className="text-xs text-muted-foreground">Grant access to specific reports individually (Admin/Manager always have full access)</p>
                 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="canAccessFinancialReports"
-                    checked={formData.canAccessFinancialReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessFinancialReports: checked as boolean })
-                    }
-                    data-testid="checkbox-can-access-financial-reports"
-                  />
-                  <Label htmlFor="canAccessFinancialReports" className="text-sm font-normal cursor-pointer">
-                    Financial Reports
-                  </Label>
+                {/* Analytical Reports Group */}
+                <div className="space-y-2 pl-2 border-l-2">
+                  <Label className="text-xs font-medium text-muted-foreground">Analytical Reports</Label>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessRevenueTrends"
+                      checked={formData.canAccessRevenueTrends}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessRevenueTrends: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-revenue-trends"
+                    />
+                    <Label htmlFor="edit-canAccessRevenueTrends" className="text-sm font-normal cursor-pointer">
+                      Revenue Trends Report
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessFleetPerformance"
+                      checked={formData.canAccessFleetPerformance}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessFleetPerformance: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-fleet-performance"
+                    />
+                    <Label htmlFor="edit-canAccessFleetPerformance" className="text-sm font-normal cursor-pointer">
+                      Fleet Performance Report
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessContractAnalytics"
+                      checked={formData.canAccessContractAnalytics}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessContractAnalytics: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-contract-analytics"
+                    />
+                    <Label htmlFor="edit-canAccessContractAnalytics" className="text-sm font-normal cursor-pointer">
+                      Contract Analytics Report
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessCollectionPerformance"
+                      checked={formData.canAccessCollectionPerformance}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessCollectionPerformance: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-collection-performance"
+                    />
+                    <Label htmlFor="edit-canAccessCollectionPerformance" className="text-sm font-normal cursor-pointer">
+                      Collection Performance Report
+                    </Label>
+                  </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="canAccessOperationalReports"
-                    checked={formData.canAccessOperationalReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessOperationalReports: checked as boolean })
-                    }
-                    data-testid="checkbox-can-access-operational-reports"
-                  />
-                  <Label htmlFor="canAccessOperationalReports" className="text-sm font-normal cursor-pointer">
-                    Operational Reports
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="canAccessCustomerReports"
-                    checked={formData.canAccessCustomerReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessCustomerReports: checked as boolean })
-                    }
-                    data-testid="checkbox-can-access-customer-reports"
-                  />
-                  <Label htmlFor="canAccessCustomerReports" className="text-sm font-normal cursor-pointer">
-                    Customer Reports
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="canAccessInsuranceReports"
-                    checked={formData.canAccessInsuranceReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessInsuranceReports: checked as boolean })
-                    }
-                    data-testid="checkbox-can-access-insurance-reports"
-                  />
-                  <Label htmlFor="canAccessInsuranceReports" className="text-sm font-normal cursor-pointer">
-                    Insurance Reports
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="canAccessAuditReports"
-                    checked={formData.canAccessAuditReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessAuditReports: checked as boolean })
-                    }
-                    data-testid="checkbox-can-access-audit-reports"
-                  />
-                  <Label htmlFor="canAccessAuditReports" className="text-sm font-normal cursor-pointer">
-                    Audit Reports
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="canAccessUserActivityReports"
-                    checked={formData.canAccessUserActivityReports}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, canAccessUserActivityReports: checked as boolean })
-                    }
-                    data-testid="checkbox-can-access-user-activity-reports"
-                  />
-                  <Label htmlFor="canAccessUserActivityReports" className="text-sm font-normal cursor-pointer">
-                    User Activity Reports
-                  </Label>
+                {/* Standard Reports Group */}
+                <div className="space-y-2 pl-2 border-l-2">
+                  <Label className="text-xs font-medium text-muted-foreground">Standard Reports</Label>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessFinancialReports"
+                      checked={formData.canAccessFinancialReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessFinancialReports: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-financial-reports"
+                    />
+                    <Label htmlFor="edit-canAccessFinancialReports" className="text-sm font-normal cursor-pointer">
+                      Financial Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessOperationalReports"
+                      checked={formData.canAccessOperationalReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessOperationalReports: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-operational-reports"
+                    />
+                    <Label htmlFor="edit-canAccessOperationalReports" className="text-sm font-normal cursor-pointer">
+                      Operational Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessCustomerReports"
+                      checked={formData.canAccessCustomerReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessCustomerReports: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-customer-reports"
+                    />
+                    <Label htmlFor="edit-canAccessCustomerReports" className="text-sm font-normal cursor-pointer">
+                      Customer Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessInsuranceReports"
+                      checked={formData.canAccessInsuranceReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessInsuranceReports: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-insurance-reports"
+                    />
+                    <Label htmlFor="edit-canAccessInsuranceReports" className="text-sm font-normal cursor-pointer">
+                      Insurance Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessAuditReports"
+                      checked={formData.canAccessAuditReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessAuditReports: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-audit-reports"
+                    />
+                    <Label htmlFor="edit-canAccessAuditReports" className="text-sm font-normal cursor-pointer">
+                      Audit Reports
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="edit-canAccessUserActivityReports"
+                      checked={formData.canAccessUserActivityReports}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, canAccessUserActivityReports: checked as boolean })
+                      }
+                      data-testid="checkbox-edit-can-access-user-activity-reports"
+                    />
+                    <Label htmlFor="edit-canAccessUserActivityReports" className="text-sm font-normal cursor-pointer">
+                      User Activity Reports
+                    </Label>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-password">{t('users.password')} (optional)</Label>
-              <Input
-                id="edit-password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                data-testid="input-edit-password"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-confirmPassword">{t('users.confirmPassword')}</Label>
-              <Input
-                id="edit-confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                data-testid="input-edit-confirm-password"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsEditDialogOpen(false);
-                  resetForm();
-                }}
-                data-testid="button-cancel-edit"
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                onClick={handleEditUser}
-                disabled={updateUserMutation.isPending}
-                data-testid="button-submit-edit"
-              >
-                {t('common.save')}
-              </Button>
-            </div>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditDialogOpen(false);
+                resetForm();
+              }}
+              data-testid="button-cancel-edit"
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleEditUser}
+              disabled={updateUserMutation.isPending}
+              data-testid="button-submit-edit"
+            >
+              {t('common.save')}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

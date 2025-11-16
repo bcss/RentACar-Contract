@@ -53,7 +53,6 @@ export const users = pgTable("users", {
   disabledAt: timestamp("disabled_at"),
   
   // Permission toggles - Fine-grained access control
-  canAccessReports: boolean("can_access_reports").notNull().default(false), // Master toggle: Access to analytics and reports
   canCloseContracts: boolean("can_close_contracts").notNull().default(false), // Close completed contracts
   canViewAllContracts: boolean("can_view_all_contracts").notNull().default(false), // View all contracts (not just own)
   

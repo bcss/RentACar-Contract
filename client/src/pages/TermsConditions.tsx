@@ -12,7 +12,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { insertCompanySettingsSchema, type CompanySettings } from "@shared/schema";
 import { z } from "zod";
 import {
-import { Icon } from '@/components/Icon';
   Form,
   FormControl,
   FormField,

@@ -1873,7 +1873,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName,
         role: userRole,
         isImmutable: false,
-        canAccessReports: isPrivileged,
         canCloseContracts: isPrivileged,
         canViewAllContracts: isPrivileged,
       });
@@ -1898,7 +1897,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user (Admin only)
   app.patch('/api/users/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const { email, firstName, lastName, role, password, canAccessReports, canCloseContracts, canViewAllContracts } = req.body;
+      const { 
+        email, 
+        firstName, 
+        lastName, 
+        role, 
+        password, 
+        canCloseContracts, 
+        canViewAllContracts,
+        canAccessRevenueTrends,
+        canAccessFleetPerformance,
+        canAccessContractAnalytics,
+        canAccessCollectionPerformance,
+        canAccessFinancialReports,
+        canAccessOperationalReports,
+        canAccessCustomerReports,
+        canAccessInsuranceReports,
+        canAccessAuditReports,
+        canAccessUserActivityReports
+      } = req.body;
       const adminId = req.user.id;
       const userId = req.params.id;
 
@@ -1914,9 +1931,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (firstName !== undefined) updates.firstName = firstName;
       if (lastName !== undefined) updates.lastName = lastName;
       if (role !== undefined) updates.role = role;
-      if (canAccessReports !== undefined) updates.canAccessReports = canAccessReports;
       if (canCloseContracts !== undefined) updates.canCloseContracts = canCloseContracts;
       if (canViewAllContracts !== undefined) updates.canViewAllContracts = canViewAllContracts;
+      if (canAccessRevenueTrends !== undefined) updates.canAccessRevenueTrends = canAccessRevenueTrends;
+      if (canAccessFleetPerformance !== undefined) updates.canAccessFleetPerformance = canAccessFleetPerformance;
+      if (canAccessContractAnalytics !== undefined) updates.canAccessContractAnalytics = canAccessContractAnalytics;
+      if (canAccessCollectionPerformance !== undefined) updates.canAccessCollectionPerformance = canAccessCollectionPerformance;
+      if (canAccessFinancialReports !== undefined) updates.canAccessFinancialReports = canAccessFinancialReports;
+      if (canAccessOperationalReports !== undefined) updates.canAccessOperationalReports = canAccessOperationalReports;
+      if (canAccessCustomerReports !== undefined) updates.canAccessCustomerReports = canAccessCustomerReports;
+      if (canAccessInsuranceReports !== undefined) updates.canAccessInsuranceReports = canAccessInsuranceReports;
+      if (canAccessAuditReports !== undefined) updates.canAccessAuditReports = canAccessAuditReports;
+      if (canAccessUserActivityReports !== undefined) updates.canAccessUserActivityReports = canAccessUserActivityReports;
 
       // Hash new password if provided
       if (password && password.trim().length > 0) {
@@ -1936,14 +1962,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (email !== undefined && email !== existingUser.email) changes.push(`email from "${existingUser.email}" to "${email}"`);
       if (role !== undefined && role !== existingUser.role) changes.push(`role from "${existingUser.role}" to "${role}"`);
       if (password && password.trim().length > 0) changes.push('password (updated)');
-      if (canAccessReports !== undefined && canAccessReports !== existingUser.canAccessReports) {
-        changes.push(`canAccessReports from ${existingUser.canAccessReports} to ${canAccessReports}`);
-      }
       if (canCloseContracts !== undefined && canCloseContracts !== existingUser.canCloseContracts) {
         changes.push(`canCloseContracts from ${existingUser.canCloseContracts} to ${canCloseContracts}`);
       }
       if (canViewAllContracts !== undefined && canViewAllContracts !== existingUser.canViewAllContracts) {
         changes.push(`canViewAllContracts from ${existingUser.canViewAllContracts} to ${canViewAllContracts}`);
+      }
+      if (canAccessRevenueTrends !== undefined && canAccessRevenueTrends !== existingUser.canAccessRevenueTrends) {
+        changes.push(`canAccessRevenueTrends from ${existingUser.canAccessRevenueTrends} to ${canAccessRevenueTrends}`);
+      }
+      if (canAccessFleetPerformance !== undefined && canAccessFleetPerformance !== existingUser.canAccessFleetPerformance) {
+        changes.push(`canAccessFleetPerformance from ${existingUser.canAccessFleetPerformance} to ${canAccessFleetPerformance}`);
+      }
+      if (canAccessContractAnalytics !== undefined && canAccessContractAnalytics !== existingUser.canAccessContractAnalytics) {
+        changes.push(`canAccessContractAnalytics from ${existingUser.canAccessContractAnalytics} to ${canAccessContractAnalytics}`);
+      }
+      if (canAccessCollectionPerformance !== undefined && canAccessCollectionPerformance !== existingUser.canAccessCollectionPerformance) {
+        changes.push(`canAccessCollectionPerformance from ${existingUser.canAccessCollectionPerformance} to ${canAccessCollectionPerformance}`);
+      }
+      if (canAccessFinancialReports !== undefined && canAccessFinancialReports !== existingUser.canAccessFinancialReports) {
+        changes.push(`canAccessFinancialReports from ${existingUser.canAccessFinancialReports} to ${canAccessFinancialReports}`);
+      }
+      if (canAccessOperationalReports !== undefined && canAccessOperationalReports !== existingUser.canAccessOperationalReports) {
+        changes.push(`canAccessOperationalReports from ${existingUser.canAccessOperationalReports} to ${canAccessOperationalReports}`);
+      }
+      if (canAccessCustomerReports !== undefined && canAccessCustomerReports !== existingUser.canAccessCustomerReports) {
+        changes.push(`canAccessCustomerReports from ${existingUser.canAccessCustomerReports} to ${canAccessCustomerReports}`);
+      }
+      if (canAccessInsuranceReports !== undefined && canAccessInsuranceReports !== existingUser.canAccessInsuranceReports) {
+        changes.push(`canAccessInsuranceReports from ${existingUser.canAccessInsuranceReports} to ${canAccessInsuranceReports}`);
+      }
+      if (canAccessAuditReports !== undefined && canAccessAuditReports !== existingUser.canAccessAuditReports) {
+        changes.push(`canAccessAuditReports from ${existingUser.canAccessAuditReports} to ${canAccessAuditReports}`);
+      }
+      if (canAccessUserActivityReports !== undefined && canAccessUserActivityReports !== existingUser.canAccessUserActivityReports) {
+        changes.push(`canAccessUserActivityReports from ${existingUser.canAccessUserActivityReports} to ${canAccessUserActivityReports}`);
       }
       
       if (changes.length > 0) {
