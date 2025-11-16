@@ -527,6 +527,210 @@ export default function Users() {
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Core Permission Toggles */}
+            <div className="space-y-3 border-t pt-3">
+              <Label className="text-sm font-semibold">{t('users.permissions')}</Label>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="create-canAccessReports"
+                  checked={formData.canAccessReports}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, canAccessReports: checked as boolean })
+                  }
+                  data-testid="checkbox-create-can-access-reports"
+                />
+                <Label htmlFor="create-canAccessReports" className="text-sm font-normal cursor-pointer">
+                  {t('users.canAccessReports')}
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="create-canCloseContracts"
+                  checked={formData.canCloseContracts}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, canCloseContracts: checked as boolean })
+                  }
+                  data-testid="checkbox-create-can-close-contracts"
+                />
+                <Label htmlFor="create-canCloseContracts" className="text-sm font-normal cursor-pointer">
+                  {t('users.canCloseContracts')}
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="create-canViewAllContracts"
+                  checked={formData.canViewAllContracts}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, canViewAllContracts: checked as boolean })
+                  }
+                  data-testid="checkbox-create-can-view-all-contracts"
+                />
+                <Label htmlFor="create-canViewAllContracts" className="text-sm font-normal cursor-pointer">
+                  {t('users.canViewAllContracts')}
+                </Label>
+              </div>
+            </div>
+            
+            {/* Granular Report Permissions */}
+            <div className="space-y-3 border-t pt-3">
+              <Label className="text-sm font-semibold">Granular Report Permissions</Label>
+              <p className="text-xs text-muted-foreground">Grant access to specific reports individually (Admin/Manager always have full access)</p>
+              
+              {/* Analytical Reports Group */}
+              <div className="space-y-2 pl-2 border-l-2">
+                <Label className="text-xs font-medium text-muted-foreground">Analytical Reports</Label>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessRevenueTrends"
+                    checked={formData.canAccessRevenueTrends}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessRevenueTrends: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-revenue-trends"
+                  />
+                  <Label htmlFor="create-canAccessRevenueTrends" className="text-sm font-normal cursor-pointer">
+                    Revenue Trends Report
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessFleetPerformance"
+                    checked={formData.canAccessFleetPerformance}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessFleetPerformance: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-fleet-performance"
+                  />
+                  <Label htmlFor="create-canAccessFleetPerformance" className="text-sm font-normal cursor-pointer">
+                    Fleet Performance Report
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessContractAnalytics"
+                    checked={formData.canAccessContractAnalytics}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessContractAnalytics: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-contract-analytics"
+                  />
+                  <Label htmlFor="create-canAccessContractAnalytics" className="text-sm font-normal cursor-pointer">
+                    Contract Analytics Report
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessCollectionPerformance"
+                    checked={formData.canAccessCollectionPerformance}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessCollectionPerformance: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-collection-performance"
+                  />
+                  <Label htmlFor="create-canAccessCollectionPerformance" className="text-sm font-normal cursor-pointer">
+                    Collection Performance Report
+                  </Label>
+                </div>
+              </div>
+              
+              {/* Standard Reports Group */}
+              <div className="space-y-2 pl-2 border-l-2">
+                <Label className="text-xs font-medium text-muted-foreground">Standard Reports</Label>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessFinancialReports"
+                    checked={formData.canAccessFinancialReports}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessFinancialReports: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-financial-reports"
+                  />
+                  <Label htmlFor="create-canAccessFinancialReports" className="text-sm font-normal cursor-pointer">
+                    Financial Reports
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessOperationalReports"
+                    checked={formData.canAccessOperationalReports}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessOperationalReports: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-operational-reports"
+                  />
+                  <Label htmlFor="create-canAccessOperationalReports" className="text-sm font-normal cursor-pointer">
+                    Operational Reports
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessCustomerReports"
+                    checked={formData.canAccessCustomerReports}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessCustomerReports: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-customer-reports"
+                  />
+                  <Label htmlFor="create-canAccessCustomerReports" className="text-sm font-normal cursor-pointer">
+                    Customer Reports
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessInsuranceReports"
+                    checked={formData.canAccessInsuranceReports}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessInsuranceReports: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-insurance-reports"
+                  />
+                  <Label htmlFor="create-canAccessInsuranceReports" className="text-sm font-normal cursor-pointer">
+                    Insurance Reports
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessAuditReports"
+                    checked={formData.canAccessAuditReports}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessAuditReports: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-audit-reports"
+                  />
+                  <Label htmlFor="create-canAccessAuditReports" className="text-sm font-normal cursor-pointer">
+                    Audit Reports
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="create-canAccessUserActivityReports"
+                    checked={formData.canAccessUserActivityReports}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, canAccessUserActivityReports: checked as boolean })
+                    }
+                    data-testid="checkbox-create-can-access-user-activity-reports"
+                  />
+                  <Label htmlFor="create-canAccessUserActivityReports" className="text-sm font-normal cursor-pointer">
+                    User Activity Reports
+                  </Label>
+                </div>
+              </div>
+            </div>
+            
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
