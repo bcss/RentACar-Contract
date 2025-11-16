@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
+import { RadialBarChart, RadialBar, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { 
   CheckCircle, 
   Check, 
@@ -23,7 +24,12 @@ import {
   Receipt,
   Package,
   UserPlus,
-  Info
+  Info,
+  Clock,
+  Activity,
+  Target,
+  Zap,
+  ArrowRight
 } from 'lucide-react';
 
 export default function DashboardSamples() {
@@ -66,7 +72,7 @@ export default function DashboardSamples() {
 
       {/* Tabs for Design Samples */}
       <Tabs defaultValue="clean-modern" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 h-auto gap-2 bg-transparent">
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 h-auto gap-2 bg-transparent">
           <TabsTrigger value="clean-modern" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" data-testid="tab-clean-modern">
             <div className="text-center py-2">
               <p className="font-semibold text-sm">Clean Modern</p>
@@ -95,6 +101,24 @@ export default function DashboardSamples() {
             <div className="text-center py-2">
               <p className="font-semibold text-sm">Colorful</p>
               <p className="text-xs opacity-70">Vibrant & Playful</p>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="gauges-metrics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" data-testid="tab-gauges-metrics">
+            <div className="text-center py-2">
+              <p className="font-semibold text-sm">Gauges & Metrics</p>
+              <p className="text-xs opacity-70">Performance Dials</p>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="timeline-view" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" data-testid="tab-timeline-view">
+            <div className="text-center py-2">
+              <p className="font-semibold text-sm">Timeline View</p>
+              <p className="text-xs opacity-70">Activity Feed</p>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="comparison-table" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" data-testid="tab-comparison-table">
+            <div className="text-center py-2">
+              <p className="font-semibold text-sm">Comparison Table</p>
+              <p className="text-xs opacity-70">Data Comparison</p>
             </div>
           </TabsTrigger>
         </TabsList>
@@ -648,6 +672,503 @@ export default function DashboardSamples() {
                   ))}
                 </div>
               </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Gauges & Metrics Design */}
+        <TabsContent value="gauges-metrics" className="space-y-6 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold">Gauges & Metrics Design</h2>
+              <p className="text-sm text-muted-foreground">Performance indicators with radial gauges - perfect for KPI tracking</p>
+            </div>
+            <Button onClick={() => setSelectedDesign('Gauges & Metrics')} variant={selectedDesign === 'Gauges & Metrics' ? 'default' : 'outline'} data-testid="button-select-gauges-metrics">
+              {selectedDesign === 'Gauges & Metrics' ? <Check className="mr-2 h-4 w-4" /> : null}
+              Select This Design
+            </Button>
+          </div>
+
+          {/* Gauge Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Fleet Utilization Gauge */}
+            <Card className="p-6">
+              <div className="flex flex-col items-center">
+                <h3 className="text-sm font-semibold mb-2">Fleet Utilization</h3>
+                <div className="relative w-32 h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="100%"
+                      barSize={10}
+                      data={[{ name: 'Utilization', value: 78, fill: '#3b82f6' }]}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      <RadialBar
+                        background
+                        dataKey="value"
+                        cornerRadius={30}
+                      />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold">78%</p>
+                      <p className="text-xs text-muted-foreground">Active</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  <span className="text-xs text-green-600">+5.2% from last month</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Revenue Target Gauge */}
+            <Card className="p-6">
+              <div className="flex flex-col items-center">
+                <h3 className="text-sm font-semibold mb-2">Revenue Target</h3>
+                <div className="relative w-32 h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="100%"
+                      barSize={10}
+                      data={[{ name: 'Revenue', value: 92, fill: '#10b981' }]}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      <RadialBar
+                        background
+                        dataKey="value"
+                        cornerRadius={30}
+                      />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold">92%</p>
+                      <p className="text-xs text-muted-foreground">of Goal</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3">
+                  <Target className="h-4 w-4 text-green-600" />
+                  <span className="text-xs text-green-600">On track</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Customer Satisfaction Gauge */}
+            <Card className="p-6">
+              <div className="flex flex-col items-center">
+                <h3 className="text-sm font-semibold mb-2">Customer Satisfaction</h3>
+                <div className="relative w-32 h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="100%"
+                      barSize={10}
+                      data={[{ name: 'Satisfaction', value: 95, fill: '#8b5cf6' }]}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      <RadialBar
+                        background
+                        dataKey="value"
+                        cornerRadius={30}
+                      />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold">95%</p>
+                      <p className="text-xs text-muted-foreground">Rating</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3">
+                  <Zap className="h-4 w-4 text-purple-600" />
+                  <span className="text-xs text-purple-600">Excellent</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Vehicle Availability Gauge */}
+            <Card className="p-6">
+              <div className="flex flex-col items-center">
+                <h3 className="text-sm font-semibold mb-2">Vehicle Availability</h3>
+                <div className="relative w-32 h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="100%"
+                      barSize={10}
+                      data={[{ name: 'Available', value: 65, fill: '#f59e0b' }]}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      <RadialBar
+                        background
+                        dataKey="value"
+                        cornerRadius={30}
+                      />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold">65%</p>
+                      <p className="text-xs text-muted-foreground">Ready</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3">
+                  <Car className="h-4 w-4 text-amber-600" />
+                  <span className="text-xs text-amber-600">89 vehicles</span>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Performance Metrics Table */}
+          <Card className="p-6">
+            <h3 className="text-lg font-bold mb-6">Detailed Performance Metrics</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { title: 'Active Contracts', value: '214', change: '+12.5%', positive: true },
+                { title: 'Pending Returns', value: '23', change: '-8.3%', positive: true },
+                { title: 'Overdue Payments', value: '7', change: '+2.1%', positive: false },
+                { title: 'Maintenance Due', value: '15', change: '-15.4%', positive: true },
+                { title: 'Fuel Efficiency', value: '18.5 L/100km', change: '-3.2%', positive: true },
+                { title: 'Average Rental Days', value: '12.3', change: '+6.7%', positive: true },
+              ].map((metric, i) => (
+                <div key={i} className="p-4 bg-muted/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">{metric.title}</p>
+                  <p className="text-2xl font-bold mb-1">{metric.value}</p>
+                  <div className="flex items-center gap-1">
+                    <ArrowUp className={`h-4 w-4 ${metric.positive ? 'text-green-600' : 'text-red-600'} ${!metric.positive && 'rotate-180'}`} />
+                    <span className={`text-xs ${metric.positive ? 'text-green-600' : 'text-red-600'}`}>{metric.change}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Timeline View Design */}
+        <TabsContent value="timeline-view" className="space-y-6 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold">Timeline View Design</h2>
+              <p className="text-sm text-muted-foreground">Activity-based layout with chronological feed - perfect for operations tracking</p>
+            </div>
+            <Button onClick={() => setSelectedDesign('Timeline View')} variant={selectedDesign === 'Timeline View' ? 'default' : 'outline'} data-testid="button-select-timeline-view">
+              {selectedDesign === 'Timeline View' ? <Check className="mr-2 h-4 w-4" /> : null}
+              Select This Design
+            </Button>
+          </div>
+
+          {/* Today's Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[
+              { icon: Car, label: 'New Rentals', value: '18', color: 'blue' },
+              { icon: CheckCircle, label: 'Completed Returns', value: '12', color: 'green' },
+              { icon: Clock, label: 'Pending Actions', value: '5', color: 'amber' },
+              { icon: Activity, label: 'Active Operations', value: '32', color: 'purple' },
+            ].map((stat, i) => (
+              <Card key={i} className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`h-10 w-10 rounded-full bg-${stat.color}-100 dark:bg-${stat.color}-950 flex items-center justify-center`}>
+                    <stat.icon className={`h-5 w-5 text-${stat.color}-600`} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Activity Timeline */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <h3 className="text-lg font-bold mb-6">Recent Activity</h3>
+              <div className="space-y-6">
+                {[
+                  {
+                    time: '2:45 PM',
+                    title: 'New rental contract created',
+                    description: 'Contract #10325 - Toyota Camry',
+                    user: 'Ahmed Al-Mansoori',
+                    icon: Car,
+                    color: 'blue',
+                  },
+                  {
+                    time: '1:20 PM',
+                    title: 'Vehicle returned',
+                    description: 'Contract #10298 - Honda Accord',
+                    user: 'Fatima Al-Zaabi',
+                    icon: CheckCircle,
+                    color: 'green',
+                  },
+                  {
+                    time: '11:05 AM',
+                    title: 'Payment received',
+                    description: 'AED 3,500 - Contract #10315',
+                    user: 'System',
+                    icon: DollarSign,
+                    color: 'purple',
+                  },
+                  {
+                    time: '9:30 AM',
+                    title: 'Maintenance scheduled',
+                    description: 'Vehicle ABC-123 - Oil change',
+                    user: 'Mohammed Hassan',
+                    icon: Truck,
+                    color: 'amber',
+                  },
+                  {
+                    time: '8:15 AM',
+                    title: 'Customer inquiry',
+                    description: 'New inquiry for weekly rental',
+                    user: 'Sarah Ahmed',
+                    icon: Users,
+                    color: 'cyan',
+                  },
+                ].map((activity, i) => (
+                  <div key={i} className="flex gap-4 items-start">
+                    <div className="flex flex-col items-center">
+                      <div className={`h-10 w-10 rounded-full bg-${activity.color}-100 dark:bg-${activity.color}-950 flex items-center justify-center flex-shrink-0`}>
+                        <activity.icon className={`h-5 w-5 text-${activity.color}-600`} />
+                      </div>
+                      {i < 4 && <div className="w-px h-8 bg-border mt-2" />}
+                    </div>
+                    <div className="flex-1 pb-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="font-semibold text-sm">{activity.title}</p>
+                        <span className="text-xs text-muted-foreground">{activity.time}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-1">{activity.description}</p>
+                      <p className="text-xs text-muted-foreground">by {activity.user}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-lg font-bold mb-6">Upcoming Schedule</h3>
+              <div className="space-y-4">
+                {[
+                  {
+                    date: 'Today, 4:00 PM',
+                    title: 'Vehicle pickup scheduled',
+                    location: 'Dubai Airport Terminal 3',
+                    contract: '#10328',
+                  },
+                  {
+                    date: 'Tomorrow, 10:00 AM',
+                    title: 'Contract expiration',
+                    location: 'Main Office',
+                    contract: '#10285',
+                  },
+                  {
+                    date: 'Tomorrow, 2:30 PM',
+                    title: 'Maintenance appointment',
+                    location: 'Service Center - Al Barsha',
+                    contract: 'Vehicle XYZ-789',
+                  },
+                  {
+                    date: 'Nov 18, 9:00 AM',
+                    title: 'Fleet inspection',
+                    location: 'Main Parking Lot',
+                    contract: '15 vehicles',
+                  },
+                  {
+                    date: 'Nov 19, 11:30 AM',
+                    title: 'Contract renewal',
+                    location: 'Customer Office',
+                    contract: '#10145',
+                  },
+                ].map((event, i) => (
+                  <div key={i} className="p-4 bg-muted/30 rounded-lg hover-elevate">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="font-semibold text-sm mb-1">{event.title}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>{event.date}</span>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-xs">{event.contract}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{event.location}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Comparison Table Design */}
+        <TabsContent value="comparison-table" className="space-y-6 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold">Comparison Table Design</h2>
+              <p className="text-sm text-muted-foreground">Side-by-side data comparison - perfect for analytics and reporting</p>
+            </div>
+            <Button onClick={() => setSelectedDesign('Comparison Table')} variant={selectedDesign === 'Comparison Table' ? 'default' : 'outline'} data-testid="button-select-comparison-table">
+              {selectedDesign === 'Comparison Table' ? <Check className="mr-2 h-4 w-4" /> : null}
+              Select This Design
+            </Button>
+          </div>
+
+          {/* Period Comparison Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold">This Month</h3>
+                <Badge className="bg-blue-100 text-blue-700">Current Period</Badge>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { label: 'Total Revenue', value: 'AED 45,680', change: '+18.2%' },
+                  { label: 'Active Contracts', value: '214', change: '+12.5%' },
+                  { label: 'New Customers', value: '42', change: '+25.3%' },
+                  { label: 'Avg Contract Value', value: 'AED 2,145', change: '+8.7%' },
+                ].map((metric, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
+                      <p className="text-xl font-bold">{metric.value}</p>
+                    </div>
+                    <Badge className="bg-green-100 text-green-700">{metric.change}</Badge>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold">Last Month</h3>
+                <Badge variant="outline">Previous Period</Badge>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { label: 'Total Revenue', value: 'AED 38,620' },
+                  { label: 'Active Contracts', value: '190' },
+                  { label: 'New Customers', value: '34' },
+                  { label: 'Avg Contract Value', value: 'AED 1,975' },
+                ].map((metric, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
+                      <p className="text-xl font-bold text-muted-foreground">{metric.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* Fleet Performance Comparison */}
+          <Card className="p-6">
+            <h3 className="text-lg font-bold mb-6">Fleet Performance Comparison</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3 text-sm font-semibold">Vehicle Type</th>
+                    <th className="text-right p-3 text-sm font-semibold">Total Units</th>
+                    <th className="text-right p-3 text-sm font-semibold">Utilization</th>
+                    <th className="text-right p-3 text-sm font-semibold">Revenue</th>
+                    <th className="text-right p-3 text-sm font-semibold">Avg Daily Rate</th>
+                    <th className="text-right p-3 text-sm font-semibold">Performance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { type: 'Luxury Sedans', units: 24, utilization: 92, revenue: 'AED 18,500', rate: 'AED 450', performance: 'Excellent' },
+                    { type: 'Economy Cars', units: 45, utilization: 78, revenue: 'AED 12,350', rate: 'AED 150', performance: 'Good' },
+                    { type: 'SUVs', units: 18, utilization: 85, revenue: 'AED 14,200', rate: 'AED 380', performance: 'Excellent' },
+                    { type: 'Vans', units: 12, utilization: 65, revenue: 'AED 8,900', rate: 'AED 280', performance: 'Average' },
+                    { type: 'Sports Cars', units: 8, utilization: 95, revenue: 'AED 16,400', rate: 'AED 850', performance: 'Outstanding' },
+                  ].map((row, i) => (
+                    <tr key={i} className="border-b hover-elevate">
+                      <td className="p-3 font-medium">{row.type}</td>
+                      <td className="p-3 text-right">{row.units}</td>
+                      <td className="p-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-primary"
+                              style={{ width: `${row.utilization}%` }}
+                            />
+                          </div>
+                          <span className="text-sm">{row.utilization}%</span>
+                        </div>
+                      </td>
+                      <td className="p-3 text-right font-semibold">{row.revenue}</td>
+                      <td className="p-3 text-right">{row.rate}</td>
+                      <td className="p-3 text-right">
+                        <Badge
+                          className={
+                            row.performance === 'Outstanding'
+                              ? 'bg-purple-100 text-purple-700'
+                              : row.performance === 'Excellent'
+                              ? 'bg-green-100 text-green-700'
+                              : row.performance === 'Good'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }
+                        >
+                          {row.performance}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Regional Comparison */}
+          <Card className="p-6">
+            <h3 className="text-lg font-bold mb-6">Regional Performance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { region: 'Dubai', revenue: 'AED 28,400', contracts: 142, growth: '+22%' },
+                { region: 'Abu Dhabi', revenue: 'AED 12,350', contracts: 58, growth: '+15%' },
+                { region: 'Sharjah', revenue: 'AED 4,930', contracts: 14, growth: '+8%' },
+              ].map((region, i) => (
+                <div key={i} className="p-4 border rounded-lg hover-elevate">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold">{region.region}</h4>
+                    <Badge className="bg-green-100 text-green-700">{region.growth}</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Revenue</p>
+                      <p className="text-lg font-bold">{region.revenue}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Active Contracts</p>
+                      <p className="text-lg font-bold">{region.contracts}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </Card>
         </TabsContent>
