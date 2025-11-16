@@ -41,6 +41,27 @@ const designSamples = [
     features: ['Bold colors', 'Visual charts', 'Engaging design', 'Data storytelling'],
     preview: '#5',
   },
+  {
+    id: 'gauges-metrics',
+    name: 'Gauges & Metrics',
+    description: 'Performance indicators with radial gauges for KPI tracking',
+    features: ['Radial gauges', 'Visual KPIs', 'Performance dials', 'Metric trends'],
+    preview: '#6',
+  },
+  {
+    id: 'timeline-view',
+    name: 'Timeline View',
+    description: 'Activity-based layout with chronological feed for operations tracking',
+    features: ['Activity feed', 'Timeline events', 'Upcoming schedule', 'Operations log'],
+    preview: '#7',
+  },
+  {
+    id: 'comparison-table',
+    name: 'Comparison Table',
+    description: 'Side-by-side data comparison for analytics and reporting',
+    features: ['Period comparison', 'Fleet performance', 'Regional analytics', 'Data tables'],
+    preview: '#8',
+  },
 ];
 
 export function DesignSamplesTab() {
@@ -57,7 +78,7 @@ export function DesignSamplesTab() {
           </h2>
         </div>
         <p className="text-muted-foreground text-base leading-6" data-testid="text-design-samples-subtitle">
-          Explore 5 professionally designed dashboard styles. Click "View Sample" to see each design in action, then choose your favorite.
+          Explore 8 professionally designed dashboard styles. Click "View Sample" to see each design in action, then choose your favorite.
         </p>
       </div>
 
