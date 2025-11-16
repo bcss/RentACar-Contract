@@ -1,7 +1,7 @@
 # RCCMS - Rental Car Contract Management System
 
 ## Overview
-RCCMS (Rental Car Contract Management System) is a production-ready, bilingual (English/Arabic) rental car management platform built with React, Express, and PostgreSQL. It manages the complete rental lifecycle through a streamlined 4-state workflow (Draft → Active → Completed → Closed). Key features include role-based access control, hardened security validation, comprehensive dual audit trails, insurance claims tracking, unclosed contract alerts, enhanced vehicle inspection documentation, and extensive admin configuration. The system is designed for global deployment without source code modifications, supporting Material Design principles and RTL/LTR layouts, and its backend is prepared for future Staff and Customer mobile applications.
+RCCMS (Rental Car Contract Management System) is a production-ready, bilingual (English/Arabic) rental car management platform. It manages the complete rental lifecycle through a streamlined 4-state workflow (Draft → Active → Completed → Closed). Key capabilities include role-based access control, hardened security validation, comprehensive dual audit trails, insurance claims tracking, unclosed contract alerts, enhanced vehicle inspection documentation, and extensive admin configuration. The system supports global deployment without source code modifications, integrates Material Design principles and RTL/LTR layouts, and its backend is prepared for future Staff and Customer mobile applications.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -19,28 +19,21 @@ Preferred communication style: Simple, everyday language.
 - **Technology Stack:** Node.js with TypeScript, Express.js, Drizzle ORM, internal username/password authentication with Passport.js, express-session with PostgreSQL store.
 - **API Design:** RESTful endpoints, role-based middleware, centralized error handling, comprehensive audit logging.
 - **Authentication & Authorization:** Internal username/password system, Passport.js, PostgreSQL-backed sessions, httpOnly/secure cookies, role-based access (Admin, Manager, Staff, Viewer).
-- **Security Hardening:** Includes session fixation protection, CSRF protection via double-submit cookie pattern with automatic token refresh and retry logic, PII sanitization from error logs, password complexity and rotation, security headers (Helmet.js), and robust business logic validation (e.g., edit reason, financial input guards). All critical vulnerabilities are resolved, aligning with GDPR, PCI-DSS, and OWASP Top 10:2021 standards.
-- **Production Security (Nov 16, 2025):** 
-  - **Mandatory Super Admin Password:** Production deployment REQUIRES `SUPER_ADMIN_PASSWORD` environment variable (app fails to start if not set)
-  - **Configurable Session TTL:** Session timeout now configurable via `SESSION_MAX_AGE` (default: 1 hour, valid range: 5 min to 30 days)
-  - **Input Validation:** SESSION_MAX_AGE validates against NaN and invalid ranges, falls back to secure default with warnings
-  - **Environment-Specific Controls:** Development mode allows weak defaults with warnings, production mode enforces strict security
-  - **CSRF Protection Implementation:** Double-submit cookie pattern with automatic token fetching on app load and login, transparent retry logic for expired tokens, 1-hour token lifetime
+- **Security Hardening:** Session fixation protection, CSRF protection via double-submit cookie pattern, PII sanitization, password complexity and rotation, security headers (Helmet.js), robust business logic validation. Adheres to GDPR, PCI-DSS, and OWASP Top 10:2021 standards. Production environment enforces strong security measures like mandatory super admin password and configurable session TTL.
 - **Audit Trails:** `contractEdits` for field-level modifications and `auditLogs` for lifecycle events.
 - **Drizzle ORM Patterns:** Enforces type safety and audit trails for all create operations.
-- **Mobile Backend Infrastructure:** Backend is prepared for future mobile apps with 29 RESTful endpoints, with customer-facing endpoints protected by `requireCustomerAuth` middleware until customer authentication is deployed.
+- **Mobile Backend Infrastructure:** Prepared for future mobile apps with 29 RESTful endpoints, with customer-facing endpoints protected by `requireCustomerAuth` middleware.
 
 ### Data Storage
 - **Database:** PostgreSQL (via Neon serverless).
-- **Schema Design:** Comprehensive tables for core entities (Users, Customers, Vehicles, Contracts, Payments) and system features (Audit Logs, Insurance Claims, System Errors).
-- **Key Design Decisions:** 4-state lifecycle, bilingual field storage, auto-incrementing identifiers, dual-layer audit trail, singleton pattern for global settings, disable-only architecture instead of delete.
+- **Schema Design:** Comprehensive tables for core entities (Users, Customers, Vehicles, Contracts, Payments) and system features. Features a 4-state lifecycle, bilingual field storage, auto-incrementing identifiers, dual-layer audit trail, singleton pattern for global settings, and disable-only architecture.
 
 ### Core Features
-- **Streamlined Rental Lifecycle:** 4-state workflow (draft → active → completed → closed).
-- **Hardened Edit Validation:** Server-side enforcement of mandatory, meaningful edit reasons for contract mutations.
+- **Streamlined Rental Lifecycle:** 4-state workflow.
+- **Hardened Edit Validation:** Server-side enforcement of mandatory edit reasons.
 - **Contract Timeline:** Visualizes full history of field edits and lifecycle events.
-- **Insurance Claims Module:** Complete CRUD system with workflow and contract integration.
-- **Unclosed Contract Alerts:** System for detecting and reporting on contracts completed but not closed.
+- **Insurance Claims Module:** Complete CRUD system with workflow.
+- **Unclosed Contract Alerts:** System for detecting and reporting unclosed contracts.
 - **Enhanced Vehicle Inspection:** Supports 6 mandatory angles plus unlimited optional photos with compression.
 - **Automated Calculations:** Automatic fuel charge calculation and advance payment auto-adjustment.
 - **Comprehensive Financial Settings:** Admin-only configuration for rental rates, fees, and pricing.
@@ -50,8 +43,8 @@ Preferred communication style: Simple, everyday language.
 - **Complete Audit Logging:** Dual audit trail for CRUD operations and lifecycle events.
 - **System Error Logging:** Automatic error logging to database with full context.
 - **Company Settings Management:** Admin-only configuration for bilingual company information and contract clauses.
-- **Support & Help Center:** Unified page with dynamic system health monitoring, documentation modals, FAQs, and error reporting.
-- **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality with chart visualization embedding.
+- **Support & Help Center:** Unified page with dynamic system health monitoring, documentation, FAQs, and error reporting.
+- **Advanced Analytics & Reporting:** Comprehensive reporting with `recharts`, PDF and Excel export functionality. Includes Revenue Trends, Fleet Performance, Contract Analytics, and Collection Performance reports.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor, from_company.
 - **Professional PDF Integration:** Bilingual PDF generation for rental contracts with RTA compliance fields.
@@ -79,54 +72,3 @@ Preferred communication style: Simple, everyday language.
 - **Styling:** `tailwindcss`, `class-variance-authority`, `clsx`.
 - **Data Visualization:** `recharts`, `html2canvas`.
 - **Export & Document Generation:** `jspdf`, `jspdf-autotable`, `xlsx`.
-
-## Documentation
-
-### Recent Changes (November 16, 2025)
-
-#### Dashboard Visual Analytics Enhancement
-Implemented Phase 1 and Phase 2.1-2.3 of the Dashboard Enhancement Proposal to transform the dashboard from a static snapshot to a living analytics hub:
-
-**Phase 1 - Trend Indicators:**
-- Created `TrendIndicator` component displaying month-over-month changes with directional arrows and color coding
-- Added trend indicators to Dashboard KPI cards:
-  - Monthly Revenue card: Shows revenue growth percentage vs last month
-  - Active Rentals card: Shows contract volume growth percentage vs last month
-- Leveraged existing `revenueGrowth` and `contractGrowth` fields from analytics endpoints
-
-**Phase 2 - Revenue Trend Visualization:**
-- Backend: Created `getRevenueTrend(months)` and `getContractVolumeTrend(months)` storage methods with SQL aggregation
-- API Endpoints:
-  - `GET /api/analytics/revenue-trend?months=N` (default: 12 months)
-  - `GET /api/analytics/contract-volume?months=N` (default: 6 months)
-- Frontend: Created `RevenueTrendChart` component using recharts LineChart featuring:
-  - Interactive time range selector (3M/6M/12M)
-  - Multiple revenue breakdowns (total, rental fees, extra charges, delivery fees)
-  - Summary metrics (total contracts, avg revenue/month, highest/lowest performing months)
-  - Responsive design with bilingual support and dark mode compatibility
-- Integration: Added chart to Dashboard visible to Admin/Manager roles only
-
-#### Critical Revenue Calculation Bug Fix (November 16, 2025)
-**Issue Discovered:** All analytics methods were calculating revenue incompletely by excluding delivery charges (`dropOffCharge` and `pickUpCharge`), which are separate from `totalExtraCharges`.
-
-**Scope:** System-wide revenue calculations were underreporting actual revenue across all analytics endpoints.
-
-**Root Cause:** The formula `totalRevenue = totalAmount + totalExtraCharges` was missing delivery charges because:
-- `totalExtraCharges` = extraKmCharge + fuelCharge + damageCharge + trafficFineCharge + otherCharges
-- Delivery charges are stored separately and must be added explicitly
-
-**Corrected Formula:**
-```
-totalRevenue = totalAmount + totalExtraCharges + dropOffCharge + pickUpCharge
-```
-
-**Methods Fixed:**
-1. `getRevenueAnalytics()`: Fixed totalRevenue, monthlyRevenue, lastMonthRevenue calculations
-2. `getRevenueTrend()`: Fixed monthly totalRevenue aggregation
-3. `getFinancialReport()`: Fixed totalRevenue, allTimeRevenue, finalizedRevenue calculations
-4. `getOperationalReport()`: Fixed vehicleStats.totalRevenue calculation
-
-**Impact:** All analytics dashboards, reports, and trend charts now display accurate total revenue including delivery charges. This fix ensures data integrity across the entire reporting system.
-
-### Enhancement Proposals
-- **Dashboard Enhancement Proposal** (`docs/DASHBOARD_ENHANCEMENT_PROPOSAL.md`): Comprehensive analysis of current dashboard against industry best practices, identifying gaps in visual data storytelling, trend analysis, and goal tracking. Proposes 3-phase implementation roadmap including trend indicators, time-series charts (revenue, contract volume, fleet utilization), interactive filters, and four new analytical report pages (Revenue Trends, Fleet Performance, Contract Analytics, Collection Performance). Based on research from 7 leading dashboard design resources.
