@@ -41,16 +41,27 @@ This document outlines the comprehensive redesign of the RCCMS dashboard into a 
 - UAE emirate geographic distribution
 - Performance forecasts and KPIs
 
+### Tab 4: "Design Samples" 🎨
+**Purpose**: Design customization and style selection  
+**Visibility**: Admin and Manager roles only  
+**Default Tab**: NO
+
+**Content Focus**:
+- 5 professionally designed dashboard layouts
+- Design preview and comparison
+- Style selection for dashboard implementation
+- Design guidelines and recommendations
+
 ---
 
 ## 2. Role-Based Access Matrix
 
-| Role    | My Day | Company Today | Executive Overview |
-|---------|--------|---------------|-------------------|
-| Viewer  | ✅     | ❌            | ❌                |
-| Staff   | ✅     | ❌            | ❌                |
-| Manager | ✅     | ✅            | ✅                |
-| Admin   | ✅     | ✅            | ✅                |
+| Role    | My Day | Company Today | Executive Overview | Design Samples |
+|---------|--------|---------------|-------------------|----------------|
+| Viewer  | ✅     | ❌            | ❌                | ❌             |
+| Staff   | ✅     | ❌            | ❌                | ❌             |
+| Manager | ✅     | ✅            | ✅                | ✅             |
+| Admin   | ✅     | ✅            | ✅                | ✅             |
 
 ---
 

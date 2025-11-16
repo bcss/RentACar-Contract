@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@/components/Icon';
 import { useTranslation } from 'react-i18next';
 
 export default function DashboardSamples() {

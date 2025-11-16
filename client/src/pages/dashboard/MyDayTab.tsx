@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Icon } from '@/components/Icon';
 import { format } from 'date-fns';
-import { FileText, DollarSign, CheckCircle, Clock, Plus, TrendingUp, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { FileText, DollarSign, CheckCircle, Clock, Plus, TrendingUp, AlertCircle, CheckCircle2, XCircle, ArrowRight, Calendar } from 'lucide-react';
 
 export function MyDayTab() {
   const { t, i18n } = useTranslation();
@@ -314,7 +314,7 @@ export function MyDayTab() {
         </CardContent>
       </Card>
 
-      {/* My Pending Tasks Details - Modern Task Command Center */}
+      {/* My Pending Tasks Details - Elegant List Design */}
       {(myOverdueReturns.length > 0 || myPendingRefunds.length > 0 || myUnclosedContracts.length > 0) && (
         <Card className="shadow-lg border-[hsl(var(--destructive)/0.2)]" data-testid="card-my-pending-tasks-details">
           <CardHeader className="p-6 bg-[hsl(var(--destructive)/0.05)]">
@@ -323,39 +323,42 @@ export function MyDayTab() {
               {t('dashboard.myPendingTasks')}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-6">
+          <CardContent className="p-0">
+            <div className="divide-y">
               {myOverdueReturns.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-bold mb-3 text-destructive uppercase tracking-wide flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    {t('dashboard.overdueReturns')} ({myOverdueReturns.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {myOverdueReturns.slice(0, 3).map(contract => {
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-sm font-bold text-destructive uppercase tracking-wide flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      {t('dashboard.overdueReturns')}
+                    </h4>
+                    <Badge variant="destructive">{myOverdueReturns.length}</Badge>
+                  </div>
+                  <div className="space-y-1">
+                    {myOverdueReturns.slice(0, 3).map((contract, idx) => {
                       const daysOverdue = contract.rentalEndDate 
                         ? Math.floor((now.getTime() - new Date(contract.rentalEndDate).getTime()) / (1000 * 60 * 60 * 24))
                         : 0;
                       return (
                         <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                          <div className="relative p-4 rounded-xl border-2 border-destructive/20 bg-destructive/5 hover:border-destructive hover:shadow-md transition-all duration-200 cursor-pointer" data-testid={`row-overdue-${contract.id}`}>
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex-1">
-                                <p className="font-semibold text-base">#{contract.contractNumber}</p>
-                                <p className="text-sm text-muted-foreground mt-1 leading-6">
-                                  {contract.customerNameEn || 'N/A'} • {contract.vehicleRegistration}
-                                </p>
-                              </div>
-                              <div className="flex flex-col items-end gap-2">
-                                <Badge variant="destructive" className="font-medium">
-                                  {daysOverdue} {t('dashboard.daysOverdue')}
-                                </Badge>
-                                {contract.rentalEndDate && (
-                                  <span className="text-xs text-muted-foreground">
-                                    {format(new Date(contract.rentalEndDate), 'PPP')}
-                                  </span>
-                                )}
-                              </div>
+                          <div className="group flex items-center gap-4 p-3 rounded-lg hover:bg-[hsl(var(--destructive)/0.05)] transition-colors cursor-pointer" data-testid={`row-overdue-${contract.id}`}>
+                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                              <span className="text-sm font-bold text-destructive">{daysOverdue}d</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm">#{contract.contractNumber}</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {contract.customerNameEn || 'N/A'} • {contract.vehicleRegistration}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {contract.rentalEndDate && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {format(new Date(contract.rentalEndDate), 'MMM d')}
+                                </span>
+                              )}
+                              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                             </div>
                           </div>
                         </Link>
@@ -366,28 +369,32 @@ export function MyDayTab() {
               )}
 
               {myPendingRefunds.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-bold mb-3 uppercase tracking-wide flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                    <DollarSign className="h-4 w-4" />
-                    {t('dashboard.pendingRefunds')} ({myPendingRefunds.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {myPendingRefunds.slice(0, 3).map(contract => (
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                      <DollarSign className="h-4 w-4" />
+                      {t('dashboard.pendingRefunds')}
+                    </h4>
+                    <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20">{myPendingRefunds.length}</Badge>
+                  </div>
+                  <div className="space-y-1">
+                    {myPendingRefunds.slice(0, 3).map((contract, idx) => (
                       <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                        <div className="p-4 rounded-xl border-2 border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20 hover:border-blue-400 hover:shadow-md transition-all duration-200 cursor-pointer" data-testid={`row-refund-${contract.id}`}>
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1">
-                              <p className="font-semibold text-base">#{contract.contractNumber}</p>
-                              <p className="text-sm text-muted-foreground mt-1 leading-6">
-                                {contract.customerNameEn || 'N/A'}
-                              </p>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 font-semibold">
-                                {currency} {parseFloat(contract.securityDeposit || '0').toLocaleString(i18n.language)}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">{t('dashboard.refundPending')}</span>
-                            </div>
+                        <div className="group flex items-center gap-4 p-3 rounded-lg hover-elevate transition-colors cursor-pointer" data-testid={`row-refund-${contract.id}`}>
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                            <DollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm">#{contract.contractNumber}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {contract.customerNameEn || 'N/A'}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
+                              {currency} {parseFloat(contract.securityDeposit || '0').toLocaleString(i18n.language, { minimumFractionDigits: 0 })}
+                            </span>
+                            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                           </div>
                         </div>
                       </Link>
@@ -397,23 +404,30 @@ export function MyDayTab() {
               )}
 
               {myUnclosedContracts.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-bold mb-3 uppercase tracking-wide flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4" />
-                    {t('dashboard.unclosedContracts')} ({myUnclosedContracts.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {myUnclosedContracts.slice(0, 3).map(contract => (
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" />
+                      {t('dashboard.unclosedContracts')}
+                    </h4>
+                    <Badge variant="outline">{myUnclosedContracts.length}</Badge>
+                  </div>
+                  <div className="space-y-1">
+                    {myUnclosedContracts.slice(0, 3).map((contract, idx) => (
                       <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                        <div className="p-4 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer" data-testid={`row-unclosed-${contract.id}`}>
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1">
-                              <p className="font-semibold text-base">#{contract.contractNumber}</p>
-                              <p className="text-sm text-muted-foreground mt-1 leading-6">
-                                {contract.customerNameEn || 'N/A'} • {contract.vehicleRegistration}
-                              </p>
-                            </div>
-                            <Badge variant="outline" className="font-medium">{t('dashboard.needsClosure')}</Badge>
+                        <div className="group flex items-center gap-4 p-3 rounded-lg hover-elevate transition-colors cursor-pointer" data-testid={`row-unclosed-${contract.id}`}>
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm">#{contract.contractNumber}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {contract.customerNameEn || 'N/A'} • {contract.vehicleRegistration}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">{t('dashboard.needsClosure')}</span>
+                            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                           </div>
                         </div>
                       </Link>

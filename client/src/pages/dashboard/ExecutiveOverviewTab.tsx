@@ -122,7 +122,7 @@ export function ExecutiveOverviewTab() {
         </CardContent>
       </Card>
 
-      {/* Top Performers */}
+      {/* Top Performers - Elegant List Design */}
       <Card data-testid="card-top-performers">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -134,32 +134,33 @@ export function ExecutiveOverviewTab() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-2">
+        <CardContent className="p-0">
+          <div className="grid md:grid-cols-2 divide-x">
             {/* Top Vehicles by Revenue */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Car className="h-4 w-4 text-muted-foreground" />
-                <h4 className="text-sm font-semibold">{t('dashboard.topVehicles')}</h4>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2">
+                  <Car className="h-4 w-4" />
+                  {t('dashboard.topVehicles')}
+                </h4>
+                <Badge variant="outline">Top 5</Badge>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {topPerformersData?.topVehiclesByRevenue.slice(0, 5).map((vehicle, index) => (
                   <Link key={vehicle.vehicleId} href={`/vehicles/${vehicle.vehicleId}`}>
-                    <div className="flex items-center gap-3 p-3 rounded-lg border hover-elevate cursor-pointer" data-testid={`row-top-vehicle-${index}`}>
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-sm font-bold text-primary">#{index + 1}</span>
-                        </div>
+                    <div className="group flex items-center gap-3 p-2 rounded-lg hover-elevate transition-colors cursor-pointer" data-testid={`row-top-vehicle-${index}`}>
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-bold text-primary">#{index + 1}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{vehicle.registration}</p>
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="font-semibold text-sm truncate">{vehicle.registration}</p>
+                        <p className="text-xs text-muted-foreground truncate">
                           {vehicle.make} {vehicle.model}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold" data-testid={`text-vehicle-revenue-${index}`}>
-                          {currency} {vehicle.totalRevenue.toLocaleString(i18n.language)}
+                        <p className="font-semibold text-sm" data-testid={`text-vehicle-revenue-${index}`}>
+                          {currency} {vehicle.totalRevenue.toLocaleString(i18n.language, { minimumFractionDigits: 0 })}
                         </p>
                       </div>
                     </div>
@@ -169,32 +170,37 @@ export function ExecutiveOverviewTab() {
             </div>
 
             {/* Most Active Staff */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <h4 className="text-sm font-semibold">{t('dashboard.topStaff')}</h4>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  {t('dashboard.topStaff')}
+                </h4>
+                <Badge variant="outline">Top 5</Badge>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {topPerformersData?.mostActiveStaff.slice(0, 5).map((staff, index) => (
-                  <div key={staff.userId} className="flex items-center gap-3 p-3 rounded-lg border" data-testid={`row-top-staff-${index}`}>
+                  <div key={staff.userId} className="group flex items-center gap-3 p-2 rounded-lg hover-elevate transition-colors" data-testid={`row-top-staff-${index}`}>
                     <div className="flex-shrink-0">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback>
+                        <AvatarFallback className="text-xs">
                           {staff.firstName?.[0]}{staff.lastName?.[0]}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{staff.firstName} {staff.lastName}</p>
-                      <p className="text-sm text-muted-foreground truncate">
+                      <p className="font-semibold text-sm truncate">{staff.firstName} {staff.lastName}</p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {staff.contractCount} {t('dashboard.contracts')}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold" data-testid={`text-staff-revenue-${index}`}>
-                        {currency} {staff.totalRevenue.toLocaleString(i18n.language)}
-                      </p>
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center ml-auto mt-1">
+                    <div className="text-right flex items-center gap-2">
+                      <div>
+                        <p className="font-semibold text-sm" data-testid={`text-staff-revenue-${index}`}>
+                          {currency} {staff.totalRevenue.toLocaleString(i18n.language, { minimumFractionDigits: 0 })}
+                        </p>
+                      </div>
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-xs font-bold text-primary">#{index + 1}</span>
                       </div>
                     </div>
