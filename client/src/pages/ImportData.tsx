@@ -14,7 +14,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { downloadSampleJSON, downloadSampleCSV, type EntityType } from '@/utils/sampleDataGenerator';
 
-type EntityType = 'customers' | 'vehicles' | 'sponsors' | 'companies' | 'contracts';
 type FileFormat = 'json' | 'csv';
 
 interface ValidationError {
