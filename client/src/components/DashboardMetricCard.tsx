@@ -50,27 +50,27 @@ export function DashboardMetricCard({
 
   return (
     <Card 
-      className={`${styles.card} hover-elevate transition-all duration-200 min-h-28 ${className}`}
+      className={`${styles.card} hover-elevate transition-all duration-200 min-h-24 ${className}`}
       data-testid={testId}
     >
-      <CardHeader className="flex flex-row items-center justify-between gap-3 p-5 pb-3">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 p-4 pb-2">
         <div className="flex-1">
-          <CardTitle className="text-sm font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
             {title}
           </CardTitle>
         </div>
-        <div className={`h-10 w-10 rounded-full ${styles.iconBg} flex items-center justify-center flex-shrink-0`}>
+        <div className={`h-9 w-9 rounded-full ${styles.iconBg} flex items-center justify-center flex-shrink-0`}>
           <Icon className={`h-5 w-5 ${styles.iconColor}`} />
         </div>
       </CardHeader>
-      <CardContent className="p-5 pt-0">
-        <div className="text-2xl font-semibold tabular-nums tracking-tight" data-testid={valueTestId}>
+      <CardContent className="p-4 pt-0">
+        <div className="text-lg font-semibold tabular-nums tracking-tight" data-testid={valueTestId}>
           {value}
         </div>
         {subtitle && (
-          <div className="mt-2">
+          <div className="mt-1.5">
             {typeof subtitle === 'string' ? (
-              <span className="text-sm text-muted-foreground leading-6">{subtitle}</span>
+              <span className="text-xs text-muted-foreground leading-5">{subtitle}</span>
             ) : (
               subtitle
             )}
