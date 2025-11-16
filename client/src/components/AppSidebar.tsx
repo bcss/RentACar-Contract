@@ -130,7 +130,24 @@ const getIconComponent = (iconName: string) => {
 export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const { t, i18n } = useTranslation();
   const [location] = useLocation();
-  const { user, isAdmin, isManager, canAccessReports, canCloseContracts } = useAuth();
+  const { 
+    user, 
+    isAdmin, 
+    isManager, 
+    canAccessReports, 
+    canCloseContracts,
+    // Granular report permissions
+    canAccessRevenueTrends,
+    canAccessFleetPerformance,
+    canAccessContractAnalytics,
+    canAccessCollectionPerformance,
+    canAccessFinancialReports,
+    canAccessOperationalReports,
+    canAccessCustomerReports,
+    canAccessInsuranceReports,
+    canAccessAuditReports,
+    canAccessUserActivityReports,
+  } = useAuth();
   const { toast } = useToast();
   const { toggleSidebar, state: sidebarState } = useSidebar();
   const { language, toggleLanguage } = useLanguage();
@@ -337,70 +354,73 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   ];
 
   const reportItems = [
-    {
-      title: t('nav.financialReports'),
-      icon: 'account_balance',
-      url: '/reports/financial',
-      show: isAdmin || isManager || canAccessReports,
-    },
-    {
-      title: t('nav.operationalReports'),
-      icon: 'bar_chart',
-      url: '/reports/operational',
-      show: isAdmin || isManager || canAccessReports,
-    },
-    {
-      title: t('nav.customerReports'),
-      icon: 'people_outline',
-      url: '/reports/customers',
-      show: isAdmin || isManager || canAccessReports,
-    },
-    {
-      title: 'Insurance Reports',
-      icon: 'health_and_safety',
-      url: '/reports/insurance',
-      show: isAdmin || isManager || canAccessReports,
-    },
-    {
-      title: t('nav.auditReports'),
-      icon: 'timeline',
-      url: '/reports/audit',
-      show: isAdmin || isManager || canAccessReports,
-    },
-    {
-      title: t('nav.userActivity'),
-      icon: 'person_search',
-      url: '/reports/user-activity',
-      show: isAdmin || isManager || canAccessReports,
-    },
-    {
-      title: 'Unclosed Contracts',
-      icon: 'warning_amber',
-      url: '/unclosed-contracts-report',
-      show: isAdmin || isManager || canAccessReports,
-    },
+    // Analytical Reports - Granular Permissions
     {
       title: 'Revenue Trends',
       icon: 'trending_up',
       url: '/reports/revenue-trends',
-      show: isAdmin || isManager || canAccessReports,
+      show: isAdmin || isManager || canAccessRevenueTrends,
     },
     {
       title: 'Fleet Performance',
       icon: 'directions_car',
       url: '/reports/fleet-performance',
-      show: isAdmin || isManager || canAccessReports,
+      show: isAdmin || isManager || canAccessFleetPerformance,
     },
     {
       title: 'Contract Analytics',
       icon: 'analytics',
       url: '/reports/contract-analytics',
-      show: isAdmin || isManager || canAccessReports,
+      show: isAdmin || isManager || canAccessContractAnalytics,
     },
     {
       title: 'Collection Performance',
       icon: 'account_balance_wallet',
       url: '/reports/collection-performance',
+      show: isAdmin || isManager || canAccessCollectionPerformance,
+    },
+    // Standard Reports - Granular Permissions
+    {
+      title: t('nav.financialReports'),
+      icon: 'account_balance',
+      url: '/reports/financial',
+      show: isAdmin || isManager || canAccessFinancialReports,
+    },
+    {
+      title: t('nav.operationalReports'),
+      icon: 'bar_chart',
+      url: '/reports/operational',
+      show: isAdmin || isManager || canAccessOperationalReports,
+    },
+    {
+      title: t('nav.customerReports'),
+      icon: 'people_outline',
+      url: '/reports/customers',
+      show: isAdmin || isManager || canAccessCustomerReports,
+    },
+    {
+      title: 'Insurance Reports',
+      icon: 'health_and_safety',
+      url: '/reports/insurance',
+      show: isAdmin || isManager || canAccessInsuranceReports,
+    },
+    {
+      title: t('nav.auditReports'),
+      icon: 'timeline',
+      url: '/reports/audit',
+      show: isAdmin || isManager || canAccessAuditReports,
+    },
+    {
+      title: t('nav.userActivity'),
+      icon: 'person_search',
+      url: '/reports/user-activity',
+      show: isAdmin || isManager || canAccessUserActivityReports,
+    },
+    // Special Reports - Keep master toggle
+    {
+      title: 'Unclosed Contracts',
+      icon: 'warning_amber',
+      url: '/unclosed-contracts-report',
       show: isAdmin || isManager || canAccessReports,
     },
   ];
