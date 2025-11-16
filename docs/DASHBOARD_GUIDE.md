@@ -284,7 +284,9 @@ These advanced analytics are only visible to Admin and Manager roles.
 - **Rank visualization**: Numbered badges with semantic colors (top 3 highlighted)
 - **Staff identity**: Full name (primary), @username (secondary)
 - **Avatar display**: Initials in rounded avatar with primary color background
-- **Performance metric**: Total contracts created with "contracts" label
+- **Performance metrics**: 
+  - Primary: Total revenue generated (with full currency formatting)
+  - Secondary: Total contracts created count
 - **Click-through**: Navigate to users management page
 
 **Professional Features**:

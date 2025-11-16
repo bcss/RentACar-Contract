@@ -1650,7 +1650,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(sql`SUM(CAST(${contracts.totalAmount} AS DECIMAL))`))
       .limit(5);
 
-    // Most active staff by contract count
+    // Most active staff by contract count WITH revenue
     const topStaff = await db
       .select({
         userId: contracts.createdBy,
@@ -1658,9 +1658,27 @@ export class DatabaseStorage implements IStorage {
         firstName: users.firstName,
         lastName: users.lastName,
         contractCount: count(),
+        totalRevenue: sql<string>`
+          COALESCE(
+            SUM(
+              CAST(${contracts.totalAmount} AS DECIMAL) + 
+              COALESCE(CAST(${contracts.totalExtraCharges} AS DECIMAL), 0) +
+              COALESCE(CAST(${contracts.dropOffCharge} AS DECIMAL), 0) +
+              COALESCE(CAST(${contracts.pickUpCharge} AS DECIMAL), 0)
+            ), 
+            0
+          )
+        `,
       })
       .from(contracts)
       .innerJoin(users, eq(contracts.createdBy, users.id))
+      .where(
+        or(
+          eq(contracts.status, 'active'),
+          eq(contracts.status, 'completed'),
+          eq(contracts.status, 'closed')
+        )
+      )
       .groupBy(contracts.createdBy, users.username, users.firstName, users.lastName)
       .orderBy(desc(count()))
       .limit(5);
@@ -1679,6 +1697,7 @@ export class DatabaseStorage implements IStorage {
         firstName: s.firstName || '',
         lastName: s.lastName || '',
         contractCount: Number(s.contractCount),
+        totalRevenue: parseFloat(s.totalRevenue),
       })),
     };
   }

@@ -1289,10 +1289,12 @@ export default function Dashboard() {
                                 <p className="text-xs text-muted-foreground truncate">@{staff.username}</p>
                               </div>
                             </div>
-                            {/* Contract Count KPI */}
+                            {/* Revenue & Contract Count KPI */}
                             <div className="text-right">
-                              <p className="text-sm font-bold text-primary">{staff.contractCount}</p>
-                              <p className="text-xs text-muted-foreground">contracts</p>
+                              <p className="text-sm font-bold text-primary">
+                                {currency} {Number(staff.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{staff.contractCount} contracts</p>
                             </div>
                           </div>
                         ))}
