@@ -96,7 +96,20 @@ interface CustomerFormProps {
 
 const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFormProps) => (
   <Form {...form}>
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <Tabs defaultValue="basic" className="w-full">
+        <div className="px-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="basic" data-testid="tab-customer-basic">Basic Info</TabsTrigger>
+            <TabsTrigger value="contact" data-testid="tab-customer-contact">Contact</TabsTrigger>
+            <TabsTrigger value="license" data-testid="tab-customer-license">License</TabsTrigger>
+            <TabsTrigger value="additional" data-testid="tab-customer-additional">Additional</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-250px)]">
+          {/* Basic Info Tab */}
+          <TabsContent value="basic" className="mt-0 space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
