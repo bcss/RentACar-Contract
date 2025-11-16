@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,25 +9,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Icon } from '@/components/Icon';
+import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from 'wouter';
 
 type EntityType = 'customers' | 'vehicles' | 'sponsors' | 'companies' | 'contracts';
 type FileFormat = 'json' | 'csv';
+
+interface ValidationError {
+  row: number;
+  field: string;
+  message: string;
+}
 
 interface ImportResult {
   success: boolean;
   message: string;
   count?: number;
+  errors?: ValidationError[];
 }
 
 export default function ImportData() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { isAuthenticated, isLoading, isAdmin, user } = useAuth();
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<EntityType>('customers');
   const [fileFormat, setFileFormat] = useState<FileFormat>('json');
   const [fileContent, setFileContent] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const [validationResult, setValidationResult] = useState<ImportResult | null>(null);
-  const [validationErrors, setValidationErrors] = useState<string>('');
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+
+  const isSuperAdmin = isAdmin && user?.isImmutable;
+
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || !isSuperAdmin)) {
+      toast({
+        title: t('common.error'),
+        description: 'Only superadmin can access this page',
+        variant: 'destructive',
+      });
+      setLocation('/');
+    }
+  }, [isAuthenticated, isLoading, isSuperAdmin, toast, t, setLocation]);
 
   const importMutation = useMutation({
     mutationFn: async ({ entity, content, format }: { entity: EntityType; content: string; format: FileFormat }) => {
@@ -39,7 +63,7 @@ export default function ImportData() {
     },
     onSuccess: (data: ImportResult) => {
       setValidationResult(data);
-      setValidationErrors('');
+      setValidationErrors([]);
       toast({
         title: t('common.success'),
         description: data.message,
@@ -48,13 +72,48 @@ export default function ImportData() {
       setFileName('');
     },
     onError: (error: any) => {
+      const parsedErrors: ValidationError[] = [];
+      
+      if (error?.errors && Array.isArray(error.errors)) {
+        parsedErrors.push(...error.errors);
+      } else if (error?.response?.errors && Array.isArray(error.response.errors)) {
+        parsedErrors.push(...error.response.errors);
+      } else {
+        const errorMessage = error?.message || t('common.error');
+        
+        if (typeof errorMessage === 'string') {
+          const lines = errorMessage.split('\n');
+          lines.forEach((line) => {
+            const match = line.match(/Row (\d+): Field '([^']+)' - (.+)/);
+            if (match) {
+              parsedErrors.push({
+                row: parseInt(match[1]),
+                field: match[2],
+                message: match[3],
+              });
+            }
+          });
+        }
+      }
+      
       const errorMessage = error?.message || t('common.error');
-      setValidationResult({ success: false, message: errorMessage });
-      setValidationErrors(errorMessage);
+      const displayMessage = parsedErrors.length > 0 
+        ? `Found ${parsedErrors.length} validation error${parsedErrors.length > 1 ? 's' : ''}` 
+        : errorMessage;
+      
+      setValidationResult({ 
+        success: false, 
+        message: displayMessage,
+        errors: parsedErrors 
+      });
+      setValidationErrors(parsedErrors);
+      
       toast({
         variant: 'destructive',
         title: t('common.error'),
-        description: errorMessage,
+        description: parsedErrors.length > 0 
+          ? `${parsedErrors.length} validation error${parsedErrors.length > 1 ? 's' : ''} found`
+          : errorMessage,
       });
     },
   });
@@ -69,7 +128,7 @@ export default function ImportData() {
       setFileContent(content);
       setFileName(file.name);
       setValidationResult(null);
-      setValidationErrors('');
+      setValidationErrors([]);
     };
     reader.readAsText(file);
   };
@@ -95,7 +154,7 @@ export default function ImportData() {
     setFileContent('');
     setFileName('');
     setValidationResult(null);
-    setValidationErrors('');
+    setValidationErrors([]);
   };
 
   const entityDescriptions: Record<EntityType, string> = {
@@ -105,6 +164,18 @@ export default function ImportData() {
     companies: 'Import corporate sponsor companies with registration numbers, trade licenses, contact persons, and business information.',
     contracts: 'Import rental contracts in DRAFT status. Requires existing customers and vehicles. Automatically calculates rental amounts and validates relationships.',
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">{t('common.loading')}</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !isSuperAdmin) {
+    return null;
+  }
 
   return (
     <div className="flex-1 overflow-auto p-6">
@@ -257,9 +328,31 @@ export default function ImportData() {
                         {validationResult.success ? (
                           <p>{validationResult.message}</p>
                         ) : (
-                          <pre className="whitespace-pre-wrap text-xs mt-2 font-mono">
-                            {validationErrors}
-                          </pre>
+                          <div className="space-y-2">
+                            <p className="font-semibold">{validationResult.message}</p>
+                            {validationErrors.length > 0 && (
+                              <div className="mt-3 overflow-x-auto">
+                                <table className="w-full text-xs border-collapse" data-testid={`table-validation-errors-${entity}`}>
+                                  <thead>
+                                    <tr className="border-b">
+                                      <th className="text-left p-2 font-semibold">Row</th>
+                                      <th className="text-left p-2 font-semibold">Field</th>
+                                      <th className="text-left p-2 font-semibold">Error</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {validationErrors.map((error, idx) => (
+                                      <tr key={idx} className="border-b" data-testid={`error-row-${idx}`}>
+                                        <td className="p-2" data-testid={`error-row-number-${idx}`}>{error.row}</td>
+                                        <td className="p-2 font-mono" data-testid={`error-field-${idx}`}>{error.field}</td>
+                                        <td className="p-2" data-testid={`error-message-${idx}`}>{error.message}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </AlertDescription>
                     </Alert>

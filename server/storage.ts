@@ -281,16 +281,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(userId: string, updates: Partial<Omit<User, 'id' | 'createdAt' | 'lastLogin' | 'isImmutable' | 'username'>>): Promise<User> {
-    // Check if user exists and is not immutable
     const user = await this.getUser(userId);
     if (!user) {
       throw new Error("User not found");
     }
+    
     if (user.isImmutable) {
-      throw new Error("Cannot modify immutable user");
+      const allowedFields = ['firstName', 'lastName', 'email', 'passwordHash', 'lastPasswordChange'];
+      const attemptedFields = Object.keys(updates);
+      const disallowedFields = attemptedFields.filter(field => !allowedFields.includes(field));
+      
+      if (disallowedFields.length > 0) {
+        throw new Error(`Cannot modify immutable user: ${disallowedFields.join(', ')} fields are protected`);
+      }
     }
 
-    // Update user with provided fields
     const [updatedUser] = await db
       .update(users)
       .set({

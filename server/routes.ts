@@ -431,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           activeContracts,
           companies: companies.length,
           sponsors: sponsors.length,
-          vehicleInspections: vehicleInspections.length,
+          vehicleInspections: inspectionCount,
           photos: totalPhotos,
         },
         storage: {
