@@ -121,6 +121,7 @@ These variables **MUST** be set for production deployment:
 #### **SESSION_MAX_AGE** (NEW)
 - **Purpose**: Session cookie lifetime in milliseconds
 - **Default**: `3600000` (1 hour)
+- **Valid Range**: `300000` (5 minutes) to `2592000000` (30 days)
 - **Common Values**:
   - 1 hour: `3600000` (recommended for high security)
   - 8 hours: `28800000` (business day)
@@ -130,6 +131,8 @@ These variables **MUST** be set for production deployment:
 - **Notes**: 
   - Shorter = more secure, less convenient
   - Also enforces 15-minute idle timeout regardless of max age
+  - Invalid values (NaN, too short, too long) will default to 1 hour with warning
+  - Application will log warning if misconfigured
   - Balance security with user experience
 
 #### **SUPER_ADMIN_USERNAME**

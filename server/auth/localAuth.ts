@@ -11,7 +11,21 @@ export function getSession() {
   // Session TTL is configurable via SESSION_MAX_AGE environment variable
   // Default: 1 hour for security (3600000 ms)
   // Common values: 1 hour (3600000), 8 hours (28800000), 24 hours (86400000), 7 days (604800000)
-  const sessionTtl = parseInt(process.env.SESSION_MAX_AGE || '3600000', 10);
+  const rawSessionTtl = parseInt(process.env.SESSION_MAX_AGE || '3600000', 10);
+  
+  // Validate SESSION_MAX_AGE: minimum 5 minutes (300000ms), maximum 30 days (2592000000ms)
+  const MIN_SESSION_TTL = 5 * 60 * 1000; // 5 minutes
+  const MAX_SESSION_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+  
+  if (isNaN(rawSessionTtl) || rawSessionTtl < MIN_SESSION_TTL || rawSessionTtl > MAX_SESSION_TTL) {
+    console.warn(`⚠️  Invalid SESSION_MAX_AGE: ${process.env.SESSION_MAX_AGE}. Using default: 1 hour (3600000ms)`);
+    console.warn(`   Valid range: ${MIN_SESSION_TTL}ms (5 min) to ${MAX_SESSION_TTL}ms (30 days)`);
+  }
+  
+  const sessionTtl = (isNaN(rawSessionTtl) || rawSessionTtl < MIN_SESSION_TTL || rawSessionTtl > MAX_SESSION_TTL) 
+    ? 3600000 // 1 hour default
+    : rawSessionTtl;
+  
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
