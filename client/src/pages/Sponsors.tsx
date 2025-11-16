@@ -63,131 +63,154 @@ interface SponsorFormProps {
 
 const SponsorForm = ({ form, t, onSubmit, isPending }: SponsorFormProps) => (
   <Form {...form}>
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="nameEn"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('sponsors.nameEn')}</FormLabel>
-              <FormControl>
-                <Input {...field} data-testid="input-person-name-en" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="nameAr"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('sponsors.nameAr')}</FormLabel>
-              <FormControl>
-                <Input {...field} value={field.value || ''} data-testid="input-person-name-ar" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="nationality"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('sponsors.nationality')}</FormLabel>
-              <FormControl>
-                <Input {...field} value={field.value || ''} data-testid="input-person-nationality" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="passportId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('sponsors.passportId')}</FormLabel>
-              <FormControl>
-                <Input {...field} value={field.value || ''} data-testid="input-person-passport-id" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="licenseNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('sponsors.licenseNumber')}</FormLabel>
-              <FormControl>
-                <Input {...field} value={field.value || ''} data-testid="input-person-license-number" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="mobile"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('sponsors.mobile')}</FormLabel>
-              <FormControl>
-                <Input {...field} value={field.value || ''} data-testid="input-person-mobile" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      <FormField
-        control={form.control}
-        name="address"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t('sponsors.address')}</FormLabel>
-            <FormControl>
-              <Input {...field} value={field.value || ''} data-testid="input-person-address" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="relation"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t('sponsors.relation')}</FormLabel>
-            <FormControl>
-              <Input {...field} value={field.value || ''} placeholder={t('sponsors.relationPlaceholder')} data-testid="input-person-relation" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="notes"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t('form.notes')}</FormLabel>
-            <FormControl>
-              <Input {...field} value={field.value || ''} data-testid="input-person-notes" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <DialogFooter>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <Tabs defaultValue="basic" className="w-full">
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="basic" data-testid="tab-basic-info">
+            {t('sponsors.tabs.basicInfo')}
+          </TabsTrigger>
+          <TabsTrigger value="identity" data-testid="tab-identity">
+            {t('sponsors.tabs.identity')}
+          </TabsTrigger>
+          <TabsTrigger value="contact" data-testid="tab-contact">
+            {t('sponsors.tabs.contact')}
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="overflow-y-auto max-h-[calc(90vh-250px)] px-6">
+          <TabsContent value="basic" className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="nameEn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('sponsors.nameEn')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} data-testid="input-person-name-en" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="nameAr"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('sponsors.nameAr')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} data-testid="input-person-name-ar" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="relation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('sponsors.relation')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ''} placeholder={t('sponsors.relationPlaceholder')} data-testid="input-person-relation" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+
+          <TabsContent value="identity" className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="nationality"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('sponsors.nationality')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} data-testid="input-person-nationality" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="passportId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('sponsors.passportId')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} data-testid="input-person-passport-id" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="licenseNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('sponsors.licenseNumber')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ''} data-testid="input-person-license-number" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+
+          <TabsContent value="contact" className="space-y-4 mt-4">
+            <FormField
+              control={form.control}
+              name="mobile"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('sponsors.mobile')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ''} data-testid="input-person-mobile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('sponsors.address')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ''} data-testid="input-person-address" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form.notes')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ''} data-testid="input-person-notes" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+        </div>
+      </Tabs>
+
+      <DialogFooter className="bg-muted/20 border-t px-6 py-4">
         <Button type="submit" disabled={isPending} data-testid="button-submit-person">
           {isPending ? t('common.saving') : t('common.save')}
         </Button>
@@ -506,8 +529,8 @@ export default function Sponsors() {
                     {t('sponsors.addSponsor')}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+                  <DialogHeader className="px-6 pt-6 pb-4">
                     <DialogTitle>{t('sponsors.newSponsor')}</DialogTitle>
                     <DialogDescription>
                       {t('sponsors.addSponsor')}
@@ -567,8 +590,8 @@ export default function Sponsors() {
       </Card>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="px-6 pt-6 pb-4">
             <DialogTitle>{t('sponsors.editSponsor')}</DialogTitle>
             <DialogDescription>
               {t('sponsors.sponsorUpdated')}

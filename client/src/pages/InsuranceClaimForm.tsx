@@ -208,12 +208,25 @@ export default function InsuranceClaimForm() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card>
-            <CardHeader>
-              <CardTitle>Claim Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <Tabs defaultValue="claim" className="w-full">
+              <CardHeader className="pb-0">
+                <TabsList className="grid grid-cols-3 w-full">
+                  <TabsTrigger value="claim" data-testid="tab-claim-info">
+                    Claim Information
+                  </TabsTrigger>
+                  <TabsTrigger value="insurance" data-testid="tab-insurance-details">
+                    Insurance Details
+                  </TabsTrigger>
+                  <TabsTrigger value="additional" data-testid="tab-additional">
+                    Status & Additional
+                  </TabsTrigger>
+                </TabsList>
+              </CardHeader>
+
+              <CardContent className="pt-6">
+                <TabsContent value="claim" className="space-y-4 mt-0">
               <FormField
                 control={form.control}
                 name="contractId"
@@ -340,14 +353,9 @@ export default function InsuranceClaimForm() {
                   )}
                 />
               </div>
-            </CardContent>
-          </Card>
+                </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Insurance Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+                <TabsContent value="insurance" className="space-y-4 mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -441,14 +449,9 @@ export default function InsuranceClaimForm() {
                   )}
                 />
               </div>
-            </CardContent>
-          </Card>
+                </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Status & Additional Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+                <TabsContent value="additional" className="space-y-4 mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -531,10 +534,12 @@ export default function InsuranceClaimForm() {
                   </FormItem>
                 )}
               />
-            </CardContent>
-          </Card>
+                </TabsContent>
+              </CardContent>
+            </Tabs>
 
-          <div className="flex items-center gap-4">
+            <CardContent className="bg-muted/20 border-t pt-6">
+              <div className="flex items-center gap-4">
             <Button
               type="submit"
               disabled={isPending}
@@ -554,7 +559,9 @@ export default function InsuranceClaimForm() {
             >
               Cancel
             </Button>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </form>
       </Form>
     </div>

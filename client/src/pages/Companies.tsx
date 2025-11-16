@@ -288,15 +288,30 @@ export default function Companies() {
                 {t('companies.addCompany')}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+              <DialogHeader className="px-6 pt-6 pb-4">
                 <DialogTitle>{t('companies.newCompany')}</DialogTitle>
                 <DialogDescription>
                   {t('companies.addCompany')}
                 </DialogDescription>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(handleCreate)}>
+                  <Tabs defaultValue="basic" className="w-full">
+                    <TabsList className="grid grid-cols-3 w-full">
+                      <TabsTrigger value="basic" data-testid="tab-basic-info">
+                        {t('companies.tabs.basicInfo')}
+                      </TabsTrigger>
+                      <TabsTrigger value="registration" data-testid="tab-registration">
+                        {t('companies.tabs.registration')}
+                      </TabsTrigger>
+                      <TabsTrigger value="contact" data-testid="tab-contact">
+                        {t('companies.tabs.contact')}
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <div className="overflow-y-auto max-h-[calc(90vh-250px)] px-6">
+                      <TabsContent value="basic" className="space-y-4 mt-4">
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -325,7 +340,37 @@ export default function Companies() {
                       )}
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="contactPerson"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('companies.contactPerson')}</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ''} data-testid="input-contactPerson" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('companies.phone')}</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ''} data-testid="input-phone" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                      </TabsContent>
 
+                      <TabsContent value="registration" className="space-y-4 mt-4">
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -395,36 +440,9 @@ export default function Companies() {
                       )}
                     />
                   </div>
+                      </TabsContent>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="contactPerson"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('companies.contactPerson')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} value={field.value || ''} data-testid="input-contactPerson" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('companies.phone')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} value={field.value || ''} data-testid="input-phone" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
+                      <TabsContent value="contact" className="space-y-4 mt-4">
                   <FormField
                     control={form.control}
                     name="email"
@@ -466,8 +484,11 @@ export default function Companies() {
                       </FormItem>
                     )}
                   />
+                      </TabsContent>
+                    </div>
+                  </Tabs>
 
-                  <DialogFooter>
+                  <DialogFooter className="bg-muted/20 border-t px-6 py-4">
                     <Button type="button" variant="outline" onClick={() => setCreateOpen(false)} data-testid="button-cancel">
                       {t('common.cancel')}
                     </Button>
@@ -618,12 +639,27 @@ export default function Companies() {
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="px-6 pt-6 pb-4">
             <DialogTitle>{t('companies.editCompany')}</DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleUpdate)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleUpdate)}>
+              <Tabs defaultValue="basic" className="w-full">
+                <TabsList className="grid grid-cols-3 w-full">
+                  <TabsTrigger value="basic" data-testid="tab-basic-info-edit">
+                    {t('companies.tabs.basicInfo')}
+                  </TabsTrigger>
+                  <TabsTrigger value="registration" data-testid="tab-registration-edit">
+                    {t('companies.tabs.registration')}
+                  </TabsTrigger>
+                  <TabsTrigger value="contact" data-testid="tab-contact-edit">
+                    {t('companies.tabs.contact')}
+                  </TabsTrigger>
+                </TabsList>
+
+                <div className="overflow-y-auto max-h-[calc(90vh-250px)] px-6">
+                  <TabsContent value="basic" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -652,7 +688,37 @@ export default function Companies() {
                   )}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="contactPerson"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('companies.contactPerson')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-edit-contactPerson" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('companies.phone')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} data-testid="input-edit-phone" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+                  </TabsContent>
 
+                  <TabsContent value="registration" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -722,36 +788,9 @@ export default function Companies() {
                   )}
                 />
               </div>
+                  </TabsContent>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="contactPerson"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('companies.contactPerson')}</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-edit-contactPerson" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('companies.phone')}</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} data-testid="input-edit-phone" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
+                  <TabsContent value="contact" className="space-y-4 mt-4">
               <FormField
                 control={form.control}
                 name="email"
@@ -793,8 +832,11 @@ export default function Companies() {
                   </FormItem>
                 )}
               />
+                  </TabsContent>
+                </div>
+              </Tabs>
 
-              <DialogFooter>
+              <DialogFooter className="bg-muted/20 border-t px-6 py-4">
                 <Button type="button" variant="outline" onClick={() => setEditOpen(false)} data-testid="button-cancel-edit">
                   {t('common.cancel')}
                 </Button>
