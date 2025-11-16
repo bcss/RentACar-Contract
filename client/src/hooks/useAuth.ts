@@ -14,6 +14,17 @@ interface UseAuthReturn {
   canAccessReports: boolean;
   canCloseContracts: boolean;
   canViewAllContracts: boolean;
+  // Granular report permissions
+  canAccessRevenueTrends: boolean;
+  canAccessFleetPerformance: boolean;
+  canAccessContractAnalytics: boolean;
+  canAccessCollectionPerformance: boolean;
+  canAccessFinancialReports: boolean;
+  canAccessOperationalReports: boolean;
+  canAccessCustomerReports: boolean;
+  canAccessInsuranceReports: boolean;
+  canAccessAuditReports: boolean;
+  canAccessUserActivityReports: boolean;
 }
 
 export function useAuth(): UseAuthReturn {
@@ -35,5 +46,16 @@ export function useAuth(): UseAuthReturn {
     canAccessReports: user?.canAccessReports ?? false,
     canCloseContracts: user?.canCloseContracts ?? false,
     canViewAllContracts: user?.canViewAllContracts ?? false,
+    // Granular report permissions - default to false if not set
+    canAccessRevenueTrends: user?.canAccessRevenueTrends ?? false,
+    canAccessFleetPerformance: user?.canAccessFleetPerformance ?? false,
+    canAccessContractAnalytics: user?.canAccessContractAnalytics ?? false,
+    canAccessCollectionPerformance: user?.canAccessCollectionPerformance ?? false,
+    canAccessFinancialReports: user?.canAccessFinancialReports ?? false,
+    canAccessOperationalReports: user?.canAccessOperationalReports ?? false,
+    canAccessCustomerReports: user?.canAccessCustomerReports ?? false,
+    canAccessInsuranceReports: user?.canAccessInsuranceReports ?? false,
+    canAccessAuditReports: user?.canAccessAuditReports ?? false,
+    canAccessUserActivityReports: user?.canAccessUserActivityReports ?? false,
   };
 }

@@ -53,9 +53,21 @@ export const users = pgTable("users", {
   disabledAt: timestamp("disabled_at"),
   
   // Permission toggles - Fine-grained access control
-  canAccessReports: boolean("can_access_reports").notNull().default(false), // Access to analytics and reports
+  canAccessReports: boolean("can_access_reports").notNull().default(false), // Master toggle: Access to analytics and reports
   canCloseContracts: boolean("can_close_contracts").notNull().default(false), // Close completed contracts
   canViewAllContracts: boolean("can_view_all_contracts").notNull().default(false), // View all contracts (not just own)
+  
+  // Granular Report Permissions - Individual access control per report type
+  canAccessRevenueTrends: boolean("can_access_revenue_trends").notNull().default(false), // Revenue Trends Report
+  canAccessFleetPerformance: boolean("can_access_fleet_performance").notNull().default(false), // Fleet Performance Report
+  canAccessContractAnalytics: boolean("can_access_contract_analytics").notNull().default(false), // Contract Analytics Report
+  canAccessCollectionPerformance: boolean("can_access_collection_performance").notNull().default(false), // Collection Performance Report
+  canAccessFinancialReports: boolean("can_access_financial_reports").notNull().default(false), // Financial Reports
+  canAccessOperationalReports: boolean("can_access_operational_reports").notNull().default(false), // Operational Reports
+  canAccessCustomerReports: boolean("can_access_customer_reports").notNull().default(false), // Customer Reports
+  canAccessInsuranceReports: boolean("can_access_insurance_reports").notNull().default(false), // Insurance Reports
+  canAccessAuditReports: boolean("can_access_audit_reports").notNull().default(false), // Audit Reports
+  canAccessUserActivityReports: boolean("can_access_user_activity_reports").notNull().default(false), // User Activity Reports
   
   lastPasswordChange: timestamp("last_password_change").defaultNow(),
   lastLoginAt: timestamp("last_login_at"), // Track last successful login for dashboard display
