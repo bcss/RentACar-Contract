@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Icon } from '@/components/Icon';
@@ -197,7 +198,230 @@ export default function ImportData() {
             <p>• Import is atomic - either all records succeed or none do</p>
             <p>• Duplicate checking is performed against existing database records</p>
             <p>• Contracts are created in DRAFT status only</p>
-            <p>• See <a href="/docs/IMPORT_DATA.md" target="_blank" rel="noopener noreferrer" className="underline">Import Data Guide</a> for detailed field definitions and format examples</p>
+            <p>
+              • See{' '}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="underline hover:text-primary" data-testid="button-open-import-guide">
+                    Import Data Guide
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Import Data Guide</DialogTitle>
+                    <DialogDescription>
+                      Comprehensive guide for importing master data and contracts into RCCMS
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-6 text-sm">
+                    <section>
+                      <h3 className="text-lg font-semibold mb-2">Overview</h3>
+                      <p className="text-muted-foreground">
+                        The Import Data feature allows you to bulk import master data (Customers, Vehicles, Sponsors, Companies) and Contracts from external systems. 
+                        Both JSON and CSV formats are supported with comprehensive validation and atomic transaction processing.
+                      </p>
+                    </section>
+
+                    <section>
+                      <h3 className="text-lg font-semibold mb-2">Key Features</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Transaction-based atomicity: All records succeed or none do</li>
+                        <li>Comprehensive validation before any database changes</li>
+                        <li>Duplicate detection using unique identifiers</li>
+                        <li>Field-level error reporting with row and column details</li>
+                        <li>Supports both JSON array and CSV formats</li>
+                        <li>Sample files available for download on each entity tab</li>
+                      </ul>
+                    </section>
+
+                    <section>
+                      <h3 className="text-lg font-semibold mb-2">File Format Guidelines</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="font-medium mb-1">JSON Format</h4>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
+                            <li>Must be a valid JSON array of objects</li>
+                            <li>Each object represents one record</li>
+                            <li>Field names are case-sensitive</li>
+                            <li>Date fields: YYYY-MM-DD format</li>
+                            <li>Datetime fields: ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)</li>
+                            <li>Boolean fields: true or false (lowercase)</li>
+                            <li>Numeric fields: Numbers without quotes</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">CSV Format</h4>
+                          <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
+                            <li>First row must contain column headers (field names)</li>
+                            <li>Headers are case-sensitive and must match schema exactly</li>
+                            <li>Use double quotes for fields containing commas</li>
+                            <li>Date/datetime formats same as JSON</li>
+                            <li>Boolean values: "true" or "false" (quoted strings)</li>
+                            <li>Empty cells are treated as null/undefined</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="text-lg font-semibold mb-2">Import Process</h3>
+                      <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                        <li><strong>Select Entity Type:</strong> Choose which type of data you're importing (Customers, Vehicles, etc.)</li>
+                        <li><strong>Choose Format:</strong> Select JSON or CSV based on your source file</li>
+                        <li><strong>Download Sample:</strong> Click JSON Sample or CSV Sample to get template files</li>
+                        <li><strong>Prepare Your Data:</strong> Fill in your data following the sample format and field requirements</li>
+                        <li><strong>Upload File:</strong> Click "Choose File" and select your prepared data file</li>
+                        <li><strong>Review Preview:</strong> Check the file preview to ensure data is correctly formatted</li>
+                        <li><strong>Import:</strong> Click "Import Data" to start the validation and import process</li>
+                        <li><strong>Handle Errors:</strong> If validation fails, review the error table showing row, field, and error details</li>
+                        <li><strong>Verify Success:</strong> Check the success message showing how many records were imported</li>
+                      </ol>
+                    </section>
+
+                    <section>
+                      <h3 className="text-lg font-semibold mb-2">Entity-Specific Notes</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="font-medium mb-1">Customers</h4>
+                          <p className="text-muted-foreground">
+                            Unique identifier: <code className="bg-muted px-1 py-0.5 rounded">nationalId</code>. 
+                            This field must be unique across all customers. Required fields include nameEn, phone, and nationalId.
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">Vehicles</h4>
+                          <p className="text-muted-foreground">
+                            Unique identifier: <code className="bg-muted px-1 py-0.5 rounded">registration</code> (license plate). 
+                            Status defaults to "available" if not specified. Valid status values: available, rented, maintenance, damaged.
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">Sponsors</h4>
+                          <p className="text-muted-foreground">
+                            Individual sponsors for contract hirers. Only required field is nameEn. Can include passport, nationality, and relationship information.
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">Companies</h4>
+                          <p className="text-muted-foreground">
+                            Corporate sponsors with business registration details. Only required field is nameEn. Can include registration numbers, tax IDs, and contact information.
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">Contracts</h4>
+                          <p className="text-muted-foreground">
+                            <strong>IMPORTANT:</strong> Customers, Vehicles, and Sponsors (if applicable) must exist before importing contracts. 
+                            Use customerId/vehicleId UUIDs or the system will attempt to look them up. All imported contracts are created in DRAFT status.
+                          </p>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="text-lg font-semibold mb-2">Common Validation Errors</h3>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li><strong>Missing required field:</strong> Ensure all required fields are present and not empty</li>
+                        <li><strong>Duplicate identifier:</strong> The unique field (nationalId, registration, etc.) already exists in database</li>
+                        <li><strong>Invalid date format:</strong> Use YYYY-MM-DD for dates, ISO 8601 for datetimes</li>
+                        <li><strong>Invalid enum value:</strong> Check that status, gender, fuelType values match allowed options</li>
+                        <li><strong>Invalid JSON:</strong> Ensure JSON is properly formatted with matching brackets and quotes</li>
+                        <li><strong>Referenced record not found:</strong> For contracts, ensure customers/vehicles/sponsors exist first</li>
+                      </ul>
+                    </section>
+
+                    <section>
+                      <h3 className="text-lg font-semibold mb-2">Download Sample Files</h3>
+                      <p className="text-muted-foreground mb-3">
+                        Each entity tab has download buttons for JSON and CSV sample files. These templates include example data with proper formatting for all fields.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/customers_sample.json', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Customers JSON
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/customers_sample.csv', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Customers CSV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/vehicles_sample.json', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Vehicles JSON
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/vehicles_sample.csv', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Vehicles CSV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/sponsors_sample.json', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Sponsors JSON
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/sponsors_sample.csv', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Sponsors CSV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/companies_sample.json', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Companies JSON
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/companies_sample.csv', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Companies CSV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/contracts_sample.json', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Contracts JSON
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/samples/contracts_sample.csv', '_blank')}
+                        >
+                          <Icon name="download" className="mr-2 h-4 w-4" />
+                          Contracts CSV
+                        </Button>
+                      </div>
+                    </section>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              {' '}for detailed instructions and examples
+            </p>
           </AlertDescription>
         </Alert>
 
