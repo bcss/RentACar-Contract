@@ -24,6 +24,21 @@ function getCsrfToken(): string | null {
   return null;
 }
 
+/**
+ * Fetch CSRF token from server
+ * This calls /api/csrf-token which sets the token in a cookie
+ */
+export async function fetchCsrfToken(): Promise<void> {
+  try {
+    await fetch('/api/csrf-token', {
+      method: 'GET',
+      credentials: 'include',
+    });
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error);
+  }
+}
+
 export async function apiRequest(
   method: string,
   url: string,
@@ -46,6 +61,35 @@ export async function apiRequest(
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
+
+  // If we get a 403 CSRF error, try to refresh the token and retry once
+  if (res.status === 403 && protectedMethods.includes(method.toUpperCase())) {
+    try {
+      const errorData = await res.clone().json();
+      if (errorData.csrfError) {
+        // Fetch new CSRF token
+        await fetchCsrfToken();
+        
+        // Retry the request with new token
+        const newCsrfToken = getCsrfToken();
+        if (newCsrfToken) {
+          headers['x-csrf-token'] = newCsrfToken;
+        }
+        
+        const retryRes = await fetch(url, {
+          method,
+          headers,
+          body: data ? JSON.stringify(data) : undefined,
+          credentials: "include",
+        });
+        
+        await throwIfResNotOk(retryRes);
+        return retryRes;
+      }
+    } catch (e) {
+      // If retry logic fails, fall through to throw original error
+    }
+  }
 
   await throwIfResNotOk(res);
   return res;
