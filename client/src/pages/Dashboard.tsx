@@ -915,32 +915,36 @@ export default function Dashboard() {
               <CardContent>
                 {geographicLoading ? (
                   <Skeleton className="h-[300px] w-full" />
-                ) : geographicData && (geographicData.customersByRegion.length > 0 || geographicData.vehiclesByRegion.length > 0) ? (
+                ) : geographicData && ((geographicData.customersByRegion?.length ?? 0) > 0 || (geographicData.vehiclesByRegion?.length ?? 0) > 0) ? (
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Customers by Region</h4>
-                      <ResponsiveContainer width="100%" height={140}>
-                        <BarChart data={geographicData.customersByRegion.slice(0, 10)} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                          <XAxis dataKey="region" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                          <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                          <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '6px' }} />
-                          <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Vehicles by Region</h4>
-                      <ResponsiveContainer width="100%" height={140}>
-                        <BarChart data={geographicData.vehiclesByRegion.slice(0, 10)} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                          <XAxis dataKey="region" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                          <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                          <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '6px' }} />
-                          <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    {geographicData.customersByRegion && geographicData.customersByRegion.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Customers by Region</h4>
+                        <ResponsiveContainer width="100%" height={140}>
+                          <BarChart data={geographicData.customersByRegion.slice(0, 10)} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="region" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                            <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '6px' }} />
+                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
+                    {geographicData.vehiclesByRegion && geographicData.vehiclesByRegion.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Vehicles by Region</h4>
+                        <ResponsiveContainer width="100%" height={140}>
+                          <BarChart data={geographicData.vehiclesByRegion.slice(0, 10)} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="region" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                            <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '6px' }} />
+                            <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">No geographic data available</p>

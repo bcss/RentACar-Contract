@@ -67,6 +67,7 @@ export const users = pgTable("users", {
   canAccessInsuranceReports: boolean("can_access_insurance_reports").notNull().default(false), // Insurance Reports
   canAccessAuditReports: boolean("can_access_audit_reports").notNull().default(false), // Audit Reports
   canAccessUserActivityReports: boolean("can_access_user_activity_reports").notNull().default(false), // User Activity Reports
+  canAccessAppAccessReport: boolean("can_access_app_access_report").notNull().default(false), // App Access Report (login attempts)
   
   lastPasswordChange: timestamp("last_password_change").defaultNow(),
   lastLoginAt: timestamp("last_login_at"), // Track last successful login for dashboard display
@@ -879,6 +880,43 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
 
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
+
+// Access logs table - Track all app access and login attempts
+export const accessLogs = pgTable("access_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id), // Null for failed login attempts
+  usernameAttempted: varchar("username_attempted"), // Username tried (for failed attempts)
+  ipAddress: varchar("ip_address").notNull(),
+  country: varchar("country", { length: 100 }),
+  region: varchar("region", { length: 100 }),
+  city: varchar("city", { length: 100 }),
+  userAgent: text("user_agent"),
+  outcome: varchar("outcome", { length: 20 }).notNull(), // success, failed_credentials, failed_disabled, failed_locked
+  failureReason: text("failure_reason"), // Detailed reason for failure
+  metadata: jsonb("metadata"), // Additional context
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_access_logs_user_id").on(table.userId),
+  index("idx_access_logs_outcome").on(table.outcome),
+  index("idx_access_logs_username_attempted").on(table.usernameAttempted),
+  index("idx_access_logs_created_at").on(table.createdAt),
+  index("idx_access_logs_ip_address").on(table.ipAddress),
+]);
+
+export const accessLogsRelations = relations(accessLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [accessLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertAccessLogSchema = createInsertSchema(accessLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAccessLog = z.infer<typeof insertAccessLogSchema>;
+export type AccessLog = typeof accessLogs.$inferSelect;
 
 // Contract edits table - Detailed tracking of all contract modifications
 export const contractEdits = pgTable("contract_edits", {

@@ -2,6 +2,7 @@ import {
   users,
   contracts,
   auditLogs,
+  accessLogs,
   contractEdits,
   contractCounter,
   systemErrors,
@@ -24,6 +25,8 @@ import {
   type InsertContract,
   type InsertAuditLog,
   type AuditLog,
+  type AccessLog,
+  type InsertAccessLog,
   type InsertContractEdit,
   type ContractEdit,
   type SystemError,
@@ -238,6 +241,20 @@ export interface IStorage {
   createPushNotificationToken(token: InsertPushNotificationToken): Promise<PushNotificationToken>;
   updatePushNotificationToken(id: string, token: Partial<InsertPushNotificationToken>): Promise<PushNotificationToken>;
   deletePushNotificationToken(id: string): Promise<void>;
+  
+  // Access log operations - Track app access and login attempts
+  createAccessLog(log: InsertAccessLog): Promise<AccessLog>;
+  getAccessLogs(filters?: {
+    startDate?: Date;
+    endDate?: Date;
+    outcome?: string;
+    username?: string;
+    ipAddress?: string;
+    country?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ logs: AccessLog[]; total: number }>;
+  purgeAccessLogs(beforeDate: Date): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {

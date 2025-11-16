@@ -4,6 +4,9 @@ interface GeolocationData {
   region?: string;
 }
 
+const geoCache = new Map<string, { data: GeolocationData; timestamp: number }>();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
 export async function getGeolocation(ipAddress: string): Promise<GeolocationData> {
   if (!ipAddress || ipAddress === '::1' || ipAddress === '127.0.0.1' || ipAddress.startsWith('::ffff:127.')) {
     return {
@@ -13,9 +16,14 @@ export async function getGeolocation(ipAddress: string): Promise<GeolocationData
     };
   }
 
+  const cleanIp = ipAddress.replace('::ffff:', '');
+
+  const cached = geoCache.get(cleanIp);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
   try {
-    const cleanIp = ipAddress.replace('::ffff:', '');
-    
     const response = await fetch(`http://ip-api.com/json/${cleanIp}?fields=status,message,country,city,regionName`, {
       method: 'GET',
       headers: {
@@ -36,13 +44,24 @@ export async function getGeolocation(ipAddress: string): Promise<GeolocationData
       return {};
     }
 
-    return {
+    const geoData = {
       country: data.country || undefined,
       city: data.city || undefined,
       region: data.regionName || undefined,
     };
+
+    geoCache.set(cleanIp, {
+      data: geoData,
+      timestamp: Date.now(),
+    });
+
+    return geoData;
   } catch (error) {
     console.error(`Error fetching geolocation for IP ${ipAddress}:`, error);
     return {};
   }
+}
+
+export function clearGeoCache(): void {
+  geoCache.clear();
 }
