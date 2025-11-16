@@ -778,43 +778,52 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                             </SidebarMenuSubItem>
                           );
                         })}
-                        
-                        {/* Help & Legal - Nested Collapsible */}
-                        <SidebarMenuSubItem>
-                          <Collapsible open={helpLegalOpen} onOpenChange={handleHelpLegalToggle} className="group/helplegal">
-                            <CollapsibleTrigger asChild>
-                              <SidebarMenuSubButton data-testid="nav-help-legal">
-                                <HelpCircle className="h-4 w-4" />
-                                {sidebarState === 'expanded' && <span>Help & Legal</span>}
-                                {sidebarState === 'expanded' && (
-                                  <ChevronRight className="ml-auto h-3 w-3 group-data-[state=open]/helplegal:rotate-90 transition-transform" />
-                                )}
-                              </SidebarMenuSubButton>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <SidebarMenuSub className="ml-4">
-                                {helpLegalItems.filter(item => item.show).map((item) => {
-                                  const IconComponent = getIconComponent(item.icon);
-                                  return (
-                                    <SidebarMenuSubItem key={item.title}>
-                                      <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.split('/').pop()}`}>
-                                        <Link href={item.url}>
-                                          <IconComponent className="h-3 w-3" />
-                                          {sidebarState === 'expanded' && <span className="text-sm">{item.title}</span>}
-                                        </Link>
-                                      </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                  );
-                                })}
-                              </SidebarMenuSub>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
               )}
+
+              {/* Help & Legal - Collapsible (All users) */}
+              <Collapsible open={helpLegalOpen} onOpenChange={handleHelpLegalToggle} className="group/collapsible">
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton data-testid="nav-help-legal">
+                          <HelpCircle className="h-4 w-4" />
+                          {sidebarState === 'expanded' && <span>Help & Legal</span>}
+                          {sidebarState === 'expanded' && (
+                            <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                    </TooltipTrigger>
+                    {sidebarState === 'collapsed' && (
+                      <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                        <p>Help & Legal</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {helpLegalItems.filter(item => item.show).map((item) => {
+                        const IconComponent = getIconComponent(item.icon);
+                        return (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.split('/').pop()}`}>
+                              <Link href={item.url}>
+                                <IconComponent className="h-4 w-4" />
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
