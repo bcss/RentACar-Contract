@@ -1,9 +1,9 @@
-import type { Express, Request } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, vehicleInspections } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
 import { count, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
@@ -19,6 +19,19 @@ import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { csrfTokenGenerator, csrfProtection } from "./middleware/csrf";
+import {
+  parseCSV,
+  parseJSON,
+  validateWithSchema,
+  customerImportSchema,
+  vehicleImportSchema,
+  sponsorImportSchema,
+  companyImportSchema,
+  contractImportSchema,
+  checkDuplicatesInArray,
+  formatValidationErrors,
+  type ValidationError,
+} from './importHelpers';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -186,6 +199,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     return { valid: true };
+  }
+  
+  // Superadmin-only middleware for import operations
+  function requireSuperAdmin(req: Request, res: Response, next: NextFunction) {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const user = req.user as User;
+    if (user.role !== 'admin' || !user.isImmutable) {
+      return res.status(403).json({ message: 'Forbidden: Superadmin access required' });
+    }
+    next();
   }
   
   // P0-4: Date range validation for reports
@@ -5336,6 +5361,485 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error creating quick inspection:", error);
       await logSystemError(error, req);
       res.status(500).json({ message: error.message || "Failed to create inspection" });
+    }
+  });
+
+  // Import Data API Endpoints (Superadmin only)
+  
+  // POST /api/import/customers - Import customers from CSV/JSON
+  app.post('/api/import/customers', requireSuperAdmin, async (req, res, next) => {
+    try {
+      const { fileContent, format } = req.body;
+      
+      if (!fileContent || !format) {
+        return res.status(400).json({ message: 'File content and format are required' });
+      }
+      
+      if (format !== 'json' && format !== 'csv') {
+        return res.status(400).json({ message: 'Format must be json or csv' });
+      }
+      
+      // Parse file
+      const parsed = format === 'json' ? parseJSON(fileContent) : parseCSV(fileContent);
+      if (parsed.errors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(parsed.errors) });
+      }
+      
+      // Validate schema
+      const { validData, errors: schemaErrors } = validateWithSchema(parsed.data, customerImportSchema);
+      if (schemaErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(schemaErrors) });
+      }
+      
+      // Check for duplicates in file
+      const duplicateErrors = checkDuplicatesInArray(validData, 'passportId', 'Passport/ID');
+      if (duplicateErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(duplicateErrors) });
+      }
+      
+      // Check for existing records with same unique identifiers
+      const allErrors: ValidationError[] = [];
+      for (let i = 0; i < validData.length; i++) {
+        const item = validData[i];
+        const existing = await storage.getCustomerByNationalId(item.passportId);
+        if (existing) {
+          allErrors.push({
+            row: i + 2,
+            field: 'passportId',
+            message: `Customer with Passport/ID '${item.passportId}' already exists`,
+          });
+        }
+      }
+      
+      if (allErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(allErrors) });
+      }
+      
+      // Import all records atomically using transaction
+      const userId = (req.user as User).id;
+      try {
+        await db.transaction(async (tx) => {
+          for (const item of validData) {
+            const { passportId, ...rest } = item;
+            await storage.createCustomer({ 
+              ...rest, 
+              nationalId: passportId,
+              createdBy: userId 
+            }, tx);
+          }
+        });
+      } catch (error) {
+        throw new Error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}. All changes have been rolled back.`);
+      }
+      
+      await createAuditLog(userId, 'customer_bulk_import', undefined, req, `Imported ${validData.length} customers`);
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully imported ${validData.length} customers`,
+        count: validData.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/import/vehicles - Import vehicles from CSV/JSON
+  app.post('/api/import/vehicles', requireSuperAdmin, async (req, res, next) => {
+    try {
+      const { fileContent, format } = req.body;
+      
+      if (!fileContent || !format) {
+        return res.status(400).json({ message: 'File content and format are required' });
+      }
+      
+      if (format !== 'json' && format !== 'csv') {
+        return res.status(400).json({ message: 'Format must be json or csv' });
+      }
+      
+      // Parse file
+      const parsed = format === 'json' ? parseJSON(fileContent) : parseCSV(fileContent);
+      if (parsed.errors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(parsed.errors) });
+      }
+      
+      // Validate schema
+      const { validData, errors: schemaErrors } = validateWithSchema(parsed.data, vehicleImportSchema);
+      if (schemaErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(schemaErrors) });
+      }
+      
+      // Check for duplicates in file
+      const duplicateErrors = checkDuplicatesInArray(validData, 'registration', 'Registration');
+      if (duplicateErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(duplicateErrors) });
+      }
+      
+      // Check for existing records with same unique identifiers
+      const allErrors: ValidationError[] = [];
+      for (let i = 0; i < validData.length; i++) {
+        const item = validData[i];
+        const existing = await storage.getVehicleByRegistration(item.registration);
+        if (existing) {
+          allErrors.push({
+            row: i + 2,
+            field: 'registration',
+            message: `Vehicle with registration '${item.registration}' already exists`,
+          });
+        }
+      }
+      
+      if (allErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(allErrors) });
+      }
+      
+      // Import all records atomically using transaction
+      const userId = (req.user as User).id;
+      try {
+        await db.transaction(async (tx) => {
+          for (const item of validData) {
+            await storage.createVehicle({ ...item, createdBy: userId }, tx);
+          }
+        });
+      } catch (error) {
+        throw new Error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}. All changes have been rolled back.`);
+      }
+      
+      await createAuditLog(userId, 'vehicle_bulk_import', undefined, req, `Imported ${validData.length} vehicles`);
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully imported ${validData.length} vehicles`,
+        count: validData.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/import/sponsors - Import sponsors from CSV/JSON
+  app.post('/api/import/sponsors', requireSuperAdmin, async (req, res, next) => {
+    try {
+      const { fileContent, format } = req.body;
+      
+      if (!fileContent || !format) {
+        return res.status(400).json({ message: 'File content and format are required' });
+      }
+      
+      if (format !== 'json' && format !== 'csv') {
+        return res.status(400).json({ message: 'Format must be json or csv' });
+      }
+      
+      // Parse file
+      const parsed = format === 'json' ? parseJSON(fileContent) : parseCSV(fileContent);
+      if (parsed.errors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(parsed.errors) });
+      }
+      
+      // Validate schema
+      const { validData, errors: schemaErrors } = validateWithSchema(parsed.data, sponsorImportSchema);
+      if (schemaErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(schemaErrors) });
+      }
+      
+      // Check for duplicates in file
+      const duplicateErrors = checkDuplicatesInArray(validData, 'passportId', 'Passport/ID');
+      if (duplicateErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(duplicateErrors) });
+      }
+      
+      // Check for existing records with same unique identifiers
+      const allErrors: ValidationError[] = [];
+      for (let i = 0; i < validData.length; i++) {
+        const item = validData[i];
+        const existing = await storage.getSponsorByPassportId(item.passportId);
+        if (existing) {
+          allErrors.push({
+            row: i + 2,
+            field: 'passportId',
+            message: `Sponsor with Passport/ID '${item.passportId}' already exists`,
+          });
+        }
+      }
+      
+      if (allErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(allErrors) });
+      }
+      
+      // Import all records atomically using transaction
+      const userId = (req.user as User).id;
+      try {
+        await db.transaction(async (tx) => {
+          for (const item of validData) {
+            await storage.createSponsor({ ...item, createdBy: userId }, tx);
+          }
+        });
+      } catch (error) {
+        throw new Error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}. All changes have been rolled back.`);
+      }
+      
+      await createAuditLog(userId, 'sponsor_bulk_import', undefined, req, `Imported ${validData.length} sponsors`);
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully imported ${validData.length} sponsors`,
+        count: validData.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/import/companies - Import companies from CSV/JSON
+  app.post('/api/import/companies', requireSuperAdmin, async (req, res, next) => {
+    try {
+      const { fileContent, format } = req.body;
+      
+      if (!fileContent || !format) {
+        return res.status(400).json({ message: 'File content and format are required' });
+      }
+      
+      if (format !== 'json' && format !== 'csv') {
+        return res.status(400).json({ message: 'Format must be json or csv' });
+      }
+      
+      // Parse file
+      const parsed = format === 'json' ? parseJSON(fileContent) : parseCSV(fileContent);
+      if (parsed.errors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(parsed.errors) });
+      }
+      
+      // Validate schema
+      const { validData, errors: schemaErrors } = validateWithSchema(parsed.data, companyImportSchema);
+      if (schemaErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(schemaErrors) });
+      }
+      
+      // Check for duplicates in file
+      const duplicateErrors = checkDuplicatesInArray(validData, 'registrationNumber', 'Registration Number');
+      if (duplicateErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(duplicateErrors) });
+      }
+      
+      // Check for existing records with same unique identifiers
+      const allErrors: ValidationError[] = [];
+      for (let i = 0; i < validData.length; i++) {
+        const item = validData[i];
+        const existing = await storage.getCompanyByRegistrationNumber(item.registrationNumber);
+        if (existing) {
+          allErrors.push({
+            row: i + 2,
+            field: 'registrationNumber',
+            message: `Company with registration number '${item.registrationNumber}' already exists`,
+          });
+        }
+      }
+      
+      if (allErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(allErrors) });
+      }
+      
+      // Import all records atomically using transaction
+      const userId = (req.user as User).id;
+      try {
+        await db.transaction(async (tx) => {
+          for (const item of validData) {
+            await storage.createCompany({ ...item, createdBy: userId }, tx);
+          }
+        });
+      } catch (error) {
+        throw new Error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}. All changes have been rolled back.`);
+      }
+      
+      await createAuditLog(userId, 'company_bulk_import', undefined, req, `Imported ${validData.length} companies`);
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully imported ${validData.length} companies`,
+        count: validData.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/import/contracts - Import contracts from CSV/JSON (with customer/vehicle/sponsor/company resolution)
+  app.post('/api/import/contracts', requireSuperAdmin, async (req, res, next) => {
+    try {
+      const { fileContent, format } = req.body;
+      
+      if (!fileContent || !format) {
+        return res.status(400).json({ message: 'File content and format are required' });
+      }
+      
+      if (format !== 'json' && format !== 'csv') {
+        return res.status(400).json({ message: 'Format must be json or csv' });
+      }
+      
+      // Parse file
+      const parsed = format === 'json' ? parseJSON(fileContent) : parseCSV(fileContent);
+      if (parsed.errors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(parsed.errors) });
+      }
+      
+      // Validate schema
+      const { validData, errors: schemaErrors } = validateWithSchema(parsed.data, contractImportSchema);
+      if (schemaErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(schemaErrors) });
+      }
+      
+      // Resolve customer IDs, vehicle IDs, sponsor IDs, and company IDs
+      const allErrors: ValidationError[] = [];
+      const resolvedContracts = [];
+      
+      for (let i = 0; i < validData.length; i++) {
+        const item = validData[i];
+        
+        // Resolve customer ID
+        const customer = await storage.getCustomerByNationalId(item.customerPassportId);
+        if (!customer) {
+          allErrors.push({
+            row: i + 2,
+            field: 'customerPassportId',
+            message: `Customer with Passport/ID '${item.customerPassportId}' not found`,
+          });
+          continue;
+        }
+        
+        // Resolve vehicle ID
+        const vehicle = await storage.getVehicleByRegistration(item.vehicleRegistration);
+        if (!vehicle) {
+          allErrors.push({
+            row: i + 2,
+            field: 'vehicleRegistration',
+            message: `Vehicle with registration '${item.vehicleRegistration}' not found`,
+          });
+          continue;
+        }
+        
+        // Resolve sponsor ID if needed
+        let sponsorId = null;
+        if (item.hirerType === 'with_sponsor') {
+          if (!item.sponsorPassportId) {
+            allErrors.push({
+              row: i + 2,
+              field: 'sponsorPassportId',
+              message: 'Sponsor Passport/ID is required when hirer type is "with_sponsor"',
+            });
+            continue;
+          }
+          const sponsor = await storage.getSponsorByPassportId(item.sponsorPassportId);
+          if (!sponsor) {
+            allErrors.push({
+              row: i + 2,
+              field: 'sponsorPassportId',
+              message: `Sponsor with Passport/ID '${item.sponsorPassportId}' not found`,
+            });
+            continue;
+          }
+          sponsorId = sponsor.id;
+        }
+        
+        // Resolve company ID if needed
+        let companyId = null;
+        if (item.hirerType === 'from_company') {
+          if (!item.companyRegistrationNumber) {
+            allErrors.push({
+              row: i + 2,
+              field: 'companyRegistrationNumber',
+              message: 'Company registration number is required when hirer type is "from_company"',
+            });
+            continue;
+          }
+          const company = await storage.getCompanyByRegistrationNumber(item.companyRegistrationNumber);
+          if (!company) {
+            allErrors.push({
+              row: i + 2,
+              field: 'companyRegistrationNumber',
+              message: `Company with registration number '${item.companyRegistrationNumber}' not found`,
+            });
+            continue;
+          }
+          companyId = company.id;
+        }
+        
+        // Calculate rental duration and amounts
+        const startDate = new Date(item.rentalStartDate);
+        const endDate = new Date(item.rentalEndDate);
+        const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Calculate subtotal based on rental type and duration
+        let subtotal = 0;
+        if (item.rentalType === 'daily') {
+          subtotal = totalDays * item.dailyRate;
+        } else if (item.rentalType === 'weekly' && item.weeklyRate) {
+          const weeks = Math.ceil(totalDays / 7);
+          subtotal = weeks * item.weeklyRate;
+        } else if (item.rentalType === 'monthly' && item.monthlyRate) {
+          const months = Math.ceil(totalDays / 30);
+          subtotal = months * item.monthlyRate;
+        } else {
+          subtotal = totalDays * item.dailyRate;
+        }
+        
+        // Calculate VAT and total (assuming 5% VAT)
+        const vatAmount = subtotal * 0.05;
+        const totalAmount = subtotal + vatAmount;
+        
+        // Build contract object
+        const contractData = {
+          customerId: customer.id,
+          vehicleId: vehicle.id,
+          sponsorId: sponsorId,
+          companySponsorId: companyId,
+          hirerType: item.hirerType,
+          rentalType: item.rentalType,
+          rentalStartDate: startDate,
+          rentalEndDate: endDate,
+          dailyRate: item.dailyRate.toString(),
+          weeklyRate: item.weeklyRate ? item.weeklyRate.toString() : null,
+          monthlyRate: item.monthlyRate ? item.monthlyRate.toString() : null,
+          totalDays,
+          subtotal: subtotal.toString(),
+          vatAmount: vatAmount.toString(),
+          totalAmount: totalAmount.toString(),
+          pickupLocation: item.pickupLocation,
+          dropoffLocation: item.dropoffLocation,
+          mileageLimit: item.mileageLimit || null,
+          extraKmRate: item.extraKmRate ? item.extraKmRate.toString() : null,
+          securityDeposit: item.securityDeposit ? item.securityDeposit.toString() : null,
+          notes: item.notes || null,
+          status: 'draft',
+        };
+        
+        resolvedContracts.push(contractData);
+      }
+      
+      if (allErrors.length > 0) {
+        return res.status(400).json({ message: formatValidationErrors(allErrors) });
+      }
+      
+      // Import all contracts atomically using transaction
+      const userId = (req.user as User).id;
+      try {
+        await db.transaction(async (tx) => {
+          for (const contractData of resolvedContracts) {
+            await storage.createContract({ ...contractData, createdBy: userId } as any, tx);
+          }
+        });
+      } catch (error) {
+        throw new Error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}. All changes have been rolled back.`);
+      }
+      
+      await createAuditLog(userId, 'contract_bulk_import', undefined, req, `Imported ${resolvedContracts.length} contracts`);
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully imported ${resolvedContracts.length} contracts`,
+        count: resolvedContracts.length,
+      });
+    } catch (error) {
+      next(error);
     }
   });
 

@@ -11,8 +11,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { insertCompanySettingsSchema, type CompanySettings } from "@shared/schema";
 import { z } from "zod";
-import {
 import { Icon } from '@/components/Icon';
+import {
   Form,
   FormControl,
   FormField,

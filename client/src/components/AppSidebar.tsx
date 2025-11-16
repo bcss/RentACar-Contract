@@ -325,6 +325,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       show: isAdmin,
     },
     {
+      title: 'Import Data',
+      icon: 'upload',
+      url: '/settings/import',
+      show: isAdmin && user?.isImmutable,
+    },
+    {
       title: t('nav.systemUsers'),
       icon: 'people',
       url: '/users',

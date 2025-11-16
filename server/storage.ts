@@ -77,7 +77,7 @@ export interface IStorage {
   getAllContracts(): Promise<ContractWithDetails[]>;
   getDisabledContracts(): Promise<ContractWithDetails[]>;
   searchContracts(query: string): Promise<Contract[]>;
-  createContract(contract: InsertContract): Promise<Contract>;
+  createContract(contract: InsertContract, tx?: any): Promise<Contract>;
   updateContract(id: string, contract: Partial<InsertContract>): Promise<Contract>;
   // Legacy finalizeContract removed - use confirmContract instead
   disableContract(id: string, userId: string): Promise<Contract>;
@@ -89,7 +89,8 @@ export interface IStorage {
   // Customer operations
   getCustomers(includeDisabled?: boolean): Promise<Customer[]>;
   getCustomerById(id: string): Promise<Customer | undefined>;
-  createCustomer(customer: InsertCustomer): Promise<Customer>;
+  getCustomerByNationalId(nationalId: string): Promise<Customer | undefined>;
+  createCustomer(customer: InsertCustomer, tx?: any): Promise<Customer>;
   updateCustomer(id: string, customer: Partial<InsertCustomer>): Promise<Customer>;
   disableCustomer(id: string, disabledBy: string): Promise<void>;
   enableCustomer(id: string): Promise<void>;
@@ -98,7 +99,8 @@ export interface IStorage {
   // Vehicle operations
   getVehicles(includeDisabled?: boolean): Promise<Vehicle[]>;
   getVehicleById(id: string): Promise<Vehicle | undefined>;
-  createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
+  getVehicleByRegistration(registration: string): Promise<Vehicle | undefined>;
+  createVehicle(vehicle: InsertVehicle, tx?: any): Promise<Vehicle>;
   updateVehicle(id: string, vehicle: Partial<InsertVehicle>): Promise<Vehicle>;
   disableVehicle(id: string, disabledBy: string): Promise<void>;
   enableVehicle(id: string): Promise<void>;
@@ -108,7 +110,8 @@ export interface IStorage {
   // Sponsor operations (individual sponsors)
   getSponsors(includeDisabled?: boolean): Promise<Sponsor[]>;
   getSponsorById(id: string): Promise<Sponsor | undefined>;
-  createSponsor(sponsor: InsertSponsor): Promise<Sponsor>;
+  getSponsorByPassportId(passportId: string): Promise<Sponsor | undefined>;
+  createSponsor(sponsor: InsertSponsor, tx?: any): Promise<Sponsor>;
   updateSponsor(id: string, sponsor: Partial<InsertSponsor>): Promise<Sponsor>;
   disableSponsor(id: string, disabledBy: string): Promise<void>;
   enableSponsor(id: string): Promise<void>;
@@ -117,7 +120,8 @@ export interface IStorage {
   // Company operations (corporate sponsors)
   getCompanies(includeDisabled?: boolean): Promise<Company[]>;
   getCompanyById(id: string): Promise<Company | undefined>;
-  createCompany(company: InsertCompany): Promise<Company>;
+  getCompanyByRegistrationNumber(registrationNumber: string): Promise<Company | undefined>;
+  createCompany(company: InsertCompany, tx?: any): Promise<Company>;
   updateCompany(id: string, company: Partial<InsertCompany>): Promise<Company>;
   disableCompany(id: string, disabledBy: string): Promise<void>;
   enableCompany(id: string): Promise<void>;
@@ -472,10 +476,11 @@ export class DatabaseStorage implements IStorage {
     return results.map(r => r.contract);
   }
 
-  async createContract(contract: InsertContract): Promise<Contract> {
+  async createContract(contract: InsertContract, tx?: any): Promise<Contract> {
     const contractNumber = await this.getNextContractNumber();
+    const dbConn = tx || db;
     
-    const [newContract] = await db
+    const [newContract] = await dbConn
       .insert(contracts)
       .values({
         ...contract,
@@ -674,8 +679,9 @@ export class DatabaseStorage implements IStorage {
     return customer;
   }
 
-  async createCustomer(customer: InsertCustomer): Promise<Customer> {
-    const [newCustomer] = await db.insert(customers).values(customer as any).returning();
+  async createCustomer(customer: InsertCustomer, tx?: any): Promise<Customer> {
+    const dbConn = tx || db;
+    const [newCustomer] = await dbConn.insert(customers).values(customer as any).returning();
     return newCustomer;
   }
 
@@ -716,6 +722,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(customers.id, id));
   }
 
+  async getCustomerByNationalId(nationalId: string): Promise<Customer | undefined> {
+    const [customer] = await db.select().from(customers).where(eq(customers.nationalId, nationalId));
+    return customer;
+  }
+
   async searchCustomers(query: string): Promise<Customer[]> {
     const searchTerm = `%${query}%`;
     return await db
@@ -748,8 +759,9 @@ export class DatabaseStorage implements IStorage {
     return vehicle;
   }
 
-  async createVehicle(vehicle: InsertVehicle): Promise<Vehicle> {
-    const [newVehicle] = await db.insert(vehicles).values(vehicle as any).returning();
+  async createVehicle(vehicle: InsertVehicle, tx?: any): Promise<Vehicle> {
+    const dbConn = tx || db;
+    const [newVehicle] = await dbConn.insert(vehicles).values(vehicle as any).returning();
     return newVehicle;
   }
 
@@ -788,6 +800,11 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(vehicles.id, id));
+  }
+
+  async getVehicleByRegistration(registration: string): Promise<Vehicle | undefined> {
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.registration, registration));
+    return vehicle;
   }
 
   async checkVehicleAvailability(
@@ -853,8 +870,9 @@ export class DatabaseStorage implements IStorage {
     return sponsor;
   }
 
-  async createSponsor(sponsorData: InsertSponsor & { createdBy: string }): Promise<Sponsor> {
-    const [sponsor] = await db.insert(sponsors).values([sponsorData]).returning();
+  async createSponsor(sponsorData: InsertSponsor & { createdBy: string }, tx?: any): Promise<Sponsor> {
+    const dbConn = tx || db;
+    const [sponsor] = await dbConn.insert(sponsors).values([sponsorData]).returning();
     return sponsor;
   }
 
@@ -891,6 +909,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(sponsors.id, id));
   }
 
+  async getSponsorByPassportId(passportId: string): Promise<Sponsor | undefined> {
+    const [sponsor] = await db.select().from(sponsors).where(eq(sponsors.passportId, passportId));
+    return sponsor;
+  }
+
   async searchSponsors(query: string): Promise<Sponsor[]> {
     const searchTerm = `%${query}%`;
     return await db
@@ -923,8 +946,9 @@ export class DatabaseStorage implements IStorage {
     return company;
   }
 
-  async createCompany(companyData: InsertCompany & { createdBy: string }): Promise<Company> {
-    const [company] = await db.insert(companies).values([companyData]).returning();
+  async createCompany(companyData: InsertCompany & { createdBy: string }, tx?: any): Promise<Company> {
+    const dbConn = tx || db;
+    const [company] = await dbConn.insert(companies).values([companyData]).returning();
     return company;
   }
 
@@ -959,6 +983,11 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(companies.id, id));
+  }
+
+  async getCompanyByRegistrationNumber(registrationNumber: string): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.registrationNumber, registrationNumber));
+    return company;
   }
 
   async searchCompanies(query: string): Promise<Company[]> {

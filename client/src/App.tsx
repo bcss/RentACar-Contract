@@ -50,6 +50,7 @@ const RevenueTrendsReport = lazy(() => import("@/pages/RevenueTrendsReport"));
 const FleetPerformanceReport = lazy(() => import("@/pages/FleetPerformanceReport"));
 const ContractAnalyticsReport = lazy(() => import("@/pages/ContractAnalyticsReport"));
 const CollectionPerformanceReport = lazy(() => import("@/pages/CollectionPerformanceReport"));
+const ImportData = lazy(() => import("@/pages/ImportData"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -148,6 +149,9 @@ function Router() {
       </Route>
       <Route path="/settings/terms">
         {() => <ProtectedRoute component={TermsConditions} />}
+      </Route>
+      <Route path="/settings/import">
+        {() => <ProtectedRoute component={ImportData} />}
       </Route>
       <Route path="/reports/financial">
         {() => <ProtectedRoute component={FinancialReports} />}
