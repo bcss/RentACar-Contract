@@ -19,12 +19,13 @@ Preferred communication style: Simple, everyday language.
 - **Technology Stack:** Node.js with TypeScript, Express.js, Drizzle ORM, internal username/password authentication with Passport.js, express-session with PostgreSQL store.
 - **API Design:** RESTful endpoints, role-based middleware, centralized error handling, comprehensive audit logging.
 - **Authentication & Authorization:** Internal username/password system, Passport.js, PostgreSQL-backed sessions, httpOnly/secure cookies, role-based access (Admin, Manager, Staff, Viewer).
-- **Security Hardening:** Includes session fixation protection, CSRF protection via double-submit cookie, PII sanitization from error logs, password complexity and rotation, security headers (Helmet.js), and robust business logic validation (e.g., edit reason, financial input guards). All critical vulnerabilities are resolved, aligning with GDPR, PCI-DSS, and OWASP Top 10:2021 standards.
+- **Security Hardening:** Includes session fixation protection, CSRF protection via double-submit cookie pattern with automatic token refresh and retry logic, PII sanitization from error logs, password complexity and rotation, security headers (Helmet.js), and robust business logic validation (e.g., edit reason, financial input guards). All critical vulnerabilities are resolved, aligning with GDPR, PCI-DSS, and OWASP Top 10:2021 standards.
 - **Production Security (Nov 16, 2025):** 
   - **Mandatory Super Admin Password:** Production deployment REQUIRES `SUPER_ADMIN_PASSWORD` environment variable (app fails to start if not set)
   - **Configurable Session TTL:** Session timeout now configurable via `SESSION_MAX_AGE` (default: 1 hour, valid range: 5 min to 30 days)
   - **Input Validation:** SESSION_MAX_AGE validates against NaN and invalid ranges, falls back to secure default with warnings
   - **Environment-Specific Controls:** Development mode allows weak defaults with warnings, production mode enforces strict security
+  - **CSRF Protection Implementation:** Double-submit cookie pattern with automatic token fetching on app load and login, transparent retry logic for expired tokens, 1-hour token lifetime
 - **Audit Trails:** `contractEdits` for field-level modifications and `auditLogs` for lifecycle events.
 - **Drizzle ORM Patterns:** Enforces type safety and audit trails for all create operations.
 - **Mobile Backend Infrastructure:** Backend is prepared for future mobile apps with 29 RESTful endpoints, with customer-facing endpoints protected by `requireCustomerAuth` middleware until customer authentication is deployed.
