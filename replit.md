@@ -74,6 +74,15 @@ Preferred communication style: Simple, everyday language.
 - **Sponsors & Companies Master Data:** Reusable records for individual and corporate sponsors.
 - **Three Hirer Types:** Direct, with_sponsor, from_company.
 - **Professional PDF Integration:** Bilingual PDF generation for rental contracts with RTA compliance fields.
+- **Tabbed Dialog Forms (✅ IMPLEMENTED):** Modern, multi-tab form interface for improved UX on large forms with Material Design 3 styling. All 5 master data forms converted to tabbed dialogs:
+  - **Customer Form (4 tabs):** Basic Info, Contact, License, Additional - reduces scrolling, improves field organization
+  - **Vehicle Form (4 tabs):** Basic Info, Technical, Ownership, Rental Settings - streamlines vehicle registration workflow
+  - **Sponsor Form (3 tabs):** Basic Info, Identity, Contact - simplified sponsor creation process
+  - **Company Form (3 tabs):** Basic Info, Registration, Contact - organized corporate sponsor data entry
+  - **Insurance Claims Form (3 tabs):** Claim Information, Insurance Details, Status & Additional - improved claims processing
+  - **User Form (2 tabs):** Basic Info, Permissions - enhanced permission management (previously implemented)
+  - **Pattern Consistency:** max-w-4xl dialogs, max-h-[90vh] with overflow-hidden, scrollable content areas, fixed footers with bg-muted/20 border-t styling
+  - **Documentation:** Complete implementation guide in `docs/TABBED_DIALOGS_GUIDE.md`
 - **Import Data Functionality (Superadmin Only):** Bulk import system for master data (Customers, Vehicles, Sponsors, Companies) and Contracts from external systems. Features include:
   - Transaction-based atomicity (all-or-nothing imports)
   - Comprehensive validation with field-level error reporting (row, field, message)
