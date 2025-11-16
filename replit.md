@@ -79,3 +79,8 @@ Preferred communication style: Simple, everyday language.
 - **Styling:** `tailwindcss`, `class-variance-authority`, `clsx`.
 - **Data Visualization:** `recharts`, `html2canvas`.
 - **Export & Document Generation:** `jspdf`, `jspdf-autotable`, `xlsx`.
+
+## Documentation
+
+### Enhancement Proposals
+- **Dashboard Enhancement Proposal** (`docs/DASHBOARD_ENHANCEMENT_PROPOSAL.md`): Comprehensive analysis of current dashboard against industry best practices, identifying gaps in visual data storytelling, trend analysis, and goal tracking. Proposes 3-phase implementation roadmap including trend indicators, time-series charts (revenue, contract volume, fleet utilization), interactive filters, and four new analytical report pages (Revenue Trends, Fleet Performance, Contract Analytics, Collection Performance). Based on research from 7 leading dashboard design resources.
