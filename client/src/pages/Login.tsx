@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, fetchCsrfToken } from '@/lib/queryClient';
 import { queryClient } from '@/lib/queryClient';
 import { Eye, EyeOff } from 'lucide-react';
 import { Icon } from '@/components/Icon';
@@ -27,6 +27,9 @@ export default function Login() {
     try {
       const res = await apiRequest('POST', '/api/login', { username, password });
       const user = await res.json();
+
+      // Fetch CSRF token immediately after successful login
+      fetchCsrfToken();
 
       // Invalidate and refetch user query
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
