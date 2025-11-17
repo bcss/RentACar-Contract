@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess, requireAppAccessReportAccess } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, insertBranchSchema, insertBranchTransferSchema, insertPublicHolidaySchema, insertDriverOutsourceCompanySchema, insertDriverSchema, insertDriverRateCardSchema, insertDriverScheduleBlockSchema, insertDriverAssignmentSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
 import { count, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
@@ -5935,6 +5935,777 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Successfully imported ${resolvedContracts.length} contracts`,
         count: resolvedContracts.length,
       });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ==================== BRANCH MANAGEMENT API ROUTES ====================
+  
+  app.get("/api/branches", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      // SECURITY: Only users with canManageAllBranches or Admins can list branches
+      if (!user.canManageAllBranches && user.role !== 'Admin') {
+        // Regular users can only see their own branch
+        if (!user.branchId) {
+          return res.status(403).json({ message: "No branch assigned to user" });
+        }
+        const branch = await storage.getBranchById(user.branchId);
+        return res.json(branch ? [branch] : []);
+      }
+      
+      const includeDisabled = req.query.includeDisabled === 'true';
+      const branches = await storage.getBranches(includeDisabled);
+      res.json(branches);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/branches/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const branch = await storage.getBranchById(req.params.id);
+      
+      if (!branch) {
+        return res.status(404).json({ message: "Branch not found" });
+      }
+      
+      // SECURITY: Users can only view their own branch unless they have canManageAllBranches
+      if (!user.canManageAllBranches && user.role !== 'Admin' && user.branchId !== branch.id) {
+        return res.status(403).json({ message: "Insufficient permissions to view this branch" });
+      }
+      
+      res.json(branch);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/branches", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageAllBranches && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to create branches" });
+      }
+      
+      const validationResult = insertBranchSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const branch = await storage.createBranch({
+        ...validationResult.data,
+        createdBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'branch_created', branch.id, req, `Created branch: ${branch.branchCode}`);
+      res.status(201).json(branch);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/branches/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageAllBranches && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to update branches" });
+      }
+      
+      // INPUT VALIDATION: Use Zod partial schema for updates
+      const validationResult = insertBranchSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const branch = await storage.updateBranch(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'branch_updated', branch.id, req, `Updated branch: ${branch.branchCode}`);
+      res.json(branch);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/branches/:id/disable", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageAllBranches && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to disable branches" });
+      }
+      
+      await storage.disableBranch(req.params.id, user.id);
+      await createAuditLog(user.id, 'branch_disabled', req.params.id, req, `Disabled branch`);
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/branches/:id/enable", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageAllBranches && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to enable branches" });
+      }
+      
+      await storage.enableBranch(req.params.id);
+      await createAuditLog(user.id, 'branch_enabled', req.params.id, req, `Enabled branch`);
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Branch Transfers
+  app.get("/api/branch-transfers", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        status: req.query.status as string | undefined,
+        vehicleId: req.query.vehicleId as string | undefined,
+        sourceBranchId: req.query.sourceBranchId as string | undefined,
+        destinationBranchId: req.query.destinationBranchId as string | undefined,
+      };
+      const transfers = await storage.getBranchTransfers(filters);
+      res.json(transfers);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/branch-transfers/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const transfer = await storage.getBranchTransferById(req.params.id);
+      if (!transfer) {
+        return res.status(404).json({ message: "Transfer not found" });
+      }
+      res.json(transfer);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/branch-transfers", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertBranchTransferSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const transfer = await storage.createBranchTransfer({
+        ...validationResult.data,
+        requestedBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'branch_transfer_initiated', transfer.id, req, `Initiated vehicle transfer`);
+      res.status(201).json(transfer);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/branch-transfers/:id/approve", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageAllBranches && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to approve transfers" });
+      }
+      
+      const transfer = await storage.approveBranchTransfer(req.params.id, user.id);
+      await createAuditLog(user.id, 'branch_transfer_approved', transfer.id, req, `Approved vehicle transfer`);
+      res.json(transfer);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/branch-transfers/:id/reject", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageAllBranches && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to reject transfers" });
+      }
+      
+      const { rejectedReason } = req.body;
+      if (!rejectedReason) {
+        return res.status(400).json({ message: "Rejection reason is required" });
+      }
+      
+      const transfer = await storage.rejectBranchTransfer(req.params.id, user.id, rejectedReason);
+      await createAuditLog(user.id, 'branch_transfer_rejected', transfer.id, req, `Rejected vehicle transfer: ${rejectedReason}`);
+      res.json(transfer);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/branch-transfers/:id/complete", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const transfer = await storage.completeBranchTransfer(req.params.id);
+      await createAuditLog(user.id, 'branch_transfer_completed', transfer.id, req, `Completed vehicle transfer`);
+      res.json(transfer);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Public Holidays
+  app.get("/api/public-holidays", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
+        year: req.query.year ? parseInt(req.query.year as string) : undefined,
+      };
+      const holidays = await storage.getPublicHolidays(filters);
+      res.json(holidays);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/public-holidays/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const holiday = await storage.getPublicHolidayById(req.params.id);
+      if (!holiday) {
+        return res.status(404).json({ message: "Holiday not found" });
+      }
+      res.json(holiday);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/public-holidays", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (user.role !== 'Admin') {
+        return res.status(403).json({ message: "Only admins can create public holidays" });
+      }
+      
+      const validationResult = insertPublicHolidaySchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const holiday = await storage.createPublicHoliday({
+        ...validationResult.data,
+        createdBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'public_holiday_created', holiday.id, req, `Created public holiday: ${holiday.nameEn}`);
+      res.status(201).json(holiday);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/public-holidays/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (user.role !== 'Admin') {
+        return res.status(403).json({ message: "Only admins can update public holidays" });
+      }
+      
+      // INPUT VALIDATION
+      const validationResult = insertPublicHolidaySchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const holiday = await storage.updatePublicHoliday(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'public_holiday_updated', holiday.id, req, `Updated public holiday: ${holiday.nameEn}`);
+      res.json(holiday);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/public-holidays/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (user.role !== 'Admin') {
+        return res.status(403).json({ message: "Only admins can delete public holidays" });
+      }
+      
+      await storage.deletePublicHoliday(req.params.id);
+      await createAuditLog(user.id, 'public_holiday_deleted', req.params.id, req, `Deleted public holiday`);
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Driver Outsource Companies
+  app.get("/api/driver-companies", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const includeDisabled = req.query.includeDisabled === 'true';
+      const companies = await storage.getDriverOutsourceCompanies(includeDisabled);
+      res.json(companies);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/driver-companies/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const company = await storage.getDriverOutsourceCompanyById(req.params.id);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      res.json(company);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/driver-companies", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to create driver companies" });
+      }
+      
+      const validationResult = insertDriverOutsourceCompanySchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const company = await storage.createDriverOutsourceCompany({
+        ...validationResult.data,
+        createdBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'driver_company_created', company.id, req, `Created driver company: ${company.nameEn}`);
+      res.status(201).json(company);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/driver-companies/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to update driver companies" });
+      }
+      
+      // INPUT VALIDATION
+      const validationResult = insertDriverOutsourceCompanySchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const company = await storage.updateDriverOutsourceCompany(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'driver_company_updated', company.id, req, `Updated driver company: ${company.nameEn}`);
+      res.json(company);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/driver-companies/:id/disable", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to disable driver companies" });
+      }
+      
+      await storage.disableDriverOutsourceCompany(req.params.id, user.id);
+      await createAuditLog(user.id, 'driver_company_disabled', req.params.id, req, `Disabled driver company`);
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/driver-companies/:id/enable", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to enable driver companies" });
+      }
+      
+      await storage.enableDriverOutsourceCompany(req.params.id);
+      await createAuditLog(user.id, 'driver_company_enabled', req.params.id, req, `Enabled driver company`);
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Drivers
+  app.get("/api/drivers", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        availability: req.query.availability as string | undefined,
+        employmentType: req.query.employmentType as string | undefined,
+        includeDisabled: req.query.includeDisabled === 'true',
+      };
+      const drivers = await storage.getDrivers(filters);
+      res.json(drivers);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/drivers/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const driver = await storage.getDriverById(req.params.id);
+      if (!driver) {
+        return res.status(404).json({ message: "Driver not found" });
+      }
+      res.json(driver);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/drivers", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to create drivers" });
+      }
+      
+      const validationResult = insertDriverSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const driver = await storage.createDriver({
+        ...validationResult.data,
+        createdBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'driver_created', driver.id, req, `Created driver: ${driver.driverCode}`);
+      res.status(201).json(driver);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/drivers/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to update drivers" });
+      }
+      
+      // INPUT VALIDATION
+      const validationResult = insertDriverSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const driver = await storage.updateDriver(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'driver_updated', driver.id, req, `Updated driver: ${driver.driverCode}`);
+      res.json(driver);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/drivers/:id/availability", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const { availability } = req.body;
+      if (!availability) {
+        return res.status(400).json({ message: "Availability is required" });
+      }
+      
+      const driver = await storage.updateDriverAvailability(req.params.id, availability);
+      await createAuditLog(user.id, 'driver_availability_updated', driver.id, req, `Updated driver availability to: ${availability}`);
+      res.json(driver);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/drivers/:id/disable", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to disable drivers" });
+      }
+      
+      await storage.disableDriver(req.params.id, user.id);
+      await createAuditLog(user.id, 'driver_disabled', req.params.id, req, `Disabled driver`);
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/drivers/:id/enable", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to enable drivers" });
+      }
+      
+      await storage.enableDriver(req.params.id);
+      await createAuditLog(user.id, 'driver_enabled', req.params.id, req, `Enabled driver`);
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Driver Rate Cards
+  app.get("/api/drivers/:id/rate-cards", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const rateCards = await storage.getDriverRateCards(req.params.id);
+      res.json(rateCards);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/drivers/:id/rate-cards", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to manage driver rates" });
+      }
+      
+      const validationResult = insertDriverRateCardSchema.safeParse({
+        ...req.body,
+        driverId: req.params.id,
+      });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const rateCard = await storage.createDriverRateCard({
+        ...validationResult.data,
+        createdBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'driver_rate_card_created', rateCard.id, req, `Created rate card for driver`);
+      res.status(201).json(rateCard);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/driver-rate-cards/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to manage driver rates" });
+      }
+      
+      // INPUT VALIDATION
+      const validationResult = insertDriverRateCardSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const rateCard = await storage.updateDriverRateCard(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'driver_rate_card_updated', rateCard.id, req, `Updated driver rate card`);
+      res.json(rateCard);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Driver Schedule
+  app.get("/api/drivers/:id/schedule", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const blocks = await storage.getDriverScheduleBlocks(req.params.id, startDate, endDate);
+      res.json(blocks);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/drivers/:id/schedule", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to manage driver schedule" });
+      }
+      
+      const validationResult = insertDriverScheduleBlockSchema.safeParse({
+        ...req.body,
+        driverId: req.params.id,
+      });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const block = await storage.createDriverScheduleBlock({
+        ...validationResult.data,
+        createdBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'driver_schedule_block_created', block.id, req, `Created schedule block for driver`);
+      res.status(201).json(block);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/driver-schedule-blocks/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canManageDrivers && user.role !== 'Admin') {
+        return res.status(403).json({ message: "Insufficient permissions to manage driver schedule" });
+      }
+      
+      await storage.deleteDriverScheduleBlock(req.params.id);
+      await createAuditLog(user.id, 'driver_schedule_block_deleted', req.params.id, req, `Deleted driver schedule block`);
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/drivers/:id/check-availability", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { startDateTime, endDateTime } = req.body;
+      if (!startDateTime || !endDateTime) {
+        return res.status(400).json({ message: "Start and end date/time required" });
+      }
+      
+      const isAvailable = await storage.checkDriverAvailability(
+        req.params.id,
+        new Date(startDateTime),
+        new Date(endDateTime)
+      );
+      
+      res.json({ isAvailable });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Driver Assignments
+  app.get("/api/driver-assignments", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        contractId: req.query.contractId as string | undefined,
+        driverId: req.query.driverId as string | undefined,
+        status: req.query.status as string | undefined,
+      };
+      const assignments = await storage.getDriverAssignments(filters);
+      res.json(assignments);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/driver-assignments/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const assignment = await storage.getDriverAssignmentById(req.params.id);
+      if (!assignment) {
+        return res.status(404).json({ message: "Assignment not found" });
+      }
+      res.json(assignment);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/driver-assignments", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canAssignDrivers && user.role !== 'Admin' && user.role !== 'Manager') {
+        return res.status(403).json({ message: "Insufficient permissions to assign drivers" });
+      }
+      
+      const validationResult = insertDriverAssignmentSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const assignment = await storage.createDriverAssignment({
+        ...validationResult.data,
+        assignedBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'driver_assigned', assignment.id, req, `Assigned driver to contract`);
+      res.status(201).json(assignment);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/driver-assignments/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!user.canAssignDrivers && user.role !== 'Admin' && user.role !== 'Manager') {
+        return res.status(403).json({ message: "Insufficient permissions to update driver assignments" });
+      }
+      
+      // INPUT VALIDATION
+      const validationResult = insertDriverAssignmentSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const assignment = await storage.updateDriverAssignment(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'driver_assignment_updated', assignment.id, req, `Updated driver assignment`);
+      res.json(assignment);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/driver-assignments/:id/complete", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const { completionNotes } = req.body;
+      const assignment = await storage.completeDriverAssignment(req.params.id, completionNotes || '');
+      await createAuditLog(user.id, 'driver_assignment_completed', assignment.id, req, `Completed driver assignment`);
+      res.json(assignment);
     } catch (error) {
       next(error);
     }

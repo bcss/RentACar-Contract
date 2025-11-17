@@ -261,6 +261,68 @@ export interface IStorage {
     offset?: number;
   }): Promise<{ logs: AccessLog[]; total: number }>;
   purgeAccessLogs(beforeDate: Date): Promise<number>;
+  
+  // Branch operations
+  getBranches(includeDisabled?: boolean): Promise<Branch[]>;
+  getBranchById(id: string): Promise<Branch | undefined>;
+  getBranchByCode(branchCode: string): Promise<Branch | undefined>;
+  createBranch(branch: InsertBranch): Promise<Branch>;
+  updateBranch(id: string, branch: Partial<InsertBranch>): Promise<Branch>;
+  disableBranch(id: string, disabledBy: string): Promise<void>;
+  enableBranch(id: string): Promise<void>;
+  
+  // Branch Transfer operations
+  getBranchTransfers(filters?: { status?: string; vehicleId?: string; sourceBranchId?: string; destinationBranchId?: string }): Promise<BranchTransfer[]>;
+  getBranchTransferById(id: string): Promise<BranchTransfer | undefined>;
+  createBranchTransfer(transfer: InsertBranchTransfer): Promise<BranchTransfer>;
+  approveBranchTransfer(id: string, approvedBy: string): Promise<BranchTransfer>;
+  rejectBranchTransfer(id: string, approvedBy: string, rejectedReason: string): Promise<BranchTransfer>;
+  completeBranchTransfer(id: string): Promise<BranchTransfer>;
+  
+  // Driver Outsource Company operations
+  getDriverOutsourceCompanies(includeDisabled?: boolean): Promise<DriverOutsourceCompany[]>;
+  getDriverOutsourceCompanyById(id: string): Promise<DriverOutsourceCompany | undefined>;
+  createDriverOutsourceCompany(company: InsertDriverOutsourceCompany): Promise<DriverOutsourceCompany>;
+  updateDriverOutsourceCompany(id: string, company: Partial<InsertDriverOutsourceCompany>): Promise<DriverOutsourceCompany>;
+  disableDriverOutsourceCompany(id: string, disabledBy: string): Promise<void>;
+  enableDriverOutsourceCompany(id: string): Promise<void>;
+  
+  // Driver operations
+  getDrivers(filters?: { availability?: string; employmentType?: string; includeDisabled?: boolean }): Promise<Driver[]>;
+  getDriverById(id: string): Promise<Driver | undefined>;
+  getDriverByCode(driverCode: string): Promise<Driver | undefined>;
+  createDriver(driver: InsertDriver): Promise<Driver>;
+  updateDriver(id: string, driver: Partial<InsertDriver>): Promise<Driver>;
+  updateDriverAvailability(id: string, availability: string): Promise<Driver>;
+  disableDriver(id: string, disabledBy: string): Promise<void>;
+  enableDriver(id: string): Promise<void>;
+  
+  // Driver Rate Card operations
+  getDriverRateCards(driverId: string): Promise<DriverRateCard[]>;
+  getActiveDriverRateCard(driverId: string, rateType: string): Promise<DriverRateCard | undefined>;
+  createDriverRateCard(rateCard: InsertDriverRateCard): Promise<DriverRateCard>;
+  updateDriverRateCard(id: string, rateCard: Partial<InsertDriverRateCard>): Promise<DriverRateCard>;
+  
+  // Driver Schedule Block operations
+  getDriverScheduleBlocks(driverId: string, startDate?: Date, endDate?: Date): Promise<DriverScheduleBlock[]>;
+  createDriverScheduleBlock(block: InsertDriverScheduleBlock): Promise<DriverScheduleBlock>;
+  deleteDriverScheduleBlock(id: string): Promise<void>;
+  checkDriverAvailability(driverId: string, startDateTime: Date, endDateTime: Date): Promise<boolean>;
+  
+  // Driver Assignment operations
+  getDriverAssignments(filters?: { contractId?: string; driverId?: string; status?: string }): Promise<DriverAssignment[]>;
+  getDriverAssignmentById(id: string): Promise<DriverAssignment | undefined>;
+  createDriverAssignment(assignment: InsertDriverAssignment): Promise<DriverAssignment>;
+  updateDriverAssignment(id: string, assignment: Partial<InsertDriverAssignment>): Promise<DriverAssignment>;
+  completeDriverAssignment(id: string, completionNotes: string): Promise<DriverAssignment>;
+  
+  // Public Holiday operations
+  getPublicHolidays(filters?: { isActive?: boolean; year?: number }): Promise<PublicHoliday[]>;
+  getPublicHolidayById(id: string): Promise<PublicHoliday | undefined>;
+  createPublicHoliday(holiday: InsertPublicHoliday): Promise<PublicHoliday>;
+  updatePublicHoliday(id: string, holiday: Partial<InsertPublicHoliday>): Promise<PublicHoliday>;
+  deletePublicHoliday(id: string): Promise<void>;
+  getHolidayByDate(date: Date): Promise<PublicHoliday | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2985,6 +3047,420 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(pushNotificationTokens)
       .where(eq(pushNotificationTokens.id, id));
+  }
+
+  // Branch operations implementation
+  async getBranches(includeDisabled = false): Promise<Branch[]> {
+    const conditions = [];
+    if (!includeDisabled) {
+      conditions.push(eq(branches.disabled, false));
+    }
+    return await db
+      .select()
+      .from(branches)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(branches.isHeadquarters), branches.branchCode);
+  }
+
+  async getBranchById(id: string): Promise<Branch | undefined> {
+    const [branch] = await db.select().from(branches).where(eq(branches.id, id));
+    return branch;
+  }
+
+  async getBranchByCode(branchCode: string): Promise<Branch | undefined> {
+    const [branch] = await db.select().from(branches).where(eq(branches.branchCode, branchCode));
+    return branch;
+  }
+
+  async createBranch(branchData: InsertBranch): Promise<Branch> {
+    const [branch] = await db.insert(branches).values(branchData).returning();
+    return branch;
+  }
+
+  async updateBranch(id: string, branchData: Partial<InsertBranch>): Promise<Branch> {
+    const [updated] = await db
+      .update(branches)
+      .set({ ...branchData, updatedAt: new Date() })
+      .where(eq(branches.id, id))
+      .returning();
+    return updated;
+  }
+
+  async disableBranch(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(branches)
+      .set({ disabled: true, disabledBy, disabledAt: new Date() })
+      .where(eq(branches.id, id));
+  }
+
+  async enableBranch(id: string): Promise<void> {
+    await db
+      .update(branches)
+      .set({ disabled: false, disabledBy: null, disabledAt: null })
+      .where(eq(branches.id, id));
+  }
+
+  // Branch Transfer operations implementation
+  async getBranchTransfers(filters?: { status?: string; vehicleId?: string; sourceBranchId?: string; destinationBranchId?: string }): Promise<BranchTransfer[]> {
+    const conditions = [];
+    if (filters?.status) conditions.push(eq(branchTransfers.status, filters.status));
+    if (filters?.vehicleId) conditions.push(eq(branchTransfers.vehicleId, filters.vehicleId));
+    if (filters?.sourceBranchId) conditions.push(eq(branchTransfers.sourceBranchId, filters.sourceBranchId));
+    if (filters?.destinationBranchId) conditions.push(eq(branchTransfers.destinationBranchId, filters.destinationBranchId));
+    
+    return await db
+      .select()
+      .from(branchTransfers)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(branchTransfers.createdAt));
+  }
+
+  async getBranchTransferById(id: string): Promise<BranchTransfer | undefined> {
+    const [transfer] = await db.select().from(branchTransfers).where(eq(branchTransfers.id, id));
+    return transfer;
+  }
+
+  async createBranchTransfer(transferData: InsertBranchTransfer): Promise<BranchTransfer> {
+    const [transfer] = await db.insert(branchTransfers).values(transferData).returning();
+    return transfer;
+  }
+
+  async approveBranchTransfer(id: string, approvedBy: string): Promise<BranchTransfer> {
+    const [updated] = await db
+      .update(branchTransfers)
+      .set({ status: 'approved', approvedBy, approvedAt: new Date(), updatedAt: new Date() })
+      .where(eq(branchTransfers.id, id))
+      .returning();
+    return updated;
+  }
+
+  async rejectBranchTransfer(id: string, approvedBy: string, rejectedReason: string): Promise<BranchTransfer> {
+    const [updated] = await db
+      .update(branchTransfers)
+      .set({ status: 'rejected', approvedBy, rejectedReason, approvedAt: new Date(), updatedAt: new Date() })
+      .where(eq(branchTransfers.id, id))
+      .returning();
+    return updated;
+  }
+
+  async completeBranchTransfer(id: string): Promise<BranchTransfer> {
+    const transfer = await this.getBranchTransferById(id);
+    if (!transfer) throw new Error('Transfer not found');
+    
+    const [updated] = await db.transaction(async (tx) => {
+      await tx
+        .update(vehicles)
+        .set({ branchId: transfer.destinationBranchId, updatedAt: new Date() })
+        .where(eq(vehicles.id, transfer.vehicleId));
+      
+      const [result] = await tx
+        .update(branchTransfers)
+        .set({ status: 'completed', completedAt: new Date(), updatedAt: new Date() })
+        .where(eq(branchTransfers.id, id))
+        .returning();
+      
+      return [result];
+    });
+    return updated;
+  }
+
+  // Driver Outsource Company operations implementation
+  async getDriverOutsourceCompanies(includeDisabled = false): Promise<DriverOutsourceCompany[]> {
+    const conditions = [];
+    if (!includeDisabled) {
+      conditions.push(eq(driverOutsourceCompanies.disabled, false));
+    }
+    return await db
+      .select()
+      .from(driverOutsourceCompanies)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(driverOutsourceCompanies.nameEn);
+  }
+
+  async getDriverOutsourceCompanyById(id: string): Promise<DriverOutsourceCompany | undefined> {
+    const [company] = await db.select().from(driverOutsourceCompanies).where(eq(driverOutsourceCompanies.id, id));
+    return company;
+  }
+
+  async createDriverOutsourceCompany(companyData: InsertDriverOutsourceCompany): Promise<DriverOutsourceCompany> {
+    const [company] = await db.insert(driverOutsourceCompanies).values(companyData).returning();
+    return company;
+  }
+
+  async updateDriverOutsourceCompany(id: string, companyData: Partial<InsertDriverOutsourceCompany>): Promise<DriverOutsourceCompany> {
+    const [updated] = await db
+      .update(driverOutsourceCompanies)
+      .set({ ...companyData, updatedAt: new Date() })
+      .where(eq(driverOutsourceCompanies.id, id))
+      .returning();
+    return updated;
+  }
+
+  async disableDriverOutsourceCompany(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(driverOutsourceCompanies)
+      .set({ disabled: true, disabledBy, disabledAt: new Date() })
+      .where(eq(driverOutsourceCompanies.id, id));
+  }
+
+  async enableDriverOutsourceCompany(id: string): Promise<void> {
+    await db
+      .update(driverOutsourceCompanies)
+      .set({ disabled: false, disabledBy: null, disabledAt: null })
+      .where(eq(driverOutsourceCompanies.id, id));
+  }
+
+  // Driver operations implementation
+  async getDrivers(filters?: { availability?: string; employmentType?: string; includeDisabled?: boolean }): Promise<Driver[]> {
+    const conditions = [];
+    if (filters?.availability) conditions.push(eq(drivers.availability, filters.availability));
+    if (filters?.employmentType) conditions.push(eq(drivers.employmentType, filters.employmentType));
+    if (!filters?.includeDisabled) conditions.push(eq(drivers.disabled, false));
+    
+    return await db
+      .select()
+      .from(drivers)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(drivers.driverCode);
+  }
+
+  async getDriverById(id: string): Promise<Driver | undefined> {
+    const [driver] = await db.select().from(drivers).where(eq(drivers.id, id));
+    return driver;
+  }
+
+  async getDriverByCode(driverCode: string): Promise<Driver | undefined> {
+    const [driver] = await db.select().from(drivers).where(eq(drivers.driverCode, driverCode));
+    return driver;
+  }
+
+  async createDriver(driverData: InsertDriver): Promise<Driver> {
+    const [driver] = await db.insert(drivers).values(driverData).returning();
+    return driver;
+  }
+
+  async updateDriver(id: string, driverData: Partial<InsertDriver>): Promise<Driver> {
+    const [updated] = await db
+      .update(drivers)
+      .set({ ...driverData, updatedAt: new Date() })
+      .where(eq(drivers.id, id))
+      .returning();
+    return updated;
+  }
+
+  async updateDriverAvailability(id: string, availability: string): Promise<Driver> {
+    const [updated] = await db
+      .update(drivers)
+      .set({ availability, updatedAt: new Date() })
+      .where(eq(drivers.id, id))
+      .returning();
+    return updated;
+  }
+
+  async disableDriver(id: string, disabledBy: string): Promise<void> {
+    await db
+      .update(drivers)
+      .set({ disabled: true, disabledBy, disabledAt: new Date(), isActive: false })
+      .where(eq(drivers.id, id));
+  }
+
+  async enableDriver(id: string): Promise<void> {
+    await db
+      .update(drivers)
+      .set({ disabled: false, disabledBy: null, disabledAt: null, isActive: true })
+      .where(eq(drivers.id, id));
+  }
+
+  // Driver Rate Card operations implementation
+  async getDriverRateCards(driverId: string): Promise<DriverRateCard[]> {
+    return await db
+      .select()
+      .from(driverRateCards)
+      .where(eq(driverRateCards.driverId, driverId))
+      .orderBy(desc(driverRateCards.effectiveFrom));
+  }
+
+  async getActiveDriverRateCard(driverId: string, rateType: string): Promise<DriverRateCard | undefined> {
+    const now = new Date();
+    const [card] = await db
+      .select()
+      .from(driverRateCards)
+      .where(
+        and(
+          eq(driverRateCards.driverId, driverId),
+          eq(driverRateCards.rateType, rateType),
+          eq(driverRateCards.isActive, true),
+          lte(driverRateCards.effectiveFrom, now),
+          or(
+            isNull(driverRateCards.effectiveTo),
+            gte(driverRateCards.effectiveTo, now)
+          )
+        )
+      )
+      .orderBy(desc(driverRateCards.effectiveFrom))
+      .limit(1);
+    return card;
+  }
+
+  async createDriverRateCard(rateCardData: InsertDriverRateCard): Promise<DriverRateCard> {
+    const [card] = await db.insert(driverRateCards).values(rateCardData).returning();
+    return card;
+  }
+
+  async updateDriverRateCard(id: string, rateCardData: Partial<InsertDriverRateCard>): Promise<DriverRateCard> {
+    const [updated] = await db
+      .update(driverRateCards)
+      .set({ ...rateCardData, updatedAt: new Date() })
+      .where(eq(driverRateCards.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Driver Schedule Block operations implementation
+  async getDriverScheduleBlocks(driverId: string, startDate?: Date, endDate?: Date): Promise<DriverScheduleBlock[]> {
+    const conditions = [eq(driverScheduleBlocks.driverId, driverId)];
+    if (startDate) conditions.push(gte(driverScheduleBlocks.endDateTime, startDate));
+    if (endDate) conditions.push(lte(driverScheduleBlocks.startDateTime, endDate));
+    
+    return await db
+      .select()
+      .from(driverScheduleBlocks)
+      .where(and(...conditions))
+      .orderBy(driverScheduleBlocks.startDateTime);
+  }
+
+  async createDriverScheduleBlock(blockData: InsertDriverScheduleBlock): Promise<DriverScheduleBlock> {
+    const [block] = await db.insert(driverScheduleBlocks).values(blockData).returning();
+    return block;
+  }
+
+  async deleteDriverScheduleBlock(id: string): Promise<void> {
+    await db.delete(driverScheduleBlocks).where(eq(driverScheduleBlocks.id, id));
+  }
+
+  async checkDriverAvailability(driverId: string, startDateTime: Date, endDateTime: Date): Promise<boolean> {
+    const blocks = await this.getDriverScheduleBlocks(driverId, startDateTime, endDateTime);
+    const assignments = await db
+      .select()
+      .from(driverAssignments)
+      .where(
+        and(
+          eq(driverAssignments.driverId, driverId),
+          or(
+            and(lte(driverAssignments.startDateTime, startDateTime), gte(driverAssignments.endDateTime, startDateTime)),
+            and(lte(driverAssignments.startDateTime, endDateTime), gte(driverAssignments.endDateTime, endDateTime)),
+            and(gte(driverAssignments.startDateTime, startDateTime), lte(driverAssignments.endDateTime, endDateTime))
+          )
+        )
+      );
+    
+    return blocks.length === 0 && assignments.length === 0;
+  }
+
+  // Driver Assignment operations implementation
+  async getDriverAssignments(filters?: { contractId?: string; driverId?: string; status?: string }): Promise<DriverAssignment[]> {
+    const conditions = [];
+    if (filters?.contractId) conditions.push(eq(driverAssignments.contractId, filters.contractId));
+    if (filters?.driverId) conditions.push(eq(driverAssignments.driverId, filters.driverId));
+    if (filters?.status) conditions.push(eq(driverAssignments.status, filters.status));
+    
+    return await db
+      .select()
+      .from(driverAssignments)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(driverAssignments.createdAt));
+  }
+
+  async getDriverAssignmentById(id: string): Promise<DriverAssignment | undefined> {
+    const [assignment] = await db.select().from(driverAssignments).where(eq(driverAssignments.id, id));
+    return assignment;
+  }
+
+  async createDriverAssignment(assignmentData: InsertDriverAssignment): Promise<DriverAssignment> {
+    const [assignment] = await db.insert(driverAssignments).values(assignmentData).returning();
+    return assignment;
+  }
+
+  async updateDriverAssignment(id: string, assignmentData: Partial<InsertDriverAssignment>): Promise<DriverAssignment> {
+    const [updated] = await db
+      .update(driverAssignments)
+      .set({ ...assignmentData, updatedAt: new Date() })
+      .where(eq(driverAssignments.id, id))
+      .returning();
+    return updated;
+  }
+
+  async completeDriverAssignment(id: string, completionNotes: string): Promise<DriverAssignment> {
+    const [updated] = await db
+      .update(driverAssignments)
+      .set({
+        status: 'completed',
+        completionNotes,
+        completionDateTime: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(driverAssignments.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Public Holiday operations implementation
+  async getPublicHolidays(filters?: { isActive?: boolean; year?: number }): Promise<PublicHoliday[]> {
+    const conditions = [];
+    if (filters?.isActive !== undefined) conditions.push(eq(publicHolidays.isActive, filters.isActive));
+    if (filters?.year) {
+      const startOfYear = new Date(filters.year, 0, 1);
+      const endOfYear = new Date(filters.year, 11, 31, 23, 59, 59);
+      conditions.push(
+        and(
+          gte(publicHolidays.holidayDate, startOfYear),
+          lte(publicHolidays.holidayDate, endOfYear)
+        )
+      );
+    }
+    
+    return await db
+      .select()
+      .from(publicHolidays)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(publicHolidays.holidayDate);
+  }
+
+  async getPublicHolidayById(id: string): Promise<PublicHoliday | undefined> {
+    const [holiday] = await db.select().from(publicHolidays).where(eq(publicHolidays.id, id));
+    return holiday;
+  }
+
+  async createPublicHoliday(holidayData: InsertPublicHoliday): Promise<PublicHoliday> {
+    const [holiday] = await db.insert(publicHolidays).values(holidayData).returning();
+    return holiday;
+  }
+
+  async updatePublicHoliday(id: string, holidayData: Partial<InsertPublicHoliday>): Promise<PublicHoliday> {
+    const [updated] = await db
+      .update(publicHolidays)
+      .set({ ...holidayData, updatedAt: new Date() })
+      .where(eq(publicHolidays.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePublicHoliday(id: string): Promise<void> {
+    await db.delete(publicHolidays).where(eq(publicHolidays.id, id));
+  }
+
+  async getHolidayByDate(date: Date): Promise<PublicHoliday | undefined> {
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const [holiday] = await db
+      .select()
+      .from(publicHolidays)
+      .where(
+        and(
+          eq(publicHolidays.isActive, true),
+          sql`DATE(${publicHolidays.holidayDate}) = DATE(${dateOnly})`
+        )
+      );
+    return holiday;
   }
 }
 

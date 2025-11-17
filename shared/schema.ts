@@ -92,6 +92,12 @@ export const users = pgTable("users", {
   canAccessUserActivityReports: boolean("can_access_user_activity_reports").notNull().default(false), // User Activity Reports
   canAccessAppAccessReport: boolean("can_access_app_access_report").notNull().default(false), // App Access Report (login attempts)
   
+  // Branch & Driver Service Permissions
+  canManageAllBranches: boolean("can_manage_all_branches").notNull().default(false), // Manage all branches (super admin only)
+  canManageDrivers: boolean("can_manage_drivers").notNull().default(false), // Create/edit/disable drivers
+  canAssignDrivers: boolean("can_assign_drivers").notNull().default(false), // Assign drivers to contracts
+  canViewDriverCosts: boolean("can_view_driver_costs").notNull().default(false), // View driver cost rates
+  
   // Branch Assignment
   branchId: varchar("branch_id").references(() => branches.id),
   
