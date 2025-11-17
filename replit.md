@@ -60,8 +60,9 @@ Preferred communication style: Simple, everyday language.
 - **Driver Service Module:** Professional driver assignment capability with UAE market compliance.
   - **Backend Complete:** Driver master data, outsource companies, rate cards, schedule management, assignment tracking, UAE public holidays calendar, surcharge calculator, driver cost integration into contracts
   - **Contract Integration Complete:** Driver service costs automatically calculated and included in contract totals via `calculateDriverAssignmentCost()` utility
-  - **Frontend Status:** Public Holidays Manager created (`/public-holidays`) with full CRUD, recurring holiday support, surcharge configuration
-  - **Pending:** Drivers Master Page, Driver Companies Page, Driver Assignment Modal, Contract Driver Service section
+  - **Frontend Status:** 4 pages operational: Public Holidays (`/public-holidays`), Branches (`/branches`), Drivers (`/drivers`), Driver Companies (`/driver-companies`) with full CRUD interfaces
+  - **Sidebar Navigation:** Branch/driver menu items added with i18n support (English/Arabic)
+  - **Pending:** Driver Assignment Modal, Contract Driver Service section integration, Vehicle Transfers UI
 - **Future-Proofing Tables:** Schema defined for Payment Gateways, Payment Transactions, Pricing Rules, Document Files, and Digital Signatures.
 
 ### Role-Based Permissions
@@ -77,13 +78,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Branch & Driver Service Implementation Status
 
-### Completed (17/35 Tasks - 48.6%)
+### Completed (21/35 Tasks - 60%)
 
 #### Backend Foundation (100% Complete)
 1. ✅ **Database Schema:** 8 new tables (branches, branchTransfers, publicHolidays, drivers, driverOutsourceCompanies, driverRateCards, driverScheduleBlocks, driverAssignments) with full migration files
 2. ✅ **Storage Layer:** 435 lines of CRUD operations for all entities with transaction-based transfers
 3. ✅ **Surcharge Calculator:** UAE-compliant minute-by-minute calculation with emirate-aware weekends, night shift detection, public holiday integration
-4. ✅ **Driver Cost Calculator:** `calculateDriverAssignmentCost()` and `calculateContractDriverCosts()` utilities with surcharge integration
+4. ✅ **Driver Cost Calculator:** `calculateDriverAssignmentCost()` and `calculateContractDriverCosts()` utilities with surcharge integration + VAT fix
 5. ✅ **API Routes:** 41 RESTful endpoints with authentication, validation, audit logging:
    - 11 Branch endpoints (CRUD, enable/disable, transfers)
    - 4 Public Holiday endpoints (CRUD)
@@ -93,32 +94,36 @@ Preferred communication style: Simple, everyday language.
 7. ✅ **Contract Calculations:** Driver service costs integrated into GET `/api/contracts/:id` endpoint with explicit `totalDriverCharges`, `totalDriverSurcharges`, and recalculated `totalDue`
 8. ✅ **Company Settings:** 8 driver service configuration fields added to global settings
 
-#### Frontend Pages (2/9 Complete - 22%)
+#### Frontend CRUD Pages (4/7 Complete - 57%)
 9. ✅ **Public Holidays Manager:** `/public-holidays` - Full CRUD interface with recurring holiday support, bilingual fields, surcharge rate configuration, Gregorian/Hijri calendar support
 10. ✅ **Branches Master Page:** `/branches` - Full CRUD with tabbed dialog, emirate selection, bilingual addresses, active/inactive toggle
+11. ✅ **Drivers Master Page:** `/drivers` - Full CRUD with tabbed dialog for personal info and employment details
+12. ✅ **Driver Companies Page:** `/driver-companies` - Simple CRUD interface for outsource company management
 
-### Pending (18/35 Tasks - 51.4%)
+#### Integration & Polish (2/4 Complete - 50%)
+13. ✅ **Sidebar Navigation:** Branch/driver management menu items added with Admin/Manager visibility
+14. ✅ **i18n Translations:** Complete English/Arabic translation keys for all Branch & Driver Service UI strings
 
-#### Frontend CRUD Pages (7 tasks)
-- **Drivers Master Page:** `/drivers` with tabbed dialog (personal info, rate cards, schedules, assignments)
-- **Driver Outsource Companies:** `/driver-companies` simple CRUD page
+### Pending (14/35 Tasks - 40%)
+
+#### Frontend CRUD Pages (3 remaining)
 - **Vehicle Transfers UI:** Add transfer dialog to Vehicles page
 - **Contract Driver Service Section:** Add driver assignment fields to Contract form
 - **Driver Assignment Modal:** Create driver selection and assignment interface
+
+#### Configuration & Settings (2 remaining)
 - **Branch Filtering:** Add branch selector dropdown to all multi-branch pages
 - **Financial Settings Extension:** Add driver service rate configuration to settings page
 
-#### Reporting & Analytics (2 tasks)
+#### Reporting & Analytics (2 remaining)
 - **Branch Analytics Dashboard:** Revenue, utilization, and transfer reports per branch
 - **Driver Analytics:** Utilization rate, earnings, assignment history reports
 
-#### Integration & Polish (4 tasks)
+#### Integration & Polish (2 remaining)
 - **Financial Integration:** Add driver service line items to PDF receipts and invoices
 - **Audit & Timeline:** Add branch/driver event types to contract timeline
-- **Sidebar Navigation:** Add branch/driver management menu items with permission-based visibility
-- **i18n Translations:** Add translation keys for all new UI strings
 
-#### Testing & Documentation (5 tasks)
+#### Testing & Documentation (5 remaining)
 - **Unit Tests:** Surcharge calculator and business logic tests
 - **API Integration Tests:** Workflow tests for branch transfers and driver assignments
 - **End-to-End Tests:** Complete user journey tests using Playwright
