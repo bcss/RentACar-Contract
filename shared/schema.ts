@@ -179,6 +179,10 @@ export const customers = pgTable("customers", {
   // Additional Information
   notes: text("notes"),
   
+  // Driver Service Preferences (Phase 1 - Customer Preferences)
+  preferredDriverService: boolean("preferred_driver_service").notNull().default(false),
+  preferredDriverServiceType: varchar("preferred_driver_service_type", { length: 20 }).default("none"), // 'daily', 'hourly', 'flat', 'none'
+  
   // Branch Assignment
   branchId: varchar("branch_id").references(() => branches.id),
   
@@ -1170,6 +1174,16 @@ export const contracts = pgTable("contracts", {
   pickUpCharge: varchar("pick_up_charge"), // Charge for picking up vehicle from customer
   pickUpAddressEn: text("pick_up_address_en"), // Pick-up address in English
   pickUpAddressAr: text("pick_up_address_ar"), // Pick-up address in Arabic
+  
+  // Driver Service (Phase 3 - Driver Assignment Integration)
+  requiresDriver: boolean("requires_driver").notNull().default(false), // Whether driver service is required
+  driverServiceType: varchar("driver_service_type", { length: 20 }).default("none"), // 'daily', 'hourly', 'flat', 'none'
+  driverServiceRate: varchar("driver_service_rate"), // Rate per unit (day/hour/flat)
+  driverServiceQuantity: varchar("driver_service_quantity"), // Number of days, hours, or trips
+  driverServiceTotal: varchar("driver_service_total"), // Total driver service charge
+  assignedDriverId: varchar("assigned_driver_id").references(() => drivers.id), // FK to drivers table
+  driverServiceNotes: text("driver_service_notes"), // Driver service notes in English
+  driverServiceNotesAr: text("driver_service_notes_ar"), // Driver service notes in Arabic
   
   // Additional Information
   notes: text("notes"),
