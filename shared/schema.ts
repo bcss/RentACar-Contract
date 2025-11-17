@@ -9,6 +9,7 @@ import {
   integer,
   boolean,
   pgEnum,
+  numeric,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -375,8 +376,8 @@ export const sponsors = pgTable("sponsors", {
   passportId: varchar("passport_id"), // Passport or National ID
   licenseNumber: varchar("license_number"),
   
-  // Phase 1: UAE Compliance - Emirates ID (nullable)
-  emiratesIdNumber: varchar("emirates_id_number"),
+  // Phase 1: UAE Compliance - Emirates ID (nullable but unique)
+  emiratesIdNumber: varchar("emirates_id_number").unique(), // Unique constraint for UAE compliance
   emiratesIdExpiry: timestamp("emirates_id_expiry"),
   
   // Contact Information
@@ -389,7 +390,7 @@ export const sponsors = pgTable("sponsors", {
   notes: text("notes"),
   
   // Phase 1: Financial & Risk Management (nullable)
-  maxExposureAmount: varchar("max_exposure_amount"), // Maximum rental exposure allowed
+  maxExposureAmount: numeric("max_exposure_amount", { precision: 12, scale: 2 }), // Numeric for exposure limit calculations
   blacklistReason: text("blacklist_reason"), // Reason for blacklisting if disabled
   
   // Audit fields
