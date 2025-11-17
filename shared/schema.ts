@@ -375,6 +375,10 @@ export const sponsors = pgTable("sponsors", {
   passportId: varchar("passport_id"), // Passport or National ID
   licenseNumber: varchar("license_number"),
   
+  // Phase 1: UAE Compliance - Emirates ID (nullable)
+  emiratesIdNumber: varchar("emirates_id_number"),
+  emiratesIdExpiry: timestamp("emirates_id_expiry"),
+  
   // Contact Information
   mobile: varchar("mobile"),
   address: text("address"),
@@ -383,6 +387,10 @@ export const sponsors = pgTable("sponsors", {
   // Additional Information
   relation: varchar("relation"), // For sponsors: relationship to hirer (e.g., "Employer", "Family Member")
   notes: text("notes"),
+  
+  // Phase 1: Financial & Risk Management (nullable)
+  maxExposureAmount: varchar("max_exposure_amount"), // Maximum rental exposure allowed
+  blacklistReason: text("blacklist_reason"), // Reason for blacklisting if disabled
   
   // Audit fields
   disabled: boolean("disabled").notNull().default(false),
@@ -2402,3 +2410,535 @@ export const insertDigitalSignatureSchema = createInsertSchema(digitalSignatures
 
 export type InsertDigitalSignature = z.infer<typeof insertDigitalSignatureSchema>;
 export type DigitalSignature = typeof digitalSignatures.$inferSelect;
+
+// ========================================
+// PHASE 2: TOLLS, FINES, INCIDENTS, MAINTENANCE
+// ========================================
+
+// Toll Systems table - UAE toll system configuration (Salik, Darb, Aber)
+export const tollSystems = pgTable("toll_systems", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  systemName: varchar("system_name").notNull(), // Salik, Darb, Aber
+  emirate: emiratesEnum("emirate").notNull(),
+  provider: varchar("provider").notNull(),
+  standardFee: varchar("standard_fee").notNull().default("4"),
+  holidayExempt: boolean("holiday_exempt").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_toll_systems_emirate").on(table.emirate),
+  index("idx_toll_systems_active").on(table.isActive),
+]);
+
+export const insertTollSystemSchema = createInsertSchema(tollSystems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertTollSystem = z.infer<typeof insertTollSystemSchema>;
+export type TollSystem = typeof tollSystems.$inferSelect;
+
+// Toll Gates table - Specific toll gate locations
+export const tollGates = pgTable("toll_gates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tollSystemId: varchar("toll_system_id").notNull().references(() => tollSystems.id),
+  gateName: varchar("gate_name").notNull(),
+  gpsLocation: varchar("gps_location"),
+  direction: varchar("direction"), // Northbound, Southbound, etc.
+  gateType: varchar("gate_type"), // Standard, Express
+  isPeakDependent: boolean("is_peak_dependent").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_toll_gates_system").on(table.tollSystemId),
+  index("idx_toll_gates_active").on(table.isActive),
+]);
+
+export const insertTollGateSchema = createInsertSchema(tollGates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertTollGate = z.infer<typeof insertTollGateSchema>;
+export type TollGate = typeof tollGates.$inferSelect;
+
+// Toll Passes table - Individual toll transactions
+export const tollPasses = pgTable("toll_passes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  gateId: varchar("gate_id").notNull().references(() => tollGates.id),
+  contractId: varchar("contract_id").references(() => contracts.id),
+  passDateTime: timestamp("pass_date_time").notNull(),
+  feeCharged: varchar("fee_charged").notNull(),
+  paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"), // pending, paid, waived
+  paidBy: varchar("paid_by"), // customer, company
+  paidDate: timestamp("paid_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_toll_passes_vehicle").on(table.vehicleId),
+  index("idx_toll_passes_contract").on(table.contractId),
+  index("idx_toll_passes_date").on(table.passDateTime),
+  index("idx_toll_passes_status").on(table.paymentStatus),
+]);
+
+export const insertTollPassSchema = createInsertSchema(tollPasses).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertTollPass = z.infer<typeof insertTollPassSchema>;
+export type TollPass = typeof tollPasses.$inferSelect;
+
+// Traffic Fines table - Traffic violations tracking
+export const trafficFines = pgTable("traffic_fines", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  customerId: varchar("customer_id").references(() => customers.id),
+  driverId: varchar("driver_id").references(() => drivers.id),
+  contractId: varchar("contract_id").references(() => contracts.id),
+  fineSource: varchar("fine_source", { length: 50 }).notNull(), // RTA, Police, Municipality
+  fineCategory: varchar("fine_category", { length: 50 }).notNull(), // Traffic, Parking, Toll, Accident
+  fineCode: varchar("fine_code"),
+  description: text("description").notNull(),
+  fineDate: timestamp("fine_date").notNull(),
+  amount: varchar("amount").notNull(),
+  blackPoints: integer("black_points").default(0),
+  paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"), // pending, paid, disputed, waived
+  paidBy: varchar("paid_by"), // customer, company, driver
+  paidDate: timestamp("paid_date"),
+  documentUrl: text("document_url"), // Fine document/photo
+  notes: text("notes"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_traffic_fines_vehicle").on(table.vehicleId),
+  index("idx_traffic_fines_customer").on(table.customerId),
+  index("idx_traffic_fines_contract").on(table.contractId),
+  index("idx_traffic_fines_date").on(table.fineDate),
+  index("idx_traffic_fines_status").on(table.paymentStatus),
+  index("idx_traffic_fines_created_at").on(table.createdAt),
+]);
+
+export const insertTrafficFineSchema = createInsertSchema(trafficFines).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertTrafficFine = z.infer<typeof insertTrafficFineSchema>;
+export type TrafficFine = typeof trafficFines.$inferSelect;
+
+// Incidents table - Accidents and incident tracking
+export const incidents = pgTable("incidents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").references(() => contracts.id).notNull(),
+  vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  customerId: varchar("customer_id").references(() => customers.id),
+  driverId: varchar("driver_id").references(() => drivers.id),
+  incidentType: varchar("incident_type", { length: 50 }).notNull(), // accident, theft, damage, breakdown
+  severity: varchar("severity", { length: 20 }).notNull().default("minor"), // minor, moderate, major, total_loss
+  incidentDate: timestamp("incident_date").notNull(),
+  location: text("location"),
+  description: text("description").notNull(),
+  policeReportNumber: varchar("police_report_number"),
+  insuranceClaimNumber: varchar("insurance_claim_number"),
+  estimatedCost: varchar("estimated_cost"),
+  actualCost: varchar("actual_cost"),
+  deductibleAmount: varchar("deductible_amount"),
+  customerLiability: varchar("customer_liability"),
+  status: varchar("status", { length: 20 }).notNull().default("reported"), // reported, under_investigation, claim_filed, resolved, closed
+  photoUrls: text("photo_urls").array(), // Array of photo URLs
+  documentUrls: text("document_urls").array(), // Array of document URLs
+  notes: text("notes"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_incidents_contract").on(table.contractId),
+  index("idx_incidents_vehicle").on(table.vehicleId),
+  index("idx_incidents_customer").on(table.customerId),
+  index("idx_incidents_date").on(table.incidentDate),
+  index("idx_incidents_status").on(table.status),
+  index("idx_incidents_created_at").on(table.createdAt),
+]);
+
+export const insertIncidentSchema = createInsertSchema(incidents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertIncident = z.infer<typeof insertIncidentSchema>;
+export type Incident = typeof incidents.$inferSelect;
+
+// Vehicle Service Records table - Maintenance and service history
+export const vehicleServiceRecords = pgTable("vehicle_service_records", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  serviceType: varchar("service_type", { length: 50 }).notNull(), // maintenance, repair, inspection, oil_change, tire_change
+  serviceDate: timestamp("service_date").notNull(),
+  odometerReading: integer("odometer_reading"),
+  serviceProvider: varchar("service_provider"),
+  description: text("description"),
+  cost: varchar("cost"),
+  nextServiceDue: timestamp("next_service_due"),
+  nextServiceOdometer: integer("next_service_odometer"),
+  invoiceNumber: varchar("invoice_number"),
+  documentUrls: text("document_urls").array(),
+  notes: text("notes"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_service_records_vehicle").on(table.vehicleId),
+  index("idx_service_records_date").on(table.serviceDate),
+  index("idx_service_records_type").on(table.serviceType),
+  index("idx_service_records_created_at").on(table.createdAt),
+]);
+
+export const insertVehicleServiceRecordSchema = createInsertSchema(vehicleServiceRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertVehicleServiceRecord = z.infer<typeof insertVehicleServiceRecordSchema>;
+export type VehicleServiceRecord = typeof vehicleServiceRecords.$inferSelect;
+
+// Rental Rate Plans table - Dynamic pricing and promotional rates
+export const rentalRatePlans = pgTable("rental_rate_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  planName: varchar("plan_name").notNull(),
+  planType: varchar("plan_type", { length: 30 }).notNull(), // standard, seasonal, promotional, corporate
+  vehicleCategory: varchar("vehicle_category"), // All, Sedan, SUV, Luxury
+  dailyRate: varchar("daily_rate"),
+  weeklyRate: varchar("weekly_rate"),
+  monthlyRate: varchar("monthly_rate"),
+  minimumDays: integer("minimum_days").default(1),
+  discountPercentage: varchar("discount_percentage").default("0"),
+  effectiveFrom: timestamp("effective_from").notNull(),
+  effectiveTo: timestamp("effective_to"),
+  isActive: boolean("is_active").notNull().default(true),
+  description: text("description"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_rate_plans_type").on(table.planType),
+  index("idx_rate_plans_active").on(table.isActive),
+  index("idx_rate_plans_effective").on(table.effectiveFrom, table.effectiveTo),
+  index("idx_rate_plans_created_at").on(table.createdAt),
+]);
+
+export const insertRentalRatePlanSchema = createInsertSchema(rentalRatePlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertRentalRatePlan = z.infer<typeof insertRentalRatePlanSchema>;
+export type RentalRatePlan = typeof rentalRatePlans.$inferSelect;
+
+// Vehicle Accessories table - Accessory master data
+export const vehicleAccessories = pgTable("vehicle_accessories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  accessoryName: varchar("accessory_name").notNull(),
+  category: varchar("category", { length: 30 }).notNull(), // safety, comfort, electronics, child_safety
+  dailyRate: varchar("daily_rate").notNull(),
+  weeklyRate: varchar("weekly_rate"),
+  monthlyRate: varchar("monthly_rate"),
+  quantity: integer("quantity").default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  description: text("description"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_accessories_category").on(table.category),
+  index("idx_accessories_active").on(table.isActive),
+  index("idx_accessories_created_at").on(table.createdAt),
+]);
+
+export const insertVehicleAccessorySchema = createInsertSchema(vehicleAccessories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertVehicleAccessory = z.infer<typeof insertVehicleAccessorySchema>;
+export type VehicleAccessory = typeof vehicleAccessories.$inferSelect;
+
+// Contract Accessories table - Accessories assigned to contracts
+export const contractAccessories = pgTable("contract_accessories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  accessoryId: varchar("accessory_id").notNull().references(() => vehicleAccessories.id),
+  quantity: integer("quantity").notNull().default(1),
+  dailyRate: varchar("daily_rate").notNull(),
+  totalCost: varchar("total_cost").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_contract_accessories_contract").on(table.contractId),
+  index("idx_contract_accessories_accessory").on(table.accessoryId),
+]);
+
+export const insertContractAccessorySchema = createInsertSchema(contractAccessories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertContractAccessory = z.infer<typeof insertContractAccessorySchema>;
+export type ContractAccessory = typeof contractAccessories.$inferSelect;
+
+// ========================================
+// PHASE 3: OPERATIONS & AUTOMATION
+// ========================================
+
+// Driver Schedules table - Driver shift scheduling
+export const driverSchedules = pgTable("driver_schedules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  driverId: varchar("driver_id").notNull().references(() => drivers.id),
+  scheduleDate: timestamp("schedule_date").notNull(),
+  shiftStart: timestamp("shift_start").notNull(),
+  shiftEnd: timestamp("shift_end").notNull(),
+  breakDuration: integer("break_duration").default(0), // minutes
+  branchId: varchar("branch_id").references(() => branches.id),
+  vehicleAssigned: varchar("vehicle_assigned").references(() => vehicles.id),
+  taskType: varchar("task_type", { length: 30 }), // rental_driver, delivery, standby
+  status: varchar("status", { length: 20 }).notNull().default("scheduled"), // scheduled, in_progress, completed, cancelled
+  notes: text("notes"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_driver_schedules_driver").on(table.driverId),
+  index("idx_driver_schedules_date").on(table.scheduleDate),
+  index("idx_driver_schedules_branch").on(table.branchId),
+  index("idx_driver_schedules_status").on(table.status),
+  index("idx_driver_schedules_created_at").on(table.createdAt),
+]);
+
+export const insertDriverScheduleSchema = createInsertSchema(driverSchedules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertDriverSchedule = z.infer<typeof insertDriverScheduleSchema>;
+export type DriverSchedule = typeof driverSchedules.$inferSelect;
+
+// Driver Attendance table - Check-in/out tracking
+export const driverAttendance = pgTable("driver_attendance", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  driverId: varchar("driver_id").notNull().references(() => drivers.id),
+  scheduleId: varchar("schedule_id").references(() => driverSchedules.id),
+  checkIn: timestamp("check_in").notNull(),
+  checkOut: timestamp("check_out"),
+  hoursWorked: varchar("hours_worked"),
+  overtimeHours: varchar("overtime_hours").default("0"),
+  location: varchar("location"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_driver_attendance_driver").on(table.driverId),
+  index("idx_driver_attendance_schedule").on(table.scheduleId),
+  index("idx_driver_attendance_check_in").on(table.checkIn),
+  index("idx_driver_attendance_created_at").on(table.createdAt),
+]);
+
+export const insertDriverAttendanceSchema = createInsertSchema(driverAttendance).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDriverAttendance = z.infer<typeof insertDriverAttendanceSchema>;
+export type DriverAttendance = typeof driverAttendance.$inferSelect;
+
+// Automated Reminders table - Notification engine
+export const automatedReminders = pgTable("automated_reminders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 30 }).notNull(), // contract, vehicle, license, insurance, driver, customer
+  entityId: varchar("entity_id").notNull(),
+  reminderType: varchar("reminder_type", { length: 50 }).notNull(), // contract_expiry, license_renewal, insurance_renewal, maintenance_due
+  reminderDate: timestamp("reminder_date").notNull(),
+  frequency: varchar("frequency", { length: 20 }).notNull().default("once"), // once, daily, weekly, monthly
+  channel: varchar("channel", { length: 20 }).notNull().default("email"), // email, sms, whatsapp, system
+  messageTemplate: text("message_template"),
+  recipientEmail: varchar("recipient_email"),
+  recipientPhone: varchar("recipient_phone"),
+  isSent: boolean("is_sent").notNull().default(false),
+  sentTime: timestamp("sent_time"),
+  sendAttempts: integer("send_attempts").default(0),
+  lastError: text("last_error"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_reminders_entity").on(table.entityType, table.entityId),
+  index("idx_reminders_date").on(table.reminderDate),
+  index("idx_reminders_sent").on(table.isSent),
+  index("idx_reminders_active").on(table.isActive),
+  index("idx_reminders_created_at").on(table.createdAt),
+]);
+
+export const insertAutomatedReminderSchema = createInsertSchema(automatedReminders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertAutomatedReminder = z.infer<typeof insertAutomatedReminderSchema>;
+export type AutomatedReminder = typeof automatedReminders.$inferSelect;
+
+// Approval Requests table - Multi-level approval workflow
+export const approvalRequests = pgTable("approval_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 30 }).notNull(), // contract, discount, refund, write_off, transfer
+  entityId: varchar("entity_id").notNull(),
+  requestType: varchar("request_type", { length: 50 }).notNull(),
+  requestedBy: varchar("requested_by").notNull().references(() => users.id),
+  requiredLevel: varchar("required_level", { length: 20 }).notNull(), // manager, admin, super_admin
+  currentLevel: varchar("current_level", { length: 20 }).notNull().default("pending"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, rejected, cancelled
+  amount: varchar("amount"), // If financial approval
+  reason: text("reason"),
+  requestData: jsonb("request_data"), // Additional context
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  rejectedBy: varchar("rejected_by").references(() => users.id),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_approval_requests_entity").on(table.entityType, table.entityId),
+  index("idx_approval_requests_requested_by").on(table.requestedBy),
+  index("idx_approval_requests_status").on(table.status),
+  index("idx_approval_requests_level").on(table.requiredLevel),
+  index("idx_approval_requests_created_at").on(table.createdAt),
+]);
+
+export const insertApprovalRequestSchema = createInsertSchema(approvalRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertApprovalRequest = z.infer<typeof insertApprovalRequestSchema>;
+export type ApprovalRequest = typeof approvalRequests.$inferSelect;
+
+// Approval Logs table - Approval workflow history
+export const approvalLogs = pgTable("approval_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  approvalId: varchar("approval_id").notNull().references(() => approvalRequests.id),
+  action: varchar("action", { length: 20 }).notNull(), // submitted, approved, rejected, escalated, cancelled
+  actionBy: varchar("action_by").notNull().references(() => users.id),
+  actionDate: timestamp("action_date").notNull().defaultNow(),
+  remarks: text("remarks"),
+  previousStatus: varchar("previous_status", { length: 20 }),
+  newStatus: varchar("new_status", { length: 20 }),
+}, (table) => [
+  index("idx_approval_logs_approval").on(table.approvalId),
+  index("idx_approval_logs_action_by").on(table.actionBy),
+  index("idx_approval_logs_date").on(table.actionDate),
+]);
+
+export const insertApprovalLogSchema = createInsertSchema(approvalLogs).omit({
+  id: true,
+  actionDate: true,
+});
+
+export type InsertApprovalLog = z.infer<typeof insertApprovalLogSchema>;
+export type ApprovalLog = typeof approvalLogs.$inferSelect;
+
+// Customer Risk Scores table - Risk assessment engine
+export const customerRiskScores = pgTable("customer_risk_scores", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id").notNull().references(() => customers.id),
+  riskScore: integer("risk_score").notNull(), // 0-100 (0 = lowest risk, 100 = highest risk)
+  riskCategory: varchar("risk_category", { length: 20 }).notNull(), // low, medium, high, critical
+  scoringDate: timestamp("scoring_date").notNull().defaultNow(),
+  
+  // Risk Factors (0-10 scale each)
+  paymentHistory: integer("payment_history").default(0), // Late payments, defaults
+  contractViolations: integer("contract_violations").default(0), // Terms violations
+  accidentHistory: integer("accident_history").default(0), // Number of accidents
+  finesHistory: integer("fines_history").default(0), // Traffic fines count
+  licenseValidity: integer("license_validity").default(0), // License issues
+  identityVerification: integer("identity_verification").default(0), // ID verification status
+  outstandingBalance: varchar("outstanding_balance").default("0"),
+  blacklistStatus: boolean("blacklist_status").default(false),
+  
+  notes: text("notes"),
+  calculatedBy: varchar("calculated_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_risk_scores_customer").on(table.customerId),
+  index("idx_risk_scores_category").on(table.riskCategory),
+  index("idx_risk_scores_date").on(table.scoringDate),
+  index("idx_risk_scores_created_at").on(table.createdAt),
+]);
+
+export const insertCustomerRiskScoreSchema = createInsertSchema(customerRiskScores).omit({
+  id: true,
+  createdAt: true,
+  scoringDate: true,
+});
+
+export type InsertCustomerRiskScore = z.infer<typeof insertCustomerRiskScoreSchema>;
+export type CustomerRiskScore = typeof customerRiskScores.$inferSelect;
+
+// Document Registry table - Centralized document management with expiry tracking
+export const documentRegistry = pgTable("document_registry", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 30 }).notNull(), // customer, driver, vehicle, contract, company
+  entityId: varchar("entity_id").notNull(),
+  documentType: varchar("document_type", { length: 50 }).notNull(), // license, passport, emirates_id, visa, insurance, registration
+  documentNumber: varchar("document_number"),
+  issueDate: timestamp("issue_date"),
+  expiryDate: timestamp("expiry_date"),
+  issuingAuthority: varchar("issuing_authority"),
+  fileUrl: text("file_url"),
+  fileName: varchar("file_name"),
+  fileType: varchar("file_type"),
+  fileSize: integer("file_size"),
+  isVerified: boolean("is_verified").notNull().default(false),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedDate: timestamp("verified_date"),
+  reminderDaysBefore: integer("reminder_days_before").default(30), // Days before expiry to send reminder
+  status: varchar("status", { length: 20 }).notNull().default("active"), // active, expired, renewed, cancelled
+  notes: text("notes"),
+  uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_document_registry_entity").on(table.entityType, table.entityId),
+  index("idx_document_registry_type").on(table.documentType),
+  index("idx_document_registry_expiry").on(table.expiryDate),
+  index("idx_document_registry_status").on(table.status),
+  index("idx_document_registry_created_at").on(table.createdAt),
+]);
+
+export const insertDocumentRegistrySchema = createInsertSchema(documentRegistry).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  uploadedBy: true,
+});
+
+export type InsertDocumentRegistry = z.infer<typeof insertDocumentRegistrySchema>;
+export type DocumentRegistryEntry = typeof documentRegistry.$inferSelect;
