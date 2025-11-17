@@ -9,7 +9,8 @@ export interface DriverAssignmentCalculation {
     holiday: number;
   };
   totalSurcharges: string;
-  totalCharge: string;
+  vatAmount: string;
+  totalCharge: string; // VAT-inclusive when applicable
 }
 
 /**
@@ -53,6 +54,7 @@ export async function calculateDriverAssignmentCost(
   const roundedHoliday = Math.round(costBreakdown.holidaySurcharge * 100) / 100;
   const totalSurcharges = roundedNight + roundedWeekend + roundedHoliday;
   
+  // CRITICAL FIX: Use totalAfterVat to include VAT when driverServiceVatApplicable is true
   return {
     baseRate: baseRate.toFixed(2),
     quantity: quantity.toFixed(serviceType === 'daily' ? 0 : 2), // Days are whole numbers, hours can be decimal
@@ -62,34 +64,41 @@ export async function calculateDriverAssignmentCost(
       holiday: roundedHoliday,
     },
     totalSurcharges: totalSurcharges.toFixed(2),
-    totalCharge: costBreakdown.totalBeforeVat.toFixed(2), // Use calculated total (without VAT as it's already in base)
+    vatAmount: costBreakdown.vatAmount.toFixed(2),
+    totalCharge: costBreakdown.totalAfterVat.toFixed(2), // VAT-inclusive when applicable
   };
 }
 
 /**
  * Calculates total driver service costs for a contract
  * Sums up all driver assignments (scheduled, active, completed)
+ * Returns VAT-inclusive totals when driverServiceVatApplicable is true
  */
 export function calculateContractDriverCosts(driverAssignments: any[]): {
   totalDriverCharges: number;
   totalDriverSurcharges: number;
+  totalDriverVat: number;
 } {
   let totalDriverCharges = 0;
   let totalDriverSurcharges = 0;
+  let totalDriverVat = 0;
   
   for (const assignment of driverAssignments) {
     // Only include scheduled, active, and completed assignments
     if (['scheduled', 'active', 'completed'].includes(assignment.status)) {
       const charge = parseFloat(assignment.totalCharge || '0');
       const surcharges = parseFloat(assignment.totalSurcharges || '0');
+      const vat = parseFloat(assignment.vatAmount || '0');
       
       if (isFinite(charge)) totalDriverCharges += charge;
       if (isFinite(surcharges)) totalDriverSurcharges += surcharges;
+      if (isFinite(vat)) totalDriverVat += vat;
     }
   }
   
   return {
     totalDriverCharges: Math.round(totalDriverCharges * 100) / 100,
     totalDriverSurcharges: Math.round(totalDriverSurcharges * 100) / 100,
+    totalDriverVat: Math.round(totalDriverVat * 100) / 100,
   };
 }

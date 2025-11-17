@@ -993,10 +993,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalAmount = validateFinancialInput(contract.totalAmount || '0', 'total amount');
       const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
       
-      // BRANCH & DRIVER SERVICE INTEGRATION: Include driver service costs in total
+      // BRANCH & DRIVER SERVICE INTEGRATION: Include driver service costs in total (VAT-inclusive)
       const driverAssignments = await storage.getDriverAssignmentsByContract(contract.id);
-      const { totalDriverCharges, totalDriverSurcharges } = calculateContractDriverCosts(driverAssignments);
+      const { totalDriverCharges, totalDriverSurcharges, totalDriverVat } = calculateContractDriverCosts(driverAssignments);
       
+      // CRITICAL FIX: totalDriverCharges now includes VAT when applicable
       const totalDue = totalAmount + totalExtraCharges + totalDriverCharges;
       
       // Calculate precise outstanding balance
@@ -1004,15 +1005,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalDueRounded = Math.round(totalDue * 100) / 100;
       const computedOutstanding = Math.max(0, totalDueRounded - totalPaidRounded);
       
-      // Return contract with complete financial breakdown including driver costs
+      // Return contract with complete financial breakdown including VAT-inclusive driver costs
       res.json({
         ...contract,
-        // Explicitly include driver service charges in response
+        // Explicitly include driver service charges in response (VAT-inclusive)
         totalDriverCharges: totalDriverCharges.toFixed(2),
         totalDriverSurcharges: totalDriverSurcharges.toFixed(2),
-        // Update total due to include all charges (rental + extras + driver)
+        totalDriverVat: totalDriverVat.toFixed(2),
+        // Update total due to include all charges (rental + extras + driver with VAT)
         totalDue: totalDueRounded.toFixed(2),
-        // Recalculated outstanding balance includes driver charges
+        // Recalculated outstanding balance includes driver charges with VAT
         outstandingBalance: computedOutstanding.toFixed(2),
       });
     } catch (error) {
