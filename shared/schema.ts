@@ -152,6 +152,22 @@ export const customers = pgTable("customers", {
   gender: varchar("gender", { length: 10 }), // male, female
   dateOfBirth: timestamp("date_of_birth"),
   
+  // Phase 1: UAE Compliance - Customer Type Classification (nullable)
+  customerType: varchar("customer_type", { length: 20 }), // resident, tourist, gcc, corporate
+  
+  // UAE Residents - Emirates ID
+  emiratesIdNumber: varchar("emirates_id_number"),
+  emiratesIdExpiry: timestamp("emirates_id_expiry"),
+  
+  // Tourists / Visitors - Passport & Visa
+  passportNumber: varchar("passport_number"),
+  passportExpiry: timestamp("passport_expiry"),
+  visaNumber: varchar("visa_number"),
+  visaType: varchar("visa_type"), // tourist, visit, residence, etc.
+  visaExpiry: timestamp("visa_expiry"),
+  dateOfEntry: timestamp("date_of_entry"),
+  portOfEntry: varchar("port_of_entry"), // DXB, AUH, etc.
+  
   // Contact Information
   phone: varchar("phone").notNull(), // REQUIRED
   email: varchar("email"),
@@ -160,6 +176,9 @@ export const customers = pgTable("customers", {
   // License Information
   licenseNumber: varchar("license_number"), // Driver's license number (required by form validation)
   licenseIssuedBy: varchar("license_issued_by"), // Issuing authority/country
+  licenseIssuingCountry: varchar("license_issuing_country"), // Phase 1: Country of issuance
+  licenseIssuingEmirate: emiratesEnum("license_issuing_emirate"), // Phase 1: UAE emirate if applicable
+  hasIDP: boolean("has_idp").default(false), // Phase 1: International Driving Permit
   licenseIssueDate: timestamp("license_issue_date"),
   licenseExpiryDate: timestamp("license_expiry_date"),
   nationality: varchar("nationality"), // Required by form validation
@@ -258,6 +277,10 @@ export const vehicles = pgTable("vehicles", {
   // Tracking
   odometer: integer("odometer"), // Current mileage
   
+  // Phase 1: UAE Compliance - GPS & Tracking (nullable)
+  gpsDeviceId: varchar("gps_device_id"),
+  trackerSerial: varchar("tracker_serial"),
+  
   // Pricing (default rates)
   dailyRate: varchar("daily_rate").notNull(),
   weeklyRate: varchar("weekly_rate"),
@@ -270,6 +293,7 @@ export const vehicles = pgTable("vehicles", {
   notes: text("notes"),
   
   // RTA (Roads & Transport Authority) Fields
+  rtaFileNumber: varchar("rta_file_number"), // Phase 1: RTA File Reference Number
   tcNumber: varchar("tc_number"), // Traffic plate number
   placeOfIssue: varchar("place_of_issue"), // Where registration was issued
   trafficCodeNo: varchar("traffic_code_no"), // Traffic code number
@@ -687,6 +711,29 @@ export const drivers = pgTable("drivers", {
   mobile: varchar("mobile").notNull(),
   email: varchar("email"),
   nationality: varchar("nationality").notNull(),
+  
+  // Phase 1: UAE Compliance - Identity & Legal Documents (nullable)
+  dateOfBirth: timestamp("date_of_birth"),
+  gender: varchar("gender", { length: 10 }), // male, female
+  
+  // Emirates ID
+  emiratesIdNumber: varchar("emirates_id_number"),
+  emiratesIdExpiry: timestamp("emirates_id_expiry"),
+  
+  // UID (Unique Identification Number)
+  uidNumber: varchar("uid_number"),
+  
+  // Visa Information
+  visaNumber: varchar("visa_number"),
+  visaIssuer: varchar("visa_issuer"),
+  visaExpiry: timestamp("visa_expiry"),
+  
+  // Passport Information
+  passportNumber: varchar("passport_number"),
+  passportExpiry: timestamp("passport_expiry"),
+  
+  // RTA (Roads & Transport Authority)
+  rtaFileNumber: varchar("rta_file_number"),
   
   // License Information
   licenseNumber: varchar("license_number").notNull(),
