@@ -48,7 +48,7 @@ export default function Drivers() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertDriver) => apiRequest("/api/drivers", "POST", data),
+    mutationFn: (data: InsertDriver) => apiRequest("POST", "/api/drivers", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
       toast({ title: t("success"), description: "Driver created successfully" });
@@ -62,7 +62,7 @@ export default function Drivers() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<InsertDriver> }) =>
-      apiRequest(`/api/drivers/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/drivers/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
       toast({ title: t("success"), description: "Driver updated successfully" });
@@ -172,8 +172,8 @@ export default function Drivers() {
                       <Badge variant="outline">{driver.licenseNumber}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={driver.employmentType === 'direct' ? 'default' : 'secondary'}>
-                        {driver.employmentType}
+                      <Badge variant={driver.employmentType === 'in_house' ? 'default' : 'secondary'}>
+                        {driver.employmentType === 'in_house' ? t("directEmployee") : t("outsourced")}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -329,7 +329,7 @@ export default function Drivers() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="direct">Direct Employee</SelectItem>
+                            <SelectItem value="in_house">Direct Employee</SelectItem>
                             <SelectItem value="outsourced">Outsourced</SelectItem>
                           </SelectContent>
                         </Select>

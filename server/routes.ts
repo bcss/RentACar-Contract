@@ -6311,7 +6311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: user.id,
       });
       
-      await createAuditLog(user.id, 'driver_company_created', company.id, req, `Created driver company: ${company.nameEn}`);
+      await createAuditLog(user.id, 'driver_company_created', undefined, req, `Created driver company: ${company.nameEn}`);
       res.status(201).json(company);
     } catch (error) {
       next(error);
@@ -6334,7 +6334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const company = await storage.updateDriverOutsourceCompany(req.params.id, validationResult.data);
-      await createAuditLog(user.id, 'driver_company_updated', company.id, req, `Updated driver company: ${company.nameEn}`);
+      await createAuditLog(user.id, 'driver_company_updated', undefined, req, `Updated driver company: ${company.nameEn}`);
       res.json(company);
     } catch (error) {
       next(error);
@@ -6350,7 +6350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.disableDriverOutsourceCompany(req.params.id, user.id);
-      await createAuditLog(user.id, 'driver_company_disabled', req.params.id, req, `Disabled driver company`);
+      await createAuditLog(user.id, 'driver_company_disabled', undefined, req, `Disabled driver company`);
       res.json({ success: true });
     } catch (error) {
       next(error);
@@ -6366,7 +6366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.enableDriverOutsourceCompany(req.params.id);
-      await createAuditLog(user.id, 'driver_company_enabled', req.params.id, req, `Enabled driver company`);
+      await createAuditLog(user.id, 'driver_company_enabled', undefined, req, `Enabled driver company`);
       res.json({ success: true });
     } catch (error) {
       next(error);
@@ -6419,7 +6419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: user.id,
       });
       
-      await createAuditLog(user.id, 'driver_created', driver.id, req, `Created driver: ${driver.driverCode}`);
+      await createAuditLog(user.id, 'driver_created', undefined, req, `Created driver: ${driver.driverCode}`);
       res.status(201).json(driver);
     } catch (error) {
       next(error);
@@ -6442,7 +6442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const driver = await storage.updateDriver(req.params.id, validationResult.data);
-      await createAuditLog(user.id, 'driver_updated', driver.id, req, `Updated driver: ${driver.driverCode}`);
+      await createAuditLog(user.id, 'driver_updated', undefined, req, `Updated driver: ${driver.driverCode}`);
       res.json(driver);
     } catch (error) {
       next(error);
@@ -6459,7 +6459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const driver = await storage.updateDriverAvailability(req.params.id, availability);
-      await createAuditLog(user.id, 'driver_availability_updated', driver.id, req, `Updated driver availability to: ${availability}`);
+      await createAuditLog(user.id, 'driver_availability_updated', undefined, req, `Updated driver availability to: ${availability}`);
       res.json(driver);
     } catch (error) {
       next(error);
@@ -6475,7 +6475,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.disableDriver(req.params.id, user.id);
-      await createAuditLog(user.id, 'driver_disabled', req.params.id, req, `Disabled driver`);
+      await createAuditLog(user.id, 'driver_disabled', undefined, req, `Disabled driver`);
       res.json({ success: true });
     } catch (error) {
       next(error);
@@ -6491,7 +6491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.enableDriver(req.params.id);
-      await createAuditLog(user.id, 'driver_enabled', req.params.id, req, `Enabled driver`);
+      await createAuditLog(user.id, 'driver_enabled', undefined, req, `Enabled driver`);
       res.json({ success: true });
     } catch (error) {
       next(error);
@@ -6530,7 +6530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: user.id,
       });
       
-      await createAuditLog(user.id, 'driver_rate_card_created', rateCard.id, req, `Created rate card for driver`);
+      await createAuditLog(user.id, 'driver_rate_card_created', undefined, req, `Created rate card for driver`);
       res.status(201).json(rateCard);
     } catch (error) {
       next(error);
@@ -6553,7 +6553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const rateCard = await storage.updateDriverRateCard(req.params.id, validationResult.data);
-      await createAuditLog(user.id, 'driver_rate_card_updated', rateCard.id, req, `Updated driver rate card`);
+      await createAuditLog(user.id, 'driver_rate_card_updated', undefined, req, `Updated driver rate card`);
       res.json(rateCard);
     } catch (error) {
       next(error);
@@ -6594,7 +6594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: user.id,
       });
       
-      await createAuditLog(user.id, 'driver_schedule_block_created', block.id, req, `Created schedule block for driver`);
+      await createAuditLog(user.id, 'driver_schedule_block_created', undefined, req, `Created schedule block for driver`);
       res.status(201).json(block);
     } catch (error) {
       next(error);
@@ -6610,7 +6610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.deleteDriverScheduleBlock(req.params.id);
-      await createAuditLog(user.id, 'driver_schedule_block_deleted', req.params.id, req, `Deleted driver schedule block`);
+      await createAuditLog(user.id, 'driver_schedule_block_deleted', undefined, req, `Deleted driver schedule block`);
       res.json({ success: true });
     } catch (error) {
       next(error);
@@ -6682,7 +6682,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         assignedBy: user.id,
       });
       
-      await createAuditLog(user.id, 'driver_assigned', assignment.id, req, `Assigned driver to contract`);
+      await createAuditLog(user.id, 'driver_assigned', undefined, req, `Assigned driver to contract`);
       res.status(201).json(assignment);
     } catch (error) {
       next(error);
@@ -6705,7 +6705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const assignment = await storage.updateDriverAssignment(req.params.id, validationResult.data);
-      await createAuditLog(user.id, 'driver_assignment_updated', assignment.id, req, `Updated driver assignment`);
+      await createAuditLog(user.id, 'driver_assignment_updated', undefined, req, `Updated driver assignment`);
       res.json(assignment);
     } catch (error) {
       next(error);

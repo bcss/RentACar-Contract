@@ -701,8 +701,8 @@ export const drivers = pgTable("drivers", {
   
   // License Information
   licenseNumber: varchar("license_number").notNull(),
-  licenseClass: varchar("license_class").notNull(), // e.g., "Light Vehicle", "Heavy Vehicle"
-  licenseExpiry: timestamp("license_expiry").notNull(),
+  licenseClass: varchar("license_class").default("Light Vehicle"), // e.g., "Light Vehicle", "Heavy Vehicle"
+  licenseExpiry: timestamp("license_expiry"),
   
   // Skills & Languages
   languagesSpoken: text("languages_spoken").array(), // ['English', 'Arabic', 'Urdu', 'Hindi']
@@ -761,16 +761,16 @@ export const insertDriverSchema = createInsertSchema(drivers).omit({
   disabledBy: true,
   disabledAt: true,
   disabled: true,
+  driverCode: true, // Auto-generated on backend
 }).extend({
-  driverCode: z.string().min(1, "Driver code is required").max(50, "Driver code too long"),
   nameEn: z.string().min(1, "Driver name (English) is required").max(200, "Name too long"),
   nameAr: z.string().max(200, "Name too long").optional(),
   mobile: z.string().min(1, "Mobile number is required").max(20, "Mobile number too long"),
   email: z.string().email("Invalid email").max(255, "Email too long").optional(),
   nationality: z.string().min(1, "Nationality is required").max(100, "Nationality too long"),
   licenseNumber: z.string().min(1, "License number is required").max(100, "License number too long"),
-  licenseClass: z.string().min(1, "License class is required").max(50, "License class too long"),
-  licenseExpiry: z.coerce.date(),
+  licenseClass: z.string().max(50, "License class too long").default("Light Vehicle"), // Optional with default
+  licenseExpiry: z.coerce.date().optional(), // Optional for now
   employmentType: z.enum(["in_house", "outsourced"]),
   notes: z.string().max(2000, "Notes too long").optional(),
 });

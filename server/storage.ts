@@ -3259,7 +3259,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDriver(driverData: InsertDriver): Promise<Driver> {
-    const [driver] = await db.insert(drivers).values(driverData).returning();
+    // Auto-generate driverCode if not provided
+    let driverCode = (driverData as any).driverCode;
+    if (!driverCode) {
+      // Get the latest driver code to generate next sequential code
+      const latestDriver = await db
+        .select({ driverCode: drivers.driverCode })
+        .from(drivers)
+        .orderBy(desc(drivers.driverCode))
+        .limit(1);
+      
+      if (latestDriver.length > 0 && latestDriver[0].driverCode) {
+        // Extract number from code like "DRV001" -> "001"
+        const lastCode = latestDriver[0].driverCode;
+        const match = lastCode.match(/DRV(\d+)/);
+        if (match) {
+          const nextNumber = parseInt(match[1]) + 1;
+          driverCode = `DRV${nextNumber.toString().padStart(3, '0')}`;
+        } else {
+          driverCode = 'DRV001';
+        }
+      } else {
+        driverCode = 'DRV001';
+      }
+    }
+
+    const [driver] = await db.insert(drivers).values({ ...driverData, driverCode } as any).returning();
     return driver;
   }
 
