@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPublicHolidaySchema, type PublicHoliday, type InsertPublicHoliday } from "@shared/schema";
@@ -28,7 +28,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function PublicHolidays() {
   const { t } = useTranslation();
-  const { toast } = useToast();
+  const { showError, showSuccess } = useErrorDisplay();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingHoliday, setEditingHoliday] = useState<PublicHoliday | null>(null);
 
@@ -54,12 +54,12 @@ export default function PublicHolidays() {
     mutationFn: (data: InsertPublicHoliday) => apiRequest("POST", "/api/public-holidays", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/public-holidays"] });
-      toast({ title: t("success"), description: t("holidayCreated") });
+      showSuccess(t("success"), t("holidayCreated"));
       setDialogOpen(false);
       form.reset();
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 
@@ -68,13 +68,13 @@ export default function PublicHolidays() {
       apiRequest("PATCH", `/api/public-holidays/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/public-holidays"] });
-      toast({ title: t("success"), description: t("holidayUpdated") });
+      showSuccess(t("success"), t("holidayUpdated"));
       setDialogOpen(false);
       setEditingHoliday(null);
       form.reset();
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 
@@ -82,10 +82,10 @@ export default function PublicHolidays() {
     mutationFn: (id: string) => apiRequest("DELETE", `/api/public-holidays/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/public-holidays"] });
-      toast({ title: t("success"), description: t("holidayDeleted") });
+      showSuccess(t("success"), t("holidayDeleted"));
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 

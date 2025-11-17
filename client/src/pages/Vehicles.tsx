@@ -43,7 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
+import { useErrorDisplay } from '@/components/design-system';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -550,7 +550,7 @@ const VehicleForm = ({ form, t, onSubmit, isPending }: VehicleFormProps) => (
 export default function Vehicles() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading, user, isViewer } = useAuth();
-  const { toast } = useToast();
+  const { showError, showSuccess } = useErrorDisplay();
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const statusFilterFromUrl = searchParams.get('status'); // e.g., 'rented', 'available'

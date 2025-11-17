@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertDriverOutsourceCompanySchema, type DriverOutsourceCompany, type InsertDriverOutsourceCompany } from "@shared/schema";
@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function DriverCompanies() {
   const { t } = useTranslation();
-  const { toast } = useToast();
+  const { showError, showSuccess } = useErrorDisplay();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<DriverOutsourceCompany | null>(null);
 
@@ -44,12 +44,12 @@ export default function DriverCompanies() {
     mutationFn: (data: InsertDriverOutsourceCompany) => apiRequest("POST", "/api/driver-companies", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/driver-companies"] });
-      toast({ title: t("success"), description: "Company created successfully" });
+      showSuccess(t("success"), "Company created successfully");
       setDialogOpen(false);
       form.reset();
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 
@@ -58,13 +58,13 @@ export default function DriverCompanies() {
       apiRequest("PATCH", `/api/driver-companies/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/driver-companies"] });
-      toast({ title: t("success"), description: "Company updated successfully" });
+      showSuccess(t("success"), "Company updated successfully");
       setDialogOpen(false);
       setEditingCompany(null);
       form.reset();
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 

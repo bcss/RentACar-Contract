@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { useErrorDisplay } from '@/components/design-system';
 import { apiRequest, fetchCsrfToken } from '@/lib/queryClient';
 import { queryClient } from '@/lib/queryClient';
 import { Eye, EyeOff, Car } from 'lucide-react';
@@ -15,7 +15,7 @@ import { CompanySettings } from '@shared/schema';
 export default function Login() {
   const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
+  const { showError, showSuccess } = useErrorDisplay();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,18 +40,14 @@ export default function Login() {
       // Invalidate and refetch user query
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
 
-      toast({
-        title: t('login.success'),
-        description: t('login.welcomeBack', { name: user.firstName || user.username }),
-      });
+      showSuccess(
+        t('login.success'),
+        t('login.welcomeBack', { name: user.firstName || user.username })
+      );
 
       setLocation('/');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: t('login.failed'),
-        description: error.message || t('login.invalidCredentials'),
-      });
+      showError(error, t('login.failed'));
     } finally {
       setIsLoading(false);
     }

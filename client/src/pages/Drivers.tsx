@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertDriverSchema, type Driver, type InsertDriver } from "@shared/schema";
@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Drivers() {
   const { t } = useTranslation();
-  const { toast } = useToast();
+  const { showError, showSuccess } = useErrorDisplay();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
 
@@ -51,12 +51,12 @@ export default function Drivers() {
     mutationFn: (data: InsertDriver) => apiRequest("POST", "/api/drivers", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
-      toast({ title: t("success"), description: "Driver created successfully" });
+      showSuccess(t("success"), "Driver created successfully");
       setDialogOpen(false);
       form.reset();
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 
@@ -65,13 +65,13 @@ export default function Drivers() {
       apiRequest("PATCH", `/api/drivers/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/drivers"] });
-      toast({ title: t("success"), description: "Driver updated successfully" });
+      showSuccess(t("success"), "Driver updated successfully");
       setDialogOpen(false);
       setEditingDriver(null);
       form.reset();
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertBranchSchema, type Branch, type InsertBranch } from "@shared/schema";
@@ -30,7 +30,7 @@ const EMIRATES = [
 
 export default function Branches() {
   const { t } = useTranslation();
-  const { toast } = useToast();
+  const { showError, showSuccess } = useErrorDisplay();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
 
@@ -57,12 +57,12 @@ export default function Branches() {
     mutationFn: (data: InsertBranch) => apiRequest("POST", "/api/branches", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
-      toast({ title: t("success"), description: "Branch created successfully" });
+      showSuccess(t("success"), "Branch created successfully");
       setDialogOpen(false);
       form.reset();
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 
@@ -71,13 +71,13 @@ export default function Branches() {
       apiRequest("PATCH", `/api/branches/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
-      toast({ title: t("success"), description: "Branch updated successfully" });
+      showSuccess(t("success"), "Branch updated successfully");
       setDialogOpen(false);
       setEditingBranch(null);
       form.reset();
     },
     onError: (error: Error) => {
-      toast({ title: t("error"), description: error.message, variant: "destructive" });
+      showError(error, t("error"));
     },
   });
 

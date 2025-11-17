@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { useErrorDisplay } from "@/components/design-system";
 import { Icon } from "@/components/Icon";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,7 +35,7 @@ type ApprovalFormData = z.infer<typeof approvalFormSchema>;
 
 export default function VehicleTransfers() {
   const { t } = useTranslation();
-  const { toast } = useToast();
+  const { showError, showSuccess } = useErrorDisplay();
   const { user, isManager, isAdmin } = useAuth();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
@@ -88,19 +88,12 @@ export default function VehicleTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branch-transfers"] });
-      toast({
-        title: "Success",
-        description: "Vehicle transfer request created successfully",
-      });
+      showSuccess("Success", "Vehicle transfer request created successfully");
       setShowCreateDialog(false);
       form.reset();
     },
     onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to create transfer request",
-      });
+      showError(error, "Error");
     },
   });
 
@@ -111,19 +104,12 @@ export default function VehicleTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branch-transfers"] });
-      toast({
-        title: "Success",
-        description: "Transfer approved successfully",
-      });
+      showSuccess("Success", "Transfer approved successfully");
       setShowApprovalDialog(false);
       setSelectedTransfer(null);
     },
     onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to approve transfer",
-      });
+      showError(error, "Error");
     },
   });
 
@@ -134,20 +120,13 @@ export default function VehicleTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branch-transfers"] });
-      toast({
-        title: "Success",
-        description: "Transfer rejected",
-      });
+      showSuccess("Success", "Transfer rejected");
       setShowApprovalDialog(false);
       setSelectedTransfer(null);
       approvalForm.reset();
     },
     onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to reject transfer",
-      });
+      showError(error, "Error");
     },
   });
 
@@ -158,20 +137,13 @@ export default function VehicleTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branch-transfers"] });
-      toast({
-        title: "Success",
-        description: "Transfer marked as completed",
-      });
+      showSuccess("Success", "Transfer marked as completed");
       setShowCompletionDialog(false);
       setSelectedTransfer(null);
       setCompletionNotes("");
     },
     onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to complete transfer",
-      });
+      showError(error, "Error");
     },
   });
 
