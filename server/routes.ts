@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess, requireAppAccessReportAccess } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, insertBranchSchema, insertBranchTransferSchema, insertPublicHolidaySchema, insertDriverOutsourceCompanySchema, insertDriverSchema, insertDriverRateCardSchema, insertDriverScheduleBlockSchema, insertDriverAssignmentSchema, insertTollSystemSchema, insertTollGateSchema, insertTollPassSchema, insertTrafficFineSchema, insertIncidentSchema, insertDocumentRegistrySchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, insertBranchSchema, insertBranchTransferSchema, insertPublicHolidaySchema, insertDriverOutsourceCompanySchema, insertDriverSchema, insertDriverRateCardSchema, insertDriverScheduleBlockSchema, insertDriverAssignmentSchema, insertTollSystemSchema, insertTollGateSchema, insertTollPassSchema, insertTrafficFineSchema, insertIncidentSchema, insertDocumentRegistrySchema, insertVehicleServiceRecordSchema, insertRentalRatePlanSchema, insertVehicleAccessorySchema, insertContractAccessorySchema, insertDriverScheduleSchema, insertDriverAttendanceSchema, insertAutomatedReminderSchema, insertApprovalRequestSchema, insertApprovalLogSchema, insertCustomerRiskScoreSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
 import { count, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
@@ -7191,6 +7191,732 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteDocument(req.params.id);
       await createAuditLog(user.id, 'document_deleted', undefined, req, `Deleted document`);
       res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ==================== WAVE 2: FLEET ECONOMICS ROUTES ====================
+
+  // Vehicle Service Records routes
+  app.get("/api/vehicle-service-records", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.vehicleId) filters.vehicleId = req.query.vehicleId;
+      if (req.query.serviceType) filters.serviceType = req.query.serviceType;
+      if (req.query.startDate) filters.startDate = new Date(req.query.startDate as string);
+      if (req.query.endDate) filters.endDate = new Date(req.query.endDate as string);
+      
+      const records = await storage.getVehicleServiceRecords(filters);
+      res.json(records);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/vehicle-service-records/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const record = await storage.getVehicleServiceRecordById(req.params.id);
+      if (!record) {
+        return res.status(404).json({ message: "Service record not found" });
+      }
+      res.json(record);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/vehicle-service-records", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertVehicleServiceRecordSchema.safeParse({ ...req.body, createdBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const record = await storage.createVehicleServiceRecord(validationResult.data);
+      await createAuditLog(user.id, 'service_record_created', undefined, req, `Created service record for vehicle ${record.vehicleId}`);
+      res.status(201).json(record);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/vehicle-service-records/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertVehicleServiceRecordSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const record = await storage.updateVehicleServiceRecord(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'service_record_updated', undefined, req, `Updated service record`);
+      res.json(record);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/vehicle-service-records/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteVehicleServiceRecord(req.params.id);
+      await createAuditLog(user.id, 'service_record_deleted', undefined, req, `Deleted service record`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Rental Rate Plans routes
+  app.get("/api/rental-rate-plans", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.planType) filters.planType = req.query.planType;
+      if (req.query.isActive !== undefined) filters.isActive = req.query.isActive === 'true';
+      if (req.query.vehicleCategory) filters.vehicleCategory = req.query.vehicleCategory;
+      
+      const plans = await storage.getRentalRatePlans(filters);
+      res.json(plans);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/rental-rate-plans/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const plan = await storage.getRentalRatePlanById(req.params.id);
+      if (!plan) {
+        return res.status(404).json({ message: "Rate plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/rental-rate-plans", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertRentalRatePlanSchema.safeParse({ ...req.body, createdBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const plan = await storage.createRentalRatePlan(validationResult.data);
+      await createAuditLog(user.id, 'rate_plan_created', undefined, req, `Created rate plan: ${plan.planName}`);
+      res.status(201).json(plan);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/rental-rate-plans/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertRentalRatePlanSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const plan = await storage.updateRentalRatePlan(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'rate_plan_updated', undefined, req, `Updated rate plan`);
+      res.json(plan);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/rental-rate-plans/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteRentalRatePlan(req.params.id);
+      await createAuditLog(user.id, 'rate_plan_deleted', undefined, req, `Deleted rate plan`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Vehicle Accessories routes
+  app.get("/api/vehicle-accessories", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.category) filters.category = req.query.category;
+      if (req.query.isActive !== undefined) filters.isActive = req.query.isActive === 'true';
+      
+      const accessories = await storage.getVehicleAccessories(filters);
+      res.json(accessories);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/vehicle-accessories/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const accessory = await storage.getVehicleAccessoryById(req.params.id);
+      if (!accessory) {
+        return res.status(404).json({ message: "Accessory not found" });
+      }
+      res.json(accessory);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/vehicle-accessories", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertVehicleAccessorySchema.safeParse({ ...req.body, createdBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const accessory = await storage.createVehicleAccessory(validationResult.data);
+      await createAuditLog(user.id, 'accessory_created', undefined, req, `Created accessory: ${accessory.accessoryName}`);
+      res.status(201).json(accessory);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/vehicle-accessories/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertVehicleAccessorySchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const accessory = await storage.updateVehicleAccessory(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'accessory_updated', undefined, req, `Updated accessory`);
+      res.json(accessory);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/vehicle-accessories/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteVehicleAccessory(req.params.id);
+      await createAuditLog(user.id, 'accessory_deleted', undefined, req, `Deleted accessory`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Contract Accessories routes
+  app.get("/api/contract-accessories", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.query.contractId) {
+        return res.status(400).json({ message: "contractId query parameter is required" });
+      }
+      
+      const accessories = await storage.getContractAccessories(req.query.contractId as string);
+      res.json(accessories);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/contract-accessories/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const accessory = await storage.getContractAccessoryById(req.params.id);
+      if (!accessory) {
+        return res.status(404).json({ message: "Contract accessory not found" });
+      }
+      res.json(accessory);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/contract-accessories", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertContractAccessorySchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const accessory = await storage.createContractAccessory(validationResult.data);
+      await createAuditLog(user.id, 'contract_accessory_added', validationResult.data.contractId, req, `Added accessory to contract`);
+      res.status(201).json(accessory);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/contract-accessories/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertContractAccessorySchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const accessory = await storage.updateContractAccessory(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'contract_accessory_updated', accessory.contractId, req, `Updated contract accessory`);
+      res.json(accessory);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/contract-accessories/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const accessory = await storage.getContractAccessoryById(req.params.id);
+      if (!accessory) {
+        return res.status(404).json({ message: "Contract accessory not found" });
+      }
+      
+      await storage.deleteContractAccessory(req.params.id);
+      await createAuditLog(user.id, 'contract_accessory_deleted', accessory.contractId, req, `Deleted contract accessory`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ==================== WAVE 3: WORKFORCE & AUTOMATION ROUTES ====================
+
+  // Driver Schedules routes
+  app.get("/api/driver-schedules", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.driverId) filters.driverId = req.query.driverId;
+      if (req.query.branchId) filters.branchId = req.query.branchId;
+      if (req.query.status) filters.status = req.query.status;
+      if (req.query.startDate) filters.startDate = new Date(req.query.startDate as string);
+      if (req.query.endDate) filters.endDate = new Date(req.query.endDate as string);
+      
+      const schedules = await storage.getDriverSchedules(filters);
+      res.json(schedules);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/driver-schedules/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const schedule = await storage.getDriverScheduleById(req.params.id);
+      if (!schedule) {
+        return res.status(404).json({ message: "Driver schedule not found" });
+      }
+      res.json(schedule);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/driver-schedules", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertDriverScheduleSchema.safeParse({ ...req.body, createdBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const schedule = await storage.createDriverSchedule(validationResult.data);
+      await createAuditLog(user.id, 'driver_schedule_created', undefined, req, `Created driver schedule`);
+      res.status(201).json(schedule);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/driver-schedules/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertDriverScheduleSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const schedule = await storage.updateDriverSchedule(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'driver_schedule_updated', undefined, req, `Updated driver schedule`);
+      res.json(schedule);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/driver-schedules/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteDriverSchedule(req.params.id);
+      await createAuditLog(user.id, 'driver_schedule_deleted', undefined, req, `Deleted driver schedule`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Driver Attendance routes
+  app.get("/api/driver-attendance", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.driverId) filters.driverId = req.query.driverId;
+      if (req.query.scheduleId) filters.scheduleId = req.query.scheduleId;
+      if (req.query.startDate) filters.startDate = new Date(req.query.startDate as string);
+      if (req.query.endDate) filters.endDate = new Date(req.query.endDate as string);
+      
+      const attendance = await storage.getDriverAttendance(filters);
+      res.json(attendance);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/driver-attendance/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const attendance = await storage.getDriverAttendanceById(req.params.id);
+      if (!attendance) {
+        return res.status(404).json({ message: "Attendance record not found" });
+      }
+      res.json(attendance);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/driver-attendance", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertDriverAttendanceSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const attendance = await storage.createDriverAttendance(validationResult.data);
+      await createAuditLog(user.id, 'driver_checked_in', undefined, req, `Driver checked in`);
+      res.status(201).json(attendance);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/driver-attendance/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertDriverAttendanceSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const attendance = await storage.updateDriverAttendance(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'driver_attendance_updated', undefined, req, `Updated driver attendance`);
+      res.json(attendance);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/driver-attendance/:id/checkout", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const attendance = await storage.checkOutDriver(req.params.id);
+      await createAuditLog(user.id, 'driver_checked_out', undefined, req, `Driver checked out`);
+      res.json(attendance);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/driver-attendance/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteDriverAttendance(req.params.id);
+      await createAuditLog(user.id, 'driver_attendance_deleted', undefined, req, `Deleted attendance record`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Automated Reminders routes
+  app.get("/api/automated-reminders", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.entityType) filters.entityType = req.query.entityType;
+      if (req.query.entityId) filters.entityId = req.query.entityId;
+      if (req.query.reminderType) filters.reminderType = req.query.reminderType;
+      if (req.query.isSent !== undefined) filters.isSent = req.query.isSent === 'true';
+      if (req.query.isActive !== undefined) filters.isActive = req.query.isActive === 'true';
+      
+      const reminders = await storage.getAutomatedReminders(filters);
+      res.json(reminders);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/automated-reminders/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const reminder = await storage.getAutomatedReminderById(req.params.id);
+      if (!reminder) {
+        return res.status(404).json({ message: "Reminder not found" });
+      }
+      res.json(reminder);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/automated-reminders", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertAutomatedReminderSchema.safeParse({ ...req.body, createdBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const reminder = await storage.createAutomatedReminder(validationResult.data);
+      await createAuditLog(user.id, 'reminder_created', undefined, req, `Created automated reminder`);
+      res.status(201).json(reminder);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/automated-reminders/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertAutomatedReminderSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const reminder = await storage.updateAutomatedReminder(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'reminder_updated', undefined, req, `Updated automated reminder`);
+      res.json(reminder);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/automated-reminders/:id/mark-sent", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const reminder = await storage.markReminderAsSent(req.params.id);
+      await createAuditLog(user.id, 'reminder_sent', undefined, req, `Marked reminder as sent`);
+      res.json(reminder);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/automated-reminders/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteAutomatedReminder(req.params.id);
+      await createAuditLog(user.id, 'reminder_deleted', undefined, req, `Deleted automated reminder`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Approval Requests routes
+  app.get("/api/approval-requests", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.entityType) filters.entityType = req.query.entityType;
+      if (req.query.requestedBy) filters.requestedBy = req.query.requestedBy;
+      if (req.query.status) filters.status = req.query.status;
+      if (req.query.requiredLevel) filters.requiredLevel = req.query.requiredLevel;
+      
+      const requests = await storage.getApprovalRequests(filters);
+      res.json(requests);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/approval-requests/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const request = await storage.getApprovalRequestById(req.params.id);
+      if (!request) {
+        return res.status(404).json({ message: "Approval request not found" });
+      }
+      res.json(request);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/approval-requests", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertApprovalRequestSchema.safeParse({ ...req.body, requestedBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const request = await storage.createApprovalRequest(validationResult.data);
+      
+      await storage.createApprovalLog({
+        approvalId: request.id,
+        action: 'submitted',
+        actionBy: user.id,
+        remarks: req.body.reason,
+        previousStatus: null,
+        newStatus: 'pending',
+      });
+      
+      await createAuditLog(user.id, 'approval_requested', undefined, req, `Created approval request`);
+      res.status(201).json(request);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/approval-requests/:id/approve", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const originalRequest = await storage.getApprovalRequestById(req.params.id);
+      if (!originalRequest) {
+        return res.status(404).json({ message: "Approval request not found" });
+      }
+      
+      const request = await storage.approveRequest(req.params.id, user.id);
+      
+      await storage.createApprovalLog({
+        approvalId: request.id,
+        action: 'approved',
+        actionBy: user.id,
+        remarks: req.body.remarks,
+        previousStatus: originalRequest.status,
+        newStatus: 'approved',
+      });
+      
+      await createAuditLog(user.id, 'approval_approved', undefined, req, `Approved request`);
+      res.json(request);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/approval-requests/:id/reject", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      if (!req.body.rejectionReason) {
+        return res.status(400).json({ message: "Rejection reason is required" });
+      }
+      
+      const originalRequest = await storage.getApprovalRequestById(req.params.id);
+      if (!originalRequest) {
+        return res.status(404).json({ message: "Approval request not found" });
+      }
+      
+      const request = await storage.rejectRequest(req.params.id, user.id, req.body.rejectionReason);
+      
+      await storage.createApprovalLog({
+        approvalId: request.id,
+        action: 'rejected',
+        actionBy: user.id,
+        remarks: req.body.rejectionReason,
+        previousStatus: originalRequest.status,
+        newStatus: 'rejected',
+      });
+      
+      await createAuditLog(user.id, 'approval_rejected', undefined, req, `Rejected request`);
+      res.json(request);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/approval-requests/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteApprovalRequest(req.params.id);
+      await createAuditLog(user.id, 'approval_request_deleted', undefined, req, `Deleted approval request`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Approval Logs routes
+  app.get("/api/approval-logs", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.query.approvalId) {
+        return res.status(400).json({ message: "approvalId query parameter is required" });
+      }
+      
+      const logs = await storage.getApprovalLogs(req.query.approvalId as string);
+      res.json(logs);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Customer Risk Scores routes
+  app.get("/api/customer-risk-scores", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.query.customerId) {
+        return res.status(400).json({ message: "customerId query parameter is required" });
+      }
+      
+      const scores = await storage.getCustomerRiskScores(req.query.customerId as string);
+      res.json(scores);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/customer-risk-scores", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertCustomerRiskScoreSchema.safeParse({ ...req.body, calculatedBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const score = await storage.createCustomerRiskScore(validationResult.data);
+      await createAuditLog(user.id, 'risk_score_created', undefined, req, `Created risk score for customer`);
+      res.status(201).json(score);
     } catch (error) {
       next(error);
     }

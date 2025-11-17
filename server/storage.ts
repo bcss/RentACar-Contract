@@ -32,6 +32,16 @@ import {
   trafficFines,
   incidents,
   documentRegistry,
+  vehicleServiceRecords,
+  rentalRatePlans,
+  vehicleAccessories,
+  contractAccessories,
+  driverSchedules,
+  driverAttendance,
+  automatedReminders,
+  approvalRequests,
+  approvalLogs,
+  customerRiskScores,
   type User,
   type UpsertUser,
   type Contract,
@@ -97,6 +107,26 @@ import {
   type InsertIncident,
   type DocumentRegistryEntry,
   type InsertDocumentRegistry,
+  type VehicleServiceRecord,
+  type InsertVehicleServiceRecord,
+  type RentalRatePlan,
+  type InsertRentalRatePlan,
+  type VehicleAccessory,
+  type InsertVehicleAccessory,
+  type ContractAccessory,
+  type InsertContractAccessory,
+  type DriverSchedule,
+  type InsertDriverSchedule,
+  type DriverAttendance,
+  type InsertDriverAttendance,
+  type AutomatedReminder,
+  type InsertAutomatedReminder,
+  type ApprovalRequest,
+  type InsertApprovalRequest,
+  type ApprovalLog,
+  type InsertApprovalLog,
+  type CustomerRiskScore,
+  type InsertCustomerRiskScore,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte } from "drizzle-orm";
@@ -410,6 +440,78 @@ export interface IStorage {
   updateDocument(id: string, document: any): Promise<any>;
   verifyDocument(id: string, verifiedBy: string): Promise<any>;
   deleteDocument(id: string): Promise<void>;
+  
+  // ==================== WAVE 2: FLEET ECONOMICS ====================
+  
+  // Vehicle Service Record operations
+  getVehicleServiceRecords(filters?: { vehicleId?: string; serviceType?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
+  getVehicleServiceRecordById(id: string): Promise<any | undefined>;
+  createVehicleServiceRecord(record: any): Promise<any>;
+  updateVehicleServiceRecord(id: string, record: any): Promise<any>;
+  deleteVehicleServiceRecord(id: string): Promise<void>;
+  
+  // Rental Rate Plan operations
+  getRentalRatePlans(filters?: { planType?: string; isActive?: boolean; vehicleCategory?: string }): Promise<any[]>;
+  getRentalRatePlanById(id: string): Promise<any | undefined>;
+  createRentalRatePlan(plan: any): Promise<any>;
+  updateRentalRatePlan(id: string, plan: any): Promise<any>;
+  deleteRentalRatePlan(id: string): Promise<void>;
+  
+  // Vehicle Accessory operations
+  getVehicleAccessories(filters?: { category?: string; isActive?: boolean }): Promise<any[]>;
+  getVehicleAccessoryById(id: string): Promise<any | undefined>;
+  createVehicleAccessory(accessory: any): Promise<any>;
+  updateVehicleAccessory(id: string, accessory: any): Promise<any>;
+  deleteVehicleAccessory(id: string): Promise<void>;
+  
+  // Contract Accessory operations
+  getContractAccessories(contractId: string): Promise<any[]>;
+  getContractAccessoryById(id: string): Promise<any | undefined>;
+  createContractAccessory(contractAccessory: any): Promise<any>;
+  updateContractAccessory(id: string, contractAccessory: any): Promise<any>;
+  deleteContractAccessory(id: string): Promise<void>;
+  
+  // ==================== WAVE 3: WORKFORCE & AUTOMATION ====================
+  
+  // Driver Schedule operations
+  getDriverSchedules(filters?: { driverId?: string; branchId?: string; status?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
+  getDriverScheduleById(id: string): Promise<any | undefined>;
+  createDriverSchedule(schedule: any): Promise<any>;
+  updateDriverSchedule(id: string, schedule: any): Promise<any>;
+  deleteDriverSchedule(id: string): Promise<void>;
+  
+  // Driver Attendance operations
+  getDriverAttendance(filters?: { driverId?: string; scheduleId?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
+  getDriverAttendanceById(id: string): Promise<any | undefined>;
+  createDriverAttendance(attendance: any): Promise<any>;
+  updateDriverAttendance(id: string, attendance: any): Promise<any>;
+  checkOutDriver(id: string): Promise<any>;
+  deleteDriverAttendance(id: string): Promise<void>;
+  
+  // Automated Reminder operations
+  getAutomatedReminders(filters?: { entityType?: string; entityId?: string; reminderType?: string; isSent?: boolean; isActive?: boolean }): Promise<any[]>;
+  getAutomatedReminderById(id: string): Promise<any | undefined>;
+  createAutomatedReminder(reminder: any): Promise<any>;
+  updateAutomatedReminder(id: string, reminder: any): Promise<any>;
+  markReminderAsSent(id: string): Promise<any>;
+  deleteAutomatedReminder(id: string): Promise<void>;
+  
+  // Approval Request operations
+  getApprovalRequests(filters?: { entityType?: string; requestedBy?: string; status?: string; requiredLevel?: string }): Promise<any[]>;
+  getApprovalRequestById(id: string): Promise<any | undefined>;
+  createApprovalRequest(request: any): Promise<any>;
+  approveRequest(id: string, approvedBy: string): Promise<any>;
+  rejectRequest(id: string, rejectedBy: string, rejectionReason: string): Promise<any>;
+  deleteApprovalRequest(id: string): Promise<void>;
+  
+  // Approval Log operations
+  getApprovalLogs(approvalId: string): Promise<any[]>;
+  createApprovalLog(log: any): Promise<any>;
+  
+  // Customer Risk Score operations
+  getCustomerRiskScores(customerId: string): Promise<any[]>;
+  getLatestCustomerRiskScore(customerId: string): Promise<any | undefined>;
+  createCustomerRiskScore(score: any): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4139,6 +4241,399 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDocument(id: string): Promise<void> {
     await db.delete(documentRegistry).where(eq(documentRegistry.id, id));
+  }
+
+  // ==================== WAVE 2: FLEET ECONOMICS ====================
+
+  // Vehicle Service Record operations
+  async getVehicleServiceRecords(filters?: { vehicleId?: string; serviceType?: string; startDate?: Date; endDate?: Date }): Promise<VehicleServiceRecord[]> {
+    const conditions = [];
+    if (filters?.vehicleId) conditions.push(eq(vehicleServiceRecords.vehicleId, filters.vehicleId));
+    if (filters?.serviceType) conditions.push(eq(vehicleServiceRecords.serviceType, filters.serviceType));
+    if (filters?.startDate) conditions.push(gte(vehicleServiceRecords.serviceDate, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(vehicleServiceRecords.serviceDate, filters.endDate));
+
+    return await db
+      .select()
+      .from(vehicleServiceRecords)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(vehicleServiceRecords.serviceDate));
+  }
+
+  async getVehicleServiceRecordById(id: string): Promise<VehicleServiceRecord | undefined> {
+    const [record] = await db.select().from(vehicleServiceRecords).where(eq(vehicleServiceRecords.id, id));
+    return record;
+  }
+
+  async createVehicleServiceRecord(recordData: InsertVehicleServiceRecord): Promise<VehicleServiceRecord> {
+    const [record] = await db.insert(vehicleServiceRecords).values(recordData).returning();
+    return record;
+  }
+
+  async updateVehicleServiceRecord(id: string, recordData: Partial<InsertVehicleServiceRecord>): Promise<VehicleServiceRecord> {
+    const [updated] = await db
+      .update(vehicleServiceRecords)
+      .set({ ...recordData, updatedAt: new Date() })
+      .where(eq(vehicleServiceRecords.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteVehicleServiceRecord(id: string): Promise<void> {
+    await db.delete(vehicleServiceRecords).where(eq(vehicleServiceRecords.id, id));
+  }
+
+  // Rental Rate Plan operations
+  async getRentalRatePlans(filters?: { planType?: string; isActive?: boolean; vehicleCategory?: string }): Promise<RentalRatePlan[]> {
+    const conditions = [];
+    if (filters?.planType) conditions.push(eq(rentalRatePlans.planType, filters.planType));
+    if (filters?.isActive !== undefined) conditions.push(eq(rentalRatePlans.isActive, filters.isActive));
+    if (filters?.vehicleCategory) conditions.push(eq(rentalRatePlans.vehicleCategory, filters.vehicleCategory));
+
+    return await db
+      .select()
+      .from(rentalRatePlans)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(rentalRatePlans.createdAt));
+  }
+
+  async getRentalRatePlanById(id: string): Promise<RentalRatePlan | undefined> {
+    const [plan] = await db.select().from(rentalRatePlans).where(eq(rentalRatePlans.id, id));
+    return plan;
+  }
+
+  async createRentalRatePlan(planData: InsertRentalRatePlan): Promise<RentalRatePlan> {
+    const [plan] = await db.insert(rentalRatePlans).values(planData).returning();
+    return plan;
+  }
+
+  async updateRentalRatePlan(id: string, planData: Partial<InsertRentalRatePlan>): Promise<RentalRatePlan> {
+    const [updated] = await db
+      .update(rentalRatePlans)
+      .set({ ...planData, updatedAt: new Date() })
+      .where(eq(rentalRatePlans.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteRentalRatePlan(id: string): Promise<void> {
+    await db.delete(rentalRatePlans).where(eq(rentalRatePlans.id, id));
+  }
+
+  // Vehicle Accessory operations
+  async getVehicleAccessories(filters?: { category?: string; isActive?: boolean }): Promise<VehicleAccessory[]> {
+    const conditions = [];
+    if (filters?.category) conditions.push(eq(vehicleAccessories.category, filters.category));
+    if (filters?.isActive !== undefined) conditions.push(eq(vehicleAccessories.isActive, filters.isActive));
+
+    return await db
+      .select()
+      .from(vehicleAccessories)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(vehicleAccessories.createdAt));
+  }
+
+  async getVehicleAccessoryById(id: string): Promise<VehicleAccessory | undefined> {
+    const [accessory] = await db.select().from(vehicleAccessories).where(eq(vehicleAccessories.id, id));
+    return accessory;
+  }
+
+  async createVehicleAccessory(accessoryData: InsertVehicleAccessory): Promise<VehicleAccessory> {
+    const [accessory] = await db.insert(vehicleAccessories).values(accessoryData).returning();
+    return accessory;
+  }
+
+  async updateVehicleAccessory(id: string, accessoryData: Partial<InsertVehicleAccessory>): Promise<VehicleAccessory> {
+    const [updated] = await db
+      .update(vehicleAccessories)
+      .set({ ...accessoryData, updatedAt: new Date() })
+      .where(eq(vehicleAccessories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteVehicleAccessory(id: string): Promise<void> {
+    await db.delete(vehicleAccessories).where(eq(vehicleAccessories.id, id));
+  }
+
+  // Contract Accessory operations
+  async getContractAccessories(contractId: string): Promise<ContractAccessory[]> {
+    return await db
+      .select()
+      .from(contractAccessories)
+      .where(eq(contractAccessories.contractId, contractId))
+      .orderBy(desc(contractAccessories.createdAt));
+  }
+
+  async getContractAccessoryById(id: string): Promise<ContractAccessory | undefined> {
+    const [accessory] = await db.select().from(contractAccessories).where(eq(contractAccessories.id, id));
+    return accessory;
+  }
+
+  async createContractAccessory(accessoryData: InsertContractAccessory): Promise<ContractAccessory> {
+    const [accessory] = await db.insert(contractAccessories).values(accessoryData).returning();
+    return accessory;
+  }
+
+  async updateContractAccessory(id: string, accessoryData: Partial<InsertContractAccessory>): Promise<ContractAccessory> {
+    const [updated] = await db
+      .update(contractAccessories)
+      .set(accessoryData)
+      .where(eq(contractAccessories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteContractAccessory(id: string): Promise<void> {
+    await db.delete(contractAccessories).where(eq(contractAccessories.id, id));
+  }
+
+  // ==================== WAVE 3: WORKFORCE & AUTOMATION ====================
+
+  // Driver Schedule operations
+  async getDriverSchedules(filters?: { driverId?: string; branchId?: string; status?: string; startDate?: Date; endDate?: Date }): Promise<DriverSchedule[]> {
+    const conditions = [];
+    if (filters?.driverId) conditions.push(eq(driverSchedules.driverId, filters.driverId));
+    if (filters?.branchId) conditions.push(eq(driverSchedules.branchId, filters.branchId));
+    if (filters?.status) conditions.push(eq(driverSchedules.status, filters.status));
+    if (filters?.startDate) conditions.push(gte(driverSchedules.scheduleDate, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(driverSchedules.scheduleDate, filters.endDate));
+
+    return await db
+      .select()
+      .from(driverSchedules)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(driverSchedules.scheduleDate));
+  }
+
+  async getDriverScheduleById(id: string): Promise<DriverSchedule | undefined> {
+    const [schedule] = await db.select().from(driverSchedules).where(eq(driverSchedules.id, id));
+    return schedule;
+  }
+
+  async createDriverSchedule(scheduleData: InsertDriverSchedule): Promise<DriverSchedule> {
+    const [schedule] = await db.insert(driverSchedules).values(scheduleData).returning();
+    return schedule;
+  }
+
+  async updateDriverSchedule(id: string, scheduleData: Partial<InsertDriverSchedule>): Promise<DriverSchedule> {
+    const [updated] = await db
+      .update(driverSchedules)
+      .set({ ...scheduleData, updatedAt: new Date() })
+      .where(eq(driverSchedules.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDriverSchedule(id: string): Promise<void> {
+    await db.delete(driverSchedules).where(eq(driverSchedules.id, id));
+  }
+
+  // Driver Attendance operations
+  async getDriverAttendance(filters?: { driverId?: string; scheduleId?: string; startDate?: Date; endDate?: Date }): Promise<DriverAttendance[]> {
+    const conditions = [];
+    if (filters?.driverId) conditions.push(eq(driverAttendance.driverId, filters.driverId));
+    if (filters?.scheduleId) conditions.push(eq(driverAttendance.scheduleId, filters.scheduleId));
+    if (filters?.startDate) conditions.push(gte(driverAttendance.checkIn, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(driverAttendance.checkIn, filters.endDate));
+
+    return await db
+      .select()
+      .from(driverAttendance)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(driverAttendance.checkIn));
+  }
+
+  async getDriverAttendanceById(id: string): Promise<DriverAttendance | undefined> {
+    const [attendance] = await db.select().from(driverAttendance).where(eq(driverAttendance.id, id));
+    return attendance;
+  }
+
+  async createDriverAttendance(attendanceData: InsertDriverAttendance): Promise<DriverAttendance> {
+    const [attendance] = await db.insert(driverAttendance).values(attendanceData).returning();
+    return attendance;
+  }
+
+  async updateDriverAttendance(id: string, attendanceData: Partial<InsertDriverAttendance>): Promise<DriverAttendance> {
+    const [updated] = await db
+      .update(driverAttendance)
+      .set(attendanceData)
+      .where(eq(driverAttendance.id, id))
+      .returning();
+    return updated;
+  }
+
+  async checkOutDriver(id: string): Promise<DriverAttendance> {
+    const attendance = await this.getDriverAttendanceById(id);
+    if (!attendance) {
+      throw new Error("Attendance record not found");
+    }
+
+    const checkOutTime = new Date();
+    const checkInTime = new Date(attendance.checkIn);
+    const hoursWorked = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
+    
+    const [updated] = await db
+      .update(driverAttendance)
+      .set({
+        checkOut: checkOutTime,
+        hoursWorked: hoursWorked.toFixed(2),
+      })
+      .where(eq(driverAttendance.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDriverAttendance(id: string): Promise<void> {
+    await db.delete(driverAttendance).where(eq(driverAttendance.id, id));
+  }
+
+  // Automated Reminder operations
+  async getAutomatedReminders(filters?: { entityType?: string; entityId?: string; reminderType?: string; isSent?: boolean; isActive?: boolean }): Promise<AutomatedReminder[]> {
+    const conditions = [];
+    if (filters?.entityType) conditions.push(eq(automatedReminders.entityType, filters.entityType));
+    if (filters?.entityId) conditions.push(eq(automatedReminders.entityId, filters.entityId));
+    if (filters?.reminderType) conditions.push(eq(automatedReminders.reminderType, filters.reminderType));
+    if (filters?.isSent !== undefined) conditions.push(eq(automatedReminders.isSent, filters.isSent));
+    if (filters?.isActive !== undefined) conditions.push(eq(automatedReminders.isActive, filters.isActive));
+
+    return await db
+      .select()
+      .from(automatedReminders)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(automatedReminders.reminderDate));
+  }
+
+  async getAutomatedReminderById(id: string): Promise<AutomatedReminder | undefined> {
+    const [reminder] = await db.select().from(automatedReminders).where(eq(automatedReminders.id, id));
+    return reminder;
+  }
+
+  async createAutomatedReminder(reminderData: InsertAutomatedReminder): Promise<AutomatedReminder> {
+    const [reminder] = await db.insert(automatedReminders).values(reminderData).returning();
+    return reminder;
+  }
+
+  async updateAutomatedReminder(id: string, reminderData: Partial<InsertAutomatedReminder>): Promise<AutomatedReminder> {
+    const [updated] = await db
+      .update(automatedReminders)
+      .set({ ...reminderData, updatedAt: new Date() })
+      .where(eq(automatedReminders.id, id))
+      .returning();
+    return updated;
+  }
+
+  async markReminderAsSent(id: string): Promise<AutomatedReminder> {
+    const [updated] = await db
+      .update(automatedReminders)
+      .set({
+        isSent: true,
+        sentTime: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(automatedReminders.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAutomatedReminder(id: string): Promise<void> {
+    await db.delete(automatedReminders).where(eq(automatedReminders.id, id));
+  }
+
+  // Approval Request operations
+  async getApprovalRequests(filters?: { entityType?: string; requestedBy?: string; status?: string; requiredLevel?: string }): Promise<ApprovalRequest[]> {
+    const conditions = [];
+    if (filters?.entityType) conditions.push(eq(approvalRequests.entityType, filters.entityType));
+    if (filters?.requestedBy) conditions.push(eq(approvalRequests.requestedBy, filters.requestedBy));
+    if (filters?.status) conditions.push(eq(approvalRequests.status, filters.status));
+    if (filters?.requiredLevel) conditions.push(eq(approvalRequests.requiredLevel, filters.requiredLevel));
+
+    return await db
+      .select()
+      .from(approvalRequests)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(approvalRequests.createdAt));
+  }
+
+  async getApprovalRequestById(id: string): Promise<ApprovalRequest | undefined> {
+    const [request] = await db.select().from(approvalRequests).where(eq(approvalRequests.id, id));
+    return request;
+  }
+
+  async createApprovalRequest(requestData: InsertApprovalRequest): Promise<ApprovalRequest> {
+    const [request] = await db.insert(approvalRequests).values(requestData).returning();
+    return request;
+  }
+
+  async approveRequest(id: string, approvedBy: string): Promise<ApprovalRequest> {
+    const [updated] = await db
+      .update(approvalRequests)
+      .set({
+        status: 'approved',
+        approvedBy,
+        approvedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(approvalRequests.id, id))
+      .returning();
+    return updated;
+  }
+
+  async rejectRequest(id: string, rejectedBy: string, rejectionReason: string): Promise<ApprovalRequest> {
+    const [updated] = await db
+      .update(approvalRequests)
+      .set({
+        status: 'rejected',
+        rejectedBy,
+        rejectedAt: new Date(),
+        rejectionReason,
+        updatedAt: new Date(),
+      })
+      .where(eq(approvalRequests.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteApprovalRequest(id: string): Promise<void> {
+    await db.delete(approvalRequests).where(eq(approvalRequests.id, id));
+  }
+
+  // Approval Log operations
+  async getApprovalLogs(approvalId: string): Promise<ApprovalLog[]> {
+    return await db
+      .select()
+      .from(approvalLogs)
+      .where(eq(approvalLogs.approvalId, approvalId))
+      .orderBy(desc(approvalLogs.actionDate));
+  }
+
+  async createApprovalLog(logData: InsertApprovalLog): Promise<ApprovalLog> {
+    const [log] = await db.insert(approvalLogs).values(logData).returning();
+    return log;
+  }
+
+  // Customer Risk Score operations
+  async getCustomerRiskScores(customerId: string): Promise<CustomerRiskScore[]> {
+    return await db
+      .select()
+      .from(customerRiskScores)
+      .where(eq(customerRiskScores.customerId, customerId))
+      .orderBy(desc(customerRiskScores.scoringDate));
+  }
+
+  async getLatestCustomerRiskScore(customerId: string): Promise<CustomerRiskScore | undefined> {
+    const [score] = await db
+      .select()
+      .from(customerRiskScores)
+      .where(eq(customerRiskScores.customerId, customerId))
+      .orderBy(desc(customerRiskScores.scoringDate))
+      .limit(1);
+    return score;
+  }
+
+  async createCustomerRiskScore(scoreData: InsertCustomerRiskScore): Promise<CustomerRiskScore> {
+    const [score] = await db.insert(customerRiskScores).values(scoreData).returning();
+    return score;
   }
 }
 
