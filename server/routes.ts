@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess, requireAppAccessReportAccess } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, insertBranchSchema, insertBranchTransferSchema, insertPublicHolidaySchema, insertDriverOutsourceCompanySchema, insertDriverSchema, insertDriverRateCardSchema, insertDriverScheduleBlockSchema, insertDriverAssignmentSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, insertBranchSchema, insertBranchTransferSchema, insertPublicHolidaySchema, insertDriverOutsourceCompanySchema, insertDriverSchema, insertDriverRateCardSchema, insertDriverScheduleBlockSchema, insertDriverAssignmentSchema, insertTollSystemSchema, insertTollGateSchema, insertTollPassSchema, insertTrafficFineSchema, insertIncidentSchema, insertDocumentRegistrySchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
 import { count, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
@@ -6726,6 +6726,471 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const assignment = await storage.completeDriverAssignment(req.params.id, completionNotes || '');
       await createAuditLog(user.id, 'driver_assignment_completed', assignment.id, req, `Completed driver assignment`);
       res.json(assignment);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ==================== WAVE 1: COMPLIANCE & OPERATIONS ROUTES ====================
+
+  // Toll Systems routes
+  app.get("/api/toll-systems", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        emirate: req.query.emirate as string | undefined,
+        isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
+      };
+      const systems = await storage.getTollSystems(filters);
+      res.json(systems);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/toll-systems/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const system = await storage.getTollSystemById(req.params.id);
+      if (!system) {
+        return res.status(404).json({ message: "Toll system not found" });
+      }
+      res.json(system);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/toll-systems", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertTollSystemSchema.safeParse({ ...req.body, createdBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const system = await storage.createTollSystem(validationResult.data);
+      await createAuditLog(user.id, 'toll_system_created', undefined, req, `Created toll system: ${system.systemName}`);
+      res.status(201).json(system);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/toll-systems/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertTollSystemSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const system = await storage.updateTollSystem(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'toll_system_updated', undefined, req, `Updated toll system: ${system.systemName}`);
+      res.json(system);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/toll-systems/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteTollSystem(req.params.id);
+      await createAuditLog(user.id, 'toll_system_deleted', undefined, req, `Deleted toll system`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Toll Gates routes
+  app.get("/api/toll-gates", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        tollSystemId: req.query.tollSystemId as string | undefined,
+        isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
+      };
+      const gates = await storage.getTollGates(filters);
+      res.json(gates);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/toll-gates/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const gate = await storage.getTollGateById(req.params.id);
+      if (!gate) {
+        return res.status(404).json({ message: "Toll gate not found" });
+      }
+      res.json(gate);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/toll-gates", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertTollGateSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const gate = await storage.createTollGate(validationResult.data);
+      await createAuditLog(user.id, 'toll_gate_created', undefined, req, `Created toll gate: ${gate.gateName}`);
+      res.status(201).json(gate);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/toll-gates/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertTollGateSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const gate = await storage.updateTollGate(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'toll_gate_updated', undefined, req, `Updated toll gate: ${gate.gateName}`);
+      res.json(gate);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/toll-gates/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteTollGate(req.params.id);
+      await createAuditLog(user.id, 'toll_gate_deleted', undefined, req, `Deleted toll gate`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Toll Passes routes
+  app.get("/api/toll-passes", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        vehicleId: req.query.vehicleId as string | undefined,
+        contractId: req.query.contractId as string | undefined,
+        paymentStatus: req.query.paymentStatus as string | undefined,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+      };
+      const passes = await storage.getTollPasses(filters);
+      res.json(passes);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/toll-passes/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const pass = await storage.getTollPassById(req.params.id);
+      if (!pass) {
+        return res.status(404).json({ message: "Toll pass not found" });
+      }
+      res.json(pass);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/toll-passes", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertTollPassSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const pass = await storage.createTollPass(validationResult.data);
+      await createAuditLog(user.id, 'toll_pass_created', pass.contractId || undefined, req, `Created toll pass`);
+      res.status(201).json(pass);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/toll-passes/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertTollPassSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const pass = await storage.updateTollPass(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'toll_pass_updated', pass.contractId || undefined, req, `Updated toll pass`);
+      res.json(pass);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/toll-passes/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteTollPass(req.params.id);
+      await createAuditLog(user.id, 'toll_pass_deleted', undefined, req, `Deleted toll pass`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Traffic Fines routes
+  app.get("/api/traffic-fines", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        vehicleId: req.query.vehicleId as string | undefined,
+        customerId: req.query.customerId as string | undefined,
+        contractId: req.query.contractId as string | undefined,
+        paymentStatus: req.query.paymentStatus as string | undefined,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+      };
+      const fines = await storage.getTrafficFines(filters);
+      res.json(fines);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/traffic-fines/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const fine = await storage.getTrafficFineById(req.params.id);
+      if (!fine) {
+        return res.status(404).json({ message: "Traffic fine not found" });
+      }
+      res.json(fine);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/traffic-fines", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertTrafficFineSchema.safeParse({ ...req.body, createdBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const fine = await storage.createTrafficFine(validationResult.data);
+      await createAuditLog(user.id, 'traffic_fine_created', fine.contractId || undefined, req, `Created traffic fine: ${fine.description}`);
+      res.status(201).json(fine);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/traffic-fines/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertTrafficFineSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const fine = await storage.updateTrafficFine(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'traffic_fine_updated', fine.contractId || undefined, req, `Updated traffic fine`);
+      res.json(fine);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/traffic-fines/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteTrafficFine(req.params.id);
+      await createAuditLog(user.id, 'traffic_fine_deleted', undefined, req, `Deleted traffic fine`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Incidents routes
+  app.get("/api/incidents", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        contractId: req.query.contractId as string | undefined,
+        vehicleId: req.query.vehicleId as string | undefined,
+        customerId: req.query.customerId as string | undefined,
+        status: req.query.status as string | undefined,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+      };
+      const incidents = await storage.getIncidents(filters);
+      res.json(incidents);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/incidents/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const incident = await storage.getIncidentById(req.params.id);
+      if (!incident) {
+        return res.status(404).json({ message: "Incident not found" });
+      }
+      res.json(incident);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/incidents", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertIncidentSchema.safeParse({ ...req.body, createdBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const incident = await storage.createIncident(validationResult.data);
+      await createAuditLog(user.id, 'incident_created', incident.contractId || undefined, req, `Created incident: ${incident.incidentType}`);
+      res.status(201).json(incident);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/incidents/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertIncidentSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const incident = await storage.updateIncident(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'incident_updated', incident.contractId || undefined, req, `Updated incident`);
+      res.json(incident);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/incidents/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteIncident(req.params.id);
+      await createAuditLog(user.id, 'incident_deleted', undefined, req, `Deleted incident`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Document Registry routes
+  app.get("/api/documents", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters = {
+        entityType: req.query.entityType as string | undefined,
+        entityId: req.query.entityId as string | undefined,
+        documentType: req.query.documentType as string | undefined,
+        status: req.query.status as string | undefined,
+      };
+      const documents = await storage.getDocuments(filters);
+      res.json(documents);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/documents/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const document = await storage.getDocumentById(req.params.id);
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      res.json(document);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/documents", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertDocumentRegistrySchema.safeParse({ ...req.body, uploadedBy: user.id });
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const document = await storage.createDocument(validationResult.data);
+      await createAuditLog(user.id, 'document_created', undefined, req, `Created document: ${document.documentType}`);
+      res.status(201).json(document);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/documents/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertDocumentRegistrySchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const document = await storage.updateDocument(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'document_updated', undefined, req, `Updated document`);
+      res.json(document);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/documents/:id/verify", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const document = await storage.verifyDocument(req.params.id, user.id);
+      await createAuditLog(user.id, 'document_verified', undefined, req, `Verified document: ${document.documentType}`);
+      res.json(document);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/documents/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteDocument(req.params.id);
+      await createAuditLog(user.id, 'document_deleted', undefined, req, `Deleted document`);
+      res.status(204).send();
     } catch (error) {
       next(error);
     }

@@ -26,6 +26,12 @@ import {
   driverRateCards,
   driverScheduleBlocks,
   driverAssignments,
+  tollSystems,
+  tollGates,
+  tollPasses,
+  trafficFines,
+  incidents,
+  documentRegistry,
   type User,
   type UpsertUser,
   type Contract,
@@ -79,6 +85,18 @@ import {
   type InsertDriverScheduleBlock,
   type DriverAssignment,
   type InsertDriverAssignment,
+  type TollSystem,
+  type InsertTollSystem,
+  type TollGate,
+  type InsertTollGate,
+  type TollPass,
+  type InsertTollPass,
+  type TrafficFine,
+  type InsertTrafficFine,
+  type Incident,
+  type InsertIncident,
+  type DocumentRegistryEntry,
+  type InsertDocumentRegistry,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte } from "drizzle-orm";
@@ -347,6 +365,51 @@ export interface IStorage {
   updatePublicHoliday(id: string, holiday: Partial<InsertPublicHoliday>): Promise<PublicHoliday>;
   deletePublicHoliday(id: string): Promise<void>;
   getHolidayByDate(date: Date): Promise<PublicHoliday | undefined>;
+  
+  // ==================== WAVE 1: COMPLIANCE & OPERATIONS ====================
+  
+  // Toll System operations
+  getTollSystems(filters?: { emirate?: string; isActive?: boolean }): Promise<any[]>;
+  getTollSystemById(id: string): Promise<any | undefined>;
+  createTollSystem(system: any): Promise<any>;
+  updateTollSystem(id: string, system: any): Promise<any>;
+  deleteTollSystem(id: string): Promise<void>;
+  
+  // Toll Gate operations  
+  getTollGates(filters?: { tollSystemId?: string; isActive?: boolean }): Promise<any[]>;
+  getTollGateById(id: string): Promise<any | undefined>;
+  createTollGate(gate: any): Promise<any>;
+  updateTollGate(id: string, gate: any): Promise<any>;
+  deleteTollGate(id: string): Promise<void>;
+  
+  // Toll Pass operations
+  getTollPasses(filters?: { vehicleId?: string; contractId?: string; paymentStatus?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
+  getTollPassById(id: string): Promise<any | undefined>;
+  createTollPass(pass: any): Promise<any>;
+  updateTollPass(id: string, pass: any): Promise<any>;
+  deleteTollPass(id: string): Promise<void>;
+  
+  // Traffic Fine operations
+  getTrafficFines(filters?: { vehicleId?: string; customerId?: string; contractId?: string; paymentStatus?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
+  getTrafficFineById(id: string): Promise<any | undefined>;
+  createTrafficFine(fine: any): Promise<any>;
+  updateTrafficFine(id: string, fine: any): Promise<any>;
+  deleteTrafficFine(id: string): Promise<void>;
+  
+  // Incident operations
+  getIncidents(filters?: { contractId?: string; vehicleId?: string; customerId?: string; status?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
+  getIncidentById(id: string): Promise<any | undefined>;
+  createIncident(incident: any): Promise<any>;
+  updateIncident(id: string, incident: any): Promise<any>;
+  deleteIncident(id: string): Promise<void>;
+  
+  // Document Registry operations
+  getDocuments(filters?: { entityType?: string; entityId?: string; documentType?: string; status?: string }): Promise<any[]>;
+  getDocumentById(id: string): Promise<any | undefined>;
+  createDocument(document: any): Promise<any>;
+  updateDocument(id: string, document: any): Promise<any>;
+  verifyDocument(id: string, verifiedBy: string): Promise<any>;
+  deleteDocument(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3831,6 +3894,251 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return holiday;
+  }
+
+  // ==================== WAVE 1: COMPLIANCE & OPERATIONS IMPLEMENTATIONS ====================
+
+  // Toll System operations
+  async getTollSystems(filters?: { emirate?: string; isActive?: boolean }): Promise<TollSystem[]> {
+    const conditions = [];
+    if (filters?.emirate) conditions.push(eq(tollSystems.emirate, filters.emirate as any));
+    if (filters?.isActive !== undefined) conditions.push(eq(tollSystems.isActive, filters.isActive));
+
+    return await db
+      .select()
+      .from(tollSystems)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(tollSystems.createdAt));
+  }
+
+  async getTollSystemById(id: string): Promise<TollSystem | undefined> {
+    const [system] = await db.select().from(tollSystems).where(eq(tollSystems.id, id));
+    return system;
+  }
+
+  async createTollSystem(systemData: InsertTollSystem): Promise<TollSystem> {
+    const [system] = await db.insert(tollSystems).values(systemData).returning();
+    return system;
+  }
+
+  async updateTollSystem(id: string, systemData: Partial<InsertTollSystem>): Promise<TollSystem> {
+    const [updated] = await db
+      .update(tollSystems)
+      .set({ ...systemData, updatedAt: new Date() })
+      .where(eq(tollSystems.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTollSystem(id: string): Promise<void> {
+    await db.delete(tollSystems).where(eq(tollSystems.id, id));
+  }
+
+  // Toll Gate operations
+  async getTollGates(filters?: { tollSystemId?: string; isActive?: boolean }): Promise<TollGate[]> {
+    const conditions = [];
+    if (filters?.tollSystemId) conditions.push(eq(tollGates.tollSystemId, filters.tollSystemId));
+    if (filters?.isActive !== undefined) conditions.push(eq(tollGates.isActive, filters.isActive));
+
+    return await db
+      .select()
+      .from(tollGates)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(tollGates.gateName);
+  }
+
+  async getTollGateById(id: string): Promise<TollGate | undefined> {
+    const [gate] = await db.select().from(tollGates).where(eq(tollGates.id, id));
+    return gate;
+  }
+
+  async createTollGate(gateData: InsertTollGate): Promise<TollGate> {
+    const [gate] = await db.insert(tollGates).values(gateData).returning();
+    return gate;
+  }
+
+  async updateTollGate(id: string, gateData: Partial<InsertTollGate>): Promise<TollGate> {
+    const [updated] = await db
+      .update(tollGates)
+      .set(gateData)
+      .where(eq(tollGates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTollGate(id: string): Promise<void> {
+    await db.delete(tollGates).where(eq(tollGates.id, id));
+  }
+
+  // Toll Pass operations
+  async getTollPasses(filters?: { vehicleId?: string; contractId?: string; paymentStatus?: string; startDate?: Date; endDate?: Date }): Promise<TollPass[]> {
+    const conditions = [];
+    if (filters?.vehicleId) conditions.push(eq(tollPasses.vehicleId, filters.vehicleId));
+    if (filters?.contractId) conditions.push(eq(tollPasses.contractId, filters.contractId));
+    if (filters?.paymentStatus) conditions.push(eq(tollPasses.paymentStatus, filters.paymentStatus));
+    if (filters?.startDate) conditions.push(gte(tollPasses.passDateTime, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(tollPasses.passDateTime, filters.endDate));
+
+    return await db
+      .select()
+      .from(tollPasses)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(tollPasses.passDateTime));
+  }
+
+  async getTollPassById(id: string): Promise<TollPass | undefined> {
+    const [pass] = await db.select().from(tollPasses).where(eq(tollPasses.id, id));
+    return pass;
+  }
+
+  async createTollPass(passData: InsertTollPass): Promise<TollPass> {
+    const [pass] = await db.insert(tollPasses).values(passData).returning();
+    return pass;
+  }
+
+  async updateTollPass(id: string, passData: Partial<InsertTollPass>): Promise<TollPass> {
+    const [updated] = await db
+      .update(tollPasses)
+      .set(passData)
+      .where(eq(tollPasses.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTollPass(id: string): Promise<void> {
+    await db.delete(tollPasses).where(eq(tollPasses.id, id));
+  }
+
+  // Traffic Fine operations
+  async getTrafficFines(filters?: { vehicleId?: string; customerId?: string; contractId?: string; paymentStatus?: string; startDate?: Date; endDate?: Date }): Promise<TrafficFine[]> {
+    const conditions = [];
+    if (filters?.vehicleId) conditions.push(eq(trafficFines.vehicleId, filters.vehicleId));
+    if (filters?.customerId) conditions.push(eq(trafficFines.customerId, filters.customerId));
+    if (filters?.contractId) conditions.push(eq(trafficFines.contractId, filters.contractId));
+    if (filters?.paymentStatus) conditions.push(eq(trafficFines.paymentStatus, filters.paymentStatus));
+    if (filters?.startDate) conditions.push(gte(trafficFines.fineDate, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(trafficFines.fineDate, filters.endDate));
+
+    return await db
+      .select()
+      .from(trafficFines)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(trafficFines.fineDate));
+  }
+
+  async getTrafficFineById(id: string): Promise<TrafficFine | undefined> {
+    const [fine] = await db.select().from(trafficFines).where(eq(trafficFines.id, id));
+    return fine;
+  }
+
+  async createTrafficFine(fineData: InsertTrafficFine): Promise<TrafficFine> {
+    const [fine] = await db.insert(trafficFines).values(fineData).returning();
+    return fine;
+  }
+
+  async updateTrafficFine(id: string, fineData: Partial<InsertTrafficFine>): Promise<TrafficFine> {
+    const [updated] = await db
+      .update(trafficFines)
+      .set({ ...fineData, updatedAt: new Date() })
+      .where(eq(trafficFines.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTrafficFine(id: string): Promise<void> {
+    await db.delete(trafficFines).where(eq(trafficFines.id, id));
+  }
+
+  // Incident operations
+  async getIncidents(filters?: { contractId?: string; vehicleId?: string; customerId?: string; status?: string; startDate?: Date; endDate?: Date }): Promise<Incident[]> {
+    const conditions = [];
+    if (filters?.contractId) conditions.push(eq(incidents.contractId, filters.contractId));
+    if (filters?.vehicleId) conditions.push(eq(incidents.vehicleId, filters.vehicleId));
+    if (filters?.customerId) conditions.push(eq(incidents.customerId, filters.customerId));
+    if (filters?.status) conditions.push(eq(incidents.status, filters.status));
+    if (filters?.startDate) conditions.push(gte(incidents.incidentDate, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(incidents.incidentDate, filters.endDate));
+
+    return await db
+      .select()
+      .from(incidents)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(incidents.incidentDate));
+  }
+
+  async getIncidentById(id: string): Promise<Incident | undefined> {
+    const [incident] = await db.select().from(incidents).where(eq(incidents.id, id));
+    return incident;
+  }
+
+  async createIncident(incidentData: InsertIncident): Promise<Incident> {
+    const [incident] = await db.insert(incidents).values(incidentData).returning();
+    return incident;
+  }
+
+  async updateIncident(id: string, incidentData: Partial<InsertIncident>): Promise<Incident> {
+    const [updated] = await db
+      .update(incidents)
+      .set({ ...incidentData, updatedAt: new Date() })
+      .where(eq(incidents.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteIncident(id: string): Promise<void> {
+    await db.delete(incidents).where(eq(incidents.id, id));
+  }
+
+  // Document Registry operations
+  async getDocuments(filters?: { entityType?: string; entityId?: string; documentType?: string; status?: string }): Promise<DocumentRegistryEntry[]> {
+    const conditions = [];
+    if (filters?.entityType) conditions.push(eq(documentRegistry.entityType, filters.entityType));
+    if (filters?.entityId) conditions.push(eq(documentRegistry.entityId, filters.entityId));
+    if (filters?.documentType) conditions.push(eq(documentRegistry.documentType, filters.documentType));
+    if (filters?.status) conditions.push(eq(documentRegistry.status, filters.status));
+
+    return await db
+      .select()
+      .from(documentRegistry)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(documentRegistry.createdAt));
+  }
+
+  async getDocumentById(id: string): Promise<DocumentRegistryEntry | undefined> {
+    const [document] = await db.select().from(documentRegistry).where(eq(documentRegistry.id, id));
+    return document;
+  }
+
+  async createDocument(documentData: InsertDocumentRegistry): Promise<DocumentRegistryEntry> {
+    const [document] = await db.insert(documentRegistry).values(documentData).returning();
+    return document;
+  }
+
+  async updateDocument(id: string, documentData: Partial<InsertDocumentRegistry>): Promise<DocumentRegistryEntry> {
+    const [updated] = await db
+      .update(documentRegistry)
+      .set({ ...documentData, updatedAt: new Date() })
+      .where(eq(documentRegistry.id, id))
+      .returning();
+    return updated;
+  }
+
+  async verifyDocument(id: string, verifiedBy: string): Promise<DocumentRegistryEntry> {
+    const [verified] = await db
+      .update(documentRegistry)
+      .set({
+        isVerified: true,
+        verifiedBy,
+        verifiedDate: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(documentRegistry.id, id))
+      .returning();
+    return verified;
+  }
+
+  async deleteDocument(id: string): Promise<void> {
+    await db.delete(documentRegistry).where(eq(documentRegistry.id, id));
   }
 }
 
