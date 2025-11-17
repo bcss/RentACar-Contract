@@ -89,6 +89,16 @@ import {
   Lock,
   LogOut,
   Info,
+  Landmark,
+  AlertOctagon,
+  FileWarning,
+  FolderOpen,
+  Wrench,
+  Receipt,
+  Package,
+  Calendar,
+  Bell,
+  CheckSquare,
 } from 'lucide-react';
 
 interface AppSidebarProps {
@@ -120,6 +130,19 @@ const getIconComponent = (iconName: string) => {
     'gavel': Scale,
     'shield': Shield,
     'info': HelpCircle,
+    // New Features - Wave 1 (Compliance & Operations)
+    'landmark': Landmark,
+    'alert_octagon': AlertOctagon,
+    'file_warning': FileWarning,
+    'folder_open': FolderOpen,
+    // New Features - Wave 2 (Fleet Economics)
+    'wrench': Wrench,
+    'receipt': Receipt,
+    'package': Package,
+    // New Features - Wave 3 (Workforce & Automation)
+    'calendar': Calendar,
+    'bell': Bell,
+    'check_square': CheckSquare,
     // Default
     'default': FileText,
   };
@@ -321,6 +344,69 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/driver-companies',
       show: isAdmin || isManager,
     },
+    // Wave 1 - Compliance & Operations
+    {
+      title: 'Toll Management',
+      icon: 'landmark',
+      url: '/toll-management',
+      show: true,
+    },
+    {
+      title: 'Traffic Fines',
+      icon: 'alert_octagon',
+      url: '/traffic-fines',
+      show: true,
+    },
+    {
+      title: 'Incidents',
+      icon: 'file_warning',
+      url: '/incidents',
+      show: true,
+    },
+    {
+      title: 'Document Registry',
+      icon: 'folder_open',
+      url: '/documents',
+      show: true,
+    },
+    // Wave 2 - Fleet Economics
+    {
+      title: 'Vehicle Maintenance',
+      icon: 'wrench',
+      url: '/vehicle-maintenance',
+      show: true,
+    },
+    {
+      title: 'Rental Rate Plans',
+      icon: 'receipt',
+      url: '/rate-plans',
+      show: true,
+    },
+    {
+      title: 'Vehicle Accessories',
+      icon: 'package',
+      url: '/accessories',
+      show: true,
+    },
+    // Wave 3 - Workforce & Automation
+    {
+      title: 'Driver Scheduling',
+      icon: 'calendar',
+      url: '/driver-scheduling',
+      show: true,
+    },
+    {
+      title: 'Automated Reminders',
+      icon: 'bell',
+      url: '/reminders',
+      show: true,
+    },
+    {
+      title: 'Customer Risk Scoring',
+      icon: 'shield',
+      url: '/risk-scoring',
+      show: isAdmin || isManager,
+    },
   ];
 
   const settingsItems = [
@@ -359,6 +445,13 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       icon: 'people',
       url: '/users',
       show: isAdmin,
+    },
+    // Wave 3 - Approval Workflows
+    {
+      title: 'Approval Workflows',
+      icon: 'check_square',
+      url: '/approvals',
+      show: isAdmin || isManager,
     },
   ];
 

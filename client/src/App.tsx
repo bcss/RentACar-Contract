@@ -61,6 +61,23 @@ const Drivers = lazy(() => import("@/pages/Drivers"));
 const DriverCompanies = lazy(() => import("@/pages/DriverCompanies"));
 const VehicleTransfers = lazy(() => import("@/pages/VehicleTransfers"));
 
+// Wave 1: Compliance & Operations
+const TollManagement = lazy(() => import("@/pages/TollManagement"));
+const TrafficFines = lazy(() => import("@/pages/TrafficFines"));
+const Incidents = lazy(() => import("@/pages/Incidents"));
+const DocumentRegistry = lazy(() => import("@/pages/DocumentRegistry"));
+
+// Wave 2: Fleet Economics
+const VehicleMaintenance = lazy(() => import("@/pages/VehicleMaintenance"));
+const RentalRatePlans = lazy(() => import("@/pages/RentalRatePlans"));
+const VehicleAccessories = lazy(() => import("@/pages/VehicleAccessories"));
+
+// Wave 3: Workforce & Automation
+const DriverScheduling = lazy(() => import("@/pages/DriverScheduling"));
+const AutomatedReminders = lazy(() => import("@/pages/AutomatedReminders"));
+const ApprovalWorkflows = lazy(() => import("@/pages/ApprovalWorkflows"));
+const CustomerRiskScoring = lazy(() => import("@/pages/CustomerRiskScoring"));
+
 // Professional loading skeleton
 function PageLoader() {
   return (
@@ -237,6 +254,46 @@ function Router() {
       <Route path="/vehicle-transfers">
         {() => <ProtectedRoute component={VehicleTransfers} />}
       </Route>
+      
+      {/* Wave 1: Compliance & Operations */}
+      <Route path="/toll-management">
+        {() => <ProtectedRoute component={TollManagement} />}
+      </Route>
+      <Route path="/traffic-fines">
+        {() => <ProtectedRoute component={TrafficFines} />}
+      </Route>
+      <Route path="/incidents">
+        {() => <ProtectedRoute component={Incidents} />}
+      </Route>
+      <Route path="/documents">
+        {() => <ProtectedRoute component={DocumentRegistry} />}
+      </Route>
+      
+      {/* Wave 2: Fleet Economics */}
+      <Route path="/vehicle-maintenance">
+        {() => <ProtectedRoute component={VehicleMaintenance} />}
+      </Route>
+      <Route path="/rate-plans">
+        {() => <ProtectedRoute component={RentalRatePlans} />}
+      </Route>
+      <Route path="/accessories">
+        {() => <ProtectedRoute component={VehicleAccessories} />}
+      </Route>
+      
+      {/* Wave 3: Workforce & Automation */}
+      <Route path="/driver-scheduling">
+        {() => <ProtectedRoute component={DriverScheduling} />}
+      </Route>
+      <Route path="/reminders">
+        {() => <ProtectedRoute component={AutomatedReminders} />}
+      </Route>
+      <Route path="/approvals">
+        {() => <ProtectedRoute component={ApprovalWorkflows} />}
+      </Route>
+      <Route path="/risk-scoring">
+        {() => <ProtectedRoute component={CustomerRiskScoring} />}
+      </Route>
+      
       <Route component={() => <NotFound />} />
       </Switch>
     </Suspense>
