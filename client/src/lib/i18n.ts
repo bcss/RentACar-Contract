@@ -911,6 +911,58 @@ const resources = {
       "msg.confirmFinalize": "Are you sure you want to finalize this contract? This action cannot be undone.",
       "msg.confirmDelete": "Are you sure you want to delete this contract?",
       "msg.noPermission": "You don't have permission to perform this action",
+      
+      // Branches
+      "branches": "Branches",
+      "addBranch": "Add Branch",
+      "editBranch": "Edit Branch",
+      "branchName": "Branch Name",
+      "branchCode": "Branch Code",
+      "emirate": "Emirate",
+      "addressEn": "Address (English)",
+      "addressAr": "Address (Arabic)",
+      "contactPerson": "Contact Person",
+      "mobile": "Mobile",
+      "email": "Email",
+      "isActive": "Active",
+      
+      // Drivers
+      "drivers": "Drivers",
+      "addDriver": "Add Driver",
+      "editDriver": "Edit Driver",
+      "addNewDriver": "Add New Driver",
+      "driverName": "Driver Name",
+      "licenseNumber": "License Number",
+      "nationality": "Nationality",
+      "employmentType": "Employment Type",
+      "contact": "Contact",
+      "status": "Status",
+      "actions": "Actions",
+      
+      // Driver Companies
+      "driverCompanies": "Driver Companies",
+      "addCompany": "Add Company",
+      "editCompany": "Edit Company",
+      "addNewCompany": "Add New Company",
+      "companyName": "Company Name",
+      
+      // Public Holidays
+      "publicHolidays": "Public Holidays",
+      "addHoliday": "Add Holiday",
+      "editHoliday": "Edit Holiday",
+      "holidayName": "Holiday Name",
+      "holidayDate": "Holiday Date",
+      "isRecurring": "Recurring",
+      "surchargeRate": "Surcharge Rate",
+      "calendarType": "Calendar Type",
+      
+      // Common
+      "saving": "Saving...",
+      "success": "Success",
+      "error": "Error",
+      "cancel": "Cancel",
+      "create": "Create",
+      "update": "Update",
     }
   },
   ar: {
@@ -1819,6 +1871,58 @@ const resources = {
       "msg.confirmFinalize": "هل أنت متأكد من إتمام هذا العقد؟ لا يمكن التراجع عن هذا الإجراء.",
       "msg.confirmDelete": "هل أنت متأكد من حذف هذا العقد؟",
       "msg.noPermission": "ليس لديك إذن لتنفيذ هذا الإجراء",
+      
+      // Branches
+      "branches": "الفروع",
+      "addBranch": "إضافة فرع",
+      "editBranch": "تعديل فرع",
+      "branchName": "اسم الفرع",
+      "branchCode": "رمز الفرع",
+      "emirate": "الإمارة",
+      "addressEn": "العنوان (إنجليزي)",
+      "addressAr": "العنوان (عربي)",
+      "contactPerson": "جهة الاتصال",
+      "mobile": "الجوال",
+      "email": "البريد الإلكتروني",
+      "isActive": "نشط",
+      
+      // Drivers
+      "drivers": "السائقون",
+      "addDriver": "إضافة سائق",
+      "editDriver": "تعديل سائق",
+      "addNewDriver": "إضافة سائق جديد",
+      "driverName": "اسم السائق",
+      "licenseNumber": "رقم الرخصة",
+      "nationality": "الجنسية",
+      "employmentType": "نوع التوظيف",
+      "contact": "الاتصال",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      
+      // Driver Companies
+      "driverCompanies": "شركات السائقين",
+      "addCompany": "إضافة شركة",
+      "editCompany": "تعديل شركة",
+      "addNewCompany": "إضافة شركة جديدة",
+      "companyName": "اسم الشركة",
+      
+      // Public Holidays
+      "publicHolidays": "العطلات الرسمية",
+      "addHoliday": "إضافة عطلة",
+      "editHoliday": "تعديل عطلة",
+      "holidayName": "اسم العطلة",
+      "holidayDate": "تاريخ العطلة",
+      "isRecurring": "متكررة",
+      "surchargeRate": "نسبة الرسوم الإضافية",
+      "calendarType": "نوع التقويم",
+      
+      // Common
+      "saving": "جاري الحفظ...",
+      "success": "نجح",
+      "error": "خطأ",
+      "cancel": "إلغاء",
+      "create": "إنشاء",
+      "update": "تحديث",
     }
   }
 };
