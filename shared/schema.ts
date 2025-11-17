@@ -2052,3 +2052,144 @@ export const insertPushNotificationTokenSchema = createInsertSchema(pushNotifica
 
 export type InsertPushNotificationToken = z.infer<typeof insertPushNotificationTokenSchema>;
 export type PushNotificationToken = typeof pushNotificationTokens.$inferSelect;
+
+// ========================================
+// FUTURE-PROOFING TABLES (Structure only, no implementation)
+// ========================================
+
+// Payment Gateways table - Support for multiple payment providers
+export const paymentGateways = pgTable("payment_gateways", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  provider: varchar("provider", { length: 50 }).notNull(), // stripe, paypal, square, authorize_net
+  isActive: boolean("is_active").notNull().default(false),
+  apiKey: varchar("api_key"),
+  apiSecret: varchar("api_secret"),
+  webhookSecret: varchar("webhook_secret"),
+  configuration: jsonb("configuration"),
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPaymentGatewaySchema = createInsertSchema(paymentGateways).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
+export type PaymentGateway = typeof paymentGateways.$inferSelect;
+
+// Payment Transactions table - Detailed transaction history
+export const paymentTransactions = pgTable("payment_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  paymentId: varchar("payment_id").references(() => payments.id).notNull(),
+  gatewayId: varchar("gateway_id").references(() => paymentGateways.id),
+  transactionId: varchar("transaction_id").notNull(), // External transaction ID from gateway
+  amount: varchar("amount").notNull(),
+  currency: varchar("currency", { length: 3 }).notNull().default("AED"),
+  status: varchar("status", { length: 20 }).notNull(), // pending, processing, completed, failed, refunded
+  gatewayResponse: jsonb("gateway_response"),
+  failureReason: text("failure_reason"),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_payment_transactions_payment").on(table.paymentId),
+  index("idx_payment_transactions_status").on(table.status),
+  index("idx_payment_transactions_created_at").on(table.createdAt),
+]);
+
+export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions).omit({
+  id: true,
+  createdAt: true,
+  processedAt: true,
+});
+
+export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+
+// Pricing Rules table - Dynamic pricing and discount engine
+export const pricingRules = pgTable("pricing_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  ruleType: varchar("rule_type", { length: 30 }).notNull(), // discount, surcharge, seasonal, loyalty
+  target: varchar("target", { length: 30 }).notNull(), // vehicle_class, customer_segment, contract_type
+  conditions: jsonb("conditions").notNull(), // Complex rule conditions
+  adjustment: jsonb("adjustment").notNull(), // Percentage or fixed amount
+  priority: integer("priority").notNull().default(0),
+  effectiveFrom: timestamp("effective_from").notNull(),
+  effectiveTo: timestamp("effective_to"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_pricing_rules_type").on(table.ruleType),
+  index("idx_pricing_rules_active").on(table.isActive),
+  index("idx_pricing_rules_effective").on(table.effectiveFrom, table.effectiveTo),
+]);
+
+export const insertPricingRuleSchema = createInsertSchema(pricingRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPricingRule = z.infer<typeof insertPricingRuleSchema>;
+export type PricingRule = typeof pricingRules.$inferSelect;
+
+// Document Files table - Centralized file storage metadata
+export const documentFiles = pgTable("document_files", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 30 }).notNull(), // contract, vehicle, customer, claim
+  entityId: varchar("entity_id").notNull(),
+  fileName: varchar("file_name").notNull(),
+  fileType: varchar("file_type", { length: 50 }).notNull(), // application/pdf, image/jpeg
+  fileSize: integer("file_size").notNull(), // bytes
+  fileUrl: text("file_url").notNull(), // Storage URL
+  category: varchar("category", { length: 30 }), // inspection, license, insurance, receipt
+  isPublic: boolean("is_public").notNull().default(false),
+  uploadedBy: varchar("uploaded_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_document_files_entity").on(table.entityType, table.entityId),
+  index("idx_document_files_uploaded_by").on(table.uploadedBy),
+  index("idx_document_files_created_at").on(table.createdAt),
+]);
+
+export const insertDocumentFileSchema = createInsertSchema(documentFiles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDocumentFile = z.infer<typeof insertDocumentFileSchema>;
+export type DocumentFile = typeof documentFiles.$inferSelect;
+
+// Digital Signatures table - Electronic signature tracking
+export const digitalSignatures = pgTable("digital_signatures", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").references(() => contracts.id).notNull(),
+  signerType: varchar("signer_type", { length: 20 }).notNull(), // customer, staff, sponsor
+  signerId: varchar("signer_id").notNull(),
+  signerName: varchar("signer_name").notNull(),
+  signatureImage: text("signature_image").notNull(), // Base64 or URL
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  signedAt: timestamp("signed_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_digital_signatures_contract").on(table.contractId),
+  index("idx_digital_signatures_signer").on(table.signerType, table.signerId),
+  index("idx_digital_signatures_signed_at").on(table.signedAt),
+]);
+
+export const insertDigitalSignatureSchema = createInsertSchema(digitalSignatures).omit({
+  id: true,
+  createdAt: true,
+  signedAt: true,
+});
+
+export type InsertDigitalSignature = z.infer<typeof insertDigitalSignatureSchema>;
+export type DigitalSignature = typeof digitalSignatures.$inferSelect;
