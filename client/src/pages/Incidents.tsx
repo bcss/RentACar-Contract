@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { DateSelector } from "@/components/ui/date-selector";
 import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -370,9 +371,28 @@ export default function Incidents() {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="location"
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="incidentDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Incident Date *</FormLabel>
+                      <FormControl>
+                        <DateSelector
+                          value={field.value}
+                          onChange={field.onChange}
+                          data-testid="input-incidentDate"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="location"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Location</FormLabel>

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { DateSelector } from "@/components/ui/date-selector";
 import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -532,12 +533,11 @@ export default function DriverScheduling() {
                   name="scheduleDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Shift Date</FormLabel>
+                      <FormLabel>Shift Date *</FormLabel>
                       <FormControl>
-                        <Input
-                          type="date"
-                          value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
-                          onChange={(e) => field.onChange(new Date(e.target.value))}
+                        <DateSelector
+                          value={field.value}
+                          onChange={field.onChange}
                           data-testid="input-scheduleDate"
                         />
                       </FormControl>

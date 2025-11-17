@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { DateSelector } from "@/components/ui/date-selector";
 import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -420,6 +421,24 @@ export default function TrafficFines() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="fineDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fine Date *</FormLabel>
+                      <FormControl>
+                        <DateSelector
+                          value={field.value}
+                          onChange={field.onChange}
+                          data-testid="input-fineDate"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="blackPoints"

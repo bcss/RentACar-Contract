@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DateSelector } from "@/components/ui/date-selector";
 import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -420,11 +421,10 @@ export default function VehicleMaintenance() {
                     <FormItem>
                       <FormLabel>Service Date *</FormLabel>
                       <FormControl>
-                        <Input
-                          type="date"
-                          value={field.value instanceof Date ? format(field.value, "yyyy-MM-dd") : ""}
-                          onChange={(e) => field.onChange(new Date(e.target.value))}
-                          data-testid="input-service-date"
+                        <DateSelector
+                          value={field.value}
+                          onChange={field.onChange}
+                          data-testid="input-serviceDate"
                         />
                       </FormControl>
                       <FormMessage />

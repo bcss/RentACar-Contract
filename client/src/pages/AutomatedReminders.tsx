@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { DateSelector } from "@/components/ui/date-selector";
 import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -445,12 +446,11 @@ export default function AutomatedReminders() {
                 name="reminderDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Scheduled Date</FormLabel>
+                    <FormLabel>Reminder Date *</FormLabel>
                     <FormControl>
-                      <Input
-                        type="datetime-local"
-                        value={field.value ? format(new Date(field.value), "yyyy-MM-dd'T'HH:mm") : ""}
-                        onChange={(e) => field.onChange(new Date(e.target.value))}
+                      <DateSelector
+                        value={field.value}
+                        onChange={field.onChange}
                         data-testid="input-reminderDate"
                       />
                     </FormControl>
