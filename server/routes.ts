@@ -995,7 +995,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // BRANCH & DRIVER SERVICE INTEGRATION: Include driver service costs in total
       const driverAssignments = await storage.getDriverAssignmentsByContract(contract.id);
-      const { totalDriverCharges } = calculateContractDriverCosts(driverAssignments);
+      const { totalDriverCharges, totalDriverSurcharges } = calculateContractDriverCosts(driverAssignments);
       
       const totalDue = totalAmount + totalExtraCharges + totalDriverCharges;
       
@@ -1004,10 +1004,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalDueRounded = Math.round(totalDue * 100) / 100;
       const computedOutstanding = Math.max(0, totalDueRounded - totalPaidRounded);
       
-      // Return contract with dynamically calculated outstanding balance and driver costs
+      // Return contract with complete financial breakdown including driver costs
       res.json({
         ...contract,
+        // Explicitly include driver service charges in response
         totalDriverCharges: totalDriverCharges.toFixed(2),
+        totalDriverSurcharges: totalDriverSurcharges.toFixed(2),
+        // Update total due to include all charges (rental + extras + driver)
+        totalDue: totalDueRounded.toFixed(2),
+        // Recalculated outstanding balance includes driver charges
         outstandingBalance: computedOutstanding.toFixed(2),
       });
     } catch (error) {
