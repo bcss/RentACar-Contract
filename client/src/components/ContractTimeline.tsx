@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Edit, User, Clock, CheckCircle, PlayCircle, XCircle, Lock, Printer } from 'lucide-react';
+import { FileText, Edit, User, Clock, CheckCircle, PlayCircle, XCircle, Lock, Printer, UserPlus, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Contract } from '@shared/schema';
 
@@ -37,12 +37,12 @@ interface ContractAuditLog {
 
 interface TimelineEvent {
   id: string;
-  type: 'created' | 'edited' | 'activate' | 'complete' | 'close' | 'print' | 'other';
+  type: 'created' | 'edited' | 'activate' | 'complete' | 'close' | 'print' | 'driver_assigned' | 'driver_updated' | 'other';
   timestamp: Date;
   user: string;
   username: string;
   description: string;
-  details?: string;
+  details?: string | null;
 }
 
 interface ContractTimelineProps {
@@ -162,6 +162,20 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
           eventType = 'other';
           description = t('Contract Activity');
           break;
+        case 'driver_assigned':
+        case 'driver_assignment_created':
+          eventType = 'driver_assigned';
+          description = t('Driver Assigned');
+          break;
+        case 'driver_assignment_updated':
+        case 'driver_updated':
+          eventType = 'driver_updated';
+          description = t('Driver Assignment Updated');
+          break;
+        case 'driver_assignment_completed':
+          eventType = 'driver_updated';
+          description = t('Driver Assignment Completed');
+          break;
         default:
           eventType = 'other';
           description = log.action.charAt(0).toUpperCase() + log.action.slice(1);
@@ -215,6 +229,10 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
         return <Lock className="w-5 h-5 text-slate-600" />;
       case 'print':
         return <Printer className="w-5 h-5 text-purple-600" />;
+      case 'driver_assigned':
+        return <UserPlus className="w-5 h-5 text-blue-600" />;
+      case 'driver_updated':
+        return <UserCheck className="w-5 h-5 text-cyan-600" />;
       default:
         return <Clock className="w-5 h-5 text-muted-foreground" />;
     }
@@ -224,8 +242,10 @@ export function ContractTimeline({ contract, creatorUsername, creatorName }: Con
     switch (type) {
       case 'created':
       case 'activate':
+      case 'driver_assigned':
         return 'default';
       case 'edited':
+      case 'driver_updated':
         return 'secondary';
       default:
         return 'outline';

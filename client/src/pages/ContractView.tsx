@@ -1493,6 +1493,20 @@ export default function ContractView() {
                 </>
               )}
 
+              {contract.requiresDriver && contract.driverServiceTotal && parseFloat(contract.driverServiceTotal) > 0 && (
+                <>
+                  <div className="border-r border-b border-black p-1.5">
+                    <span className="text-[10px] font-semibold">Driver Service</span>
+                    <span className="text-[9px] font-arabic block">خدمة السائق</span>
+                  </div>
+                  <div className="border-b border-black p-1.5 text-right">
+                    <span className="text-[10px] font-mono">
+                      {contract.driverServiceTotal} {currency}
+                    </span>
+                  </div>
+                </>
+              )}
+
               <div className="border-r border-b border-black p-1.5">
                 <span className="text-[10px] font-semibold">SALIK</span>
                 <span className="text-[9px] font-arabic block">سالك</span>
@@ -2343,6 +2357,90 @@ export default function ContractView() {
                       </p>
                     </div>
                   )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Driver Service */}
+        {contract.requiresDriver && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icon name="person" className="" />
+                Driver Service
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="default" className="flex items-center gap-1">
+                  <Icon name="drive_eta" className=" text-sm" />
+                  Professional Driver Assigned
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {contract.driverServiceType && contract.driverServiceType !== 'none' && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Service Type</p>
+                    <p className="font-medium capitalize" data-testid="text-driver-service-type">
+                      {contract.driverServiceType === 'daily' && 'Daily Rate'}
+                      {contract.driverServiceType === 'hourly' && 'Hourly Rate'}
+                      {contract.driverServiceType === 'flat' && 'Flat Fee'}
+                    </p>
+                  </div>
+                )}
+                
+                {contract.driverServiceRate && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Rate</p>
+                    <p className="font-medium font-mono" data-testid="text-driver-service-rate">
+                      {contract.driverServiceRate} {currency}
+                      {contract.driverServiceType === 'daily' && '/day'}
+                      {contract.driverServiceType === 'hourly' && '/hour'}
+                    </p>
+                  </div>
+                )}
+                
+                {contract.driverServiceQuantity && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {contract.driverServiceType === 'daily' && 'Number of Days'}
+                      {contract.driverServiceType === 'hourly' && 'Number of Hours'}
+                      {contract.driverServiceType === 'flat' && 'Quantity'}
+                    </p>
+                    <p className="font-medium" data-testid="text-driver-service-quantity">
+                      {contract.driverServiceQuantity}
+                    </p>
+                  </div>
+                )}
+                
+                {contract.driverServiceTotal && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Driver Service Cost</p>
+                    <p className="text-xl font-bold font-mono text-primary" data-testid="text-driver-service-total">
+                      {contract.driverServiceTotal} {currency}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              {contract.driverServiceNotes && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Driver Service Notes</p>
+                  <p className="font-medium whitespace-pre-wrap" data-testid="text-driver-service-notes">
+                    {contract.driverServiceNotes}
+                  </p>
+                </div>
+              )}
+              
+              {contract.assignedDriverId && (
+                <div className="border-t pt-3">
+                  <p className="text-sm font-medium mb-2">Assigned Driver</p>
+                  <Badge variant="secondary" className="font-mono">
+                    Driver ID: {contract.assignedDriverId}
+                  </Badge>
                 </div>
               )}
             </CardContent>
