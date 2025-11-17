@@ -117,6 +117,16 @@ const contractFormSchema = z.object({
   pickUpAddressEn: z.string().nullable().optional(),
   pickUpAddressAr: z.string().nullable().optional(),
   
+  // Driver Service fields (Phase 3)
+  requiresDriver: z.boolean().nullable().optional(),
+  driverServiceType: z.string().nullable().optional(),
+  driverServiceRate: z.string().nullable().optional(),
+  driverServiceQuantity: z.string().nullable().optional(),
+  driverServiceTotal: z.string().nullable().optional(),
+  assignedDriverId: z.string().nullable().optional(),
+  driverServiceNotes: z.string().nullable().optional(),
+  driverServiceNotesAr: z.string().nullable().optional(),
+  
   notes: z.string().nullable().optional(),
   createdBy: z.string(),
   status: z.string().nullable().optional(),
@@ -501,10 +511,33 @@ export default function ContractForm() {
     return () => subscription.unsubscribe();
   }, [form, settings]);
 
-  // Auto-calculate totalAmount from subtotal, vatAmount, and delivery charges
+  // Auto-calculate driverServiceTotal from rate, quantity, and type
   useEffect(() => {
     const subscription = form.watch((value: any, { name }: any) => {
-      if (name === 'subtotal' || name === 'vatAmount' || name === 'dropOffEnabled' || name === 'dropOffCharge' || name === 'pickUpEnabled' || name === 'pickUpCharge') {
+      if (name === 'requiresDriver' || name === 'driverServiceType' || name === 'driverServiceRate' || name === 'driverServiceQuantity') {
+        // Only calculate if driver service is enabled
+        if (value.requiresDriver) {
+          const rate = parseFloat(value.driverServiceRate || '0');
+          const quantity = parseFloat(value.driverServiceQuantity || '0');
+          
+          if (!isNaN(rate) && !isNaN(quantity) && rate > 0 && quantity > 0) {
+            const driverTotal = rate * quantity;
+            form.setValue('driverServiceTotal', driverTotal.toFixed(2));
+          } else {
+            form.setValue('driverServiceTotal', '0');
+          }
+        } else {
+          form.setValue('driverServiceTotal', '0');
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Auto-calculate totalAmount from subtotal, vatAmount, delivery charges, and driver service
+  useEffect(() => {
+    const subscription = form.watch((value: any, { name }: any) => {
+      if (name === 'subtotal' || name === 'vatAmount' || name === 'dropOffEnabled' || name === 'dropOffCharge' || name === 'pickUpEnabled' || name === 'pickUpCharge' || name === 'driverServiceTotal') {
         const subtotalValue = parseFloat(value.subtotal || '0');
         const vatAmountValue = parseFloat(value.vatAmount || '0');
         
@@ -517,8 +550,11 @@ export default function ContractForm() {
           deliveryCharges += parseFloat(value.pickUpCharge || '0');
         }
         
+        // Add driver service charges
+        const driverServiceCharges = parseFloat(value.driverServiceTotal || '0');
+        
         if (!isNaN(subtotalValue) && !isNaN(vatAmountValue)) {
-          const total = subtotalValue + vatAmountValue + deliveryCharges;
+          const total = subtotalValue + vatAmountValue + deliveryCharges + driverServiceCharges;
           form.setValue('totalAmount', total.toFixed(2), { shouldValidate: true });
         }
       }
@@ -2143,36 +2179,154 @@ export default function ContractForm() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {isEditing && existingContract?.id ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">
-                      Driver assignments will be managed after contract creation
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Navigate to contract view where driver assignments can be managed
-                        navigate(`/contracts/${existingContract.id}`);
-                      }}
-                      data-testid="button-manage-drivers"
-                    >
-                      <Icon name="person" className="mr-2" />
-                      Manage Drivers
-                    </Button>
+              <FormField
+                control={form.control}
+                name="requiresDriver"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value || false}
+                        onCheckedChange={field.onChange}
+                        data-testid="checkbox-requires-driver"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Enable Driver Service
+                      </FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Add professional driver service to this rental contract
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch('requiresDriver') && (
+                <div className="space-y-4 pt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="driverServiceType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Service Type *</FormLabel>
+                          <Select 
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              // Auto-fill rate from settings
+                              if (value === 'daily' && settings?.driverDailyRate) {
+                                form.setValue('driverServiceRate', settings.driverDailyRate);
+                              } else if (value === 'hourly' && settings?.driverHourlyRate) {
+                                form.setValue('driverServiceRate', settings.driverHourlyRate);
+                              }
+                            }} 
+                            value={field.value || ''}
+                          >
+                            <FormControl>
+                              <SelectTrigger data-testid="select-driver-service-type">
+                                <SelectValue placeholder="Select service type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="daily">Daily Rate</SelectItem>
+                              <SelectItem value="hourly">Hourly Rate</SelectItem>
+                              <SelectItem value="flat">Flat Fee</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="driverServiceRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Rate per {form.watch('driverServiceType') === 'hourly' ? 'Hour' : form.watch('driverServiceType') === 'daily' ? 'Day' : 'Service'} *
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              value={field.value || ''} 
+                              type="number" 
+                              step="0.01" 
+                              placeholder="0.00" 
+                              data-testid="input-driver-service-rate" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                </div>
-              ) : (
-                <div className="rounded-lg border border-dashed p-6 text-center">
-                  <Icon name="info" className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Driver service can be added after creating the contract
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Save this contract first, then assign drivers from the contract details page
-                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="driverServiceQuantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Quantity ({form.watch('driverServiceType') === 'hourly' ? 'Hours' : form.watch('driverServiceType') === 'daily' ? 'Days' : 'Units'}) *
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              value={field.value || ''} 
+                              type="number" 
+                              step="0.01" 
+                              placeholder="0" 
+                              data-testid="input-driver-service-quantity" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="driverServiceTotal"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Driver Service Total</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              value={field.value || '0.00'} 
+                              readOnly 
+                              className="font-bold bg-muted" 
+                              data-testid="input-driver-service-total" 
+                            />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground">Auto-calculated</p>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="driverServiceNotes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Driver Service Notes (English)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field} 
+                            value={field.value || ''} 
+                            placeholder="Enter driver service requirements or special instructions..." 
+                            data-testid="input-driver-service-notes" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               )}
             </CardContent>

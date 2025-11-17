@@ -74,6 +74,9 @@ const customerFormSchema = insertCustomerSchema.extend({
   address: z.string().optional().transform(val => val || undefined),
   licenseIssuedBy: z.string().optional().transform(val => val || undefined),
   notes: z.string().optional().transform(val => val || undefined),
+  // Driver service preferences
+  preferredDriverService: z.boolean().optional(),
+  preferredDriverServiceType: z.string().optional(),
   // Required fields: nationalId, nationality, phone, licenseNumber (inherited from insertCustomerSchema)
 });
 
@@ -497,6 +500,59 @@ const CustomerForm = ({ form, phoneWarning, t, onSubmit, isPending }: CustomerFo
 
           {/* Additional Tab */}
           <TabsContent value="additional" className="mt-0 space-y-4">
+            <div className="space-y-4 p-4 border rounded-md">
+              <h4 className="font-medium">Driver Service Preferences</h4>
+              <FormField
+                control={form.control}
+                name="preferredDriverService"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value || false}
+                        onCheckedChange={field.onChange}
+                        data-testid="checkbox-preferred-driver-service"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Prefers Driver Service
+                      </FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Customer prefers professional driver service for rentals
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch('preferredDriverService') && (
+                <FormField
+                  control={form.control}
+                  name="preferredDriverServiceType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Preferred Service Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || 'none'}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-preferred-driver-service-type">
+                            <SelectValue placeholder="Select preferred type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily Rate</SelectItem>
+                          <SelectItem value="hourly">Hourly Rate</SelectItem>
+                          <SelectItem value="flat">Flat Fee</SelectItem>
+                          <SelectItem value="none">No Preference</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+            
             <FormField
               control={form.control}
               name="notes"
