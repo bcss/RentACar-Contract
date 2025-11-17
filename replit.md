@@ -13,6 +13,7 @@ Preferred communication style: Simple, everyday language.
 - **Design System:** Material Design 3 (cyan-blue primary), dual theme (light/dark), i18next for English/Arabic with RTL/LTR, custom fonts.
 - **UI/UX Decisions:** Hierarchical sidebar, bilingual tooltips, full RTL/LTR layout, data visualization (recharts), tabbed views, enhanced filtering, responsive design, context-based theme/language, custom authentication hooks, shared Zod schemas, print functionality.
 - **Key Features:** Dashboard with personalized greetings and role badges, tabbed dialog forms for improved UX, advanced analytics, and reporting with PDF/Excel export.
+- **Branch & Driver Management:** Full CRUD pages for Branches, Public Holidays, Drivers, Driver Companies, and Vehicle Transfers with tabbed dialogs, status filtering, and bilingual support. Integrated Driver Service placeholders in ContractForm and ContractView for future driver assignment functionality.
 
 ### Backend
 - **Technology Stack:** Node.js with TypeScript, Express.js, Drizzle ORM, internal username/password authentication with Passport.js, express-session with PostgreSQL store.
@@ -28,16 +29,18 @@ Preferred communication style: Simple, everyday language.
 - **Schema Design:** Tables for Users, Customers, Vehicles, Contracts, Payments, supporting a 4-state lifecycle, bilingual field storage, auto-incrementing identifiers, dual-layer audit trail, singleton pattern for global settings, and disable-only architecture.
 
 ### Core Features
-- **Rental Lifecycle Management:** Streamlined 4-state workflow, hardened edit validation, contract timeline.
+- **Rental Lifecycle Management:** Streamlined 4-state workflow, hardened edit validation, contract timeline with ContractTimeline component.
 - **Financials:** Automated calculations (fuel, advance payment), configurable financial settings, enhanced payment tracking.
 - **Reporting & Analytics:** Comprehensive reporting with `recharts`, PDF/Excel export, including Revenue Trends, Fleet Performance, Contract Analytics, and Collection Performance.
 - **System Management:** Company settings management, dynamic system health monitoring, error logging, support & help center.
-- **Vehicle Management:** Enhanced vehicle inspection, automatic vehicle status synchronization, inter-branch vehicle transfers.
-- **Driver Service Module:** Professional driver assignment, UAE market compliance (surcharge calculation, public holidays), driver master data, outsource companies, rate cards, schedule management, and assignment tracking.
-- **Branch Management System:** Multi-location operational support with comprehensive branch hierarchy, branch-scoped data access, and inter-branch vehicle transfer workflow.
+- **Vehicle Management:** Enhanced vehicle inspection, automatic vehicle status synchronization, inter-branch vehicle transfers with complete UI workflow (request, approve/reject, complete).
+- **Driver Service Module:** Professional driver assignment backend infrastructure, UAE market compliance (surcharge calculation, public holidays), driver master data with full CRUD UI, outsource companies management page, rate cards, schedule management, and assignment tracking. Driver Service sections added to ContractForm and ContractView (placeholders for future full implementation).
+- **Branch Management System:** Multi-location operational support with comprehensive branch hierarchy UI, branch-scoped data access, and inter-branch vehicle transfer workflow with dedicated VehicleTransfers page (create, approve, reject, complete transfers).
+- **Public Holidays Management:** Full CRUD interface for managing UAE public holidays with emirate selection and active status, integrated with driver surcharge calculations.
 - **Security & Compliance:** App access logging with IP geolocation, granular role-based permissions for features and reports.
 - **Data Handling:** Import data functionality (Superadmin Only) for bulk master data and contracts with transaction-based atomicity.
 - **PDF Integration:** Professional bilingual PDF generation for rental contracts with RTA compliance fields.
+- **Internationalization:** Complete English/Arabic translations for all Branch Management and Driver Service features via i18next.
 
 ## External Dependencies
 
