@@ -1652,6 +1652,16 @@ export const companySettings = pgTable("company_settings", {
   defaultDropOffCharge: varchar("default_drop_off_charge").notNull().default("0"),
   defaultPickUpCharge: varchar("default_pick_up_charge").notNull().default("0"),
   
+  // Driver Service Configuration
+  driverDailyRate: varchar("driver_daily_rate").notNull().default("300"),
+  driverHourlyRate: varchar("driver_hourly_rate").notNull().default("50"),
+  driverNightShiftStartHour: varchar("driver_night_shift_start_hour").notNull().default("22"), // 10 PM
+  driverNightShiftEndHour: varchar("driver_night_shift_end_hour").notNull().default("06"), // 6 AM
+  driverNightSurchargeMultiplier: varchar("driver_night_surcharge_multiplier").notNull().default("1.5"),
+  driverWeekendSurchargeMultiplier: varchar("driver_weekend_surcharge_multiplier").notNull().default("1.3"),
+  driverHolidaySurchargeMultiplier: varchar("driver_holiday_surcharge_multiplier").notNull().default("2.0"),
+  driverServiceVatApplicable: boolean("driver_service_vat_applicable").notNull().default(true),
+  
   // Terms & Conditions Sections (bilingual)
   termsSection1En: text("terms_section_1_en").notNull().default(""),
   termsSection1Ar: text("terms_section_1_ar").notNull().default(""),
