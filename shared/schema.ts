@@ -696,6 +696,149 @@ export const insertDriverOutsourceCompanySchema = createInsertSchema(driverOutso
 export type InsertDriverOutsourceCompany = z.infer<typeof insertDriverOutsourceCompanySchema>;
 export type DriverOutsourceCompany = typeof driverOutsourceCompanies.$inferSelect;
 
+// Phase 1: Company Authorized Signatories - Track authorized signatories with identity documents
+export const companySignatories = pgTable("company_signatories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Company Reference
+  companyId: varchar("company_id").notNull().references(() => companies.id),
+  
+  // Signatory Information (bilingual)
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  
+  // Position & Authority
+  position: varchar("position").notNull(), // e.g., "Managing Director", "Authorized Signatory"
+  authorizationLevel: varchar("authorization_level"), // e.g., "Level 1", "Level 2", "Unlimited"
+  
+  // Emirates ID
+  emiratesIdNumber: varchar("emirates_id_number"),
+  emiratesIdExpiry: timestamp("emirates_id_expiry"),
+  
+  // Passport Information
+  passportNumber: varchar("passport_number"),
+  passportExpiry: timestamp("passport_expiry"),
+  nationality: varchar("nationality"),
+  
+  // Contact Information
+  mobile: varchar("mobile"),
+  email: varchar("email"),
+  
+  // Documents (file paths)
+  emiratesIdCopy: text("emirates_id_copy"),
+  passportCopy: text("passport_copy"),
+  authorizationLetterCopy: text("authorization_letter_copy"),
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_signatories_company").on(table.companyId),
+  index("idx_signatories_active").on(table.isActive),
+  index("idx_signatories_created_at").on(table.createdAt),
+]);
+
+export const companySignatoriesRelations = relations(companySignatories, ({ one }) => ({
+  company: one(companies, {
+    fields: [companySignatories.companyId],
+    references: [companies.id],
+  }),
+  creator: one(users, {
+    fields: [companySignatories.createdBy],
+    references: [users.id],
+    relationName: "signatoryCreator",
+  }),
+}));
+
+export const insertCompanySignatorySchema = createInsertSchema(companySignatories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+}).extend({
+  nameEn: z.string().min(1, "Signatory name (English) is required").max(200, "Name too long"),
+  nameAr: z.string().max(200, "Name too long").optional(),
+  position: z.string().min(1, "Position is required").max(100, "Position too long"),
+  mobile: z.string().max(20, "Mobile number too long").optional(),
+  email: z.string().email("Invalid email").max(255, "Email too long").optional(),
+  isActive: z.boolean().default(true).optional(),
+});
+
+export type InsertCompanySignatory = z.infer<typeof insertCompanySignatorySchema>;
+export type CompanySignatory = typeof companySignatories.$inferSelect;
+
+// Phase 1: Customer-Company Links - Track corporate customer relationships (employees, contractors, etc.)
+export const customerCompanyLinks = pgTable("customer_company_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Customer & Company References
+  customerId: varchar("customer_id").notNull().references(() => customers.id),
+  companyId: varchar("company_id").notNull().references(() => companies.id),
+  
+  // Relationship Details
+  relationshipType: varchar("relationship_type", { length: 30 }).notNull().default("employee"), // employee, contractor, partner, affiliate
+  employeeId: varchar("employee_id"), // Employee badge/ID number
+  department: varchar("department"),
+  
+  // Financial Limits (for corporate exposure tracking)
+  creditLimit: varchar("credit_limit"), // Maximum rental exposure allowed
+  currentExposure: varchar("current_exposure").default("0"), // Current outstanding amount
+  
+  // Effective Period
+  effectiveFrom: timestamp("effective_from").notNull().defaultNow(),
+  effectiveTo: timestamp("effective_to"),
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_customer_company_customer").on(table.customerId),
+  index("idx_customer_company_company").on(table.companyId),
+  index("idx_customer_company_active").on(table.isActive),
+  index("idx_customer_company_created_at").on(table.createdAt),
+]);
+
+export const customerCompanyLinksRelations = relations(customerCompanyLinks, ({ one }) => ({
+  customer: one(customers, {
+    fields: [customerCompanyLinks.customerId],
+    references: [customers.id],
+  }),
+  company: one(companies, {
+    fields: [customerCompanyLinks.companyId],
+    references: [companies.id],
+  }),
+  creator: one(users, {
+    fields: [customerCompanyLinks.createdBy],
+    references: [users.id],
+    relationName: "customerCompanyLinkCreator",
+  }),
+}));
+
+export const insertCustomerCompanyLinkSchema = createInsertSchema(customerCompanyLinks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+}).extend({
+  relationshipType: z.enum(["employee", "contractor", "partner", "affiliate"]).default("employee"),
+  effectiveFrom: z.coerce.date().optional(),
+  effectiveTo: z.coerce.date().optional(),
+  isActive: z.boolean().default(true).optional(),
+});
+
+export type InsertCustomerCompanyLink = z.infer<typeof insertCustomerCompanyLinkSchema>;
+export type CustomerCompanyLink = typeof customerCompanyLinks.$inferSelect;
+
 // Drivers table - Master data for all drivers (in-house and outsourced)
 export const drivers = pgTable("drivers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
