@@ -53,6 +53,7 @@ const ContractAnalyticsReport = lazy(() => import("@/pages/ContractAnalyticsRepo
 const CollectionPerformanceReport = lazy(() => import("@/pages/CollectionPerformanceReport"));
 const ImportData = lazy(() => import("@/pages/ImportData"));
 const DashboardSamples = lazy(() => import("@/pages/DashboardSamples"));
+const PublicHolidays = lazy(() => import("@/pages/PublicHolidays"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -208,6 +209,9 @@ function Router() {
       </Route>
       <Route path="/dashboard-samples">
         {() => <ProtectedRoute component={DashboardSamples} />}
+      </Route>
+      <Route path="/public-holidays">
+        {() => <ProtectedRoute component={PublicHolidays} />}
       </Route>
       <Route component={() => <NotFound />} />
       </Switch>
