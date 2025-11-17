@@ -92,12 +92,16 @@ export const users = pgTable("users", {
   canAccessUserActivityReports: boolean("can_access_user_activity_reports").notNull().default(false), // User Activity Reports
   canAccessAppAccessReport: boolean("can_access_app_access_report").notNull().default(false), // App Access Report (login attempts)
   
+  // Branch Assignment
+  branchId: varchar("branch_id").references(() => branches.id),
+  
   lastPasswordChange: timestamp("last_password_change").defaultNow(),
   lastLoginAt: timestamp("last_login_at"), // Track last successful login for dashboard display
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("idx_users_username").on(table.username),
+  index("idx_users_branch").on(table.branchId),
   index("idx_users_disabled").on(table.disabled),
   index("idx_users_created_at").on(table.createdAt),
 ]);
@@ -169,6 +173,9 @@ export const customers = pgTable("customers", {
   // Additional Information
   notes: text("notes"),
   
+  // Branch Assignment
+  branchId: varchar("branch_id").references(() => branches.id),
+  
   // Audit fields
   disabled: boolean("disabled").notNull().default(false),
   disabledBy: varchar("disabled_by").references(() => users.id),
@@ -177,6 +184,7 @@ export const customers = pgTable("customers", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
+  index("idx_customers_branch").on(table.branchId),
   index("idx_customers_disabled").on(table.disabled),
   index("idx_customers_created_at").on(table.createdAt),
   index("idx_customers_national_id").on(table.nationalId),
@@ -270,6 +278,9 @@ export const vehicles = pgTable("vehicles", {
   licensingAuthority: varchar("licensing_authority"), // Licensing authority
   emirate: emiratesEnum("emirate"), // UAE Emirate for geographic distribution
   
+  // Branch Assignment
+  branchId: varchar("branch_id").references(() => branches.id),
+  
   // Audit fields
   disabled: boolean("disabled").notNull().default(false),
   disabledBy: varchar("disabled_by").references(() => users.id),
@@ -280,6 +291,7 @@ export const vehicles = pgTable("vehicles", {
 }, (table) => [
   index("idx_vehicles_registration").on(table.registration),
   index("idx_vehicles_status").on(table.status),
+  index("idx_vehicles_branch").on(table.branchId),
   index("idx_vehicles_disabled").on(table.disabled),
   index("idx_vehicles_created_at").on(table.createdAt),
 ]);
@@ -435,6 +447,573 @@ export const insertCompanySchema = createInsertSchema(companies).omit({
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Company = typeof companies.$inferSelect;
 
+// ========================================
+// BRANCH MANAGEMENT ENTITIES
+// ========================================
+
+// Branches table - Multi-location branch management
+export const branches = pgTable("branches", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Branch Identification
+  branchCode: varchar("branch_code").notNull().unique(), // e.g., "DXB-001", "SHJ-001"
+  
+  // Basic Information (bilingual)
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  
+  // Location
+  emirate: emiratesEnum("emirate").notNull(),
+  addressEn: text("address_en").notNull(),
+  addressAr: text("address_ar"),
+  
+  // Contact Information
+  phone: varchar("phone").notNull(),
+  email: varchar("email"),
+  
+  // Management
+  managerUserId: varchar("manager_user_id").references(() => users.id), // Branch manager
+  
+  // Settings
+  isHeadquarters: boolean("is_headquarters").notNull().default(false),
+  openingHours: jsonb("opening_hours"), // {mon: "8:00-20:00", tue: "8:00-20:00", ...}
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  isActive: boolean("is_active").notNull().default(true),
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_branches_code").on(table.branchCode),
+  index("idx_branches_emirate").on(table.emirate),
+  index("idx_branches_active").on(table.isActive),
+  index("idx_branches_disabled").on(table.disabled),
+  index("idx_branches_created_at").on(table.createdAt),
+]);
+
+export const branchesRelations = relations(branches, ({ one }) => ({
+  manager: one(users, {
+    fields: [branches.managerUserId],
+    references: [users.id],
+    relationName: "branchManager",
+  }),
+  creator: one(users, {
+    fields: [branches.createdBy],
+    references: [users.id],
+    relationName: "branchCreator",
+  }),
+}));
+
+export const insertBranchSchema = createInsertSchema(branches).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  disabledBy: true,
+  disabledAt: true,
+  disabled: true,
+}).extend({
+  branchCode: z.string().min(1, "Branch code is required").max(50, "Branch code too long"),
+  nameEn: z.string().min(1, "Branch name (English) is required").max(200, "Name too long"),
+  nameAr: z.string().max(200, "Name too long").optional(),
+  addressEn: z.string().min(1, "Address (English) is required").max(500, "Address too long"),
+  addressAr: z.string().max(500, "Address too long").optional(),
+  phone: z.string().min(1, "Phone number is required").max(20, "Phone number too long"),
+  email: z.string().email("Invalid email").max(255, "Email too long").optional(),
+  notes: z.string().max(2000, "Notes too long").optional(),
+});
+
+export type InsertBranch = z.infer<typeof insertBranchSchema>;
+export type Branch = typeof branches.$inferSelect;
+
+// Branch Transfers table - Track vehicle transfers between branches
+export const branchTransfers = pgTable("branch_transfers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Transfer Details
+  vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  sourceBranchId: varchar("source_branch_id").notNull().references(() => branches.id),
+  destinationBranchId: varchar("destination_branch_id").notNull().references(() => branches.id),
+  
+  // Transfer Information
+  transferDate: timestamp("transfer_date").notNull(),
+  reason: text("reason"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, rejected, completed
+  
+  // Approval
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  rejectedReason: text("rejected_reason"),
+  
+  // Completion
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"),
+  
+  // Audit fields
+  initiatedBy: varchar("initiated_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const branchTransfersRelations = relations(branchTransfers, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [branchTransfers.vehicleId],
+    references: [vehicles.id],
+  }),
+  sourceBranch: one(branches, {
+    fields: [branchTransfers.sourceBranchId],
+    references: [branches.id],
+    relationName: "transferSourceBranch",
+  }),
+  destinationBranch: one(branches, {
+    fields: [branchTransfers.destinationBranchId],
+    references: [branches.id],
+    relationName: "transferDestinationBranch",
+  }),
+  initiator: one(users, {
+    fields: [branchTransfers.initiatedBy],
+    references: [users.id],
+    relationName: "transferInitiator",
+  }),
+  approver: one(users, {
+    fields: [branchTransfers.approvedBy],
+    references: [users.id],
+    relationName: "transferApprover",
+  }),
+}));
+
+export const insertBranchTransferSchema = createInsertSchema(branchTransfers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  initiatedBy: true,
+  approvedBy: true,
+  approvedAt: true,
+  completedAt: true,
+}).extend({
+  vehicleId: z.string().min(1, "Vehicle is required"),
+  sourceBranchId: z.string().min(1, "Source branch is required"),
+  destinationBranchId: z.string().min(1, "Destination branch is required"),
+  transferDate: z.coerce.date(),
+  reason: z.string().max(1000, "Reason too long").optional(),
+});
+
+export type InsertBranchTransfer = z.infer<typeof insertBranchTransferSchema>;
+export type BranchTransfer = typeof branchTransfers.$inferSelect;
+
+// ========================================
+// DRIVER SERVICE ENTITIES
+// ========================================
+
+// Driver Outsource Companies table - Companies providing outsourced drivers
+export const driverOutsourceCompanies = pgTable("driver_outsource_companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Company Information (bilingual)
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  
+  // Contact Information
+  contactPerson: varchar("contact_person"),
+  phone: varchar("phone").notNull(),
+  email: varchar("email"),
+  address: text("address"),
+  
+  // Contract Information
+  contractNumber: varchar("contract_number"),
+  contractStartDate: timestamp("contract_start_date"),
+  contractEndDate: timestamp("contract_end_date"),
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_outsource_companies_disabled").on(table.disabled),
+  index("idx_outsource_companies_created_at").on(table.createdAt),
+]);
+
+export const driverOutsourceCompaniesRelations = relations(driverOutsourceCompanies, ({ one }) => ({
+  creator: one(users, {
+    fields: [driverOutsourceCompanies.createdBy],
+    references: [users.id],
+    relationName: "outsourceCompanyCreator",
+  }),
+}));
+
+export const insertDriverOutsourceCompanySchema = createInsertSchema(driverOutsourceCompanies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  disabledBy: true,
+  disabledAt: true,
+  disabled: true,
+}).extend({
+  nameEn: z.string().min(1, "Company name (English) is required").max(200, "Name too long"),
+  nameAr: z.string().max(200, "Name too long").optional(),
+  phone: z.string().min(1, "Phone number is required").max(20, "Phone number too long"),
+  email: z.string().email("Invalid email").max(255, "Email too long").optional(),
+  contractStartDate: z.coerce.date().optional(),
+  contractEndDate: z.coerce.date().optional(),
+});
+
+export type InsertDriverOutsourceCompany = z.infer<typeof insertDriverOutsourceCompanySchema>;
+export type DriverOutsourceCompany = typeof driverOutsourceCompanies.$inferSelect;
+
+// Drivers table - Master data for all drivers (in-house and outsourced)
+export const drivers = pgTable("drivers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Driver Identification
+  driverCode: varchar("driver_code").notNull().unique(), // e.g., "DRV-001"
+  
+  // Basic Information (bilingual)
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  
+  // Contact Information
+  mobile: varchar("mobile").notNull(),
+  email: varchar("email"),
+  nationality: varchar("nationality").notNull(),
+  
+  // License Information
+  licenseNumber: varchar("license_number").notNull(),
+  licenseClass: varchar("license_class").notNull(), // e.g., "Light Vehicle", "Heavy Vehicle"
+  licenseExpiry: timestamp("license_expiry").notNull(),
+  
+  // Skills & Languages
+  languagesSpoken: text("languages_spoken").array(), // ['English', 'Arabic', 'Urdu', 'Hindi']
+  
+  // Employment Information
+  employmentType: varchar("employment_type", { length: 20 }).notNull(), // in_house, outsourced
+  outsourceCompanyId: varchar("outsource_company_id").references(() => driverOutsourceCompanies.id), // If outsourced
+  
+  // Cost Rate (for profit tracking - internal use only)
+  costRate: varchar("cost_rate"), // Daily cost rate to company
+  
+  // Availability
+  availability: varchar("availability", { length: 20 }).notNull().default("available"), // available, on_assignment, off_duty, on_leave
+  
+  // Documents (file paths)
+  emiratesIdFront: text("emirates_id_front"), // File path
+  licenseCopy: text("license_copy"), // File path
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  isActive: boolean("is_active").notNull().default(true),
+  disabled: boolean("disabled").notNull().default(false),
+  disabledBy: varchar("disabled_by").references(() => users.id),
+  disabledAt: timestamp("disabled_at"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_drivers_code").on(table.driverCode),
+  index("idx_drivers_availability").on(table.availability),
+  index("idx_drivers_employment_type").on(table.employmentType),
+  index("idx_drivers_active").on(table.isActive),
+  index("idx_drivers_disabled").on(table.disabled),
+  index("idx_drivers_created_at").on(table.createdAt),
+]);
+
+export const driversRelations = relations(drivers, ({ one }) => ({
+  outsourceCompany: one(driverOutsourceCompanies, {
+    fields: [drivers.outsourceCompanyId],
+    references: [driverOutsourceCompanies.id],
+  }),
+  creator: one(users, {
+    fields: [drivers.createdBy],
+    references: [users.id],
+    relationName: "driverCreator",
+  }),
+}));
+
+export const insertDriverSchema = createInsertSchema(drivers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  disabledBy: true,
+  disabledAt: true,
+  disabled: true,
+}).extend({
+  driverCode: z.string().min(1, "Driver code is required").max(50, "Driver code too long"),
+  nameEn: z.string().min(1, "Driver name (English) is required").max(200, "Name too long"),
+  nameAr: z.string().max(200, "Name too long").optional(),
+  mobile: z.string().min(1, "Mobile number is required").max(20, "Mobile number too long"),
+  email: z.string().email("Invalid email").max(255, "Email too long").optional(),
+  nationality: z.string().min(1, "Nationality is required").max(100, "Nationality too long"),
+  licenseNumber: z.string().min(1, "License number is required").max(100, "License number too long"),
+  licenseClass: z.string().min(1, "License class is required").max(50, "License class too long"),
+  licenseExpiry: z.coerce.date(),
+  employmentType: z.enum(["in_house", "outsourced"]),
+  notes: z.string().max(2000, "Notes too long").optional(),
+});
+
+export type InsertDriver = z.infer<typeof insertDriverSchema>;
+export type Driver = typeof drivers.$inferSelect;
+
+// Driver Rate Cards table - Pricing structure for drivers (daily/hourly rates)
+export const driverRateCards = pgTable("driver_rate_cards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Driver Reference
+  driverId: varchar("driver_id").notNull().references(() => drivers.id),
+  
+  // Rate Information
+  rateType: varchar("rate_type", { length: 20 }).notNull(), // daily, hourly
+  baseRate: varchar("base_rate").notNull(), // Base customer rate
+  
+  // Effective Period
+  effectiveFrom: timestamp("effective_from").notNull(),
+  effectiveTo: timestamp("effective_to"),
+  
+  // Status
+  isActive: boolean("is_active").notNull().default(true),
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_driver_rates_driver").on(table.driverId),
+  index("idx_driver_rates_active").on(table.isActive),
+  index("idx_driver_rates_effective").on(table.effectiveFrom),
+]);
+
+export const driverRateCardsRelations = relations(driverRateCards, ({ one }) => ({
+  driver: one(drivers, {
+    fields: [driverRateCards.driverId],
+    references: [drivers.id],
+  }),
+  creator: one(users, {
+    fields: [driverRateCards.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const insertDriverRateCardSchema = createInsertSchema(driverRateCards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+}).extend({
+  driverId: z.string().min(1, "Driver is required"),
+  rateType: z.enum(["daily", "hourly"]),
+  baseRate: z.string().min(1, "Base rate is required"),
+  effectiveFrom: z.coerce.date(),
+  effectiveTo: z.coerce.date().optional(),
+});
+
+export type InsertDriverRateCard = z.infer<typeof insertDriverRateCardSchema>;
+export type DriverRateCard = typeof driverRateCards.$inferSelect;
+
+// Driver Schedule Blocks table - Recurring availability/unavailability windows
+export const driverScheduleBlocks = pgTable("driver_schedule_blocks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Driver Reference
+  driverId: varchar("driver_id").notNull().references(() => drivers.id),
+  
+  // Schedule Window
+  startDateTime: timestamp("start_date_time").notNull(),
+  endDateTime: timestamp("end_date_time").notNull(),
+  
+  // Block Type
+  blockType: varchar("block_type", { length: 20 }).notNull(), // unavailable, on_leave, maintenance
+  reason: text("reason"),
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_schedule_blocks_driver").on(table.driverId),
+  index("idx_schedule_blocks_start").on(table.startDateTime),
+  index("idx_schedule_blocks_end").on(table.endDateTime),
+]);
+
+export const driverScheduleBlocksRelations = relations(driverScheduleBlocks, ({ one }) => ({
+  driver: one(drivers, {
+    fields: [driverScheduleBlocks.driverId],
+    references: [drivers.id],
+  }),
+  creator: one(users, {
+    fields: [driverScheduleBlocks.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const insertDriverScheduleBlockSchema = createInsertSchema(driverScheduleBlocks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+}).extend({
+  driverId: z.string().min(1, "Driver is required"),
+  startDateTime: z.coerce.date(),
+  endDateTime: z.coerce.date(),
+  blockType: z.enum(["unavailable", "on_leave", "maintenance"]),
+  reason: z.string().max(500, "Reason too long").optional(),
+});
+
+export type InsertDriverScheduleBlock = z.infer<typeof insertDriverScheduleBlockSchema>;
+export type DriverScheduleBlock = typeof driverScheduleBlocks.$inferSelect;
+
+// Driver Assignments table - Link drivers to contracts with scheduling and surcharges
+export const driverAssignments = pgTable("driver_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Assignment References
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  driverId: varchar("driver_id").notNull().references(() => drivers.id),
+  
+  // Assignment Period
+  startDateTime: timestamp("start_date_time").notNull(),
+  endDateTime: timestamp("end_date_time").notNull(),
+  
+  // Service Type & Charges
+  serviceType: varchar("service_type", { length: 20 }).notNull(), // daily, hourly
+  baseRate: varchar("base_rate").notNull(),
+  quantity: varchar("quantity").notNull(), // Days or hours
+  
+  // Surcharges (calculated breakdown stored as JSON)
+  surchargeBreakdown: jsonb("surcharge_breakdown"), // {night: 100, weekend: 200, holiday: 150}
+  totalSurcharges: varchar("total_surcharges").notNull().default('0'),
+  totalCharge: varchar("total_charge").notNull(), // base + surcharges
+  
+  // Assignment Status
+  status: varchar("status", { length: 20 }).notNull().default("scheduled"), // scheduled, active, completed, cancelled
+  
+  // Handover Information
+  handoverNotes: text("handover_notes"),
+  handoverNotesAr: text("handover_notes_ar"),
+  completionNotes: text("completion_notes"),
+  handoverDateTime: timestamp("handover_date_time"),
+  completionDateTime: timestamp("completion_date_time"),
+  
+  // Audit fields
+  assignedBy: varchar("assigned_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_driver_assignments_contract").on(table.contractId),
+  index("idx_driver_assignments_driver").on(table.driverId),
+  index("idx_driver_assignments_status").on(table.status),
+  index("idx_driver_assignments_start").on(table.startDateTime),
+  index("idx_driver_assignments_end").on(table.endDateTime),
+]);
+
+export const driverAssignmentsRelations = relations(driverAssignments, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [driverAssignments.contractId],
+    references: [contracts.id],
+  }),
+  driver: one(drivers, {
+    fields: [driverAssignments.driverId],
+    references: [drivers.id],
+  }),
+  assigner: one(users, {
+    fields: [driverAssignments.assignedBy],
+    references: [users.id],
+  }),
+}));
+
+export const insertDriverAssignmentSchema = createInsertSchema(driverAssignments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  assignedBy: true,
+  handoverDateTime: true,
+  completionDateTime: true,
+}).extend({
+  contractId: z.string().min(1, "Contract is required"),
+  driverId: z.string().min(1, "Driver is required"),
+  startDateTime: z.coerce.date(),
+  endDateTime: z.coerce.date(),
+  serviceType: z.enum(["daily", "hourly"]),
+  baseRate: z.string().min(1, "Base rate is required"),
+  quantity: z.string().min(1, "Quantity is required"),
+  totalSurcharges: z.string(),
+  totalCharge: z.string().min(1, "Total charge is required"),
+});
+
+export type InsertDriverAssignment = z.infer<typeof insertDriverAssignmentSchema>;
+export type DriverAssignment = typeof driverAssignments.$inferSelect;
+
+// ========================================
+// PUBLIC HOLIDAYS CALENDAR
+// ========================================
+
+// Public Holidays table - UAE public holidays calendar for surcharge calculation
+export const publicHolidays = pgTable("public_holidays", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Holiday Information (bilingual)
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  
+  // Date
+  holidayDate: timestamp("holiday_date").notNull(),
+  
+  // Recurrence
+  isRecurring: boolean("is_recurring").notNull().default(false), // Annually recurring
+  recurrenceType: varchar("recurrence_type", { length: 20 }), // gregorian, hijri
+  
+  // Surcharge Configuration
+  surchargeRate: varchar("surcharge_rate"), // Specific surcharge for this holiday
+  
+  // Additional Information
+  notes: text("notes"),
+  
+  // Audit fields
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_public_holidays_date").on(table.holidayDate),
+  index("idx_public_holidays_active").on(table.isActive),
+]);
+
+export const publicHolidaysRelations = relations(publicHolidays, ({ one }) => ({
+  creator: one(users, {
+    fields: [publicHolidays.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const insertPublicHolidaySchema = createInsertSchema(publicHolidays).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+}).extend({
+  nameEn: z.string().min(1, "Holiday name (English) is required").max(200, "Name too long"),
+  nameAr: z.string().max(200, "Name too long").optional(),
+  holidayDate: z.coerce.date(),
+  recurrenceType: z.enum(["gregorian", "hijri"]).optional(),
+  notes: z.string().max(500, "Notes too long").optional(),
+});
+
+export type InsertPublicHoliday = z.infer<typeof insertPublicHolidaySchema>;
+export type PublicHoliday = typeof publicHolidays.$inferSelect;
+
 // Damage Assessments table - Structured damage tracking for completed rentals
 export const damageAssessments = pgTable("damage_assessments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -486,6 +1065,9 @@ export const contracts = pgTable("contracts", {
   // Foreign Keys to Master Data
   customerId: varchar("customer_id").notNull().references(() => customers.id),
   vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
+  
+  // Branch Assignment
+  branchId: varchar("branch_id").references(() => branches.id),
   
   // Hirer Type - determines which fields are required
   hirerType: varchar("hirer_type", { length: 20 }).notNull().default("direct"), // direct, with_sponsor, from_company
@@ -612,6 +1194,7 @@ export const contracts = pgTable("contracts", {
 }, (table) => [
   index("idx_contracts_customer_id").on(table.customerId),
   index("idx_contracts_vehicle_id").on(table.vehicleId),
+  index("idx_contracts_branch").on(table.branchId),
   index("idx_contracts_created_by").on(table.createdBy),
   index("idx_contracts_status").on(table.status),
   index("idx_contracts_disabled").on(table.disabled),
@@ -710,6 +1293,9 @@ export const payments = pgTable("payments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractId: varchar("contract_id").notNull().references(() => contracts.id),
   
+  // Branch Assignment
+  branchId: varchar("branch_id").references(() => branches.id),
+  
   // Payment Details
   amount: varchar("amount").notNull(), // Payment amount (stored as string for precision)
   paymentMethod: varchar("payment_method", { length: 50 }).notNull(), // cash, card, bank_transfer, check, etc.
@@ -730,6 +1316,7 @@ export const payments = pgTable("payments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("idx_payments_contract_id").on(table.contractId),
+  index("idx_payments_branch").on(table.branchId),
   index("idx_payments_created_at").on(table.createdAt),
 ]);
 
