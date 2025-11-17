@@ -409,6 +409,18 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/reports/collection-performance',
       show: isAdmin || isManager || canAccessCollectionPerformance,
     },
+    {
+      title: 'Driver Utilization',
+      icon: 'person_pin_circle',
+      url: '/reports/driver-utilization',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Driver Revenue & Cost',
+      icon: 'account_balance_wallet',
+      url: '/reports/driver-revenue-cost',
+      show: isAdmin || isManager || canAccessReports,
+    },
     // Standard Reports - Granular Permissions
     {
       title: t('nav.financialReports'),

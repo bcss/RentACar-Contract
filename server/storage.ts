@@ -2532,6 +2532,327 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Analytics - Driver Availability Summary (lightweight for dashboard)
+  async getDriverAvailabilitySummary() {
+    const allDrivers = await db.select().from(drivers).where(eq(drivers.isActive, true));
+    const allAssignments = await db.select().from(driverAssignments);
+    
+    // Calculate current availability based on active assignments
+    const driversOnAssignment = new Set<string>();
+    const now = new Date();
+    allAssignments.forEach(a => {
+      if (a.status === 'active' || a.status === 'scheduled') {
+        const start = new Date(a.startDateTime);
+        const end = new Date(a.endDateTime);
+        if (start <= now && now <= end) {
+          driversOnAssignment.add(a.driverId);
+        }
+      }
+    });
+
+    const totalDrivers = allDrivers.length;
+    const onAssignment = driversOnAssignment.size;
+    const activeDrivers = totalDrivers - onAssignment;
+    const averageUtilization = totalDrivers > 0 ? (onAssignment / totalDrivers) * 100 : 0;
+
+    return {
+      totalDrivers,
+      activeDrivers,
+      onAssignment,
+      averageUtilization,
+    };
+  }
+
+  // Reports - Driver Utilization
+  async getDriverUtilizationReport(startDate?: Date, endDate?: Date) {
+    const allDrivers = await db.select().from(drivers).where(eq(drivers.isActive, true));
+    const allAssignments = await db.select().from(driverAssignments);
+    const allContracts = await db.select().from(contracts);
+    const allRateCards = await db.select().from(driverRateCards);
+    
+    // Create Set of active driver IDs for filtering assignments
+    const activeDriverIds = new Set(allDrivers.map(d => d.id));
+    
+    // Create lookup maps
+    const rateCardsByDriver = new Map<string, typeof allRateCards>();
+    allRateCards.forEach(rc => {
+      if (!rateCardsByDriver.has(rc.driverId)) {
+        rateCardsByDriver.set(rc.driverId, []);
+      }
+      rateCardsByDriver.get(rc.driverId)!.push(rc);
+    });
+    
+    // Filter assignments by active drivers AND date range
+    const filteredAssignments = allAssignments.filter(a => {
+      // Only include assignments for active drivers
+      if (!activeDriverIds.has(a.driverId)) return false;
+      
+      // Apply date range filter if provided
+      if (!startDate && !endDate) return true;
+      if (!a.startDateTime) return false;
+      const assignmentDate = new Date(a.startDateTime);
+      if (startDate && assignmentDate < startDate) return false;
+      if (endDate && assignmentDate > endDate) return false;
+      return true;
+    });
+
+    // Calculate which drivers are currently on assignment (in the filtered period)
+    const driversOnAssignment = new Set<string>();
+    const now = new Date();
+    filteredAssignments.forEach(a => {
+      if (a.status === 'active' || a.status === 'scheduled') {
+        const start = new Date(a.startDateTime);
+        const end = new Date(a.endDateTime);
+        if (start <= now && now <= end) {
+          driversOnAssignment.add(a.driverId);
+        }
+      }
+    });
+
+    // Calculate driver statistics
+    const driverStats = allDrivers.map(driver => {
+      const driverAssignments = filteredAssignments.filter(a => a.driverId === driver.id);
+      
+      // Calculate total days worked
+      const totalDaysWorked = driverAssignments
+        .filter(a => a.status === 'completed')
+        .reduce((sum, a) => {
+          const start = new Date(a.startDateTime);
+          const end = new Date(a.endDateTime);
+          const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          return sum + days;
+        }, 0);
+
+      // Calculate total revenue from contracts (authoritative source)
+      const totalRevenue = driverAssignments
+        .filter(a => a.status === 'completed')
+        .reduce((sum, a) => {
+          if (!a.contractId) return sum + parseFloat(a.totalCharge || '0');
+          const contract = allContracts.find(c => c.id === a.contractId);
+          if (!contract) return sum + parseFloat(a.totalCharge || '0');
+          
+          // Use driverServiceCharge from contract as authoritative revenue
+          const driverCharge = contract.driverServiceCharge 
+            ? parseFloat(contract.driverServiceCharge) 
+            : parseFloat(a.totalCharge || '0');
+          
+          return sum + driverCharge;
+        }, 0);
+
+      // Calculate total cost using applicable rate cards
+      const totalCost = driverAssignments
+        .filter(a => a.status === 'completed')
+        .reduce((sum, a) => {
+          const start = new Date(a.startDateTime);
+          const end = new Date(a.endDateTime);
+          const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          
+          // Get applicable rate card for this assignment period
+          const applicableRates = rateCardsByDriver.get(driver.id) || [];
+          const rateCard = applicableRates.find(rc => {
+            const validFrom = new Date(rc.validFrom);
+            const validTo = rc.validTo ? new Date(rc.validTo) : new Date('2099-12-31');
+            return start >= validFrom && start <= validTo && rc.isActive;
+          });
+
+          // Use rate from card, or fall back to driver's default cost rate
+          const dailyRate = rateCard 
+            ? parseFloat(rateCard.ratePerDay || '0')
+            : parseFloat(driver.costRate || '0');
+          
+          return sum + (dailyRate * days);
+        }, 0);
+
+      // Count assignments by status
+      const assignmentsByStatus = {
+        scheduled: driverAssignments.filter(a => a.status === 'scheduled').length,
+        active: driverAssignments.filter(a => a.status === 'active').length,
+        completed: driverAssignments.filter(a => a.status === 'completed').length,
+        cancelled: driverAssignments.filter(a => a.status === 'cancelled').length,
+      };
+
+      return {
+        driverId: driver.id,
+        driverCode: driver.driverCode,
+        driverName: driver.nameEn,
+        driverNameAr: driver.nameAr,
+        employmentType: driver.employmentType,
+        availability: driver.availability,
+        totalAssignments: driverAssignments.length,
+        completedAssignments: assignmentsByStatus.completed,
+        activeAssignments: assignmentsByStatus.active,
+        totalDaysWorked,
+        totalRevenue,
+        totalCost,
+        profitMargin: totalRevenue - totalCost,
+        assignmentsByStatus,
+        isActive: driver.isActive,
+      };
+    });
+
+    // Calculate summary statistics based on actual assignment data
+    const totalDrivers = allDrivers.filter(d => d.isActive).length;
+    const onAssignment = driversOnAssignment.size;
+    const activeDrivers = totalDrivers - onAssignment; // Available = total - on assignment
+    const totalAssignments = filteredAssignments.length;
+    const completedAssignments = filteredAssignments.filter(a => a.status === 'completed').length;
+    const totalRevenue = driverStats.reduce((sum, d) => sum + d.totalRevenue, 0);
+    const totalCost = driverStats.reduce((sum, d) => sum + d.totalCost, 0);
+
+    return {
+      summary: {
+        totalDrivers,
+        activeDrivers,
+        onAssignment,
+        totalAssignments,
+        completedAssignments,
+        totalRevenue,
+        totalCost,
+        totalProfit: totalRevenue - totalCost,
+        averageUtilization: totalDrivers > 0 ? (onAssignment / totalDrivers) * 100 : 0,
+      },
+      driverStats: driverStats.sort((a, b) => b.totalRevenue - a.totalRevenue),
+    };
+  }
+
+  // Reports - Driver Revenue vs Cost Analysis
+  async getDriverRevenueCostReport(startDate?: Date, endDate?: Date) {
+    const allDrivers = await db.select().from(drivers).where(eq(drivers.isActive, true));
+    const allAssignments = await db.select().from(driverAssignments);
+    const allContracts = await db.select().from(contracts);
+    const allRateCards = await db.select().from(driverRateCards);
+    
+    // Create Set of active driver IDs for filtering assignments
+    const activeDriverIds = new Set(allDrivers.map(d => d.id));
+    
+    // Create lookup maps
+    const contractMap = new Map(allContracts.map(c => [c.id, c]));
+    const rateCardsByDriver = new Map<string, typeof allRateCards>();
+    allRateCards.forEach(rc => {
+      if (!rateCardsByDriver.has(rc.driverId)) {
+        rateCardsByDriver.set(rc.driverId, []);
+      }
+      rateCardsByDriver.get(rc.driverId)!.push(rc);
+    });
+    
+    // Filter assignments by active drivers AND date range
+    const filteredAssignments = allAssignments.filter(a => {
+      // Only include assignments for active drivers
+      if (!activeDriverIds.has(a.driverId)) return false;
+      
+      // Apply date range filter if provided
+      if (!startDate && !endDate) return true;
+      if (!a.startDateTime) return false;
+      const assignmentDate = new Date(a.startDateTime);
+      if (startDate && assignmentDate < startDate) return false;
+      if (endDate && assignmentDate > endDate) return false;
+      return true;
+    });
+
+    // Revenue vs Cost analysis per driver
+    const driverAnalysis = allDrivers.map(driver => {
+      const driverAssignments = filteredAssignments.filter(a => a.driverId === driver.id && a.status === 'completed');
+      
+      // Calculate revenue from contracts (authoritative source)
+      const totalRevenue = driverAssignments.reduce((sum, a) => {
+        if (!a.contractId) return sum;
+        const contract = contractMap.get(a.contractId);
+        if (!contract) return sum;
+        
+        // Use driverServiceCharge from contract as authoritative revenue source
+        const driverCharge = contract.driverServiceCharge 
+          ? parseFloat(contract.driverServiceCharge) 
+          : parseFloat(a.totalCharge || '0'); // Fallback to assignment charge
+        
+        return sum + driverCharge;
+      }, 0);
+      
+      const baseRevenue = driverAssignments.reduce((sum, a) => sum + (parseFloat(a.baseRate) * parseFloat(a.quantity)), 0);
+      const surchargeRevenue = driverAssignments.reduce((sum, a) => sum + parseFloat(a.totalSurcharges || '0'), 0);
+      
+      // Calculate costs using rate cards (authoritative source)
+      const totalDaysWorked = driverAssignments.reduce((sum, a) => {
+        const start = new Date(a.startDateTime);
+        const end = new Date(a.endDateTime);
+        return sum + Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      }, 0);
+      
+      // Calculate total cost using applicable rate cards
+      const totalCost = driverAssignments.reduce((sum, a) => {
+        const start = new Date(a.startDateTime);
+        const end = new Date(a.endDateTime);
+        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        
+        // Get applicable rate card for this assignment period
+        const applicableRates = rateCardsByDriver.get(driver.id) || [];
+        const rateCard = applicableRates.find(rc => {
+          const validFrom = new Date(rc.validFrom);
+          const validTo = rc.validTo ? new Date(rc.validTo) : new Date('2099-12-31');
+          return start >= validFrom && start <= validTo && rc.isActive;
+        });
+
+        // Use rate from card, or fall back to driver's default cost rate
+        const dailyRate = rateCard 
+          ? parseFloat(rateCard.ratePerDay || '0')
+          : parseFloat(driver.costRate || '0');
+        
+        return sum + (dailyRate * days);
+      }, 0);
+      
+      // Calculate profit metrics
+      const profit = totalRevenue - totalCost;
+      const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+      const roi = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+      
+      return {
+        driverId: driver.id,
+        driverCode: driver.driverCode,
+        driverName: driver.nameEn,
+        driverNameAr: driver.nameAr,
+        employmentType: driver.employmentType,
+        costRate: driverCostRate,
+        totalAssignments: driverAssignments.length,
+        totalDaysWorked,
+        totalRevenue,
+        baseRevenue,
+        surchargeRevenue,
+        totalCost,
+        profit,
+        profitMargin,
+        roi,
+        revenuePerDay: totalDaysWorked > 0 ? totalRevenue / totalDaysWorked : 0,
+        costPerDay: totalDaysWorked > 0 ? totalCost / totalDaysWorked : 0,
+        isActive: driver.isActive,
+      };
+    });
+
+    // Top performers
+    const topPerformers = [...driverAnalysis]
+      .filter(d => d.totalAssignments > 0)
+      .sort((a, b) => b.profit - a.profit)
+      .slice(0, 10);
+
+    // Summary metrics
+    const totalRevenue = driverAnalysis.reduce((sum, d) => sum + d.totalRevenue, 0);
+    const totalCost = driverAnalysis.reduce((sum, d) => sum + d.totalCost, 0);
+    const totalProfit = totalRevenue - totalCost;
+    const overallProfitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+
+    return {
+      summary: {
+        totalRevenue,
+        totalCost,
+        totalProfit,
+        overallProfitMargin,
+        totalAssignments: filteredAssignments.filter(a => a.status === 'completed').length,
+        averageRevenuePerDriver: driverAnalysis.length > 0 ? totalRevenue / driverAnalysis.length : 0,
+        averageCostPerDriver: driverAnalysis.length > 0 ? totalCost / driverAnalysis.length : 0,
+      },
+      driverAnalysis: driverAnalysis.sort((a, b) => b.totalRevenue - a.totalRevenue),
+      topPerformers,
+    };
+  }
+
   // Company settings operations
   async getCompanySettings(): Promise<CompanySettings> {
     const [settings] = await db.select().from(companySettings).where(eq(companySettings.id, "singleton"));

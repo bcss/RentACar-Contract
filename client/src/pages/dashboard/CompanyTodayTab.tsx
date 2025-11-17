@@ -27,6 +27,15 @@ export function CompanyTodayTab() {
     queryKey: ['/api/analytics/pending-actions'],
   });
 
+  const { data: driverAvailabilityData, isLoading: driverAvailabilityLoading } = useQuery<{
+    totalDrivers: number;
+    activeDrivers: number;
+    onAssignment: number;
+    averageUtilization: number;
+  }>({
+    queryKey: ['/api/analytics/driver-availability'],
+  });
+
   // Fleet status chart data
   const fleetChartData = fleetStatusData ? [
     { name: t('vehicle.status.available'), value: fleetStatusData.available, color: 'hsl(var(--chart-1))' },
@@ -37,11 +46,12 @@ export function CompanyTodayTab() {
 
   const totalVehicles = fleetChartData.reduce((sum, item) => sum + item.value, 0);
 
-  if (fleetStatusLoading || pendingActionsLoading) {
+  if (fleetStatusLoading || pendingActionsLoading || driverAvailabilityLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-96 w-full" />
         <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-48 w-full" />
       </div>
     );
   }
@@ -135,6 +145,44 @@ export function CompanyTodayTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Driver Availability */}
+      {driverAvailabilityData && (
+        <Card data-testid="card-driver-availability">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                  Driver Service
+                </p>
+                <CardTitle className="text-lg">Driver Availability</CardTitle>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <p className="text-xs text-muted-foreground mb-1">Total Drivers</p>
+                <p className="text-2xl font-bold" data-testid="text-total-drivers">{driverAvailabilityData.totalDrivers}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-chart-1/10 border border-chart-1/20">
+                <p className="text-xs text-muted-foreground mb-1">Available</p>
+                <p className="text-2xl font-bold" data-testid="text-available-drivers">{driverAvailabilityData.activeDrivers}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-chart-2/10 border border-chart-2/20">
+                <p className="text-xs text-muted-foreground mb-1">On Assignment</p>
+                <p className="text-2xl font-bold" data-testid="text-on-assignment">{driverAvailabilityData.onAssignment}</p>
+              </div>
+            </div>
+            <div className="mt-3 p-3 rounded-lg bg-muted/30">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">Utilization Rate</p>
+                <p className="text-sm font-bold" data-testid="text-utilization-rate">{driverAvailabilityData.averageUtilization.toFixed(1)}%</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Pending Actions */}
       <Card data-testid="card-pending-actions">

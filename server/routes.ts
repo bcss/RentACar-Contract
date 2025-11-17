@@ -3280,6 +3280,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analytics routes (Admin and Manager, or users with canAccessReports toggle)
+  app.get('/api/analytics/driver-availability', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const availability = await storage.getDriverAvailabilitySummary();
+      res.json(availability);
+    } catch (error) {
+      console.error("Error fetching driver availability:", error);
+      res.status(500).json({ message: "Failed to fetch driver availability" });
+    }
+  });
+
   app.get('/api/analytics/revenue', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
       const analytics = await storage.getRevenueAnalytics();
@@ -3429,6 +3439,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching audit report:", error);
       res.status(500).json({ message: "Failed to fetch audit report" });
+    }
+  });
+
+  app.get('/api/reports/driver-utilization', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const report = await storage.getDriverUtilizationReport(startDate, endDate);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching driver utilization report:", error);
+      res.status(500).json({ message: "Failed to fetch driver utilization report" });
+    }
+  });
+
+  app.get('/api/reports/driver-revenue-cost', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const report = await storage.getDriverRevenueCostReport(startDate, endDate);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching driver revenue-cost report:", error);
+      res.status(500).json({ message: "Failed to fetch driver revenue-cost report" });
     }
   });
 

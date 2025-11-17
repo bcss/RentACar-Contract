@@ -40,6 +40,8 @@ const OperationalReports = lazy(() => import("@/pages/OperationalReports"));
 const CustomerReports = lazy(() => import("@/pages/CustomerReports"));
 const AuditReports = lazy(() => import("@/pages/AuditReports"));
 const UserActivity = lazy(() => import("@/pages/UserActivity"));
+const DriverUtilizationReport = lazy(() => import("@/pages/DriverUtilizationReport"));
+const DriverRevenueCostReport = lazy(() => import("@/pages/DriverRevenueCostReport"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
 const SupportHelpPage = lazy(() => import("@/pages/SupportHelpPage"));
@@ -195,6 +197,12 @@ function Router() {
       </Route>
       <Route path="/reports/collection-performance">
         {() => <ProtectedRoute component={CollectionPerformanceReport} />}
+      </Route>
+      <Route path="/reports/driver-utilization">
+        {() => <ProtectedRoute component={DriverUtilizationReport} />}
+      </Route>
+      <Route path="/reports/driver-revenue-cost">
+        {() => <ProtectedRoute component={DriverRevenueCostReport} />}
       </Route>
       <Route path="/settings/support">
         {() => <ProtectedRoute component={SupportHelpPage} />}
