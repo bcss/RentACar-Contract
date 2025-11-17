@@ -53,16 +53,17 @@ Preferred communication style: Simple, everyday language.
 - **Tabbed Dialog Forms:** Modern, multi-tab form interface for improved UX on large forms (e.g., Customer, Vehicle, Sponsor, Company, Insurance Claims, User forms).
 - **Import Data Functionality (Superadmin Only):** Bulk import system for master data and contracts from external systems (JSON/CSV), with transaction-based atomicity and field-level error reporting.
 - **App Access Logging System:** Comprehensive security monitoring tracking all login attempts with IP geolocation, country tracking, and user agent logging.
-- **Branch Management System (DATABASE FOUNDATION COMPLETE):** Multi-location operational support with comprehensive branch hierarchy and inter-branch vehicle transfer workflow (UI/API pending).
-- **Driver Service Module (DATABASE FOUNDATION COMPLETE):** Professional driver assignment capability with UAE market compliance, including driver master data, outsource companies, rate cards, schedule management, assignment tracking, and UAE public holidays integration (UI/API pending).
+- **Branch Management System (BACKEND COMPLETE):** Multi-location operational support with comprehensive branch hierarchy and inter-branch vehicle transfer workflow. Includes 41 RESTful API endpoints, branch-scoped data access, and permission-based filtering. Frontend UI pending.
+- **Driver Service Module (BACKEND COMPLETE):** Professional driver assignment capability with UAE market compliance. Includes driver master data, outsource companies, rate cards, schedule management, assignment tracking, and UAE public holidays integration with full CRUD API endpoints and business logic. Frontend UI pending.
 - **Future-Proofing Tables:** Schema defined for Payment Gateways, Payment Transactions, Pricing Rules, Document Files, and Digital Signatures.
 
 ### Role-Based Permissions
 - **Core Roles:** Admin, Manager, Staff, Viewer.
 - **Core Permission Toggles:** `canCloseContracts`, `canViewAllContracts`.
+- **Branch & Driver Permissions:** `canManageAllBranches` (manage all branches/transfers), `canManageDrivers` (manage drivers/companies/rates), `canAssignDrivers` (assign drivers to contracts), `canViewDriverCosts` (view driver cost breakdown).
 - **Granular Report Permissions:** 10 fine-grained permission flags for individual report access. Admin and Manager roles have full access; Staff and Viewer roles are restricted.
 - **Permission UI:** Users.tsx features tabbed dialogs (Basic Info + Permissions) for Create and Edit User operations, with grouped granular report permissions.
-- **Permission Enforcement:** AppSidebar dynamically shows/hides report navigation based on user's granular permissions; `useAuth` hook implements Admin/Manager bypass logic.
+- **Permission Enforcement:** AppSidebar dynamically shows/hides report navigation based on user's granular permissions; `useAuth` hook implements Admin/Manager bypass logic. Branch API endpoints enforce branch-scoped access control.
 
 ### Dynamic System Health Monitoring
 - Real-time metrics including version, database health, webserver status, hardware info, and storage tracking.
