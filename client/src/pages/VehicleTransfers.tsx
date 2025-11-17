@@ -81,12 +81,9 @@ export default function VehicleTransfers() {
   // Create transfer mutation
   const createMutation = useMutation({
     mutationFn: async (data: TransferFormData) => {
-      return await apiRequest("/api/branch-transfers", {
-        method: "POST",
-        body: JSON.stringify({
-          ...data,
-          sourceBranchId: user?.branchId,
-        }),
+      return await apiRequest("POST", "/api/branch-transfers", {
+        ...data,
+        sourceBranchId: user?.branchId,
       });
     },
     onSuccess: () => {
@@ -110,9 +107,7 @@ export default function VehicleTransfers() {
   // Approve transfer mutation
   const approveMutation = useMutation({
     mutationFn: async (transferId: string) => {
-      return await apiRequest(`/api/branch-transfers/${transferId}/approve`, {
-        method: "POST",
-      });
+      return await apiRequest("POST", `/api/branch-transfers/${transferId}/approve`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branch-transfers"] });
@@ -135,10 +130,7 @@ export default function VehicleTransfers() {
   // Reject transfer mutation
   const rejectMutation = useMutation({
     mutationFn: async ({ transferId, reason }: { transferId: string; reason: string }) => {
-      return await apiRequest(`/api/branch-transfers/${transferId}/reject`, {
-        method: "POST",
-        body: JSON.stringify({ rejectedReason: reason }),
-      });
+      return await apiRequest("POST", `/api/branch-transfers/${transferId}/reject`, { rejectedReason: reason });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branch-transfers"] });
@@ -162,10 +154,7 @@ export default function VehicleTransfers() {
   // Complete transfer mutation
   const completeMutation = useMutation({
     mutationFn: async ({ transferId, notes }: { transferId: string; notes: string }) => {
-      return await apiRequest(`/api/branch-transfers/${transferId}/complete`, {
-        method: "POST",
-        body: JSON.stringify({ notes }),
-      });
+      return await apiRequest("POST", `/api/branch-transfers/${transferId}/complete`, { notes });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branch-transfers"] });

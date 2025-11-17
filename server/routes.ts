@@ -6238,13 +6238,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/public-holidays", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  app.post("/api/public-holidays", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
-      
-      if (user.role !== 'Admin') {
-        return res.status(403).json({ message: "Only admins can create public holidays" });
-      }
       
       const validationResult = insertPublicHolidaySchema.safeParse(req.body);
       if (!validationResult.success) {
@@ -6264,13 +6260,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/public-holidays/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  app.patch("/api/public-holidays/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
-      
-      if (user.role !== 'Admin') {
-        return res.status(403).json({ message: "Only admins can update public holidays" });
-      }
       
       // INPUT VALIDATION
       const validationResult = insertPublicHolidaySchema.partial().safeParse(req.body);
@@ -6287,13 +6279,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/public-holidays/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  app.delete("/api/public-holidays/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
-      
-      if (user.role !== 'Admin') {
-        return res.status(403).json({ message: "Only admins can delete public holidays" });
-      }
       
       await storage.deletePublicHoliday(req.params.id);
       await createAuditLog(user.id, 'public_holiday_deleted', req.params.id, req, `Deleted public holiday`);

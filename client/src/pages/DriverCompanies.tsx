@@ -41,7 +41,7 @@ export default function DriverCompanies() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertDriverOutsourceCompany) => apiRequest("/api/driver-companies", "POST", data),
+    mutationFn: (data: InsertDriverOutsourceCompany) => apiRequest("POST", "/api/driver-companies", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/driver-companies"] });
       toast({ title: t("success"), description: "Company created successfully" });
@@ -55,7 +55,7 @@ export default function DriverCompanies() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<InsertDriverOutsourceCompany> }) =>
-      apiRequest(`/api/driver-companies/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/driver-companies/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/driver-companies"] });
       toast({ title: t("success"), description: "Company updated successfully" });

@@ -54,7 +54,7 @@ export default function Branches() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertBranch) => apiRequest("/api/branches", "POST", data),
+    mutationFn: (data: InsertBranch) => apiRequest("POST", "/api/branches", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
       toast({ title: t("success"), description: "Branch created successfully" });
@@ -68,7 +68,7 @@ export default function Branches() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<InsertBranch> }) =>
-      apiRequest(`/api/branches/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/branches/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
       toast({ title: t("success"), description: "Branch updated successfully" });

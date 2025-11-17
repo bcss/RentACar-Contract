@@ -3513,7 +3513,7 @@ export class DatabaseStorage implements IStorage {
   async getDriverOutsourceCompanies(includeDisabled = false): Promise<DriverOutsourceCompany[]> {
     const conditions = [];
     if (!includeDisabled) {
-      conditions.push(eq(driverOutsourceCompanies.disabled, false));
+      conditions.push(eq(driverOutsourceCompanies.isActive, true));
     }
     return await db
       .select()
@@ -3544,14 +3544,14 @@ export class DatabaseStorage implements IStorage {
   async disableDriverOutsourceCompany(id: string, disabledBy: string): Promise<void> {
     await db
       .update(driverOutsourceCompanies)
-      .set({ disabled: true, disabledBy, disabledAt: new Date() })
+      .set({ isActive: false })
       .where(eq(driverOutsourceCompanies.id, id));
   }
 
   async enableDriverOutsourceCompany(id: string): Promise<void> {
     await db
       .update(driverOutsourceCompanies)
-      .set({ disabled: false, disabledBy: null, disabledAt: null })
+      .set({ isActive: true })
       .where(eq(driverOutsourceCompanies.id, id));
   }
 

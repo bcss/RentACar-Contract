@@ -1,0 +1,1389 @@
+# 🚀 **FINAL CONSOLIDATED UAE RENT-A-CAR SYSTEM BLUEPRINT**
+
+### *(Master Document – Complete, Unified, Production-Ready)*
+
+# 🟧 **SECTION 0 — SYSTEM PRINCIPLES & SCOPE**
+
+This system covers **every operational, legal, financial, and compliance requirement** needed for a UAE rent-a-car & driver outsourcing business:
+
+- UAE Laws (RTA, Traffic, Tolling)
+  
+- UAE Toll Systems (Salik, Darb, Aber)
+  
+- UAE VAT (Tax compliance)
+  
+- ISO 9001 (Process) + ISO 27001 (Security)
+  
+- Audit compliance
+  
+- Insurance & claim processing
+  
+- Multi-company structure
+  
+- Branch-centric fleet allocation
+  
+- Customer, sponsor, corporate, driver workflows
+  
+- Asset management, depreciation
+  
+- Accident, fines, risk management
+  
+- Driver outsourcing
+  
+- Fleet management
+  
+- Real operational automation features
+  
+
+The blueprint includes:  
+**all master data + all operations + all advanced modules + all corrections**.
+
+---
+
+# 🔶 **SECTION 1 — IDENTITY & ENTITY MASTER MODULES**
+
+---
+
+# 1️⃣ **DRIVER MASTER**
+
+*(Direct Staff / Non-Staff / Outsourced)*
+
+### Identity & Legal
+
+- Driver_ID
+  
+- Driver_Code
+  
+- Full_Name_En / Ar
+  
+- Nationality
+  
+- DOB
+  
+- Gender
+  
+- Emirates_ID_Number
+  
+- Emirates_ID_Expiry
+  
+- UID_Number
+  
+- Visa_Number
+  
+- Visa_Issuer
+  
+- Visa_Expiry
+  
+- Passport_Number
+  
+- Passport_Expiry
+  
+
+### Driving Credentials
+
+- UAE_License_Number
+  
+- License_Category
+  
+- License_Expiry
+  
+- License_Issuing_Emirate
+  
+- RTA_File_Number
+  
+
+### Employment
+
+- Employment_Type (Staff / Non-Staff / Outsourced)
+  
+- Outsourcing_Company_ID
+  
+- Staff_Employee_ID
+  
+- Joining_Date
+  
+- Contract_Expiry
+  
+- Work_Permit_Number
+  
+
+### Driver Rates (Separate Table)
+
+- Rate_ID
+  
+- Driver_ID
+  
+- Rate_Type (Hour/Day/Week/Month/Year)
+  
+- Base_Rate
+  
+- Overtime_Rate
+  
+- Weekend_Rate
+  
+- Holiday_Rate
+  
+- Validity
+  
+
+### Operational
+
+- Allowed_Emirates
+  
+- Max_Daily_Working_Hours
+  
+- Max_Weekly_Working_Hours
+  
+- Current_Status (Available/Assigned/Leave/Suspended)
+  
+- Home_Branch
+  
+
+### Contact
+
+- Mobile
+  
+- WhatsApp
+  
+- Email
+  
+- Address
+  
+
+### Risk
+
+- Blacklist_Flag
+  
+- Blacklist_Reason_ID
+  
+- Last_Incident_ID
+  
+
+---
+
+# 2️⃣ **CUSTOMER MASTER**
+
+*(Residents, Tourists, Visitors, GCC, Corporate Employees)*
+
+### Identity
+
+- Customer_ID
+  
+- Customer_Code
+  
+- Full_Name_En/Ar
+  
+- Nationality
+  
+- DOB
+  
+- Gender
+  
+
+### UAE Residents
+
+- Emirates_ID_Number
+  
+- Emirates_ID_Expiry
+  
+
+### Tourists / Visitors
+
+- Passport_Number
+  
+- Passport_Expiry
+  
+- Visa_Number
+  
+- Visa_Type
+  
+- Visa_Expiry
+  
+- Date_of_Entry
+  
+- Port_of_Entry
+  
+
+### Driving
+
+- License_Number
+  
+- License_Issuing_Country
+  
+- License_Issuing_Emirate
+  
+- License_Expiry
+  
+- Has_IDP (International Driving Permit)
+  
+- IDP_Expiry
+  
+
+### Contact
+
+- Mobile
+  
+- WhatsApp
+  
+- Email
+  
+- Address
+  
+
+### Sponsor
+
+- Sponsor_ID (required for tourists)
+
+### Corporate Link
+
+**Customer_Company_Link**
+
+- Link_ID
+  
+- Customer_ID
+  
+- Company_ID
+  
+- Role
+  
+- Is_Default
+  
+- Status
+  
+
+### Financial & Risk
+
+- Credit_Limit
+  
+- Outstanding_Balance
+  
+- Preferred_Payment_Method
+  
+- Blacklist_Flag
+  
+- Blacklist_Reason
+  
+- Customer_Risk_Score
+  
+
+---
+
+# 3️⃣ **SPONSOR MASTER**
+
+- Sponsor_ID
+  
+- Full_Name_En/Ar
+  
+- Nationality
+  
+- Emirates_ID_Number
+  
+- Emirates_ID_Expiry
+  
+- Mobile
+  
+- WhatsApp
+  
+- Email
+  
+- Address
+  
+- Relationship_To_Customer
+  
+- Max_Exposure_Amount
+  
+- Blacklist_Flag
+  
+- Blacklist_Reason
+  
+
+---
+
+# 4️⃣ **COMPANY MASTER**
+
+*(Corporate customers)*
+
+### Legal
+
+- Company_ID
+  
+- Company_Code
+  
+- Legal_Name_En/Ar
+  
+- Trade_Name_En/Ar
+  
+- Trade_License_Number
+  
+- Trade_License_Issuer
+  
+- Trade_License_Expiry
+  
+- VAT_TRN_Number
+  
+
+### Contact
+
+- HQ_Address_En/Ar
+  
+- Billing_Address_En/Ar
+  
+- PO_Box
+  
+- Email
+  
+- Landline
+  
+- Website
+  
+
+### Authorized Signatory (Separate table)
+
+- Signatory_ID
+  
+- Company_ID
+  
+- Name
+  
+- Designation
+  
+- Mobile
+  
+- Email
+  
+- Emirates_ID
+  
+- Passport
+  
+- Signature_Document_ID
+  
+
+### Financial
+
+- Payment_Terms
+  
+- Credit_Limit
+  
+- Discount_Rate
+  
+- Outstanding_Balance
+  
+- Company_Risk_Flag
+  
+
+---
+
+# 5️⃣ **OUTSOURCING DRIVER COMPANY MASTER**
+
+- Outsourcing_Company_ID
+  
+- Name_En/Ar
+  
+- Trade_License
+  
+- Trade_License_Expiry
+  
+- VAT_TRN
+  
+- Address
+  
+- Email
+  
+- Landline
+  
+- Contact_Person
+  
+- Contract_Start
+  
+- Contract_End
+  
+- Agreement_Document_ID
+  
+- SLA_Document_ID
+  
+- SLA_Score
+  
+- Status
+  
+
+---
+
+# 6️⃣ **BRANCH MASTER**
+
+- Branch_ID
+  
+- Branch_Code
+  
+- Company_ID
+  
+- Branch_Name_En/Ar
+  
+- Emirate
+  
+- Full_Address_En/Ar
+  
+- Google_Map_Link
+  
+- Branch_Email
+  
+- Landline
+  
+- Manager_Name
+  
+- Manager_Mobile
+  
+- Working_Hours
+  
+- Is_Airport_Branch
+  
+- Trade_License_Number
+  
+- Trade_License_Expiry
+  
+
+---
+
+# 🔶 **SECTION 2 — VEHICLE & FLEET MODULES**
+
+---
+
+# 7️⃣ **VEHICLE MASTER**
+
+### Identity
+
+- Vehicle_ID
+  
+- Vehicle_Code
+  
+- VIN
+  
+- Plate_Number
+  
+- Plate_Code
+  
+- Registration_Number
+  
+- Registration_Expiry
+  
+
+### Specs
+
+- Make
+  
+- Model
+  
+- Year
+  
+- Trim
+  
+- Color
+  
+- Category
+  
+- Body_Type
+  
+- Fuel_Type
+  
+- Transmission
+  
+- Engine_Size
+  
+- Seating_Capacity
+  
+
+### Operational
+
+- Odometer_Current
+  
+- GPS_Device_ID
+  
+- Tracker_Serial
+  
+- Current_Status
+  
+- Branch_ID
+  
+- Ownership_Type
+  
+- Market_Value
+  
+- Purchase_Date
+  
+- Purchase_Price
+  
+
+### Insurance
+
+- Insurance_Provider
+  
+- Policy_Number
+  
+- Insurance_Expiry
+  
+- Deductible
+  
+- Insurance_Type
+  
+- Coverage_Type
+  
+- Offroad_Exclusion
+  
+- Policy_Document_ID
+  
+
+### Toll Registration
+
+- Salik_Tag_Number
+  
+- Darb_Account_ID
+  
+- Aber_Account_ID
+  
+
+---
+
+# 8️⃣ **VEHICLE SERVICE & MAINTENANCE**
+
+### Vehicle_Service_Log
+
+- Service_ID
+  
+- Vehicle_ID
+  
+- Service_Date
+  
+- Service_Type
+  
+- Provider
+  
+- Mileage
+  
+- Service_Cost
+  
+- Next_Service_Mileage
+  
+- Next_Service_Date
+  
+- Document_ID
+  
+
+### Work Orders
+
+- WorkOrder_ID
+  
+- Vehicle_ID
+  
+- Issue_Report
+  
+- Assigned_To
+  
+- Estimate
+  
+- Actual_Cost
+  
+- Completion_Date
+  
+
+---
+
+# 9️⃣ **CAR CLEANING / DETAILING LOG**
+
+- Cleaning_ID
+  
+- Vehicle_ID
+  
+- Cleaning_Type
+  
+- Cleaning_By
+  
+- Cleaning_Date
+  
+- Cost
+  
+- Condition_Before
+  
+- Condition_After
+  
+- Photos_Before_Doc_ID
+  
+- Photos_After_Doc_ID
+  
+
+---
+
+# 🔟 **VEHICLE CONDITION REPORTS (Structured)**
+
+### Condition_Report
+
+- Report_ID
+  
+- Vehicle_ID
+  
+- Contract_ID
+  
+- Date
+  
+- Checklist (Tyres/Lights/Glass/Interior/Exterior)
+  
+- Dashboard_Warnings
+  
+- Fuel_Level
+  
+- Tools_And_Spare_Present
+  
+- Photos_Doc_ID
+  
+
+---
+
+# 1️⃣1️⃣ **ACCESSORIES MODULE**
+
+- Accessory_ID
+  
+- Vehicle_ID
+  
+- Accessory_Type
+  
+- Serial_Number
+  
+- Cost
+  
+- Status
+  
+
+---
+
+# 1️⃣2️⃣ **FLEET DEPRECIATION & ACCOUNTING**
+
+### Fleet_Asset_Master
+
+- Asset_ID
+  
+- Vehicle_ID
+  
+- Purchase_Date
+  
+- Purchase_Price
+  
+- Useful_Life_Years
+  
+- Depreciation_Method
+  
+- Salvage_Value
+  
+- Depreciation_Start
+  
+- Depreciation_End
+  
+- Book_Value_Current
+  
+- Accumulated_Depreciation
+  
+- Lease_Provider
+  
+- Lease_Amount
+  
+- GL_Code
+  
+
+### Depreciation_Log
+
+- Log_ID
+  
+- Asset_ID
+  
+- Month
+  
+- Depreciation_Amount
+  
+- Book_Value_After
+  
+- Posted_To_Accounts_Flag
+  
+
+---
+
+# 🔶 **SECTION 3 — RENTAL CONTRACTS & FINANCIALS**
+
+---
+
+# 1️⃣3️⃣ **RENTAL RATE PLAN**
+
+- Rate_Plan_ID
+  
+- Vehicle_Category
+  
+- Rate_Type
+  
+- Base_Rate
+  
+- Mileage_Limit_Per_Day
+  
+- Extra_KM_Rate
+  
+- Deposit_Required
+  
+- Deposit_Amount
+  
+- Additional_Driver_Rate
+  
+- GPS_Rate
+  
+- Baby_Seat_Rate
+  
+- Delivery_Charge
+  
+- Pickup_Charge
+  
+- Cancellation_Fee
+  
+- Min_Renter_Age
+  
+- Young_Driver_Surcharge
+  
+- Validity
+  
+
+---
+
+# 1️⃣4️⃣ **RENTAL CONTRACT**
+
+### Contract Details
+
+- Contract_ID
+  
+- Contract_Number
+  
+- Created_By
+  
+- Branch_ID
+  
+- Contract_Date
+  
+
+### Entities
+
+- Customer_ID
+  
+- Sponsor_ID
+  
+- Company_ID
+  
+- Driver_ID
+  
+- Vehicle_ID
+  
+- Rate_Plan_ID
+  
+
+### Rental Period
+
+- Start_DateTime
+  
+- End_DateTime
+  
+- Extended_End_Date
+  
+- Actual_Return_DateTime
+  
+
+### KM & Fuel
+
+- Odometer_Out
+  
+- Odometer_In
+  
+- Included_KMs
+  
+- KMs_Run
+  
+- Extra_KMs
+  
+- Extra_KM_Rate
+  
+- Extra_KM_Charge
+  
+- Fuel_Level_Out
+  
+- Fuel_Level_In
+  
+- Fuel_Charge
+  
+
+### Deposits
+
+- Deposit_Method
+  
+- Deposit_Amount
+  
+- PG_Transaction_ID
+  
+- Refund_Status
+  
+- Refund_Date
+  
+
+### Financial Summary
+
+- Base_Rental
+  
+- Addons_Total
+  
+- Extra_KM_Total
+  
+- Fine_Total
+  
+- Fuel_Total
+  
+- Damage_Total
+  
+- VAT_Amount
+  
+- Grand_Total
+  
+- Paid_Amount
+  
+- Outstanding_Amount
+  
+
+### Status
+
+- Contract_Status
+  
+- Notes
+  
+
+---
+
+# 1️⃣5️⃣ **CONTRACT PAYMENTS**
+
+- Payment_ID
+  
+- Contract_ID
+  
+- Amount
+  
+- Date
+  
+- Method
+  
+- Reference
+  
+- VAT
+  
+- Payment_Status
+  
+
+---
+
+# 🔶 **SECTION 4 — TOLLS, FINES, INCIDENTS, CLAIMS**
+
+---
+
+# 1️⃣6️⃣ **TOLL SYSTEM (Salik / Darb / Aber)**
+
+### Toll_System_Master
+
+- Toll_System_ID
+  
+- Name
+  
+- Emirate
+  
+- Provider
+  
+- Standard_Fee
+  
+- Holiday_Exempt
+  
+
+### Toll_Peak_Hour_Window (Supports Multi-Peak)
+
+- Peak_ID
+  
+- Toll_System_ID
+  
+- Day_Type
+  
+- Start_Time
+  
+- End_Time
+  
+- Fee_Amount
+  
+- Active
+  
+
+### Toll_Gate_Master
+
+- Gate_ID
+  
+- Toll_System_ID
+  
+- Name
+  
+- GPS_Location
+  
+- Direction
+  
+- Gate_Type
+  
+- Is_Peak_Dependent
+  
+
+### Toll_Pass
+
+- Pass_ID
+  
+- Vehicle_ID
+  
+- Gate_ID
+  
+- Contract_ID
+  
+- Pass_DateTime
+  
+- Fee_Charged
+  
+
+---
+
+# 1️⃣7️⃣ **FINES (Traffic / Police / Parking / Toll / Accident)**
+
+### Traffic_Fine_Master
+
+- Fine_ID
+  
+- Vehicle_ID
+  
+- Customer_ID
+  
+- Driver_ID
+  
+- Contract_ID
+  
+- Fine_Source
+  
+- Fine_Category
+  
+- Fine_Code
+  
+- Description
+  
+- Fine_Date
+  
+- Amount
+  
+- Black_Points
+  
+- Payment_Status
+  
+- Paid_By
+  
+- Paid_Date
+  
+- Document_ID
+  
+
+---
+
+# 1️⃣8️⃣ **INCIDENT MASTER**
+
+- Incident_ID
+  
+- Contract_ID
+  
+- Vehicle_ID
+  
+- Customer_ID
+  
+- Driver_ID
+  
+- Incident_Type
+  
+- Description
+  
+- Photos_Doc_ID
+  
+- Police_Report_Number
+  
+- Insurance_Claim_Number
+  
+- Financial_Impact
+  
+- Status
+  
+- Blacklist_Flag
+  
+- Blacklist_Reason_ID
+  
+
+---
+
+# 1️⃣9️⃣ **CLAIMS MANAGEMENT**
+
+### Claim_Master
+
+- Claim_ID
+  
+- Incident_ID
+  
+- Vehicle_ID
+  
+- Insurance_Provider
+  
+- Claim_Type
+  
+- Claim_Status
+  
+- Amount_Claimed
+  
+- Amount_Approved
+  
+- Amount_Reimbursed
+  
+- Deductible
+  
+- Claim_Document_ID
+  
+
+### Repair_Work_Order
+
+- WorkOrder_ID
+  
+- Claim_ID
+  
+- Description
+  
+- Estimate
+  
+- Actual_Cost
+  
+- Completion_Date
+  
+
+---
+
+# 🔶 **SECTION 5 — OPERATIONS & AUTOMATION**
+
+---
+
+# 2️⃣0️⃣ **DRIVER ROSTERING & SHIFTS**
+
+### Driver_Schedule
+
+- Schedule_ID
+  
+- Driver_ID
+  
+- Date
+  
+- Shift_Start
+  
+- Shift_End
+  
+- Break
+  
+- Branch_ID
+  
+- Vehicle_Assigned
+  
+- Task_Type
+  
+
+### Driver_Attendance
+
+- Attendance_ID
+  
+- Driver_ID
+  
+- Check_In
+  
+- Check_Out
+  
+- Hours_Worked
+  
+- Overtime
+  
+
+---
+
+# 2️⃣1️⃣ **GPS TRACKING (Future-Ready)**
+
+### GPS_Tracking_Master
+
+- GPS_ID
+  
+- Vehicle_ID
+  
+- IMEI
+  
+- SIM_Number
+  
+- Provider
+  
+- Activation_Date
+  
+
+### GPS_Live_Log (Future)
+
+- Log_ID
+  
+- Vehicle_ID
+  
+- Timestamp
+  
+- Lat
+  
+- Lon
+  
+- Speed
+  
+- Ignition
+  
+- Fuel_Level
+  
+- Driver_Behaviour
+  
+
+---
+
+# 2️⃣2️⃣ **AUTOMATED REMINDER SYSTEM**
+
+- Reminder_ID
+  
+- Entity_Type
+  
+- Entity_ID
+  
+- Reminder_Type
+  
+- Reminder_Date
+  
+- Frequency
+  
+- Channel
+  
+- Message_Template
+  
+- Is_Sent
+  
+- Sent_Time
+  
+
+---
+
+# 2️⃣3️⃣ **RBAC — ROLE-BASED PERMISSIONS**
+
+### User_Master
+
+- User_ID
+  
+- Name
+  
+- Email
+  
+- Mobile
+  
+- Role_ID
+  
+- Branch_ID
+  
+- Status
+  
+
+### Roles
+
+- Role_ID
+  
+- Role_Name
+  
+- Description
+  
+
+### Permissions
+
+- Permission_ID
+  
+- Permission_Name
+  
+
+### Role_Permission_Map
+
+- Role_ID
+  
+- Permission_ID
+  
+
+---
+
+# 2️⃣4️⃣ **APPROVAL WORKFLOW ENGINE**
+
+### Approval_Master
+
+- Approval_ID
+  
+- Entity_Type
+  
+- Entity_ID
+  
+- Requested_By
+  
+- Required_Level
+  
+- Status
+  
+- Notes
+  
+
+### Approval_Log
+
+- Log_ID
+  
+- Approval_ID
+  
+- Action
+  
+- Action_By
+  
+- Date
+  
+- Remarks
+  
+
+---
+
+# 🔶 **SECTION 6 — SUPPORT, COMPLIANCE, AUDIT**
+
+---
+
+# 2️⃣5️⃣ **DOCUMENT MANAGEMENT**
+
+- Document_ID
+  
+- Entity_Type
+  
+- Entity_ID
+  
+- Document_Type
+  
+- File_URL
+  
+- Issue_Date
+  
+- Expiry_Date
+  
+- Verified
+  
+- Verified_By
+  
+- Verified_Date
+  
+
+---
+
+# 2️⃣6️⃣ **AUDIT LOG**
+
+- Log_ID
+  
+- Entity
+  
+- Entity_ID
+  
+- Action (Create/Update/Delete/Login/Approval)
+  
+- Old_Value
+  
+- New_Value
+  
+- Performed_By
+  
+- Performed_At
+  
+
+---
+
+# 2️⃣7️⃣ **MULTI-COMPANY & MULTI-BRANCH**
+
+### Company_Profile
+
+- Company_ID
+  
+- Parent_Company_ID
+  
+- Name
+  
+- Trade_License
+  
+- Tax_Number
+  
+
+### Branch_Profile
+
+- Branch_ID
+  
+- Company_ID
+  
+- Branch_Name
+  
+- Branch_Location
+  
+
+---
+
+# 🔶 **SECTION 7 — STRATEGIC & OPTIONAL MODULES**
+
+---
+
+# 2️⃣8️⃣ **CUSTOMER RISK SCORING ENGINE**
+
+Factors:
+
+- Nationality risk
+  
+- Visa type
+  
+- Payment history
+  
+- Previous fines
+  
+- Accidents
+  
+- Late return history
+  
+- Chargeback tendency
+  
+
+---
+
+# 2️⃣9️⃣ **CUSTOMER MOBILE APP (Optional)**
+
+- View contracts
+  
+- Extend rental
+  
+- Digital signature
+  
+- Raise support tickets
+  
+- Track tolls, fines, payments
+  
+
+---
+
+# 3️⃣0️⃣ **API-GATEWAY LAYER**
+
+For integration with:
+
+- UAE Pass
+  
+- Insurance portals
+  
+- Payment gateways
+  
+- Telematics providers
+  
+- Corporate ERP systems
+  
+
+---

@@ -51,7 +51,7 @@ export default function PublicHolidays() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertPublicHoliday) => apiRequest("/api/public-holidays", "POST", data),
+    mutationFn: (data: InsertPublicHoliday) => apiRequest("POST", "/api/public-holidays", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/public-holidays"] });
       toast({ title: t("success"), description: t("holidayCreated") });
@@ -65,7 +65,7 @@ export default function PublicHolidays() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<InsertPublicHoliday> }) =>
-      apiRequest(`/api/public-holidays/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/public-holidays/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/public-holidays"] });
       toast({ title: t("success"), description: t("holidayUpdated") });
@@ -79,7 +79,7 @@ export default function PublicHolidays() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/public-holidays/${id}`, "DELETE"),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/public-holidays/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/public-holidays"] });
       toast({ title: t("success"), description: t("holidayDeleted") });
@@ -290,8 +290,13 @@ export default function PublicHolidays() {
                     <FormControl>
                       <Input
                         type="date"
-                        value={field.value instanceof Date ? format(field.value, "yyyy-MM-dd") : ""}
-                        onChange={(e) => field.onChange(new Date(e.target.value))}
+                        value={field.value instanceof Date && !isNaN(field.value.getTime()) ? format(field.value, "yyyy-MM-dd") : ""}
+                        onChange={(e) => {
+                          const newDate = new Date(e.target.value);
+                          if (!isNaN(newDate.getTime())) {
+                            field.onChange(newDate);
+                          }
+                        }}
                         data-testid="input-holiday-date"
                       />
                     </FormControl>
