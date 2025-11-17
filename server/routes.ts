@@ -13,6 +13,7 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGeolocation } from "./services/geolocation";
 import { validateEditReason } from "./utils/validation";
+import { calculateContractDriverCosts } from "./utils/driverCostCalculator";
 import { format } from "date-fns";
 import os from "os";
 import { readFileSync } from "fs";
@@ -991,16 +992,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }, 0);
       const totalAmount = validateFinancialInput(contract.totalAmount || '0', 'total amount');
       const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
-      const totalDue = totalAmount + totalExtraCharges;
+      
+      // BRANCH & DRIVER SERVICE INTEGRATION: Include driver service costs in total
+      const driverAssignments = await storage.getDriverAssignmentsByContract(contract.id);
+      const { totalDriverCharges } = calculateContractDriverCosts(driverAssignments);
+      
+      const totalDue = totalAmount + totalExtraCharges + totalDriverCharges;
       
       // Calculate precise outstanding balance
       const totalPaidRounded = Math.round(totalPaid * 100) / 100;
       const totalDueRounded = Math.round(totalDue * 100) / 100;
       const computedOutstanding = Math.max(0, totalDueRounded - totalPaidRounded);
       
-      // Return contract with dynamically calculated outstanding balance
+      // Return contract with dynamically calculated outstanding balance and driver costs
       res.json({
         ...contract,
+        totalDriverCharges: totalDriverCharges.toFixed(2),
         outstandingBalance: computedOutstanding.toFixed(2),
       });
     } catch (error) {
