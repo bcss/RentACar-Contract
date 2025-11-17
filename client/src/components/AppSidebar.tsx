@@ -303,6 +303,24 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/companies',
       show: isAdmin || isManager,
     },
+    {
+      title: 'Branches',
+      icon: 'business',
+      url: '/branches',
+      show: isAdmin || isManager,
+    },
+    {
+      title: 'Drivers',
+      icon: 'people',
+      url: '/drivers',
+      show: isAdmin || isManager,
+    },
+    {
+      title: 'Driver Companies',
+      icon: 'business_center',
+      url: '/driver-companies',
+      show: isAdmin || isManager,
+    },
   ];
 
   const settingsItems = [
@@ -322,6 +340,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       title: t('nav.termsConditions'),
       icon: 'description',
       url: '/settings/terms',
+      show: isAdmin,
+    },
+    {
+      title: 'Public Holidays',
+      icon: 'default',
+      url: '/public-holidays',
       show: isAdmin,
     },
     {

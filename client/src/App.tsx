@@ -55,6 +55,8 @@ const ImportData = lazy(() => import("@/pages/ImportData"));
 const DashboardSamples = lazy(() => import("@/pages/DashboardSamples"));
 const PublicHolidays = lazy(() => import("@/pages/PublicHolidays"));
 const Branches = lazy(() => import("@/pages/Branches"));
+const Drivers = lazy(() => import("@/pages/Drivers"));
+const DriverCompanies = lazy(() => import("@/pages/DriverCompanies"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -216,6 +218,12 @@ function Router() {
       </Route>
       <Route path="/branches">
         {() => <ProtectedRoute component={Branches} />}
+      </Route>
+      <Route path="/drivers">
+        {() => <ProtectedRoute component={Drivers} />}
+      </Route>
+      <Route path="/driver-companies">
+        {() => <ProtectedRoute component={DriverCompanies} />}
       </Route>
       <Route component={() => <NotFound />} />
       </Switch>
