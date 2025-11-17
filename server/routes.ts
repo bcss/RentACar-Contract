@@ -6763,13 +6763,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertTollSystemSchema.safeParse({ ...req.body, createdBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertTollSystemSchema.parse(req.body);
+      const system = await storage.createTollSystem({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const system = await storage.createTollSystem(validationResult.data);
       await createAuditLog(user.id, 'toll_system_created', undefined, req, `Created toll system: ${system.systemName}`);
       res.status(201).json(system);
     } catch (error) {
@@ -6836,13 +6835,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertTollGateSchema.safeParse(req.body);
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertTollGateSchema.parse(req.body);
+      const gate = await storage.createTollGate({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const gate = await storage.createTollGate(validationResult.data);
       await createAuditLog(user.id, 'toll_gate_created', undefined, req, `Created toll gate: ${gate.gateName}`);
       res.status(201).json(gate);
     } catch (error) {
@@ -6912,13 +6910,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertTollPassSchema.safeParse(req.body);
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertTollPassSchema.parse(req.body);
+      const pass = await storage.createTollPass({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const pass = await storage.createTollPass(validationResult.data);
       await createAuditLog(user.id, 'toll_pass_created', pass.contractId || undefined, req, `Created toll pass`);
       res.status(201).json(pass);
     } catch (error) {
@@ -6989,13 +6986,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertTrafficFineSchema.safeParse({ ...req.body, createdBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertTrafficFineSchema.parse(req.body);
+      const fine = await storage.createTrafficFine({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const fine = await storage.createTrafficFine(validationResult.data);
       await createAuditLog(user.id, 'traffic_fine_created', fine.contractId || undefined, req, `Created traffic fine: ${fine.description}`);
       res.status(201).json(fine);
     } catch (error) {
@@ -7066,13 +7062,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertIncidentSchema.safeParse({ ...req.body, createdBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertIncidentSchema.parse(req.body);
+      const incident = await storage.createIncident({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const incident = await storage.createIncident(validationResult.data);
       await createAuditLog(user.id, 'incident_created', incident.contractId || undefined, req, `Created incident: ${incident.incidentType}`);
       res.status(201).json(incident);
     } catch (error) {
@@ -7141,13 +7136,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertDocumentRegistrySchema.safeParse({ ...req.body, uploadedBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertDocumentRegistrySchema.parse(req.body);
+      const document = await storage.createDocument({
+        ...data,
+        uploadedBy: user.id,
+      } as any);
       
-      const document = await storage.createDocument(validationResult.data);
       await createAuditLog(user.id, 'document_created', undefined, req, `Created document: ${document.documentType}`);
       res.status(201).json(document);
     } catch (error) {
@@ -7230,13 +7224,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertVehicleServiceRecordSchema.safeParse({ ...req.body, createdBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertVehicleServiceRecordSchema.parse(req.body);
+      const record = await storage.createVehicleServiceRecord({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const record = await storage.createVehicleServiceRecord(validationResult.data);
       await createAuditLog(user.id, 'service_record_created', undefined, req, `Created service record for vehicle ${record.vehicleId}`);
       res.status(201).json(record);
     } catch (error) {
@@ -7304,13 +7297,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertRentalRatePlanSchema.safeParse({ ...req.body, createdBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertRentalRatePlanSchema.parse(req.body);
+      const plan = await storage.createRentalRatePlan({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const plan = await storage.createRentalRatePlan(validationResult.data);
       await createAuditLog(user.id, 'rate_plan_created', undefined, req, `Created rate plan: ${plan.planName}`);
       res.status(201).json(plan);
     } catch (error) {
@@ -7377,13 +7369,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertVehicleAccessorySchema.safeParse({ ...req.body, createdBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertVehicleAccessorySchema.parse(req.body);
+      const accessory = await storage.createVehicleAccessory({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const accessory = await storage.createVehicleAccessory(validationResult.data);
       await createAuditLog(user.id, 'accessory_created', undefined, req, `Created accessory: ${accessory.accessoryName}`);
       res.status(201).json(accessory);
     } catch (error) {
@@ -7450,14 +7441,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertContractAccessorySchema.safeParse(req.body);
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertContractAccessorySchema.parse(req.body);
+      const accessory = await storage.createContractAccessory({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const accessory = await storage.createContractAccessory(validationResult.data);
-      await createAuditLog(user.id, 'contract_accessory_added', validationResult.data.contractId, req, `Added accessory to contract`);
+      await createAuditLog(user.id, 'contract_accessory_added', data.contractId, req, `Added accessory to contract`);
       res.status(201).json(accessory);
     } catch (error) {
       next(error);
@@ -7533,13 +7523,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertDriverScheduleSchema.safeParse({ ...req.body, createdBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertDriverScheduleSchema.parse(req.body);
+      const schedule = await storage.createDriverSchedule({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const schedule = await storage.createDriverSchedule(validationResult.data);
       await createAuditLog(user.id, 'driver_schedule_created', undefined, req, `Created driver schedule`);
       res.status(201).json(schedule);
     } catch (error) {
@@ -7608,13 +7597,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertDriverAttendanceSchema.safeParse(req.body);
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertDriverAttendanceSchema.parse(req.body);
+      const attendance = await storage.createDriverAttendance({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const attendance = await storage.createDriverAttendance(validationResult.data);
       await createAuditLog(user.id, 'driver_checked_in', undefined, req, `Driver checked in`);
       res.status(201).json(attendance);
     } catch (error) {
@@ -7696,13 +7684,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertAutomatedReminderSchema.safeParse({ ...req.body, createdBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertAutomatedReminderSchema.parse(req.body);
+      const reminder = await storage.createAutomatedReminder({
+        ...data,
+        createdBy: user.id,
+      } as any);
       
-      const reminder = await storage.createAutomatedReminder(validationResult.data);
       await createAuditLog(user.id, 'reminder_created', undefined, req, `Created automated reminder`);
       res.status(201).json(reminder);
     } catch (error) {
@@ -7783,13 +7770,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertApprovalRequestSchema.safeParse({ ...req.body, requestedBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
-      
-      const request = await storage.createApprovalRequest(validationResult.data);
+      const data = insertApprovalRequestSchema.parse(req.body);
+      const request = await storage.createApprovalRequest({
+        ...data,
+        requestedBy: user.id,
+      } as any);
       
       await storage.createApprovalLog({
         approvalId: request.id,
@@ -7908,13 +7893,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as User;
       
-      const validationResult = insertCustomerRiskScoreSchema.safeParse({ ...req.body, calculatedBy: user.id });
-      if (!validationResult.success) {
-        const errors = fromZodError(validationResult.error);
-        return res.status(400).json({ message: errors.message });
-      }
+      const data = insertCustomerRiskScoreSchema.parse(req.body);
+      const score = await storage.createCustomerRiskScore({
+        ...data,
+        calculatedBy: user.id,
+      } as any);
       
-      const score = await storage.createCustomerRiskScore(validationResult.data);
       await createAuditLog(user.id, 'risk_score_created', undefined, req, `Created risk score for customer`);
       res.status(201).json(score);
     } catch (error) {

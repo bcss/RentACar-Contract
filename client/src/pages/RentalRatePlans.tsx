@@ -43,9 +43,9 @@ export default function RentalRatePlans() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<RentalRatePlan | null>(null);
   const [filters, setFilters] = useState({
-    planType: "",
-    vehicleCategory: "",
-    isActive: "",
+    planType: "all",
+    vehicleCategory: "all",
+    isActive: "all",
     activeNow: false,
   });
 
@@ -163,9 +163,9 @@ export default function RentalRatePlans() {
   // Filter plans
   const filteredPlans = useMemo(() => {
     return ratePlans.filter((plan) => {
-      if (filters.planType && plan.planType !== filters.planType) return false;
-      if (filters.vehicleCategory && plan.vehicleCategory !== filters.vehicleCategory) return false;
-      if (filters.isActive !== "" && plan.isActive !== (filters.isActive === "true")) return false;
+      if (filters.planType && filters.planType !== "all" && plan.planType !== filters.planType) return false;
+      if (filters.vehicleCategory && filters.vehicleCategory !== "all" && plan.vehicleCategory !== filters.vehicleCategory) return false;
+      if (filters.isActive !== "all" && plan.isActive !== (filters.isActive === "true")) return false;
       
       if (filters.activeNow) {
         const now = new Date();
@@ -208,7 +208,7 @@ export default function RentalRatePlans() {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   {PLAN_TYPES.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
                       {type.label}
@@ -225,7 +225,7 @@ export default function RentalRatePlans() {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {VEHICLE_CATEGORIES.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
@@ -242,7 +242,7 @@ export default function RentalRatePlans() {
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="true">Active</SelectItem>
                   <SelectItem value="false">Inactive</SelectItem>
                 </SelectContent>
@@ -417,14 +417,14 @@ export default function RentalRatePlans() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Vehicle Category</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <Select onValueChange={field.onChange} value={field.value || "none"}>
                         <FormControl>
                           <SelectTrigger data-testid="select-vehicle-category">
                             <SelectValue placeholder="All Categories" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">All Categories</SelectItem>
+                          <SelectItem value="none">All Categories</SelectItem>
                           {VEHICLE_CATEGORIES.map((category) => (
                             <SelectItem key={category.value} value={category.value}>
                               {category.label}

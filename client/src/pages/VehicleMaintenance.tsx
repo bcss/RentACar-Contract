@@ -36,8 +36,8 @@ export default function VehicleMaintenance() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<VehicleServiceRecord | null>(null);
   const [filters, setFilters] = useState({
-    vehicleId: "",
-    serviceType: "",
+    vehicleId: "all",
+    serviceType: "all",
   });
 
   const { data: serviceRecords = [], isLoading } = useQuery<VehicleServiceRecord[]>({
@@ -143,8 +143,8 @@ export default function VehicleMaintenance() {
   // Filter records
   const filteredRecords = useMemo(() => {
     return serviceRecords.filter((record) => {
-      if (filters.vehicleId && record.vehicleId !== filters.vehicleId) return false;
-      if (filters.serviceType && record.serviceType !== filters.serviceType) return false;
+      if (filters.vehicleId && filters.vehicleId !== "all" && record.vehicleId !== filters.vehicleId) return false;
+      if (filters.serviceType && filters.serviceType !== "all" && record.serviceType !== filters.serviceType) return false;
       return true;
     });
   }, [serviceRecords, filters]);
@@ -236,7 +236,7 @@ export default function VehicleMaintenance() {
                   <SelectValue placeholder="All Vehicles" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Vehicles</SelectItem>
+                  <SelectItem value="all">All Vehicles</SelectItem>
                   {vehicles.map((vehicle) => (
                     <SelectItem key={vehicle.id} value={vehicle.id}>
                       {vehicle.registration} - {vehicle.make} {vehicle.model}
@@ -253,7 +253,7 @@ export default function VehicleMaintenance() {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   {SERVICE_TYPES.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
                       {type.label}

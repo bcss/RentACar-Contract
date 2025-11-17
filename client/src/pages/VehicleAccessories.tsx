@@ -49,8 +49,8 @@ export default function VehicleAccessories() {
   const [catalogDialogOpen, setCatalogDialogOpen] = useState(false);
   const [editingAccessory, setEditingAccessory] = useState<VehicleAccessory | null>(null);
   const [catalogFilters, setCatalogFilters] = useState({
-    category: "",
-    isActive: "",
+    category: "all",
+    isActive: "all",
     inStock: false,
   });
 
@@ -58,8 +58,8 @@ export default function VehicleAccessories() {
   const [contractDialogOpen, setContractDialogOpen] = useState(false);
   const [editingContractAccessory, setEditingContractAccessory] = useState<ContractAccessory | null>(null);
   const [contractFilters, setContractFilters] = useState({
-    contractId: "",
-    accessoryId: "",
+    contractId: "all",
+    accessoryId: "all",
   });
 
   // Fetch data
@@ -246,8 +246,8 @@ export default function VehicleAccessories() {
   // Filter accessories
   const filteredAccessories = useMemo(() => {
     return accessories.filter((accessory) => {
-      if (catalogFilters.category && accessory.category !== catalogFilters.category) return false;
-      if (catalogFilters.isActive !== "" && accessory.isActive !== (catalogFilters.isActive === "true")) return false;
+      if (catalogFilters.category && catalogFilters.category !== "all" && accessory.category !== catalogFilters.category) return false;
+      if (catalogFilters.isActive !== "all" && accessory.isActive !== (catalogFilters.isActive === "true")) return false;
       if (catalogFilters.inStock && (accessory.quantity || 0) <= 0) return false;
       return true;
     });
@@ -256,8 +256,8 @@ export default function VehicleAccessories() {
   // Filter contract accessories
   const filteredContractAccessories = useMemo(() => {
     return contractAccessories.filter((ca) => {
-      if (contractFilters.contractId && ca.contractId !== contractFilters.contractId) return false;
-      if (contractFilters.accessoryId && ca.accessoryId !== contractFilters.accessoryId) return false;
+      if (contractFilters.contractId && contractFilters.contractId !== "all" && ca.contractId !== contractFilters.contractId) return false;
+      if (contractFilters.accessoryId && contractFilters.accessoryId !== "all" && ca.accessoryId !== contractFilters.accessoryId) return false;
       return true;
     });
   }, [contractAccessories, contractFilters]);
@@ -310,7 +310,7 @@ export default function VehicleAccessories() {
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
                       {ACCESSORY_CATEGORIES.map((cat) => (
                         <SelectItem key={cat.value} value={cat.value}>
                           {cat.label}
@@ -327,7 +327,7 @@ export default function VehicleAccessories() {
                       <SelectValue placeholder="All Statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Statuses</SelectItem>
+                      <SelectItem value="all">All Statuses</SelectItem>
                       <SelectItem value="true">Active</SelectItem>
                       <SelectItem value="false">Inactive</SelectItem>
                     </SelectContent>
@@ -465,7 +465,7 @@ export default function VehicleAccessories() {
                       <SelectValue placeholder="All Contracts" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Contracts</SelectItem>
+                      <SelectItem value="all">All Contracts</SelectItem>
                       {contracts.map((contract) => (
                         <SelectItem key={contract.id} value={contract.id}>
                           {contract.contractNumber || contract.id}
@@ -482,7 +482,7 @@ export default function VehicleAccessories() {
                       <SelectValue placeholder="All Accessories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Accessories</SelectItem>
+                      <SelectItem value="all">All Accessories</SelectItem>
                       {accessories.map((accessory) => (
                         <SelectItem key={accessory.id} value={accessory.id}>
                           {accessory.accessoryName}

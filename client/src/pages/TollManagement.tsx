@@ -917,14 +917,14 @@ export default function TollManagement() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Contract (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select onValueChange={field.onChange} value={field.value || "none"}>
                       <FormControl>
                         <SelectTrigger data-testid="select-contractId">
                           <SelectValue placeholder="Select contract" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {contracts.map((contract) => (
                           <SelectItem key={contract.id} value={contract.id}>
                             {contract.contractNumber}

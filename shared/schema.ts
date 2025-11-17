@@ -2531,6 +2531,9 @@ export const insertTrafficFineSchema = createInsertSchema(trafficFines).omit({
   createdAt: true,
   updatedAt: true,
   createdBy: true,
+}).extend({
+  fineDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  paidDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
 });
 
 export type InsertTrafficFine = z.infer<typeof insertTrafficFineSchema>;
@@ -2575,6 +2578,8 @@ export const insertIncidentSchema = createInsertSchema(incidents).omit({
   createdAt: true,
   updatedAt: true,
   createdBy: true,
+}).extend({
+  incidentDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
 });
 
 export type InsertIncident = z.infer<typeof insertIncidentSchema>;
@@ -2610,6 +2615,9 @@ export const insertVehicleServiceRecordSchema = createInsertSchema(vehicleServic
   createdAt: true,
   updatedAt: true,
   createdBy: true,
+}).extend({
+  serviceDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  nextServiceDue: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
 });
 
 export type InsertVehicleServiceRecord = z.infer<typeof insertVehicleServiceRecordSchema>;
@@ -2645,6 +2653,9 @@ export const insertRentalRatePlanSchema = createInsertSchema(rentalRatePlans).om
   createdAt: true,
   updatedAt: true,
   createdBy: true,
+}).extend({
+  effectiveFrom: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  effectiveTo: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
 });
 
 export type InsertRentalRatePlan = z.infer<typeof insertRentalRatePlanSchema>;
@@ -2735,6 +2746,10 @@ export const insertDriverScheduleSchema = createInsertSchema(driverSchedules).om
   createdAt: true,
   updatedAt: true,
   createdBy: true,
+}).extend({
+  scheduleDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  shiftStart: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  shiftEnd: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
 });
 
 export type InsertDriverSchedule = z.infer<typeof insertDriverScheduleSchema>;
@@ -2762,6 +2777,9 @@ export const driverAttendance = pgTable("driver_attendance", {
 export const insertDriverAttendanceSchema = createInsertSchema(driverAttendance).omit({
   id: true,
   createdAt: true,
+}).extend({
+  checkIn: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  checkOut: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
 });
 
 export type InsertDriverAttendance = z.infer<typeof insertDriverAttendanceSchema>;
@@ -2800,6 +2818,9 @@ export const insertAutomatedReminderSchema = createInsertSchema(automatedReminde
   createdAt: true,
   updatedAt: true,
   createdBy: true,
+}).extend({
+  reminderDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  sentTime: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
 });
 
 export type InsertAutomatedReminder = z.infer<typeof insertAutomatedReminderSchema>;
@@ -2939,6 +2960,10 @@ export const insertDocumentRegistrySchema = createInsertSchema(documentRegistry)
   createdAt: true,
   updatedAt: true,
   uploadedBy: true,
+}).extend({
+  issueDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
+  expiryDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
+  verifiedDate: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
 });
 
 export type InsertDocumentRegistry = z.infer<typeof insertDocumentRegistrySchema>;
