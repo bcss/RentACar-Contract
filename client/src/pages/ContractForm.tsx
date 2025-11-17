@@ -2131,6 +2131,53 @@ export default function ContractForm() {
             </CardContent>
           </Card>
 
+          {/* Driver Service */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icon name="directions_car" className="" />
+                Driver Service
+              </CardTitle>
+              <CardDescription>
+                Assign professional drivers to this contract (optional)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isEditing && existingContract?.id ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      Driver assignments will be managed after contract creation
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Navigate to contract view where driver assignments can be managed
+                        navigate(`/contracts/${existingContract.id}`);
+                      }}
+                      data-testid="button-manage-drivers"
+                    >
+                      <Icon name="person" className="mr-2" />
+                      Manage Drivers
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-dashed p-6 text-center">
+                  <Icon name="info" className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Driver service can be added after creating the contract
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Save this contract first, then assign drivers from the contract details page
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Notes */}
           <Card>
             <CardHeader>

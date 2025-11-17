@@ -2029,6 +2029,40 @@ export default function ContractView() {
         </CardContent>
       </Card>
 
+      {/* Driver Service */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+              <Icon name="directions_car" className="" />
+              Driver Service
+            </div>
+            {contract.status !== 'closed' && (
+              <Button onClick={() => {
+                toast({
+                  title: "Coming Soon",
+                  description: "Driver assignment management will be available in the next update",
+                });
+              }} size="sm" data-testid="button-manage-driver-assignments">
+                <Icon name="add" className=" text-sm" />
+                <span>Assign Driver</span>
+              </Button>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-lg border border-dashed p-6 text-center">
+            <Icon name="info" className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              No driver assignments for this contract
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Driver service functionality will be fully available in the next update
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Customer Information */}
         <Card>
