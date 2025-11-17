@@ -631,27 +631,20 @@ export const driverOutsourceCompanies = pgTable("driver_outsource_companies", {
   
   // Contact Information
   contactPerson: varchar("contact_person"),
-  phone: varchar("phone").notNull(),
+  mobile: varchar("mobile").notNull(),
   email: varchar("email"),
   address: text("address"),
-  
-  // Contract Information
-  contractNumber: varchar("contract_number"),
-  contractStartDate: timestamp("contract_start_date"),
-  contractEndDate: timestamp("contract_end_date"),
   
   // Additional Information
   notes: text("notes"),
   
   // Audit fields
-  disabled: boolean("disabled").notNull().default(false),
-  disabledBy: varchar("disabled_by").references(() => users.id),
-  disabledAt: timestamp("disabled_at"),
+  isActive: boolean("is_active").notNull().default(true),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  index("idx_outsource_companies_disabled").on(table.disabled),
+  index("idx_outsource_companies_active").on(table.isActive),
   index("idx_outsource_companies_created_at").on(table.createdAt),
 ]);
 
@@ -668,16 +661,12 @@ export const insertDriverOutsourceCompanySchema = createInsertSchema(driverOutso
   createdAt: true,
   updatedAt: true,
   createdBy: true,
-  disabledBy: true,
-  disabledAt: true,
-  disabled: true,
 }).extend({
   nameEn: z.string().min(1, "Company name (English) is required").max(200, "Name too long"),
   nameAr: z.string().max(200, "Name too long").optional(),
-  phone: z.string().min(1, "Phone number is required").max(20, "Phone number too long"),
+  mobile: z.string().min(1, "Mobile number is required").max(20, "Mobile number too long"),
   email: z.string().email("Invalid email").max(255, "Email too long").optional(),
-  contractStartDate: z.coerce.date().optional(),
-  contractEndDate: z.coerce.date().optional(),
+  isActive: z.boolean().default(true).optional(),
 });
 
 export type InsertDriverOutsourceCompany = z.infer<typeof insertDriverOutsourceCompanySchema>;

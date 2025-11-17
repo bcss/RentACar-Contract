@@ -6326,13 +6326,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/driver-companies", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  app.post("/api/driver-companies", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
-      
-      if (!user.canManageDrivers && user.role !== 'Admin') {
-        return res.status(403).json({ message: "Insufficient permissions to create driver companies" });
-      }
       
       const validationResult = insertDriverOutsourceCompanySchema.safeParse(req.body);
       if (!validationResult.success) {
@@ -6352,13 +6348,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/driver-companies/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  app.patch("/api/driver-companies/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
-      
-      if (!user.canManageDrivers && user.role !== 'Admin') {
-        return res.status(403).json({ message: "Insufficient permissions to update driver companies" });
-      }
       
       // INPUT VALIDATION
       const validationResult = insertDriverOutsourceCompanySchema.partial().safeParse(req.body);
@@ -6375,13 +6367,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/driver-companies/:id/disable", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  app.post("/api/driver-companies/:id/disable", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
-      
-      if (!user.canManageDrivers && user.role !== 'Admin') {
-        return res.status(403).json({ message: "Insufficient permissions to disable driver companies" });
-      }
       
       await storage.disableDriverOutsourceCompany(req.params.id, user.id);
       await createAuditLog(user.id, 'driver_company_disabled', undefined, req, `Disabled driver company`);
@@ -6391,13 +6379,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/driver-companies/:id/enable", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  app.post("/api/driver-companies/:id/enable", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
-      
-      if (!user.canManageDrivers && user.role !== 'Admin') {
-        return res.status(403).json({ message: "Insufficient permissions to enable driver companies" });
-      }
       
       await storage.enableDriverOutsourceCompany(req.params.id);
       await createAuditLog(user.id, 'driver_company_enabled', undefined, req, `Enabled driver company`);
