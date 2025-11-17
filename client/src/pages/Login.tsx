@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useErrorDisplay } from '@/components/design-system';
+import { useErrorDisplay, ErrorDisplay } from '@/components/design-system';
 import { apiRequest, fetchCsrfToken } from '@/lib/queryClient';
 import { queryClient } from '@/lib/queryClient';
 import { Eye, EyeOff, Car } from 'lucide-react';
@@ -15,7 +15,7 @@ import { CompanySettings } from '@shared/schema';
 export default function Login() {
   const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
-  const { showError, showSuccess } = useErrorDisplay();
+  const { currentError, dismissError, showError, showSuccess } = useErrorDisplay();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +47,10 @@ export default function Login() {
 
       setLocation('/');
     } catch (error: any) {
-      showError(error, t('login.failed'));
+      showError(error, { 
+        title: t('login.failed'),
+        mode: "banner" // Use banner mode to demonstrate the ErrorDisplay component
+      });
     } finally {
       setIsLoading(false);
     }
@@ -73,6 +76,12 @@ export default function Login() {
           <p className="text-muted-foreground">{t('login.subtitle')}</p>
         </CardHeader>
         <CardContent>
+          {currentError && (
+            <ErrorDisplay 
+              {...currentError}
+              onDismiss={dismissError}
+            />
+          )}
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">{t('login.username')}</Label>

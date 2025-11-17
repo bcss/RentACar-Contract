@@ -4,6 +4,6 @@
  * Mix of "Get in touch" (clean, minimal) + "Gusto" (structured, progressive) styles
  */
 
-export { useErrorDisplay } from "./ErrorDisplay";
+export { ErrorDisplay, useErrorDisplay } from "./ErrorDisplay";
 export { FormSection } from "./FormSection";
 export { ActionButtons } from "./ActionButtons";
