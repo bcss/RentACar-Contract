@@ -240,7 +240,8 @@ export class RiskCalculator {
         
         if (paidRatio < 0.10) {
           // Extreme underpayment: 95-100 points (critical threshold)
-          underpaymentScore = 95 + (1 - paidRatio) * 50; // 0% paid = 100, 10% paid = 95
+          // Linear interpolation: 0% paid → 100, 10% paid → 95
+          underpaymentScore = 100 - (paidRatio / 0.10) * 5;
         } else if (paidRatio < 0.25) {
           // Severe underpayment: 90-95 points (high threshold)
           underpaymentScore = 90 + ((0.25 - paidRatio) / 0.15) * 5;
