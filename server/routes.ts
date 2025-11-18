@@ -8000,7 +8000,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/automation/seed-documents - Seed document registry from all entities
-  app.post("/api/automation/seed-documents", isAuthenticated, requireSuperadmin, async (req: Request, res: Response, next: NextFunction) => {
+  app.post("/api/automation/seed-documents", isAuthenticated, requireSuperAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
       
@@ -8021,7 +8021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/automation/seed-notification-templates - Seed 12 bilingual notification templates
-  app.post("/api/automation/seed-notification-templates", isAuthenticated, requireSuperadmin, async (req: Request, res: Response, next: NextFunction) => {
+  app.post("/api/automation/seed-notification-templates", isAuthenticated, requireSuperAdmin, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as User;
       
@@ -8069,6 +8069,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(reminders);
     } catch (error) {
       next(error);
+    }
+  });
+
+  // ==================== QR CODE & CONTRACT VERIFICATION ====================
+  
+  // GET /api/contracts/:id/qr - Generate QR code for contract
+  app.get("/api/contracts/:id/qr", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { generateContractQR } = await import('./services/qrCodeService');
+      
+      // Get contract details
+      const contract = await storage.getContractById(req.params.id);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      // Get customer details
+      const customer = await storage.getCustomerById(contract.customerId);
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+
+      // Get vehicle details
+      const vehicle = await storage.getVehicleById(contract.vehicleId);
+      if (!vehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+
+      // Generate QR code
+      const qrData = await generateContractQR({
+        id: contract.id,
+        contractNumber: contract.contractNumber,
+        customerId: contract.customerId,
+        customerName: customer.name,
+        vehiclePlate: vehicle.plateNumber,
+      });
+
+      res.json(qrData);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/verify-contract/:token - Verify contract QR token
+  app.get("/api/verify-contract/:token", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { verifyContractToken } = await import('./services/qrCodeService');
+      
+      // Verify JWT token
+      const payload = verifyContractToken(req.params.token);
+
+      // Get contract details
+      const contract = await storage.getContractById(payload.contractId);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      // Return verified contract info
+      res.json({
+        valid: true,
+        contract: {
+          id: contract.id,
+          contractNumber: contract.contractNumber,
+          customerName: payload.customerName,
+          vehiclePlate: payload.vehiclePlate,
+          status: contract.status,
+          startDate: contract.startDate,
+          endDate: contract.endDate,
+        },
+        payload,
+      });
+    } catch (error: any) {
+      res.status(401).json({
+        valid: false,
+        message: error.message || "Invalid or expired QR code",
+      });
     }
   });
 
