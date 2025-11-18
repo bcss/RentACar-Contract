@@ -2794,13 +2794,17 @@ export const automatedReminders = pgTable("automated_reminders", {
   reminderDate: timestamp("reminder_date").notNull(),
   frequency: varchar("frequency", { length: 20 }).notNull().default("once"), // once, daily, weekly, monthly
   channel: varchar("channel", { length: 20 }).notNull().default("email"), // email, sms, whatsapp, system
+  channelType: varchar("channel_type", { length: 20 }).default("email"), // sms, email, both - New field
+  templateId: varchar("template_id").references(() => notificationTemplates.id), // Reference to notification_templates - New field
   messageTemplate: text("message_template"),
   recipientEmail: varchar("recipient_email"),
   recipientPhone: varchar("recipient_phone"),
   isSent: boolean("is_sent").notNull().default(false),
   sentTime: timestamp("sent_time"),
+  lastTriggered: timestamp("last_triggered"), // Last time reminder was triggered - New field
   sendAttempts: integer("send_attempts").default(0),
   lastError: text("last_error"),
+  isSystemOwned: boolean("is_system_owned").notNull().default(false), // System-owned reminders (12 defaults)
   isActive: boolean("is_active").notNull().default(true),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -2810,6 +2814,7 @@ export const automatedReminders = pgTable("automated_reminders", {
   index("idx_reminders_date").on(table.reminderDate),
   index("idx_reminders_sent").on(table.isSent),
   index("idx_reminders_active").on(table.isActive),
+  index("idx_reminders_template").on(table.templateId),
   index("idx_reminders_created_at").on(table.createdAt),
 ]);
 
@@ -2927,9 +2932,10 @@ export type CustomerRiskScore = typeof customerRiskScores.$inferSelect;
 // Document Registry table - Centralized document management with expiry tracking
 export const documentRegistry = pgTable("document_registry", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  entityType: varchar("entity_type", { length: 30 }).notNull(), // customer, driver, vehicle, contract, company
+  entityType: varchar("entity_type", { length: 30 }).notNull(), // customer, driver, vehicle, contract, company, sponsor
   entityId: varchar("entity_id").notNull(),
   documentType: varchar("document_type", { length: 50 }).notNull(), // license, passport, emirates_id, visa, insurance, registration
+  documentCategory: varchar("document_category", { length: 30 }), // identification, license, insurance, vehicle_docs, company_docs
   documentNumber: varchar("document_number"),
   issueDate: timestamp("issue_date"),
   expiryDate: timestamp("expiry_date"),
@@ -2941,7 +2947,9 @@ export const documentRegistry = pgTable("document_registry", {
   isVerified: boolean("is_verified").notNull().default(false),
   verifiedBy: varchar("verified_by").references(() => users.id),
   verifiedDate: timestamp("verified_date"),
+  isRequired: boolean("is_required").notNull().default(false), // Auto-seeded required documents
   reminderDaysBefore: integer("reminder_days_before").default(30), // Days before expiry to send reminder
+  reminderSent: boolean("reminder_sent").notNull().default(false), // Reminder sent flag
   status: varchar("status", { length: 20 }).notNull().default("active"), // active, expired, renewed, cancelled
   notes: text("notes"),
   uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
@@ -2950,8 +2958,10 @@ export const documentRegistry = pgTable("document_registry", {
 }, (table) => [
   index("idx_document_registry_entity").on(table.entityType, table.entityId),
   index("idx_document_registry_type").on(table.documentType),
+  index("idx_document_registry_category").on(table.documentCategory),
   index("idx_document_registry_expiry").on(table.expiryDate),
   index("idx_document_registry_status").on(table.status),
+  index("idx_document_registry_required").on(table.isRequired),
   index("idx_document_registry_created_at").on(table.createdAt),
 ]);
 
@@ -2968,3 +2978,242 @@ export const insertDocumentRegistrySchema = createInsertSchema(documentRegistry)
 
 export type InsertDocumentRegistry = z.infer<typeof insertDocumentRegistrySchema>;
 export type DocumentRegistryEntry = typeof documentRegistry.$inferSelect;
+
+// ========================================
+// PHASE 3: AUTOMATION & COMMUNICATIONS
+// ========================================
+
+// Customer Risk Score History table - Track risk score changes over time
+export const customerRiskScoreHistory = pgTable("customer_risk_score_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id").notNull().references(() => customers.id),
+  riskScore: integer("risk_score").notNull(), // 0-100
+  riskLevel: varchar("risk_level", { length: 20 }).notNull(), // low, medium, high, critical
+  
+  // Contributing Factors (stored as JSON for detailed breakdown)
+  contributingFactors: jsonb("contributing_factors"), // { payment: 45%, violations: 25%, incidents: 20%, documents: 10% }
+  
+  // Calculation Details
+  calculationDate: timestamp("calculation_date").notNull().defaultNow(),
+  calculatedBy: varchar("calculated_by").references(() => users.id), // null if automated
+  isAutomated: boolean("is_automated").notNull().default(true),
+  
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_risk_history_customer").on(table.customerId),
+  index("idx_risk_history_date").on(table.calculationDate),
+  index("idx_risk_history_level").on(table.riskLevel),
+  index("idx_risk_history_created_at").on(table.createdAt),
+]);
+
+export const insertCustomerRiskScoreHistorySchema = createInsertSchema(customerRiskScoreHistory).omit({
+  id: true,
+  createdAt: true,
+  calculationDate: true,
+});
+
+export type InsertCustomerRiskScoreHistory = z.infer<typeof insertCustomerRiskScoreHistorySchema>;
+export type CustomerRiskScoreHistory = typeof customerRiskScoreHistory.$inferSelect;
+
+// Communication Providers table - SMS/Email provider configuration
+export const communicationProviders = pgTable("communication_providers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Provider Details
+  type: varchar("type", { length: 20 }).notNull(), // sms, email
+  name: varchar("name").notNull(), // Twilio, Gmail, Office365, Generic SMTP
+  provider: varchar("provider", { length: 50 }).notNull(), // twilio, gmail_oauth, office365_oauth, smtp, generic_api
+  
+  // Priority & Status
+  priority: integer("priority").notNull().default(1), // Lower = higher priority (1 = primary, 2 = fallback)
+  isActive: boolean("is_active").notNull().default(true),
+  healthStatus: varchar("health_status", { length: 20 }).notNull().default("unknown"), // healthy, degraded, down, unknown
+  lastHealthCheck: timestamp("last_health_check"),
+  
+  // Encrypted Credentials (JSONB for flexibility)
+  credentials: jsonb("credentials").notNull(), // Encrypted API keys, tokens, passwords
+  
+  // Configuration
+  configuration: jsonb("configuration"), // Additional provider-specific settings
+  
+  // Usage Statistics
+  totalSent: integer("total_sent").default(0),
+  totalFailed: integer("total_failed").default(0),
+  lastUsed: timestamp("last_used"),
+  
+  // Audit
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_communication_providers_type").on(table.type),
+  index("idx_communication_providers_priority").on(table.priority),
+  index("idx_communication_providers_active").on(table.isActive),
+  index("idx_communication_providers_health").on(table.healthStatus),
+  index("idx_communication_providers_created_at").on(table.createdAt),
+]);
+
+export const insertCommunicationProviderSchema = createInsertSchema(communicationProviders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  lastHealthCheck: true,
+  lastUsed: true,
+  totalSent: true,
+  totalFailed: true,
+});
+
+export type InsertCommunicationProvider = z.infer<typeof insertCommunicationProviderSchema>;
+export type CommunicationProvider = typeof communicationProviders.$inferSelect;
+
+// Communication Logs table - Track all sent messages
+export const communicationLogs = pgTable("communication_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Message Details
+  channel: varchar("channel", { length: 20 }).notNull(), // sms, email
+  recipient: varchar("recipient").notNull(), // Phone number or email
+  subject: varchar("subject"), // Email subject
+  message: text("message").notNull(),
+  
+  // Provider Information
+  providerId: varchar("provider_id").references(() => communicationProviders.id),
+  providerName: varchar("provider_name"), // Snapshot for historical reference
+  
+  // Status Tracking
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, sent, delivered, failed, bounced
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  failureReason: text("failure_reason"),
+  
+  // External References
+  externalId: varchar("external_id"), // Provider's message ID
+  entityType: varchar("entity_type", { length: 30 }), // contract, customer, driver, etc.
+  entityId: varchar("entity_id"),
+  
+  // Template Reference
+  templateId: varchar("template_id"),
+  templateVariables: jsonb("template_variables"), // Variables used in template
+  
+  // Delivery Metadata
+  deliveryMetadata: jsonb("delivery_metadata"), // Webhooks, delivery receipts
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_communication_logs_channel").on(table.channel),
+  index("idx_communication_logs_recipient").on(table.recipient),
+  index("idx_communication_logs_status").on(table.status),
+  index("idx_communication_logs_provider").on(table.providerId),
+  index("idx_communication_logs_entity").on(table.entityType, table.entityId),
+  index("idx_communication_logs_sent_at").on(table.sentAt),
+  index("idx_communication_logs_created_at").on(table.createdAt),
+]);
+
+export const insertCommunicationLogSchema = createInsertSchema(communicationLogs).omit({
+  id: true,
+  createdAt: true,
+  sentAt: true,
+  deliveredAt: true,
+});
+
+export type InsertCommunicationLog = z.infer<typeof insertCommunicationLogSchema>;
+export type CommunicationLog = typeof communicationLogs.$inferSelect;
+
+// Notification Preferences table - Customer/Driver communication preferences
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Owner (either customer or driver)
+  customerId: varchar("customer_id").references(() => customers.id),
+  driverId: varchar("driver_id").references(() => drivers.id),
+  
+  // Channel Preferences
+  preferredChannel: varchar("preferred_channel", { length: 20 }).notNull().default("both"), // sms, email, both
+  smsOptIn: boolean("sms_opt_in").notNull().default(true),
+  emailOptIn: boolean("email_opt_in").notNull().default(true),
+  
+  // Contact Information
+  smsNumber: varchar("sms_number"),
+  emailAddress: varchar("email_address"),
+  
+  // Notification Types (opt-in/opt-out for each type)
+  contractReminders: boolean("contract_reminders").notNull().default(true),
+  paymentReminders: boolean("payment_reminders").notNull().default(true),
+  documentExpiry: boolean("document_expiry").notNull().default(true),
+  maintenanceAlerts: boolean("maintenance_alerts").notNull().default(false),
+  marketingMessages: boolean("marketing_messages").notNull().default(false),
+  
+  // Language Preference
+  preferredLanguage: varchar("preferred_language", { length: 5 }).notNull().default("en"), // en, ar
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_notification_prefs_customer").on(table.customerId),
+  index("idx_notification_prefs_driver").on(table.driverId),
+  index("idx_notification_prefs_channel").on(table.preferredChannel),
+  index("idx_notification_prefs_language").on(table.preferredLanguage),
+  index("idx_notification_prefs_created_at").on(table.createdAt),
+]);
+
+export const insertNotificationPreferenceSchema = createInsertSchema(notificationPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertNotificationPreference = z.infer<typeof insertNotificationPreferenceSchema>;
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+
+// Notification Templates table - Reusable message templates (32 types)
+export const notificationTemplates = pgTable("notification_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Template Identification
+  templateCode: varchar("template_code", { length: 50 }).notNull().unique(), // CONTRACT_ACTIVATED, PAYMENT_DUE, etc.
+  category: varchar("category", { length: 30 }).notNull(), // contract, payment, document, compliance, fleet, workforce, approval
+  name: varchar("name").notNull(),
+  description: text("description"),
+  
+  // Template Content (Bilingual)
+  subjectEn: varchar("subject_en"), // Email subject (English)
+  subjectAr: varchar("subject_ar"), // Email subject (Arabic)
+  bodyEn: text("body_en").notNull(), // Message body with {{variables}} (English)
+  bodyAr: text("body_ar").notNull(), // Message body with {{variables}} (Arabic)
+  
+  // Template Variables (e.g., {{contractId}}, {{customerName}}, {{amount}})
+  variables: jsonb("variables"), // ["contractId", "customerName", "amount"]
+  
+  // Channel Support
+  supportsSms: boolean("supports_sms").notNull().default(true),
+  supportsEmail: boolean("supports_email").notNull().default(true),
+  
+  // System Templates (non-editable core templates)
+  isSystemTemplate: boolean("is_system_template").notNull().default(false),
+  
+  // Status
+  isActive: boolean("is_active").notNull().default(true),
+  
+  // Audit
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_notification_templates_code").on(table.templateCode),
+  index("idx_notification_templates_category").on(table.category),
+  index("idx_notification_templates_active").on(table.isActive),
+  index("idx_notification_templates_system").on(table.isSystemTemplate),
+  index("idx_notification_templates_created_at").on(table.createdAt),
+]);
+
+export const insertNotificationTemplateSchema = createInsertSchema(notificationTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertNotificationTemplate = z.infer<typeof insertNotificationTemplateSchema>;
+export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
