@@ -78,6 +78,11 @@ const AutomatedReminders = lazy(() => import("@/pages/AutomatedReminders"));
 const ApprovalWorkflows = lazy(() => import("@/pages/ApprovalWorkflows"));
 const CustomerRiskScoring = lazy(() => import("@/pages/CustomerRiskScoring"));
 
+// Communication Platform
+const CommunicationProviders = lazy(() => import("@/pages/CommunicationProviders"));
+const CommunicationLogs = lazy(() => import("@/pages/CommunicationLogs"));
+const ManualNotificationSender = lazy(() => import("@/pages/ManualNotificationSender"));
+
 // Professional loading skeleton
 function PageLoader() {
   return (
@@ -292,6 +297,17 @@ function Router() {
       </Route>
       <Route path="/risk-scoring">
         {() => <ProtectedRoute component={CustomerRiskScoring} />}
+      </Route>
+      
+      {/* Communication Platform */}
+      <Route path="/communication-providers">
+        {() => <ProtectedRoute component={CommunicationProviders} />}
+      </Route>
+      <Route path="/communication-logs">
+        {() => <ProtectedRoute component={CommunicationLogs} />}
+      </Route>
+      <Route path="/notifications/send">
+        {() => <ProtectedRoute component={ManualNotificationSender} />}
       </Route>
       
       <Route component={() => <NotFound />} />
