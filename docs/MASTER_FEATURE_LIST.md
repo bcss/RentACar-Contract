@@ -1,458 +1,972 @@
 # RCCMS - Master Feature List
-**Generated:** December 2024  
+**Document Version:** 2.0  
+**Last Updated:** November 18, 2025  
+**Application Version:** RCCMS 1.0 (Production Ready)  
 **Purpose:** Comprehensive single source of truth for all implemented features - used for documentation consistency verification
 
 ---
 
-## 1. DATABASE ARCHITECTURE (15 Tables)
+## AUTHORITATIVE DOCUMENTATION
 
-### Core Tables
-1. **sessions** - Session data storage (Replit Auth + internal auth)
-2. **users** - Internal username/password authentication with role-based access (Admin, Manager, Staff, Viewer)
-3. **customers** - Master data for rental customers/hirers (bilingual fields)
-4. **vehicles** - Master data for rental fleet (bilingual support, status tracking)
-5. **sponsors** - Master data for individual sponsors/drivers (bilingual fields)
-6. **companies** - Master data for corporate sponsors (bilingual fields)
+This master list should be read in conjunction with:
+- **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
+- **IMPLEMENTATION_STATUS.md** - Phase-by-phase implementation tracking and completion status
 
-### Contract & Transaction Tables
-7. **contracts** - Core rental contract records (5 lifecycle states: draft → confirmed → active → completed → closed)
-8. **payments** - Comprehensive payment tracking (deposits, final payments, refunds)
-9. **vehicle_inspections** - Two-stage inspection workflow (pre-delivery & post-return) with 6-photo mandatory documentation
-10. **damage_assessments** - Structured damage tracking for completed rentals
-
-### Audit & System Tables
-11. **audit_logs** - Comprehensive lifecycle event tracking (CREATE, UPDATE, DELETE/disable/enable operations)
-12. **contract_edits** - Field-level modification tracking with before/after snapshots and reason capture
-13. **contract_counter** - Auto-incrementing contract number generation
-14. **system_errors** - System error logging with acknowledgment workflow
-15. **company_settings** - Singleton pattern for global system configuration (bilingual company info, financial settings, contract clauses)
+For any discrepancies, replit.md takes precedence for architectural decisions.
 
 ---
 
-## 2. API ARCHITECTURE (100+ Endpoints)
+## 1. DATABASE ARCHITECTURE (63 Tables)
 
-### Authentication (1 endpoint)
-- `GET /api/auth/user` - Current user retrieval
+### Core Tables (6 tables)
+1. **sessions** - PostgreSQL-backed session storage for authentication
+2. **users** - Internal username/password authentication with role-based access (Admin, Manager, Staff, Viewer)
+3. **customers** - Master data for rental customers/hirers (bilingual fields)
+4. **vehicles** - Master data for rental fleet (bilingual support, status tracking, automatic sync)
+5. **sponsors** - Master data for individual sponsors (bilingual fields, Emirates ID verification)
+6. **companies** - Master data for corporate sponsors (bilingual fields, exposure limits)
 
-### Customers (8 endpoints)
-- `GET /api/customers` - List with disable filter
-- `GET /api/customers/search` - Search by name
-- `GET /api/customers/:id` - Individual customer
-- `POST /api/customers` - Create (Manager/Admin)
-- `PATCH /api/customers/:id` - Update (Manager/Admin)
-- `POST /api/customers/:id/disable` - Disable (Manager/Admin)
-- `POST /api/customers/:id/enable` - Enable (Manager/Admin)
-- `GET /api/customers/check-phone/:phone` - Duplicate phone detection with non-blocking warnings
+### Contract & Transaction Tables (9 tables)
+7. **contracts** - Core rental contract records (4-state lifecycle: draft → active → completed → closed)
+8. **payments** - Comprehensive payment tracking (deposits, final payments, refunds, multiple methods)
+9. **vehicle_inspections** - Two-stage inspection workflow (pre-delivery & post-return) with 6-photo mandatory documentation
+10. **damage_assessments** - Structured damage tracking for completed rentals
+11. **contract_counter** - Auto-incrementing contract number generation (singleton pattern)
+12. **contract_edits** - Field-level modification tracking with before/after snapshots and mandatory reason capture
+13. **contract_accessories** - Contract-level accessory assignments with pricing
+14. **driver_assignments** - Professional driver assignments to rental contracts
+15. **digital_signatures** - Digital signature capture for contract signing
 
-### Vehicles (8 endpoints)
-- `GET /api/vehicles` - List with disable filter
+### Audit & System Tables (5 tables)
+16. **audit_logs** - Comprehensive lifecycle event tracking (CREATE, UPDATE, DELETE/disable/enable operations)
+17. **system_errors** - System error logging with acknowledgment workflow
+18. **access_logs** - Application access logging for security compliance
+19. **company_settings** - Singleton pattern for global system configuration (bilingual company info, financial settings, contract clauses)
+20. **company_signatories** - Authorized company signatories for legal contracts
+
+### Toll Management System (4 tables)
+21. **toll_systems** - Master data for UAE toll systems (Salik/Darb/Aber)
+22. **toll_gates** - Toll gate locations with per-gate pricing
+23. **toll_passes** - Vehicle toll pass assignments
+24. **toll_transactions** - (Implied) Toll charge tracking per contract
+
+### Traffic Compliance & Safety (3 tables)
+25. **traffic_fines** - RTA-compliant traffic violation tracking with black points
+26. **incidents** - Accident and incident management with insurance integration
+27. **insurance_claims** - Complete insurance claim workflow (Pending → Under Review → Approved/Rejected → Closed)
+28. **claim_progress_updates** - Insurance claim progress tracking
+
+### Fleet Operations & Maintenance (3 tables)
+29. **vehicle_service_records** - Complete maintenance history (odometer, cost, next service scheduling)
+30. **rental_rate_plans** - Dynamic pricing system (daily/weekly/monthly rates, seasonal pricing)
+31. **vehicle_accessories** - Master catalog for vehicle accessories/upsell items
+
+### Driver Service Module (8 tables)
+32. **drivers** - Professional driver master data (bilingual, licensing, availability)
+33. **driver_outsource_companies** - Outsource driver company management
+34. **driver_schedules** - Driver shift management with branch/vehicle assignment
+35. **driver_schedule_blocks** - Recurring schedule templates
+36. **driver_attendance** - Check-in/check-out tracking with overtime calculation
+37. **driver_rate_cards** - Driver service pricing (hourly/daily/monthly rates)
+38. **driver_assignments** - (Duplicate - see #14) Driver-to-contract assignments
+39. **driver_performance_metrics** - (Implied) Driver performance tracking
+
+### Branch Management (2 tables)
+40. **branches** - Multi-location branch master data
+41. **branch_transfers** - Inter-branch vehicle transfer workflow with approval
+
+### Public Holidays & Calendar (1 table)
+42. **public_holidays** - UAE public holidays with emirate-specific configuration
+
+### Customer Risk & Compliance (3 tables)
+43. **customer_risk_scores** - Production-ready hybrid risk algorithm with automated nightly calculation
+44. **customer_risk_score_history** - Historical risk score tracking for trend analysis
+45. **customer_company_links** - Customer-to-company relationship tracking
+
+### Document Management (3 tables)
+46. **document_registry** - Centralized document tracking with intelligent auto-seeding
+47. **document_files** - Document file storage and metadata
+48. **document_approvals** - Document approval workflow
+
+### Communications Platform (9 tables)
+49. **communication_providers** - Multi-provider SMS/Email configuration (Twilio, SendGrid, Gmail, Mock)
+50. **communication_logs** - Complete delivery tracking with success/failure status
+51. **notification_templates** - 12 default bilingual reminder templates
+52. **notification_channel_preferences** - Channel-specific settings (email/SMS costs, priorities)
+53. **notification_preferences** - User-level notification preferences
+54. **automated_reminders** - Automated reminder scheduling and execution
+55. **notification_campaigns** - Campaign management with RBAC enforcement
+56. **campaign_recipients** - Campaign recipient tracking
+57. **push_notification_tokens** - Mobile push notification token storage
+
+### Advanced Analytics & Intelligence (3 tables)
+58. **template_analytics** - Notification template performance analytics
+59. **ab_test_variants** - (Implied) A/B testing variant tracking
+60. **pricing_rules** - (Implied) Dynamic pricing rule engine
+
+### Approval & Workflow (2 tables)
+61. **approval_requests** - Multi-level authorization for high-value transactions
+62. **approval_logs** - Approval decision audit trail
+
+### Payment Gateway Integration (2 tables)
+63. **payment_gateways** - Payment gateway configuration
+64. **payment_transactions** - Payment transaction tracking
+
+### Support & Customer Service (2 tables)
+65. **support_tickets** - Customer support ticket management
+66. **renewal_requests** - Contract renewal request tracking
+
+**Note:** Actual verified count is 63 tables in shared/schema.ts
+
+---
+
+## 2. API ARCHITECTURE (120+ Unique Endpoints)
+
+### Authentication & Authorization (2 endpoints)
+- `GET /api/auth/user` - Current authenticated user retrieval
+- `POST /api/auth/logout` - User logout
+
+### Customer Management (8 endpoints)
+- `GET /api/customers` - List customers with disable filter
+- `GET /api/customers/search` - Search by name/phone
+- `GET /api/customers/:id` - Individual customer details
+- `GET /api/customers/check-phone/:phone` - Duplicate phone detection (non-blocking warning)
+- `POST /api/customers` - Create customer (Manager/Admin)
+- `PATCH /api/customers/:id` - Update customer (Manager/Admin)
+- `POST /api/customers/:id/disable` - Disable customer (Manager/Admin)
+- `POST /api/customers/:id/enable` - Enable customer (Manager/Admin)
+
+### Vehicle Management (8 endpoints)
+- `GET /api/vehicles` - List vehicles with status filter
 - `GET /api/vehicles/search` - Search by registration
-- `GET /api/vehicles/:id` - Individual vehicle
+- `GET /api/vehicles/:id` - Individual vehicle details
 - `GET /api/vehicles/:id/availability` - Date range availability check
-- `POST /api/vehicles` - Create (Manager/Admin)
-- `PATCH /api/vehicles/:id` - Update (Manager/Admin)
-- `POST /api/vehicles/:id/disable` - Disable (Manager/Admin)
-- `POST /api/vehicles/:id/enable` - Enable (Manager/Admin)
+- `POST /api/vehicles` - Create vehicle (Manager/Admin)
+- `PATCH /api/vehicles/:id` - Update vehicle (Manager/Admin)
+- `POST /api/vehicles/:id/disable` - Disable vehicle (Manager/Admin)
+- `POST /api/vehicles/:id/enable` - Enable vehicle (Manager/Admin)
 
-### Sponsors (8 endpoints)
-- `GET /api/sponsors` - List with disable filter
+### Sponsor Management (7 endpoints)
+- `GET /api/sponsors` - List individual sponsors
 - `GET /api/sponsors/search` - Search by name
-- `GET /api/sponsors/:id` - Individual sponsor
-- `POST /api/sponsors` - Create (Manager/Admin)
-- `PATCH /api/sponsors/:id` - Update (Manager/Admin)
-- `POST /api/sponsors/:id/disable` - Disable (Manager/Admin)
-- `POST /api/sponsors/:id/enable` - Enable (Manager/Admin)
+- `GET /api/sponsors/:id` - Individual sponsor details
+- `POST /api/sponsors` - Create sponsor (Manager/Admin)
+- `PATCH /api/sponsors/:id` - Update sponsor (Manager/Admin)
+- `POST /api/sponsors/:id/disable` - Disable sponsor (Manager/Admin)
+- `POST /api/sponsors/:id/enable` - Enable sponsor (Manager/Admin)
 
-### Companies (8 endpoints)
-- `GET /api/companies` - List with disable filter
-- `GET /api/companies/search` - Search by name
-- `GET /api/companies/:id` - Individual company
-- `POST /api/companies` - Create (Manager/Admin)
-- `PATCH /api/companies/:id` - Update (Manager/Admin)
-- `POST /api/companies/:id/disable` - Disable (Manager/Admin)
-- `POST /api/companies/:id/enable` - Enable (Manager/Admin)
+### Company Management (8 endpoints)
+- `GET /api/companies` - List corporate sponsors
+- `GET /api/companies/search` - Search by company name
+- `GET /api/companies/:id` - Individual company details
+- `POST /api/companies` - Create company (Manager/Admin)
+- `PATCH /api/companies/:id` - Update company (Manager/Admin)
+- `POST /api/companies/:id/disable` - Disable company (Manager/Admin)
+- `POST /api/companies/:id/enable` - Enable company (Manager/Admin)
 
-### Contracts (17 endpoints)
-- `GET /api/contracts` - List all (role-based filtering: Staff see only their own)
+### Contract Management (17+ endpoints)
+- `GET /api/contracts` - List all contracts (role-based filtering)
 - `GET /api/contracts/disabled` - Disabled contracts (Admin only)
-- `GET /api/contracts/:id` - Individual contract with real-time outstanding balance calculation
-- `GET /api/contracts/:id/edits` - Edit history
-- `GET /api/contracts/:id/audit-logs` - Audit logs
+- `GET /api/contracts/:id` - Individual contract with real-time outstanding balance
+- `GET /api/contracts/:id/edits` - Field-level edit history
+- `GET /api/contracts/:id/audit-logs` - Contract audit trail
+- `GET /api/contracts/:id/qr` - QR code verification endpoint
 - `POST /api/contracts` - Create new contract
 - `PATCH /api/contracts/:id` - Update draft contract (requires edit reason)
-- `POST /api/contracts/:id/confirm` - Transition: draft → confirmed (includes vehicle availability check)
-- `POST /api/contracts/:id/activate` - Transition: confirmed → active (requires pre-delivery inspection, prevents early activation)
-- `POST /api/contracts/:id/complete` - Transition: active → completed (requires post-return inspection, recalculates charges)
-- `POST /api/contracts/:id/close` - Transition: completed → closed (requires payment verification, Admin only)
-- `POST /api/contracts/:id/deposit` - Legacy deposit payment endpoint
-- `POST /api/contracts/:id/final-payment` - Legacy final payment endpoint
-- `POST /api/contracts/:id/refund` - Legacy refund endpoint
+- `POST /api/contracts/:id/confirm` - Transition: draft → confirmed
+- `POST /api/contracts/:id/activate` - Transition: confirmed → active (requires inspection)
+- `POST /api/contracts/:id/complete` - Transition: active → completed
+- `POST /api/contracts/:id/close` - Transition: completed → closed (Admin only)
 - `POST /api/contracts/:id/disable` - Disable contract (Admin only)
 - `POST /api/contracts/:id/enable` - Enable contract (Admin only)
 - `POST /api/contracts/:id/print` - Log print action
+- `GET /api/verify-contract/:token` - JWT-based contract verification (QR code)
 
-### Payments (3 endpoints)
-- `POST /api/contracts/:contractId/payments` - Create payment (Manager/Admin)
-- `GET /api/contracts/:contractId/payments` - List all payments for contract
+### Payment Management (3 endpoints)
+- `POST /api/contracts/:contractId/payments` - Create payment
+- `GET /api/contracts/:contractId/payments` - List payments for contract
 - `DELETE /api/payments/:id` - Delete payment (Admin only)
 
-### Vehicle Inspections (3 endpoints)
-- `POST /api/contracts/:contractId/inspections` - Create inspection (pre-delivery or post-return)
-- `GET /api/contracts/:contractId/inspections` - List all inspections for contract
+### Vehicle Inspection (3 endpoints)
+- `POST /api/contracts/:contractId/inspections` - Create inspection (pre/post)
+- `GET /api/contracts/:contractId/inspections` - List inspections
 - `GET /api/inspections/:id` - Individual inspection details
+
+### Toll Management (9 endpoints)
+- `GET /api/toll-systems` - List toll systems (Salik/Darb/Aber)
+- `POST /api/toll-systems` - Create toll system
+- `PATCH /api/toll-systems/:id` - Update toll system
+- `GET /api/toll-gates` - List toll gates
+- `POST /api/toll-gates` - Create toll gate
+- `PATCH /api/toll-gates/:id` - Update toll gate
+- `GET /api/toll-passes` - List toll passes
+- `POST /api/toll-passes` - Create toll pass
+- `PATCH /api/toll-passes/:id` - Update toll pass
+
+### Traffic Fines & Violations (4 endpoints)
+- `GET /api/traffic-fines` - List traffic fines
+- `GET /api/traffic-fines/:id` - Individual fine details
+- `POST /api/traffic-fines` - Create traffic fine
+- `PATCH /api/traffic-fines/:id` - Update traffic fine (payment status)
+
+### Incidents & Insurance Claims (6 endpoints)
+- `GET /api/incidents` - List incidents
+- `GET /api/incidents/:id` - Individual incident details
+- `POST /api/incidents` - Create incident
+- `PATCH /api/incidents/:id` - Update incident
+- `GET /api/insurance-claims` - List insurance claims
+- `POST /api/claims/:claimId/progress` - Add claim progress update
+
+### Vehicle Maintenance & Service (4 endpoints)
+- `GET /api/vehicle-service-records` - List service records
+- `GET /api/vehicle-service-records/:id` - Individual service record
+- `POST /api/vehicle-service-records` - Create service record
+- `PATCH /api/vehicle-service-records/:id` - Update service record
+
+### Rental Rate Plans (4 endpoints)
+- `GET /api/rental-rate-plans` - List rate plans
+- `GET /api/rental-rate-plans/:id` - Individual rate plan
+- `POST /api/rental-rate-plans` - Create rate plan
+- `PATCH /api/rental-rate-plans/:id` - Update rate plan
+
+### Vehicle Accessories (4 endpoints)
+- `GET /api/vehicle-accessories` - List accessories catalog
+- `GET /api/vehicle-accessories/:id` - Individual accessory
+- `POST /api/vehicle-accessories` - Create accessory
+- `PATCH /api/vehicle-accessories/:id` - Update accessory
+- `GET /api/contract-accessories` - List contract accessories
+- `POST /api/contract-accessories` - Assign accessory to contract
+- `DELETE /api/contract-accessories/:id` - Remove accessory from contract
+
+### Driver Service Module (15+ endpoints)
+- `GET /api/drivers` - List drivers
+- `GET /api/drivers/:id` - Individual driver details
+- `GET /api/drivers/:id/availability` - Check driver availability
+- `GET /api/drivers/:id/check-availability` - Availability verification
+- `GET /api/drivers/:id/schedule` - Driver schedule
+- `GET /api/drivers/:id/rate-cards` - Driver rate cards
+- `POST /api/drivers` - Create driver
+- `PATCH /api/drivers/:id` - Update driver
+- `POST /api/drivers/:id/disable` - Disable driver
+- `POST /api/drivers/:id/enable` - Enable driver
+- `GET /api/driver-companies` - List outsource companies
+- `POST /api/driver-companies/:id/disable` - Disable company
+- `POST /api/driver-companies/:id/enable` - Enable company
+- `GET /api/driver-schedules` - List schedules
+- `POST /api/driver-schedules` - Create schedule
+- `PATCH /api/driver-schedules/:id` - Update schedule
+- `DELETE /api/driver-schedule-blocks/:id` - Delete schedule block
+- `GET /api/driver-rate-cards/:id` - Get rate card
+- `PATCH /api/driver-rate-cards/:id` - Update rate card
+- `GET /api/driver-assignments` - List assignments
+- `POST /api/driver-assignments` - Create assignment
+- `PATCH /api/driver-assignments/:id` - Update assignment
+- `POST /api/driver-assignments/:id/complete` - Complete assignment
+- `GET /api/driver-attendance` - List attendance records
+- `POST /api/driver-attendance` - Check-in
+- `PATCH /api/driver-attendance/:id/checkout` - Check-out
+
+### Branch Management (9 endpoints)
+- `GET /api/branches` - List branches
+- `GET /api/branches/:id` - Individual branch details
+- `POST /api/branches` - Create branch
+- `PATCH /api/branches/:id` - Update branch
+- `POST /api/branches/:id/disable` - Disable branch
+- `POST /api/branches/:id/enable` - Enable branch
+- `GET /api/branch-transfers` - List vehicle transfers
+- `POST /api/branch-transfers` - Create transfer request
+- `PATCH /api/branch-transfers/:id` - Update transfer
+- `POST /api/branch-transfers/:id/approve` - Approve transfer
+- `POST /api/branch-transfers/:id/reject` - Reject transfer
+- `POST /api/branch-transfers/:id/complete` - Complete transfer
+
+### Public Holidays (4 endpoints)
+- `GET /api/public-holidays` - List UAE public holidays
+- `GET /api/public-holidays/:id` - Individual holiday details
+- `POST /api/public-holidays` - Create public holiday
+- `PATCH /api/public-holidays/:id` - Update public holiday
+- `DELETE /api/public-holidays/:id` - Delete public holiday
+
+### Customer Risk Scoring (5 endpoints)
+- `GET /api/customer-risk-scores` - List risk scores
+- `GET /api/automation/high-risk-customers` - High-risk customer report
+- `POST /api/automation/calculate-risk-scores` - Trigger nightly calculation
+- `POST /api/automation/calculate-customer-risk/:customerId` - Calculate individual risk
+- `GET /api/customer-risk-scores/:customerId` - Customer risk history
+
+### Document Registry (5 endpoints)
+- `GET /api/documents` - List all documents
+- `GET /api/documents/:id` - Individual document details
+- `POST /api/documents` - Create document record
+- `PATCH /api/documents/:id` - Update document
+- `POST /api/documents/:id/verify` - Verify document
+- `POST /api/automation/seed-documents` - Auto-seed documents from entities
+
+### Communications Platform (15+ endpoints)
+- `GET /api/communication-providers` - List providers (Twilio, SendGrid, etc.)
+- `GET /api/communication-providers/:id` - Individual provider
+- `POST /api/communication-providers` - Add provider
+- `PATCH /api/communication-providers/:id` - Update provider
+- `DELETE /api/communication-providers/:id` - Remove provider
+- `GET /api/communication-logs` - List delivery logs
+- `GET /api/communication-logs/:id` - Individual log details
+- `POST /api/notifications/send` - Manual notification send (testing)
+- `GET /api/notification-templates` - List templates
+- `GET /api/notification-templates/:id` - Individual template
+- `PATCH /api/notification-templates/:id` - Update template
+- `POST /api/automation/seed-notification-templates` - Seed 12 default templates
+- `GET /api/channel-preferences` - List channel preferences
+- `GET /api/channel-preferences/:id` - Individual preference
+- `GET /api/channel-preferences/type/:notificationType` - Get by type
+- `PATCH /api/channel-preferences/:id` - Update preference
+- `POST /api/channel-preferences/:id/toggle` - Toggle channel on/off
+- `POST /api/channel-preferences/calculate-cost` - Calculate campaign cost
+- `POST /api/channel-preferences/seed` - Seed default preferences
+
+### Campaign Management (8 endpoints)
+- `GET /api/campaigns` - List campaigns (RBAC filtered)
+- `GET /api/campaigns/:id` - Individual campaign details
+- `GET /api/campaigns/:id/recipients` - List campaign recipients
+- `POST /api/campaigns` - Create campaign (RBAC scoped)
+- `POST /api/campaigns/estimate-recipients` - Estimate recipient count
+- `PATCH /api/campaigns/:id` - Update campaign
+- `POST /api/campaigns/:id/approve` - Approve campaign
+- `POST /api/campaigns/:id/reject` - Reject campaign
+- `POST /api/campaigns/:id/send` - Send campaign
+- `DELETE /api/campaigns/:id` - Delete campaign
+
+### Automated Reminders (4 endpoints)
+- `GET /api/automated-reminders` - List automated reminders
+- `GET /api/automated-reminders/:id` - Individual reminder
+- `POST /api/automated-reminders` - Create reminder
+- `POST /api/automated-reminders/:id/mark-sent` - Mark as sent
+
+### Template Analytics (3 endpoints)
+- `GET /api/template-analytics` - List analytics
+- `GET /api/template-analytics/summary` - Analytics summary
+- `POST /api/template-analytics/generate` - Generate analytics for period
+
+### A/B Testing (5 endpoints)
+- `GET /api/ab-tests` - List A/B tests
+- `GET /api/ab-tests/:id` - Individual test details
+- `POST /api/ab-tests` - Create A/B test
+- `POST /api/ab-tests/:id/start` - Start test
+- `POST /api/ab-tests/:id/complete` - Complete test and declare winner
+
+### Approval Workflows (5 endpoints)
+- `GET /api/approval-requests` - List approval requests
+- `GET /api/approval-requests/:id` - Individual request details
+- `POST /api/approval-requests` - Create approval request
+- `POST /api/approval-requests/:id/approve` - Approve request
+- `POST /api/approval-requests/:id/reject` - Reject request
+- `GET /api/approval-logs` - List approval logs
+
+### Analytics & Dashboard (10+ endpoints)
+- `GET /api/analytics/revenue` - Revenue analytics
+- `GET /api/analytics/operations` - Operational analytics
+- `GET /api/analytics/customers` - Customer analytics
+- `GET /api/analytics/fleet-status` - Fleet status distribution
+- `GET /api/analytics/geographic-distribution` - UAE geographic distribution
+- `GET /api/analytics/pending-actions` - Pending actions (overdue returns, refunds)
+- `GET /api/analytics/top-performers` - Top vehicles and staff by revenue
+- `GET /api/analytics/revenue-trend` - 12-month revenue trends
+
+### Standard Reports (12+ endpoints)
+- `GET /api/reports/financial` - Financial report with date range
+- `GET /api/reports/operational` - Operational report with date range
+- `GET /api/reports/customers` - Customer report with date range
+- `GET /api/reports/audit` - Audit report with date range
+- `GET /api/reports/insurance` - Insurance claims report
+- `GET /api/reports/user-activity` - User activity report
+- `POST /api/reports/financial/export` - Export to PDF/Excel
+- `POST /api/reports/operational/export` - Export to PDF/Excel
+- `POST /api/reports/customers/export` - Export to PDF/Excel
+- `POST /api/reports/audit/export` - Export to PDF/Excel
+
+### Predictive Intelligence Reports (6 endpoints)
+- `GET /api/reports/revenue-forecast` - Revenue forecasting with ML predictions
+- `GET /api/reports/fleet-utilization-forecast` - Fleet capacity planning
+- `GET /api/reports/customer-churn-risk` - Customer churn prediction
+- `GET /api/reports/maintenance-cost-forecast` - Maintenance cost predictions
+- `GET /api/reports/payment-default-prediction` - Payment default risk
+- `GET /api/reports/demand-forecast` - Location-based demand forecasting
 
 ### Audit & System (5 endpoints)
 - `GET /api/audit-logs` - All audit logs (Admin/Manager)
 - `GET /api/audit-logs/recent` - 10 most recent logs
 - `GET /api/system-errors` - All system errors (Admin only)
-- `GET /api/system-errors/unacknowledged` - Unacknowledged errors (Admin only)
-- `POST /api/system-errors/:id/acknowledge` - Acknowledge error (Admin only)
+- `GET /api/system-errors/unacknowledged` - Unacknowledged errors
+- `POST /api/system-errors/:id/acknowledge` - Acknowledge error
 
-### Analytics (3 endpoints)
-- `GET /api/analytics/revenue` - Revenue analytics (Admin/Manager)
-- `GET /api/analytics/operations` - Operational analytics (Admin/Manager)
-- `GET /api/analytics/customers` - Customer analytics (Admin/Manager)
-
-### Reports (12 endpoints)
-- `GET /api/reports/financial` - Financial report with date range
-- `GET /api/reports/operational` - Operational report with date range
-- `GET /api/reports/customers` - Customer report with date range
-- `GET /api/reports/audit` - Audit report with date range
-- `POST /api/reports/financial/export` - Export to PDF/Excel with chart visualization embedding
-- `POST /api/reports/operational/export` - Export to PDF/Excel with chart visualization embedding
-- `POST /api/reports/customers/export` - Export to PDF/Excel with chart visualization embedding
-- `POST /api/reports/audit/export` - Export to PDF/Excel with chart visualization embedding
-
-### Settings (4 endpoints)
+### Settings Management (4 endpoints)
 - `GET /api/settings` - All company settings
 - `PUT /api/settings` - Update all settings (Admin only)
 - `GET /api/settings/financial` - Financial settings only
 - `PUT /api/settings/financial` - Update financial settings (Admin only)
 
-### User Management (7 endpoints)
+### User Management (8 endpoints)
 - `GET /api/users` - All users (Admin only)
-- `GET /api/users/:id` - Individual user
-- `PATCH /api/users/:id/role` - Update role (Admin only)
+- `GET /api/users/:id` - Individual user details
+- `GET /api/users/disabled` - Disabled users (Admin only)
 - `POST /api/users` - Create user (Admin only)
+- `PATCH /api/users/:id` - Update user
+- `PATCH /api/users/:id/role` - Update role (Admin only)
 - `POST /api/users/:id/disable` - Disable user (Admin only)
 - `POST /api/users/:id/enable` - Enable user (Admin only)
-- `GET /api/users/disabled` - Disabled users (Admin only)
 - `POST /api/users/change-password` - Change own password
 
+**Total Unique API Paths:** 120+ endpoints  
+**Total Routes (including HTTP methods):** 200+ route definitions
+
 ---
 
-## 3. FRONTEND ARCHITECTURE (22 Pages)
+## 3. FRONTEND ARCHITECTURE (66 Pages)
 
-### Public Pages (2)
+### Public & Authentication Pages (3 pages)
 1. **Landing** (`/`) - Welcome page with login button
 2. **Login** (`/login`) - Internal authentication
+3. **not-found** - 404 catch-all page
 
-### Core Pages (5)
-3. **Dashboard** (`/`) - Metrics overview (active rentals, monthly revenue, overdue returns, system errors)
-4. **Contracts** (`/contracts`) - Contract list with filtering (status, date range)
-5. **Contract View** (`/contracts/:id`) - Detailed contract view (timeline, payments, inspections, legal terms)
-6. **Contract Form** (`/contracts/new`, `/contracts/:id/edit`) - Create/edit contracts
-7. **Not Found** - 404 catch-all
+### Core Dashboard & Contract Pages (6 pages)
+4. **Dashboard** (`/dashboard`) - KPI overview with analytics cards
+5. **DashboardSamples** (`/dashboard/samples`) - Sample dashboard views
+6. **Contracts** (`/contracts`) - Contract list with filtering
+7. **ContractView** (`/contracts/:id`) - Detailed contract view with timeline
+8. **ContractForm** (`/contracts/new` or `/contracts/:id/edit`) - Create/edit contracts
+9. **InsuranceClaimForm** (`/claims/new` or `/claims/:id/edit`) - Claim form
 
-### Master Data Pages (4)
-8. **Customers** (`/customers`) - Customer management with active/disabled tabs
-9. **Vehicles** (`/vehicles`) - Vehicle management with active/disabled tabs
-10. **Sponsors** (`/sponsors`) - Individual sponsor management with active/disabled tabs
-11. **Companies** (`/companies`) - Corporate sponsor management with active/disabled tabs
+### Master Data Management Pages (7 pages)
+10. **Customers** (`/customers`) - Customer management with active/disabled tabs
+11. **Vehicles** (`/vehicles`) - Vehicle management with status filtering
+12. **Sponsors** (`/sponsors`) - Individual sponsor management
+13. **Companies** (`/companies`) - Corporate sponsor management
+14. **Drivers** (`/drivers`) - Professional driver master data
+15. **DriverCompanies** (`/driver-companies`) - Outsource driver company management
+16. **VehicleAccessories** (`/vehicle-accessories`) - Accessory catalog management
 
-### Report Pages (4)
-12. **Financial Reports** (`/reports/financial`) - Revenue trends, payment collection, outstanding payments with recharts visualization
-13. **Operational Reports** (`/reports/operational`) - Vehicle utilization, contract status with recharts visualization
-14. **Customer Reports** (`/reports/customers`) - Customer activity, retention rates with recharts visualization
-15. **Audit Reports** (`/reports/audit`) - Contract modifications, system actions, user activity
+### Operational Management Pages (8 pages)
+17. **DriverScheduling** (`/driver-scheduling`) - Driver shift management
+18. **TollManagement** (`/toll-management`) - UAE toll system tracking
+19. **TrafficFines** (`/traffic-fines`) - RTA traffic violation management
+20. **Incidents** (`/incidents`) - Accident and incident tracking
+21. **InsuranceClaims** (`/insurance-claims`) - Insurance claim workflow
+22. **VehicleMaintenance** (`/vehicle-maintenance`) - Fleet service records
+23. **RentalRatePlans** (`/rental-rate-plans`) - Dynamic pricing management
+24. **VehicleTransfers** (`/vehicle-transfers`) - Inter-branch vehicle transfers
 
-### Admin Pages (5)
-16. **Audit Logs** (`/audit`) - System action trail (filtering by action, user, date range)
-17. **System Errors** (`/system-errors`) - Error list with acknowledgment (Admin only)
-18. **Users** (`/users`) - User management (Admin only)
-19. **Settings** (`/settings`) - Multi-tab settings page (company, financial, terms & conditions)
-20. **Company Settings** (Settings tab) - Company info configuration
-21. **Financial Settings** (Settings tab) - Rental rates, addon fees, fuel pricing
-22. **Terms & Conditions** (Settings tab) - Bilingual contract clauses editor
+### Branch & Calendar Management Pages (2 pages)
+25. **Branches** (`/branches`) - Multi-location branch management
+26. **PublicHolidays** (`/public-holidays`) - UAE public holiday configuration
+
+### Customer Intelligence & Compliance Pages (2 pages)
+27. **CustomerRiskScoring** (`/customer-risk-scoring`) - Risk score management
+28. **DocumentRegistry** (`/document-registry`) - Centralized document tracking
+
+### Communications Platform Pages (5 pages)
+29. **CommunicationProviders** (`/communication-providers`) - SMS/Email provider config
+30. **CommunicationLogs** (`/communication-logs`) - Delivery tracking viewer
+31. **ManualNotificationSender** (`/manual-notification-sender`) - Testing tool
+32. **AutomatedReminders** (`/automated-reminders`) - Reminder template management
+33. **CampaignManagement** (`/campaign-management`) - Marketing campaign system
+
+### Workflow & Approval Pages (1 page)
+34. **ApprovalWorkflows** (`/approval-workflows`) - Multi-level authorization
+
+### Standard Analytical Reports Pages (8 pages)
+35. **RevenueTrendsReport** (`/reports/revenue-trends`) - 12-month revenue analysis
+36. **FleetPerformanceReport** (`/reports/fleet-performance`) - Vehicle ROI analysis
+37. **ContractAnalyticsReport** (`/reports/contract-analytics`) - Contract insights
+38. **CollectionPerformanceReport** (`/reports/collection-performance`) - Payment collection
+39. **DriverUtilizationReport** (`/reports/driver-utilization`) - Driver efficiency
+40. **DriverRevenueCostReport** (`/reports/driver-revenue-cost`) - Driver profitability
+41. **UnclosedContractsReport** (`/reports/unclosed-contracts`) - Workflow completion
+42. **AccessReport** (`/reports/access`) - User access tracking
+
+### Predictive Intelligence Report Pages (6 pages - FULLY BILINGUAL)
+43. **RevenueForecastReport** (`/reports/revenue-forecast`) - ML-based revenue prediction
+44. **FleetUtilizationForecast** (`/reports/fleet-utilization-forecast`) - Capacity planning
+45. **CustomerChurnRiskReport** (`/reports/customer-churn-risk`) - Churn prediction
+46. **MaintenanceCostForecast** (`/reports/maintenance-cost-forecast`) - Cost forecasting
+47. **PaymentDefaultPrediction** (`/reports/payment-default-prediction`) - Default risk
+48. **LocationDemandForecast** (`/reports/location-demand-forecast`) - Demand trends
+
+### Legacy Standard Reports Pages (5 pages)
+49. **FinancialReports** (`/reports/financial`) - Financial overview
+50. **OperationalReports** (`/reports/operational`) - Operations overview
+51. **CustomerReports** (`/reports/customers`) - Customer analytics
+52. **InsuranceReports** (`/reports/insurance`) - Insurance claims analytics
+53. **AuditReports** (`/reports/audit`) - System audit overview
+
+### Admin & System Pages (8 pages)
+54. **Users** (`/users`) - User management (Admin only)
+55. **UserActivity** (`/user-activity`) - User activity logs
+56. **AuditLogs** (`/audit`) - System action trail
+57. **SystemErrors** (`/system-errors`) - Error management (Admin only)
+58. **Settings** (`/settings`) - Multi-tab settings page
+59. **CompanySettings** (Settings tab) - Company info configuration
+60. **FinancialSettings** (Settings tab) - Rental rates, fees, pricing
+61. **TermsConditions** (Settings tab) - Bilingual contract clauses
+
+### Data Management Pages (1 page)
+62. **ImportData** (`/import-data`) - Bulk data import utility
+
+### Legal & Informational Pages (4 pages)
+63. **AboutPage** (`/about`) - About RCCMS information
+64. **PrivacyPolicyPage** (`/privacy-policy`) - Privacy policy
+65. **TermsOfServicePage** (`/terms-of-service`) - Terms of service
+66. **SupportHelpPage** (`/support-help`) - Support and help documentation
+
+**Total Frontend Pages:** 66 TSX components
 
 ---
 
-## 4. UI/UX FEATURES
+## 4. FIVE-PHASE IMPLEMENTATION COMPLETE ✅
 
-### Microsoft 365-Style Sidebar (Latest Implementation)
-- **Responsive Header Controls:** Horizontal layout (flex-row) when expanded, vertical layout (flex-col) when collapsed to prevent overflow
-- **Icon-Only Collapsed Mode:** All controls remain accessible with icons only
-- **Deferred Submenu Opening:** `pendingSubmenuOpen` state + `useEffect` pattern ensures submenus open AFTER sidebar expansion completes (no race conditions)
-- **Complete Tooltip Coverage:** All 6 main menu items (Dashboard, Masters, Contracts, Reports, Audit, Settings) have tooltips in collapsed mode
-- **Hierarchical Navigation:** Collapsible sections (Masters, Reports, Audit, Settings) with localStorage state persistence
-- **RTL/LTR Adaptation:** Sidebar positioned right (Arabic) or left (English), tooltip positioning adapts
-- **Bilingual Tooltips:** Dynamic aria-labels and tooltip content based on current language
+### Phase 1: Data & Automation Foundation ✅
+**Completed:** Q3-Q4 2025  
+**Features:**
+- ✅ Customer Risk Scoring with hybrid algorithm
+- ✅ Nightly risk calculation (2 AM cron job)
+- ✅ Document Registry with auto-seeding from 8 entity types
+- ✅ 12 Default Bilingual Reminder Templates
+- ✅ QR Code Service (JWT-signed, 30-day expiry)
+- ✅ Background Automation Orchestrator with 4 active cron jobs
+
+### Phase 2: Experience & Navigation ✅
+**Completed:** Q4 2025  
+**Features:**
+- ✅ Reorganized hierarchical sidebar menu (Material Design 3)
+- ✅ 8 Advanced Analytical Reports with Recharts visualizations
+- ✅ All reports include filters, CSV export, and bilingual support
+- ✅ Enhanced user navigation and workflow optimization
+
+**8 Analytical Reports:**
+1. Customer Risk Trends Dashboard
+2. Toll Expense vs Budget Analysis
+3. Traffic Fine Aging & Recovery Report
+4. Incident Cost & Liability Analysis
+5. Maintenance Compliance Report
+6. Driver Utilization & Overtime Report
+7. Reminder Delivery SLA Report
+8. Approval Turnaround Time Report
+
+### Phase 3: Communications Platform ✅
+**Completed:** October 2025  
+**Features:**
+- ✅ Multi-Provider SMS/Email Infrastructure
+  - SMS: Twilio (primary), Mock (testing)
+  - Email: SendGrid (primary), Gmail SMTP (fallback), Mock (testing)
+- ✅ Priority-based routing with automatic failover
+- ✅ Health monitoring and circuit breaking
+- ✅ Communication Providers management UI
+- ✅ Communication Logs viewer with delivery tracking
+- ✅ Manual Notification Sender for testing
+- ✅ 11 Automated Notification Touchpoints (event-driven + scheduled)
+
+### Phase 4: Campaign Management System ✅
+**Completed:** November 2025  
+**Features:**
+- ✅ Campaign Management UI with RBAC enforcement
+  - Branch-scoped campaigns for Staff/Manager roles
+  - Organization-wide campaigns for Admin role only
+  - Multi-branch campaign selection for Admins
+- ✅ Approval workflow integration
+  - Staff campaigns auto-require approval
+  - Admin/Manager campaigns with optional approval
+- ✅ Recipient filtering and channel selection (Email/SMS/Both)
+- ✅ Campaign status tracking (Draft → Pending Approval → Approved → Sent)
+- ✅ Delivery tracking with success/failure counts
+- ✅ Cost estimation and scheduling capabilities
+
+### Phase 5: Complete Bilingual Implementation ✅
+**Completed:** November 18, 2025  
+**Features:**
+- ✅ Comprehensive i18n Translation Infrastructure
+  - 190+ translation keys covering all features
+  - Organized namespaces: campaigns.*, communications.*, reports.*, common.*
+  - Full English and Arabic translations
+- ✅ Campaign Management & Communications Pages (fully bilingual)
+- ✅ All 6 Predictive Intelligence Reports (fully bilingual)
+- ✅ RTL/LTR Layout Support
+  - Automatic document.dir switching (ltr/rtl)
+  - Automatic document.lang attribute updates
+  - Font switching: Inter for English, Cairo for Arabic
+  - Sidebar position mirroring (left→right in RTL mode)
+- ✅ CSV Export Localization (all column headers translated)
+- ✅ UAE Emirates Translations (all 7 emirates)
+- ✅ E2E Testing & Validation
+- ✅ Production Ready
+
+---
+
+## 5. AUTOMATION ORCHESTRATOR (4 Active Cron Jobs)
+
+### Background Job Scheduler
+**Implementation:** `server/services/automationOrchestrator.ts`  
+**Technology:** node-cron library
+
+### Active Cron Jobs:
+1. **Nightly Risk Score Calculation**
+   - **Schedule:** Daily at 2:00 AM (`0 2 * * *`)
+   - **Purpose:** Recalculate risk scores for all active customers
+   - **Functionality:** Updates customer_risk_scores table with latest calculations
+
+2. **Document Expiry Check**
+   - **Schedule:** Daily at 8:00 AM (`0 8 * * *`)
+   - **Purpose:** Create reminders for documents expiring within 30 days
+   - **Functionality:** Scans document_registry and generates automated reminders
+
+3. **Contract Expiry Reminders**
+   - **Schedule:** Daily at 9:00 AM (`0 9 * * *`)
+   - **Purpose:** Send reminders for contracts expiring in 7 days
+   - **Functionality:** Notification to customers about upcoming contract end
+
+4. **Payment Due Reminders**
+   - **Schedule:** Daily at 10:00 AM (`0 10 * * *`)
+   - **Purpose:** Send reminders for overdue payments
+   - **Functionality:** Identifies outstanding balances and triggers notifications
+
+### Manual Triggers:
+- `POST /api/automation/calculate-risk-scores` - Trigger risk calculation on-demand
+- `POST /api/automation/seed-documents` - Trigger document auto-seeding
+- `POST /api/automation/seed-notification-templates` - Seed 12 default templates
+
+---
+
+## 6. UI/UX FEATURES
 
 ### Material Design 3 System
-- **Color System:** Cyan-blue primary, semantic color tokens
+- **Color System:** Cyan-blue primary (#0891b2), semantic tokens
 - **Typography:** Inter (English), Cairo (Arabic), JetBrains Mono (code)
-- **Dual Theme:** Light/dark mode with automatic CSS variable switching
-- **Elevation System:** Subtle shadows, elevated cards
-- **Responsive Layout:** Mobile-first design with breakpoint adaptation
+- **Dual Theme:** Light/dark mode with CSS variable switching
+- **Elevation System:** Subtle shadows with hover-elevate utilities
+- **Responsive Layout:** Mobile-first with breakpoint adaptation
+
+### Hierarchical Sidebar Navigation
+- **Microsoft 365-Inspired Design:** Professional enterprise UI
+- **Collapsible Sections:** Dashboard, Masters, Contracts, Reports, Audit, Settings
+- **Icon-Only Collapsed Mode:** Space-efficient with tooltip accessibility
+- **RTL/LTR Adaptation:** Sidebar positioned right (Arabic) or left (English)
+- **State Persistence:** localStorage for user preferences
+- **Responsive Header Controls:** flex-row (expanded) vs flex-col (collapsed)
 
 ### Bilingual Architecture (i18next)
-- **Complete English/Arabic Support:** All UI strings, error messages, validation messages
-- **RTL/LTR Layout Switching:** Automatic direction change with language toggle
-- **Bilingual Data Fields:** nameEn/nameAr, companyNameEn/companyNameAr, currencyEn/currencyAr
-- **Dynamic Font Loading:** Google Fonts (Inter, Cairo, JetBrains Mono)
+- **Complete English/Arabic Support:** 190+ translation keys
+- **RTL/LTR Layout Switching:** Automatic direction change
+- **Bilingual Data Fields:** nameEn/nameAr pattern throughout
+- **Dynamic Font Loading:** Google Fonts integration
+- **CSV Export Localization:** All exports adapt to current language
 
 ### Form System (React Hook Form + Zod)
-- **Comprehensive Validation:** Client-side + server-side validation
-- **Smart Defaults:** Auto-filled fields (inspector name, created by, timestamps)
-- **Non-Blocking Warnings:** Duplicate phone detection with warning (not error)
+- **Comprehensive Validation:** Client-side + server-side
+- **Smart Defaults:** Auto-filled fields (timestamps, user info)
+- **Non-Blocking Warnings:** Duplicate detection without blocking
 - **Date/Time Pickers:** React Day Picker integration
-- **File Upload:** Image compression for inspections (1920x1080, 0.85 quality, JPEG)
+- **File Upload:** Image compression (1920x1080, 0.85 quality, JPEG)
 
 ### Data Visualization (recharts)
-- **Financial Charts:** Monthly revenue trends (line chart), revenue by status (pie chart), payment method breakdown (pie chart)
-- **Operational Charts:** Vehicle utilization (bar chart), contract status distribution (pie chart)
-- **Customer Charts:** Top customers by revenue (bar chart), retention analysis (donut chart)
-- **Theme Integration:** Charts adapt to light/dark mode
-- **Responsive Design:** Charts resize for mobile/tablet/desktop
+- **Financial Charts:** Revenue trends, payment breakdown
+- **Operational Charts:** Fleet utilization, contract distribution
+- **Customer Charts:** Top customers, retention analysis
+- **Predictive Charts:** Forecast visualizations with confidence intervals
+- **Theme Integration:** Automatic light/dark mode adaptation
+- **Responsive Design:** Charts resize for all devices
 
 ---
 
-## 5. CORE BUSINESS FEATURES
+## 7. CORE BUSINESS FEATURES
 
 ### Contract Lifecycle Management
-1. **Five-Stage Workflow:** draft → confirmed → active → completed → closed
-2. **Role-Based Permissions:** Staff (create/view own), Manager (view all), Admin (full control)
-3. **Immutability Rules:** Finalized contracts cannot be edited (only closed by Admin)
-4. **Sequential Gating:** Pre-delivery inspection required for activation, post-return inspection required for completion
-5. **Automatic Vehicle Status:** Real-time synchronization (rented/available) based on contract lifecycle
+- **Four-State Workflow:** draft → active → completed → closed
+- **Role-Based Permissions:** Staff (own), Manager (all), Admin (full control)
+- **Sequential Gating:** Inspections required for state transitions
+- **Automatic Vehicle Status:** Real-time synchronization
+- **Edit History:** Field-level tracking with mandatory reason
 
 ### Payment Tracking System
-1. **Comprehensive Payment History:** Separate `payments` table for all transactions
-2. **Real-Time Outstanding Balance:** Calculated from totalAmount + totalExtraCharges - sum(payments)
-3. **Multiple Payment Methods:** Cash, card, bank transfer, check
-4. **Payment Deletion:** Admin-only with audit logging
-5. **Currency Support:** Configurable via company settings (bilingual currency names)
+- **Comprehensive History:** Separate payments table
+- **Real-Time Balance:** Calculated from total - sum(payments)
+- **Multiple Methods:** Cash, card, bank transfer, check
+- **Admin Controls:** Payment deletion with audit logging
+- **Currency Support:** Bilingual currency configuration
 
-### Two-Stage Vehicle Inspection Workflow
-1. **Pre-Delivery Inspection:**
-   - Required before contract activation (gates draft → confirmed → active)
-   - Mandatory 6 unique photos at different angles (front, back, left, right, top, dashboard)
-   - Strict photo validation (no duplicates, validated frontend + backend)
-   - Auto-compression (1920x1080, 0.85 quality, JPEG)
-   - Captures: inspector name, odometer reading, fuel level, condition notes
-   - Automatic chaining to activation workflow
+### Two-Stage Vehicle Inspection
+- **Pre-Delivery Inspection:** Required for activation
+- **Post-Return Inspection:** Required for completion
+- **Mandatory 6 Photos:** Front, back, left, right, top, dashboard
+- **Auto-Compression:** 1920x1080, 0.85 quality, JPEG
+- **Complete History:** Timeline with photo gallery
 
-2. **Post-Return Inspection:**
-   - Required before rental completion (gates active → completed)
-   - Same 6-photo requirement with validation
-   - Auto-compression applied
-   - Captures return condition data
-   - Automatic chaining to return charges dialog
+### Toll Management System
+- **Complete UAE Integration:** Salik, Darb, Aber support
+- **Gate-Level Tracking:** Individual toll gate pricing
+- **Automatic Fee Assignment:** Contract linking
+- **Toll Pass Management:** Vehicle toll pass tracking
 
-3. **Inspection History View:**
-   - Complete timeline with photo gallery
-   - Zoom capabilities for photos
-   - Visual differentiation (default badge for pre-delivery, secondary badge for post-return)
-   - Material icons (local_shipping/assignment_turned_in)
-   - Full bilingual support
+### Traffic Fines & Violations
+- **RTA Compliance:** Official traffic violation tracking
+- **Black Points Management:** Cumulative black points
+- **Payment Status Tracking:** Paid/unpaid/disputed
+- **Document Uploads:** Fine notice attachments
 
-4. **Technical Implementation:**
-   - JSONB photo storage (base64-encoded)
-   - Inspector tracking (name, timestamp, user auth)
-   - Comprehensive audit logging
-   - API: POST create, GET list, GET individual
+### Accidents & Incidents
+- **Comprehensive Tracking:** Full incident details
+- **Insurance Integration:** Claim management workflow
+- **Cost Estimation:** Repair and liability costs
+- **Police Report Integration:** Official documentation
 
-### Financial Calculations
-1. **Automatic Fuel Charge:** Based on tank capacity, fuel type, configurable pricing (manual override available)
-2. **Rental Rate Calculation:** Daily/weekly/monthly rates from vehicle or company defaults
-3. **Extra Charges:** Extra kilometers, damages, addons (GPS, baby seat, insurance, additional driver)
-4. **VAT Support:** Configurable VAT percentage in company settings
-5. **Security Deposit:** Configurable default with per-contract override
+### Fleet Maintenance & Service
+- **Service Records:** Complete maintenance history
+- **Odometer Tracking:** Mileage-based scheduling
+- **Cost Logging:** Service expense tracking
+- **Next Service Scheduling:** Automated reminders
+- **Depreciation Tracking:** Asset value management
 
-### Master Data Architecture
-1. **Reusable Records:** Customers, vehicles, sponsors (individual), companies (corporate)
-2. **Three Hirer Types:** Direct, with_sponsor (individual), from_company (corporate)
-3. **Disable-Only Pattern:** No deletion - all entities can be disabled/enabled with tracking (disabledBy, disabledAt)
-4. **Bilingual Fields:** nameEn/nameAr for all master entities
-5. **Search Functionality:** Real-time search by name, registration, phone, etc.
+### Dynamic Pricing System
+- **Rental Rate Plans:** Daily/weekly/monthly rates
+- **Seasonal Pricing:** Time-based rate variations
+- **Promotional Discounts:** Campaign-based pricing
+- **Vehicle-Specific Rates:** Customizable per vehicle
 
-### Audit & Compliance
-1. **Dual-Layer Audit Trail:**
-   - `auditLogs` - Lifecycle events (CREATE, UPDATE, DELETE/disable/enable)
-   - `contractEdits` - Field-level modifications with before/after snapshots + reason
+### Vehicle Accessories & Upsell
+- **Master Catalog:** Accessory inventory management
+- **Contract-Level Assignment:** Rental upsell tracking
+- **Pricing Integration:** Automatic charge calculation
 
-2. **Comprehensive Event Tracking:**
-   - All CRUD operations
-   - Contract state transitions
-   - Payment additions/deletions
-   - Inspection creation
-   - User role changes
-   - Settings updates
+### Driver Scheduling & Attendance
+- **Shift Management:** Branch and vehicle assignment
+- **Check-In/Check-Out:** Attendance tracking
+- **Overtime Calculation:** Automatic overtime detection
+- **Rate Cards:** Hourly/daily/monthly driver pricing
 
-3. **System Error Management:**
-   - Automatic error logging
-   - Admin-only acknowledgment workflow
-   - Dashboard alerts for unacknowledged errors
+### Automated Reminders Engine
+- **Multi-Channel:** Email and SMS support
+- **Bilingual Templates:** English and Arabic
+- **12 System Templates:** Pre-configured notifications
+- **Full CRUD APIs:** Template management
 
-### Report Export System
-1. **Four Report Types:** Financial, Operational, Customer, Audit
-2. **Dual Format Export:** PDF and Excel
-3. **Chart Visualization Embedding:**
-   - Frontend: html2canvas captures recharts as images
-   - Backend: Receives base64-encoded chart images
-   - PDF: Full chart images embedded
-   - Excel: Metadata sheet with chart data
-4. **Technical Details:**
-   - jsPDF v3.x with named export
-   - xlsx library for Excel
-   - Request body limit: 10MB for base64 images
-   - Bilingual support in exports
-5. **Date Range Filtering:** All reports support custom date ranges
+### Approval Workflows
+- **Multi-Level Authorization:** High-value transaction approval
+- **Role-Based Triggers:** Staff auto-require approval
+- **Audit Trail:** Complete approval history
+- **Configurable Thresholds:** Approval amount limits
 
-### Generic System Architecture
-1. **Zero Hardcoding:** All company info configurable via admin panel
-2. **Bilingual Configuration:** Company name, address, contract clauses (English + Arabic)
-3. **No Code Changes Required:** Any rental company can deploy and customize
-4. **Sample Data:** Included for demonstration only
-5. **Currency Flexibility:** Configurable currency symbol and name (bilingual)
+### Customer Risk Scoring
+- **Hybrid Algorithm:** Payment + violations + incidents + compliance
+- **Automated Calculation:** Nightly recalculation (2 AM)
+- **Risk Categories:** Low, Medium, High, Critical
+- **Historical Tracking:** Trend analysis over time
+
+### Document Registry & Management
+- **Centralized Tracking:** All documents in one system
+- **Auto-Seeding:** From contracts, customers, vehicles, drivers, etc.
+- **Expiry Monitoring:** Automated alerts for expiring documents
+- **Verification Workflow:** Document approval process
+
+### Branch Management System
+- **Multi-Location Support:** Branch hierarchy
+- **Vehicle Transfer Workflow:** Inter-branch transfers with approval
+- **Branch-Scoped RBAC:** Staff/Manager branch restrictions
+- **Transfer History:** Complete audit trail
+
+### Enhanced Sponsor Compliance
+- **Emirates ID Verification:** Identity validation
+- **Max Exposure Limits:** Credit limit enforcement
+- **Blacklist Reason Documentation:** Compliance tracking
 
 ---
 
-## 6. TECHNICAL INFRASTRUCTURE
+## 8. COMMUNICATIONS PLATFORM ARCHITECTURE
+
+### Multi-Provider Infrastructure
+**SMS Providers:**
+- Twilio (primary)
+- Mock (testing)
+
+**Email Providers:**
+- SendGrid (primary)
+- Gmail SMTP (fallback)
+- Mock (testing)
+
+### Features:
+- ✅ Priority-based routing with automatic failover
+- ✅ Health monitoring and circuit breaking
+- ✅ Provider configuration UI
+- ✅ Complete delivery log tracking
+- ✅ Cost-per-send calculation
+- ✅ Channel preference management
+
+### 11 Automated Notification Touchpoints:
+1. Contract Created
+2. Contract Confirmed
+3. Contract Activated
+4. Contract Nearing Expiry (7 days)
+5. Contract Completed
+6. Payment Received
+7. Payment Overdue
+8. Document Expiring Soon (30 days)
+9. Risk Score Elevated
+10. Insurance Claim Status Changed
+11. Vehicle Transfer Approved
+
+---
+
+## 9. CAMPAIGN MANAGEMENT SYSTEM
+
+### RBAC-Enforced Campaigns:
+- **Staff:** Branch-scoped only, auto-require approval
+- **Manager:** Branch-scoped only, optional approval
+- **Admin:** Organization-wide, multi-branch selection, optional approval
+
+### Features:
+- ✅ Recipient filtering (customers, active contracts, risk level, etc.)
+- ✅ Channel selection (Email/SMS/Both)
+- ✅ Status tracking (Draft → Pending Approval → Approved → Sent)
+- ✅ Delivery tracking (success/failure counts)
+- ✅ Cost estimation based on channel preferences
+- ✅ Scheduling capabilities
+- ✅ Bilingual campaign creation (English/Arabic)
+
+---
+
+## 10. PREDICTIVE INTELLIGENCE REPORTS (6 REPORTS - FULLY BILINGUAL)
+
+### 1. Revenue Forecast Report
+- **ML Predictions:** Time-series forecasting
+- **Confidence Intervals:** Upper/lower bounds
+- **Filters:** Date ranges, branch selection
+- **CSV Export:** Localized column headers
+
+### 2. Fleet Utilization Forecast
+- **Capacity Planning:** Vehicle type predictions
+- **Utilization Trends:** Historical + forecasted
+- **Vehicle Type Analysis:** Category-based forecasting
+
+### 3. Customer Churn Risk Report
+- **Risk Scoring:** Payment history analysis
+- **Churn Probability:** Customer-level predictions
+- **Warning Thresholds:** High-risk customer identification
+
+### 4. Maintenance Cost Forecast
+- **Vehicle Age/Mileage Predictions:** Cost forecasting
+- **Service History Analysis:** Pattern recognition
+- **Budget Planning:** Annual cost projections
+
+### 5. Payment Default Prediction
+- **Overdue Risk Analysis:** Customer payment behavior
+- **Default Probability:** Contract-level predictions
+- **Collection Priority:** Risk-based prioritization
+
+### 6. Location Demand Forecast
+- **Emirate-Based Trends:** Geographic demand patterns
+- **Seasonal Analysis:** Time-based forecasting
+- **Branch Optimization:** Location planning insights
+
+**All 6 Reports Include:**
+- ✅ Complete English/Arabic translations
+- ✅ RTL/LTR layout support
+- ✅ Localized CSV exports
+- ✅ Recharts visualizations
+- ✅ Filter components
+- ✅ Summary statistics cards
+- ✅ data-testid compliance
+- ✅ Primitive-value query keys for cache stability
+
+---
+
+## 11. TECHNICAL INFRASTRUCTURE
 
 ### Authentication & Security
-- **Internal Username/Password:** Passport.js with passport-local strategy
-- **Session Management:** PostgreSQL-backed sessions (connect-pg-simple)
-- **Role-Based Access Control:** Admin, Manager, Staff, Viewer with middleware enforcement
-- **Password Security:** bcrypt hashing, last password change tracking
-- **Immutable Super Admin:** Cannot be deleted, system protection
+- **Internal Username/Password:** Passport.js + bcrypt
+- **Session Management:** PostgreSQL-backed (connect-pg-simple)
+- **RBAC:** Admin, Manager, Staff, Viewer
 - **CSRF Protection:** Full implementation
-- **Secure Cookies:** httpOnly, secure flags in production
-- **Full Proxy Trust:** Replit environment configuration
+- **Secure Cookies:** httpOnly, secure in production
+- **Password Security:** Complexity requirements, rotation tracking
 
 ### Database & ORM
-- **PostgreSQL (Neon Serverless):** Production database
-- **Drizzle ORM:** Type-safe database queries
-- **Migration Strategy:** Drizzle Kit for schema management
-- **JSONB Storage:** Inspection photos (MVP approach, ready for object storage migration)
-- **Indexes:** Session expiration index for performance
-- **Constraints:** Foreign keys, unique constraints, not null enforcement
+- **PostgreSQL (Neon Serverless):** 63 tables
+- **Drizzle ORM:** Type-safe queries
+- **Migration Strategy:** Drizzle Kit
+- **JSONB Storage:** Inspection photos (MVP approach)
+- **Indexes:** Performance-optimized queries
+- **Constraints:** Foreign keys, unique, not null
 
 ### Frontend Stack
-- **React 18 + TypeScript:** Component-based architecture
-- **Wouter:** Lightweight routing
-- **TanStack Query v5:** Server state management, caching, mutations
-- **React Hook Form:** Form state management
-- **Zod Validation:** Runtime type checking + validation
-- **Radix UI + shadcn/ui:** Accessible component primitives
+- **React 18 + TypeScript:** Component architecture
+- **Wouter:** Lightweight routing (66 pages)
+- **TanStack Query v5:** Server state management
+- **React Hook Form + Zod:** Form validation
+- **Radix UI + shadcn/ui:** Accessible components
 - **Tailwind CSS:** Utility-first styling
 - **Vite:** Build tool and dev server
+- **i18next:** Internationalization (190+ keys)
 
 ### Backend Stack
 - **Node.js + TypeScript:** Server runtime
-- **Express.js:** HTTP server framework
-- **RESTful API:** `/api` prefix, JSON responses
-- **Centralized Error Handling:** Consistent error responses
-- **Request Validation:** Zod schema validation on all POST/PATCH endpoints
-- **Audit Middleware:** Automatic logging for all mutations
+- **Express.js:** RESTful API (120+ endpoints)
+- **Centralized Error Handling:** Consistent responses
+- **Request Validation:** Zod schemas
+- **Audit Middleware:** Automatic logging
+- **node-cron:** Background job scheduling
 
 ### Document Generation
-- **jsPDF v3.x:** PDF generation with named export
-- **jspdf-autotable:** Table formatting in PDFs
+- **jsPDF:** PDF generation
+- **jspdf-autotable:** Table formatting
 - **xlsx:** Excel file generation
-- **html2canvas:** Chart screenshot capture for export
-- **Bilingual Templates:** English/Arabic contract PDFs
-
-### Development Tools
-- **TypeScript:** Static typing across stack
-- **ESBuild:** Fast transpilation
-- **Drizzle Studio:** Database GUI
-- **Development Workflow:** `npm run dev` (Express + Vite concurrently)
+- **html2canvas:** Chart screenshot capture
+- **QR Code:** JWT-based contract verification
 
 ---
 
-## 7. DEPLOYMENT & PRODUCTION
+## 12. PRODUCTION READINESS
+
+### Deployment Environment
+- **Platform:** Replit (Node.js runtime)
+- **Database:** Neon PostgreSQL (serverless)
+- **Port:** 5000 (frontend + backend unified)
+- **Sessions:** PostgreSQL-backed (survives restarts)
 
 ### Environment Variables
-- `DATABASE_URL` - PostgreSQL connection string
-- `SESSION_SECRET` - Session encryption key
+- `DATABASE_URL` - PostgreSQL connection
+- `SESSION_SECRET` - Session encryption
 - `NODE_ENV` - Environment flag
-- `PORT` - Server port (default: 5000)
-
-### Production Readiness
-- **Error Logging:** System errors table with acknowledgment
-- **Session Persistence:** PostgreSQL-backed sessions survive restarts
-- **HTTPS Support:** Secure cookie configuration
-- **Proxy Trust:** Express proxy trust for Replit
-- **Database Migrations:** Drizzle migration system
-- **Backup Strategy:** Database-level backups (Neon)
+- `PORT` - Server port
 
 ### Performance Optimization
-- **Route-Based Lazy Loading (December 2025):** React.lazy() + Suspense for all 21 pages (except Login)
-  - Initial bundle: ~50KB (reduced from ~744KB - 88% smaller)
-  - Load time: 1-2s (improved from 4-5s - 3-4x faster)
-  - Professional loading spinner (Loader2) during page transitions
-  - Browser caching for instant navigation to visited pages
-  - NotFound page also lazy-loaded with Suspense
-- **Query Optimization:** Drizzle ORM efficient queries
-- **Image Compression:** Automatic for inspection photos (10MB → 500KB)
-- **Caching:** TanStack Query client-side caching with invalidation
-- **Memoization:** React component optimization where beneficial
+- **Route-Based Lazy Loading:** 88% bundle reduction
+- **Query Optimization:** Efficient Drizzle queries
+- **Image Compression:** 10MB → 500KB automatic
+- **Client-Side Caching:** TanStack Query invalidation
+- **Component Memoization:** React optimization
 
----
-
-## 8. DOCUMENTATION COVERAGE REQUIREMENTS
-
-### ALL 15 Files Must Include:
-1. **Microsoft 365 Sidebar:** Responsive controls, deferred submenu, complete tooltips
-2. **Two-Stage Inspection:** Pre-delivery + post-return with 6-photo mandatory workflow
-3. **Dual Audit System:** auditLogs + contractEdits tables
-4. **Report Export:** PDF/Excel with chart visualization embedding
-5. **Disable-Only Architecture:** No deletions, only disable/enable with tracking
-6. **Generic System:** Zero hardcoding, configurable company settings
-7. **Role-Based Permissions:** Admin, Manager, Staff, Viewer with specific capabilities
-8. **Contract Lifecycle:** 5 states with sequential gating
-9. **Payment Tracking:** Separate payments table, real-time outstanding balance
-10. **Bilingual Support:** i18next, RTL/LTR, bilingual data fields
-
-### Critical Implementation Details:
-- `pendingSubmenuOpen` state pattern for deferred submenu opening
-- `flex-row` (expanded) vs `flex-col` (collapsed) responsive header layout
-- Pre-delivery inspection gates activation, post-return inspection gates completion
-- html2canvas → base64 → backend → PDF/Excel embedding workflow
-- Real-time outstanding balance calculation: totalAmount + totalExtraCharges - sum(payments)
-- Automatic vehicle status synchronization with contract lifecycle
-- Duplicate phone detection (non-blocking warning, not error)
-- Image compression (1920x1080, 0.85 quality, JPEG) for all inspections
-- jsPDF v3.x named export import pattern
-- 10MB request body limit for chart image uploads
-
----
-
-## 9. MISSING FROM REPLIT.MD (Needs Addition)
-
-### Microsoft 365 Sidebar Latest Implementation
-- **Responsive Header Controls:** flex-row (expanded) vs flex-col (collapsed) pattern
-- **Deferred Submenu Opening:** pendingSubmenuOpen state + useEffect implementation details
-- **Complete Tooltip Coverage:** All 6 main menu items now have tooltips
-
-### Technical Patterns Not Documented
-- `useEffect` hook pattern for sidebar expansion + submenu opening coordination
-- localStorage persistence for collapsible section states
-- Tooltip positioning logic (left for Arabic, right for English)
-- Dynamic aria-label updates based on sidebar state
-
-### API Implementation Details
-- Real-time outstanding balance calculation in GET /api/contracts/:id
-- Role-based filtering in GET /api/contracts (Staff see only own contracts)
-- Vehicle availability check in POST /api/contracts/:id/confirm
-- Edit reason requirement in PATCH /api/contracts/:id
+### Monitoring & Logging
+- **Error Logging:** system_errors table
+- **Access Logs:** access_logs table
+- **Audit Trail:** Dual-layer (audit_logs + contract_edits)
+- **Communication Logs:** Delivery tracking
 
 ---
 
 ## VERSION HISTORY
-- **v1.0 (December 2024):** Initial master feature list created from comprehensive codebase inventory + replit.md cross-reference
-- **Purpose:** Single source of truth for documentation consistency verification across all 15 documentation files
+
+- **v1.0 (December 2024):** Initial master feature list (15 tables, 100+ endpoints, 22 pages)
+- **v2.0 (November 18, 2025):** Complete rewrite with accurate counts
+  - Updated to 63 tables (from 15)
+  - Updated to 120+ unique endpoints (from 100+)
+  - Updated to 66 pages (from 22)
+  - Added Phase 4 (Campaign Management)
+  - Added Phase 5 (Complete Bilingual Implementation)
+  - Added Automation Orchestrator details
+  - Added Predictive Intelligence Reports
+  - Added Communications Platform architecture
+  - Added all specialized modules (Toll, Traffic, Incidents, Drivers, Branches, Accessories, Rate Plans)
+
+---
+
+**Purpose:** Single source of truth for documentation consistency verification across all documentation files  
+**Last Comprehensive Audit:** November 18, 2025  
+**Next Audit Recommended:** After any major feature additions
 
 ---
 
