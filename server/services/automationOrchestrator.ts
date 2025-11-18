@@ -43,6 +43,10 @@ export function initializeAutomationOrchestrator() {
 
       for (const customer of customers) {
         try {
+          // Get previous risk level
+          const previousScores = await storage.getCustomerRiskScores(customer.id);
+          const previousLevel = previousScores.length > 0 ? previousScores[0].riskCategory : 'low';
+          
           // Calculate and save risk score
           const riskScore = await riskCalculator.calculateCustomerRisk(customer.id);
           await storage.createCustomerRiskScore({
@@ -59,6 +63,19 @@ export function initializeAutomationOrchestrator() {
             blacklistStatus: false,
             calculatedBy: 'system',
           });
+          
+          // Send notification if risk level elevated (non-blocking)
+          if (previousLevel !== riskScore.level) {
+            notificationService.sendRiskElevatedNotification(
+              customer.id,
+              previousLevel,
+              riskScore.level,
+              riskScore.score
+            ).catch(err => {
+              console.error(`[Automation] Failed to send risk elevated notification for ${customer.id}:`, err);
+            });
+          }
+          
           processed++;
         } catch (error) {
           console.error(`[Automation] Error calculating risk for customer ${customer.id}:`, error);

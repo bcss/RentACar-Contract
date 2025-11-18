@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { communicationProviders, communicationLogs, notificationTemplates, customers, drivers, users } from '@shared/schema';
+import { communicationProviders, communicationLogs, notificationTemplates, customers, drivers, users, contracts, payments, documentRegistry, approvalRequests } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
 export interface SendNotificationParams {
@@ -407,7 +407,7 @@ class NotificationService {
       return {
         name: driver.nameEn || driver.nameAr || 'Driver',
         email: driver.email || undefined,
-        phone: driver.phone || undefined,
+        phone: driver.mobile || undefined,
         preferredLanguage: 'en',
       };
     }
@@ -459,6 +459,272 @@ class NotificationService {
         lastUsed: new Date(),
       })
       .where(eq(communicationProviders.id, providerId));
+  }
+
+  /**
+   * Send payment received notification
+   */
+  async sendPaymentReceivedNotification(contractId: string, paymentId: string): Promise<NotificationResult> {
+    try {
+      // Get contract and payment details
+      const [contract] = await db.select().from(contracts).where(eq(contracts.id, contractId));
+      const [payment] = await db.select().from(payments).where(eq(payments.id, paymentId));
+      
+      if (!contract || !payment) {
+        return {
+          success: false,
+          messageSent: {},
+          logIds: [],
+          errors: ['Contract or payment not found'],
+        };
+      }
+
+      return await this.sendNotification({
+        templateCode: 'payment_received',
+        channel: 'both',
+        recipientType: 'customer',
+        recipientId: contract.customerId,
+        variables: {
+          contractNumber: contract.contractNumber || '',
+          amount: payment.amount,
+          paymentMethod: payment.paymentMethod,
+          customerName: '',
+        },
+        triggerType: 'event_driven',
+        entityType: 'payment',
+        entityId: paymentId,
+      });
+    } catch (error) {
+      console.error('[NotificationService] Error sending payment received notification:', error);
+      return {
+        success: false,
+        messageSent: {},
+        logIds: [],
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      };
+    }
+  }
+
+  /**
+   * Send document uploaded notification
+   */
+  async sendDocumentUploadedNotification(documentId: string): Promise<NotificationResult> {
+    try {
+      const [document] = await db.select().from(documentRegistry).where(eq(documentRegistry.id, documentId));
+      
+      if (!document) {
+        return {
+          success: false,
+          messageSent: {},
+          logIds: [],
+          errors: ['Document not found'],
+        };
+      }
+
+      // Only notify for customer documents
+      if (document.entityType !== 'customer') {
+        return {
+          success: true,
+          messageSent: {},
+          logIds: [],
+          errors: [],
+        };
+      }
+
+      return await this.sendNotification({
+        templateCode: 'document_uploaded',
+        channel: 'both',
+        recipientType: 'customer',
+        recipientId: document.entityId,
+        variables: {
+          documentType: document.documentType,
+          documentNumber: document.documentNumber || 'N/A',
+          customerName: '',
+        },
+        triggerType: 'event_driven',
+        entityType: 'document',
+        entityId: documentId,
+      });
+    } catch (error) {
+      console.error('[NotificationService] Error sending document uploaded notification:', error);
+      return {
+        success: false,
+        messageSent: {},
+        logIds: [],
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      };
+    }
+  }
+
+  /**
+   * Send document verified notification
+   */
+  async sendDocumentVerifiedNotification(documentId: string): Promise<NotificationResult> {
+    try {
+      const [document] = await db.select().from(documentRegistry).where(eq(documentRegistry.id, documentId));
+      
+      if (!document) {
+        return {
+          success: false,
+          messageSent: {},
+          logIds: [],
+          errors: ['Document not found'],
+        };
+      }
+
+      // Only notify for customer documents
+      if (document.entityType !== 'customer') {
+        return {
+          success: true,
+          messageSent: {},
+          logIds: [],
+          errors: [],
+        };
+      }
+
+      return await this.sendNotification({
+        templateCode: 'document_verified',
+        channel: 'both',
+        recipientType: 'customer',
+        recipientId: document.entityId,
+        variables: {
+          documentType: document.documentType,
+          documentNumber: document.documentNumber || 'N/A',
+          customerName: '',
+        },
+        triggerType: 'event_driven',
+        entityType: 'document',
+        entityId: documentId,
+      });
+    } catch (error) {
+      console.error('[NotificationService] Error sending document verified notification:', error);
+      return {
+        success: false,
+        messageSent: {},
+        logIds: [],
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      };
+    }
+  }
+
+  /**
+   * Send approval required notification
+   */
+  async sendApprovalRequiredNotification(approvalId: string): Promise<NotificationResult> {
+    try {
+      const [approval] = await db.select().from(approvalRequests).where(eq(approvalRequests.id, approvalId));
+      
+      if (!approval) {
+        return {
+          success: false,
+          messageSent: {},
+          logIds: [],
+          errors: ['Approval request not found'],
+        };
+      }
+
+      // Get all users with Manager/Admin roles to notify
+      const [managerUsers] = await db
+        .select()
+        .from(users)
+        .where(eq(users.role, 'manager'))
+        .limit(1);
+
+      if (!managerUsers) {
+        console.log('[NotificationService] No managers found to notify for approval');
+        return {
+          success: false,
+          messageSent: {},
+          logIds: [],
+          errors: ['No managers found to notify'],
+        };
+      }
+
+      return await this.sendNotification({
+        templateCode: 'approval_required',
+        channel: 'both',
+        recipientType: 'user',
+        recipientId: managerUsers.id,
+        variables: {
+          approvalType: approval.entityType,
+          requester: '',
+          amount: approval.amount || '0',
+        },
+        triggerType: 'event_driven',
+        entityType: 'approval',
+        entityId: approvalId,
+      });
+    } catch (error) {
+      console.error('[NotificationService] Error sending approval required notification:', error);
+      return {
+        success: false,
+        messageSent: {},
+        logIds: [],
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      };
+    }
+  }
+
+  /**
+   * Send risk score elevated notification
+   */
+  async sendRiskElevatedNotification(customerId: string, oldLevel: string, newLevel: string, score: number): Promise<NotificationResult> {
+    try {
+      // Only notify on risk elevation (not reduction)
+      const riskHierarchy = ['low', 'medium', 'high'];
+      const oldIndex = riskHierarchy.indexOf(oldLevel.toLowerCase());
+      const newIndex = riskHierarchy.indexOf(newLevel.toLowerCase());
+      
+      if (newIndex <= oldIndex) {
+        // Risk decreased or stayed same, no notification needed
+        return {
+          success: true,
+          messageSent: {},
+          logIds: [],
+          errors: [],
+        };
+      }
+
+      // Notify internal users (managers) about risk elevation
+      const [managerUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.role, 'manager'))
+        .limit(1);
+
+      if (!managerUser) {
+        return {
+          success: false,
+          messageSent: {},
+          logIds: [],
+          errors: ['No managers found to notify'],
+        };
+      }
+
+      return await this.sendNotification({
+        templateCode: 'risk_score_elevated',
+        channel: 'both',
+        recipientType: 'user',
+        recipientId: managerUser.id,
+        variables: {
+          customerName: '',
+          oldLevel,
+          newLevel,
+          riskScore: score.toString(),
+        },
+        triggerType: 'automated',
+        entityType: 'customer',
+        entityId: customerId,
+      });
+    } catch (error) {
+      console.error('[NotificationService] Error sending risk elevated notification:', error);
+      return {
+        success: false,
+        messageSent: {},
+        logIds: [],
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+      };
+    }
   }
 }
 

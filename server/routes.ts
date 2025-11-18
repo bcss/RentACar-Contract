@@ -1772,6 +1772,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await createAuditLog(userId, 'payment', contract.id, req, `Recorded deposit payment of ${contract.securityDeposit || '0'} ${currency} for contract #${contract.contractNumber}`);
       
+      // Send payment received notification (non-blocking)
+      notificationService.sendPaymentReceivedNotification(contract.id, payment.id).catch(err => {
+        console.error('[Notification] Failed to send payment received notification:', err);
+      });
+      
       res.json(payment);
     } catch (error: any) {
       console.error("Error recording deposit:", error);
@@ -1820,6 +1825,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } as any);
       
       await createAuditLog(userId, 'payment', contract.id, req, `Recorded final payment of ${finalPaymentAmount.toFixed(2)} ${currency} for contract #${contract.contractNumber}`);
+      
+      // Send payment received notification (non-blocking)
+      notificationService.sendPaymentReceivedNotification(contract.id, payment.id).catch(err => {
+        console.error('[Notification] Failed to send payment received notification:', err);
+      });
       
       res.json(payment);
     } catch (error: any) {
@@ -7205,6 +7215,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } as any);
       
       await createAuditLog(user.id, 'document_created', undefined, req, `Created document: ${document.documentType}`);
+      
+      // Send document uploaded notification (non-blocking)
+      notificationService.sendDocumentUploadedNotification(document.id).catch(err => {
+        console.error('[Notification] Failed to send document uploaded notification:', err);
+      });
+      
       res.status(201).json(document);
     } catch (error) {
       next(error);
@@ -7223,6 +7239,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const document = await storage.updateDocument(req.params.id, validationResult.data);
       await createAuditLog(user.id, 'document_updated', undefined, req, `Updated document`);
+      
+      // Send document updated notification if status changed to verified (non-blocking)
+      if (validationResult.data.isVerified === true) {
+        notificationService.sendDocumentVerifiedNotification(document.id).catch(err => {
+          console.error('[Notification] Failed to send document verified notification:', err);
+        });
+      }
+      
       res.json(document);
     } catch (error) {
       next(error);
@@ -7991,6 +8015,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       await createAuditLog(user.id, 'approval_requested', undefined, req, `Created approval request`);
+      
+      // Send approval required notification (non-blocking)
+      notificationService.sendApprovalRequiredNotification(request.id).catch(err => {
+        console.error('[Notification] Failed to send approval required notification:', err);
+      });
+      
       res.status(201).json(request);
     } catch (error) {
       next(error);

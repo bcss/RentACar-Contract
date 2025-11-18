@@ -83,6 +83,16 @@ const CommunicationProviders = lazy(() => import("@/pages/CommunicationProviders
 const CommunicationLogs = lazy(() => import("@/pages/CommunicationLogs"));
 const ManualNotificationSender = lazy(() => import("@/pages/ManualNotificationSender"));
 
+// Advanced Analytics Reports
+const CustomerRiskTrends = lazy(() => import("@/pages/reports/CustomerRiskTrends"));
+const TollExpenseAnalysis = lazy(() => import("@/pages/reports/TollExpenseAnalysis"));
+const TrafficFineAgingReport = lazy(() => import("@/pages/reports/TrafficFineAgingReport"));
+const IncidentCostAnalysis = lazy(() => import("@/pages/reports/IncidentCostAnalysis"));
+const MaintenanceComplianceReport = lazy(() => import("@/pages/reports/MaintenanceComplianceReport"));
+const DriverUtilizationReport = lazy(() => import("@/pages/reports/DriverUtilizationReport"));
+const ReminderDeliverySLA = lazy(() => import("@/pages/reports/ReminderDeliverySLA"));
+const ApprovalTurnaroundReport = lazy(() => import("@/pages/reports/ApprovalTurnaroundReport"));
+
 // Professional loading skeleton
 function PageLoader() {
   return (
@@ -308,6 +318,32 @@ function Router() {
       </Route>
       <Route path="/notifications/send">
         {() => <ProtectedRoute component={ManualNotificationSender} />}
+      </Route>
+      
+      {/* Advanced Analytics Reports */}
+      <Route path="/reports/customer-risk-trends">
+        {() => <ProtectedRoute component={CustomerRiskTrends} />}
+      </Route>
+      <Route path="/reports/toll-expense-analysis">
+        {() => <ProtectedRoute component={TollExpenseAnalysis} />}
+      </Route>
+      <Route path="/reports/traffic-fine-aging">
+        {() => <ProtectedRoute component={TrafficFineAgingReport} />}
+      </Route>
+      <Route path="/reports/incident-cost-analysis">
+        {() => <ProtectedRoute component={IncidentCostAnalysis} />}
+      </Route>
+      <Route path="/reports/maintenance-compliance">
+        {() => <ProtectedRoute component={MaintenanceComplianceReport} />}
+      </Route>
+      <Route path="/reports/driver-utilization">
+        {() => <ProtectedRoute component={DriverUtilizationReport} />}
+      </Route>
+      <Route path="/reports/reminder-delivery-sla">
+        {() => <ProtectedRoute component={ReminderDeliverySLA} />}
+      </Route>
+      <Route path="/reports/approval-turnaround">
+        {() => <ProtectedRoute component={ApprovalTurnaroundReport} />}
       </Route>
       
       <Route component={() => <NotFound />} />
