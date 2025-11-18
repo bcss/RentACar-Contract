@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated, requireAdmin, requireManagerOrAdmin, requireEditor, requireReportsAccess, requireContractCloseAccess, requireAppAccessReportAccess } from "./auth/localAuth";
-import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, insertBranchSchema, insertBranchTransferSchema, insertPublicHolidaySchema, insertDriverOutsourceCompanySchema, insertDriverSchema, insertDriverRateCardSchema, insertDriverScheduleBlockSchema, insertDriverAssignmentSchema, insertTollSystemSchema, insertTollGateSchema, insertTollPassSchema, insertTrafficFineSchema, insertIncidentSchema, insertDocumentRegistrySchema, insertVehicleServiceRecordSchema, insertRentalRatePlanSchema, insertVehicleAccessorySchema, insertContractAccessorySchema, insertDriverScheduleSchema, insertDriverAttendanceSchema, insertAutomatedReminderSchema, insertApprovalRequestSchema, insertApprovalLogSchema, insertCustomerRiskScoreSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
+import { insertContractSchema, insertUserSchema, insertCompanySettingsSchema, insertCustomerSchema, insertVehicleSchema, insertSponsorSchema, insertCompanySchema, insertPaymentSchema, insertVehicleInspectionSchema, insertInsuranceClaimSchema, insertRenewalRequestSchema, insertDocumentApprovalSchema, insertSupportTicketSchema, insertPushNotificationTokenSchema, insertBranchSchema, insertBranchTransferSchema, insertPublicHolidaySchema, insertDriverOutsourceCompanySchema, insertDriverSchema, insertDriverRateCardSchema, insertDriverScheduleBlockSchema, insertDriverAssignmentSchema, insertTollSystemSchema, insertTollGateSchema, insertTollPassSchema, insertTrafficFineSchema, insertIncidentSchema, insertDocumentRegistrySchema, insertVehicleServiceRecordSchema, insertRentalRatePlanSchema, insertVehicleAccessorySchema, insertContractAccessorySchema, insertDriverScheduleSchema, insertDriverAttendanceSchema, insertAutomatedReminderSchema, insertApprovalRequestSchema, insertApprovalLogSchema, insertCustomerRiskScoreSchema, insertClaimProgressUpdateSchema, insertCampaignSchema, insertCampaignRecipientSchema, insertTemplateAnalyticsSchema, insertAbTestSchema, passwordSchema, type Customer, type Vehicle, type Sponsor, type Company, type User, vehicleInspections } from "@shared/schema";
 import { count, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/passwordUtils";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
@@ -8301,6 +8301,473 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const reminders = await storage.getAutomatedReminders(req.query as any);
       res.json(reminders);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ==================== PHASE 4-5: CLAIMS PROGRESS TRACKING ====================
+  
+  // GET /api/claims/:claimId/progress - Get all progress updates for a claim
+  app.get("/api/claims/:claimId/progress", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const updates = await storage.getClaimProgressUpdates(req.params.claimId);
+      res.json(updates);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/claims/:claimId/progress - Add progress update to claim
+  app.post("/api/claims/:claimId/progress", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const update = await storage.createClaimProgressUpdate({
+        ...req.body,
+        claimId: req.params.claimId,
+        updatedBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'claim_progress_added', undefined, req, 
+        `Added ${req.body.updateType} progress update to claim ${req.params.claimId}`);
+      
+      res.json(update);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ==================== PHASE 4-5: CAMPAIGN MANAGEMENT ====================
+  
+  // GET /api/campaigns - Get campaigns with RBAC filtering
+  app.get("/api/campaigns", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      // Enforce branch scope for non-admins
+      const filters: any = { ...req.query };
+      
+      // Non-admins can only see campaigns in their branch or created by them
+      if (user.role !== 'admin') {
+        if (!user.branchId) {
+          return res.status(403).json({ 
+            message: "You must be assigned to a branch to view campaigns" 
+          });
+        }
+        // Force branch filter for non-admins
+        filters.branchId = user.branchId;
+      }
+      
+      const campaigns = await storage.getCampaigns(user, filters);
+      res.json(campaigns);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/campaigns/:id - Get single campaign
+  app.get("/api/campaigns/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const campaign = await storage.getCampaignById(req.params.id, user);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      res.json(campaign);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/campaigns - Create new campaign (with RBAC scoping)
+  app.post("/api/campaigns", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      // RBAC enforcement: Staff/Manager can only create branch-scoped campaigns
+      if (user.role !== 'admin' && req.body.scope === 'organization') {
+        return res.status(403).json({ 
+          message: "Only administrators can create organization-wide campaigns" 
+        });
+      }
+      
+      // Enforce branch scope for non-admins
+      if (user.role !== 'admin' && !user.branchId) {
+        return res.status(403).json({ 
+          message: "You must be assigned to a branch to create campaigns" 
+        });
+      }
+      
+      const campaignData = {
+        ...req.body,
+        createdBy: user.id,
+        // Auto-set branch for non-admins
+        branchId: user.role === 'admin' ? req.body.branchId : user.branchId,
+        // Staff always require approval
+        requiresApproval: user.role === 'staff' ? true : req.body.requiresApproval,
+        // Auto-set status based on approval requirement
+        status: (user.role === 'staff' || req.body.requiresApproval) ? 'pending_approval' : 'draft',
+      };
+      
+      const campaign = await storage.createCampaign(campaignData);
+      
+      await createAuditLog(user.id, 'campaign_created', undefined, req, 
+        `Created campaign ${campaign.name} (${campaign.scope})`);
+      
+      res.json(campaign);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // PUT /api/campaigns/:id - Update campaign
+  app.put("/api/campaigns/:id", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      // Get existing campaign
+      const existing = await storage.getCampaignById(req.params.id, user);
+      if (!existing) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Only creator or admin can edit
+      if (existing.createdBy !== user.id && user.role !== 'admin') {
+        return res.status(403).json({ message: "You can only edit your own campaigns" });
+      }
+      
+      // Cannot edit sent campaigns
+      if (existing.status === 'sent' || existing.status === 'sending') {
+        return res.status(400).json({ message: "Cannot edit campaigns that are already sent or sending" });
+      }
+      
+      const campaign = await storage.updateCampaign(req.params.id, req.body);
+      
+      await createAuditLog(user.id, 'campaign_updated', undefined, req, 
+        `Updated campaign ${campaign.name}`);
+      
+      res.json(campaign);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // DELETE /api/campaigns/:id - Delete campaign (draft only)
+  app.delete("/api/campaigns/:id", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const existing = await storage.getCampaignById(req.params.id, user);
+      if (!existing) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Only draft or failed campaigns can be deleted
+      if (!['draft', 'failed', 'cancelled'].includes(existing.status)) {
+        return res.status(400).json({ 
+          message: "Only draft, failed, or cancelled campaigns can be deleted" 
+        });
+      }
+      
+      // Only creator or admin can delete
+      if (existing.createdBy !== user.id && user.role !== 'admin') {
+        return res.status(403).json({ message: "You can only delete your own campaigns" });
+      }
+      
+      await storage.deleteCampaign(req.params.id);
+      
+      await createAuditLog(user.id, 'campaign_deleted', undefined, req, 
+        `Deleted campaign ${existing.name}`);
+      
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/campaigns/:id/approve - Approve campaign (Manager/Admin only)
+  app.post("/api/campaigns/:id/approve", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const existing = await storage.getCampaignById(req.params.id, user);
+      if (!existing) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      if (existing.status !== 'pending_approval') {
+        return res.status(400).json({ message: "Campaign is not pending approval" });
+      }
+      
+      // Manager can only approve campaigns in their branch
+      if (user.role === 'manager' && existing.scope !== 'branch') {
+        return res.status(403).json({ 
+          message: "Managers can only approve branch-specific campaigns" 
+        });
+      }
+      
+      if (user.role === 'manager' && existing.branchId !== user.branchId) {
+        return res.status(403).json({ 
+          message: "You can only approve campaigns for your own branch" 
+        });
+      }
+      
+      const campaign = await storage.approveCampaign(req.params.id, user.id);
+      
+      await createAuditLog(user.id, 'campaign_approved', undefined, req, 
+        `Approved campaign ${campaign.name}`);
+      
+      res.json(campaign);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/campaigns/:id/reject - Reject campaign
+  app.post("/api/campaigns/:id/reject", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const existing = await storage.getCampaignById(req.params.id, user);
+      if (!existing) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      if (existing.status !== 'pending_approval') {
+        return res.status(400).json({ message: "Campaign is not pending approval" });
+      }
+      
+      const campaign = await storage.rejectCampaign(
+        req.params.id, 
+        user.id, 
+        req.body.rejectionReason || 'No reason provided'
+      );
+      
+      await createAuditLog(user.id, 'campaign_rejected', undefined, req, 
+        `Rejected campaign ${campaign.name}: ${req.body.rejectionReason}`);
+      
+      res.json(campaign);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/campaigns/:id/send - Send campaign immediately (Manager/Admin only for approved campaigns)
+  app.post("/api/campaigns/:id/send", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const existing = await storage.getCampaignById(req.params.id, user);
+      if (!existing) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Strict status checks: only approved campaigns can be sent
+      if (existing.status !== 'approved') {
+        return res.status(400).json({ 
+          message: `Campaign must be approved before sending. Current status: ${existing.status}` 
+        });
+      }
+      
+      // Manager can only send campaigns in their branch
+      if (user.role === 'manager' && existing.scope !== 'branch') {
+        return res.status(403).json({ 
+          message: "Managers can only send branch-specific campaigns" 
+        });
+      }
+      
+      if (user.role === 'manager' && existing.branchId !== user.branchId) {
+        return res.status(403).json({ 
+          message: "You can only send campaigns for your own branch" 
+        });
+      }
+      
+      // Start sending process (actual sending will be done by background job)
+      const campaign = await storage.sendCampaign(req.params.id);
+      
+      await createAuditLog(user.id, 'campaign_sent', undefined, req, 
+        `Initiated sending campaign ${campaign.name} to ${campaign.estimatedRecipients} recipients`);
+      
+      res.json(campaign);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/campaigns/estimate-recipients - Estimate recipient count based on filters (server-side computation only)
+  app.post("/api/campaigns/estimate-recipients", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const { recipientFilter, scope, branchId, selectedBranches, channel } = req.body;
+      
+      // Enforce branch scope for non-admins
+      let effectiveScope = scope;
+      let effectiveBranchId = branchId;
+      let effectiveSelectedBranches = selectedBranches;
+      
+      if (user.role !== 'admin') {
+        if (scope === 'organization') {
+          return res.status(403).json({ 
+            message: "Only administrators can estimate for organization-wide campaigns" 
+          });
+        }
+        
+        // Force branch scope for non-admins
+        effectiveScope = 'branch';
+        effectiveBranchId = user.branchId;
+        effectiveSelectedBranches = null;
+      }
+      
+      // Server-side computation - never trust client-supplied costs
+      const estimate = await storage.estimateCampaignRecipients({
+        recipientFilter: recipientFilter || {},
+        scope: effectiveScope,
+        branchId: effectiveScope === 'branch' ? effectiveBranchId : null,
+        selectedBranches: effectiveScope === 'selected_branches' ? effectiveSelectedBranches : null,
+        userRole: user.role,
+        userBranchId: user.branchId,
+        channel: channel || 'email', // Add channel to estimate costs correctly
+      });
+      
+      res.json(estimate);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/campaigns/:id/recipients - Get campaign recipients
+  app.get("/api/campaigns/:id/recipients", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      // Verify user has access to this campaign
+      const campaign = await storage.getCampaignById(req.params.id, user);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      const recipients = await storage.getCampaignRecipients(req.params.id, req.query as any);
+      res.json(recipients);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ==================== PHASE 4-5: TEMPLATE ANALYTICS ====================
+  
+  // GET /api/template-analytics - Get template analytics
+  app.get("/api/template-analytics", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const analytics = await storage.getTemplateAnalytics(req.query as any);
+      res.json(analytics);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/template-analytics/summary - Get analytics summary
+  app.get("/api/template-analytics/summary", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const summary = await storage.getTemplateAnalyticsSummary(req.query as any);
+      res.json(summary);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/template-analytics/generate - Generate analytics for period
+  app.post("/api/template-analytics/generate", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const { periodType, periodStart, periodEnd } = req.body;
+      
+      const result = await storage.generateTemplateAnalytics({ periodType, periodStart, periodEnd });
+      
+      await createAuditLog(user.id, 'analytics_generated', undefined, req, 
+        `Generated template analytics for period ${periodStart} to ${periodEnd}`);
+      
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ==================== PHASE 4-5: A/B TESTING ====================
+  
+  // GET /api/ab-tests - Get all A/B tests
+  app.get("/api/ab-tests", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const tests = await storage.getAbTests(req.query as any);
+      res.json(tests);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/ab-tests/:id - Get single A/B test
+  app.get("/api/ab-tests/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const test = await storage.getAbTestById(req.params.id);
+      
+      if (!test) {
+        return res.status(404).json({ message: "A/B test not found" });
+      }
+      
+      res.json(test);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/ab-tests - Create new A/B test
+  app.post("/api/ab-tests", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const test = await storage.createAbTest({
+        ...req.body,
+        createdBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'ab_test_created', undefined, req, 
+        `Created A/B test ${test.testName}`);
+      
+      res.json(test);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/ab-tests/:id/start - Start A/B test
+  app.post("/api/ab-tests/:id/start", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const test = await storage.startAbTest(req.params.id);
+      
+      await createAuditLog(user.id, 'ab_test_started', undefined, req, 
+        `Started A/B test ${test.testName}`);
+      
+      res.json(test);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/ab-tests/:id/complete - Complete A/B test and declare winner
+  app.post("/api/ab-tests/:id/complete", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const test = await storage.completeAbTest(req.params.id);
+      
+      await createAuditLog(user.id, 'ab_test_completed', undefined, req, 
+        `Completed A/B test ${test.testName}, winner: ${test.winner || 'tie'}`);
+      
+      res.json(test);
     } catch (error) {
       next(error);
     }

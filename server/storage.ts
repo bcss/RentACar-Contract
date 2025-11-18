@@ -45,6 +45,11 @@ import {
   communicationProviders,
   communicationLogs,
   notificationTemplates,
+  claimProgressUpdates,
+  notificationCampaigns,
+  campaignRecipients,
+  templateAnalytics,
+  abTestVariants,
   type User,
   type UpsertUser,
   type Contract,
@@ -136,6 +141,16 @@ import {
   type InsertCommunicationLog,
   type NotificationTemplate,
   type InsertNotificationTemplate,
+  type ClaimProgressUpdate,
+  type InsertClaimProgressUpdate,
+  type Campaign,
+  type InsertCampaign,
+  type CampaignRecipient,
+  type InsertCampaignRecipient,
+  type TemplateAnalytics,
+  type InsertTemplateAnalytics,
+  type AbTest,
+  type InsertAbTest,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte } from "drizzle-orm";
@@ -484,6 +499,51 @@ export interface IStorage {
   updateAutomatedReminder(id: string, reminder: any): Promise<any>;
   deleteAutomatedReminder(id: string): Promise<void>;
   seedAutomatedReminders(): Promise<{ seeded: number; skipped: number }>;
+  
+  // ==================== PHASE 4-5: CLAIMS PROGRESS TRACKING ====================
+  
+  getClaimProgressUpdates(claimId: string): Promise<any[]>;
+  createClaimProgressUpdate(update: any): Promise<any>;
+  
+  // ==================== PHASE 4-5: CAMPAIGN MANAGEMENT ====================
+  
+  getCampaigns(user: any, filters?: { status?: string; scope?: string; branchId?: string }): Promise<any[]>;
+  getCampaignById(id: string, user: any): Promise<any | undefined>;
+  createCampaign(campaign: any): Promise<any>;
+  updateCampaign(id: string, campaign: any): Promise<any>;
+  deleteCampaign(id: string): Promise<void>;
+  approveCampaign(id: string, approvedBy: string): Promise<any>;
+  rejectCampaign(id: string, rejectedBy: string, rejectionReason: string): Promise<any>;
+  sendCampaign(id: string): Promise<any>;
+  
+  // Campaign Recipients operations
+  estimateCampaignRecipients(params: {
+    recipientFilter: any;
+    scope: string;
+    branchId?: string | null;
+    selectedBranches?: string[] | null;
+    userRole: string;
+    userBranchId?: string | null;
+    channel?: string;
+  }): Promise<{ count: number; estimatedCost: string }>;
+  getCampaignRecipients(campaignId: string, filters?: any): Promise<any[]>;
+  createCampaignRecipient(recipient: any): Promise<any>;
+  updateCampaignRecipient(id: string, recipient: any): Promise<any>;
+  
+  // ==================== PHASE 4-5: TEMPLATE ANALYTICS ====================
+  
+  getTemplateAnalytics(filters?: { templateId?: string; periodType?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
+  getTemplateAnalyticsSummary(filters?: { templateId?: string; periodType?: string }): Promise<any>;
+  generateTemplateAnalytics(params: { periodType: string; periodStart: Date; periodEnd: Date }): Promise<{ generated: number }>;
+  
+  // ==================== PHASE 4-5: A/B TESTING ====================
+  
+  getAbTests(filters?: { status?: string }): Promise<any[]>;
+  getAbTestById(id: string): Promise<any | undefined>;
+  createAbTest(test: any): Promise<any>;
+  updateAbTest(id: string, test: any): Promise<any>;
+  startAbTest(id: string): Promise<any>;
+  completeAbTest(id: string): Promise<any>;
   
   // ==================== WAVE 2: FLEET ECONOMICS ====================
   
@@ -4815,6 +4875,385 @@ export class DatabaseStorage implements IStorage {
     // This will be populated by the automation orchestrator
     // System-owned reminders are created dynamically for each entity/contract
     return { seeded: 0, skipped: 0 };
+  }
+
+  // ==================== PHASE 4-5: CLAIMS PROGRESS TRACKING ====================
+
+  async getClaimProgressUpdates(claimId: string): Promise<ClaimProgressUpdate[]> {
+    return await db
+      .select()
+      .from(claimProgressUpdates)
+      .where(eq(claimProgressUpdates.claimId, claimId))
+      .orderBy(desc(claimProgressUpdates.createdAt));
+  }
+
+  async createClaimProgressUpdate(updateData: InsertClaimProgressUpdate): Promise<ClaimProgressUpdate> {
+    const [update] = await db.insert(claimProgressUpdates).values(updateData).returning();
+    return update;
+  }
+
+  // ==================== PHASE 4-5: CAMPAIGN MANAGEMENT ====================
+
+  async getCampaigns(user: User, filters?: { status?: string; scope?: string; branchId?: string }): Promise<Campaign[]> {
+    const conditions = [];
+    
+    // RBAC filtering: Non-admins can only see campaigns in their scope
+    if (user.role !== 'admin') {
+      if (user.branchId) {
+        conditions.push(
+          or(
+            eq(notificationCampaigns.branchId, user.branchId),
+            eq(notificationCampaigns.createdBy, user.id)
+          )
+        );
+      } else {
+        conditions.push(eq(notificationCampaigns.createdBy, user.id));
+      }
+    }
+    
+    if (filters?.status) conditions.push(eq(notificationCampaigns.status, filters.status));
+    if (filters?.scope) conditions.push(eq(notificationCampaigns.scope, filters.scope));
+    if (filters?.branchId) conditions.push(eq(notificationCampaigns.branchId, filters.branchId));
+
+    return await db
+      .select()
+      .from(notificationCampaigns)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(notificationCampaigns.createdAt));
+  }
+
+  async getCampaignById(id: string, user: User): Promise<Campaign | undefined> {
+    const [campaign] = await db
+      .select()
+      .from(notificationCampaigns)
+      .where(eq(notificationCampaigns.id, id));
+    
+    if (!campaign) return undefined;
+    
+    // RBAC check: Non-admins can only access campaigns in their scope
+    if (user.role !== 'admin') {
+      if (campaign.branchId !== user.branchId && campaign.createdBy !== user.id) {
+        return undefined;
+      }
+    }
+    
+    return campaign;
+  }
+
+  async createCampaign(campaignData: InsertCampaign): Promise<Campaign> {
+    const [campaign] = await db
+      .insert(notificationCampaigns)
+      .values(campaignData)
+      .returning();
+    return campaign;
+  }
+
+  async updateCampaign(id: string, campaignData: Partial<InsertCampaign>): Promise<Campaign> {
+    const [updated] = await db
+      .update(notificationCampaigns)
+      .set({ ...campaignData, updatedAt: new Date() })
+      .where(eq(notificationCampaigns.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCampaign(id: string): Promise<void> {
+    await db.delete(notificationCampaigns).where(eq(notificationCampaigns.id, id));
+  }
+
+  async approveCampaign(id: string, approvedBy: string): Promise<Campaign> {
+    const [approved] = await db
+      .update(notificationCampaigns)
+      .set({
+        status: 'approved',
+        approvedBy,
+        approvedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(notificationCampaigns.id, id))
+      .returning();
+    return approved;
+  }
+
+  async rejectCampaign(id: string, rejectedBy: string, rejectionReason: string): Promise<Campaign> {
+    const [rejected] = await db
+      .update(notificationCampaigns)
+      .set({
+        status: 'cancelled',
+        rejectedBy,
+        rejectedAt: new Date(),
+        rejectionReason,
+        updatedAt: new Date(),
+      })
+      .where(eq(notificationCampaigns.id, id))
+      .returning();
+    return rejected;
+  }
+
+  async sendCampaign(id: string): Promise<Campaign> {
+    const [campaign] = await db
+      .update(notificationCampaigns)
+      .set({
+        status: 'scheduled',
+        scheduledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(notificationCampaigns.id, id))
+      .returning();
+    return campaign;
+  }
+
+  async estimateCampaignRecipients(params: {
+    recipientFilter: any;
+    scope: string;
+    branchId?: string | null;
+    selectedBranches?: string[] | null;
+    userRole: string;
+    userBranchId?: string | null;
+    channel?: string;
+  }): Promise<{ count: number; estimatedCost: string }> {
+    const { recipientFilter, scope, branchId, selectedBranches, userRole, userBranchId, channel } = params;
+    
+    // Build query conditions based on recipient filter
+    const conditions = [];
+    
+    // Branch filtering based on scope
+    if (scope === 'branch' && branchId) {
+      // For branch-specific campaigns, filter customers by branch
+      // (Assuming customers table will have branchId field in future)
+      // For now, count all active customers
+    } else if (scope === 'selected_branches' && selectedBranches && selectedBranches.length > 0) {
+      // For selected branches campaigns
+      // Filter by selected branches
+    }
+    
+    // Filter by customer attributes from recipientFilter
+    if (recipientFilter.emirate) {
+      conditions.push(eq(customers.emirate, recipientFilter.emirate));
+    }
+    
+    if (recipientFilter.area) {
+      conditions.push(eq(customers.area, recipientFilter.area));
+    }
+    
+    if (recipientFilter.riskScoreMin !== undefined || recipientFilter.riskScoreMax !== undefined) {
+      // Join with risk scores and filter
+      // For now, estimate based on all customers
+    }
+    
+    // Count active customers matching filters
+    const result = await db
+      .select({ count: count() })
+      .from(customers)
+      .where(
+        and(
+          eq(customers.isDisabled, false),
+          conditions.length > 0 ? and(...conditions) : undefined
+        )
+      );
+    
+    const recipientCount = result[0]?.count || 0;
+    
+    // Server-side cost calculation - never trust client
+    // Rates: SMS = AED 0.15, Email = AED 0.02, Both = sum
+    const smsRate = 0.15; // AED per SMS in UAE
+    const emailRate = 0.02; // AED per email
+    
+    let costPerRecipient = 0;
+    if (channel === 'sms') {
+      costPerRecipient = smsRate;
+    } else if (channel === 'email') {
+      costPerRecipient = emailRate;
+    } else if (channel === 'both') {
+      costPerRecipient = smsRate + emailRate;
+    } else {
+      costPerRecipient = emailRate; // Default to email
+    }
+    
+    const estimatedCost = (recipientCount * costPerRecipient).toFixed(2);
+    
+    return {
+      count: recipientCount,
+      estimatedCost: estimatedCost,
+    };
+  }
+
+  async getCampaignRecipients(campaignId: string, filters?: any): Promise<CampaignRecipient[]> {
+    const conditions = [eq(campaignRecipients.campaignId, campaignId)];
+    
+    if (filters?.status) conditions.push(eq(campaignRecipients.status, filters.status));
+    if (filters?.recipientType) conditions.push(eq(campaignRecipients.recipientType, filters.recipientType));
+    
+    return await db
+      .select()
+      .from(campaignRecipients)
+      .where(and(...conditions))
+      .orderBy(desc(campaignRecipients.createdAt));
+  }
+
+  async createCampaignRecipient(recipientData: InsertCampaignRecipient): Promise<CampaignRecipient> {
+    const [recipient] = await db
+      .insert(campaignRecipients)
+      .values(recipientData)
+      .returning();
+    return recipient;
+  }
+
+  async updateCampaignRecipient(id: string, recipientData: Partial<InsertCampaignRecipient>): Promise<CampaignRecipient> {
+    const [updated] = await db
+      .update(campaignRecipients)
+      .set(recipientData)
+      .where(eq(campaignRecipients.id, id))
+      .returning();
+    return updated;
+  }
+
+  // ==================== PHASE 4-5: TEMPLATE ANALYTICS ====================
+
+  async getTemplateAnalytics(filters?: { templateId?: string; periodType?: string; startDate?: Date; endDate?: Date }): Promise<TemplateAnalytics[]> {
+    const conditions = [];
+    
+    if (filters?.templateId) conditions.push(eq(templateAnalytics.templateId, filters.templateId));
+    if (filters?.periodType) conditions.push(eq(templateAnalytics.periodType, filters.periodType));
+    if (filters?.startDate) conditions.push(gte(templateAnalytics.periodStart, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(templateAnalytics.periodEnd, filters.endDate));
+    
+    return await db
+      .select()
+      .from(templateAnalytics)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(templateAnalytics.periodStart));
+  }
+
+  async getTemplateAnalyticsSummary(filters?: { templateId?: string; periodType?: string }): Promise<any> {
+    const conditions = [];
+    
+    if (filters?.templateId) conditions.push(eq(templateAnalytics.templateId, filters.templateId));
+    if (filters?.periodType) conditions.push(eq(templateAnalytics.periodType, filters.periodType));
+    
+    const result = await db
+      .select({
+        totalSent: sum(templateAnalytics.sendCount),
+        totalDelivered: sum(templateAnalytics.deliverySuccessCount),
+        totalFailed: sum(templateAnalytics.deliveryFailureCount),
+        totalOpened: sum(templateAnalytics.emailOpenCount),
+        totalClicked: sum(templateAnalytics.emailClickCount),
+      })
+      .from(templateAnalytics)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+    
+    const data = result[0] || {};
+    const totalSent = Number(data.totalSent) || 0;
+    const totalDelivered = Number(data.totalDelivered) || 0;
+    const totalOpened = Number(data.totalOpened) || 0;
+    
+    return {
+      totalSent,
+      totalDelivered,
+      totalFailed: Number(data.totalFailed) || 0,
+      totalOpened,
+      totalClicked: Number(data.totalClicked) || 0,
+      deliveryRate: totalSent > 0 ? ((totalDelivered / totalSent) * 100).toFixed(2) + '%' : '0%',
+      openRate: totalDelivered > 0 ? ((totalOpened / totalDelivered) * 100).toFixed(2) + '%' : '0%',
+    };
+  }
+
+  async generateTemplateAnalytics(params: { periodType: string; periodStart: Date; periodEnd: Date }): Promise<{ generated: number }> {
+    // This would aggregate communication logs and generate analytics records
+    // For now, return a stub
+    return { generated: 0 };
+  }
+
+  // ==================== PHASE 4-5: A/B TESTING ====================
+
+  async getAbTests(filters?: { status?: string }): Promise<AbTest[]> {
+    const conditions = [];
+    
+    if (filters?.status) conditions.push(eq(abTestVariants.status, filters.status));
+    
+    return await db
+      .select()
+      .from(abTestVariants)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(abTestVariants.createdAt));
+  }
+
+  async getAbTestById(id: string): Promise<AbTest | undefined> {
+    const [test] = await db
+      .select()
+      .from(abTestVariants)
+      .where(eq(abTestVariants.id, id));
+    return test;
+  }
+
+  async createAbTest(testData: InsertAbTest): Promise<AbTest> {
+    const [test] = await db
+      .insert(abTestVariants)
+      .values(testData)
+      .returning();
+    return test;
+  }
+
+  async updateAbTest(id: string, testData: Partial<InsertAbTest>): Promise<AbTest> {
+    const [updated] = await db
+      .update(abTestVariants)
+      .set({ ...testData, updatedAt: new Date() })
+      .where(eq(abTestVariants.id, id))
+      .returning();
+    return updated;
+  }
+
+  async startAbTest(id: string): Promise<AbTest> {
+    const [started] = await db
+      .update(abTestVariants)
+      .set({
+        status: 'active',
+        startedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(abTestVariants.id, id))
+      .returning();
+    return started;
+  }
+
+  async completeAbTest(id: string): Promise<AbTest> {
+    const [test] = await db
+      .select()
+      .from(abTestVariants)
+      .where(eq(abTestVariants.id, id));
+    
+    if (!test) {
+      throw new Error('A/B test not found');
+    }
+    
+    // Calculate winner based on success rates
+    const variantARate = test.variantASendCount > 0 
+      ? (test.variantASuccessCount / test.variantASendCount) * 100 
+      : 0;
+    const variantBRate = test.variantBSendCount > 0 
+      ? (test.variantBSuccessCount / test.variantBSendCount) * 100 
+      : 0;
+    
+    let winner: string | null = null;
+    if (Math.abs(variantARate - variantBRate) < 2) {
+      winner = 'tie';
+    } else {
+      winner = variantARate > variantBRate ? 'A' : 'B';
+    }
+    
+    const [completed] = await db
+      .update(abTestVariants)
+      .set({
+        status: 'completed',
+        completedAt: new Date(),
+        winner,
+        confidenceLevel: Math.abs(variantARate - variantBRate) > 10 ? '95%' : '80%',
+        updatedAt: new Date(),
+      })
+      .where(eq(abTestVariants.id, id))
+      .returning();
+    
+    return completed;
   }
 
   // ==================== COMMUNICATION INFRASTRUCTURE ====================
