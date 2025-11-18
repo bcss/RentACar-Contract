@@ -1,8 +1,9 @@
 # RCCMS Technical Documentation
 
 **Last Updated:** November 18, 2025  
-**Version:** 3.0 - Communications Platform Complete  
-**Target Audience:** Developers, Technical Architects, DevOps Engineers
+**Version:** 5.0 - Complete Bilingual Implementation  
+**Target Audience:** Developers, Technical Architects, DevOps Engineers  
+**System Scale:** 63 tables, 120+ endpoints, 66 pages, 5 transformation phases complete
 
 ---
 
@@ -1047,17 +1048,128 @@ POST   /api/send-notification
 
 ---
 
+## Phase 4 & 5 Architecture
+
+### Campaign Management System (Phase 4)
+
+**Key Components:**
+- **campaigns** table with RBAC fields (createdBy, branchId, requiresApproval)
+- **campaign_recipients** table for delivery tracking
+- **approval_requests** integration for workflow enforcement
+
+**RBAC Enforcement Pattern:**
+```typescript
+// Staff/Manager: Branch-scoped campaigns only
+if (role === 'staff' || role === 'manager') {
+  campaign.branchId = user.branchId;
+  campaign.requiresApproval = (role === 'staff') ? true : false;
+}
+
+// Admin: Organization-wide, multi-branch selection
+if (role === 'admin') {
+  campaign.branchIds = selectedBranches; // null = all branches
+  campaign.requiresApproval = optional;
+}
+```
+
+**Delivery Architecture:**
+- Campaign recipients estimated via `/api/campaigns/estimate-recipients`
+- Delivery via communications platform (Phase 3 infrastructure)
+- Success/failure tracking per recipient
+- Cost calculation based on channel preferences
+
+### Predictive Intelligence Reports (Phase 5)
+
+**ML-Based Forecasting Pattern:**
+```typescript
+// Revenue Forecast Report
+GET /api/reports/revenue-forecast?startDate=2025-01-01&endDate=2025-12-31
+
+Response: {
+  historicalData: Array<{month, revenue, components}>,
+  forecast: Array<{month, predicted, upper, lower, confidence}>,
+  statistics: {avgGrowth, seasonalPatterns, trendDirection}
+}
+```
+
+**6 Predictive Reports Architecture:**
+1. Revenue Forecast - Time-series forecasting
+2. Fleet Utilization - Capacity planning predictions
+3. Customer Churn Risk - Retention analysis
+4. Maintenance Cost - Vehicle age/mileage forecasting
+5. Payment Default - Overdue risk prediction
+6. Location Demand - Geographic trend analysis
+
+**All reports share common patterns:**
+- TypeScript interfaces in `shared/schema.ts`
+- Filter components for date ranges, categories
+- Recharts visualizations (line, bar, pie, scatter)
+- CSV export with localized headers via `t()` calls
+- Fully bilingual with RTL/LTR support
+- data-testid compliance for e2e testing
+
+### Complete i18n Implementation (Phase 5)
+
+**Translation Infrastructure:**
+```typescript
+// client/src/lib/i18n.ts
+resources: {
+  en: { translation: enTranslations },
+  ar: { translation: arTranslations }
+}
+
+// 190+ translation keys organized:
+campaigns.*        // Campaign management
+communications.*   // Communications platform
+reports.*          // All reports (predictive + standard)
+predictive.*       // Predictive report specifics
+common.*           // Shared UI elements
+emirates.*         // UAE 7 emirates
+```
+
+**RTL/LTL Layout Switching:**
+```typescript
+// Automatic direction attribute
+document.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+document.lang = currentLanguage;
+
+// Sidebar position mirroring
+<Sidebar side={currentLanguage === 'ar' ? 'right' : 'left'} />
+
+// Font switching in CSS
+body {
+  font-family: currentLanguage === 'ar' ? 'Cairo' : 'Inter';
+}
+```
+
+**CSV Export Localization:**
+```typescript
+// All CSV column headers use t() translation calls
+const headers = [
+  t('reports.revenue.month'),
+  t('reports.revenue.totalRevenue'),
+  t('reports.revenue.rentalFees')
+];
+```
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 2.0 | Nov 2025 | Option B complete (Driver Service + Branch Management) |
-| 1.5 | Oct 2025 | Driver Service Module implementation |
-| 1.0 | Sep 2025 | Core contract management system |
+| 5.0 | Nov 18, 2025 | Phase 5 complete - Full bilingual implementation (190+ keys, 6 predictive reports, RTL/LTR) |
+| 4.0 | Nov 2025 | Phase 4 complete - Campaign Management System with RBAC |
+| 3.0 | Oct 2025 | Phase 3 complete - Communications Platform (multi-provider, 11 touchpoints) |
+| 2.0 | Oct 2025 | Phase 2 complete - Driver Service + Branch Management + Specialized modules |
+| 1.5 | Sep 2025 | Phase 1 complete - Risk scoring, document registry, automation orchestrator |
+| 1.0 | Aug 2025 | Core contract management system launch |
 
 ---
 
 **For More Information:**
+- [MASTER_FEATURE_LIST.md](MASTER_FEATURE_LIST.md) - Single source of truth (63 tables, 120+ endpoints, 66 pages)
+- [FEATURES.md](FEATURES.md) - Complete feature catalog with all specialized modules
 - [User Guide](USER_GUIDE.md) - End-user documentation
 - [Admin Guide](ADMIN_GUIDE.md) - Administrator documentation
 - [Deployment Guide](DEPLOYMENT.md) - Deployment instructions
