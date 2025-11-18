@@ -76,7 +76,7 @@ export default function CampaignManagement() {
       queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
       toast({
         title: t('common.success'),
-        description: 'Campaign created successfully',
+        description: t('campaigns.created'),
       });
       setIsCreateOpen(false);
       resetForm();
@@ -85,7 +85,7 @@ export default function CampaignManagement() {
       toast({
         variant: 'destructive',
         title: t('common.error'),
-        description: error.message || 'Failed to create campaign',
+        description: error.message || t('campaigns.nameRequired'),
       });
     },
   });
@@ -99,7 +99,7 @@ export default function CampaignManagement() {
       queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
       toast({
         title: t('common.success'),
-        description: 'Campaign approved',
+        description: t('campaigns.approved'),
       });
     },
   });
@@ -113,7 +113,7 @@ export default function CampaignManagement() {
       queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
       toast({
         title: t('common.success'),
-        description: 'Campaign sent',
+        description: t('campaigns.sent'),
       });
     },
   });
@@ -134,7 +134,7 @@ export default function CampaignManagement() {
       toast({
         variant: 'destructive',
         title: t('common.error'),
-        description: 'Name and template are required',
+        description: t('campaigns.nameRequired'),
       });
       return;
     }
@@ -186,59 +186,59 @@ export default function CampaignManagement() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold" data-testid="title-campaigns">
-            Campaign Management
+            {t('campaigns.title')}
           </h1>
-          <p className="text-muted-foreground mt-1">Create and manage notification campaigns</p>
+          <p className="text-muted-foreground mt-1">{t('campaigns.subtitle')}</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button data-testid="button-create-campaign">
               <Plus className="h-4 w-4 mr-2" />
-              Create Campaign
+              {t('campaigns.createCampaign')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-campaign">
             <DialogHeader>
-              <DialogTitle>Create Campaign</DialogTitle>
+              <DialogTitle>{t('campaigns.createCampaign')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <Label>Campaign Name *</Label>
+                <Label>{t('campaigns.campaignName')} *</Label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter campaign name"
+                  placeholder={t('campaigns.enterName')}
                   data-testid="input-campaign-name"
                 />
               </div>
 
               <div>
-                <Label>Arabic Name</Label>
+                <Label>{t('campaigns.campaignNameAr')}</Label>
                 <Input
                   value={nameAr}
                   onChange={(e) => setNameAr(e.target.value)}
-                  placeholder="Enter Arabic name"
+                  placeholder={t('campaigns.enterArabicName')}
                   dir="rtl"
                   data-testid="input-campaign-name-ar"
                 />
               </div>
 
               <div>
-                <Label>Description</Label>
+                <Label>{t('campaigns.description')}</Label>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter description"
+                  placeholder={t('campaigns.enterDescription')}
                   rows={3}
                   data-testid="textarea-campaign-description"
                 />
               </div>
 
               <div>
-                <Label>Template *</Label>
+                <Label>{t('campaigns.template')} *</Label>
                 <Select value={templateId} onValueChange={setTemplateId}>
                   <SelectTrigger data-testid="select-template">
-                    <SelectValue placeholder="Select template" />
+                    <SelectValue placeholder={t('campaigns.selectTemplate')} />
                   </SelectTrigger>
                   <SelectContent>
                     {templates.map((template: any) => (
@@ -251,50 +251,50 @@ export default function CampaignManagement() {
               </div>
 
               <div>
-                <Label>Channel</Label>
+                <Label>{t('campaigns.channel')}</Label>
                 <Select value={channel} onValueChange={setChannel}>
                   <SelectTrigger data-testid="select-channel">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="sms">SMS</SelectItem>
-                    <SelectItem value="both">Both</SelectItem>
+                    <SelectItem value="email">{t('campaigns.channelEmail')}</SelectItem>
+                    <SelectItem value="sms">{t('campaigns.channelSms')}</SelectItem>
+                    <SelectItem value="both">{t('campaigns.channelBoth')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label>Scope</Label>
+                <Label>{t('campaigns.scope')}</Label>
                 <Select value={scope} onValueChange={setScope} disabled={!canCreateOrganizationCampaigns}>
                   <SelectTrigger data-testid="select-scope">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="branch">Branch</SelectItem>
+                    <SelectItem value="branch">{t('campaigns.scopeBranch')}</SelectItem>
                     {canCreateOrganizationCampaigns && (
-                      <SelectItem value="organization">Organization</SelectItem>
+                      <SelectItem value="organization">{t('campaigns.scopeOrganization')}</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label>Recipients</Label>
+                <Label>{t('campaigns.recipientType')}</Label>
                 <Select value={recipientType} onValueChange={setRecipientType}>
                   <SelectTrigger data-testid="select-recipients">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Customers</SelectItem>
-                    <SelectItem value="active">Active Customers</SelectItem>
-                    <SelectItem value="inactive">Inactive Customers</SelectItem>
+                    <SelectItem value="all">{t('campaigns.recipientAll')}</SelectItem>
+                    <SelectItem value="active">{t('campaigns.recipientCustomers')}</SelectItem>
+                    <SelectItem value="inactive">{t('campaigns.recipientDrivers')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label>Schedule At</Label>
+                <Label>{t('campaigns.scheduledAt')}</Label>
                 <Input
                   type="datetime-local"
                   value={scheduledAt}
@@ -328,7 +328,7 @@ export default function CampaignManagement() {
         {campaigns.length === 0 ? (
           <Card data-testid="card-no-campaigns">
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No campaigns created yet</p>
+              <p className="text-muted-foreground">{t('campaigns.noCampaigns')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -353,24 +353,24 @@ export default function CampaignManagement() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <div className="text-sm text-muted-foreground">Channel</div>
+                    <div className="text-sm text-muted-foreground">{t('campaigns.channel')}</div>
                     <div className="font-medium">{campaign.channel}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Scope</div>
+                    <div className="text-sm text-muted-foreground">{t('campaigns.scope')}</div>
                     <div className="font-medium">{campaign.scope}</div>
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      Recipients
+                      {t('campaigns.estimatedRecipients')}
                     </div>
                     <div className="font-medium">{campaign.estimatedRecipients || 0}</div>
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground flex items-center gap-1">
                       <DollarSign className="h-3 w-3" />
-                      Cost
+                      {t('campaigns.estimatedCost')}
                     </div>
                     <div className="font-medium">{campaign.estimatedCost || '0'} AED</div>
                   </div>
@@ -379,11 +379,11 @@ export default function CampaignManagement() {
                 {campaign.status === 'sent' && (
                   <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t">
                     <div>
-                      <div className="text-sm text-muted-foreground">Success</div>
+                      <div className="text-sm text-muted-foreground">{t('campaigns.successCount')}</div>
                       <div className="font-medium text-green-600">{campaign.successCount}</div>
                     </div>
                     <div>
-                      <div className="text-sm text-muted-foreground">Failed</div>
+                      <div className="text-sm text-muted-foreground">{t('campaigns.failureCount')}</div>
                       <div className="font-medium text-red-600">{campaign.failureCount}</div>
                     </div>
                   </div>
@@ -398,7 +398,7 @@ export default function CampaignManagement() {
                       data-testid={`button-approve-${campaign.id}`}
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Approve
+                      {t('campaigns.approve')}
                     </Button>
                   )}
                   {(campaign.status === 'approved' || campaign.status === 'draft') && canApproveCampaigns && (
@@ -409,7 +409,7 @@ export default function CampaignManagement() {
                       data-testid={`button-send-${campaign.id}`}
                     >
                       <Send className="h-4 w-4 mr-2" />
-                      Send
+                      {t('campaigns.send')}
                     </Button>
                   )}
                 </div>
