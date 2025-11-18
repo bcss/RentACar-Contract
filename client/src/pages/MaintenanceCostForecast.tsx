@@ -27,7 +27,7 @@ export default function MaintenanceCostForecast() {
   const exportData = () => {
     if (!data) return;
     const csvContent = [
-      ['Vehicle Type', 'Total Vehicles', 'Forecast Cost', 'Avg Vehicle Age', 'Avg Mileage'].join(','),
+      [t('reports.columns.vehicleType'), t('reports.columns.totalVehicles'), t('reports.columns.forecastCost'), t('reports.columns.avgVehicleAge'), t('reports.columns.avgMileage')].join(','),
       ...data.vehicleTypes.map((v: any) => 
         [v.vehicleType, v.totalVehicles, v.forecastCost, v.avgVehicleAge, v.avgMileage].join(',')
       )

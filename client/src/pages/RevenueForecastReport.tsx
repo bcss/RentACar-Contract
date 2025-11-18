@@ -23,7 +23,7 @@ export default function RevenueForecastReport() {
   const exportData = () => {
     if (!data) return;
     const csvContent = [
-      ['Date', 'Forecast Revenue', 'Historical Revenue', 'Confidence'].join(','),
+      [t('reports.columns.date'), t('reports.columns.forecastRevenue'), t('reports.columns.historicalRevenue'), t('reports.columns.confidence')].join(','),
       ...data.forecasts.map((f: any) => 
         [f.forecastDate, f.forecastRevenue, f.historicalRevenue || '', f.confidence].join(',')
       )

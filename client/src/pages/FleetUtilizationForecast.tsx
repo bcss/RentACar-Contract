@@ -24,7 +24,7 @@ export default function FleetUtilizationForecast() {
   const exportData = () => {
     if (!data) return;
     const csvContent = [
-      ['Vehicle Type', 'Total Fleet', 'Current Utilization %', 'Forecast Utilization %', 'Available Capacity'].join(','),
+      [t('reports.columns.vehicleType'), t('reports.columns.totalFleet'), t('reports.columns.currentUtilization'), t('reports.columns.forecastUtilization'), t('reports.columns.availableCapacity')].join(','),
       ...data.vehicleTypes.map((v: any) => 
         [v.vehicleType, v.totalFleet, v.currentUtilization, v.forecastUtilization, v.availableCapacity].join(',')
       )

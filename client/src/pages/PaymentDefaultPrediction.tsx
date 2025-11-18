@@ -32,7 +32,7 @@ export default function PaymentDefaultPrediction() {
   const exportData = () => {
     if (!data) return;
     const csvContent = [
-      ['Contract ID', 'Customer Name', 'Default Probability', 'Risk Level', 'Outstanding', 'Days Overdue'].join(','),
+      [t('reports.columns.contractId'), t('reports.columns.customerName'), t('reports.columns.defaultProbability'), t('reports.columns.riskLevel'), t('reports.columns.outstandingAmount'), t('reports.columns.daysOverdue')].join(','),
       ...data.contracts.map((c: any) => 
         [c.contractId, c.customerName, c.defaultProbability, c.riskLevel, c.outstandingAmount, c.daysOverdue].join(',')
       )

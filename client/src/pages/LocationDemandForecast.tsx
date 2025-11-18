@@ -16,7 +16,7 @@ import { AlertTriangle, Download, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import type { LocationDemandForecastReport } from '@shared/schema';
 
-const EMIRATES = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain'];
+const EMIRATES = ['dubai', 'abudhabi', 'sharjah', 'ajman', 'rasalkhaimah', 'fujairah', 'ummalquwain'];
 
 export default function LocationDemandForecast() {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ export default function LocationDemandForecast() {
   const exportData = () => {
     if (!data) return;
     const csvContent = [
-      ['Emirate', 'Historical Demand', 'Forecast Demand', 'Growth Rate'].join(','),
+      [t('reports.columns.emirate'), t('reports.columns.historicalDemand'), t('reports.columns.forecastDemand'), t('reports.columns.growthRate')].join(','),
       ...data.locations.map((l: any) => 
         [l.emirate, l.historicalDemand, l.forecastDemand, l.growthRate].join(',')
       )
@@ -74,7 +74,7 @@ export default function LocationDemandForecast() {
               <SelectContent>
                 <SelectItem value="all">{t('common.all')}</SelectItem>
                 {EMIRATES.map((e) => (
-                  <SelectItem key={e} value={e}>{e}</SelectItem>
+                  <SelectItem key={e} value={e}>{t(`common.emirates.${e}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

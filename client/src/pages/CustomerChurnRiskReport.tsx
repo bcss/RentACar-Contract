@@ -36,7 +36,7 @@ export default function CustomerChurnRiskReport() {
   const exportData = () => {
     if (!data) return;
     const csvContent = [
-      ['Customer ID', 'Name', 'Risk Score', 'Risk Level', 'Total Contracts', 'Days Since Last', 'Payment Score'].join(','),
+      [t('reports.columns.customerId'), t('reports.columns.name'), t('reports.columns.riskScore'), t('reports.columns.riskLevel'), t('reports.columns.totalContracts'), t('reports.columns.daysSinceLastContract'), t('reports.columns.paymentScore')].join(','),
       ...data.customers.map((c: any) => 
         [c.customerId, c.customerName, c.riskScore, c.riskLevel, c.totalContracts, c.daysSinceLastContract, c.paymentScore].join(',')
       )
