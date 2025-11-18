@@ -3217,3 +3217,220 @@ export const insertNotificationTemplateSchema = createInsertSchema(notificationT
 
 export type InsertNotificationTemplate = z.infer<typeof insertNotificationTemplateSchema>;
 export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
+
+// SMS Providers table - Multi-provider SMS configuration with priority/fallback
+export const smsProviders = pgTable("sms_providers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Provider Configuration
+  providerName: varchar("provider_name", { length: 50 }).notNull(), // Twilio, Generic API, etc.
+  providerType: varchar("provider_type", { length: 30 }).notNull(), // twilio, generic_api
+  displayName: varchar("display_name").notNull(),
+  
+  // Priority & Routing
+  priority: integer("priority").notNull().default(1), // 1 = primary, 2 = fallback, etc.
+  isActive: boolean("is_active").notNull().default(true),
+  isFallback: boolean("is_fallback").notNull().default(false),
+  
+  // API Configuration (encrypted in production)
+  apiKey: varchar("api_key"), // Twilio Account SID or API key
+  apiSecret: varchar("api_secret"), // Twilio Auth Token or API secret
+  apiEndpoint: varchar("api_endpoint"), // For generic API providers
+  senderPhone: varchar("sender_phone"), // Twilio phone number
+  senderName: varchar("sender_name"), // SMS sender name/ID
+  
+  // Connection Settings
+  configuration: jsonb("configuration"), // Additional provider-specific config
+  webhookUrl: varchar("webhook_url"), // Delivery status webhook
+  
+  // Health Monitoring
+  lastHealthCheck: timestamp("last_health_check"),
+  healthStatus: varchar("health_status", { length: 20 }).default("unknown"), // healthy, degraded, down, unknown
+  lastError: text("last_error"),
+  failureCount: integer("failure_count").default(0),
+  lastSuccessfulSend: timestamp("last_successful_send"),
+  
+  // Usage Tracking
+  totalSent: integer("total_sent").default(0),
+  totalFailed: integer("total_failed").default(0),
+  monthlyQuota: integer("monthly_quota"), // SMS quota per month
+  currentMonthUsage: integer("current_month_usage").default(0),
+  
+  // Audit
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_sms_providers_priority").on(table.priority),
+  index("idx_sms_providers_active").on(table.isActive),
+  index("idx_sms_providers_type").on(table.providerType),
+  index("idx_sms_providers_health").on(table.healthStatus),
+  index("idx_sms_providers_created_at").on(table.createdAt),
+]);
+
+export const insertSmsProviderSchema = createInsertSchema(smsProviders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  totalSent: true,
+  totalFailed: true,
+  currentMonthUsage: true,
+  failureCount: true,
+});
+
+export type InsertSmsProvider = z.infer<typeof insertSmsProviderSchema>;
+export type SmsProvider = typeof smsProviders.$inferSelect;
+
+// Email Providers table - Multi-provider email configuration with OAuth support
+export const emailProviders = pgTable("email_providers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Provider Configuration
+  providerName: varchar("provider_name", { length: 50 }).notNull(), // SendGrid, Gmail, Office365, SMTP
+  providerType: varchar("provider_type", { length: 30 }).notNull(), // sendgrid, gmail, office365, smtp, imap
+  displayName: varchar("display_name").notNull(),
+  
+  // Priority & Routing
+  priority: integer("priority").notNull().default(1), // 1 = primary, 2 = fallback, etc.
+  isActive: boolean("is_active").notNull().default(true),
+  isFallback: boolean("is_fallback").notNull().default(false),
+  
+  // API Configuration (for SendGrid, Gmail OAuth, etc.)
+  apiKey: varchar("api_key"), // SendGrid API key, Gmail access token
+  apiSecret: varchar("api_secret"),
+  clientId: varchar("client_id"), // OAuth client ID (Gmail, Office365)
+  clientSecret: varchar("client_secret"), // OAuth client secret
+  refreshToken: varchar("refresh_token"), // OAuth refresh token
+  accessToken: varchar("access_token"), // OAuth access token (auto-refreshed)
+  tokenExpiry: timestamp("token_expiry"), // Token expiration time
+  
+  // SMTP/IMAP Configuration
+  smtpHost: varchar("smtp_host"), // smtp.gmail.com, smtp.office365.com
+  smtpPort: integer("smtp_port").default(587), // 25, 465, 587
+  smtpUsername: varchar("smtp_username"),
+  smtpPassword: varchar("smtp_password"),
+  smtpSecure: boolean("smtp_secure").default(true), // TLS/SSL
+  imapHost: varchar("imap_host"),
+  imapPort: integer("imap_port").default(993),
+  
+  // Sender Configuration
+  senderEmail: varchar("sender_email").notNull(),
+  senderName: varchar("sender_name").notNull(),
+  replyToEmail: varchar("reply_to_email"),
+  
+  // Additional Settings
+  configuration: jsonb("configuration"), // Provider-specific config
+  webhookUrl: varchar("webhook_url"), // Delivery status webhook
+  
+  // Health Monitoring
+  lastHealthCheck: timestamp("last_health_check"),
+  healthStatus: varchar("health_status", { length: 20 }).default("unknown"), // healthy, degraded, down, unknown
+  lastError: text("last_error"),
+  failureCount: integer("failure_count").default(0),
+  lastSuccessfulSend: timestamp("last_successful_send"),
+  
+  // Usage Tracking
+  totalSent: integer("total_sent").default(0),
+  totalFailed: integer("total_failed").default(0),
+  monthlyQuota: integer("monthly_quota"), // Email quota per month
+  currentMonthUsage: integer("current_month_usage").default(0),
+  
+  // Audit
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_email_providers_priority").on(table.priority),
+  index("idx_email_providers_active").on(table.isActive),
+  index("idx_email_providers_type").on(table.providerType),
+  index("idx_email_providers_health").on(table.healthStatus),
+  index("idx_email_providers_created_at").on(table.createdAt),
+]);
+
+export const insertEmailProviderSchema = createInsertSchema(emailProviders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  totalSent: true,
+  totalFailed: true,
+  currentMonthUsage: true,
+  failureCount: true,
+  accessToken: true, // Auto-refreshed
+  tokenExpiry: true, // Auto-refreshed
+});
+
+export type InsertEmailProvider = z.infer<typeof insertEmailProviderSchema>;
+export type EmailProvider = typeof emailProviders.$inferSelect;
+
+// Communication Logs table - Track all sent SMS/Email messages
+export const communicationLogs = pgTable("communication_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Message Details
+  channel: varchar("channel", { length: 20 }).notNull(), // sms, email
+  providerId: varchar("provider_id"), // Reference to smsProviders.id or emailProviders.id
+  providerName: varchar("provider_name"), // Provider name at time of send
+  templateId: varchar("template_id").references(() => notificationTemplates.id),
+  templateCode: varchar("template_code", { length: 50 }), // Template code for reporting
+  
+  // Recipient Details
+  recipientType: varchar("recipient_type", { length: 30 }), // customer, driver, user, sponsor
+  recipientId: varchar("recipient_id"), // ID of the recipient entity
+  recipientEmail: varchar("recipient_email"),
+  recipientPhone: varchar("recipient_phone"),
+  recipientName: varchar("recipient_name"),
+  
+  // Message Content
+  subject: varchar("subject"), // Email subject
+  messageBody: text("message_body"),
+  language: varchar("language", { length: 5 }).default("en"), // en, ar
+  
+  // Context & Trigger
+  triggerType: varchar("trigger_type", { length: 30 }), // manual, automated, scheduled, event_driven
+  triggeredBy: varchar("triggered_by").references(() => users.id), // User who triggered (if manual)
+  entityType: varchar("entity_type", { length: 30 }), // contract, payment, vehicle, etc.
+  entityId: varchar("entity_id"), // Related entity ID
+  contextData: jsonb("context_data"), // Additional context
+  
+  // Delivery Status
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, sent, delivered, failed, bounced
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  readAt: timestamp("read_at"), // Email opened timestamp
+  failedAt: timestamp("failed_at"),
+  
+  // Error Handling
+  attemptCount: integer("attempt_count").default(1),
+  lastAttemptAt: timestamp("last_attempt_at").defaultNow(),
+  errorCode: varchar("error_code"),
+  errorMessage: text("error_message"),
+  
+  // Provider Response
+  providerMessageId: varchar("provider_message_id"), // External provider message ID
+  providerResponse: jsonb("provider_response"), // Full provider response
+  
+  // Cost Tracking (if applicable)
+  cost: varchar("cost"), // SMS/Email cost
+  currency: varchar("currency", { length: 5 }).default("AED"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_communication_logs_channel").on(table.channel),
+  index("idx_communication_logs_status").on(table.status),
+  index("idx_communication_logs_recipient").on(table.recipientType, table.recipientId),
+  index("idx_communication_logs_entity").on(table.entityType, table.entityId),
+  index("idx_communication_logs_template").on(table.templateId),
+  index("idx_communication_logs_provider").on(table.providerId),
+  index("idx_communication_logs_sent_at").on(table.sentAt),
+  index("idx_communication_logs_created_at").on(table.createdAt),
+]);
+
+export const insertCommunicationLogSchema = createInsertSchema(communicationLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCommunicationLog = z.infer<typeof insertCommunicationLogSchema>;
+export type CommunicationLog = typeof communicationLogs.$inferSelect;
