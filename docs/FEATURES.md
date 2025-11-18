@@ -408,34 +408,560 @@ All Admin and Manager users have full access to ALL reports regardless of permis
 
 ---
 
-## Future Enhancements
+## Specialized Operational Modules
 
-### Planned Features
-1. **Predictive Analytics**: Machine learning models for demand forecasting, maintenance prediction
-2. **Mobile Dashboard**: Native iOS/Android apps for on-the-go monitoring
-3. **Custom Report Builder**: Drag-and-drop interface for creating ad-hoc reports
-4. **Scheduled Reports**: Email delivery of reports on a schedule
-5. **Data Export**: Excel/CSV export for all reports
-6. **Report Sharing**: Share report snapshots with external stakeholders
+### 11. Toll Management System
+**Access Level**: Staff and above  
+**Route**: `/toll-management`  
+**Data Source**: `/api/toll-systems`, `/api/toll-gates`, `/api/toll-passes`  
+
+**Features**:
+- Complete UAE toll system integration (Salik, Darb, Aber)
+- Toll system master data (system name, operator, active status)
+- Gate-level tracking with individual pricing
+- Vehicle toll pass assignment and management
+- Automatic fee assignment to contracts
+- Billing integration
+
+**Business Value**: Accurate toll expense tracking, automated billing, compliance with UAE RTA requirements
+
+### 12. Traffic Fines & Violations
+**Access Level**: Staff and above  
+**Route**: `/traffic-fines`  
+**Data Source**: `/api/traffic-fines`  
+
+**Features**:
+- RTA-compliant traffic violation tracking
+- Black points management (cumulative tracking)
+- Fine status tracking (Pending, Paid, Disputed, Waived)
+- Payment tracking with receipt documentation
+- Vehicle and contract linkage
+- Driver accountability assignment
+- Document attachments (fine notices, receipts)
+
+**Business Value**: RTA compliance, customer billing accuracy, driver performance tracking, legal documentation
+
+### 13. Accidents & Incidents Management
+**Access Level**: Manager and above  
+**Route**: `/incidents`  
+**Data Source**: `/api/incidents`  
+
+**Features**:
+- Comprehensive incident tracking
+- Incident type classification (Minor Accident, Major Accident, Theft, Vandalism, etc.)
+- Insurance claim integration
+- Police report documentation
+- Cost estimation (repair + liability)
+- Fault party determination
+- Vehicle and contract linkage
+- Claim progress updates
+
+**Business Value**: Risk management, insurance claim processing, legal protection, cost recovery
+
+### 14. Fleet Maintenance & Service
+**Access Level**: Staff and above  
+**Route**: `/vehicle-maintenance`  
+**Data Source**: `/api/vehicle-service-records`  
+
+**Features**:
+- Complete maintenance history per vehicle
+- Service type tracking (Oil Change, Tire Replacement, Brake Service, etc.)
+- Odometer tracking at service time
+- Service cost logging
+- Next service scheduling based on km or date
+- Depreciation tracking
+- Service provider documentation
+- Preventive maintenance alerts
+
+**Business Value**: Fleet health optimization, cost control, downtime reduction, asset value preservation
+
+### 15. Rental Rate Plans (Dynamic Pricing)
+**Access Level**: Manager and above  
+**Route**: `/rental-rate-plans`  
+**Data Source**: `/api/rental-rate-plans`  
+
+**Features**:
+- Dynamic pricing system
+- Rate plan creation (daily/weekly/monthly rates)
+- Seasonal pricing variations
+- Promotional discount configuration
+- Vehicle category-specific rates
+- Date range applicability
+- Priority ordering for rate selection
+- Automatic rate application to contracts
+
+**Business Value**: Revenue optimization, competitive pricing, promotional flexibility, market adaptation
+
+### 16. Vehicle Accessories & Upsell
+**Access Level**: Staff and above  
+**Route**: `/vehicle-accessories`  
+**Data Source**: `/api/vehicle-accessories`, `/api/contract-accessories`  
+
+**Features**:
+- Master accessory catalog
+- Accessory types (GPS, Baby Seat, Insurance, Additional Driver, etc.)
+- Inventory tracking (quantity available/assigned)
+- Per-day or fixed pricing
+- Contract-level accessory assignment
+- Automatic charge calculation
+- Availability validation
+- Upsell revenue tracking
+
+**Business Value**: Additional revenue streams, customer convenience, inventory management
+
+### 17. Driver Service Module
+**Access Level**: Staff and above  
+**Routes**: `/drivers`, `/driver-companies`, `/driver-scheduling`  
+**Data Sources**: Multiple driver-related endpoints  
+
+**Features**:
+- Professional driver master data (bilingual)
+- Driver licensing and certification tracking
+- Employment type (In-House vs Outsourced)
+- Outsource company management
+- Driver availability status (Available, On Assignment, Off Duty, On Leave)
+- Rate cards (hourly/daily/monthly pricing)
+- Schedule management with shift blocks
+- Check-in/check-out attendance tracking
+- Overtime calculation
+- Contract-level driver assignments
+- Public holiday surcharge calculation (UAE market compliance)
+- Driver performance tracking
+- Cost vs revenue analysis
+
+**Business Value**: Professional driver service offering, additional revenue stream, UAE market differentiation, operational efficiency
+
+### 18. Branch Management System
+**Access Level**: Manager and above  
+**Routes**: `/branches`, `/vehicle-transfers`  
+**Data Sources**: `/api/branches`, `/api/branch-transfers`  
+
+**Features**:
+- Multi-location branch master data
+- Branch hierarchy (HQ vs Branch)
+- Inter-branch vehicle transfer workflow
+- Transfer request creation
+- Approval workflow (Manager/Admin approval required)
+- Transfer status tracking (Requested → Approved → In Transit → Completed)
+- Transfer rejection with reason
+- Branch-scoped RBAC (Staff/Manager see only their branch)
+- Branch performance analytics
+- Vehicle allocation optimization
+
+**Business Value**: Multi-location operations support, fleet optimization, operational flexibility, regional expansion capability
+
+### 19. Public Holidays Management
+**Access Level**: Admin only  
+**Route**: `/public-holidays`  
+**Data Source**: `/api/public-holidays`  
+
+**Features**:
+- UAE public holiday configuration
+- Emirate-specific holiday selection (National vs Emirate-specific)
+- All 7 emirates supported (Abu Dhabi, Dubai, Sharjah, Ajman, Umm Al Quwain, Ras Al Khaimah, Fujairah)
+- Holiday type classification (National, Emirate-Specific, Religious)
+- Date configuration
+- Bilingual holiday names
+- Driver service surcharge integration
+- Contract calculation integration
+
+**Business Value**: Driver service compliance, accurate pricing, UAE market alignment, customer transparency
+
+### 20. Document Registry & Management
+**Access Level**: Staff and above  
+**Route**: `/document-registry`  
+**Data Source**: `/api/documents`  
+
+**Features**:
+- Centralized document tracking
+- Intelligent auto-seeding from 8+ entity types
+- Document types (License, Insurance, Registration, ID, Contract, etc.)
+- Entity linkage (Customer, Vehicle, Driver, Sponsor, Company, etc.)
+- Expiry date tracking
+- Automated expiry monitoring (30-day alerts via cron job)
+- Document verification workflow
+- Status tracking (Valid, Expiring Soon, Expired)
+- Renewal reminder automation
+- Audit trail for document updates
+
+**Business Value**: Compliance management, risk mitigation, automated alerts, operational efficiency
+
+### 21. Customer Risk Scoring
+**Access Level**: Manager and above  
+**Route**: `/customer-risk-scoring`  
+**Data Source**: `/api/customer-risk-scores`, `/api/automation/high-risk-customers`  
+
+**Features**:
+- Production-ready hybrid risk algorithm
+- Automated nightly calculation (2 AM cron job)
+- Risk categories (Low, Medium, High, Critical)
+- Multi-factor scoring:
+  - Payment history analysis
+  - Contract violation tracking
+  - Incident/accident history
+  - Traffic fine compliance
+  - Document validity
+  - Identity verification
+- Escalation overrides for severe issues
+- Historical risk score tracking
+- Trend analysis over time
+- High-risk customer alerts
+- Manual risk override capability
+
+**Business Value**: Risk mitigation, informed decision-making, credit policy enforcement, loss prevention
+
+### 22. Approval Workflows
+**Access Level**: Varies by workflow  
+**Route**: `/approval-workflows`  
+**Data Sources**: `/api/approval-requests`, `/api/approval-logs`  
+
+**Features**:
+- Multi-level authorization system
+- Approval request creation for high-value transactions
+- Request types (Campaign, Contract Modification, Vehicle Transfer, etc.)
+- Approval routing based on role and amount thresholds
+- Approval/rejection with mandatory reason
+- Status tracking (Pending → Approved/Rejected)
+- Approval logs audit trail
+- Email/SMS notification integration
+- Escalation for overdue approvals
+
+**Business Value**: Financial control, fraud prevention, accountability, compliance
+
+---
+
+## Communications Platform (Phase 3)
+
+### 23. Communication Providers Management
+**Access Level**: Admin only  
+**Route**: `/communication-providers`  
+**Data Source**: `/api/communication-providers`  
+
+**Features**:
+- Multi-provider SMS/Email configuration
+- Supported SMS Providers: Twilio (primary), Mock (testing)
+- Supported Email Providers: SendGrid (primary), Gmail SMTP (fallback), Mock (testing)
+- Provider priority ordering (primary/fallback)
+- Health monitoring and circuit breaking
+- Provider credentials management
+- Active/inactive status control
+- Automatic failover on provider failure
+- Cost tracking per provider
+
+**Business Value**: Communication reliability, cost optimization, vendor independence, fault tolerance
+
+### 24. Communication Logs
+**Access Level**: Manager and above  
+**Route**: `/communication-logs`  
+**Data Source**: `/api/communication-logs`  
+
+**Features**:
+- Complete delivery tracking
+- Communication type (Email, SMS)
+- Delivery status (Pending, Sent, Delivered, Failed, Bounced)
+- Provider used for delivery
+- Recipient information
+- Message content logging
+- Error tracking and retry attempts
+- Timestamp tracking
+- Cost per communication
+- Filtering by status, type, date range
+- Resend failed communications
+
+**Business Value**: Delivery accountability, troubleshooting, audit trail, cost analysis
+
+### 25. Notification Templates
+**Access Level**: Manager and above  
+**Route**: `/automated-reminders`  
+**Data Source**: `/api/notification-templates`  
+
+**Features**:
+- 12 default bilingual reminder templates
+- Template categories (Transactional, Promotional, Reminder, Alert)
+- Email and SMS channel support
+- Template variables/placeholders (customer name, contract number, etc.)
+- Bilingual content (English + Arabic)
+- Template activation/deactivation
+- Channel preferences per template (email/SMS/both)
+- Cost-per-send configuration
+- Template performance analytics
+- System-managed vs user-managed templates
+
+**Business Value**: Communication consistency, personalization, bilingual support, operational efficiency
+
+### 26. Manual Notification Sender
+**Access Level**: Manager and above  
+**Route**: `/manual-notification-sender`  
+**Data Source**: `/api/notifications/send`  
+
+**Features**:
+- Ad-hoc notification sending
+- Template selection or custom message
+- Recipient selection (individual or bulk)
+- Channel selection (Email/SMS/Both)
+- Preview before sending
+- Send confirmation
+- Immediate delivery
+- Testing tool for template validation
+- Cost estimation before send
+
+**Business Value**: Operational flexibility, urgent communications, testing capability, customer service
+
+### 27. Campaign Management System (Phase 4)
+**Access Level**: Staff and above (RBAC-enforced)  
+**Route**: `/campaign-management`  
+**Data Sources**: `/api/campaigns`, `/api/campaigns/estimate-recipients`  
+
+**Features**:
+- RBAC-enforced campaign creation:
+  - Staff: Branch-scoped only, auto-require approval
+  - Manager: Branch-scoped only, optional approval
+  - Admin: Organization-wide, multi-branch selection, optional approval
+- Campaign status workflow (Draft → Pending Approval → Approved → Sent)
+- Recipient filtering:
+  - Customer segments (active, repeat, high-value)
+  - Contract status (active, completed)
+  - Risk level filtering
+  - Location/branch filtering
+  - Custom date ranges
+- Channel selection (Email/SMS/Both)
+- Recipient count estimation
+- Delivery tracking:
+  - Total recipients
+  - Successful deliveries
+  - Failed deliveries
+  - Bounce/unsubscribe tracking
+- Cost estimation and budgeting
+- Campaign scheduling (immediate or scheduled)
+- Bilingual campaign creation (English/Arabic)
+- Campaign templates
+- Campaign approval workflow integration
+- Campaign analytics and ROI tracking
+
+**Business Value**: Marketing automation, customer engagement, revenue generation, targeted communications, RBAC compliance
+
+---
+
+## Predictive Intelligence Reports (Phase 5 - Fully Bilingual)
+
+### 28. Revenue Forecast Report
+**Access Level**: Manager and above  
+**Route**: `/reports/revenue-forecast`  
+**Data Source**: `/api/reports/revenue-forecast`  
+
+**Features**:
+- ML-based revenue predictions
+- Time-series forecasting with trend analysis
+- Confidence intervals (upper/lower bounds)
+- Historical revenue comparison
+- Seasonal pattern detection
+- Revenue component breakdown (rental fees, extras, drivers)
+- Filters: Date ranges, branches, vehicle types
+- Recharts visualizations (line charts with confidence bands)
+- CSV export with localized headers
+- Summary statistics cards
+- Warning thresholds for revenue targets
+- Fully bilingual (English/Arabic)
+- RTL/LTR layout support
+
+**Business Value**: Strategic planning, budget forecasting, growth targets, investment decisions
+
+### 29. Fleet Utilization Forecast
+**Access Level**: Manager and above  
+**Route**: `/reports/fleet-utilization-forecast`  
+**Data Source**: `/api/reports/fleet-utilization-forecast`  
+
+**Features**:
+- Capacity planning predictions
+- Vehicle type utilization forecasting
+- Occupancy rate trends
+- Peak demand identification
+- Vehicle acquisition recommendations
+- Utilization optimization suggestions
+- Filters: Date ranges, vehicle types, branches
+- Recharts visualizations (bar and line charts)
+- CSV export with localized headers
+- Fully bilingual (English/Arabic)
+- RTL/LTR layout support
+
+**Business Value**: Fleet optimization, acquisition planning, capacity management, cost reduction
+
+### 30. Customer Churn Risk Report
+**Access Level**: Manager and above  
+**Route**: `/reports/customer-churn-risk`  
+**Data Source**: `/api/reports/customer-churn-risk`  
+
+**Features**:
+- Customer churn probability predictions
+- Risk scoring (Low, Medium, High, Critical)
+- Payment history analysis
+- Rental frequency trends
+- Customer lifetime value calculation
+- Churn factors identification
+- Retention recommendations
+- Filters: Risk levels, customer segments, date ranges
+- Recharts visualizations (pie and bar charts)
+- CSV export with localized headers
+- Fully bilingual (English/Arabic)
+- RTL/LTR layout support
+
+**Business Value**: Customer retention, loyalty programs, proactive engagement, revenue protection
+
+### 31. Maintenance Cost Forecast
+**Access Level**: Manager and above  
+**Route**: `/reports/maintenance-cost-forecast`  
+**Data Source**: `/api/reports/maintenance-cost-forecast`  
+
+**Features**:
+- Vehicle age/mileage-based cost predictions
+- Service history pattern analysis
+- Annual cost projections
+- Budget planning insights
+- Vehicle replacement recommendations
+- Maintenance schedule optimization
+- Filters: Date ranges, vehicle types, age ranges
+- Recharts visualizations (line and scatter charts)
+- CSV export with localized headers
+- Fully bilingual (English/Arabic)
+- RTL/LTR layout support
+
+**Business Value**: Budget planning, fleet replacement strategy, cost control, asset management
+
+### 32. Payment Default Prediction
+**Access Level**: Manager and above  
+**Route**: `/reports/payment-default-prediction`  
+**Data Source**: `/api/reports/payment-default-prediction`  
+
+**Features**:
+- Overdue payment risk analysis
+- Customer payment behavior patterns
+- Default probability per contract
+- Collection priority recommendations
+- Payment delay trend analysis
+- Risk-based collection strategies
+- Filters: Risk levels, payment methods, date ranges
+- Recharts visualizations (donut and bar charts)
+- CSV export with localized headers
+- Fully bilingual (English/Arabic)
+- RTL/LTR layout support
+
+**Business Value**: Cash flow optimization, bad debt reduction, collection efficiency, credit policy refinement
+
+### 33. Location Demand Forecast
+**Access Level**: Manager and above  
+**Route**: `/reports/location-demand-forecast`  
+**Data Source**: `/api/reports/demand-forecast`  
+
+**Features**:
+- Emirate-based demand trends (all 7 UAE emirates)
+- Geographic demand patterns
+- Seasonal demand forecasting
+- Location-specific recommendations
+- Branch expansion insights
+- Vehicle allocation optimization
+- Filters: Date ranges, emirates, vehicle types
+- Recharts visualizations (map-style bar charts)
+- CSV export with localized headers
+- Fully bilingual (English/Arabic) including emirate names
+- RTL/LTR layout support
+
+**Business Value**: Regional expansion planning, resource allocation, market penetration, competitive positioning
+
+---
+
+## Automation & Background Jobs
+
+### 34. Automation Orchestrator
+**Access Level**: System (Background Jobs)  
+**Implementation**: `server/services/automationOrchestrator.ts`  
+
+**Active Cron Jobs:**
+
+1. **Nightly Risk Score Calculation** - Daily at 2:00 AM
+   - Recalculates risk scores for all active customers
+   - Updates customer_risk_scores table
+   - Triggers elevated risk notifications
+
+2. **Document Expiry Check** - Daily at 8:00 AM
+   - Scans document_registry for documents expiring within 30 days
+   - Creates automated reminder entries
+   - Triggers notifications to responsible parties
+
+3. **Contract Expiry Reminders** - Daily at 9:00 AM
+   - Identifies contracts expiring in 7 days
+   - Sends customer notifications
+   - Logs reminder delivery
+
+4. **Payment Due Reminders** - Daily at 10:00 AM
+   - Identifies overdue payments
+   - Sends payment reminder notifications
+   - Tracks reminder delivery status
+
+**Manual Triggers:**
+- `POST /api/automation/calculate-risk-scores` - On-demand risk calculation
+- `POST /api/automation/seed-documents` - Document auto-seeding
+- `POST /api/automation/seed-notification-templates` - Template seeding
+
+**Business Value**: Operational automation, proactive notifications, compliance management, customer service
+
+---
+
+## Implemented Features (Previously "Future")
+
+### ✅ Completed Features
+
+1. **✅ Predictive Analytics** - COMPLETE (6 predictive intelligence reports implemented)
+2. **✅ Data Export** - COMPLETE (CSV export on all reports with bilingual support)
+3. **✅ Real-time Notifications** - COMPLETE (11 automated notification touchpoints)
+4. **✅ Advanced Data Visualization** - COMPLETE (Recharts integration across all reports)
+
+### 🔜 Planned Features
+
+1. **Mobile Dashboard**: Native iOS/Android apps for on-the-go monitoring
+2. **Custom Report Builder**: Drag-and-drop interface for creating ad-hoc reports
+3. **Scheduled Reports**: Email delivery of reports on a schedule
+4. **Report Sharing**: Share report snapshots with external stakeholders
 
 ### Under Consideration
+
 - Integration with external accounting systems (QuickBooks, Xero)
 - Integration with fleet telematics providers
-- Real-time notifications for critical alerts
-- Advanced data visualization options (heatmaps, geographic maps)
-- Multi-currency support
+- Real-time GPS tracking for fleet
+- Multi-currency support (currently AED only)
 - Multi-company/franchise support
+- Mobile app for customers (self-service portal)
+- Online booking and reservation system
+
+---
+
+## Authoritative Documentation
+
+This features catalog should be read in conjunction with:
+- **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
+- **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (63 tables, 120+ endpoints, 66 pages)
+
+For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 
 ---
 
 ## Document History
+
 - **v1.0** (2025-11-16): Initial comprehensive feature catalog
-- Includes granular permission system documentation
-- New dashboard analytics cards documented
-- Report permission structure clarified
+  - Granular permission system documentation
+  - New dashboard analytics cards documented
+  - Report permission structure clarified
+
+- **v2.0** (2025-11-18): Major update with Phase 4 & 5 implementation
+  - Added 23 specialized operational modules
+  - Added Communications Platform (Phase 3)
+  - Added Campaign Management System (Phase 4)
+  - Added 6 Predictive Intelligence Reports (Phase 5)
+  - Added Automation Orchestrator documentation
+  - Updated "Future Enhancements" to reflect completed features
+  - Cross-reference to updated MASTER_FEATURE_LIST.md (63 tables, 120+ endpoints, 66 pages)
 
 ---
 
-*For technical implementation details, see `/docs/TECHNICAL_ARCHITECTURE.md`*  
+*For technical implementation details, see `/docs/TECHNICAL_DOCUMENTATION.md`*  
 *For permission setup, see `/docs/ADMIN_GUIDE.md`*  
-*For dashboard user guide, see `/docs/DASHBOARD_GUIDE.md`*
+*For dashboard user guide, see `/docs/USER_GUIDE.md`*
