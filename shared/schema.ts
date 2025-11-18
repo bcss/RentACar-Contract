@@ -3627,3 +3627,72 @@ export const insertAbTestSchema = createInsertSchema(abTestVariants).omit({
 
 export type InsertAbTest = z.infer<typeof insertAbTestSchema>;
 export type AbTest = typeof abTestVariants.$inferSelect;
+
+// Notification Channel Preferences - Flip switches for Email/SMS selection per notification type
+export const notificationChannelPreferences = pgTable("notification_channel_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Notification Type Identifier
+  notificationType: varchar("notification_type", { length: 50 }).notNull().unique(), 
+  // Types: contract_copy, invoice, receipt, qr_verification, payment_reminder, contract_reminder, etc.
+  
+  // Display Information
+  nameEn: varchar("name_en").notNull(),
+  nameAr: varchar("name_ar"),
+  descriptionEn: text("description_en"),
+  descriptionAr: text("description_ar"),
+  
+  // Channel Preferences
+  emailEnabled: boolean("email_enabled").notNull().default(true),
+  smsEnabled: boolean("sms_enabled").notNull().default(false),
+  
+  // Cost Rates (for real-time calculation)
+  emailCostPerSend: varchar("email_cost_per_send").default("0.02"), // AED
+  smsCostPerSend: varchar("sms_cost_per_send").default("0.15"), // AED
+  
+  // Priority & Categorization
+  category: varchar("category", { length: 30 }), // customer_deliverables, payment_notices, system_alerts, campaigns
+  priority: varchar("priority", { length: 20 }).default("normal"), // critical, high, normal, low
+  
+  // System Flags
+  isSystemManaged: boolean("is_system_managed").default(false), // If true, only admins can modify
+  isCentralized: boolean("is_centralized").default(false), // If true, bypasses branch scope (e.g., payment notices)
+  isActive: boolean("is_active").default(true),
+  
+  // Metadata
+  metadata: jsonb("metadata"),
+  
+  // Audit
+  createdBy: varchar("created_by").references(() => users.id),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_channel_pref_type").on(table.notificationType),
+  index("idx_channel_pref_category").on(table.category),
+  index("idx_channel_pref_active").on(table.isActive),
+  index("idx_channel_pref_system").on(table.isSystemManaged),
+  index("idx_channel_pref_centralized").on(table.isCentralized),
+]);
+
+export const channelPreferenceRelations = relations(notificationChannelPreferences, ({ one }) => ({
+  creator: one(users, {
+    fields: [notificationChannelPreferences.createdBy],
+    references: [users.id],
+    relationName: "channelPrefCreator",
+  }),
+  updater: one(users, {
+    fields: [notificationChannelPreferences.updatedBy],
+    references: [users.id],
+    relationName: "channelPrefUpdater",
+  }),
+}));
+
+export const insertChannelPreferenceSchema = createInsertSchema(notificationChannelPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertChannelPreference = z.infer<typeof insertChannelPreferenceSchema>;
+export type ChannelPreference = typeof notificationChannelPreferences.$inferSelect;

@@ -8773,6 +8773,314 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== PHASE 4-5: NOTIFICATION CHANNEL PREFERENCES ====================
+
+  // GET /api/channel-preferences - Get all channel preferences
+  app.get("/api/channel-preferences", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const preferences = await storage.getChannelPreferences(req.query as any);
+      res.json(preferences);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/channel-preferences/type/:notificationType - Get preference by notification type
+  app.get("/api/channel-preferences/type/:notificationType", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const preference = await storage.getChannelPreferenceByType(req.params.notificationType);
+      
+      if (!preference) {
+        return res.status(404).json({ message: "Channel preference not found" });
+      }
+      
+      res.json(preference);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/channel-preferences/:id - Get single channel preference
+  app.get("/api/channel-preferences/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const preference = await storage.getChannelPreferenceById(req.params.id);
+      
+      if (!preference) {
+        return res.status(404).json({ message: "Channel preference not found" });
+      }
+      
+      res.json(preference);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/channel-preferences - Create new channel preference (Admin only)
+  app.post("/api/channel-preferences", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      // Validate and sanitize input - never trust client-supplied system flags
+      const {
+        notificationType,
+        nameEn,
+        nameAr,
+        descriptionEn,
+        descriptionAr,
+        category,
+        emailEnabled,
+        smsEnabled,
+        emailCostPerSend,
+        smsCostPerSend,
+        priority,
+        isSystemManaged,
+        isCentralized,
+        isActive,
+        metadata,
+      } = req.body;
+      
+      // Validate required fields
+      if (!notificationType || !nameEn) {
+        return res.status(400).json({ message: "notificationType and nameEn are required" });
+      }
+      
+      // Validate and sanitize cost rates - never trust client financial inputs
+      // Only accept explicit numeric strings or numbers, reject booleans/objects/arrays
+      let sanitizedEmailCost = '0.02';
+      if (emailCostPerSend !== undefined && emailCostPerSend !== null) {
+        // Strict primitive check - reject objects, arrays, functions, symbols
+        const inputType = typeof emailCostPerSend;
+        if (inputType !== 'string' && inputType !== 'number') {
+          return res.status(400).json({ message: "emailCostPerSend must be a string or number (primitives only)" });
+        }
+        
+        // Additional safeguard: reject if value is somehow an object (shouldn't happen after typeof check)
+        if (emailCostPerSend !== null && typeof emailCostPerSend === 'object') {
+          return res.status(400).json({ message: "emailCostPerSend cannot be an object or array" });
+        }
+        
+        // For strings, trim whitespace; for numbers, convert to string
+        const trimmedValue = inputType === 'string' ? (emailCostPerSend as string).trim() : String(emailCostPerSend);
+        
+        // Reject empty strings
+        if (trimmedValue === '') {
+          return res.status(400).json({ message: "emailCostPerSend cannot be empty" });
+        }
+        
+        // Validate decimal format (digits with optional decimal point)
+        if (!/^\d+(\.\d{1,4})?$/.test(trimmedValue)) {
+          return res.status(400).json({ message: "emailCostPerSend must be a valid decimal number (e.g., 0.02)" });
+        }
+        
+        const emailCost = Number(trimmedValue);
+        if (!Number.isFinite(emailCost) || emailCost < 0) {
+          return res.status(400).json({ message: "emailCostPerSend must be a valid non-negative number" });
+        }
+        sanitizedEmailCost = emailCost.toFixed(2);
+      }
+      
+      let sanitizedSmsCost = '0.15';
+      if (smsCostPerSend !== undefined && smsCostPerSend !== null) {
+        // Strict primitive check - reject objects, arrays, functions, symbols
+        const inputType = typeof smsCostPerSend;
+        if (inputType !== 'string' && inputType !== 'number') {
+          return res.status(400).json({ message: "smsCostPerSend must be a string or number (primitives only)" });
+        }
+        
+        // Additional safeguard: reject if value is somehow an object (shouldn't happen after typeof check)
+        if (smsCostPerSend !== null && typeof smsCostPerSend === 'object') {
+          return res.status(400).json({ message: "smsCostPerSend cannot be an object or array" });
+        }
+        
+        // For strings, trim whitespace; for numbers, convert to string
+        const trimmedValue = inputType === 'string' ? (smsCostPerSend as string).trim() : String(smsCostPerSend);
+        
+        // Reject empty strings
+        if (trimmedValue === '') {
+          return res.status(400).json({ message: "smsCostPerSend cannot be empty" });
+        }
+        
+        // Validate decimal format (digits with optional decimal point)
+        if (!/^\d+(\.\d{1,4})?$/.test(trimmedValue)) {
+          return res.status(400).json({ message: "smsCostPerSend must be a valid decimal number (e.g., 0.15)" });
+        }
+        
+        const smsCost = Number(trimmedValue);
+        if (!Number.isFinite(smsCost) || smsCost < 0) {
+          return res.status(400).json({ message: "smsCostPerSend must be a valid non-negative number" });
+        }
+        sanitizedSmsCost = smsCost.toFixed(2);
+      }
+      
+      const preference = await storage.createChannelPreference({
+        notificationType,
+        nameEn,
+        nameAr,
+        descriptionEn,
+        descriptionAr,
+        category,
+        emailEnabled: typeof emailEnabled === 'boolean' ? emailEnabled : true,
+        smsEnabled: typeof smsEnabled === 'boolean' ? smsEnabled : false,
+        emailCostPerSend: sanitizedEmailCost,
+        smsCostPerSend: sanitizedSmsCost,
+        priority,
+        isSystemManaged: typeof isSystemManaged === 'boolean' ? isSystemManaged : false,
+        isCentralized: typeof isCentralized === 'boolean' ? isCentralized : false,
+        isActive: typeof isActive === 'boolean' ? isActive : true,
+        metadata,
+        createdBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'channel_preference_created', undefined, req, 
+        `Created channel preference for ${preference.notificationType}`);
+      
+      res.json(preference);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // PATCH /api/channel-preferences/:id - Update channel preference
+  app.patch("/api/channel-preferences/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const existing = await storage.getChannelPreferenceById(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ message: "Channel preference not found" });
+      }
+      
+      // System-managed or centralized preferences can only be modified by admins
+      if ((existing.isSystemManaged || existing.isCentralized) && user.role !== 'admin') {
+        return res.status(403).json({ 
+          message: "Only administrators can modify system-managed or centralized channel preferences" 
+        });
+      }
+      
+      // Build update object with validated fields only
+      const updateData: any = {
+        updatedBy: user.id,
+      };
+      
+      // Only allow non-admins to update specific fields
+      const allowedFields = ['nameEn', 'nameAr', 'descriptionEn', 'descriptionAr', 'emailEnabled', 'smsEnabled'];
+      
+      if (user.role === 'admin') {
+        // Admins can update all fields except system flags which are immutable after creation
+        for (const [key, value] of Object.entries(req.body)) {
+          if (key !== 'isSystemManaged' && key !== 'isCentralized' && key !== 'id' && key !== 'createdBy') {
+            // Validate cost fields
+            if (key === 'emailCostPerSend' || key === 'smsCostPerSend') {
+              const cost = parseFloat(value as string);
+              if (isNaN(cost) || cost < 0) {
+                return res.status(400).json({ message: `Invalid ${key}` });
+              }
+              updateData[key] = cost.toFixed(2);
+            } else {
+              updateData[key] = value;
+            }
+          }
+        }
+      } else {
+        // Non-admins can only update allowed fields
+        for (const key of allowedFields) {
+          if (req.body[key] !== undefined) {
+            updateData[key] = req.body[key];
+          }
+        }
+      }
+      
+      const preference = await storage.updateChannelPreference(req.params.id, updateData);
+      
+      await createAuditLog(user.id, 'channel_preference_updated', undefined, req, 
+        `Updated channel preference for ${preference.notificationType}`);
+      
+      res.json(preference);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/channel-preferences/:id/toggle - Toggle email/sms channel
+  app.post("/api/channel-preferences/:id/toggle", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const { channel, enabled } = req.body;
+      
+      if (!channel || !['email', 'sms'].includes(channel)) {
+        return res.status(400).json({ message: "Invalid channel. Must be 'email' or 'sms'" });
+      }
+      
+      if (typeof enabled !== 'boolean') {
+        return res.status(400).json({ message: "Enabled must be a boolean" });
+      }
+      
+      const existing = await storage.getChannelPreferenceById(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ message: "Channel preference not found" });
+      }
+      
+      // System-managed or centralized preferences can only be modified by admins
+      // This prevents managers from disabling centralized payment notices
+      if ((existing.isSystemManaged || existing.isCentralized) && user.role !== 'admin') {
+        return res.status(403).json({ 
+          message: "Only administrators can modify system-managed or centralized channel preferences" 
+        });
+      }
+      
+      const preference = await storage.toggleChannelPreference(req.params.id, channel, enabled, user.id);
+      
+      await createAuditLog(user.id, 'channel_preference_toggled', undefined, req, 
+        `Toggled ${channel} ${enabled ? 'on' : 'off'} for ${preference.notificationType}`);
+      
+      res.json(preference);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/channel-preferences/calculate-cost - Calculate notification cost
+  app.post("/api/channel-preferences/calculate-cost", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { notificationType, recipientCount } = req.body;
+      
+      if (!notificationType) {
+        return res.status(400).json({ message: "notificationType is required" });
+      }
+      
+      // Validate and sanitize recipientCount
+      const sanitizedCount = parseInt(recipientCount);
+      
+      if (isNaN(sanitizedCount) || sanitizedCount < 0) {
+        return res.status(400).json({ message: "recipientCount must be a non-negative number" });
+      }
+      
+      // Clamp to reasonable max to prevent abuse
+      const clampedCount = Math.min(sanitizedCount, 1000000);
+      
+      const cost = await storage.calculateNotificationCost(notificationType, clampedCount);
+      res.json(cost);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/channel-preferences/seed - Seed default channel preferences (Admin only)
+  app.post("/api/channel-preferences/seed", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const result = await storage.seedChannelPreferences();
+      
+      await createAuditLog(user.id, 'channel_preferences_seeded', undefined, req, 
+        `Seeded ${result.seeded} channel preferences, skipped ${result.skipped}`);
+      
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // ==================== QR CODE & CONTRACT VERIFICATION ====================
   
   // GET /api/contracts/:id/qr - Generate QR code for contract

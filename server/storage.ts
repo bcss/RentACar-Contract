@@ -50,6 +50,7 @@ import {
   campaignRecipients,
   templateAnalytics,
   abTestVariants,
+  notificationChannelPreferences,
   type User,
   type UpsertUser,
   type Contract,
@@ -151,6 +152,8 @@ import {
   type InsertTemplateAnalytics,
   type AbTest,
   type InsertAbTest,
+  type ChannelPreference,
+  type InsertChannelPreference,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte } from "drizzle-orm";
@@ -544,6 +547,17 @@ export interface IStorage {
   updateAbTest(id: string, test: any): Promise<any>;
   startAbTest(id: string): Promise<any>;
   completeAbTest(id: string): Promise<any>;
+  
+  // ==================== PHASE 4-5: CHANNEL PREFERENCES ====================
+  
+  getChannelPreferences(filters?: { category?: string; isActive?: boolean }): Promise<any[]>;
+  getChannelPreferenceById(id: string): Promise<any | undefined>;
+  getChannelPreferenceByType(notificationType: string): Promise<any | undefined>;
+  createChannelPreference(preference: any): Promise<any>;
+  updateChannelPreference(id: string, preference: any): Promise<any>;
+  toggleChannelPreference(id: string, channel: 'email' | 'sms', enabled: boolean, userId: string): Promise<any>;
+  calculateNotificationCost(notificationType: string, recipientCount: number): Promise<{ emailCost: string; smsCost: string; totalCost: string }>;
+  seedChannelPreferences(): Promise<{ seeded: number; skipped: number }>;
   
   // ==================== WAVE 2: FLEET ECONOMICS ====================
   
@@ -5254,6 +5268,248 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return completed;
+  }
+
+  // ==================== PHASE 4-5: CHANNEL PREFERENCES ====================
+
+  async getChannelPreferences(filters?: { category?: string; isActive?: boolean }): Promise<ChannelPreference[]> {
+    const conditions = [];
+    
+    if (filters?.category) conditions.push(eq(notificationChannelPreferences.category, filters.category));
+    if (filters?.isActive !== undefined) conditions.push(eq(notificationChannelPreferences.isActive, filters.isActive));
+    
+    return await db
+      .select()
+      .from(notificationChannelPreferences)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(notificationChannelPreferences.category, notificationChannelPreferences.notificationType);
+  }
+
+  async getChannelPreferenceById(id: string): Promise<ChannelPreference | undefined> {
+    const [preference] = await db
+      .select()
+      .from(notificationChannelPreferences)
+      .where(eq(notificationChannelPreferences.id, id));
+    return preference;
+  }
+
+  async getChannelPreferenceByType(notificationType: string): Promise<ChannelPreference | undefined> {
+    const [preference] = await db
+      .select()
+      .from(notificationChannelPreferences)
+      .where(eq(notificationChannelPreferences.notificationType, notificationType));
+    return preference;
+  }
+
+  async createChannelPreference(preferenceData: InsertChannelPreference): Promise<ChannelPreference> {
+    const [preference] = await db
+      .insert(notificationChannelPreferences)
+      .values(preferenceData)
+      .returning();
+    return preference;
+  }
+
+  async updateChannelPreference(id: string, preferenceData: Partial<InsertChannelPreference>): Promise<ChannelPreference> {
+    const [updated] = await db
+      .update(notificationChannelPreferences)
+      .set({ ...preferenceData, updatedAt: new Date() })
+      .where(eq(notificationChannelPreferences.id, id))
+      .returning();
+    return updated;
+  }
+
+  async toggleChannelPreference(id: string, channel: 'email' | 'sms', enabled: boolean, userId: string): Promise<ChannelPreference> {
+    const updateData: any = {
+      updatedBy: userId,
+      updatedAt: new Date(),
+    };
+    
+    if (channel === 'email') {
+      updateData.emailEnabled = enabled;
+    } else if (channel === 'sms') {
+      updateData.smsEnabled = enabled;
+    }
+    
+    const [updated] = await db
+      .update(notificationChannelPreferences)
+      .set(updateData)
+      .where(eq(notificationChannelPreferences.id, id))
+      .returning();
+    
+    return updated;
+  }
+
+  async calculateNotificationCost(notificationType: string, recipientCount: number): Promise<{ emailCost: string; smsCost: string; totalCost: string }> {
+    const preference = await this.getChannelPreferenceByType(notificationType);
+    
+    if (!preference) {
+      // Default costs if preference not found
+      const emailCost = (recipientCount * 0.02).toFixed(2);
+      const smsCost = (recipientCount * 0.15).toFixed(2);
+      return {
+        emailCost,
+        smsCost,
+        totalCost: emailCost,
+      };
+    }
+    
+    const emailRate = parseFloat(preference.emailCostPerSend || '0.02');
+    const smsRate = parseFloat(preference.smsCostPerSend || '0.15');
+    
+    let emailCost = '0.00';
+    let smsCost = '0.00';
+    let totalCost = 0;
+    
+    if (preference.emailEnabled) {
+      emailCost = (recipientCount * emailRate).toFixed(2);
+      totalCost += parseFloat(emailCost);
+    }
+    
+    if (preference.smsEnabled) {
+      smsCost = (recipientCount * smsRate).toFixed(2);
+      totalCost += parseFloat(smsCost);
+    }
+    
+    return {
+      emailCost,
+      smsCost,
+      totalCost: totalCost.toFixed(2),
+    };
+  }
+
+  async seedChannelPreferences(): Promise<{ seeded: number; skipped: number }> {
+    let seeded = 0;
+    let skipped = 0;
+    
+    const defaultPreferences = [
+      // Customer Deliverables
+      {
+        notificationType: 'contract_copy',
+        nameEn: 'Contract Copy',
+        nameAr: 'نسخة العقد',
+        descriptionEn: 'Send rental contract copy to customer',
+        descriptionAr: 'إرسال نسخة عقد الإيجار للعميل',
+        category: 'customer_deliverables',
+        emailEnabled: true,
+        smsEnabled: false,
+        priority: 'normal',
+      },
+      {
+        notificationType: 'invoice',
+        nameEn: 'Invoice',
+        nameAr: 'الفاتورة',
+        descriptionEn: 'Send invoice to customer',
+        descriptionAr: 'إرسال الفاتورة للعميل',
+        category: 'customer_deliverables',
+        emailEnabled: true,
+        smsEnabled: false,
+        priority: 'normal',
+      },
+      {
+        notificationType: 'receipt',
+        nameEn: 'Payment Receipt',
+        nameAr: 'إيصال الدفع',
+        descriptionEn: 'Send payment receipt to customer',
+        descriptionAr: 'إرسال إيصال الدفع للعميل',
+        category: 'customer_deliverables',
+        emailEnabled: true,
+        smsEnabled: false,
+        priority: 'normal',
+      },
+      {
+        notificationType: 'qr_verification',
+        nameEn: 'QR Code Verification',
+        nameAr: 'التحقق من رمز الاستجابة السريعة',
+        descriptionEn: 'Send QR code for contract verification',
+        descriptionAr: 'إرسال رمز QR للتحقق من العقد',
+        category: 'customer_deliverables',
+        emailEnabled: true,
+        smsEnabled: true,
+        priority: 'high',
+      },
+      
+      // Payment Notices (Centralized)
+      {
+        notificationType: 'payment_reminder',
+        nameEn: 'Payment Reminder',
+        nameAr: 'تذكير بالدفع',
+        descriptionEn: 'Automated payment due reminder',
+        descriptionAr: 'تذكير تلقائي بموعد الدفع',
+        category: 'payment_notices',
+        emailEnabled: true,
+        smsEnabled: true,
+        priority: 'critical',
+        isSystemManaged: true,
+        isCentralized: true,
+      },
+      {
+        notificationType: 'payment_overdue',
+        nameEn: 'Payment Overdue',
+        nameAr: 'تأخر الدفع',
+        descriptionEn: 'Overdue payment notification',
+        descriptionAr: 'إشعار بتأخر الدفع',
+        category: 'payment_notices',
+        emailEnabled: true,
+        smsEnabled: true,
+        priority: 'critical',
+        isSystemManaged: true,
+        isCentralized: true,
+      },
+      
+      // System Alerts
+      {
+        notificationType: 'contract_expiry',
+        nameEn: 'Contract Expiry Alert',
+        nameAr: 'تنبيه انتهاء العقد',
+        descriptionEn: 'Upcoming contract expiry notification',
+        descriptionAr: 'إشعار بقرب انتهاء العقد',
+        category: 'system_alerts',
+        emailEnabled: true,
+        smsEnabled: true,
+        priority: 'high',
+      },
+      {
+        notificationType: 'document_expiry',
+        nameEn: 'Document Expiry Alert',
+        nameAr: 'تنبيه انتهاء الوثيقة',
+        descriptionEn: 'Document expiring soon notification',
+        descriptionAr: 'إشعار بقرب انتهاء الوثيقة',
+        category: 'system_alerts',
+        emailEnabled: true,
+        smsEnabled: false,
+        priority: 'normal',
+      },
+      
+      // Campaigns
+      {
+        notificationType: 'campaign',
+        nameEn: 'Marketing Campaign',
+        nameAr: 'حملة تسويقية',
+        descriptionEn: 'Marketing and promotional campaigns',
+        descriptionAr: 'الحملات التسويقية والترويجية',
+        category: 'campaigns',
+        emailEnabled: true,
+        smsEnabled: false,
+        priority: 'normal',
+      },
+    ];
+    
+    for (const pref of defaultPreferences) {
+      try {
+        const existing = await this.getChannelPreferenceByType(pref.notificationType);
+        if (existing) {
+          skipped++;
+        } else {
+          await this.createChannelPreference(pref as InsertChannelPreference);
+          seeded++;
+        }
+      } catch (error) {
+        console.error(`Failed to seed channel preference ${pref.notificationType}:`, error);
+        skipped++;
+      }
+    }
+    
+    return { seeded, skipped };
   }
 
   // ==================== COMMUNICATION INFRASTRUCTURE ====================
