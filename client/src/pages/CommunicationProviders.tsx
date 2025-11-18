@@ -45,7 +45,7 @@ export default function CommunicationProviders() {
     mutationFn: (data: InsertCommunicationProvider) => apiRequest("POST", "/api/communication-providers", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/communication-providers"] });
-      showSuccess(t("success"), "Provider created successfully");
+      showSuccess(t("success"), t('communications.providerCreated'));
       setDialogOpen(false);
       form.reset();
     },
@@ -59,7 +59,7 @@ export default function CommunicationProviders() {
       apiRequest("PATCH", `/api/communication-providers/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/communication-providers"] });
-      showSuccess(t("success"), "Provider updated successfully");
+      showSuccess(t("success"), t('communications.providerUpdated'));
       setDialogOpen(false);
       setEditingProvider(null);
       form.reset();
@@ -112,12 +112,12 @@ export default function CommunicationProviders() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Communication Providers</h1>
-          <p className="text-muted-foreground mt-1">Manage SMS and Email service providers with priority-based fallback routing</p>
+          <h1 className="text-3xl font-bold">{t('communications.providers')}</h1>
+          <p className="text-muted-foreground mt-1">{t('communications.providersDescription')}</p>
         </div>
         <Button onClick={handleCreate} data-testid="button-create-provider">
           <Plus className="h-4 w-4" />
-          Add Provider
+          {t('communications.addProvider')}
         </Button>
       </div>
 
@@ -126,7 +126,7 @@ export default function CommunicationProviders() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              SMS Providers ({smsProviders.length})
+              {t('communications.smsProviders')} ({smsProviders.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -134,8 +134,8 @@ export default function CommunicationProviders() {
               {smsProviders.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <AlertCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No SMS providers configured</p>
-                  <p className="text-sm">Add Twilio or another SMS provider to enable notifications</p>
+                  <p>{t('communications.noSmsProviders')}</p>
+                  <p className="text-sm">{t('communications.addSmsProviderHint')}</p>
                 </div>
               ) : (
                 smsProviders.map((provider) => (
@@ -148,13 +148,13 @@ export default function CommunicationProviders() {
                       <div className="flex items-center gap-3">
                         <h3 className="font-semibold">{provider.name}</h3>
                         <Badge variant={provider.isActive ? "default" : "secondary"}>
-                          {provider.isActive ? "Active" : "Inactive"}
+                          {provider.isActive ? t('common.active') : t('common.inactive')}
                         </Badge>
-                        <Badge variant="outline">Priority: {provider.priority}</Badge>
+                        <Badge variant="outline">{t('communications.priority')}: {provider.priority}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {provider.provider.toUpperCase()} • 
-                        Last used: {provider.lastUsed ? new Date(provider.lastUsed).toLocaleDateString() : 'Never'}
+                        {t('communications.lastUsed')}: {provider.lastUsed ? new Date(provider.lastUsed).toLocaleDateString() : t('common.never')}
                       </p>
                     </div>
                     <Button
@@ -176,7 +176,7 @@ export default function CommunicationProviders() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Email Providers ({emailProviders.length})
+              {t('communications.emailProviders')} ({emailProviders.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -184,8 +184,8 @@ export default function CommunicationProviders() {
               {emailProviders.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <AlertCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No Email providers configured</p>
-                  <p className="text-sm">Add SendGrid, Gmail, or SMTP to enable email notifications</p>
+                  <p>{t('communications.noEmailProviders')}</p>
+                  <p className="text-sm">{t('communications.addEmailProviderHint')}</p>
                 </div>
               ) : (
                 emailProviders.map((provider) => (
@@ -198,13 +198,13 @@ export default function CommunicationProviders() {
                       <div className="flex items-center gap-3">
                         <h3 className="font-semibold">{provider.name}</h3>
                         <Badge variant={provider.isActive ? "default" : "secondary"}>
-                          {provider.isActive ? "Active" : "Inactive"}
+                          {provider.isActive ? t('common.active') : t('common.inactive')}
                         </Badge>
-                        <Badge variant="outline">Priority: {provider.priority}</Badge>
+                        <Badge variant="outline">{t('communications.priority')}: {provider.priority}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {provider.provider.toUpperCase()} • 
-                        Last used: {provider.lastUsed ? new Date(provider.lastUsed).toLocaleDateString() : 'Never'}
+                        {t('communications.lastUsed')}: {provider.lastUsed ? new Date(provider.lastUsed).toLocaleDateString() : t('common.never')}
                       </p>
                     </div>
                     <Button
@@ -226,7 +226,7 @@ export default function CommunicationProviders() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingProvider ? "Edit Provider" : "Add Communication Provider"}</DialogTitle>
+            <DialogTitle>{editingProvider ? t('communications.editProvider') : t('communications.addProvider')}</DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
@@ -236,9 +236,9 @@ export default function CommunicationProviders() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Provider Name</FormLabel>
+                    <FormLabel>{t('communications.providerName')}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g., Primary Twilio SMS" data-testid="input-provider-name" />
+                      <Input {...field} placeholder={t('communications.providerNamePlaceholder')} data-testid="input-provider-name" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -251,7 +251,7 @@ export default function CommunicationProviders() {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type</FormLabel>
+                      <FormLabel>{t('communications.providerType')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value} disabled={!!editingProvider}>
                         <FormControl>
                           <SelectTrigger data-testid="select-provider-type">
@@ -259,8 +259,8 @@ export default function CommunicationProviders() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="sms">SMS</SelectItem>
-                          <SelectItem value="email">Email</SelectItem>
+                          <SelectItem value="sms">{t('communications.typeSms')}</SelectItem>
+                          <SelectItem value="email">{t('communications.typeEmail')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -273,7 +273,7 @@ export default function CommunicationProviders() {
                   name="providerName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Service</FormLabel>
+                      <FormLabel>{t('communications.service')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-provider-service">
@@ -307,7 +307,7 @@ export default function CommunicationProviders() {
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Priority (1 = Highest)</FormLabel>
+                      <FormLabel>{t('communications.priorityLabel')}</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} min="1" max="10" onChange={(e) => field.onChange(parseInt(e.target.value))} data-testid="input-provider-priority" />
                       </FormControl>
@@ -321,7 +321,7 @@ export default function CommunicationProviders() {
                   name="isActive"
                   render={({ field }) => (
                     <FormItem className="flex items-center justify-between p-4 border rounded-lg">
-                      <FormLabel className="mb-0">Active</FormLabel>
+                      <FormLabel className="mb-0">{t('common.active')}</FormLabel>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-provider-active" />
                       </FormControl>
@@ -332,13 +332,12 @@ export default function CommunicationProviders() {
 
               <div className="p-4 border rounded-lg bg-muted/50">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Note:</strong> API credentials must be configured via Replit Secrets for security.
-                  Required secrets vary by provider:
+                  <strong>{t('common.note')}:</strong> {t('communications.credentialsNote')}
                 </p>
                 <ul className="text-sm text-muted-foreground mt-2 ml-4 list-disc space-y-1">
-                  <li><strong>Twilio SMS:</strong> TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER</li>
-                  <li><strong>SendGrid Email:</strong> SENDGRID_API_KEY, SENDGRID_FROM_EMAIL</li>
-                  <li><strong>Gmail OAuth:</strong> GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN</li>
+                  <li><strong>{t('communications.twilioSms')}:</strong> TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER</li>
+                  <li><strong>{t('communications.sendgridEmail')}:</strong> SENDGRID_API_KEY, SENDGRID_FROM_EMAIL</li>
+                  <li><strong>{t('communications.gmailOauth')}:</strong> GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN</li>
                 </ul>
               </div>
 
@@ -348,7 +347,7 @@ export default function CommunicationProviders() {
                   disabled={createMutation.isPending || updateMutation.isPending}
                   data-testid="button-submit-provider"
                 >
-                  {editingProvider ? "Update Provider" : "Create Provider"}
+                  {editingProvider ? t('communications.updateProvider') : t('communications.createProvider')}
                 </Button>
                 <Button
                   type="button"
@@ -356,7 +355,7 @@ export default function CommunicationProviders() {
                   onClick={() => setDialogOpen(false)}
                   data-testid="button-cancel-provider"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </div>
             </form>

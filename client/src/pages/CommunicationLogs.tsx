@@ -64,13 +64,13 @@ export default function CommunicationLogs() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'delivered':
-        return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="w-3 h-3 mr-1" /> Delivered</Badge>;
+        return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="w-3 h-3 mr-1" /> {t('communications.logStatusDelivered')}</Badge>;
       case 'sent':
-        return <Badge variant="default" className="bg-blue-600"><Send className="w-3 h-3 mr-1" /> Sent</Badge>;
+        return <Badge variant="default" className="bg-blue-600"><Send className="w-3 h-3 mr-1" /> {t('communications.logStatusSent')}</Badge>;
       case 'failed':
-        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" /> Failed</Badge>;
+        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" /> {t('communications.logStatusFailed')}</Badge>;
       case 'pending':
-        return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" /> Pending</Badge>;
+        return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" /> {t('communications.logStatusPending')}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -86,17 +86,17 @@ export default function CommunicationLogs() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2" data-testid="heading-communication-logs">
-          Communication Logs
+          {t('communications.logs')}
         </h1>
         <p className="text-muted-foreground">
-          View all sent SMS and Email notifications with delivery tracking
+          {t('communications.logsDescription')}
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Message History</span>
+            <span>{t('communications.messageHistory')}</span>
             <div className="flex gap-2">
               <Button
                 size="sm"
@@ -106,7 +106,7 @@ export default function CommunicationLogs() {
                 data-testid="button-export-logs"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Export CSV
+                {t('common.exportCSV')}
               </Button>
             </div>
           </CardTitle>
@@ -118,7 +118,7 @@ export default function CommunicationLogs() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
-                  placeholder="Search by recipient, message, or subject..."
+                  placeholder={t('communications.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -130,12 +130,12 @@ export default function CommunicationLogs() {
               <Select value={channelFilter} onValueChange={setChannelFilter}>
                 <SelectTrigger data-testid="select-channel-filter">
                   <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Channel" />
+                  <SelectValue placeholder={t('communications.logChannel')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Channels</SelectItem>
-                  <SelectItem value="sms">SMS Only</SelectItem>
-                  <SelectItem value="email">Email Only</SelectItem>
+                  <SelectItem value="all">{t('communications.allChannels')}</SelectItem>
+                  <SelectItem value="sms">{t('communications.smsOnly')}</SelectItem>
+                  <SelectItem value="email">{t('communications.emailOnly')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -143,14 +143,14 @@ export default function CommunicationLogs() {
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger data-testid="select-status-filter">
                   <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t('communications.logStatus')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="all">{t('communications.allStatus')}</SelectItem>
+                  <SelectItem value="delivered">{t('communications.logStatusDelivered')}</SelectItem>
+                  <SelectItem value="sent">{t('communications.logStatusSent')}</SelectItem>
+                  <SelectItem value="failed">{t('communications.logStatusFailed')}</SelectItem>
+                  <SelectItem value="pending">{t('communications.logStatusPending')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -189,7 +189,7 @@ export default function CommunicationLogs() {
                           <span className="font-medium">{log.recipient}</span>
                           {log.providerName && (
                             <Badge variant="outline" className="text-xs">
-                              via {log.providerName}
+                              {t('communications.via')} {log.providerName}
                             </Badge>
                           )}
                         </div>
@@ -201,17 +201,17 @@ export default function CommunicationLogs() {
                         </p>
                         {log.failureReason && (
                           <p className="text-sm text-destructive mt-2">
-                            <strong>Error:</strong> {log.failureReason}
+                            <strong>{t('common.error')}:</strong> {log.failureReason}
                           </p>
                         )}
                         {log.sentAt && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            Sent: {format(new Date(log.sentAt), 'MMM dd, yyyy HH:mm:ss')}
+                            {t('communications.sentAt')}: {format(new Date(log.sentAt), 'MMM dd, yyyy HH:mm:ss')}
                           </p>
                         )}
                         {log.deliveredAt && (
                           <p className="text-xs text-muted-foreground">
-                            Delivered: {format(new Date(log.deliveredAt), 'MMM dd, yyyy HH:mm:ss')}
+                            {t('communications.deliveredAt')}: {format(new Date(log.deliveredAt), 'MMM dd, yyyy HH:mm:ss')}
                           </p>
                         )}
                       </div>
@@ -223,7 +223,7 @@ export default function CommunicationLogs() {
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No communication logs found</p>
+              <p>{t('communications.noLogs')}</p>
               {(searchTerm || channelFilter !== "all" || statusFilter !== "all") && (
                 <Button 
                   variant="ghost" 
@@ -235,7 +235,7 @@ export default function CommunicationLogs() {
                   className="mt-2"
                   data-testid="button-clear-filters"
                 >
-                  Clear filters
+                  {t('common.clearFilters')}
                 </Button>
               )}
             </div>
