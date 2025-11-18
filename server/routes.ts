@@ -6333,17 +6333,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const destinationBranch = await storage.getBranch(transfer.destinationBranchId);
         const vehicle = await storage.getVehicleById(transfer.vehicleId);
         
-        // Notify branch managers
-        const branchUsers = await db.select().from(users)
-          .where(eq(users.branchId, transfer.sourceBranchId))
+        // Notify branch managers only (RBAC: Manager or Admin role required)
+        const branchManagers = await db.select().from(users)
+          .where(and(
+            eq(users.branchId, transfer.sourceBranchId),
+            or(eq(users.role, 'manager'), eq(users.role, 'admin'))
+          ))
           .limit(1);
         
-        if (branchUsers.length > 0 && vehicle) {
+        if (branchManagers.length > 0 && vehicle) {
           await notificationService.sendNotification({
             templateCode: 'VEHICLE_TRANSFER_APPROVED',
             channel: 'email',
             recipientType: 'user',
-            recipientId: branchUsers[0].id,
+            recipientId: branchManagers[0].id,
             variables: {
               vehicleRegistration: vehicle.registration || 'N/A',
               sourceBranch: sourceBranch?.nameEn || 'N/A',
@@ -6388,17 +6391,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sourceBranch = await storage.getBranch(transfer.sourceBranchId);
         const vehicle = await storage.getVehicleById(transfer.vehicleId);
         
-        // Notify requester/source branch
-        const branchUsers = await db.select().from(users)
-          .where(eq(users.branchId, transfer.sourceBranchId))
+        // Notify requester/source branch managers (RBAC: Manager or Admin role required)
+        const branchManagers = await db.select().from(users)
+          .where(and(
+            eq(users.branchId, transfer.sourceBranchId),
+            or(eq(users.role, 'manager'), eq(users.role, 'admin'))
+          ))
           .limit(1);
         
-        if (branchUsers.length > 0 && vehicle) {
+        if (branchManagers.length > 0 && vehicle) {
           await notificationService.sendNotification({
             templateCode: 'VEHICLE_TRANSFER_REJECTED',
             channel: 'email',
             recipientType: 'user',
-            recipientId: branchUsers[0].id,
+            recipientId: branchManagers[0].id,
             variables: {
               vehicleRegistration: vehicle.registration || 'N/A',
               sourceBranch: sourceBranch?.nameEn || 'N/A',
@@ -7524,28 +7530,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await createAuditLog(user.id, 'service_record_created', undefined, req, `Created service record for vehicle ${record.vehicleId}`);
       
-      // Send service record notification to fleet manager
+      // Send service record notification to fleet manager (RBAC: Vehicle's branch manager)
       try {
-        const managers = await db.select().from(users).where(eq(users.role, 'manager')).limit(1);
-        if (managers.length > 0) {
-          const vehicle = await storage.getVehicleById(record.vehicleId);
-          await notificationService.sendNotification({
-            templateCode: 'SERVICE_RECORD_ADDED',
-            channel: 'email',
-            recipientType: 'user',
-            recipientId: managers[0].id,
-            variables: {
-              vehicleRegistration: vehicle?.registration || 'N/A',
-              serviceType: record.serviceType || 'N/A',
-              serviceCost: record.cost || '0',
-              serviceDate: record.serviceDate ? new Date(record.serviceDate).toLocaleDateString('en-AE') : 'N/A',
-            },
-            language: 'en',
-            triggerType: 'event_driven',
-            triggeredBy: user.id,
-            entityType: 'service_record',
-            entityId: record.id,
-          });
+        const vehicle = await storage.getVehicleById(record.vehicleId);
+        if (vehicle) {
+          // Query for managers/admins at the vehicle's branch
+          const branchManagers = await db.select().from(users)
+            .where(and(
+              eq(users.branchId, vehicle.branchId),
+              or(eq(users.role, 'manager'), eq(users.role, 'admin'))
+            ))
+            .limit(1);
+          
+          if (branchManagers.length > 0) {
+            await notificationService.sendNotification({
+              templateCode: 'SERVICE_RECORD_ADDED',
+              channel: 'email',
+              recipientType: 'user',
+              recipientId: branchManagers[0].id,
+              variables: {
+                vehicleRegistration: vehicle.registration || 'N/A',
+                serviceType: record.serviceType || 'N/A',
+                serviceCost: record.cost || '0',
+                serviceDate: record.serviceDate ? new Date(record.serviceDate).toLocaleDateString('en-AE') : 'N/A',
+              },
+              language: 'en',
+              triggerType: 'event_driven',
+              triggeredBy: user.id,
+              entityType: 'service_record',
+              entityId: record.id,
+            });
+          }
         }
       } catch (notifError) {
         console.error('[Notification] Failed to send service record notification:', notifError);

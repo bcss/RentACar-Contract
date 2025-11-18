@@ -2,6 +2,9 @@ import cron from 'node-cron';
 import { storage } from '../storage';
 import { RiskCalculator } from './riskCalculator';
 import { notificationService } from './notificationService';
+import { db } from '../db';
+import { users } from '../../shared/schema';
+import { and, or, eq } from 'drizzle-orm';
 
 /**
  * Automation Orchestrator for RCCMS
@@ -118,40 +121,77 @@ export function initializeAutomationOrchestrator() {
           );
 
           if (!hasRecentReminder) {
-            // Send notification using NotificationService
-            const result = await notificationService.sendNotification({
-              templateCode: 'DOCUMENT_RENEWAL_REMINDER',
-              channel: 'both',
-              recipientType: doc.entityType as 'customer' | 'driver' | 'sponsor',
-              recipientId: doc.entityId,
-              variables: {
-                documentType: doc.documentType,
-                expiryDate: expiryDate.toLocaleDateString('en-AE'),
-                daysUntilExpiry: Math.ceil((expiryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)).toString(),
-              },
-              language: 'en',
-              triggerType: 'automated',
-              triggeredBy: 'system',
-            });
-
-            if (result.success) {
-              // Create reminder record for tracking
-              const template = await storage.getNotificationTemplateByCode('DOCUMENT_RENEWAL_REMINDER');
-              if (template) {
-                await storage.createAutomatedReminder({
-                  entityType: doc.entityType,
-                  entityId: doc.entityId,
-                  reminderType: 'document_renewal',
-                  reminderDate: expiryDate,
-                  templateId: template.id,
-                  messageTemplate: `Document ${doc.documentType} expiring on ${expiryDate.toLocaleDateString()}`,
-                  recipientEmail: undefined,
-                  recipientPhone: undefined,
-                  isSent: true,
-                  sentTime: new Date(),
-                });
-                remindersCreated++;
+            // Map non-person entity types to their owners
+            let recipientType: 'customer' | 'driver' | 'sponsor' | 'user' | null = null;
+            let recipientId: string | null = null;
+            
+            if (doc.entityType === 'customer' || doc.entityType === 'driver' || doc.entityType === 'sponsor' || doc.entityType === 'user') {
+              recipientType = doc.entityType;
+              recipientId = doc.entityId;
+            } else if (doc.entityType === 'vehicle') {
+              // Get vehicle's branch manager
+              const vehicle = await storage.getVehicleById(doc.entityId);
+              if (vehicle) {
+                const branchManagers = await db.select().from(users)
+                  .where(and(
+                    eq(users.branchId, vehicle.branchId),
+                    or(eq(users.role, 'manager'), eq(users.role, 'admin'))
+                  ))
+                  .limit(1);
+                if (branchManagers.length > 0) {
+                  recipientType = 'user';
+                  recipientId = branchManagers[0].id;
+                }
               }
+            } else if (doc.entityType === 'contract') {
+              // Get contract's customer
+              const contract = await storage.getContract(doc.entityId);
+              if (contract) {
+                recipientType = 'customer';
+                recipientId = contract.customerId;
+              }
+            }
+            
+            // Only send if we found a valid recipient
+            if (recipientType && recipientId) {
+              const result = await notificationService.sendNotification({
+                templateCode: 'DOCUMENT_RENEWAL_REMINDER',
+                channel: 'both',
+                recipientType,
+                recipientId,
+                variables: {
+                  documentType: doc.documentType,
+                  expiryDate: expiryDate.toLocaleDateString('en-AE'),
+                  daysUntilExpiry: Math.ceil((expiryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)).toString(),
+                },
+                language: 'en',
+                triggerType: 'automated',
+                triggeredBy: 'system',
+                entityType: 'document',
+                entityId: doc.id,
+              });
+
+              if (result.success) {
+                // Create reminder record for tracking
+                const template = await storage.getNotificationTemplateByCode('DOCUMENT_RENEWAL_REMINDER');
+                if (template) {
+                  await storage.createAutomatedReminder({
+                    entityType: doc.entityType,
+                    entityId: doc.entityId,
+                    reminderType: 'document_renewal',
+                    reminderDate: expiryDate,
+                    templateId: template.id,
+                    messageTemplate: `Document ${doc.documentType} expiring on ${expiryDate.toLocaleDateString()}`,
+                    recipientEmail: undefined,
+                    recipientPhone: undefined,
+                    isSent: true,
+                    sentTime: new Date(),
+                  });
+                  remindersCreated++;
+                }
+              }
+            } else {
+              console.log(`[Automation] Skipping document expiry notification - no valid recipient for ${doc.entityType}:${doc.entityId}`);
             }
           }
         }
