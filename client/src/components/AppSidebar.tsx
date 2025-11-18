@@ -427,13 +427,13 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     {
       title: 'Communication Providers',
       icon: 'mail',
-      url: '/communication-providers',
+      url: '/communication/providers',
       show: isAdmin,
     },
     {
       title: 'Communication Logs',
       icon: 'message_square',
-      url: '/communication-logs',
+      url: '/communication/logs',
       show: isAdmin || isManager,
     },
     {

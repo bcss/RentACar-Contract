@@ -315,10 +315,10 @@ function Router() {
       </Route>
       
       {/* Communication Platform */}
-      <Route path="/communication-providers">
+      <Route path="/communication/providers">
         {() => <ProtectedRoute component={CommunicationProviders} />}
       </Route>
-      <Route path="/communication-logs">
+      <Route path="/communication/logs">
         {() => <ProtectedRoute component={CommunicationLogs} />}
       </Route>
       <Route path="/notifications/send">
