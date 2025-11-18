@@ -14,6 +14,7 @@ import { fromZodError } from "zod-validation-error";
 import { getGeolocation } from "./services/geolocation";
 import { validateEditReason } from "./utils/validation";
 import { calculateContractDriverCosts } from "./utils/driverCostCalculator";
+import { RiskCalculator } from "./services/riskCalculator";
 import { format } from "date-fns";
 import os from "os";
 import { readFileSync } from "fs";
@@ -7870,6 +7871,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const logs = await storage.getApprovalLogs(req.query.approvalId as string);
       res.json(logs);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Automation & Risk Calculation routes
+  // POST /api/automation/calculate-risk-scores - Calculate risk scores for all customers
+  app.post("/api/automation/calculate-risk-scores", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const riskCalculator = new RiskCalculator(storage);
+      
+      // Calculate risk scores for all customers
+      const results = await riskCalculator.calculateAllCustomerRisks();
+      
+      // Save risk scores to database
+      const savedScores = [];
+      for (const result of results) {
+        const scoreData = {
+          customerId: result.customerId,
+          riskScore: result.riskScore.score,
+          riskLevel: result.riskScore.level,
+          contributingFactors: {
+            paymentScore: result.riskScore.paymentScore,
+            violationScore: result.riskScore.violationScore,
+            incidentScore: result.riskScore.incidentScore,
+            documentScore: result.riskScore.documentScore,
+          },
+          calculatedBy: user.id,
+          isAutomated: true,
+        };
+        
+        const saved = await storage.createCustomerRiskScore(scoreData as any);
+        savedScores.push(saved);
+      }
+      
+      await createAuditLog(user.id, 'bulk_risk_calculation', undefined, req, `Calculated risk scores for ${results.length} customers`);
+      
+      res.json({
+        message: `Successfully calculated risk scores for ${results.length} customers`,
+        totalCalculated: results.length,
+        scores: savedScores,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST /api/automation/calculate-customer-risk/:customerId - Calculate risk for specific customer
+  app.post("/api/automation/calculate-customer-risk/:customerId", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const { customerId } = req.params;
+      const riskCalculator = new RiskCalculator(storage);
+      
+      // Calculate risk score for this customer
+      const riskScore = await riskCalculator.calculateCustomerRisk(customerId);
+      
+      // Save to database
+      const scoreData = {
+        customerId,
+        riskScore: riskScore.score,
+        riskLevel: riskScore.level,
+        contributingFactors: {
+          paymentScore: riskScore.paymentScore,
+          violationScore: riskScore.violationScore,
+          incidentScore: riskScore.incidentScore,
+          documentScore: riskScore.documentScore,
+        },
+        calculatedBy: user.id,
+        isAutomated: false,
+      };
+      
+      const saved = await storage.createCustomerRiskScore(scoreData as any);
+      
+      await createAuditLog(user.id, 'risk_calculation', undefined, req, `Calculated risk score for customer ${customerId}: ${riskScore.level} (${riskScore.score})`);
+      
+      res.json({
+        message: "Risk score calculated successfully",
+        riskScore: saved,
+        breakdown: {
+          paymentScore: riskScore.paymentScore,
+          violationScore: riskScore.violationScore,
+          incidentScore: riskScore.incidentScore,
+          documentScore: riskScore.documentScore,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/automation/high-risk-customers - Get list of high-risk customers
+  app.get("/api/automation/high-risk-customers", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const riskCalculator = new RiskCalculator(storage);
+      
+      // Get high-risk customers (score >= 50)
+      const highRiskCustomers = await riskCalculator.getHighRiskCustomers();
+      
+      // Enrich with customer details
+      const enrichedResults = await Promise.all(
+        highRiskCustomers.map(async (item) => {
+          const customer = await storage.getCustomer(item.customerId);
+          return {
+            customerId: item.customerId,
+            customerName: customer?.nameEn || 'Unknown',
+            riskScore: item.riskScore.score,
+            riskLevel: item.riskScore.level,
+            breakdown: {
+              paymentScore: item.riskScore.paymentScore,
+              violationScore: item.riskScore.violationScore,
+              incidentScore: item.riskScore.incidentScore,
+              documentScore: item.riskScore.documentScore,
+            },
+          };
+        })
+      );
+      
+      res.json({
+        totalHighRisk: enrichedResults.length,
+        customers: enrichedResults,
+      });
     } catch (error) {
       next(error);
     }
