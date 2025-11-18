@@ -978,3 +978,174 @@ For issues or questions:
 **Document Version**: 1.0  
 **Last Updated**: November 16, 2025  
 **Security Fixes**: Super admin password enforcement, configurable session TTL
+
+---
+
+## 📱 Communications Platform Setup
+
+### Provider Configuration
+
+**Required Environment Variables:**
+
+```bash
+# Twilio SMS (Primary)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token_here
+TWILIO_PHONE_NUMBER=+971xxxxxxxxx
+
+# SendGrid Email (Primary)
+SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+SENDGRID_FROM_EMAIL=noreply@yourdomain.com
+SENDGRID_FROM_NAME="RCCMS Notifications"
+
+# Gmail SMTP (Fallback Email)
+GMAIL_USER=your-email@gmail.com
+GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
+GMAIL_HOST=smtp.gmail.com
+GMAIL_PORT=587
+```
+
+### Provider Setup Steps
+
+**1. Twilio SMS Setup:**
+```bash
+1. Create account at twilio.com
+2. Verify phone number
+3. Purchase Twilio phone number
+4. Get Account SID and Auth Token
+5. Add to Replit Secrets:
+   - TWILIO_ACCOUNT_SID
+   - TWILIO_AUTH_TOKEN
+   - TWILIO_PHONE_NUMBER
+```
+
+**2. SendGrid Email Setup:**
+```bash
+1. Create account at sendgrid.com
+2. Verify sender email domain
+3. Create API key with "Mail Send" permissions
+4. Add to Replit Secrets:
+   - SENDGRID_API_KEY
+   - SENDGRID_FROM_EMAIL
+   - SENDGRID_FROM_NAME
+```
+
+**3. Gmail SMTP Setup (Optional Fallback):**
+```bash
+1. Enable 2-factor authentication on Gmail
+2. Generate app-specific password
+3. Add to Replit Secrets:
+   - GMAIL_USER
+   - GMAIL_APP_PASSWORD
+   - GMAIL_HOST=smtp.gmail.com
+   - GMAIL_PORT=587
+```
+
+### Database Seeding
+
+**Initial Provider Configuration:**
+```sql
+-- Run after deployment to seed providers
+
+-- SMS Provider (Twilio)
+INSERT INTO communication_providers (
+  name, provider_type, channel, is_active, priority, 
+  account_sid, auth_token, from_number
+) VALUES (
+  'Twilio SMS', 'twilio', 'sms', true, 10,
+  'ACxxxxxxxx', 'your_token', '+971xxxxxxx'
+);
+
+-- Email Provider (SendGrid)
+INSERT INTO communication_providers (
+  name, provider_type, channel, is_active, priority,
+  api_key, from_email, from_name
+) VALUES (
+  'SendGrid', 'sendgrid', 'email', true, 10,
+  'SG.xxxxxxxx', 'noreply@domain.com', 'RCCMS Notifications'
+);
+
+-- Gmail Fallback (Optional)
+INSERT INTO communication_providers (
+  name, provider_type, channel, is_active, priority,
+  smtp_host, smtp_port, smtp_user, smtp_password,
+  from_email, from_name
+) VALUES (
+  'Gmail SMTP', 'gmail', 'email', true, 5,
+  'smtp.gmail.com', 587, 'user@gmail.com', 'app_password',
+  'user@gmail.com', 'RCCMS Notifications'
+);
+```
+
+### Post-Deployment Testing
+
+**1. Test SMS Delivery:**
+```bash
+1. Navigate to Notifications → Send
+2. Select template "Contract Activated"
+3. Channel: SMS
+4. Enter test phone number
+5. Send and verify receipt
+6. Check Communication Logs for delivery status
+```
+
+**2. Test Email Delivery:**
+```bash
+1. Navigate to Notifications → Send
+2. Select template "Payment Received"
+3. Channel: Email
+4. Enter test email address
+5. Send and verify receipt
+6. Check spam folder if not received
+7. Check Communication Logs
+```
+
+**3. Test Fallback Routing:**
+```bash
+1. Disable primary provider (set is_active = false)
+2. Send test notification
+3. Verify fallback provider used
+4. Check Communication Logs for provider switch
+5. Re-enable primary provider
+```
+
+### Production Monitoring
+
+**Health Checks:**
+- Monitor provider health status daily
+- Set up alerts for provider failures
+- Track delivery rates (target >95%)
+- Monitor API quota usage
+
+**Cost Management:**
+- Twilio: ~$0.0075/SMS (UAE)
+- SendGrid: Free tier 100 emails/day, then $19.95/mo for 50k
+- Gmail: Free (with daily limits)
+
+**Scaling Considerations:**
+- Twilio: 1 message/second default, increase via API
+- SendGrid: Rate limits based on plan
+- Consider provider load balancing for high volume
+
+### Troubleshooting
+
+**SMS Not Delivered:**
+- Verify Twilio account balance
+- Check phone number format (+971xxxxxxxxx)
+- Review Twilio logs at twilio.com/console
+- Verify sender phone number is verified
+
+**Email Not Delivered:**
+- Check SendGrid domain verification
+- Review SendGrid activity feed
+- Verify recipient email format
+- Check spam/junk folders
+- Review SPF/DKIM records
+
+**Provider Authentication Failed:**
+- Verify environment variables set correctly
+- Check API key/token expiry
+- Test credentials directly with provider
+- Review provider account status
+
+---

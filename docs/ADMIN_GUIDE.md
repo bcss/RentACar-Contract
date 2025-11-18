@@ -2502,3 +2502,135 @@ Each log entry includes:
 
 **End of Administrator Guide**
 
+
+---
+
+## 📱 Communications Platform Administration (Phase 3)
+
+### Overview
+
+The Communications Platform enables automated SMS and Email notifications across the contract lifecycle. As an administrator, you manage provider configurations, monitor delivery performance, and ensure system reliability.
+
+### Provider Management
+
+**Access:** Settings → Communication Providers
+
+**Supported Providers:**
+- **SMS:** Twilio, Mock (testing)
+- **Email:** SendGrid, Gmail SMTP, Mock (testing)
+
+**Configuration Steps:**
+
+1. **Add New Provider**
+   - Click "Add Provider"
+   - Select provider type (Twilio, SendGrid, Gmail, Mock)
+   - Enter credentials:
+     - **Twilio:** Account SID, Auth Token, Phone Number
+     - **SendGrid:** API Key, From Email, From Name
+     - **Gmail:** Email, App Password, Host, Port
+   - Set priority (1-100, higher = preferred)
+   - Save
+
+2. **Test Provider**
+   - Use Manual Notification Sender (Notifications → Send)
+   - Select template and recipient
+   - Send test message
+   - Check delivery in Communication Logs
+
+3. **Monitor Health**
+   - Providers show health status (Healthy, Degraded, Failed)
+   - Automatic health checks on each send
+   - Failed providers automatically skipped (fallback routing)
+
+### Communication Templates
+
+**Access:** Settings → Communication Templates
+
+**12 Built-in Templates:**
+1. Contract Activated
+2. Contract Completed
+3. Payment Received
+4. Document Expiry Reminder
+5. Contract Expiry Reminder
+6. Payment Due Reminder
+7. Document Upload Confirmation
+8. Document Verified
+9. Approval Required
+10. Approval Approved
+11. Approval Rejected
+12. Risk Score Elevated
+
+**Template Variables:**
+- `{{customerName}}` - Customer full name
+- `{{contractNumber}}` - Contract reference
+- `{{amount}}` - Financial amount
+- `{{dueDate}}` - Payment/expiry date
+- `{{vehicleName}}` - Vehicle description
+- `{{documentType}}` - Document category
+
+### Automated Notifications
+
+**Event-Driven (Real-time):**
+- Contract activation/completion
+- Payment received (deposit/final)
+- Document uploaded/verified
+- Approval workflows
+- Risk score elevation
+
+**Scheduled (Cron Jobs):**
+- 2:00 AM - Nightly risk score calculation
+- 8:00 AM - Document expiry checks
+- 9:00 AM - Contract expiry reminders
+- 10:00 AM - Payment due reminders
+
+### Monitoring & Troubleshooting
+
+**Communication Logs**
+- Access: Notifications → Communication Logs
+- Filter by status, channel, date range
+- View delivery metadata and errors
+- Export for analysis
+
+**Common Issues:**
+
+1. **Provider Authentication Failed**
+   - Verify API keys/credentials in provider config
+   - Check provider account status
+   - Test with Manual Notification Sender
+
+2. **Messages Not Delivered**
+   - Check recipient phone/email format
+   - Verify provider health status
+   - Review communication logs for errors
+   - Ensure fallback providers configured
+
+3. **Automated Notifications Not Sent**
+   - Check cron job status in OPERATIONAL_RUNBOOK.md
+   - Verify workflow server is running
+   - Review automation orchestrator logs
+
+### Best Practices
+
+1. **Multi-Provider Setup**
+   - Configure at least 2 providers per channel (primary + fallback)
+   - Set different priorities to control routing
+   - Use Mock provider for development/testing
+
+2. **Template Management**
+   - Review bilingual content for accuracy
+   - Test templates before production use
+   - Update variables when adding new features
+
+3. **Performance Monitoring**
+   - Weekly review of communication logs
+   - Monitor delivery rates (target >95%)
+   - Track provider performance metrics
+
+### Security Considerations
+
+- **API Keys:** Store in environment variables, never in code
+- **Rate Limits:** Respect provider limits (Twilio: 1 msg/sec, SendGrid: varies)
+- **PII Protection:** Sanitize logs, never expose full phone numbers
+- **Access Control:** Only Admins can manage providers
+
+---

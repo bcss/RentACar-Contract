@@ -1,7 +1,7 @@
 # RCCMS Technical Documentation
 
-**Last Updated:** November 17, 2025  
-**System Version:** 2.0  
+**Last Updated:** November 18, 2025  
+**Version:** 3.0 - Communications Platform Complete  
 **Target Audience:** Developers, Technical Architects, DevOps Engineers
 
 ---
@@ -781,6 +781,138 @@ if (isPublicHoliday && emirate in holidayList) {
 
 ---
 
+## Communications Platform (Phase 3) ✅
+
+### Overview
+
+RCCMS features a production-ready multi-provider communications infrastructure supporting SMS and Email notifications with intelligent routing, fallback handling, and comprehensive delivery tracking.
+
+### Architecture
+
+```
+┌──────────────────────┐
+│ Notification Service │
+│  (Orchestration)     │
+└──────────┬───────────┘
+           │
+           ├──> Priority Routing
+           ├──> Provider Health Monitoring
+           ├──> Fallback Handling
+           └──> Delivery Logging
+           │
+    ┌──────┴──────┐
+    │  Providers   │
+    ├─────────────┤
+    │ SMS:         │
+    │ - Twilio     │
+    │ - Mock       │
+    ├─────────────┤
+    │ Email:       │
+    │ - SendGrid   │
+    │ - Gmail SMTP │
+    │ - Mock       │
+    └─────────────┘
+```
+
+### Key Components
+
+**1. NotificationService** (`server/services/notificationService.ts`)
+- Template-based message rendering (English/Arabic)
+- Multi-channel delivery (SMS, Email, Both)
+- Provider priority and fallback routing
+- Health monitoring and circuit breaking
+- Comprehensive logging
+
+**2. Communication Providers** (Database-driven)
+- Dynamic provider configuration
+- Health status tracking
+- Priority-based routing
+- Support for multiple providers per channel
+
+**3. Communication Templates** (12 Bilingual Templates)
+- Contract lifecycle events
+- Payment notifications
+- Document reminders
+- Risk score alerts
+- Approval workflows
+
+### Automated Notification Touchpoints
+
+**Event-Driven (8 touchpoints):**
+1. Contract Activated
+2. Contract Completed
+3. Payment Received (Deposit)
+4. Payment Received (Final)
+5. Document Uploaded
+6. Document Verified
+7. Approval Required
+8. Risk Score Elevated
+
+**Scheduled (4 cron jobs via Automation Orchestrator):**
+1. Document Expiry Reminders (8 AM daily)
+2. Contract Expiry Reminders (9 AM daily)
+3. Payment Due Reminders (10 AM daily)
+4. Nightly Risk Score Calculation (2 AM daily)
+
+### API Endpoints
+
+```typescript
+// Provider Management
+GET    /api/communication-providers
+POST   /api/communication-providers
+PATCH  /api/communication-providers/:id
+DELETE /api/communication-providers/:id
+
+// Communication Logs
+GET    /api/communication-logs
+
+// Templates
+GET    /api/communication-templates
+POST   /api/communication-templates
+PATCH  /api/communication-templates/:id
+
+// Send Notification
+POST   /api/send-notification
+```
+
+### Provider Configuration
+
+**Twilio (SMS):**
+```typescript
+{
+  providerType: 'twilio',
+  channel: 'sms',
+  config: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
+    fromNumber: process.env.TWILIO_PHONE_NUMBER
+  }
+}
+```
+
+**SendGrid (Email):**
+```typescript
+{
+  providerType: 'sendgrid',
+  channel: 'email',
+  config: {
+    apiKey: process.env.SENDGRID_API_KEY,
+    fromEmail: process.env.SENDGRID_FROM_EMAIL,
+    fromName: process.env.SENDGRID_FROM_NAME
+  }
+}
+```
+
+### Monitoring & Observability
+
+- Real-time delivery status tracking
+- Provider health checks
+- Automatic fallback on provider failure
+- Comprehensive communication logs with metadata
+- Performance metrics per provider
+
+---
+
 ## Integration Points
 
 ### 1. PDF Generation
@@ -794,10 +926,21 @@ if (isPublicHoliday && emirate in holidayList) {
 **Library:** xlsx  
 **Features:** Multi-sheet exports, formula support
 
-### 3. Future Integrations (Roadmap)
+### 3. SMS/Email Notifications ✅ IMPLEMENTED
+
+**Providers:**
+- **SMS:** Twilio (primary), Mock (testing)
+- **Email:** SendGrid (primary), Gmail SMTP (fallback), Mock (testing)
+
+**Features:**
+- Multi-provider routing with priority
+- Health monitoring and automatic fallback
+- Template-based bilingual messages
+- Comprehensive delivery tracking
+
+### 4. Future Integrations (Roadmap)
 
 - Payment gateways (Stripe, PayTabs)
-- SMS providers (Twilio)
 - Accounting software (Zoho Books, QuickBooks)
 - Telematics platforms
 - RTA/AML compliance APIs

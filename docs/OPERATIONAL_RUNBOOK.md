@@ -695,3 +695,109 @@ This runbook is a living document. Submit feedback or improvement suggestions th
 **Document Owner:** System Administration Team  
 **Review Frequency:** Quarterly  
 **Next Review:** February 2026
+
+---
+
+## 📱 Communications Platform Operations
+
+### Monitoring Automated Notifications
+
+**Cron Jobs Status:**
+```bash
+# Check if automation orchestrator is initialized
+# Logs will show: "[Automation] Initializing Automation Orchestrator..."
+grep "Automation" /tmp/logs/*.log
+```
+
+**Job Schedule:**
+- **2:00 AM** - Nightly Risk Score Calculation (triggers risk elevated notifications)
+- **8:00 AM** - Document Expiry Check (creates reminders 30 days before expiry)
+- **9:00 AM** - Contract Expiry Reminders (sends expiry notifications)
+- **10:00 AM** - Payment Due Reminders (sends payment due alerts)
+
+### Communication Provider Health
+
+**Check Provider Status:**
+1. Navigate to Settings → Communication Providers
+2. Review health status column:
+   - 🟢 Healthy - Provider operational
+   - 🟡 Degraded - Experiencing issues
+   - 🔴 Failed - Provider unavailable
+
+**Health Check Actions:**
+- Healthy providers process messages normally
+- Degraded/Failed providers automatically skipped
+- Fallback providers activated on primary failure
+- Manual testing via Notifications → Send
+
+### Troubleshooting Communication Issues
+
+**Symptom: No notifications sent**
+1. Check cron jobs are running
+2. Verify at least one provider is healthy
+3. Review communication logs for errors
+4. Test with Manual Notification Sender
+
+**Symptom: High failure rate**
+1. Check provider credentials (API keys, tokens)
+2. Verify provider account status (quotas, billing)
+3. Review error messages in communication logs
+4. Test connectivity to provider APIs
+
+**Symptom: Notifications delayed**
+1. Check server load and performance
+2. Verify database connection is stable
+3. Review cron job execution times
+4. Check provider API rate limits
+
+### Performance Metrics
+
+**Target SLAs:**
+- Delivery Rate: >95% for critical notifications
+- Provider Health: >99% uptime for primary providers
+- Notification Latency: <30 seconds for event-driven
+- Cron Job Execution: 100% on-time execution
+
+**Monitoring:**
+- Review Communication Logs daily
+- Check provider health weekly
+- Monitor delivery rates in reports
+- Track failed notifications
+
+### Incident Response
+
+**Provider Outage:**
+1. Verify fallback provider is configured
+2. Check fallback provider health
+3. Monitor delivery via fallback
+4. Contact primary provider support
+5. Document incident in logs
+
+**Mass Notification Failure:**
+1. Check all provider health status
+2. Review recent configuration changes
+3. Verify environment variables
+4. Test individual providers
+5. Escalate to technical team
+
+### Maintenance Tasks
+
+**Weekly:**
+- Review communication logs for patterns
+- Check provider health trends
+- Verify cron job execution
+- Update template content if needed
+
+**Monthly:**
+- Analyze delivery rate metrics
+- Review provider costs and usage
+- Test disaster recovery (fallback activation)
+- Update provider credentials if rotating
+
+**Quarterly:**
+- Full audit of notification touchpoints
+- Provider contract review
+- Template content refresh
+- Performance optimization review
+
+---

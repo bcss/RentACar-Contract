@@ -2242,3 +2242,86 @@ Review payment history before attempting contract closure to ensure full payment
 
 **End of New Features Guide**
 
+
+---
+
+## 📱 Notifications & Communications
+
+### Overview
+
+RCCMS automatically sends you important updates via SMS and Email throughout the contract lifecycle. Stay informed about contract status, payments, document expiries, and approvals.
+
+### Notification Types
+
+**Contract Updates:**
+- Contract activated - Confirmation when rental begins
+- Contract completed - Notification when rental ends
+
+**Payment Notifications:**
+- Payment received - Confirmation for deposit and final payments
+- Payment due reminder - Alerts before payment deadlines
+
+**Document Reminders:**
+- Document expiry - 30-day advance notice for license/ID expiry
+- Document verified - Confirmation when documents are approved
+
+**Approval Workflows:**
+- Approval required - When manager review is needed
+- Approval decision - Notification of approval/rejection
+
+### How to Receive Notifications
+
+1. **Ensure Contact Information is Current**
+   - Update your mobile number in profile
+   - Verify email address is correct
+   - Contact admin if you need to change details
+
+2. **Check Notification Preferences**
+   - Your administrator controls which notifications you receive
+   - Notifications are sent based on your role and contract involvement
+
+### Communication Channels
+
+- **SMS:** Instant updates for time-sensitive matters
+- **Email:** Detailed notifications with full information
+- **Both:** Critical alerts sent via both channels
+
+### Viewing Sent Notifications
+
+**Communication Logs:**
+- Access: Notifications → Communication Logs (if authorized)
+- View delivery status of all messages
+- Check sent, delivered, or failed notifications
+- Filter by date range and type
+
+### What to Do If You Don't Receive Notifications
+
+1. **Check Phone Number/Email**
+   - Verify contact details are correct
+   - Ensure no typos in phone/email
+
+2. **Check Spam/Junk Folder**
+   - Email notifications may be filtered
+   - Add sender to safe senders list
+
+3. **Contact Support**
+   - Report missing notifications to administrator
+   - Provide date/time and expected notification type
+
+### Manual Notifications
+
+Authorized users can send manual notifications:
+1. Navigate to Notifications → Send
+2. Select template (contract, payment, document, etc.)
+3. Choose channel (SMS, Email, or Both)
+4. Enter recipient details
+5. Send notification
+
+### Notification Best Practices
+
+- **Keep contact info updated** - Ensure you receive timely alerts
+- **Review regularly** - Check emails and SMS for important updates
+- **Report issues** - Notify admin if notifications stop working
+- **Don't ignore reminders** - Act on expiry and payment due notifications
+
+---
