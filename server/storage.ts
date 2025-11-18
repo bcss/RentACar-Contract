@@ -440,6 +440,7 @@ export interface IStorage {
   updateDocument(id: string, document: any): Promise<any>;
   verifyDocument(id: string, verifiedBy: string): Promise<any>;
   deleteDocument(id: string): Promise<void>;
+  seedDocumentRegistry(): Promise<{ seeded: number; skipped: number }>;
   
   // ==================== WAVE 2: FLEET ECONOMICS ====================
   
@@ -4241,6 +4242,234 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDocument(id: string): Promise<void> {
     await db.delete(documentRegistry).where(eq(documentRegistry.id, id));
+  }
+
+  /**
+   * Seed document registry from all existing entities
+   * Auto-populates documents from customers, drivers, vehicles, contracts, sponsors
+   */
+  async seedDocumentRegistry(): Promise<{ seeded: number; skipped: number }> {
+    let seeded = 0;
+    let skipped = 0;
+
+    // Helper: Check if document already exists
+    const documentExists = async (entityType: string, entityId: string, documentType: string): Promise<boolean> => {
+      const [existing] = await db
+        .select()
+        .from(documentRegistry)
+        .where(
+          and(
+            eq(documentRegistry.entityType, entityType),
+            eq(documentRegistry.entityId, entityId),
+            eq(documentRegistry.documentType, documentType)
+          )
+        )
+        .limit(1);
+      return !!existing;
+    };
+
+    // Helper: Create document if not exists
+    const createIfNotExists = async (doc: InsertDocumentRegistry): Promise<boolean> => {
+      if (await documentExists(doc.entityType, doc.entityId, doc.documentType)) {
+        skipped++;
+        return false;
+      }
+      await db.insert(documentRegistry).values(doc);
+      seeded++;
+      return true;
+    };
+
+    // 1. Seed from Customers
+    const customersData = await db.select().from(customers).where(eq(customers.isDisabled, false));
+    for (const customer of customersData) {
+      // Driver License
+      if (customer.licenseNumber) {
+        await createIfNotExists({
+          entityType: 'customer',
+          entityId: customer.id,
+          documentType: 'driver_license',
+          documentNumber: customer.licenseNumber,
+          expiryDate: customer.licenseExpiry ? new Date(customer.licenseExpiry) : null,
+          status: customer.licenseExpiry && new Date(customer.licenseExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Passport
+      if (customer.passportNumber) {
+        await createIfNotExists({
+          entityType: 'customer',
+          entityId: customer.id,
+          documentType: 'passport',
+          documentNumber: customer.passportNumber,
+          expiryDate: customer.passportExpiry ? new Date(customer.passportExpiry) : null,
+          status: customer.passportExpiry && new Date(customer.passportExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Emirates ID
+      if (customer.emiratesId) {
+        await createIfNotExists({
+          entityType: 'customer',
+          entityId: customer.id,
+          documentType: 'emirates_id',
+          documentNumber: customer.emiratesId,
+          expiryDate: customer.emiratesIdExpiry ? new Date(customer.emiratesIdExpiry) : null,
+          status: customer.emiratesIdExpiry && new Date(customer.emiratesIdExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Visa
+      if (customer.visaNumber) {
+        await createIfNotExists({
+          entityType: 'customer',
+          entityId: customer.id,
+          documentType: 'visa',
+          documentNumber: customer.visaNumber,
+          expiryDate: customer.visaExpiry ? new Date(customer.visaExpiry) : null,
+          status: customer.visaExpiry && new Date(customer.visaExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+    }
+
+    // 2. Seed from Drivers
+    const driversData = await db.select().from(drivers).where(eq(drivers.isDisabled, false));
+    for (const driver of driversData) {
+      // Driver License
+      if (driver.licenseNumber) {
+        await createIfNotExists({
+          entityType: 'driver',
+          entityId: driver.id,
+          documentType: 'driver_license',
+          documentNumber: driver.licenseNumber,
+          expiryDate: driver.licenseExpiry ? new Date(driver.licenseExpiry) : null,
+          status: driver.licenseExpiry && new Date(driver.licenseExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Passport
+      if (driver.passportNumber) {
+        await createIfNotExists({
+          entityType: 'driver',
+          entityId: driver.id,
+          documentType: 'passport',
+          documentNumber: driver.passportNumber,
+          expiryDate: driver.passportExpiry ? new Date(driver.passportExpiry) : null,
+          status: driver.passportExpiry && new Date(driver.passportExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Emirates ID
+      if (driver.emiratesId) {
+        await createIfNotExists({
+          entityType: 'driver',
+          entityId: driver.id,
+          documentType: 'emirates_id',
+          documentNumber: driver.emiratesId,
+          expiryDate: driver.emiratesIdExpiry ? new Date(driver.emiratesIdExpiry) : null,
+          status: driver.emiratesIdExpiry && new Date(driver.emiratesIdExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Visa
+      if (driver.visaNumber) {
+        await createIfNotExists({
+          entityType: 'driver',
+          entityId: driver.id,
+          documentType: 'visa',
+          documentNumber: driver.visaNumber,
+          expiryDate: driver.visaExpiry ? new Date(driver.visaExpiry) : null,
+          status: driver.visaExpiry && new Date(driver.visaExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+    }
+
+    // 3. Seed from Vehicles
+    const vehiclesData = await db.select().from(vehicles).where(eq(vehicles.isDisabled, false));
+    for (const vehicle of vehiclesData) {
+      // Vehicle Registration
+      if (vehicle.registrationNumber) {
+        await createIfNotExists({
+          entityType: 'vehicle',
+          entityId: vehicle.id,
+          documentType: 'vehicle_registration',
+          documentNumber: vehicle.registrationNumber,
+          expiryDate: vehicle.registrationExpiry ? new Date(vehicle.registrationExpiry) : null,
+          status: vehicle.registrationExpiry && new Date(vehicle.registrationExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Insurance
+      if (vehicle.insurancePolicyNumber) {
+        await createIfNotExists({
+          entityType: 'vehicle',
+          entityId: vehicle.id,
+          documentType: 'insurance_policy',
+          documentNumber: vehicle.insurancePolicyNumber,
+          expiryDate: vehicle.insuranceExpiry ? new Date(vehicle.insuranceExpiry) : null,
+          status: vehicle.insuranceExpiry && new Date(vehicle.insuranceExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+    }
+
+    // 4. Seed from Contracts
+    const contractsData = await db.select().from(contracts).where(eq(contracts.isDisabled, false));
+    for (const contract of contractsData) {
+      await createIfNotExists({
+        entityType: 'contract',
+        entityId: contract.id,
+        documentType: 'rental_agreement',
+        documentNumber: contract.contractNumber,
+        expiryDate: contract.endDate ? new Date(contract.endDate) : null,
+        status: contract.state === 'closed' ? 'completed' : 'active',
+        uploadedBy: 'system_seed',
+      });
+    }
+
+    // 5. Seed from Sponsors
+    const sponsorsData = await db.select().from(sponsors).where(eq(sponsors.isDisabled, false));
+    for (const sponsor of sponsorsData) {
+      // Passport
+      if (sponsor.passportNumber) {
+        await createIfNotExists({
+          entityType: 'sponsor',
+          entityId: sponsor.id,
+          documentType: 'passport',
+          documentNumber: sponsor.passportNumber,
+          expiryDate: sponsor.passportExpiry ? new Date(sponsor.passportExpiry) : null,
+          status: sponsor.passportExpiry && new Date(sponsor.passportExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Emirates ID
+      if (sponsor.emiratesId) {
+        await createIfNotExists({
+          entityType: 'sponsor',
+          entityId: sponsor.id,
+          documentType: 'emirates_id',
+          documentNumber: sponsor.emiratesId,
+          expiryDate: sponsor.emiratesIdExpiry ? new Date(sponsor.emiratesIdExpiry) : null,
+          status: sponsor.emiratesIdExpiry && new Date(sponsor.emiratesIdExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+      // Visa
+      if (sponsor.visaNumber) {
+        await createIfNotExists({
+          entityType: 'sponsor',
+          entityId: sponsor.id,
+          documentType: 'visa',
+          documentNumber: sponsor.visaNumber,
+          expiryDate: sponsor.visaExpiry ? new Date(sponsor.visaExpiry) : null,
+          status: sponsor.visaExpiry && new Date(sponsor.visaExpiry) < new Date() ? 'expired' : 'active',
+          uploadedBy: 'system_seed',
+        });
+      }
+    }
+
+    return { seeded, skipped };
   }
 
   // ==================== WAVE 2: FLEET ECONOMICS ====================

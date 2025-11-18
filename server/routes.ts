@@ -7999,6 +7999,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/automation/seed-documents - Seed document registry from all entities
+  app.post("/api/automation/seed-documents", isAuthenticated, requireSuperadmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      // Seed document registry from customers, drivers, vehicles, contracts, sponsors
+      const result = await storage.seedDocumentRegistry();
+      
+      await createAuditLog(user.id, 'documents_seeded', undefined, req, `Seeded ${result.seeded} documents, skipped ${result.skipped} existing`);
+      
+      res.json({
+        success: true,
+        seeded: result.seeded,
+        skipped: result.skipped,
+        message: `Successfully seeded ${result.seeded} documents. ${result.skipped} already existed.`,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Customer Risk Scores routes
   app.get("/api/customer-risk-scores", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
     try {
