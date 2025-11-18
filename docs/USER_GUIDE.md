@@ -134,7 +134,8 @@ The system supports English and Arabic:
 
 This guide should be read in conjunction with:
 - **replit.md** - Authoritative source for system architecture, user preferences, and technical decisions
-- **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (15 tables, 100+ endpoints, 22 pages)
+- **MASTER_FEATURE_LIST.md** - Comprehensive feature inventory (63 tables, 120+ endpoints, 66 pages)
+- **FEATURES.md** - Complete feature catalog with Phase 4 & 5 implementations
 
 For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 
