@@ -1,7 +1,7 @@
 # RCCMS - Rental Car Contract Management System
 
 ## Overview
-RCCMS (Rental Car Contract Management System) is a production-ready, bilingual (English/Arabic) rental car management platform designed for multi-branch operations and driver services. It streamlines the entire rental lifecycle, features robust security, role-based access control, dual audit trails, insurance claims tracking, and inter-branch vehicle transfers. The system includes a driver service module with emirate-aware surcharge calculations and extensive administrative configurations. RCCMS aims to enhance operational efficiency and market reach for rental car businesses through a comprehensive, secure, and user-friendly solution, supporting global deployment and future mobile integration.
+RCCMS (Rental Car Contract Management System) is a production-ready, bilingual (English/Arabic) rental car management platform designed for multi-branch operations and driver services. It streamlines the entire rental lifecycle, featuring robust security, role-based access control, dual audit trails, insurance claims tracking, and inter-branch vehicle transfers. The system includes a driver service module with emirate-aware surcharge calculations and extensive administrative configurations. RCCMS aims to enhance operational efficiency and market reach for rental car businesses through a comprehensive, secure, and user-friendly solution, supporting global deployment and future mobile integration. The system also includes advanced analytics, predictive intelligence reports, and a campaign management system.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -12,7 +12,7 @@ Preferred communication style: Simple, everyday language.
 - **Technology Stack:** React with TypeScript, Wouter, TanStack Query, React Hook Form with Zod, Radix UI/shadcn/ui, Tailwind CSS, Vite.
 - **Design System:** Material Design 3 (cyan-blue primary), dual theme (light/dark), i18next for English/Arabic with RTL/LTR, custom fonts.
 - **UI/UX Decisions:** Hierarchical sidebar, bilingual tooltips, full RTL/LTR layout, data visualization (recharts), tabbed views, enhanced filtering, responsive design, context-based theme/language, custom authentication hooks, shared Zod schemas, print functionality.
-- **Key Features:** Dashboard, tabbed dialog forms, advanced analytics and reporting with PDF/Excel export, full CRUD pages for Branches, Public Holidays, Drivers, Driver Companies, and Vehicle Transfers.
+- **Key Features:** Dashboard, tabbed dialog forms, advanced analytics and reporting with PDF/Excel export, full CRUD pages for Branches, Public Holidays, Drivers, Driver Companies, Vehicle Transfers, and Campaign Management. Six production-ready predictive intelligence reports are integrated.
 
 ### Backend
 - **Technology Stack:** Node.js with TypeScript, Express.js, Drizzle ORM, internal username/password authentication with Passport.js, express-session with PostgreSQL store.
@@ -22,40 +22,28 @@ Preferred communication style: Simple, everyday language.
 - **Audit Trails:** `contractEdits` for field-level modifications and `auditLogs` for lifecycle events.
 - **Drizzle ORM Patterns:** Enforces type safety and audit trails for all create operations.
 - **Mobile Backend Infrastructure:** Prepared endpoints for future mobile applications with customer-facing authentication.
+- **Automation Orchestrator:** Background job scheduler with cron jobs for nightly risk scoring, document expiry checks, and contract/payment due reminders.
+- **Communications Platform:** Multi-provider SMS/Email infrastructure with priority-based routing and automatic failover.
 
 ### Data Storage
 - **Database:** PostgreSQL (via Neon serverless).
 - **Schema Design:** Comprehensive 40+ table schema supporting complete UAE rental car operations, including:
     - Core entities: Users, Customers, Vehicles, Contracts, Payments, Branches, Drivers, Driver Companies, Sponsors, Public Holidays.
-    - Specialized modules: Toll Management (Salik/Darb/Aber), Compliance & Safety (traffic fines, incidents), Fleet Operations (service records, rental rate plans), Accessories & Upsell, Driver Scheduling, Automation (reminders), Approvals, Risk Management, Document Registry.
+    - Specialized modules: Toll Management, Compliance & Safety, Fleet Operations, Accessories & Upsell, Driver Scheduling, Automation, Approvals, Risk Management, Document Registry.
     - Architecture: 4-state lifecycle, bilingual field storage, auto-incrementing identifiers, dual-layer audit trail, singleton pattern for global settings, disable-only architecture.
 
 ### Core Features
 - **Rental Lifecycle Management:** 4-state workflow, hardened edit validation, contract timeline.
 - **Financials:** Automated calculations, configurable settings, enhanced payment tracking.
-- **Reporting & Analytics:** Comprehensive reporting with `recharts`, PDF/Excel export (Revenue Trends, Fleet Performance, Contract Analytics, Collection Performance, Driver Utilization, Driver Revenue vs. Cost Analysis).
-- **Vehicle Management:** Enhanced inspection, automatic status synchronization, inter-branch transfers.
-- **Toll Management System:** Complete UAE toll integration (Salik/Darb/Aber) with gate-level tracking, automatic fee assignment, and contract linking.
-- **Traffic Fines & Violations:** RTA-compliant tracking, black points management, payment status, document uploads.
-- **Accidents & Incidents Management:** Comprehensive tracking, insurance claim management, cost estimation, police report integration.
-- **Fleet Maintenance & Service:** Vehicle service records, odometer tracking, cost logging, next service scheduling, depreciation tracking.
-- **Dynamic Pricing System:** Rental rate plans with daily/weekly/monthly rates, seasonal pricing, promotional discounts.
-- **Vehicle Accessories & Upsell:** Master catalog with inventory management and contract-level assignment.
-- **Driver Scheduling & Attendance:** Shift management, branch/vehicle assignment, check-in/check-out, overtime calculation.
-- **Automated Reminders Engine:** Multi-channel (email/SMS) bilingual notification system with 12 system templates and full CRUD APIs.
-- **Approval Workflows:** Multi-level authorization for high-value transactions and modifications.
-- **Customer Risk Scoring:** Production-ready hybrid override algorithm (payment history, violations, incidents, compliance) with calibrated payment curve, escalation overrides, and automated nightly recalculations.
-- **Document Registry & Management:** Centralized tracking with intelligent auto-seeding from various entities and automated expiry monitoring.
-- **Enhanced Sponsor Compliance:** Emirates ID verification, max exposure limits, blacklist reason documentation.
-- **Driver Service Module:** Professional driver assignment infrastructure, UAE market compliance (surcharge, public holidays), driver master data, outsource companies management, rate cards, schedule management, and comprehensive reporting.
-- **Branch Management System:** Multi-location operational support with hierarchy UI and inter-branch vehicle transfer workflow.
-- **Public Holidays Management:** Full CRUD interface for UAE public holidays with emirate selection.
-- **Security & Compliance:** App access logging, granular role-based permissions.
-- **Data Handling:** Import data functionality for bulk master data and contracts.
-- **PDF Integration:** Professional bilingual PDF generation for rental contracts.
-- **QR Code Service:** JWT-based contract verification system with 30-day signed tokens embedded in contract PDFs.
-- **Automation Orchestrator:** Background job scheduler with 4 active cron jobs: Nightly Risk Scoring, Document Expiry Check, Contract Expiry Reminders, Payment Due Reminders.
-- **Internationalization:** Complete English/Arabic translations via i18next for all features.
+- **Reporting & Analytics:** Comprehensive reporting with `recharts`, PDF/Excel export across various operational areas. Six predictive intelligence reports for revenue, fleet, churn, maintenance, payment default, and location demand.
+- **Vehicle Management:** Enhanced inspection, automatic status synchronization, inter-branch transfers. Complete UAE toll integration, traffic fines tracking, accidents & incidents management, fleet maintenance, dynamic pricing, and accessories management.
+- **Driver Service Module:** Professional driver assignment infrastructure, UAE market compliance, driver master data, outsource companies management, rate cards, and schedule management.
+- **Customer Risk Scoring:** Production-ready hybrid override algorithm with automated nightly recalculations.
+- **Document Registry & Management:** Centralized tracking with intelligent auto-seeding and automated expiry monitoring.
+- **Automated Reminders Engine:** Multi-channel (email/SMS) bilingual notification system with templates and CRUD APIs.
+- **Campaign Management System:** UI for creating and managing branch-scoped or organization-wide campaigns with RBAC, approval workflows, recipient filtering, scheduling, and delivery tracking.
+- **Internationalization:** Complete English/Arabic translations via i18next for all features, including RTL/LTR layout support and localized CSV exports.
+- **Security & Compliance:** App access logging, granular role-based permissions, QR Code Service for contract verification.
 
 ## External Dependencies
 
@@ -63,6 +51,9 @@ Preferred communication style: Simple, everyday language.
 - **Neon Database:** Serverless PostgreSQL hosting.
 - **Google Fonts:** Inter, Cairo, and JetBrains Mono.
 - **Material Icons:** Icon library.
+- **Twilio:** Primary SMS provider.
+- **SendGrid:** Primary Email provider.
+- **Gmail SMTP:** Fallback Email provider.
 
 ### Key NPM Packages
 - **Database:** `@neondatabase/serverless`, `drizzle-orm`, `drizzle-kit`.
@@ -73,119 +64,4 @@ Preferred communication style: Simple, everyday language.
 - **Styling:** `tailwindcss`, `class-variance-authority`, `clsx`.
 - **Data Visualization:** `recharts`, `html2canvas`.
 - **Export & Document Generation:** `jspdf`, `jspdf-autotable`, `xlsx`.
-- **Communications:** `qrcode`, `jsonwebtoken`, `node-cron` for automation.
-
-## Recent Implementation (November 2025)
-
-### Three-Phase Transformation Complete ✅
-
-**Phase 1: Data & Automation Foundation**
-- ✅ Customer Risk Scoring with nightly calculation (2 AM cron)
-- ✅ Multi-Entity Document Registry with auto-seeding
-- ✅ 12 Default Bilingual Reminder Templates
-- ✅ QR Code Service (JWT-signed, 30-day expiry)
-- ✅ Background Automation Orchestrator (4 active cron jobs)
-
-**Phase 2: Experience & Navigation**
-- ✅ Reorganized hierarchical sidebar menu
-- ✅ 8 Advanced Analytical Reports with Recharts visualizations:
-  - Customer Risk Trends Dashboard
-  - Toll Expense vs Budget Analysis
-  - Traffic Fine Aging & Recovery Report
-  - Incident Cost & Liability Analysis
-  - Maintenance Compliance Report
-  - Driver Utilization & Overtime Report
-  - Reminder Delivery SLA Report
-  - Approval Turnaround Time Report
-- ✅ All reports include filters, CSV export, and bilingual support
-
-**Phase 3: Communications Platform**
-- ✅ Multi-Provider SMS/Email Infrastructure
-  - SMS: Twilio (primary), Mock (testing)
-  - Email: SendGrid (primary), Gmail SMTP (fallback), Mock (testing)
-- ✅ Priority-based routing with automatic failover
-- ✅ Health monitoring and circuit breaking
-- ✅ Communication Providers management UI
-- ✅ Communication Logs viewer with delivery tracking
-- ✅ Manual Notification Sender for testing
-- ✅ 11 Automated Notification Touchpoints (event-driven + scheduled)
-
-**Phase 3 Frontend: Predictive Intelligence Reports**
-- ✅ 6 Production-Ready Predictive Report Pages with Recharts visualizations:
-  - Revenue Forecast Report (time-series forecasting with confidence intervals)
-  - Fleet Utilization Forecast (vehicle type capacity planning)
-  - Customer Churn Risk Report (risk scoring with payment history analysis)
-  - Maintenance Cost Forecast (vehicle age/mileage-based predictions)
-  - Payment Default Prediction (overdue payment risk analysis)
-  - Location Demand Forecast (emirate-based demand trends)
-- ✅ Complete TypeScript interfaces in shared/schema.ts
-- ✅ Filter components for date ranges, vehicle types, emirates, risk levels
-- ✅ Summary statistics cards with warning thresholds
-- ✅ CSV export functionality with memory leak prevention
-- ✅ Full data-testid compliance for automated testing
-- ✅ All query keys serialized with primitive values for cache stability
-
-**Phase 4: Campaign Management System**
-- ✅ Campaign Management UI with RBAC enforcement
-  - Branch-scoped campaigns for Staff/Manager roles
-  - Organization-wide campaigns for Admin role only
-  - Multi-branch campaign selection for Admins
-- ✅ Approval workflow integration
-  - Staff campaigns auto-require approval
-  - Admin/Manager campaigns with optional approval
-- ✅ Recipient filtering and channel selection (Email/SMS/Both)
-- ✅ Campaign status tracking (Draft → Pending Approval → Approved → Sent)
-- ✅ Delivery tracking with success/failure counts
-- ✅ Cost estimation and scheduling capabilities
-- ✅ Bilingual campaign creation (English/Arabic)
-
-**Phase 5: Complete Bilingual Implementation ✅**
-- ✅ Comprehensive i18n Translation Infrastructure
-  - 190+ translation keys covering all features
-  - Organized namespaces: campaigns.*, communications.*, reports.*, common.*
-  - Full English and Arabic translations
-- ✅ Campaign Management & Communications Pages
-  - Campaign Management page fully bilingual
-  - Communication Providers page fully bilingual
-  - Communication Logs page fully bilingual
-  - All UI elements, buttons, labels, placeholders translated
-- ✅ All 6 Predictive Intelligence Reports
-  - Revenue Forecast Report (English/Arabic)
-  - Fleet Utilization Forecast (English/Arabic)
-  - Customer Churn Risk Report (English/Arabic)
-  - Maintenance Cost Forecast (English/Arabic)
-  - Payment Default Prediction (English/Arabic)
-  - Location Demand Forecast (English/Arabic with UAE emirates translations)
-- ✅ RTL/LTR Layout Support
-  - Automatic document.dir switching (ltr/rtl)
-  - Automatic document.lang attribute updates
-  - Font switching: Inter for English, Cairo for Arabic
-  - Sidebar position mirroring (left→right in RTL mode)
-  - Fully responsive RTL layouts
-- ✅ CSV Export Localization
-  - All CSV column headers use t() translation calls
-  - Export files adapt to current language
-  - 40+ column header translations
-- ✅ UAE Emirates Translations
-  - All 7 emirates fully translated
-  - Location filters bilingual
-  - Dropdown selectors use t() calls
-- ✅ E2E Testing & Validation
-  - Comprehensive bilingual tests passed
-  - English and Arabic UI verified
-  - RTL/LTR layout switching validated
-  - Language toggle functionality confirmed
-- ✅ Production Ready
-  - All hardcoded English eliminated
-  - Architect-reviewed and approved
-  - No functionality regressions
-  - Full RBAC compliance maintained
-
-### Current System Status
-- **Application:** Running on port 5000
-- **Cron Jobs:** 4 active (Risk Scoring 2AM, Document Expiry 8AM, Contract Reminders 9AM, Payment Reminders 10AM)
-- **Predictive Reports:** 6 pages operational with backend integration (fully bilingual)
-- **Campaign System:** Fully operational with RBAC and approval workflows (fully bilingual)
-- **Internationalization:** Complete English/Arabic support with RTL/LTR layouts
-- **Production Readiness:** Ready for go-live (provider credentials required)
-- **Documentation:** All docs files updated + IMPLEMENTATION_STATUS.md current
+- **Communications:** `qrcode`, `jsonwebtoken`, `node-cron`.
