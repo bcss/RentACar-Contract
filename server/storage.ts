@@ -2914,9 +2914,9 @@ export class DatabaseStorage implements IStorage {
           const contract = allContracts.find(c => c.id === a.contractId);
           if (!contract) return sum + parseFloat(a.totalCharge || '0');
           
-          // Use driverServiceCharge from contract as authoritative revenue
-          const driverCharge = contract.driverServiceCharge 
-            ? parseFloat(contract.driverServiceCharge) 
+          // Use driverServiceTotal from contract as authoritative revenue
+          const driverCharge = contract.driverServiceTotal 
+            ? parseFloat(contract.driverServiceTotal) 
             : parseFloat(a.totalCharge || '0');
           
           return sum + driverCharge;
@@ -2933,14 +2933,14 @@ export class DatabaseStorage implements IStorage {
           // Get applicable rate card for this assignment period
           const applicableRates = rateCardsByDriver.get(driver.id) || [];
           const rateCard = applicableRates.find(rc => {
-            const validFrom = new Date(rc.validFrom);
-            const validTo = rc.validTo ? new Date(rc.validTo) : new Date('2099-12-31');
+            const validFrom = new Date(rc.effectiveFrom);
+            const validTo = rc.effectiveTo ? new Date(rc.effectiveTo) : new Date('2099-12-31');
             return start >= validFrom && start <= validTo && rc.isActive;
           });
 
           // Use rate from card, or fall back to driver's default cost rate
           const dailyRate = rateCard 
-            ? parseFloat(rateCard.ratePerDay || '0')
+            ? parseFloat(rateCard.baseRate || '0')
             : parseFloat(driver.costRate || '0');
           
           return sum + (dailyRate * days);
@@ -3042,9 +3042,9 @@ export class DatabaseStorage implements IStorage {
         const contract = contractMap.get(a.contractId);
         if (!contract) return sum;
         
-        // Use driverServiceCharge from contract as authoritative revenue source
-        const driverCharge = contract.driverServiceCharge 
-          ? parseFloat(contract.driverServiceCharge) 
+        // Use driverServiceTotal from contract as authoritative revenue source
+        const driverCharge = contract.driverServiceTotal 
+          ? parseFloat(contract.driverServiceTotal) 
           : parseFloat(a.totalCharge || '0'); // Fallback to assignment charge
         
         return sum + driverCharge;
@@ -3069,14 +3069,14 @@ export class DatabaseStorage implements IStorage {
         // Get applicable rate card for this assignment period
         const applicableRates = rateCardsByDriver.get(driver.id) || [];
         const rateCard = applicableRates.find(rc => {
-          const validFrom = new Date(rc.validFrom);
-          const validTo = rc.validTo ? new Date(rc.validTo) : new Date('2099-12-31');
+          const validFrom = new Date(rc.effectiveFrom);
+          const validTo = rc.effectiveTo ? new Date(rc.effectiveTo) : new Date('2099-12-31');
           return start >= validFrom && start <= validTo && rc.isActive;
         });
 
         // Use rate from card, or fall back to driver's default cost rate
         const dailyRate = rateCard 
-          ? parseFloat(rateCard.ratePerDay || '0')
+          ? parseFloat(rateCard.baseRate || '0')
           : parseFloat(driver.costRate || '0');
         
         return sum + (dailyRate * days);
@@ -3093,7 +3093,7 @@ export class DatabaseStorage implements IStorage {
         driverName: driver.nameEn,
         driverNameAr: driver.nameAr,
         employmentType: driver.employmentType,
-        costRate: driverCostRate,
+        costRate: driver.costRate || '0',
         totalAssignments: driverAssignments.length,
         totalDaysWorked,
         totalRevenue,
@@ -3133,6 +3133,502 @@ export class DatabaseStorage implements IStorage {
       },
       driverAnalysis: driverAnalysis.sort((a, b) => b.totalRevenue - a.totalRevenue),
       topPerformers,
+    };
+  }
+
+  // Predictive Reports - Revenue Forecasting
+  async getRevenueForecastReport(months: number = 12, forecastMonths: number = 3) {
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+    
+    const allPayments = await db.select().from(payments);
+    const filteredPayments = allPayments.filter(p => p.paidAt && new Date(p.paidAt) >= cutoffDate);
+    
+    // Group payments by month
+    const monthlyRevenue = new Map<string, number>();
+    filteredPayments.forEach(p => {
+      if (!p.paidAt) return;
+      const month = new Date(p.paidAt).toISOString().substring(0, 7); // YYYY-MM
+      monthlyRevenue.set(month, (monthlyRevenue.get(month) || 0) + parseFloat(p.amount));
+    });
+    
+    // Convert to array and sort by month
+    const historicalData = Array.from(monthlyRevenue.entries())
+      .map(([month, revenue]) => ({ month, revenue }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+    
+    // Simple moving average forecast
+    const forecastData: { month: string; forecast: number; lowerBound: number; upperBound: number }[] = [];
+    let trendValue = 0;
+    
+    if (historicalData.length >= 3) {
+      const avgRevenue = historicalData.reduce((sum, d) => sum + d.revenue, 0) / historicalData.length;
+      trendValue = historicalData.length > 1 
+        ? (historicalData[historicalData.length - 1].revenue - historicalData[0].revenue) / historicalData.length
+        : 0;
+      
+      const lastMonth = new Date(historicalData[historicalData.length - 1].month + '-01');
+      for (let i = 1; i <= forecastMonths; i++) {
+        const forecastMonth = new Date(lastMonth);
+        forecastMonth.setMonth(forecastMonth.getMonth() + i);
+        const monthStr = forecastMonth.toISOString().substring(0, 7);
+        const forecast = avgRevenue + (trendValue * (historicalData.length + i));
+        const variance = avgRevenue * 0.15; // 15% variance
+        
+        forecastData.push({
+          month: monthStr,
+          forecast: Math.max(0, forecast),
+          lowerBound: Math.max(0, forecast - variance),
+          upperBound: forecast + variance,
+        });
+      }
+    }
+    
+    // Warning if forecast shows >20% drop
+    const lastHistoricalRevenue = historicalData.length > 0 ? historicalData[historicalData.length - 1].revenue : 0;
+    const firstForecast = forecastData.length > 0 ? forecastData[0].forecast : 0;
+    const dropPercentage = lastHistoricalRevenue > 0 ? ((lastHistoricalRevenue - firstForecast) / lastHistoricalRevenue) * 100 : 0;
+    const hasWarning = dropPercentage > 20;
+    
+    return {
+      historicalData,
+      forecastData,
+      summary: {
+        averageMonthlyRevenue: historicalData.reduce((sum, d) => sum + d.revenue, 0) / (historicalData.length || 1),
+        trend: trendValue > 0 ? 'increasing' : trendValue < 0 ? 'decreasing' : 'stable',
+        trendValue,
+        forecastedTotal: forecastData.reduce((sum, d) => sum + d.forecast, 0),
+        hasWarning,
+        warningMessage: hasWarning ? `Revenue forecast shows ${dropPercentage.toFixed(1)}% drop` : null,
+      },
+    };
+  }
+
+  // Predictive Reports - Fleet Utilization Forecast
+  async getFleetUtilizationForecastReport(months: number = 6, vehicleType?: string) {
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+    
+    const allVehicles = await db.select().from(vehicles).where(eq(vehicles.disabled, false));
+    const allContracts = await db.select().from(contracts);
+    const filteredContracts = allContracts.filter(c => new Date(c.rentalStartDate) >= cutoffDate);
+    
+    // Filter vehicles by vehicle type if specified
+    const relevantVehicles = vehicleType 
+      ? allVehicles.filter(v => v.vehicleType === vehicleType)
+      : allVehicles;
+    
+    // Calculate utilization by vehicle type over time
+    const typeUtilization = new Map<string, Map<string, { totalDays: number; rentedDays: number }>>();
+    
+    relevantVehicles.forEach(vehicle => {
+      const vType = vehicle.vehicleType || 'Uncategorized';
+      if (!typeUtilization.has(vType)) {
+        typeUtilization.set(vType, new Map());
+      }
+      
+      const monthStats = typeUtilization.get(vType)!;
+      
+      // Count rental days per month
+      filteredContracts
+        .filter(c => c.vehicleId === vehicle.id && c.status !== 'cancelled')
+        .forEach(contract => {
+          const start = new Date(contract.rentalStartDate);
+          const end = new Date(contract.rentalEndDate);
+          const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          
+          const month = start.toISOString().substring(0, 7);
+          if (!monthStats.has(month)) {
+            monthStats.set(month, { totalDays: 30, rentedDays: 0 });
+          }
+          const stats = monthStats.get(month)!;
+          stats.rentedDays += days;
+        });
+    });
+    
+    // Calculate utilization rates and forecast
+    const categoryForecasts = Array.from(typeUtilization.entries()).map(([vType, monthMap]) => {
+      const monthlyData = Array.from(monthMap.entries())
+        .map(([month, stats]) => ({
+          month,
+          utilizationRate: (stats.rentedDays / stats.totalDays) * 100,
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month));
+      
+      const avgUtilization = monthlyData.reduce((sum, d) => sum + d.utilizationRate, 0) / (monthlyData.length || 1);
+      const expectedIdlePercentage = 100 - avgUtilization;
+      const hasWarning = expectedIdlePercentage > 30;
+      
+      return {
+        category: vType,
+        vehicleCount: relevantVehicles.filter(v => (v.vehicleType || 'Uncategorized') === vType).length,
+        monthlyData,
+        avgUtilization,
+        expectedIdlePercentage,
+        hasWarning,
+        warningMessage: hasWarning ? `Expected ${expectedIdlePercentage.toFixed(1)}% idle time next month` : null,
+      };
+    });
+    
+    return {
+      categoryForecasts: categoryForecasts.sort((a, b) => b.avgUtilization - a.avgUtilization),
+      summary: {
+        totalVehicles: relevantVehicles.length,
+        averageUtilization: categoryForecasts.reduce((sum, c) => sum + c.avgUtilization, 0) / (categoryForecasts.length || 1),
+        categoriesWithLowUtilization: categoryForecasts.filter(c => c.avgUtilization < 50).length,
+      },
+    };
+  }
+
+  // Predictive Reports - Customer Churn Risk
+  async getCustomerChurnRiskReport(inactiveDays: number = 90, minRentals: number = 3) {
+    const allCustomers = await db.select().from(customers).where(eq(customers.disabled, false));
+    const allContracts = await db.select().from(contracts);
+    
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - inactiveDays);
+    
+    const customerAnalysis = allCustomers.map(customer => {
+      const customerContracts = allContracts
+        .filter(c => c.customerId === customer.id)
+        .sort((a, b) => new Date(b.rentalStartDate).getTime() - new Date(a.rentalStartDate).getTime());
+      
+      const totalRentals = customerContracts.length;
+      const lastRental = customerContracts[0];
+      const lastRentalDate = lastRental ? new Date(lastRental.rentalStartDate) : null;
+      const daysSinceLastRental = lastRentalDate 
+        ? Math.floor((new Date().getTime() - lastRentalDate.getTime()) / (1000 * 60 * 60 * 24))
+        : 999;
+      
+      const totalRevenue = customerContracts.reduce((sum, c) => sum + parseFloat(c.totalAmount), 0);
+      const avgRentalValue = totalRentals > 0 ? totalRevenue / totalRentals : 0;
+      
+      // Calculate churn risk score (0-100)
+      let churnScore = 0;
+      if (totalRentals >= minRentals) {
+        // High-value customer showing signs of churn
+        if (daysSinceLastRental > inactiveDays) {
+          churnScore = Math.min(100, 50 + (daysSinceLastRental - inactiveDays) / 2);
+        } else if (daysSinceLastRental > inactiveDays * 0.7) {
+          churnScore = 30;
+        }
+        
+        // Increase risk if declining rental frequency
+        if (customerContracts.length >= 3) {
+          const recent3 = customerContracts.slice(0, 3);
+          const previous3 = customerContracts.slice(3, 6);
+          if (previous3.length === 3) {
+            const recentAvgGap = recent3.reduce((sum, c, i) => {
+              if (i === 0) return sum;
+              return sum + (new Date(recent3[i-1].rentalStartDate).getTime() - new Date(c.rentalStartDate).getTime());
+            }, 0) / 2;
+            const previousAvgGap = previous3.reduce((sum, c, i) => {
+              if (i === 0) return sum;
+              return sum + (new Date(previous3[i-1].rentalStartDate).getTime() - new Date(c.rentalStartDate).getTime());
+            }, 0) / 2;
+            
+            if (recentAvgGap > previousAvgGap * 1.5) {
+              churnScore += 20;
+            }
+          }
+        }
+      }
+      
+      return {
+        customerId: customer.id,
+        customerCode: customer.customerCode,
+        nameEn: customer.nameEn,
+        nameAr: customer.nameAr || null,
+        totalRentals,
+        totalRevenue,
+        avgRentalValue,
+        lastRentalDate: lastRentalDate ? lastRentalDate.toISOString().split('T')[0] : null,
+        daysSinceLastRental,
+        churnScore: Math.min(100, Math.max(0, churnScore)),
+        riskLevel: churnScore >= 70 ? 'high' : churnScore >= 40 ? 'medium' : churnScore > 0 ? 'low' : 'none',
+      };
+    });
+    
+    const highRiskCustomers = customerAnalysis.filter(c => c.churnScore >= 70 && c.totalRentals >= minRentals);
+    const atRiskRevenue = highRiskCustomers.reduce((sum, c) => sum + c.totalRevenue, 0);
+    
+    return {
+      customerAnalysis: customerAnalysis
+        .filter(c => c.totalRentals >= minRentals)
+        .sort((a, b) => b.churnScore - a.churnScore),
+      highRiskCustomers,
+      summary: {
+        totalCustomers: allCustomers.length,
+        qualifiedCustomers: customerAnalysis.filter(c => c.totalRentals >= minRentals).length,
+        highRiskCount: highRiskCustomers.length,
+        atRiskRevenue,
+        hasWarning: highRiskCustomers.length > 0,
+        warningMessage: highRiskCustomers.length > 0 
+          ? `${highRiskCustomers.length} high-value customers at risk of churning` 
+          : null,
+      },
+    };
+  }
+
+  // Predictive Reports - Maintenance Cost Forecast
+  async getMaintenanceCostForecastReport(months: number = 12, forecastMonths: number = 3, vehicleId?: string) {
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+    
+    const allMaintenanceRecords = await db.select().from(vehicleServiceRecords);
+    const allVehicles = await db.select().from(vehicles).where(eq(vehicles.disabled, false));
+    
+    const relevantVehicles = vehicleId 
+      ? allVehicles.filter(v => v.id === vehicleId)
+      : allVehicles;
+    
+    const filteredRecords = allMaintenanceRecords.filter(r => 
+      new Date(r.serviceDate) >= cutoffDate &&
+      (!vehicleId || r.vehicleId === vehicleId)
+    );
+    
+    // Group by month
+    const monthlyCosts = new Map<string, number>();
+    filteredRecords.forEach(r => {
+      const month = new Date(r.serviceDate).toISOString().substring(0, 7);
+      monthlyCosts.set(month, (monthlyCosts.get(month) || 0) + parseFloat(r.cost));
+    });
+    
+    const historicalData = Array.from(monthlyCosts.entries())
+      .map(([month, cost]) => ({ month, cost }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+    
+    // Forecast using moving average with age factor
+    const forecastData: { month: string; forecast: number; lowerBound: number; upperBound: number }[] = [];
+    if (historicalData.length >= 3) {
+      const avgCost = historicalData.reduce((sum, d) => sum + d.cost, 0) / historicalData.length;
+      const trend = historicalData.length > 1 
+        ? (historicalData[historicalData.length - 1].cost - historicalData[0].cost) / historicalData.length
+        : 0;
+      
+      const lastMonth = new Date(historicalData[historicalData.length - 1].month + '-01');
+      for (let i = 1; i <= forecastMonths; i++) {
+        const forecastMonth = new Date(lastMonth);
+        forecastMonth.setMonth(forecastMonth.getMonth() + i);
+        const monthStr = forecastMonth.toISOString().substring(0, 7);
+        
+        // Factor in age-based cost increase (2% per month as fleet ages)
+        const ageFactor = 1 + (i * 0.02);
+        const forecast = (avgCost + (trend * (historicalData.length + i))) * ageFactor;
+        const variance = forecast * 0.20; // 20% variance
+        
+        forecastData.push({
+          month: monthStr,
+          forecast: Math.max(0, forecast),
+          lowerBound: Math.max(0, forecast - variance),
+          upperBound: forecast + variance,
+        });
+      }
+    }
+    
+    // Identify high-cost vehicles
+    const vehicleCosts = new Map<string, number>();
+    filteredRecords.forEach(r => {
+      vehicleCosts.set(r.vehicleId, (vehicleCosts.get(r.vehicleId) || 0) + parseFloat(r.cost));
+    });
+    
+    const highCostVehicles = Array.from(vehicleCosts.entries())
+      .map(([vId, cost]) => {
+        const vehicle = relevantVehicles.find(v => v.id === vId);
+        return {
+          vehicleId: vId,
+          registration: vehicle?.registration || 'Unknown',
+          make: vehicle?.make || '',
+          model: vehicle?.model || '',
+          totalCost: cost,
+          avgMonthly: cost / months,
+        };
+      })
+      .sort((a, b) => b.totalCost - a.totalCost)
+      .slice(0, 10);
+    
+    const avgHistoricalCost = historicalData.reduce((sum, d) => sum + d.cost, 0) / (historicalData.length || 1);
+    const forecastedTotal = forecastData.reduce((sum, d) => sum + d.forecast, 0);
+    const costIncrease = avgHistoricalCost > 0 ? ((forecastedTotal / forecastMonths - avgHistoricalCost) / avgHistoricalCost) * 100 : 0;
+    
+    return {
+      historicalData,
+      forecastData,
+      highCostVehicles,
+      summary: {
+        avgMonthlyCost: avgHistoricalCost,
+        forecastedTotal,
+        forecastedMonthly: forecastData.length > 0 ? forecastedTotal / forecastData.length : 0,
+        costIncrease,
+        hasWarning: costIncrease > 15,
+        warningMessage: costIncrease > 15 ? `Maintenance costs forecasted to increase by ${costIncrease.toFixed(1)}%` : null,
+      },
+    };
+  }
+
+  // Predictive Reports - Payment Default Prediction
+  async getPaymentDefaultPredictionReport(riskThreshold: number = 50) {
+    const allContracts = await db.select().from(contracts);
+    const allPayments = await db.select().from(payments);
+    const allRiskScores = await db.select().from(customerRiskScores);
+    const allCustomers = await db.select().from(customers).where(eq(customers.disabled, false));
+    
+    // Create lookup maps
+    const riskScoreMap = new Map(allRiskScores.map(r => [r.customerId, r.finalScore]));
+    const customerMap = new Map(allCustomers.map(c => [c.id, c]));
+    
+    // Analyze active/upcoming contracts
+    const today = new Date();
+    const upcomingContracts = allContracts.filter(c => 
+      c.status === 'active' || 
+      (c.status === 'confirmed' && new Date(c.rentalStartDate) > today)
+    );
+    
+    const contractAnalysis = upcomingContracts.map(contract => {
+      const customer = customerMap.get(contract.customerId);
+      const riskScore = riskScoreMap.get(contract.customerId) || 0;
+      const contractPayments = allPayments.filter(p => p.contractId === contract.id);
+      
+      const totalPaid = contractPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+      const totalCost = parseFloat(contract.totalAmount);
+      const outstandingAmount = totalCost - totalPaid;
+      const paymentProgress = totalCost > 0 ? (totalPaid / totalCost) * 100 : 0;
+      
+      // Calculate default probability based on risk score and payment behavior
+      let defaultProbability = riskScore;
+      
+      // Adjust for payment behavior
+      if (contract.status === 'active') {
+        const daysSincePickup = Math.floor((today.getTime() - new Date(contract.rentalStartDate).getTime()) / (1000 * 60 * 60 * 24));
+        const expectedProgress = Math.min(100, (daysSincePickup / ((new Date(contract.rentalEndDate).getTime() - new Date(contract.rentalStartDate).getTime()) / (1000 * 60 * 60 * 24))) * 100);
+        
+        if (paymentProgress < expectedProgress - 20) {
+          defaultProbability += 20; // Behind on payments
+        }
+      }
+      
+      // High outstanding amounts increase risk
+      if (outstandingAmount > 5000) {
+        defaultProbability += 10;
+      }
+      
+      defaultProbability = Math.min(100, Math.max(0, defaultProbability));
+      
+      return {
+        contractId: contract.id,
+        contractNumber: contract.contractNumber,
+        customerId: contract.customerId,
+        customerName: customer?.nameEn || 'Unknown',
+        customerRiskScore: riskScore,
+        totalCost,
+        totalPaid,
+        outstandingAmount,
+        paymentProgress,
+        defaultProbability,
+        riskLevel: defaultProbability >= 70 ? 'high' : defaultProbability >= 40 ? 'medium' : 'low',
+        status: contract.status,
+        pickupDate: contract.rentalStartDate.toISOString().split('T')[0],
+        returnDate: contract.rentalEndDate.toISOString().split('T')[0],
+      };
+    });
+    
+    const highRiskContracts = contractAnalysis.filter(c => c.defaultProbability >= riskThreshold);
+    const totalAtRisk = highRiskContracts.reduce((sum, c) => sum + c.outstandingAmount, 0);
+    
+    return {
+      contractAnalysis: contractAnalysis.sort((a, b) => b.defaultProbability - a.defaultProbability),
+      highRiskContracts,
+      summary: {
+        totalContracts: contractAnalysis.length,
+        highRiskCount: highRiskContracts.length,
+        totalOutstanding: contractAnalysis.reduce((sum, c) => sum + c.outstandingAmount, 0),
+        totalAtRisk,
+        avgDefaultProbability: contractAnalysis.reduce((sum, c) => sum + c.defaultProbability, 0) / (contractAnalysis.length || 1),
+        hasWarning: highRiskContracts.length > 0,
+        warningMessage: highRiskContracts.length > 0 
+          ? `${highRiskContracts.length} contracts at high risk of default (AED ${totalAtRisk.toFixed(2)} at risk)` 
+          : null,
+      },
+    };
+  }
+
+  // Predictive Reports - Demand Forecasting (Location-Based)
+  async getDemandForecastReport(months: number = 6, emirate?: string) {
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+    
+    const allContracts = await db.select().from(contracts);
+    const allCustomers = await db.select().from(customers).where(eq(customers.disabled, false));
+    
+    const filteredContracts = allContracts.filter(c => new Date(c.rentalStartDate) >= cutoffDate);
+    
+    // Create customer lookup map
+    const customerMap = new Map(allCustomers.map(c => [c.id, c]));
+    
+    // Group contracts by emirate and month
+    const emirateDemand = new Map<string, Map<string, number>>();
+    
+    filteredContracts.forEach(contract => {
+      const customer = customerMap.get(contract.customerId);
+      const customerEmirate = customer?.emirate || 'unknown';
+      
+      if (emirate && customerEmirate !== emirate) {
+        return; // Skip if filtering by specific emirate
+      }
+      
+      if (!emirateDemand.has(customerEmirate)) {
+        emirateDemand.set(customerEmirate, new Map());
+      }
+      
+      const month = new Date(contract.rentalStartDate).toISOString().substring(0, 7);
+      const monthMap = emirateDemand.get(customerEmirate)!;
+      monthMap.set(month, (monthMap.get(month) || 0) + 1);
+    });
+    
+    // Calculate trends and forecasts per emirate
+    const emirateForecasts = Array.from(emirateDemand.entries()).map(([em, monthMap]) => {
+      const monthlyData = Array.from(monthMap.entries())
+        .map(([month, demand]) => ({ month, demand }))
+        .sort((a, b) => a.month.localeCompare(b.month));
+      
+      const avgDemand = monthlyData.reduce((sum, d) => sum + d.demand, 0) / (monthlyData.length || 1);
+      const trend = monthlyData.length > 1 
+        ? (monthlyData[monthlyData.length - 1].demand - monthlyData[0].demand) / monthlyData.length
+        : 0;
+      
+      // Forecast next 3 months
+      const nextMonthForecast = Math.max(0, avgDemand + trend);
+      const forecastedGrowth = avgDemand > 0 ? (trend / avgDemand) * 100 : 0;
+      
+      return {
+        emirate: em,
+        monthlyData,
+        avgDemand,
+        trend: trend > 0 ? 'increasing' : trend < 0 ? 'decreasing' : 'stable',
+        trendValue: trend,
+        nextMonthForecast,
+        forecastedGrowth,
+        hasHighDemand: nextMonthForecast > avgDemand * 1.2,
+      };
+    });
+    
+    // Sort by forecasted demand
+    const sortedForecasts = emirateForecasts.sort((a, b) => b.nextMonthForecast - a.nextMonthForecast);
+    const hotspots = sortedForecasts.filter(e => e.hasHighDemand);
+    
+    return {
+      emirateForecasts: sortedForecasts,
+      hotspots,
+      summary: {
+        totalDemand: filteredContracts.length,
+        avgMonthlyDemand: filteredContracts.length / months,
+        topEmirate: sortedForecasts[0]?.emirate || 'N/A',
+        topEmirateForecast: sortedForecasts[0]?.nextMonthForecast || 0,
+        hasHotspots: hotspots.length > 0,
+        warningMessage: hotspots.length > 0 
+          ? `${hotspots.length} emirates showing high demand forecast` 
+          : null,
+      },
     };
   }
 

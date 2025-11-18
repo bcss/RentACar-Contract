@@ -32,6 +32,7 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { DateSelector } from '@/components/ui/date-selector';
+import { ClaimsProgressTimeline } from '@/components/ClaimsProgressTimeline';
 
 const formSchema = insertInsuranceClaimSchema.extend({
   contractId: z.string().min(1, 'Contract is required'),
@@ -564,6 +565,16 @@ export default function InsuranceClaimForm() {
           </Card>
         </form>
       </Form>
+      
+      {/* Claims Progress Timeline - Only show when editing existing claim */}
+      {isEditing && params.id && (
+        <div className="mt-6">
+          <ClaimsProgressTimeline 
+            claimId={params.id} 
+            canAddUpdates={user?.role === 'manager' || user?.role === 'admin' || user?.canCloseContracts}
+          />
+        </div>
+      )}
     </div>
   );
 }

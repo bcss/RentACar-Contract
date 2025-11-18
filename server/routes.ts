@@ -3592,6 +3592,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Predictive Reports - Revenue Forecasting
+  app.get('/api/reports/revenue-forecast', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const months = req.query.months ? parseInt(req.query.months as string) : 12;
+      const forecastMonths = req.query.forecastMonths ? parseInt(req.query.forecastMonths as string) : 3;
+      const report = await storage.getRevenueForecastReport(months, forecastMonths);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching revenue forecast report:", error);
+      res.status(500).json({ message: "Failed to fetch revenue forecast report" });
+    }
+  });
+
+  // Predictive Reports - Fleet Utilization Forecast
+  app.get('/api/reports/fleet-utilization-forecast', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const months = req.query.months ? parseInt(req.query.months as string) : 6;
+      const category = req.query.category as string || undefined;
+      const report = await storage.getFleetUtilizationForecastReport(months, category);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching fleet utilization forecast report:", error);
+      res.status(500).json({ message: "Failed to fetch fleet utilization forecast report" });
+    }
+  });
+
+  // Predictive Reports - Customer Churn Risk
+  app.get('/api/reports/customer-churn-risk', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const inactiveDays = req.query.inactiveDays ? parseInt(req.query.inactiveDays as string) : 90;
+      const minRentals = req.query.minRentals ? parseInt(req.query.minRentals as string) : 3;
+      const report = await storage.getCustomerChurnRiskReport(inactiveDays, minRentals);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching customer churn risk report:", error);
+      res.status(500).json({ message: "Failed to fetch customer churn risk report" });
+    }
+  });
+
+  // Predictive Reports - Maintenance Cost Forecast
+  app.get('/api/reports/maintenance-cost-forecast', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const months = req.query.months ? parseInt(req.query.months as string) : 12;
+      const forecastMonths = req.query.forecastMonths ? parseInt(req.query.forecastMonths as string) : 3;
+      const vehicleId = req.query.vehicleId as string || undefined;
+      const report = await storage.getMaintenanceCostForecastReport(months, forecastMonths, vehicleId);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching maintenance cost forecast report:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance cost forecast report" });
+    }
+  });
+
+  // Predictive Reports - Payment Default Prediction
+  app.get('/api/reports/payment-default-prediction', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const riskThreshold = req.query.riskThreshold ? parseInt(req.query.riskThreshold as string) : 50;
+      const report = await storage.getPaymentDefaultPredictionReport(riskThreshold);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching payment default prediction report:", error);
+      res.status(500).json({ message: "Failed to fetch payment default prediction report" });
+    }
+  });
+
+  // Predictive Reports - Demand Forecasting (Location-Based)
+  app.get('/api/reports/demand-forecast', isAuthenticated, requireReportsAccess, async (req: any, res) => {
+    try {
+      const months = req.query.months ? parseInt(req.query.months as string) : 6;
+      const emirate = req.query.emirate as string || undefined;
+      const report = await storage.getDemandForecastReport(months, emirate);
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching demand forecast report:", error);
+      res.status(500).json({ message: "Failed to fetch demand forecast report" });
+    }
+  });
+
   // Export endpoints (requires reports access)
   app.post('/api/reports/financial/export', isAuthenticated, requireReportsAccess, async (req: any, res) => {
     try {
