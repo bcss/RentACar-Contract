@@ -1363,8 +1363,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               endDate: new Date(activated.rentalEndDate).toLocaleDateString('en-AE'),
             },
             language: 'en',
-            triggerType: 'event',
+            triggerType: 'event_driven',
             triggeredBy: userId,
+            entityType: 'contract',
+            entityId: activated.id,
           });
         }
       } catch (notifError) {
@@ -1591,8 +1593,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               returnDate: new Date().toLocaleDateString('en-AE'),
             },
             language: 'en',
-            triggerType: 'event',
+            triggerType: 'event_driven',
             triggeredBy: userId,
+            entityType: 'contract',
+            entityId: completed.id,
           });
         }
       } catch (notifError) {
@@ -1710,6 +1714,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `Admin override: Closed contract #${closed.contractNumber} with outstanding balance of ${computedOutstanding.toFixed(2)} AED. Remark: ${closureRemark}`
         );
         
+        // Send contract closure notification to customer
+        try {
+          const customer = await storage.getCustomerById(closed.customerId);
+          if (customer) {
+            await notificationService.sendNotification({
+              templateCode: 'CONTRACT_CLOSED',
+              channel: 'email',
+              recipientType: 'customer',
+              recipientId: customer.id,
+              variables: {
+                contractNumber: closed.contractNumber.toString(),
+                customerName: customer.nameEn || '',
+                closureDate: new Date().toLocaleDateString('en-AE'),
+              },
+              language: 'en',
+              triggerType: 'event_driven',
+              triggeredBy: userId,
+              entityType: 'contract',
+              entityId: closed.id,
+            });
+          }
+        } catch (notifError) {
+          console.error('[Notification] Failed to send contract closure notification:', notifError);
+        }
+        
         return res.json(closed);
       }
       
@@ -1731,6 +1760,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create audit log
       await createAuditLog(userId, 'close', closed.id, req, `Closed contract #${closed.contractNumber} - all payments settled and verified`);
+      
+      // Send contract closure notification to customer
+      try {
+        const customer = await storage.getCustomerById(closed.customerId);
+        if (customer) {
+          await notificationService.sendNotification({
+            templateCode: 'CONTRACT_CLOSED',
+            channel: 'email',
+            recipientType: 'customer',
+            recipientId: customer.id,
+            variables: {
+              contractNumber: closed.contractNumber.toString(),
+              customerName: customer.nameEn || '',
+              closureDate: new Date().toLocaleDateString('en-AE'),
+            },
+            language: 'en',
+            triggerType: 'event_driven',
+            triggeredBy: userId,
+            entityType: 'contract',
+            entityId: closed.id,
+          });
+        }
+      } catch (notifError) {
+        console.error('[Notification] Failed to send contract closure notification:', notifError);
+      }
       
       res.json(closed);
     } catch (error: any) {
@@ -5098,6 +5152,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       createdRecords.audit = true;
       
+      // Send incident notification to manager
+      try {
+        const managers = await db.select().from(users).where(eq(users.role, 'manager')).limit(1);
+        if (managers.length > 0) {
+          await notificationService.sendNotification({
+            templateCode: 'INCIDENT_REPORTED',
+            channel: 'sms',
+            recipientType: 'user',
+            recipientId: managers[0].id,
+            variables: {
+              claimNumber,
+              contractNumber: contract.contractNumber.toString(),
+              severity,
+              location,
+              customerName: customer?.nameEn || 'Unknown',
+            },
+            language: 'en',
+            triggerType: 'event_driven',
+            triggeredBy: userId,
+            entityType: 'insurance_claim',
+            entityId: claim.id,
+          });
+        }
+      } catch (notifError) {
+        console.error('[Notification] Failed to send incident notification:', notifError);
+      }
+      
       res.status(201).json({
         message: "Accident reported successfully",
         claimNumber,
@@ -6245,6 +6326,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const transfer = await storage.approveBranchTransfer(req.params.id, user.id);
       await createAuditLog(user.id, 'branch_transfer_approved', transfer.id, req, `Approved vehicle transfer`);
+      
+      // Send transfer approval notification
+      try {
+        const sourceBranch = await storage.getBranch(transfer.sourceBranchId);
+        const destinationBranch = await storage.getBranch(transfer.destinationBranchId);
+        const vehicle = await storage.getVehicleById(transfer.vehicleId);
+        
+        // Notify branch managers
+        const branchUsers = await db.select().from(users)
+          .where(eq(users.branchId, transfer.sourceBranchId))
+          .limit(1);
+        
+        if (branchUsers.length > 0 && vehicle) {
+          await notificationService.sendNotification({
+            templateCode: 'VEHICLE_TRANSFER_APPROVED',
+            channel: 'email',
+            recipientType: 'user',
+            recipientId: branchUsers[0].id,
+            variables: {
+              vehicleRegistration: vehicle.registration || 'N/A',
+              sourceBranch: sourceBranch?.nameEn || 'N/A',
+              destinationBranch: destinationBranch?.nameEn || 'N/A',
+              transferDate: new Date(transfer.transferDate).toLocaleDateString('en-AE'),
+            },
+            language: 'en',
+            triggerType: 'event_driven',
+            triggeredBy: user.id,
+            entityType: 'vehicle_transfer',
+            entityId: transfer.id,
+          });
+        }
+      } catch (notifError) {
+        console.error('[Notification] Failed to send transfer approval notification:', notifError);
+      }
+      
       res.json(transfer);
     } catch (error) {
       next(error);
@@ -6266,6 +6382,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const transfer = await storage.rejectBranchTransfer(req.params.id, user.id, rejectedReason);
       await createAuditLog(user.id, 'branch_transfer_rejected', transfer.id, req, `Rejected vehicle transfer: ${rejectedReason}`);
+      
+      // Send transfer rejection notification
+      try {
+        const sourceBranch = await storage.getBranch(transfer.sourceBranchId);
+        const vehicle = await storage.getVehicleById(transfer.vehicleId);
+        
+        // Notify requester/source branch
+        const branchUsers = await db.select().from(users)
+          .where(eq(users.branchId, transfer.sourceBranchId))
+          .limit(1);
+        
+        if (branchUsers.length > 0 && vehicle) {
+          await notificationService.sendNotification({
+            templateCode: 'VEHICLE_TRANSFER_REJECTED',
+            channel: 'email',
+            recipientType: 'user',
+            recipientId: branchUsers[0].id,
+            variables: {
+              vehicleRegistration: vehicle.registration || 'N/A',
+              sourceBranch: sourceBranch?.nameEn || 'N/A',
+              rejectionReason: rejectedReason,
+            },
+            language: 'en',
+            triggerType: 'event_driven',
+            triggeredBy: user.id,
+            entityType: 'vehicle_transfer',
+            entityId: transfer.id,
+          });
+        }
+      } catch (notifError) {
+        console.error('[Notification] Failed to send transfer rejection notification:', notifError);
+      }
+      
       res.json(transfer);
     } catch (error) {
       next(error);
@@ -6761,6 +6910,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       await createAuditLog(user.id, 'driver_assigned', undefined, req, `Assigned driver to contract`);
+      
+      // Send driver assignment notification
+      try {
+        const driver = await storage.getDriverById(assignment.driverId);
+        const contract = assignment.contractId ? await storage.getContract(assignment.contractId) : null;
+        if (driver) {
+          await notificationService.sendNotification({
+            templateCode: 'DRIVER_ASSIGNMENT_CREATED',
+            channel: 'sms',
+            recipientType: 'driver',
+            recipientId: driver.id,
+            variables: {
+              driverName: driver.nameEn || '',
+              assignmentDate: new Date(assignment.startDate).toLocaleDateString('en-AE'),
+              contractNumber: contract?.contractNumber.toString() || 'N/A',
+              assignmentType: assignment.assignmentType || 'N/A',
+            },
+            language: 'en',
+            triggerType: 'event_driven',
+            triggeredBy: user.id,
+            entityType: 'driver_assignment',
+            entityId: assignment.id,
+          });
+        }
+      } catch (notifError) {
+        console.error('[Notification] Failed to send driver assignment notification:', notifError);
+      }
+      
       res.status(201).json(assignment);
     } catch (error) {
       next(error);
@@ -7065,6 +7242,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } as any);
       
       await createAuditLog(user.id, 'traffic_fine_created', fine.contractId || undefined, req, `Created traffic fine: ${fine.description}`);
+      
+      // Send notification if fine is assigned to a contract
+      if (fine.contractId) {
+        try {
+          const contract = await storage.getContract(fine.contractId);
+          if (contract) {
+            await notificationService.sendNotification({
+              templateCode: 'TRAFFIC_FINE_ASSIGNED',
+              channel: 'sms',
+              recipientType: 'customer',
+              recipientId: contract.customerId,
+              variables: {
+                contractNumber: contract.contractNumber.toString(),
+                fineAmount: fine.fineAmount || '0',
+                violationDate: fine.violationDate ? new Date(fine.violationDate).toLocaleDateString('en-AE') : 'N/A',
+                description: fine.description || 'Traffic violation',
+              },
+              language: 'en',
+              triggerType: 'event_driven',
+              triggeredBy: user.id,
+              entityType: 'traffic_fine',
+              entityId: fine.id,
+            });
+          }
+        } catch (notifError) {
+          console.error('[Notification] Failed to send traffic fine notification:', notifError);
+        }
+      }
+      
       res.status(201).json(fine);
     } catch (error) {
       next(error);
@@ -7317,6 +7523,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } as any);
       
       await createAuditLog(user.id, 'service_record_created', undefined, req, `Created service record for vehicle ${record.vehicleId}`);
+      
+      // Send service record notification to fleet manager
+      try {
+        const managers = await db.select().from(users).where(eq(users.role, 'manager')).limit(1);
+        if (managers.length > 0) {
+          const vehicle = await storage.getVehicleById(record.vehicleId);
+          await notificationService.sendNotification({
+            templateCode: 'SERVICE_RECORD_ADDED',
+            channel: 'email',
+            recipientType: 'user',
+            recipientId: managers[0].id,
+            variables: {
+              vehicleRegistration: vehicle?.registration || 'N/A',
+              serviceType: record.serviceType || 'N/A',
+              serviceCost: record.cost || '0',
+              serviceDate: record.serviceDate ? new Date(record.serviceDate).toLocaleDateString('en-AE') : 'N/A',
+            },
+            language: 'en',
+            triggerType: 'event_driven',
+            triggeredBy: user.id,
+            entityType: 'service_record',
+            entityId: record.id,
+          });
+        }
+      } catch (notifError) {
+        console.error('[Notification] Failed to send service record notification:', notifError);
+      }
+      
       res.status(201).json(record);
     } catch (error) {
       next(error);

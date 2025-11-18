@@ -434,7 +434,6 @@ class NotificationService {
       .update(communicationProviders)
       .set({
         healthStatus,
-        lastError: lastError || null,
         lastHealthCheck: new Date(),
       })
       .where(eq(communicationProviders.id, providerId));
@@ -485,7 +484,7 @@ class NotificationService {
         recipientType: 'customer',
         recipientId: contract.customerId,
         variables: {
-          contractNumber: contract.contractNumber || '',
+          contractNumber: String(contract.contractNumber || ''),
           amount: payment.amount,
           paymentMethod: payment.paymentMethod,
           customerName: '',
