@@ -99,6 +99,13 @@ import {
   Calendar,
   Bell,
   CheckSquare,
+  Mail,
+  MessageSquare,
+  Send,
+  TrendingUp,
+  Target,
+  LineChart,
+  Activity,
 } from 'lucide-react';
 
 interface AppSidebarProps {
@@ -143,6 +150,15 @@ const getIconComponent = (iconName: string) => {
     'calendar': Calendar,
     'bell': Bell,
     'check_square': CheckSquare,
+    // Communications
+    'mail': Mail,
+    'message_square': MessageSquare,
+    'send': Send,
+    // Predictive Intelligence
+    'trending_up': TrendingUp,
+    'target': Target,
+    'line_chart': LineChart,
+    'activity': Activity,
     // Default
     'default': FileText,
   };
@@ -407,6 +423,25 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/risk-scoring',
       show: isAdmin || isManager,
     },
+    // Wave 4 - Communications & Campaigns
+    {
+      title: 'Communication Providers',
+      icon: 'mail',
+      url: '/communication-providers',
+      show: isAdmin,
+    },
+    {
+      title: 'Communication Logs',
+      icon: 'message_square',
+      url: '/communication-logs',
+      show: isAdmin || isManager,
+    },
+    {
+      title: 'Campaign Management',
+      icon: 'send',
+      url: '/campaigns',
+      show: isAdmin || isManager || user?.role === 'staff',
+    },
   ];
 
   const settingsItems = [
@@ -477,6 +512,43 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   ];
 
   const reportItems = [
+    // Predictive Intelligence Reports
+    {
+      title: 'Revenue Forecast',
+      icon: 'trending_up',
+      url: '/reports/predictive/revenue-forecast',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Fleet Utilization Forecast',
+      icon: 'activity',
+      url: '/reports/predictive/fleet-utilization',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Customer Churn Risk',
+      icon: 'target',
+      url: '/reports/predictive/customer-churn',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Maintenance Cost Forecast',
+      icon: 'line_chart',
+      url: '/reports/predictive/maintenance-forecast',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Payment Default Prediction',
+      icon: 'trending_up',
+      url: '/reports/predictive/payment-default',
+      show: isAdmin || isManager || canAccessReports,
+    },
+    {
+      title: 'Location Demand Forecast',
+      icon: 'activity',
+      url: '/reports/predictive/demand-forecast',
+      show: isAdmin || isManager || canAccessReports,
+    },
     // Analytical Reports - Granular Permissions
     {
       title: 'Revenue Trends',
