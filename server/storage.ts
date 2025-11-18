@@ -442,6 +442,23 @@ export interface IStorage {
   deleteDocument(id: string): Promise<void>;
   seedDocumentRegistry(): Promise<{ seeded: number; skipped: number }>;
   
+  // Notification Templates operations
+  getNotificationTemplates(filters?: { category?: string; isActive?: boolean; isSystemTemplate?: boolean }): Promise<any[]>;
+  getNotificationTemplateById(id: string): Promise<any | undefined>;
+  getNotificationTemplateByCode(code: string): Promise<any | undefined>;
+  createNotificationTemplate(template: any): Promise<any>;
+  updateNotificationTemplate(id: string, template: any): Promise<any>;
+  deleteNotificationTemplate(id: string): Promise<void>;
+  seedNotificationTemplates(): Promise<{ seeded: number; skipped: number }>;
+  
+  // Automated Reminders operations
+  getAutomatedReminders(filters?: { entityType?: string; entityId?: string; reminderType?: string; isActive?: boolean }): Promise<any[]>;
+  getAutomatedReminderById(id: string): Promise<any | undefined>;
+  createAutomatedReminder(reminder: any): Promise<any>;
+  updateAutomatedReminder(id: string, reminder: any): Promise<any>;
+  deleteAutomatedReminder(id: string): Promise<void>;
+  seedAutomatedReminders(): Promise<{ seeded: number; skipped: number }>;
+  
   // ==================== WAVE 2: FLEET ECONOMICS ====================
   
   // Vehicle Service Record operations
@@ -4470,6 +4487,308 @@ export class DatabaseStorage implements IStorage {
     }
 
     return { seeded, skipped };
+  }
+
+  // ==================== NOTIFICATION TEMPLATES & AUTOMATED REMINDERS ====================
+
+  async getNotificationTemplates(filters?: { category?: string; isActive?: boolean; isSystemTemplate?: boolean }): Promise<NotificationTemplate[]> {
+    const conditions = [];
+    if (filters?.category) conditions.push(eq(notificationTemplates.category, filters.category));
+    if (filters?.isActive !== undefined) conditions.push(eq(notificationTemplates.isActive, filters.isActive));
+    if (filters?.isSystemTemplate !== undefined) conditions.push(eq(notificationTemplates.isSystemTemplate, filters.isSystemTemplate));
+
+    return await db
+      .select()
+      .from(notificationTemplates)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(notificationTemplates.createdAt));
+  }
+
+  async getNotificationTemplateById(id: string): Promise<NotificationTemplate | undefined> {
+    const [template] = await db.select().from(notificationTemplates).where(eq(notificationTemplates.id, id));
+    return template;
+  }
+
+  async getNotificationTemplateByCode(code: string): Promise<NotificationTemplate | undefined> {
+    const [template] = await db.select().from(notificationTemplates).where(eq(notificationTemplates.templateCode, code));
+    return template;
+  }
+
+  async createNotificationTemplate(templateData: InsertNotificationTemplate): Promise<NotificationTemplate> {
+    const [template] = await db.insert(notificationTemplates).values(templateData).returning();
+    return template;
+  }
+
+  async updateNotificationTemplate(id: string, templateData: Partial<InsertNotificationTemplate>): Promise<NotificationTemplate> {
+    const [updated] = await db
+      .update(notificationTemplates)
+      .set({ ...templateData, updatedAt: new Date() })
+      .where(eq(notificationTemplates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteNotificationTemplate(id: string): Promise<void> {
+    await db.delete(notificationTemplates).where(eq(notificationTemplates.id, id));
+  }
+
+  /**
+   * Seed 12 system notification templates (bilingual EN/AR)
+   * These templates are editable by admins
+   */
+  async seedNotificationTemplates(): Promise<{ seeded: number; skipped: number }> {
+    let seeded = 0;
+    let skipped = 0;
+
+    const templates: Omit<InsertNotificationTemplate, 'createdBy'>[] = [
+      {
+        templateCode: 'CONTRACT_EXPIRY_REMINDER',
+        category: 'contract',
+        name: 'Contract Expiry Reminder',
+        description: 'Sent 7 days before contract ends',
+        subjectEn: 'Your Rental Contract is Expiring Soon',
+        subjectAr: 'عقد الإيجار الخاص بك سينتهي قريباً',
+        bodyEn: 'Dear {{customerName}},\n\nYour rental contract {{contractNumber}} for {{vehicleMake}} {{vehicleModel}} ({{plateNumber}}) will expire on {{endDate}}.\n\nPlease contact us to renew or return the vehicle.\n\nThank you,\nRCCMS Team',
+        bodyAr: 'عزيزي {{customerName}}،\n\nعقد الإيجار {{contractNumber}} لـ {{vehicleMake}} {{vehicleModel}} ({{plateNumber}}) سينتهي في {{endDate}}.\n\nيرجى الاتصال بنا لتجديد أو إعادة المركبة.\n\nشكراً لكم،\nفريق RCCMS',
+        variables: ['customerName', 'contractNumber', 'vehicleMake', 'vehicleModel', 'plateNumber', 'endDate'],
+        supportsSms: true,
+        supportsEmail: true,
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'DOCUMENT_RENEWAL_REMINDER',
+        category: 'document',
+        name: 'Document Renewal Reminder',
+        description: 'Sent when customer/driver documents are about to expire',
+        subjectEn: 'Document Expiry Alert',
+        subjectAr: 'تنبيه انتهاء صلاحية الوثيقة',
+        bodyEn: 'Dear {{entityName}},\n\nYour {{documentType}} ({{documentNumber}}) will expire on {{expiryDate}}.\n\nPlease renew it to avoid service interruption.\n\nThank you,\nRCCMS Team',
+        bodyAr: 'عزيزي {{entityName}}،\n\nستنتهي صلاحية {{documentType}} ({{documentNumber}}) في {{expiryDate}}.\n\nيرجى تجديدها لتجنب انقطاع الخدمة.\n\nشكراً لكم،\nفريق RCCMS',
+        variables: ['entityName', 'documentType', 'documentNumber', 'expiryDate'],
+        supportsSms: true,
+        supportsEmail: true,
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'PAYMENT_DUE_REMINDER',
+        category: 'payment',
+        name: 'Payment Due Reminder',
+        description: 'Sent when payment is due',
+        subjectEn: 'Payment Due - Contract {{contractNumber}}',
+        subjectAr: 'دفعة مستحقة - عقد {{contractNumber}}',
+        bodyEn: 'Dear {{customerName}},\n\nA payment of AED {{amount}} is due for contract {{contractNumber}}.\n\nDue Date: {{dueDate}}\n\nPlease make the payment to avoid late fees.\n\nThank you,\nRCCMS Team',
+        bodyAr: 'عزيزي {{customerName}}،\n\nدفعة بقيمة {{amount}} درهم مستحقة للعقد {{contractNumber}}.\n\nتاريخ الاستحقاق: {{dueDate}}\n\nيرجى سداد الدفعة لتجنب الرسوم المتأخرة.\n\nشكراً لكم،\nفريق RCCMS',
+        variables: ['customerName', 'contractNumber', 'amount', 'dueDate'],
+        supportsSms: true,
+        supportsEmail: true,
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'PAYMENT_OVERDUE_ALERT',
+        category: 'payment',
+        name: 'Payment Overdue Alert',
+        description: 'Sent when payment is overdue',
+        subjectEn: 'URGENT: Overdue Payment - Contract {{contractNumber}}',
+        subjectAr: 'عاجل: دفعة متأخرة - عقد {{contractNumber}}',
+        bodyEn: 'Dear {{customerName}},\n\nYour payment of AED {{amount}} for contract {{contractNumber}} is OVERDUE.\n\nPlease make the payment immediately to avoid service suspension.\n\nThank you,\nRCCMS Team',
+        bodyAr: 'عزيزي {{customerName}}،\n\nدفعتك بقيمة {{amount}} درهم للعقد {{contractNumber}} متأخرة.\n\nيرجى سداد الدفعة فوراً لتجنب تعليق الخدمة.\n\nشكراً لكم،\nفريق RCCMS',
+        variables: ['customerName', 'contractNumber', 'amount'],
+        supportsSms: true,
+        supportsEmail: true,
+        priority: 'high',
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'VEHICLE_SERVICE_DUE',
+        category: 'fleet',
+        name: 'Vehicle Service Due',
+        description: 'Sent when vehicle requires maintenance',
+        subjectEn: 'Vehicle Service Required - {{plateNumber}}',
+        subjectAr: 'صيانة المركبة مطلوبة - {{plateNumber}}',
+        bodyEn: 'Vehicle {{vehicleMake}} {{vehicleModel}} ({{plateNumber}}) is due for {{serviceType}} service.\n\nOdometer: {{odometer}} km\nNext Service: {{nextServiceDate}}\n\nPlease schedule maintenance.\n\nRCCMS Fleet Team',
+        bodyAr: 'المركبة {{vehicleMake}} {{vehicleModel}} ({{plateNumber}}) تحتاج إلى صيانة {{serviceType}}.\n\nعداد المسافات: {{odometer}} كم\nالصيانة القادمة: {{nextServiceDate}}\n\nيرجى جدولة الصيانة.\n\nفريق الأسطول RCCMS',
+        variables: ['vehicleMake', 'vehicleModel', 'plateNumber', 'serviceType', 'odometer', 'nextServiceDate'],
+        supportsSms: false,
+        supportsEmail: true,
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'INSURANCE_EXPIRY_REMINDER',
+        category: 'compliance',
+        name: 'Insurance Expiry Reminder',
+        description: 'Sent when vehicle insurance is about to expire',
+        subjectEn: 'Vehicle Insurance Expiring - {{plateNumber}}',
+        subjectAr: 'تأمين المركبة ينتهي - {{plateNumber}}',
+        bodyEn: 'Insurance for vehicle {{plateNumber}} expires on {{expiryDate}}.\n\nPolicy Number: {{policyNumber}}\n\nPlease renew immediately to maintain compliance.\n\nRCCMS Compliance Team',
+        bodyAr: 'تأمين المركبة {{plateNumber}} ينتهي في {{expiryDate}}.\n\nرقم البوليصة: {{policyNumber}}\n\nيرجى التجديد فوراً للحفاظ على الامتثال.\n\nفريق الامتثال RCCMS',
+        variables: ['plateNumber', 'expiryDate', 'policyNumber'],
+        supportsSms: false,
+        supportsEmail: true,
+        priority: 'high',
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'LICENSE_EXPIRY_REMINDER',
+        category: 'compliance',
+        name: 'License Expiry Reminder',
+        description: 'Sent when driver license is about to expire',
+        subjectEn: 'Driver License Expiring Soon',
+        subjectAr: 'رخصة القيادة ستنتهي قريباً',
+        bodyEn: 'Dear {{driverName}},\n\nYour driver license ({{licenseNumber}}) will expire on {{expiryDate}}.\n\nPlease renew it to continue driving.\n\nRCCMS Team',
+        bodyAr: 'عزيزي {{driverName}}،\n\nرخصة القيادة الخاصة بك ({{licenseNumber}}) ستنتهي في {{expiryDate}}.\n\nيرجى تجديدها لمواصلة القيادة.\n\nفريق RCCMS',
+        variables: ['driverName', 'licenseNumber', 'expiryDate'],
+        supportsSms: true,
+        supportsEmail: true,
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'VISA_EXPIRY_REMINDER',
+        category: 'compliance',
+        name: 'Visa Expiry Reminder',
+        description: 'Sent when visa is about to expire',
+        subjectEn: 'Visa Expiry Alert',
+        subjectAr: 'تنبيه انتهاء التأشيرة',
+        bodyEn: 'Dear {{entityName}},\n\nYour visa ({{visaNumber}}) will expire on {{expiryDate}}.\n\nPlease renew it to avoid legal issues.\n\nRCCMS Team',
+        bodyAr: 'عزيزي {{entityName}}،\n\nستنتهي تأشيرتك ({{visaNumber}}) في {{expiryDate}}.\n\nيرجى تجديدها لتجنب المشاكل القانونية.\n\nفريق RCCMS',
+        variables: ['entityName', 'visaNumber', 'expiryDate'],
+        supportsSms: true,
+        supportsEmail: true,
+        priority: 'high',
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'CONTRACT_COMPLETION_REMINDER',
+        category: 'contract',
+        name: 'Contract Completion Reminder',
+        description: 'Sent 3 days before contract ends',
+        subjectEn: 'Contract Ending Soon - Action Required',
+        subjectAr: 'العقد ينتهي قريباً - إجراء مطلوب',
+        bodyEn: 'Dear {{customerName}},\n\nYour rental contract {{contractNumber}} ends in 3 days ({{endDate}}).\n\nPlease return the vehicle or contact us to extend.\n\nReturn Location: {{returnLocation}}\n\nThank you,\nRCCMS Team',
+        bodyAr: 'عزيزي {{customerName}}،\n\nعقد الإيجار {{contractNumber}} ينتهي خلال 3 أيام ({{endDate}}).\n\nيرجى إعادة المركبة أو الاتصال بنا للتمديد.\n\nموقع الإرجاع: {{returnLocation}}\n\nشكراً لكم،\nفريق RCCMS',
+        variables: ['customerName', 'contractNumber', 'endDate', 'returnLocation'],
+        supportsSms: true,
+        supportsEmail: true,
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'WELCOME_NEW_CUSTOMER',
+        category: 'contract',
+        name: 'Welcome New Customer',
+        description: 'Sent when new contract is activated',
+        subjectEn: 'Welcome to RCCMS - Contract {{contractNumber}}',
+        subjectAr: 'مرحباً بك في RCCMS - عقد {{contractNumber}}',
+        bodyEn: 'Dear {{customerName}},\n\nWelcome to RCCMS! Your rental contract {{contractNumber}} is now active.\n\nVehicle: {{vehicleMake}} {{vehicleModel}} ({{plateNumber}})\nPeriod: {{startDate}} to {{endDate}}\n\nFor support, call {{supportHotline}} or visit {{websiteUrl}}\n\nThank you for choosing us!\nRCCMS Team',
+        bodyAr: 'عزيزي {{customerName}}،\n\nمرحباً بك في RCCMS! عقد الإيجار {{contractNumber}} الآن نشط.\n\nالمركبة: {{vehicleMake}} {{vehicleModel}} ({{plateNumber}})\nالمدة: {{startDate}} إلى {{endDate}}\n\nللدعم، اتصل على {{supportHotline}} أو قم بزيارة {{websiteUrl}}\n\nشكراً لاختياركم لنا!\nفريق RCCMS',
+        variables: ['customerName', 'contractNumber', 'vehicleMake', 'vehicleModel', 'plateNumber', 'startDate', 'endDate', 'supportHotline', 'websiteUrl'],
+        supportsSms: true,
+        supportsEmail: true,
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'PAYMENT_RECEIVED_CONFIRMATION',
+        category: 'payment',
+        name: 'Payment Received Confirmation',
+        description: 'Sent after payment is received',
+        subjectEn: 'Payment Received - Contract {{contractNumber}}',
+        subjectAr: 'تم استلام الدفعة - عقد {{contractNumber}}',
+        bodyEn: 'Dear {{customerName}},\n\nWe have received your payment of AED {{amount}} for contract {{contractNumber}}.\n\nPayment Date: {{paymentDate}}\nPayment Method: {{paymentMethod}}\nReceipt: {{receiptNumber}}\n\nThank you,\nRCCMS Team',
+        bodyAr: 'عزيزي {{customerName}}،\n\nلقد استلمنا دفعتك بقيمة {{amount}} درهم للعقد {{contractNumber}}.\n\nتاريخ الدفع: {{paymentDate}}\nطريقة الدفع: {{paymentMethod}}\nالإيصال: {{receiptNumber}}\n\nشكراً لكم،\nفريق RCCMS',
+        variables: ['customerName', 'contractNumber', 'amount', 'paymentDate', 'paymentMethod', 'receiptNumber'],
+        supportsSms: true,
+        supportsEmail: true,
+        isSystemTemplate: true,
+        isActive: true,
+      },
+      {
+        templateCode: 'RISK_SCORE_ALERT',
+        category: 'compliance',
+        name: 'Risk Score Alert',
+        description: 'Sent when customer risk score crosses critical threshold',
+        subjectEn: 'Account Risk Alert - Action Required',
+        subjectAr: 'تنبيه مخاطر الحساب - إجراء مطلوب',
+        bodyEn: 'Dear {{customerName}},\n\nYour account risk level has been elevated to {{riskLevel}} (Score: {{riskScore}}).\n\nReason: {{riskReason}}\n\nPlease contact us immediately to resolve any outstanding issues.\n\nRCCMS Compliance Team',
+        bodyAr: 'عزيزي {{customerName}}،\n\nمستوى مخاطر حسابك ارتفع إلى {{riskLevel}} (النقاط: {{riskScore}}).\n\nالسبب: {{riskReason}}\n\nيرجى الاتصال بنا فوراً لحل أي مشاكل معلقة.\n\nفريق الامتثال RCCMS',
+        variables: ['customerName', 'riskLevel', 'riskScore', 'riskReason'],
+        supportsSms: false,
+        supportsEmail: true,
+        priority: 'high',
+        isSystemTemplate: true,
+        isActive: true,
+      },
+    ];
+
+    for (const template of templates) {
+      const existing = await this.getNotificationTemplateByCode(template.templateCode);
+      if (existing) {
+        skipped++;
+      } else {
+        await db.insert(notificationTemplates).values({
+          ...template,
+          createdBy: 'system',
+        });
+        seeded++;
+      }
+    }
+
+    return { seeded, skipped };
+  }
+
+  // Automated Reminders operations
+  async getAutomatedReminders(filters?: { entityType?: string; entityId?: string; reminderType?: string; isActive?: boolean }): Promise<AutomatedReminder[]> {
+    const conditions = [];
+    if (filters?.entityType) conditions.push(eq(automatedReminders.entityType, filters.entityType));
+    if (filters?.entityId) conditions.push(eq(automatedReminders.entityId, filters.entityId));
+    if (filters?.reminderType) conditions.push(eq(automatedReminders.reminderType, filters.reminderType));
+    if (filters?.isActive !== undefined) conditions.push(eq(automatedReminders.isActive, filters.isActive));
+
+    return await db
+      .select()
+      .from(automatedReminders)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(automatedReminders.reminderDate));
+  }
+
+  async getAutomatedReminderById(id: string): Promise<AutomatedReminder | undefined> {
+    const [reminder] = await db.select().from(automatedReminders).where(eq(automatedReminders.id, id));
+    return reminder;
+  }
+
+  async createAutomatedReminder(reminderData: InsertAutomatedReminder): Promise<AutomatedReminder> {
+    const [reminder] = await db.insert(automatedReminders).values(reminderData).returning();
+    return reminder;
+  }
+
+  async updateAutomatedReminder(id: string, reminderData: Partial<InsertAutomatedReminder>): Promise<AutomatedReminder> {
+    const [updated] = await db
+      .update(automatedReminders)
+      .set({ ...reminderData, updatedAt: new Date() })
+      .where(eq(automatedReminders.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAutomatedReminder(id: string): Promise<void> {
+    await db.delete(automatedReminders).where(eq(automatedReminders.id, id));
+  }
+
+  /**
+   * Seed system-owned automated reminders (linked to notification templates)
+   * Creates default reminder configurations for each template
+   */
+  async seedAutomatedReminders(): Promise<{ seeded: number; skipped: number }> {
+    // This will be populated by the automation orchestrator
+    // System-owned reminders are created dynamically for each entity/contract
+    return { seeded: 0, skipped: 0 };
   }
 
   // ==================== WAVE 2: FLEET ECONOMICS ====================

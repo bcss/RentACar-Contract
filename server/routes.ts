@@ -8020,6 +8020,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/automation/seed-notification-templates - Seed 12 bilingual notification templates
+  app.post("/api/automation/seed-notification-templates", isAuthenticated, requireSuperadmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const result = await storage.seedNotificationTemplates();
+      
+      await createAuditLog(user.id, 'templates_seeded', undefined, req, `Seeded ${result.seeded} templates, skipped ${result.skipped} existing`);
+      
+      res.json({
+        success: true,
+        seeded: result.seeded,
+        skipped: result.skipped,
+        message: `Successfully seeded ${result.seeded} notification templates. ${result.skipped} already existed.`,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/notification-templates - Get all notification templates
+  app.get("/api/notification-templates", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const templates = await storage.getNotificationTemplates(req.query as any);
+      res.json(templates);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // PUT /api/notification-templates/:id - Update notification template
+  app.put("/api/notification-templates/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const updated = await storage.updateNotificationTemplate(req.params.id, req.body);
+      await createAuditLog(user.id, 'template_updated', undefined, req, `Updated notification template ${req.params.id}`);
+      res.json(updated);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/automated-reminders - Get automated reminders
+  app.get("/api/automated-reminders", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const reminders = await storage.getAutomatedReminders(req.query as any);
+      res.json(reminders);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Customer Risk Scores routes
   app.get("/api/customer-risk-scores", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
     try {
