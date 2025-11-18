@@ -16,7 +16,7 @@ import {
 import { BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { AlertTriangle, Download, Users } from 'lucide-react';
 import { format } from 'date-fns';
-import type { CustomerChurnRiskReport as CustomerChurnRiskReportType } from '@/../../shared/schema';
+import type { CustomerChurnRiskReport as CustomerChurnRiskReportType } from '@shared/schema';
 
 const RISK_COLORS = {
   high: '#ef4444',
@@ -30,7 +30,7 @@ export default function CustomerChurnRiskReport() {
   const [minContracts, setMinContracts] = useState('');
 
   const { data, isLoading } = useQuery<CustomerChurnRiskReportType>({
-    queryKey: ['/api/reports/predictive/customer-churn', { riskLevel, minContracts }],
+    queryKey: ['/api/reports/predictive/customer-churn', riskLevel, minContracts],
   });
 
   const exportData = () => {
@@ -48,6 +48,7 @@ export default function CustomerChurnRiskReport() {
     a.href = url;
     a.download = `churn-risk-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   const getRiskBadgeVariant = (level: string) => {

@@ -14,7 +14,7 @@ import {
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { AlertTriangle, Download, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
-import type { LocationDemandForecastReport } from '@/../../shared/schema';
+import type { LocationDemandForecastReport } from '@shared/schema';
 
 const EMIRATES = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain'];
 
@@ -23,7 +23,7 @@ export default function LocationDemandForecast() {
   const [emirate, setEmirate] = useState('');
 
   const { data, isLoading } = useQuery<LocationDemandForecastReport>({
-    queryKey: ['/api/reports/predictive/demand-forecast', { emirate }],
+    queryKey: ['/api/reports/predictive/demand-forecast', emirate],
   });
 
   const exportData = () => {
@@ -41,6 +41,7 @@ export default function LocationDemandForecast() {
     a.href = url;
     a.download = `demand-forecast-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading) {

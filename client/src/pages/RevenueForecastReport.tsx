@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, Download } from 'lucide-react';
 import { format } from 'date-fns';
-import type { RevenueForecastReport as RevenueForecastReportType } from '@/../../shared/schema';
+import type { RevenueForecastReport as RevenueForecastReportType } from '@shared/schema';
 
 export default function RevenueForecastReport() {
   const { t, i18n } = useTranslation();
@@ -16,8 +16,8 @@ export default function RevenueForecastReport() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  const { data, isLoading } = useQuery<RevenueForecastReportType>({
-    queryKey: ['/api/reports/predictive/revenue-forecast', { startDate, endDate }],
+  const { data, isLoading} = useQuery<RevenueForecastReportType>({
+    queryKey: ['/api/reports/predictive/revenue-forecast', startDate, endDate],
   });
 
   const exportData = () => {
@@ -35,6 +35,7 @@ export default function RevenueForecastReport() {
     a.href = url;
     a.download = `revenue-forecast-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading) {

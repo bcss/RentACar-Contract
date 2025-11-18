@@ -14,14 +14,14 @@ import {
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { AlertTriangle, Download, Wrench } from 'lucide-react';
 import { format } from 'date-fns';
-import type { MaintenanceCostForecastReport } from '@/../../shared/schema';
+import type { MaintenanceCostForecastReport } from '@shared/schema';
 
 export default function MaintenanceCostForecast() {
   const { t } = useTranslation();
   const [vehicleType, setVehicleType] = useState('');
 
   const { data, isLoading } = useQuery<MaintenanceCostForecastReport>({
-    queryKey: ['/api/reports/predictive/maintenance-forecast', { vehicleType }],
+    queryKey: ['/api/reports/predictive/maintenance-forecast', vehicleType],
   });
 
   const exportData = () => {
@@ -39,6 +39,7 @@ export default function MaintenanceCostForecast() {
     a.href = url;
     a.download = `maintenance-forecast-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading) {

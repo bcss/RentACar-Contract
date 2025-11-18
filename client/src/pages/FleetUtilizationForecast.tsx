@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { AlertTriangle, Download, Car } from 'lucide-react';
 import { format } from 'date-fns';
-import type { FleetUtilizationForecastReport } from '@/../../shared/schema';
+import type { FleetUtilizationForecastReport } from '@shared/schema';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
@@ -18,7 +18,7 @@ export default function FleetUtilizationForecast() {
   const [endDate, setEndDate] = useState('');
 
   const { data, isLoading } = useQuery<FleetUtilizationForecastReport>({
-    queryKey: ['/api/reports/predictive/fleet-utilization', { startDate, endDate }],
+    queryKey: ['/api/reports/predictive/fleet-utilization', startDate, endDate],
   });
 
   const exportData = () => {
@@ -36,6 +36,7 @@ export default function FleetUtilizationForecast() {
     a.href = url;
     a.download = `fleet-utilization-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading) {

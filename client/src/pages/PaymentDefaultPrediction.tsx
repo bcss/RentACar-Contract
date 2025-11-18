@@ -16,7 +16,7 @@ import {
 import { BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { AlertTriangle, Download, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
-import type { PaymentDefaultPredictionReport } from '@/../../shared/schema';
+import type { PaymentDefaultPredictionReport } from '@shared/schema';
 
 const RISK_COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6'];
 
@@ -26,7 +26,7 @@ export default function PaymentDefaultPrediction() {
   const [minAmount, setMinAmount] = useState('');
 
   const { data, isLoading } = useQuery<PaymentDefaultPredictionReport>({
-    queryKey: ['/api/reports/predictive/payment-default', { riskLevel, minAmount }],
+    queryKey: ['/api/reports/predictive/payment-default', riskLevel, minAmount],
   });
 
   const exportData = () => {
@@ -44,6 +44,7 @@ export default function PaymentDefaultPrediction() {
     a.href = url;
     a.download = `payment-default-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   const getRiskBadgeVariant = (level: string) => {

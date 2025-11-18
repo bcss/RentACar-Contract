@@ -81,6 +81,7 @@ const CustomerRiskScoring = lazy(() => import("@/pages/CustomerRiskScoring"));
 const CommunicationProviders = lazy(() => import("@/pages/CommunicationProviders"));
 const CommunicationLogs = lazy(() => import("@/pages/CommunicationLogs"));
 const ManualNotificationSender = lazy(() => import("@/pages/ManualNotificationSender"));
+const CampaignManagement = lazy(() => import("@/pages/CampaignManagement"));
 
 // Advanced Analytics Reports
 const CustomerRiskTrends = lazy(() => import("@/pages/reports/CustomerRiskTrends"));
@@ -91,6 +92,14 @@ const MaintenanceComplianceReport = lazy(() => import("@/pages/reports/Maintenan
 const DriverUtilizationReport = lazy(() => import("@/pages/reports/DriverUtilizationReport"));
 const ReminderDeliverySLA = lazy(() => import("@/pages/reports/ReminderDeliverySLA"));
 const ApprovalTurnaroundReport = lazy(() => import("@/pages/reports/ApprovalTurnaroundReport"));
+
+// Predictive Intelligence Reports
+const RevenueForecastReport = lazy(() => import("@/pages/RevenueForecastReport"));
+const FleetUtilizationForecast = lazy(() => import("@/pages/FleetUtilizationForecast"));
+const CustomerChurnRiskReport = lazy(() => import("@/pages/CustomerChurnRiskReport"));
+const MaintenanceCostForecast = lazy(() => import("@/pages/MaintenanceCostForecast"));
+const PaymentDefaultPrediction = lazy(() => import("@/pages/PaymentDefaultPrediction"));
+const LocationDemandForecast = lazy(() => import("@/pages/LocationDemandForecast"));
 
 // Professional loading skeleton
 function PageLoader() {
@@ -315,6 +324,9 @@ function Router() {
       <Route path="/notifications/send">
         {() => <ProtectedRoute component={ManualNotificationSender} />}
       </Route>
+      <Route path="/campaigns">
+        {() => <ProtectedRoute component={CampaignManagement} />}
+      </Route>
       
       {/* Advanced Analytics Reports */}
       <Route path="/reports/customer-risk-trends">
@@ -340,6 +352,26 @@ function Router() {
       </Route>
       <Route path="/reports/approval-turnaround">
         {() => <ProtectedRoute component={ApprovalTurnaroundReport} />}
+      </Route>
+      
+      {/* Predictive Intelligence Reports */}
+      <Route path="/reports/predictive/revenue-forecast">
+        {() => <ProtectedRoute component={RevenueForecastReport} />}
+      </Route>
+      <Route path="/reports/predictive/fleet-utilization">
+        {() => <ProtectedRoute component={FleetUtilizationForecast} />}
+      </Route>
+      <Route path="/reports/predictive/customer-churn">
+        {() => <ProtectedRoute component={CustomerChurnRiskReport} />}
+      </Route>
+      <Route path="/reports/predictive/maintenance-forecast">
+        {() => <ProtectedRoute component={MaintenanceCostForecast} />}
+      </Route>
+      <Route path="/reports/predictive/payment-default">
+        {() => <ProtectedRoute component={PaymentDefaultPrediction} />}
+      </Route>
+      <Route path="/reports/predictive/demand-forecast">
+        {() => <ProtectedRoute component={LocationDemandForecast} />}
       </Route>
       
       <Route component={() => <NotFound />} />
