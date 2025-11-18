@@ -3696,3 +3696,113 @@ export const insertChannelPreferenceSchema = createInsertSchema(notificationChan
 
 export type InsertChannelPreference = z.infer<typeof insertChannelPreferenceSchema>;
 export type ChannelPreference = typeof notificationChannelPreferences.$inferSelect;
+
+
+// ===========================
+// Predictive Report Response Types
+// ===========================
+
+export interface RevenueForecastReport {
+  summary: {
+    averageMonthlyRevenue: number;
+    growthRate: number;
+    forecast30Days: number;
+    forecast90Days: number;
+  };
+  forecasts: Array<{
+    forecastDate: string;
+    forecastRevenue: number;
+    historicalRevenue?: number;
+    confidence: number;
+  }>;
+  warnings: string[];
+}
+
+export interface FleetUtilizationForecastReport {
+  summary: {
+    overallUtilization: number;
+    totalFleet: number;
+    vehiclesRented: number;
+    availableCapacity: number;
+  };
+  vehicleTypes: Array<{
+    vehicleType: string;
+    totalFleet: number;
+    currentUtilization: number;
+    forecastUtilization: number;
+    vehiclesRented: number;
+    availableCapacity: number;
+  }>;
+  warnings: string[];
+}
+
+export interface CustomerChurnRiskReport {
+  summary: {
+    totalCustomers: number;
+    highRiskCount: number;
+    mediumRiskCount: number;
+    lowRiskCount: number;
+    averageRiskScore: number;
+    averagePaymentScore: number;
+  };
+  customers: Array<{
+    customerId: string;
+    customerName: string;
+    riskScore: number;
+    riskLevel: 'high' | 'medium' | 'low';
+    totalContracts: number;
+    daysSinceLastContract: number;
+    paymentScore: number;
+  }>;
+}
+
+export interface MaintenanceCostForecastReport {
+  summary: {
+    totalForecastCost: number;
+    avgCostPerVehicle: number;
+    totalVehicles: number;
+    avgFleetAge: number;
+  };
+  vehicleTypes: Array<{
+    vehicleType: string;
+    totalVehicles: number;
+    forecastCost: number;
+    avgVehicleAge: number;
+    avgMileage: number;
+  }>;
+  warnings: string[];
+}
+
+export interface PaymentDefaultPredictionReport {
+  summary: {
+    totalOutstanding: number;
+    highRiskCount: number;
+    mediumRiskCount: number;
+    lowRiskCount: number;
+    atRiskAmount: number;
+    avgDefaultProbability: number;
+  };
+  contracts: Array<{
+    contractId: string;
+    customerName: string;
+    defaultProbability: number;
+    riskLevel: 'high' | 'medium' | 'low';
+    outstandingAmount: number;
+    daysOverdue: number;
+  }>;
+}
+
+export interface LocationDemandForecastReport {
+  summary: {
+    totalForecastDemand: number;
+    totalHistorical: number;
+    avgGrowthRate: number;
+  };
+  locations: Array<{
+    emirate: string;
+    historicalDemand: number;
+    forecastDemand: number;
+    growthRate: number;
+  }>;
+  warnings: string[];
+}
