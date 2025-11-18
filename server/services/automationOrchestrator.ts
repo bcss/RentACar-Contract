@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { storage } from '../storage';
 import { RiskCalculator } from './riskCalculator';
+import { notificationService } from './notificationService';
 
 /**
  * Automation Orchestrator for RCCMS
@@ -100,21 +101,40 @@ export function initializeAutomationOrchestrator() {
           );
 
           if (!hasRecentReminder) {
-            // Get notification template
-            const template = await storage.getNotificationTemplateByCode('DOCUMENT_RENEWAL_REMINDER');
-            
-            if (template) {
-              await storage.createAutomatedReminder({
-                entityType: doc.entityType,
-                entityId: doc.entityId,
-                reminderType: 'document_renewal',
-                reminderDate: expiryDate,
-                templateId: template.id,
-                messageTemplate: `Document ${doc.documentType} expiring on ${expiryDate.toLocaleDateString()}`,
-                recipientEmail: doc.entityType === 'customer' ? 'customer@example.com' : undefined,
-                recipientPhone: undefined,
-              });
-              remindersCreated++;
+            // Send notification using NotificationService
+            const result = await notificationService.sendNotification({
+              templateCode: 'DOCUMENT_RENEWAL_REMINDER',
+              channel: 'both',
+              recipientType: doc.entityType as 'customer' | 'driver' | 'sponsor',
+              recipientId: doc.entityId,
+              variables: {
+                documentType: doc.documentType,
+                expiryDate: expiryDate.toLocaleDateString('en-AE'),
+                daysUntilExpiry: Math.ceil((expiryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)).toString(),
+              },
+              language: 'en',
+              triggerType: 'automated',
+              triggeredBy: 'system',
+            });
+
+            if (result.success) {
+              // Create reminder record for tracking
+              const template = await storage.getNotificationTemplateByCode('DOCUMENT_RENEWAL_REMINDER');
+              if (template) {
+                await storage.createAutomatedReminder({
+                  entityType: doc.entityType,
+                  entityId: doc.entityId,
+                  reminderType: 'document_renewal',
+                  reminderDate: expiryDate,
+                  templateId: template.id,
+                  messageTemplate: `Document ${doc.documentType} expiring on ${expiryDate.toLocaleDateString()}`,
+                  recipientEmail: undefined,
+                  recipientPhone: undefined,
+                  isSent: true,
+                  sentTime: new Date(),
+                });
+                remindersCreated++;
+              }
             }
           }
         }
@@ -156,21 +176,49 @@ export function initializeAutomationOrchestrator() {
           );
 
           if (!hasRecentReminder) {
-            const template = await storage.getNotificationTemplateByCode('CONTRACT_EXPIRY_REMINDER');
             const customer = await storage.getCustomerById(contract.customerId);
+            const vehicle = await storage.getVehicleById(contract.vehicleId);
             
-            if (template && customer) {
-              await storage.createAutomatedReminder({
-                entityType: 'contract',
-                entityId: contract.id,
-                reminderType: 'contract_expiry',
-                reminderDate: endDate,
-                templateId: template.id,
-                messageTemplate: `Contract ${contract.contractNumber} expiring on ${endDate.toLocaleDateString()}`,
-                recipientEmail: customer.email,
-                recipientPhone: customer.phone,
+            if (customer && vehicle) {
+              // Send notification using NotificationService
+              const result = await notificationService.sendNotification({
+                templateCode: 'CONTRACT_EXPIRY_REMINDER',
+                channel: 'both',
+                recipientType: 'customer',
+                recipientId: customer.id,
+                variables: {
+                  contractNumber: contract.contractNumber.toString(),
+                  customerName: customer.nameEn || '',
+                  vehicleMake: vehicle.make || '',
+                  vehicleModel: vehicle.model || '',
+                  vehicleRegistration: vehicle.registration || '',
+                  endDate: endDate.toLocaleDateString('en-AE'),
+                  daysUntilExpiry: Math.ceil((endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)).toString(),
+                },
+                language: 'en',
+                triggerType: 'automated',
+                triggeredBy: 'system',
               });
-              remindersCreated++;
+
+              if (result.success) {
+                // Create reminder record for tracking
+                const template = await storage.getNotificationTemplateByCode('CONTRACT_EXPIRY_REMINDER');
+                if (template) {
+                  await storage.createAutomatedReminder({
+                    entityType: 'contract',
+                    entityId: contract.id,
+                    reminderType: 'contract_expiry',
+                    reminderDate: endDate,
+                    templateId: template.id,
+                    messageTemplate: `Contract ${contract.contractNumber} expiring on ${endDate.toLocaleDateString()}`,
+                    recipientEmail: customer.email,
+                    recipientPhone: customer.phone,
+                    isSent: true,
+                    sentTime: new Date(),
+                  });
+                  remindersCreated++;
+                }
+              }
             }
           }
         }
@@ -215,21 +263,45 @@ export function initializeAutomationOrchestrator() {
           );
 
           if (!hasRecentReminder) {
-            const template = await storage.getNotificationTemplateByCode('PAYMENT_OVERDUE_ALERT');
             const customer = await storage.getCustomerById(contract.customerId);
             
-            if (template && customer) {
-              await storage.createAutomatedReminder({
-                entityType: 'contract',
-                entityId: contract.id,
-                reminderType: 'payment_overdue',
-                reminderDate: today,
-                templateId: template.id,
-                messageTemplate: `Payment overdue for contract ${contract.contractNumber}: AED ${overdueAmount}`,
-                recipientEmail: customer.email,
-                recipientPhone: customer.phone,
+            if (customer) {
+              // Send notification using NotificationService
+              const result = await notificationService.sendNotification({
+                templateCode: 'PAYMENT_OVERDUE_ALERT',
+                channel: 'both',
+                recipientType: 'customer',
+                recipientId: customer.id,
+                variables: {
+                  contractNumber: contract.contractNumber.toString(),
+                  customerName: customer.nameEn || '',
+                  overdueAmount: overdueAmount.toFixed(2),
+                  paymentUrl: `https://app.rccms.ae/contracts/${contract.id}/payment`,
+                },
+                language: 'en',
+                triggerType: 'automated',
+                triggeredBy: 'system',
               });
-              remindersCreated++;
+
+              if (result.success) {
+                // Create reminder record for tracking
+                const template = await storage.getNotificationTemplateByCode('PAYMENT_OVERDUE_ALERT');
+                if (template) {
+                  await storage.createAutomatedReminder({
+                    entityType: 'contract',
+                    entityId: contract.id,
+                    reminderType: 'payment_overdue',
+                    reminderDate: today,
+                    templateId: template.id,
+                    messageTemplate: `Payment overdue for contract ${contract.contractNumber}: AED ${overdueAmount}`,
+                    recipientEmail: customer.email,
+                    recipientPhone: customer.phone,
+                    isSent: true,
+                    sentTime: new Date(),
+                  });
+                  remindersCreated++;
+                }
+              }
             }
           }
         }

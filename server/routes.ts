@@ -15,6 +15,7 @@ import { getGeolocation } from "./services/geolocation";
 import { validateEditReason } from "./utils/validation";
 import { calculateContractDriverCosts } from "./utils/driverCostCalculator";
 import { RiskCalculator } from "./services/riskCalculator";
+import { notificationService } from "./services/notificationService";
 import { format } from "date-fns";
 import os from "os";
 import { readFileSync } from "fs";
@@ -1341,6 +1342,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create audit log
       await createAuditLog(userId, 'activate', activated.id, req, `Activated contract #${activated.contractNumber} - vehicle handed over at ${timeOut || 'N/A'}`);
       
+      // Send activation notification to customer
+      try {
+        const customer = await storage.getCustomerById(activated.customerId);
+        const vehicle = await storage.getVehicleById(activated.vehicleId);
+        
+        if (customer && vehicle) {
+          await notificationService.sendNotification({
+            templateCode: 'CONTRACT_ACTIVATED',
+            channel: 'both',
+            recipientType: 'customer',
+            recipientId: customer.id,
+            variables: {
+              contractNumber: activated.contractNumber.toString(),
+              customerName: customer.nameEn || '',
+              vehicleMake: vehicle.make || '',
+              vehicleModel: vehicle.model || '',
+              vehicleRegistration: vehicle.registration || '',
+              startDate: new Date(activated.rentalStartDate).toLocaleDateString('en-AE'),
+              endDate: new Date(activated.rentalEndDate).toLocaleDateString('en-AE'),
+            },
+            language: 'en',
+            triggerType: 'event',
+            triggeredBy: userId,
+          });
+        }
+      } catch (notifError) {
+        console.error('[Notification] Failed to send contract activation notification:', notifError);
+        // Don't fail the activation if notification fails
+      }
+      
       res.json(activated);
     } catch (error: any) {
       console.error("Error activating contract:", error);
@@ -1538,6 +1569,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create audit log with calculation details and return time
       const finalAuditNote = `${auditNote}${timeIn ? ` | Vehicle returned at ${timeIn}` : ''}`;
       await createAuditLog(userId, 'complete', completed.id, req, finalAuditNote);
+      
+      // Send completion notification to customer
+      try {
+        const customer = await storage.getCustomerById(completed.customerId);
+        const vehicle = await storage.getVehicleById(completed.vehicleId);
+        
+        if (customer && vehicle) {
+          await notificationService.sendNotification({
+            templateCode: 'CONTRACT_COMPLETED',
+            channel: 'both',
+            recipientType: 'customer',
+            recipientId: customer.id,
+            variables: {
+              contractNumber: completed.contractNumber.toString(),
+              customerName: customer.nameEn || '',
+              vehicleMake: vehicle.make || '',
+              vehicleModel: vehicle.model || '',
+              totalAmount: completed.totalAmount || '0',
+              outstandingBalance: completed.outstandingBalance || '0',
+              returnDate: new Date().toLocaleDateString('en-AE'),
+            },
+            language: 'en',
+            triggerType: 'event',
+            triggeredBy: userId,
+          });
+        }
+      } catch (notifError) {
+        console.error('[Notification] Failed to send contract completion notification:', notifError);
+        // Don't fail the completion if notification fails
+      }
       
       res.json(completed);
     } catch (error: any) {
