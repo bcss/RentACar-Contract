@@ -7739,6 +7739,149 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Communication Provider routes
+  app.get("/api/communication-providers", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.type) filters.type = req.query.type;
+      if (req.query.isActive !== undefined) filters.isActive = req.query.isActive === 'true';
+      
+      const providers = await storage.getCommunicationProviders(filters);
+      res.json(providers);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/communication-providers/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const provider = await storage.getCommunicationProviderById(req.params.id);
+      if (!provider) {
+        return res.status(404).json({ message: "Communication provider not found" });
+      }
+      res.json(provider);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/communication-providers", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const data = insertCommunicationProviderSchema.parse(req.body);
+      const provider = await storage.createCommunicationProvider(data, user.id);
+      
+      await createAuditLog(user.id, 'provider_created', undefined, req, `Created ${data.type} provider: ${data.name}`);
+      res.status(201).json(provider);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/communication-providers/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      const validationResult = insertCommunicationProviderSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = fromZodError(validationResult.error);
+        return res.status(400).json({ message: errors.message });
+      }
+      
+      const provider = await storage.updateCommunicationProvider(req.params.id, validationResult.data);
+      await createAuditLog(user.id, 'provider_updated', undefined, req, `Updated provider: ${provider.name}`);
+      res.json(provider);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/communication-providers/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      await storage.deleteCommunicationProvider(req.params.id);
+      await createAuditLog(user.id, 'provider_deleted', undefined, req, `Deleted communication provider`);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Communication Log routes
+  app.get("/api/communication-logs", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const filters: any = {};
+      if (req.query.channel) filters.channel = req.query.channel;
+      if (req.query.status) filters.status = req.query.status;
+      if (req.query.recipientId) filters.recipientId = req.query.recipientId;
+      if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
+      
+      const logs = await storage.getCommunicationLogs(filters);
+      res.json(logs);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/communication-logs/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const log = await storage.getCommunicationLogById(req.params.id);
+      if (!log) {
+        return res.status(404).json({ message: "Communication log not found" });
+      }
+      res.json(log);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Manual notification sending endpoint (for testing and manual triggers)
+  app.post("/api/notifications/send", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      
+      // Validate request body
+      const { templateCode, channel, recipientType, recipientId, variables, language } = req.body;
+      
+      if (!templateCode || !channel || !recipientType || !recipientId) {
+        return res.status(400).json({ 
+          message: "Missing required fields: templateCode, channel, recipientType, recipientId" 
+        });
+      }
+      
+      // Send notification using NotificationService
+      const { notificationService } = await import('../services/notificationService');
+      const result = await notificationService.sendNotification({
+        templateCode,
+        channel,
+        recipientType,
+        recipientId,
+        variables: variables || {},
+        language: language || 'en',
+        triggerType: 'manual',
+        triggeredBy: user.id,
+      });
+      
+      await createAuditLog(user.id, 'notification_sent', undefined, req, `Sent ${channel} notification using template ${templateCode}`);
+      
+      if (result.success) {
+        res.status(200).json({
+          success: true,
+          messageSent: result.messageSent,
+          logIds: result.logIds,
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          errors: result.errors,
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Approval Requests routes
   app.get("/api/approval-requests", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
     try {

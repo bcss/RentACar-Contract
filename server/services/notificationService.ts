@@ -65,11 +65,11 @@ class NotificationService {
       // 3. Render messages
       const language = params.language || recipient.preferredLanguage || 'en';
       const renderedSubject = this.renderTemplate(
-        language === 'ar' ? template.subjectAr : template.subjectEn,
+        (language === 'ar' ? template.subjectAr : template.subjectEn) || '',
         params.variables
       );
       const renderedBody = this.renderTemplate(
-        language === 'ar' ? template.bodyAr : template.bodyEn,
+        (language === 'ar' ? template.bodyAr : template.bodyEn) || '',
         params.variables
       );
 
@@ -121,7 +121,7 @@ class NotificationService {
       }
 
       // 6. Determine overall success
-      result.success = (result.messageSent.sms || result.messageSent.email) && result.errors.length === 0;
+      result.success = !!(result.messageSent.sms || result.messageSent.email) && result.errors.length === 0;
 
       return result;
     } catch (error) {
@@ -396,7 +396,7 @@ class NotificationService {
       return {
         name: customer.nameEn || customer.nameAr || 'Customer',
         email: customer.email || undefined,
-        phone: customer.mobile || undefined,
+        phone: customer.phone || undefined,
         preferredLanguage: 'en',
       };
     }
@@ -407,7 +407,7 @@ class NotificationService {
       return {
         name: driver.nameEn || driver.nameAr || 'Driver',
         email: driver.email || undefined,
-        phone: driver.mobile || undefined,
+        phone: driver.phone || undefined,
         preferredLanguage: 'en',
       };
     }
