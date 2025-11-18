@@ -174,6 +174,11 @@ export const customers = pgTable("customers", {
   email: varchar("email"),
   address: text("address"),
   
+  // Phase 4-5: Location-Based Analytics
+  area: varchar("area"), // Area within emirate (Dubai Marina, JLT, etc.)
+  latitude: numeric("latitude", { precision: 10, scale: 6 }), // GPS coordinates
+  longitude: numeric("longitude", { precision: 10, scale: 6 }),
+  
   // License Information
   licenseNumber: varchar("license_number"), // Driver's license number (required by form validation)
   licenseIssuedBy: varchar("license_issued_by"), // Issuing authority/country
@@ -3240,3 +3245,385 @@ export const insertCommunicationLogSchema = createInsertSchema(communicationLogs
 
 export type InsertCommunicationLog = z.infer<typeof insertCommunicationLogSchema>;
 export type CommunicationLog = typeof communicationLogs.$inferSelect;
+
+// ============================================================================
+// PHASE 4-5: ADVANCED FEATURES - Campaign Management, Analytics, Predictions
+// ============================================================================
+
+// Claim Progress Updates table - Timeline tracking for insurance claims
+export const claimProgressUpdates = pgTable("claim_progress_updates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  claimId: varchar("claim_id").notNull().references(() => insuranceClaims.id, { onDelete: 'cascade' }),
+  
+  // Update Details
+  updateType: varchar("update_type", { length: 30 }).notNull(), // status_change, remark, financial_update, document_upload, approval
+  
+  // Status Changes
+  previousStatus: varchar("previous_status", { length: 20 }),
+  newStatus: varchar("new_status", { length: 20 }),
+  
+  // Financial Updates
+  previousAmount: varchar("previous_amount"),
+  newAmount: varchar("new_amount"),
+  amountType: varchar("amount_type", { length: 30 }), // claim_amount, approved_amount, settled_amount
+  
+  // Remark/Notes
+  remark: text("remark"),
+  remarkAr: text("remark_ar"), // Arabic remark
+  
+  // Document Attachments (file paths)
+  attachments: jsonb("attachments"), // Array of file paths
+  
+  // User Info
+  updatedBy: varchar("updated_by").notNull().references(() => users.id),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_claim_progress_claim_id").on(table.claimId),
+  index("idx_claim_progress_update_type").on(table.updateType),
+  index("idx_claim_progress_updated_by").on(table.updatedBy),
+  index("idx_claim_progress_created_at").on(table.createdAt),
+]);
+
+export const claimProgressRelations = relations(claimProgressUpdates, ({ one }) => ({
+  claim: one(insuranceClaims, {
+    fields: [claimProgressUpdates.claimId],
+    references: [insuranceClaims.id],
+  }),
+  user: one(users, {
+    fields: [claimProgressUpdates.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const insertClaimProgressUpdateSchema = createInsertSchema(claimProgressUpdates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertClaimProgressUpdate = z.infer<typeof insertClaimProgressUpdateSchema>;
+export type ClaimProgressUpdate = typeof claimProgressUpdates.$inferSelect;
+
+// Notification Campaigns table - Marketing & communication campaigns
+export const notificationCampaigns = pgTable("notification_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Campaign Details
+  name: varchar("name").notNull(),
+  nameAr: varchar("name_ar"),
+  description: text("description"),
+  descriptionAr: text("description_ar"),
+  
+  // Status Workflow
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, pending_approval, approved, scheduled, sending, sent, cancelled, failed
+  
+  // Template & Channel
+  templateId: varchar("template_id").notNull().references(() => notificationTemplates.id),
+  channel: varchar("channel", { length: 20 }).notNull(), // email, sms, both
+  
+  // Branch Scoping (RBAC)
+  scope: varchar("scope", { length: 20 }).notNull().default("branch"), // branch, organization, selected_branches
+  branchId: varchar("branch_id").references(() => branches.id), // For branch scope
+  selectedBranches: jsonb("selected_branches"), // Array of branch IDs for selected_branches scope
+  
+  // Recipient Filtering
+  recipientFilter: jsonb("recipient_filter").notNull(), // Complex filter criteria
+  estimatedRecipients: integer("estimated_recipients").default(0),
+  actualRecipients: integer("actual_recipients").default(0),
+  
+  // Cost Estimation & Tracking
+  estimatedCost: varchar("estimated_cost"),
+  actualCost: varchar("actual_cost"),
+  currency: varchar("currency", { length: 5 }).default("AED"),
+  
+  // Scheduling
+  scheduledAt: timestamp("scheduled_at"), // When to send (null = send immediately)
+  sentAt: timestamp("sent_at"), // When actually sent
+  
+  // Delivery Tracking
+  successCount: integer("success_count").default(0),
+  failureCount: integer("failure_count").default(0),
+  
+  // Approval Workflow
+  requiresApproval: boolean("requires_approval").notNull().default(true),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  rejectedBy: varchar("rejected_by").references(() => users.id),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
+  
+  // A/B Testing
+  isAbTest: boolean("is_ab_test").notNull().default(false),
+  abTestId: varchar("ab_test_id"),
+  variantName: varchar("variant_name", { length: 10 }), // 'A', 'B'
+  
+  // Audit
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_campaigns_status").on(table.status),
+  index("idx_campaigns_scope").on(table.scope),
+  index("idx_campaigns_branch").on(table.branchId),
+  index("idx_campaigns_template").on(table.templateId),
+  index("idx_campaigns_scheduled").on(table.scheduledAt),
+  index("idx_campaigns_created_by").on(table.createdBy),
+  index("idx_campaigns_ab_test").on(table.abTestId),
+  index("idx_campaigns_created_at").on(table.createdAt),
+]);
+
+export const campaignRelations = relations(notificationCampaigns, ({ one }) => ({
+  template: one(notificationTemplates, {
+    fields: [notificationCampaigns.templateId],
+    references: [notificationTemplates.id],
+  }),
+  branch: one(branches, {
+    fields: [notificationCampaigns.branchId],
+    references: [branches.id],
+  }),
+  creator: one(users, {
+    fields: [notificationCampaigns.createdBy],
+    references: [users.id],
+    relationName: "campaignCreator",
+  }),
+  approver: one(users, {
+    fields: [notificationCampaigns.approvedBy],
+    references: [users.id],
+    relationName: "campaignApprover",
+  }),
+}));
+
+export const insertCampaignSchema = createInsertSchema(notificationCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  actualRecipients: true,
+  actualCost: true,
+  sentAt: true,
+  successCount: true,
+  failureCount: true,
+  approvedBy: true,
+  approvedAt: true,
+  rejectedBy: true,
+  rejectedAt: true,
+});
+
+export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
+export type Campaign = typeof notificationCampaigns.$inferSelect;
+
+// Campaign Recipients table - Track individual message delivery per campaign
+export const campaignRecipients = pgTable("campaign_recipients", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => notificationCampaigns.id, { onDelete: 'cascade' }),
+  
+  // Recipient Details
+  recipientType: varchar("recipient_type", { length: 30 }).notNull(), // customer, driver, user
+  recipientId: varchar("recipient_id").notNull(),
+  recipientName: varchar("recipient_name"),
+  recipientContact: varchar("recipient_contact").notNull(), // Email or phone
+  
+  // Delivery Status
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, sent, delivered, failed, bounced
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  readAt: timestamp("read_at"), // Email read tracking
+  failureReason: text("failure_reason"),
+  
+  // Reference to communication log
+  communicationLogId: varchar("communication_log_id").references(() => communicationLogs.id),
+  
+  // Metadata
+  deliveryMetadata: jsonb("delivery_metadata"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_campaign_recipients_campaign").on(table.campaignId),
+  index("idx_campaign_recipients_type").on(table.recipientType, table.recipientId),
+  index("idx_campaign_recipients_status").on(table.status),
+  index("idx_campaign_recipients_sent_at").on(table.sentAt),
+  index("idx_campaign_recipients_created_at").on(table.createdAt),
+]);
+
+export const campaignRecipientRelations = relations(campaignRecipients, ({ one }) => ({
+  campaign: one(notificationCampaigns, {
+    fields: [campaignRecipients.campaignId],
+    references: [notificationCampaigns.id],
+  }),
+  communicationLog: one(communicationLogs, {
+    fields: [campaignRecipients.communicationLogId],
+    references: [communicationLogs.id],
+  }),
+}));
+
+export const insertCampaignRecipientSchema = createInsertSchema(campaignRecipients).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCampaignRecipient = z.infer<typeof insertCampaignRecipientSchema>;
+export type CampaignRecipient = typeof campaignRecipients.$inferSelect;
+
+// Template Analytics table - Track template performance metrics
+export const templateAnalytics = pgTable("template_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").notNull().references(() => notificationTemplates.id, { onDelete: 'cascade' }),
+  
+  // Time Period
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  periodType: varchar("period_type", { length: 20 }).notNull(), // daily, weekly, monthly
+  
+  // Channel Breakdown
+  channel: varchar("channel", { length: 20 }).notNull(), // email, sms, both
+  
+  // Volume Metrics
+  sendCount: integer("send_count").notNull().default(0),
+  deliverySuccessCount: integer("delivery_success_count").default(0),
+  deliveryFailureCount: integer("delivery_failure_count").default(0),
+  
+  // Email-specific Metrics
+  emailOpenCount: integer("email_open_count").default(0),
+  emailClickCount: integer("email_click_count").default(0),
+  emailBounceCount: integer("email_bounce_count").default(0),
+  emailUnsubscribeCount: integer("email_unsubscribe_count").default(0),
+  
+  // Calculated Rates (stored for performance)
+  deliveryRate: varchar("delivery_rate"), // Percentage
+  openRate: varchar("open_rate"), // Email only
+  clickRate: varchar("click_rate"), // Email only
+  bounceRate: varchar("bounce_rate"),
+  
+  // Performance Score (0-100)
+  performanceScore: integer("performance_score"),
+  
+  // Cost Tracking
+  totalCost: varchar("total_cost"),
+  currency: varchar("currency", { length: 5 }).default("AED"),
+  
+  // Branch Analytics (nullable for organization-wide)
+  branchId: varchar("branch_id").references(() => branches.id),
+  
+  // Metadata
+  metadata: jsonb("metadata"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_template_analytics_template").on(table.templateId),
+  index("idx_template_analytics_period").on(table.periodStart, table.periodEnd),
+  index("idx_template_analytics_channel").on(table.channel),
+  index("idx_template_analytics_branch").on(table.branchId),
+  index("idx_template_analytics_score").on(table.performanceScore),
+  index("idx_template_analytics_created_at").on(table.createdAt),
+]);
+
+export const templateAnalyticsRelations = relations(templateAnalytics, ({ one }) => ({
+  template: one(notificationTemplates, {
+    fields: [templateAnalytics.templateId],
+    references: [notificationTemplates.id],
+  }),
+  branch: one(branches, {
+    fields: [templateAnalytics.branchId],
+    references: [branches.id],
+  }),
+}));
+
+export const insertTemplateAnalyticsSchema = createInsertSchema(templateAnalytics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTemplateAnalytics = z.infer<typeof insertTemplateAnalyticsSchema>;
+export type TemplateAnalytics = typeof templateAnalytics.$inferSelect;
+
+// A/B Test Variants table - A/B testing for templates
+export const abTestVariants = pgTable("ab_test_variants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Test Details
+  testName: varchar("test_name").notNull(),
+  testDescription: text("test_description"),
+  
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, active, completed, cancelled
+  
+  // Variants
+  variantATemplateId: varchar("variant_a_template_id").notNull().references(() => notificationTemplates.id),
+  variantBTemplateId: varchar("variant_b_template_id").notNull().references(() => notificationTemplates.id),
+  
+  // Split Configuration
+  splitPercentage: integer("split_percentage").notNull().default(50), // Percentage for variant A (B gets remainder)
+  
+  // Success Criteria
+  successMetric: varchar("success_metric", { length: 30 }).notNull(), // delivery_rate, open_rate, click_rate
+  minimumSampleSize: integer("minimum_sample_size").default(100),
+  
+  // Results Tracking
+  variantASendCount: integer("variant_a_send_count").default(0),
+  variantBSendCount: integer("variant_b_send_count").default(0),
+  variantASuccessCount: integer("variant_a_success_count").default(0),
+  variantBSuccessCount: integer("variant_b_success_count").default(0),
+  variantASuccessRate: varchar("variant_a_success_rate"),
+  variantBSuccessRate: varchar("variant_b_success_rate"),
+  
+  // Winner Declaration
+  winner: varchar("winner", { length: 10 }), // 'A', 'B', 'tie', null
+  winnerDeclaredAt: timestamp("winner_declared_at"),
+  confidenceLevel: varchar("confidence_level"), // Statistical confidence
+  
+  // Test Period
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  
+  // Audit
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_ab_test_status").on(table.status),
+  index("idx_ab_test_variant_a").on(table.variantATemplateId),
+  index("idx_ab_test_variant_b").on(table.variantBTemplateId),
+  index("idx_ab_test_created_by").on(table.createdBy),
+  index("idx_ab_test_created_at").on(table.createdAt),
+]);
+
+export const abTestRelations = relations(abTestVariants, ({ one }) => ({
+  variantA: one(notificationTemplates, {
+    fields: [abTestVariants.variantATemplateId],
+    references: [notificationTemplates.id],
+    relationName: "abTestVariantA",
+  }),
+  variantB: one(notificationTemplates, {
+    fields: [abTestVariants.variantBTemplateId],
+    references: [notificationTemplates.id],
+    relationName: "abTestVariantB",
+  }),
+  creator: one(users, {
+    fields: [abTestVariants.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const insertAbTestSchema = createInsertSchema(abTestVariants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  variantASendCount: true,
+  variantBSendCount: true,
+  variantASuccessCount: true,
+  variantBSuccessCount: true,
+  variantASuccessRate: true,
+  variantBSuccessRate: true,
+  winner: true,
+  winnerDeclaredAt: true,
+  confidenceLevel: true,
+  startedAt: true,
+  completedAt: true,
+});
+
+export type InsertAbTest = z.infer<typeof insertAbTestSchema>;
+export type AbTest = typeof abTestVariants.$inferSelect;
