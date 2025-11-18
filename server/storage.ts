@@ -42,6 +42,9 @@ import {
   approvalRequests,
   approvalLogs,
   customerRiskScores,
+  communicationProviders,
+  communicationLogs,
+  notificationTemplates,
   type User,
   type UpsertUser,
   type Contract,
@@ -127,6 +130,12 @@ import {
   type InsertApprovalLog,
   type CustomerRiskScore,
   type InsertCustomerRiskScore,
+  type CommunicationProvider,
+  type InsertCommunicationProvider,
+  type CommunicationLog,
+  type InsertCommunicationLog,
+  type NotificationTemplate,
+  type InsertNotificationTemplate,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte } from "drizzle-orm";
@@ -450,6 +459,23 @@ export interface IStorage {
   updateNotificationTemplate(id: string, template: any): Promise<any>;
   deleteNotificationTemplate(id: string): Promise<void>;
   seedNotificationTemplates(): Promise<{ seeded: number; skipped: number }>;
+  
+  // Communication Provider operations
+  getCommunicationProviders(filters?: { type?: string; isActive?: boolean }): Promise<CommunicationProvider[]>;
+  getCommunicationProviderById(id: string): Promise<CommunicationProvider | undefined>;
+  getActiveSmsProviders(): Promise<CommunicationProvider[]>;
+  getActiveEmailProviders(): Promise<CommunicationProvider[]>;
+  createCommunicationProvider(provider: InsertCommunicationProvider, userId: string): Promise<CommunicationProvider>;
+  updateCommunicationProvider(id: string, provider: Partial<InsertCommunicationProvider>): Promise<CommunicationProvider>;
+  deleteCommunicationProvider(id: string): Promise<void>;
+  updateProviderHealth(id: string, healthStatus: string, lastError?: string): Promise<void>;
+  incrementProviderUsage(id: string, success: boolean): Promise<void>;
+  
+  // Communication Log operations
+  getCommunicationLogs(filters?: { channel?: string; status?: string; recipientId?: string; startDate?: Date; endDate?: Date; limit?: number }): Promise<CommunicationLog[]>;
+  getCommunicationLogById(id: string): Promise<CommunicationLog | undefined>;
+  createCommunicationLog(log: InsertCommunicationLog): Promise<CommunicationLog>;
+  updateCommunicationLogStatus(id: string, status: string, metadata?: any): Promise<CommunicationLog>;
   
   // Automated Reminders operations
   getAutomatedReminders(filters?: { entityType?: string; entityId?: string; reminderType?: string; isActive?: boolean }): Promise<any[]>;
@@ -4789,6 +4815,148 @@ export class DatabaseStorage implements IStorage {
     // This will be populated by the automation orchestrator
     // System-owned reminders are created dynamically for each entity/contract
     return { seeded: 0, skipped: 0 };
+  }
+
+  // ==================== COMMUNICATION INFRASTRUCTURE ====================
+
+  // Communication Provider operations
+  async getCommunicationProviders(filters?: { type?: string; isActive?: boolean }): Promise<CommunicationProvider[]> {
+    const conditions = [];
+    if (filters?.type) conditions.push(eq(communicationProviders.type, filters.type));
+    if (filters?.isActive !== undefined) conditions.push(eq(communicationProviders.isActive, filters.isActive));
+
+    return await db
+      .select()
+      .from(communicationProviders)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(communicationProviders.priority);
+  }
+
+  async getCommunicationProviderById(id: string): Promise<CommunicationProvider | undefined> {
+    const [provider] = await db.select().from(communicationProviders).where(eq(communicationProviders.id, id));
+    return provider;
+  }
+
+  async getActiveSmsProviders(): Promise<CommunicationProvider[]> {
+    return await db
+      .select()
+      .from(communicationProviders)
+      .where(and(eq(communicationProviders.type, 'sms'), eq(communicationProviders.isActive, true)))
+      .orderBy(communicationProviders.priority);
+  }
+
+  async getActiveEmailProviders(): Promise<CommunicationProvider[]> {
+    return await db
+      .select()
+      .from(communicationProviders)
+      .where(and(eq(communicationProviders.type, 'email'), eq(communicationProviders.isActive, true)))
+      .orderBy(communicationProviders.priority);
+  }
+
+  async createCommunicationProvider(providerData: InsertCommunicationProvider, userId: string): Promise<CommunicationProvider> {
+    const [provider] = await db
+      .insert(communicationProviders)
+      .values({ ...providerData, createdBy: userId })
+      .returning();
+    return provider;
+  }
+
+  async updateCommunicationProvider(id: string, providerData: Partial<InsertCommunicationProvider>): Promise<CommunicationProvider> {
+    const [updated] = await db
+      .update(communicationProviders)
+      .set({ ...providerData, updatedAt: new Date() })
+      .where(eq(communicationProviders.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCommunicationProvider(id: string): Promise<void> {
+    await db.delete(communicationProviders).where(eq(communicationProviders.id, id));
+  }
+
+  async updateProviderHealth(id: string, healthStatus: string, lastError?: string): Promise<void> {
+    await db
+      .update(communicationProviders)
+      .set({
+        healthStatus,
+        lastError: lastError || null,
+        lastHealthCheck: new Date(),
+      })
+      .where(eq(communicationProviders.id, id));
+  }
+
+  async incrementProviderUsage(id: string, success: boolean): Promise<void> {
+    const [provider] = await db
+      .select()
+      .from(communicationProviders)
+      .where(eq(communicationProviders.id, id));
+
+    if (!provider) return;
+
+    await db
+      .update(communicationProviders)
+      .set({
+        totalSent: success ? (provider.totalSent || 0) + 1 : provider.totalSent,
+        totalFailed: !success ? (provider.totalFailed || 0) + 1 : provider.totalFailed,
+        lastUsed: new Date(),
+      })
+      .where(eq(communicationProviders.id, id));
+  }
+
+  // Communication Log operations
+  async getCommunicationLogs(filters?: {
+    channel?: string;
+    status?: string;
+    recipientId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+  }): Promise<CommunicationLog[]> {
+    const conditions = [];
+    if (filters?.channel) conditions.push(eq(communicationLogs.channel, filters.channel));
+    if (filters?.status) conditions.push(eq(communicationLogs.status, filters.status));
+    if (filters?.recipientId) conditions.push(eq(communicationLogs.recipientId, filters.recipientId));
+    if (filters?.startDate) conditions.push(gte(communicationLogs.createdAt, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(communicationLogs.createdAt, filters.endDate));
+
+    let query = db
+      .select()
+      .from(communicationLogs)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(communicationLogs.createdAt));
+
+    if (filters?.limit) {
+      query = query.limit(filters.limit) as any;
+    }
+
+    return await query;
+  }
+
+  async getCommunicationLogById(id: string): Promise<CommunicationLog | undefined> {
+    const [log] = await db.select().from(communicationLogs).where(eq(communicationLogs.id, id));
+    return log;
+  }
+
+  async createCommunicationLog(logData: InsertCommunicationLog): Promise<CommunicationLog> {
+    const [log] = await db.insert(communicationLogs).values(logData).returning();
+    return log;
+  }
+
+  async updateCommunicationLogStatus(id: string, status: string, metadata?: any): Promise<CommunicationLog> {
+    const updateData: any = {
+      status,
+      ...(status === 'sent' && { sentAt: new Date() }),
+      ...(status === 'delivered' && { deliveredAt: new Date() }),
+      ...(status === 'failed' && { failedAt: new Date() }),
+      ...(metadata && { deliveryMetadata: metadata }),
+    };
+
+    const [updated] = await db
+      .update(communicationLogs)
+      .set(updateData)
+      .where(eq(communicationLogs.id, id))
+      .returning();
+    return updated;
   }
 
   // ==================== WAVE 2: FLEET ECONOMICS ====================
