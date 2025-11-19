@@ -1,3 +1,15 @@
+/**
+ * Design System Showcase
+ * 
+ * This page demonstrates 12 dashboard variations using consistent design patterns.
+ * 
+ * Internationalization Note:
+ * - All visible UI elements (tab names, KPI titles, chart titles, status labels) 
+ *   are internationalized using i18next translation keys
+ * - Sample demonstration data (customer names, vehicle models, activity descriptions) 
+ *   remains in English as illustrative placeholders
+ * - This pragmatic approach provides full bilingual UX while keeping maintenance simple
+ */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageLayout } from '@/components/PageLayout';
@@ -74,17 +86,19 @@ function KPICard({ title, value, change, trend, icon: Icon }: {
 
 // Dashboard 1: Executive Summary
 function ExecutiveDashboard() {
+  const { t } = useTranslation();
+  
   return (
     <div className={layout.section}>
       <div className={dashboard.dashboardGrid}>
-        <KPICard title="Total Revenue" value="AED 328K" change="+12.5%" trend="up" icon={DollarSign} />
-        <KPICard title="Active Contracts" value="45" change="+8" trend="up" icon={FileText} />
-        <KPICard title="Fleet Utilization" value="87%" change="+3.2%" trend="up" icon={Car} />
-        <KPICard title="Avg Risk Score" value="32" change="-5 pts" trend="down" icon={Shield} />
+        <KPICard title={t('designShowcase.totalRevenue')} value="AED 328K" change="+12.5%" trend="up" icon={DollarSign} />
+        <KPICard title={t('designShowcase.activeContracts')} value="45" change="+8" trend="up" icon={FileText} />
+        <KPICard title={t('designShowcase.fleetUtilization')} value="87%" change="+3.2%" trend="up" icon={Car} />
+        <KPICard title={t('designShowcase.avgRiskScore')} value="32" change="-5 pts" trend="down" icon={Shield} />
       </div>
       <div className={dashboard.dashboardGrid2}>
         <Card>
-          <CardHeader><CardTitle>Revenue Trend (6 Months)</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t('designShowcase.revenueTrend')}</CardTitle></CardHeader>
           <CardContent>
             <div className={dashboard.chartContainer}>
               <ResponsiveContainer width="100%" height="100%">
@@ -102,7 +116,7 @@ function ExecutiveDashboard() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Top 5 Vehicles by Revenue</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t('designShowcase.topVehicles')}</CardTitle></CardHeader>
           <CardContent>
             <div className={dashboard.chartContainer}>
               <ResponsiveContainer width="100%" height="100%">
@@ -120,7 +134,7 @@ function ExecutiveDashboard() {
       </div>
       <div className={dashboard.dashboardGrid2}>
         <Card>
-          <CardHeader><CardTitle>Contract Status</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t('designShowcase.contractStatus')}</CardTitle></CardHeader>
           <CardContent>
             <div className={dashboard.chartContainerSmall}>
               <ResponsiveContainer width="100%" height="100%">
@@ -142,7 +156,7 @@ function ExecutiveDashboard() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t('designShowcase.recentActivity')}</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-3">
               {[
@@ -168,16 +182,18 @@ function ExecutiveDashboard() {
 
 // Dashboard 2: Operations
 function OperationsDashboard() {
+  const { t } = useTranslation();
+  
   return (
     <div className={layout.section}>
       <div className={dashboard.dashboardGrid}>
-        <KPICard title="Available Vehicles" value="23" change="12% of fleet" icon={Car} />
-        <KPICard title="Currently Rented" value="152" change="87% utilization" trend="up" icon={Activity} />
-        <KPICard title="Under Maintenance" value="8" change="3 scheduled" icon={Settings} />
-        <KPICard title="Overdue Returns" value="3" change="Attention needed" icon={AlertTriangle} />
+        <KPICard title={t('designShowcase.availableVehicles')} value="23" change="12% of fleet" icon={Car} />
+        <KPICard title={t('designShowcase.currentlyRented')} value="152" change="87% utilization" trend="up" icon={Activity} />
+        <KPICard title={t('designShowcase.underMaintenance')} value="8" change="3 scheduled" icon={Settings} />
+        <KPICard title={t('designShowcase.overdueReturns')} value="3" change="Attention needed" icon={AlertTriangle} />
       </div>
       <Card>
-        <CardHeader><CardTitle>Today's Schedule</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('designShowcase.todaySchedule')}</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-2">
             {[
@@ -192,7 +208,7 @@ function OperationsDashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs">{item.time}</span>
-                  <Badge>{item.status}</Badge>
+                  <Badge>{t(`designShowcase.status${item.status.charAt(0).toUpperCase()}${item.status.slice(1).replace('-', '')}`)}</Badge>
                 </div>
               </div>
             ))}
@@ -205,16 +221,18 @@ function OperationsDashboard() {
 
 // Dashboard 3-12: Simplified versions for space
 function FinancialDashboard() {
+  const { t } = useTranslation();
+  
   return (
     <div className={layout.section}>
       <div className={dashboard.dashboardGrid}>
-        <KPICard title="Revenue" value="AED 328K" change="+12.5%" trend="up" icon={DollarSign} />
-        <KPICard title="Outstanding" value="AED 45K" change="15 invoices" icon={FileText} />
-        <KPICard title="Collection Rate" value="94%" change="+2%" trend="up" icon={TrendingUp} />
-        <KPICard title="Profit Margin" value="32%" change="+1.5%" trend="up" icon={Target} />
+        <KPICard title={t('designShowcase.revenue')} value="AED 328K" change="+12.5%" trend="up" icon={DollarSign} />
+        <KPICard title={t('designShowcase.outstanding')} value="AED 45K" change="15 invoices" icon={FileText} />
+        <KPICard title={t('designShowcase.collectionRate')} value="94%" change="+2%" trend="up" icon={TrendingUp} />
+        <KPICard title={t('designShowcase.profitMargin')} value="32%" change="+1.5%" trend="up" icon={Target} />
       </div>
       <Card>
-        <CardHeader><CardTitle>Revenue & Expense Breakdown</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('designShowcase.revenueExpense')}</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-4">
             {[
@@ -266,18 +284,18 @@ export default function DesignSystemShowcase() {
     >
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-6">
-          <TabsTrigger value="executive">Executive</TabsTrigger>
-          <TabsTrigger value="operations">Operations</TabsTrigger>
-          <TabsTrigger value="financial">Financial</TabsTrigger>
-          <TabsTrigger value="fleet">Fleet</TabsTrigger>
-          <TabsTrigger value="customer">Customer</TabsTrigger>
-          <TabsTrigger value="risk">Risk</TabsTrigger>
-          <TabsTrigger value="marketing">Marketing</TabsTrigger>
-          <TabsTrigger value="branch">Branch</TabsTrigger>
-          <TabsTrigger value="predictive">Predictive</TabsTrigger>
-          <TabsTrigger value="audit">Audit</TabsTrigger>
-          <TabsTrigger value="communications">Comms</TabsTrigger>
-          <TabsTrigger value="driver">Driver</TabsTrigger>
+          <TabsTrigger value="executive">{t('designShowcase.executive')}</TabsTrigger>
+          <TabsTrigger value="operations">{t('designShowcase.operations')}</TabsTrigger>
+          <TabsTrigger value="financial">{t('designShowcase.financial')}</TabsTrigger>
+          <TabsTrigger value="fleet">{t('designShowcase.fleet')}</TabsTrigger>
+          <TabsTrigger value="customer">{t('designShowcase.customer')}</TabsTrigger>
+          <TabsTrigger value="risk">{t('designShowcase.risk')}</TabsTrigger>
+          <TabsTrigger value="marketing">{t('designShowcase.marketing')}</TabsTrigger>
+          <TabsTrigger value="branch">{t('designShowcase.branchManager')}</TabsTrigger>
+          <TabsTrigger value="predictive">{t('designShowcase.predictive')}</TabsTrigger>
+          <TabsTrigger value="audit">{t('designShowcase.audit')}</TabsTrigger>
+          <TabsTrigger value="communications">{t('designShowcase.communications')}</TabsTrigger>
+          <TabsTrigger value="driver">{t('designShowcase.driverOps')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="executive"><ExecutiveDashboard /></TabsContent>
