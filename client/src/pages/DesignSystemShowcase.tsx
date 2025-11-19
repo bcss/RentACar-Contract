@@ -39,13 +39,6 @@ const revenueData = [
   { month: 'Jun', revenue: 67000, target: 65000 },
 ];
 
-const statusData = [
-  { name: 'Active', value: 45, color: '#10b981' },
-  { name: 'Completed', value: 30, color: '#3b82f6' },
-  { name: 'Draft', value: 15, color: '#f59e0b' },
-  { name: 'Closed', value: 10, color: '#6b7280' },
-];
-
 const vehicleData = [
   { vehicle: 'Toyota Camry', revenue: 25000 },
   { vehicle: 'Honda Accord', revenue: 22000 },
@@ -87,6 +80,14 @@ function KPICard({ title, value, change, trend, icon: Icon }: {
 // Dashboard 1: Executive Summary
 function ExecutiveDashboard() {
   const { t } = useTranslation();
+  
+  // Localized status data
+  const statusData = [
+    { name: t('designShowcase.statusActive'), value: 45, color: '#10b981' },
+    { name: t('designShowcase.statusCompleted'), value: 30, color: '#3b82f6' },
+    { name: t('designShowcase.statusDraft'), value: 15, color: '#f59e0b' },
+    { name: t('designShowcase.statusClosed'), value: 10, color: '#6b7280' },
+  ];
   
   return (
     <div className={layout.section}>
@@ -160,9 +161,9 @@ function ExecutiveDashboard() {
           <CardContent>
             <div className="space-y-3">
               {[
-                { icon: CheckCircle, text: 'Contract #1234 Completed', time: '2h ago', color: 'text-green-600' },
-                { icon: Car, text: 'New Vehicle: Toyota Camry 2024', time: '5h ago', color: 'text-blue-600' },
-                { icon: AlertTriangle, text: 'Inspection Due: Honda Accord', time: '1d ago', color: 'text-orange-600' },
+                { icon: CheckCircle, text: t('designShowcase.activityContractCompleted'), time: '2h ago', color: 'text-green-600' },
+                { icon: Car, text: t('designShowcase.activityNewVehicle'), time: '5h ago', color: 'text-blue-600' },
+                { icon: AlertTriangle, text: t('designShowcase.activityInspectionDue'), time: '1d ago', color: 'text-orange-600' },
               ].map((activity, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <activity.icon className={cn("h-5 w-5 mt-0.5", activity.color)} />
@@ -184,6 +185,19 @@ function ExecutiveDashboard() {
 function OperationsDashboard() {
   const { t } = useTranslation();
   
+  // Status label lookup map
+  const statusLabels: Record<string, string> = {
+    'pending': t('designShowcase.statusPending'),
+    'on-time': t('designShowcase.statusOnTime'),
+    'ready': t('designShowcase.statusReady'),
+  };
+  
+  // Activity type lookup map
+  const activityTypes: Record<string, string> = {
+    'Pickup': t('designShowcase.pickup'),
+    'Return': t('designShowcase.return'),
+  };
+  
   return (
     <div className={layout.section}>
       <div className={dashboard.dashboardGrid}>
@@ -202,14 +216,15 @@ function OperationsDashboard() {
               { type: 'Pickup', time: '02:00 PM', customer: 'Ali Khalid', vehicle: 'Nissan Altima', status: 'ready' },
             ].map((item, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
-                <div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="outline" className="text-xs">{activityTypes[item.type] || item.type}</Badge>
+                    <span className="text-xs text-muted-foreground">{item.time}</span>
+                  </div>
                   <p className="font-medium text-sm">{item.customer}</p>
                   <p className="text-xs text-muted-foreground">{item.vehicle}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs">{item.time}</span>
-                  <Badge>{t(`designShowcase.status${item.status.charAt(0).toUpperCase()}${item.status.slice(1).replace('-', '')}`)}</Badge>
-                </div>
+                <Badge>{statusLabels[item.status] || item.status}</Badge>
               </div>
             ))}
           </div>
@@ -236,10 +251,10 @@ function FinancialDashboard() {
         <CardContent>
           <div className="space-y-4">
             {[
-              { label: 'Rental Fees', amount: 'AED 280K', percent: 85 },
-              { label: 'Driver Services', amount: 'AED 25K', percent: 8 },
-              { label: 'Accessories', amount: 'AED 15K', percent: 5 },
-              { label: 'Other Charges', amount: 'AED 8K', percent: 2 },
+              { label: t('designShowcase.rentalFees'), amount: 'AED 280K', percent: 85 },
+              { label: t('designShowcase.driverServices'), amount: 'AED 25K', percent: 8 },
+              { label: t('designShowcase.accessories'), amount: 'AED 15K', percent: 5 },
+              { label: t('designShowcase.otherCharges'), amount: 'AED 8K', percent: 2 },
             ].map((item, i) => (
               <div key={i}>
                 <div className="flex justify-between mb-2 text-sm">
