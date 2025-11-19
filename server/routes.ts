@@ -4477,6 +4477,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         vatPercentage: settings.vatPercentage,
         currencyEn: settings.currencyEn,
         currencyAr: settings.currencyAr,
+        defaultDropOffCharge: settings.defaultDropOffCharge,
+        defaultPickUpCharge: settings.defaultPickUpCharge,
+        driverDailyRate: settings.driverDailyRate,
+        driverHourlyRate: settings.driverHourlyRate,
       };
       
       res.json(financialSettings);

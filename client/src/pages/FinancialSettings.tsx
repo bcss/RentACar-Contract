@@ -62,12 +62,19 @@ const deliveryServiceSchema = z.object({
   defaultPickUpCharge: z.string().min(1, "Default pick-up charge is required"),
 });
 
+// Schema for driver service rates
+const driverServiceSchema = z.object({
+  driverDailyRate: z.string().min(1, "Driver daily rate is required"),
+  driverHourlyRate: z.string().min(1, "Driver hourly rate is required"),
+});
+
 type CurrencySettingsForm = z.infer<typeof currencySettingsSchema>;
 type RentalRatesForm = z.infer<typeof rentalRatesSchema>;
 type AddonPricingForm = z.infer<typeof addonPricingSchema>;
 type ExtraChargesForm = z.infer<typeof extraChargesSchema>;
 type FuelPricingForm = z.infer<typeof fuelPricingSchema>;
 type DeliveryServiceForm = z.infer<typeof deliveryServiceSchema>;
+type DriverServiceForm = z.infer<typeof driverServiceSchema>;
 
 export default function FinancialSettings() {
   const { t } = useTranslation();
@@ -131,6 +138,14 @@ export default function FinancialSettings() {
     },
   });
 
+  const driverServiceForm = useForm<DriverServiceForm>({
+    resolver: zodResolver(driverServiceSchema),
+    defaultValues: {
+      driverDailyRate: "300",
+      driverHourlyRate: "50",
+    },
+  });
+
   useEffect(() => {
     if (settings) {
       currencyForm.reset({
@@ -160,8 +175,12 @@ export default function FinancialSettings() {
         defaultDropOffCharge: settings.defaultDropOffCharge || "0",
         defaultPickUpCharge: settings.defaultPickUpCharge || "0",
       });
+      driverServiceForm.reset({
+        driverDailyRate: settings.driverDailyRate || "300",
+        driverHourlyRate: settings.driverHourlyRate || "50",
+      });
     }
-  }, [settings, currencyForm, rentalRatesForm, addonPricingForm, extraChargesForm, fuelPricingForm, deliveryServiceForm]);
+  }, [settings, currencyForm, rentalRatesForm, addonPricingForm, extraChargesForm, fuelPricingForm, deliveryServiceForm, driverServiceForm]);
 
   // Individual mutation for each form
   const createUpdateMutation = (successMessage: string) => useMutation({
@@ -191,6 +210,7 @@ export default function FinancialSettings() {
   const extraChargesMutation = createUpdateMutation('Extra charges saved successfully');
   const fuelPricingMutation = createUpdateMutation('Fuel pricing saved successfully');
   const deliveryServiceMutation = createUpdateMutation('Delivery service settings saved successfully');
+  const driverServiceMutation = createUpdateMutation('Driver service rates saved successfully');
 
   if (authLoading || isLoading) {
     return (
@@ -663,6 +683,72 @@ export default function FinancialSettings() {
                     data-testid="button-save-delivery-service"
                   >
                     {deliveryServiceMutation.isPending ? t('common.saving') : t('common.save')}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </Card>
+
+          {/* Driver Service Rates */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Professional Driver Service Rates</CardTitle>
+            </CardHeader>
+            <Form {...driverServiceForm}>
+              <form onSubmit={driverServiceForm.handleSubmit((data) => driverServiceMutation.mutate(data))}>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={driverServiceForm.control}
+                      name="driverDailyRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{`Driver Daily Rate${currency ? ` (${currency})` : ''}`}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="300" 
+                              data-testid="input-driver-daily-rate" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={driverServiceForm.control}
+                      name="driverHourlyRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{`Driver Hourly Rate${currency ? ` (${currency})` : ''}`}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="number" 
+                              step="0.01"
+                              placeholder="50" 
+                              data-testid="input-driver-hourly-rate" 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Configure default rates for professional driver service. Daily rate applies for full-day service (8+ hours), hourly rate for shorter durations. These rates are used when customers book a driver with their rental vehicle.
+                  </p>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button
+                    type="submit"
+                    disabled={driverServiceMutation.isPending}
+                    data-testid="button-save-driver-service"
+                  >
+                    {driverServiceMutation.isPending ? t('common.saving') : t('common.save')}
                   </Button>
                 </CardFooter>
               </form>

@@ -538,6 +538,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/settings/import',
       show: isAdmin && (user?.isImmutable === true),
     },
+    {
+      title: t('nav.designSystemLibrary'),
+      icon: 'description',
+      url: '/design-system-library',
+      show: isAdmin || isManager,
+    },
   ];
 
   // Help & Legal Items
