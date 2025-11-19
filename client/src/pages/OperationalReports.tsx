@@ -16,6 +16,7 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Toolti
 import { captureMultipleCharts } from '@/utils/chartExport';
 import { useToast } from '@/hooks/use-toast';
 import { Icon } from '@/components/Icon';
+import { getCsrfToken } from '@/lib/queryClient';
 
 interface VehicleUtilization {
   vehicleId: string;
@@ -137,11 +138,18 @@ export default function OperationalReports() {
         params.append('endDate', endDate.toISOString());
       }
       
+      // Get CSRF token and include it in headers
+      const csrfToken = getCsrfToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (csrfToken) {
+        headers['x-csrf-token'] = csrfToken;
+      }
+      
       const response = await fetch(`/api/reports/operational/export?${params.toString()}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         credentials: 'include',
         body: JSON.stringify({ charts: chartImages }),
       });

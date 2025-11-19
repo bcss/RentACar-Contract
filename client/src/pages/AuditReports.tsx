@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Link } from 'wouter';
 import { Icon } from '@/components/Icon';
+import { getCsrfToken } from '@/lib/queryClient';
 
 interface Modification {
   id: string;
@@ -101,7 +102,16 @@ export default function AuditReports() {
         params.append('endDate', endDate.toISOString());
       }
       
+      // Get CSRF token and include it in headers
+      const csrfToken = getCsrfToken();
+      const headers: Record<string, string> = {};
+      if (csrfToken) {
+        headers['x-csrf-token'] = csrfToken;
+      }
+      
       const response = await fetch(`/api/reports/audit/export?${params.toString()}`, {
+        method: 'POST',
+        headers,
         credentials: 'include'
       });
       
