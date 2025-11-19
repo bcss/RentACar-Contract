@@ -9,6 +9,7 @@ import { hashPassword, verifyPassword, validatePasswordStrength } from "./auth/p
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
 import { seedCompanySettings } from "./seedCompanySettings";
 import { sanitizeRequestData } from "./index";
+import { apiLimiter } from "./rateLimiters";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGeolocation } from "./services/geolocation";
@@ -37,8 +38,13 @@ import {
 } from './importHelpers';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
+  // Auth middleware (includes authLimiter for /api/login and /api/users/change-password)
   await setupAuth(app);
+  
+  // CRITICAL: Apply API rate limiter AFTER setupAuth so req.user is available
+  // for the hybrid key generator (user ID for authenticated, IP for unauthenticated)
+  // Note: authLimiter is applied inside setupAuth before login routes are defined
+  app.use('/api/', apiLimiter);
   
   // Seed super admin on startup
   await seedSuperAdmin();

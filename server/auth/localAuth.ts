@@ -47,11 +47,19 @@ export function getSession() {
   });
 }
 
+// Import rate limiters from standalone module (breaks circular dependency)
+import { authLimiter } from "../rateLimiters";
+
 export async function setupAuth(app: Express) {
   app.set("trust proxy", true);
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
+  
+  // CRITICAL: Apply auth rate limiter AFTER session/passport setup
+  // but BEFORE login route is defined, so limiter can access req.user
+  app.use('/api/login', authLimiter);
+  app.use('/api/users/change-password', authLimiter);
 
   // P1-2: Add idle timeout middleware (15 minutes)
   const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
@@ -136,9 +144,9 @@ export async function setupAuth(app: Express) {
           
           await storage.createAccessLog({
             outcome: 'failure',
-            username: username || 'unknown',
+            usernameAttempted: username || 'unknown',
             userId: null,
-            ipAddress: ipAddress || null,
+            ipAddress: ipAddress || 'unknown',
             userAgent: userAgent || null,
             country: geolocation?.country || null,
             city: geolocation?.city || null,
@@ -190,9 +198,9 @@ export async function setupAuth(app: Express) {
             // Log successful login attempt in access logs
             await storage.createAccessLog({
               outcome: 'success',
-              username: user.username,
+              usernameAttempted: user.username,
               userId: user.id,
-              ipAddress: ipAddress || null,
+              ipAddress: ipAddress || 'unknown',
               userAgent: userAgent || null,
               country: geolocation?.country || null,
               city: geolocation?.city || null,

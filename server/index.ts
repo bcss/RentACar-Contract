@@ -2,7 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
-import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 
@@ -71,30 +70,9 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// P0-5: Rate limiting for authentication endpoints and general API protection
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per window per IP
-  message: { message: "Too many authentication attempts, please try again after 15 minutes" },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: false,
-});
-
-const apiLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // 100 requests per minute per IP
-  message: { message: "Too many requests, please slow down" },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Apply strict rate limiting to authentication endpoints
-app.use('/api/login', authLimiter);
-app.use('/api/users/change-password', authLimiter);
-
-// Apply general rate limiting to all API routes
-app.use('/api/', apiLimiter);
+// NOTE: Rate limiters are defined in server/rateLimiters.ts and applied in:
+// - server/auth/localAuth.ts for authentication endpoints (after session/passport setup)
+// - server/routes.ts for general API endpoints (after setupAuth)
 
 app.use((req, res, next) => {
   const start = Date.now();
