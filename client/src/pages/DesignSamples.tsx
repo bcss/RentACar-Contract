@@ -551,7 +551,7 @@ export default function DesignSamples() {
                   <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                   <div className="flex-1">
                     <CardTitle className="text-base">New Booking Request</CardTitle>
-                    <CardDescription">Customer Sara Mohammed requested a vehicle for Feb 5-12</CardDescription>
+                    <CardDescription>Customer Sara Mohammed requested a vehicle for Feb 5-12</CardDescription>
                   </div>
                 </CardHeader>
               </Card>
