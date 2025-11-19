@@ -1,0 +1,50 @@
+need you to check the project documents in docs folder as well as your files including replit.md and see whether all the features requested and entered in the documents are implemented in full across the project. 
+Also need to analyse the workflows, processes and procedures are logical or not and it is it implemented logically and correctly. What is the context of this workflow in the context of the project ?
+I have at several instances asked you to change the UI to adhere to a theme across the project and make some common classes and reuse it to have same theme across the project. You have not done anything on that front. I need you to provide me with ten or more sample designs as a separate dashboard near sample dashboards.
+Similarly I had told you to smartly analyse and revamp the entire menu category wise like Dashboard, operations, masters, reports, settings etc.
+Also check each screen and show LTR/RTL properly and not showing the field names. Analyse the logic for all of the below and if not correct then let me know the revamp plan.
+Specialized Operational Modules - what are these ? Why are these ?
+Toll Management System (Salik/Darb/Aber) - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ? - add any new tolls being introduced in future
+Traffic Fines & Violations - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Accidents & Incidents Management - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Fleet Maintenance & Service - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Rental Rate Plans (Dynamic Pricing) - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Vehicle Accessories & Upsell - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Driver Service Module - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Branch Management System - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Public Holidays Management - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Document Registry & Management - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ? is there any feature of uploading that document copy and where it will be stored 
+Customer Risk Scoring -  I had told this should be automatically calculated from the business done, is it correct or not ? I there are any external tools available then we will see that later, am I correct or not ? What is your suggestions ?
+Approval Workflows - what is the use of this ? What is the flow of this ? is it really needed ? what is your rationale in this.
+Communications Platform - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Campaign Management System - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+6 Predictive Intelligence Reports - what are they ? Are they showing tru values from database or hard coded data ?
+Automation Orchestrator - what it does ? how it works ? is this logic correct ? What is the workflow ? where all it will be used and how ?
+Campaign Management System RBAC patterns - what is the flow of this ? is this correctly implemented, if I want to select a campaign for multiple branches then what I will do ?
+Predictive Intelligence Reports ML architecture
+Complete i18n implementation patterns (190+ translation keys) - is this complete or anything pending ?
+RTL/LTR layout switching documentation - is there anything pending to implement anywhere in the project ?
+CSV export localization patterns - Lot of reports lack pdf export or csv export. If there is a need only provide csv export else give only PDF export. Properly analyse and do this
+Complete Bilingual Implementation  - is there anything pending to implement anywhere in the project ?
+
+There is no driver and GPS rates in the financials setup isn't that needed ?
+The file upload should be either drag and drop or browse and select
+
+1. UI Theme Consistency
+Issue: No centralized design system
+Impact: Each page has its own styling, making it hard to maintain
+Solution: I've outlined a design tokens system in the report
+
+2. Missing Sample Dashboards
+Issue: No showcase of different dashboard layouts
+Solution: I've designed 12 dashboard variations in the report (Executive, Operations, Financial, Fleet, Customer, Risk, Marketing, Branch Manager, Predictive, Audit, Communications, Driver Operations)
+
+3. Inconsistent Export Patterns
+Issue: Some reports have CSV+PDF, others only CSV
+Impact: Users may expect PDF where it's missing
+Solution: I've created a decision matrix for which reports need what
+
+4. Possible RTL/LTR Translation Gaps
+Issue: Some field labels might show translation keys instead of text
+Impact: Arabic users might see code like financialSettings.currencyEn
+Solution: Need to test all 66 pages and fix missing translations
