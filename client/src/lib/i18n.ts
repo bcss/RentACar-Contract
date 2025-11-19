@@ -54,6 +54,11 @@ const resources = {
       "nav.publicHolidays": "Public Holidays",
       "nav.accessReport": "Access Report",
       "nav.designSystemLibrary": "Design System Library",
+      "nav.designShowcase": "Design System Showcase",
+      
+      // Design System Showcase
+      "designShowcase.title": "Design System Showcase",
+      "designShowcase.description": "12 production-ready dashboard layouts with consistent design patterns",
       
       // Greetings
       "greeting.goodMorning": "Good morning",
@@ -2233,6 +2238,11 @@ const resources = {
       "nav.publicHolidays": "العطلات الرسمية",
       "nav.accessReport": "تقرير الوصول",
       "nav.designSystemLibrary": "مكتبة نظام التصميم",
+      "nav.designShowcase": "عرض نظام التصميم",
+      
+      // Design System Showcase
+      "designShowcase.title": "عرض نظام التصميم",
+      "designShowcase.description": "12 تصميم لوحة تحكم جاهز للإنتاج مع أنماط تصميم متسقة",
       
       // Greetings
       "greeting.goodMorning": "صباح الخير",
