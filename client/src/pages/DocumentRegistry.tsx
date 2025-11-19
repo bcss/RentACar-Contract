@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Edit, FileText, CheckCircle } from "lucide-react";
+import { Plus, Edit, FileText, CheckCircle, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,7 +17,7 @@ import {
   type DocumentRegistryEntry,
   type InsertDocumentRegistry
 } from "@shared/schema";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, getCsrfToken } from "@/lib/queryClient";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format, differenceInDays } from "date-fns";
@@ -28,6 +28,9 @@ export default function DocumentRegistry() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<DocumentRegistryEntry | null>(null);
   const [selectedEntityType, setSelectedEntityType] = useState<string>("");
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; url: string; type: string } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: documents = [], isLoading } = useQuery<DocumentRegistryEntry[]>({
     queryKey: ["/api/documents"],
@@ -109,8 +112,65 @@ export default function DocumentRegistry() {
     onError: (error: Error) => showError(error, t("error")),
   });
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Get CSRF token using the same helper as apiRequest
+      const csrfToken = getCsrfToken();
+
+      const response = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+        headers: {
+          ...(csrfToken && { 'x-csrf-token': csrfToken }),
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'File upload failed');
+      }
+
+      const data = await response.json();
+      
+      setUploadedFile({
+        name: data.fileName,
+        url: data.fileUrl,
+        type: data.fileType,
+      });
+
+      form.setValue('fileUrl', data.fileUrl);
+      form.setValue('fileName', data.fileName);
+      form.setValue('fileType', data.fileType);
+
+      showSuccess(t("success"), "File uploaded successfully");
+    } catch (error) {
+      showError(error as Error, "File upload failed");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
+    form.setValue('fileUrl', '');
+    form.setValue('fileName', '');
+    form.setValue('fileType', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleCreate = () => {
     setEditingDocument(null);
+    setUploadedFile(null);
     form.reset({
       entityType: "customer",
       entityId: "",
@@ -133,6 +193,11 @@ export default function DocumentRegistry() {
   const handleEdit = (document: DocumentRegistryEntry) => {
     setEditingDocument(document);
     setSelectedEntityType(document.entityType);
+    setUploadedFile(document.fileUrl ? {
+      name: document.fileName || 'Uploaded file',
+      url: document.fileUrl,
+      type: document.fileType || '',
+    } : null);
     form.reset({
       entityType: document.entityType,
       entityId: document.entityId,
@@ -452,39 +517,61 @@ export default function DocumentRegistry() {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div>
+                  <FormLabel>Document File</FormLabel>
+                  <div className="mt-2">
+                    {uploadedFile ? (
+                      <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/50">
+                        <FileText className="h-4 w-4" />
+                        <span className="flex-1 text-sm">{uploadedFile.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleRemoveFile}
+                          data-testid="button-remove-file"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          data-testid="input-file"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          data-testid="button-upload-file"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          {isUploading ? "Uploading..." : "Upload File"}
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Supported: PDF, JPG, PNG, DOC, DOCX (max 10MB)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="fileUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>File URL</FormLabel>
+                      <FormLabel>Or Enter File URL (Optional)</FormLabel>
                       <FormControl>
-                        <Input {...field} data-testid="input-fileUrl" placeholder="Document URL" />
+                        <Input {...field} data-testid="input-fileUrl" placeholder="https://..." disabled={!!uploadedFile} />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="fileType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>File Type</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-fileType">
-                            <SelectValue placeholder="Select file type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="pdf">PDF</SelectItem>
-                          <SelectItem value="image">Image</SelectItem>
-                          <SelectItem value="doc">Document</SelectItem>
-                        </SelectContent>
-                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

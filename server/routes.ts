@@ -22,6 +22,8 @@ import os from "os";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import multer from "multer";
+import { randomUUID } from "crypto";
 import { csrfTokenGenerator, csrfProtection } from "./middleware/csrf";
 import {
   parseCSV,
@@ -51,6 +53,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Seed company settings on startup
   await seedCompanySettings();
+  
+  // Configure multer for document file uploads
+  const documentStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'attached_assets/documents/');
+    },
+    filename: (req, file, cb) => {
+      const uniqueId = randomUUID();
+      const extension = file.originalname.split('.').pop();
+      cb(null, `${uniqueId}.${extension}`);
+    }
+  });
+  
+  const documentUpload = multer({
+    storage: documentStorage,
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type. Only PDF, JPG, PNG, DOC, and DOCX files are allowed.'));
+      }
+    }
+  });
 
   // Helper function to create audit log with enhanced tracking
   async function createAuditLog(userId: string, action: string, contractId: string | undefined, req: Request, details?: string) {
@@ -7518,6 +7547,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.status(201).json(document);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Upload document file endpoint
+  app.post("/api/documents/upload", isAuthenticated, csrfProtection, documentUpload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      const fileUrl = `/attached_assets/documents/${req.file.filename}`;
+      const fileName = req.file.originalname;
+      const fileType = req.file.mimetype;
+      
+      res.status(200).json({
+        fileUrl,
+        fileName,
+        fileType,
+        fileSize: req.file.size,
+      });
     } catch (error) {
       next(error);
     }

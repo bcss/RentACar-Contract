@@ -54,6 +54,7 @@ const ContractAnalyticsReport = lazy(() => import("@/pages/ContractAnalyticsRepo
 const CollectionPerformanceReport = lazy(() => import("@/pages/CollectionPerformanceReport"));
 const ImportData = lazy(() => import("@/pages/ImportData"));
 const DashboardSamples = lazy(() => import("@/pages/DashboardSamples"));
+const DesignSamples = lazy(() => import("@/pages/DesignSamples"));
 const PublicHolidays = lazy(() => import("@/pages/PublicHolidays"));
 const Branches = lazy(() => import("@/pages/Branches"));
 const Drivers = lazy(() => import("@/pages/Drivers"));
@@ -258,6 +259,9 @@ function Router() {
       </Route>
       <Route path="/dashboard-samples">
         {() => <ProtectedRoute component={DashboardSamples} />}
+      </Route>
+      <Route path="/design-samples">
+        {() => <ProtectedRoute component={DesignSamples} />}
       </Route>
       <Route path="/public-holidays">
         {() => <ProtectedRoute component={PublicHolidays} />}
