@@ -48,28 +48,28 @@ export default function DesignSystemLibrary() {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">text-3xl font-bold</p>
-                  <h1 className="text-3xl font-bold" data-testid="heading-1">{t('designSystemLibrary.heading1')} - Title Text</h1>
+                  <p className="text-sm text-muted-foreground mb-2">{t('designSystemLibrary.textStyleLabel')}: text-3xl font-bold</p>
+                  <h1 className="text-3xl font-bold" data-testid="heading-1">{t('designSystemLibrary.heading1')}</h1>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">text-2xl font-semibold</p>
-                  <h2 className="text-2xl font-semibold" data-testid="heading-2">{t('designSystemLibrary.heading2')} - Section Title</h2>
+                  <p className="text-sm text-muted-foreground mb-2">{t('designSystemLibrary.textStyleLabel')}: text-2xl font-semibold</p>
+                  <h2 className="text-2xl font-semibold" data-testid="heading-2">{t('designSystemLibrary.heading2')}</h2>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">text-xl font-semibold</p>
-                  <h3 className="text-xl font-semibold" data-testid="heading-3">{t('designSystemLibrary.heading3')} - Subsection</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{t('designSystemLibrary.textStyleLabel')}: text-xl font-semibold</p>
+                  <h3 className="text-xl font-semibold" data-testid="heading-3">{t('designSystemLibrary.heading3')}</h3>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">text-lg font-medium</p>
-                  <h4 className="text-lg font-medium" data-testid="heading-4">{t('designSystemLibrary.heading4')} - Card Title</h4>
+                  <p className="text-sm text-muted-foreground mb-2">{t('designSystemLibrary.textStyleLabel')}: text-lg font-medium</p>
+                  <h4 className="text-lg font-medium" data-testid="heading-4">{t('designSystemLibrary.heading4')}</h4>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">text-base</p>
-                  <p className="text-base" data-testid="body-text">{t('designSystemLibrary.body')} - Regular paragraph text for content and descriptions</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t('designSystemLibrary.textStyleLabel')}: text-base</p>
+                  <p className="text-base" data-testid="body-text">{t('designSystemLibrary.body')}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">text-sm text-muted-foreground</p>
-                  <p className="text-sm text-muted-foreground" data-testid="caption-text">{t('designSystemLibrary.caption')} - Helper text and labels</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t('designSystemLibrary.textStyleLabel')}: text-sm text-muted-foreground</p>
+                  <p className="text-sm text-muted-foreground" data-testid="caption-text">{t('designSystemLibrary.caption')}</p>
                 </div>
               </div>
             </CardContent>
@@ -107,25 +107,25 @@ export default function DesignSystemLibrary() {
                 </div>
                 <div className="space-y-2">
                   <div className="h-20 bg-card border rounded-md" data-testid="color-card"></div>
-                  <p className="text-sm font-medium">Card</p>
-                  <p className="text-xs text-muted-foreground">Card backgrounds</p>
+                  <p className="text-sm font-medium">{t('designSystemLibrary.cards')}</p>
+                  <p className="text-xs text-muted-foreground">{t('designSystemLibrary.cardsDesc')}</p>
                 </div>
                 <div className="space-y-2">
                   <div className="h-20 bg-background border rounded-md" data-testid="color-background"></div>
-                  <p className="text-sm font-medium">Background</p>
-                  <p className="text-xs text-muted-foreground">Page background</p>
+                  <p className="text-sm font-medium">{t('common.background')}</p>
+                  <p className="text-xs text-muted-foreground">{t('common.background')}</p>
                 </div>
                 <div className="space-y-2">
                   <div className="h-20 bg-destructive rounded-md" data-testid="color-destructive"></div>
-                  <p className="text-sm font-medium">Destructive</p>
-                  <p className="text-xs text-muted-foreground">Error/danger</p>
+                  <p className="text-sm font-medium">{t('designSystemLibrary.destructive')}</p>
+                  <p className="text-xs text-muted-foreground">{t('designSystemLibrary.error')}</p>
                 </div>
                 <div className="space-y-2">
                   <div className="h-20 border rounded-md flex items-center justify-center" data-testid="color-border">
-                    <p className="text-xs text-muted-foreground">Border</p>
+                    <p className="text-xs text-muted-foreground">{t('common.border')}</p>
                   </div>
-                  <p className="text-sm font-medium">Border</p>
-                  <p className="text-xs text-muted-foreground">UI borders</p>
+                  <p className="text-sm font-medium">{t('common.border')}</p>
+                  <p className="text-xs text-muted-foreground">{t('common.border')}</p>
                 </div>
               </div>
             </CardContent>
@@ -164,10 +164,10 @@ export default function DesignSystemLibrary() {
 
               {/* States */}
               <div className="space-y-3">
-                <h4 className="text-sm font-medium">States</h4>
+                <h4 className="text-sm font-medium">{t('common.states')}</h4>
                 <div className="flex flex-wrap gap-2">
-                  <Button data-testid="button-enabled">Enabled</Button>
-                  <Button disabled data-testid="button-disabled">Disabled</Button>
+                  <Button data-testid="button-enabled">{t('common.enabled')}</Button>
+                  <Button disabled data-testid="button-disabled">{t('common.disabled')}</Button>
                 </div>
               </div>
             </CardContent>
