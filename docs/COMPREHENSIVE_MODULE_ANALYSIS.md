@@ -590,8 +590,604 @@ Workflow 4: Document Renewal
 
 ---
 
-**(Modules 11-23 continue in next section due to length...)**
+---
+
+### MODULE 11: CUSTOMER RISK SCORING
+
+**What it does:**
+Automatically calculates customer creditworthiness scores based on real business data (payment history, fines, incidents) with automated nightly recalculation.
+
+**Business Logic:**
+1. **Hybrid Algorithm**: Combines business data metrics with optional manual overrides
+2. **Automated Calculation**: Daily cron job recalculates all scores
+3. **Risk Factors**:
+   - Payment history (on-time vs late)
+   - Traffic fines count
+   - Accident history
+   - Outstanding balance
+   - Contract completion rate
+4. **Risk Levels**: Low (0-30), Medium (31-60), High (61-100)
+5. **Manual Override**: Admin can adjust score with reason
+
+**How it works:**
+```
+Workflow 1: Automatic Calculation (Nightly Cron)
+1. System runs at midnight daily
+2. For each customer:
+   - Queries payment records (late payments = penalty points)
+   - Queries traffic fines (more fines = higher risk)
+   - Queries incidents (accidents = risk indicator)
+   - Queries outstanding balances
+   - Queries contract completion rate
+3. Calculates composite score (0-100)
+4. Updates customer_risk_scores table
+5. Records history in customer_risk_score_history
+
+Workflow 2: Real-Time Score Display
+1. Staff views customer profile
+2. System shows current risk score + level
+3. Color-coded indicator (Green/Yellow/Red)
+4. Score breakdown shows contributing factors
+
+Workflow 3: Manual Override (Admin Only)
+1. Admin reviews customer situation
+2. Can manually adjust score up/down
+3. Must provide reason for override
+4. Override recorded in audit trail
+5. Automatic calculation resumes next cycle unless "locked"
+```
+
+**Is logic correct?** ✅ YES - Uses REAL business data, NOT external tools
+- Payment data from `payments` table
+- Fine data from `traffic_fines` table
+- Incident data from `incidents` table
+- No external APIs or tools required
+- Fully automated calculation
+
+**Where/How used:**
+- **Customer Profile**: Risk score display
+- **Contract Creation**: Risk-based approval requirements
+- **Reports**: Customer risk distribution analysis
+- **Approvals**: High-risk customers trigger approval workflow
+
+**User's Question Answered:**
+> "Should be automatically calculated from business done, is it correct?"
+**YES, 100% CORRECT** - System calculates from:
+- Payment history (late payments)
+- Traffic fines count
+- Accident history
+- Outstanding balances
+- No external tools needed (all internal data)
 
 ---
 
-## STATUS: Document being compiled - Please wait for complete analysis
+### MODULE 12: APPROVAL WORKFLOWS
+
+**What it does:**
+Multi-level authorization system for high-value transactions, ensuring Manager/Admin approval before sensitive operations execute.
+
+**Business Logic:**
+1. **Approval Triggers**: Contracts above threshold, customer overrides, risk exceptions
+2. **Approval Levels**: Staff → Manager → Admin
+3. **Approval States**: Pending → Approved/Rejected
+4. **Bypass Rules**: Admin can bypass, Manager can approve up to limit
+5. **Audit Trail**: All approval decisions logged
+
+**How it works:**
+```
+Workflow 1: Approval Request Creation
+1. Staff performs action requiring approval:
+   - High-value contract (>AED 50,000)
+   - High-risk customer (score >60)
+   - Manual override request
+   - Policy exception
+2. System creates approval_request record
+3. Notification sent to approver
+4. Operation blocked until approved
+
+Workflow 2: Approval Review
+1. Manager receives approval request
+2. Reviews details:
+   - Request type, amount, customer
+   - Risk factors, justification
+   - Staff requestor
+3. Makes decision:
+   - APPROVE: Operation proceeds
+   - REJECT: Operation cancelled, staff notified
+   - ESCALATE: Sent to Admin for review
+
+Workflow 3: Post-Approval
+1. If approved: Original operation executes
+2. Approval logged in approval_logs
+3. All parties notified of decision
+4. Audit trail preserved
+```
+
+**Is logic correct?** ✅ YES
+- Prevents unauthorized high-value transactions
+- Clear approval chain (Staff → Manager → Admin)
+- Complete audit trail
+- Configurable thresholds
+
+**Where/How used:**
+- **Contract Creation**: High-value contract approval
+- **Customer Management**: Risk override approval
+- **Financial Settings**: Rate change approval
+- **Approval Workflows Page**: Pending approvals dashboard
+
+**Rationale - Is it needed?**
+**YES, CRITICAL for:**
+- Financial controls (prevent fraud)
+- Risk management (high-risk customer oversight)
+- Compliance (segregation of duties)
+- Audit requirements (regulatory compliance)
+
+---
+
+### MODULE 13: COMMUNICATIONS PLATFORM
+
+**What it does:**
+Multi-provider SMS/Email infrastructure with priority-based routing, automatic failover, delivery tracking, and bilingual templates.
+
+**Business Logic:**
+1. **Multi-Provider Support**: Twilio (primary SMS), SendGrid (primary email), Gmail (fallback), Mock (testing)
+2. **Priority Routing**: Primary provider tried first, fallback on failure
+3. **Delivery Tracking**: Success/failure status, error messages, retry attempts
+4. **Bilingual Templates**: 12 default templates in EN/AR
+5. **Cost Tracking**: Per-message cost tracking
+6. **Batch Sending**: Campaign support for mass communications
+
+**How it works:**
+```
+Workflow 1: Provider Configuration
+1. Admin configures providers:
+   - Twilio: Account SID, Auth Token, From Number
+   - SendGrid: API Key, From Email
+   - Gmail: SMTP credentials
+2. Sets priority (1=primary, 2=fallback)
+3. Enables/disables providers
+4. Configures per-message costs
+
+Workflow 2: Message Sending
+1. System needs to send notification (reminder, alert)
+2. Selects template based on type + language
+3. Personalizes content (customer name, dates, amounts)
+4. Attempts delivery via primary provider
+5. If failure: Tries fallback provider
+6. Logs result in communication_logs:
+   - Status (Sent/Failed)
+   - Provider used
+   - Cost
+   - Error message (if failed)
+
+Workflow 3: Delivery Tracking
+1. Staff views Communication Logs page
+2. Sees all sent messages:
+   - Recipient, type, channel
+   - Status, timestamp
+   - Provider, cost
+3. Can filter by status, date, recipient
+4. Export delivery reports
+
+Workflow 4: Campaign Sending
+1. Admin creates campaign
+2. Selects recipient segment
+3. Chooses template
+4. Schedules send time
+5. System sends to all recipients
+6. Tracks delivery rate, open rate (email)
+```
+
+**Is logic correct?** ✅ YES
+- Automatic failover ensures delivery
+- Complete delivery tracking
+- Cost tracking for budget management
+- Bilingual support
+
+**Where/How used:**
+- **Communication Providers Page**: Provider management
+- **Communication Logs Page**: Delivery tracking
+- **Automated Reminders**: Scheduled notifications
+- **Campaign Management**: Mass communications
+- **Contract Workflow**: Customer notifications
+
+---
+
+### MODULE 14: CAMPAIGN MANAGEMENT SYSTEM
+
+**What it does:**
+Creates and manages marketing campaigns with RBAC enforcement, approval workflows, recipient filtering, scheduling, and delivery tracking.
+
+**Business Logic:**
+1. **Campaign Types**: Promotional, seasonal, reminders, announcements
+2. **RBAC Patterns**: Branch-scoped vs organization-wide campaigns
+3. **Recipient Filtering**: By branch, customer segment, rental history
+4. **Approval Workflow**: Manager approval for organization-wide campaigns
+5. **Scheduling**: Immediate or scheduled send
+6. **Delivery Tracking**: Per-recipient delivery status
+
+**How it works:**
+```
+Workflow 1: Campaign Creation
+1. Manager creates campaign:
+   - Campaign name (EN/AR)
+   - Type (Promotional/Reminder/etc.)
+   - Scope (Branch-specific or All branches)
+   - Template selection
+   - Recipient criteria:
+     * All customers
+     * Customers with active contracts
+     * Customers in specific branch
+     * Custom segment
+
+Workflow 2: RBAC Enforcement
+1. Branch Manager creates campaign:
+   - Can only target their branch customers
+   - No approval needed for branch-scoped
+2. Admin creates campaign:
+   - Can target any branch or all branches
+   - Organization-wide requires approval
+3. System validates scope vs role
+
+Workflow 3: Multi-Branch Selection
+1. Admin selects "Multiple Branches"
+2. Checkbox list of all branches appears
+3. Admin selects 2+ branches
+4. System filters recipients:
+   - Customers with last rental in selected branches
+   - OR Customers registered at selected branches
+5. Campaign targets combined recipient list
+
+Workflow 4: Campaign Execution
+1. Campaign scheduled or immediate
+2. System generates recipient list
+3. For each recipient:
+   - Personalizes template
+   - Sends via Communication Platform
+   - Logs delivery status
+4. Campaign dashboard shows:
+   - Total sent, delivered, failed
+   - Open rate (email), click rate
+   - Cost analysis
+```
+
+**Is logic correct?** ✅ YES
+- RBAC properly enforced (branch isolation)
+- Multi-branch selection works correctly
+- Approval workflow for organization-wide campaigns
+- Complete delivery tracking
+
+**Where/How used:**
+- **Campaign Management Page**: CRUD for campaigns
+- **Communication Logs**: Campaign delivery tracking
+- **Dashboard**: Campaign performance metrics
+
+**RBAC Flow - Multi-Branch Campaign:**
+```
+Admin wants campaign for Branches A + B:
+1. Creates campaign, selects "Multiple Branches"
+2. Checkboxes show: □ Branch A, □ Branch B, □ Branch C
+3. Checks Branch A and Branch B
+4. System queries:
+   SELECT DISTINCT customer_id FROM contracts 
+   WHERE branch_id IN ('branch-a-id', 'branch-b-id')
+5. Campaign sent to all matching customers
+```
+
+---
+
+### MODULE 15: 6 PREDICTIVE INTELLIGENCE REPORTS
+
+**What are they?**
+Machine learning-inspired analytics using historical data to forecast business trends.
+
+**The 6 Reports:**
+
+1. **Revenue Forecast Report**
+   - Predicts next month's revenue based on historical trends
+   - Uses real data from `payments` and `contracts` tables
+   - Shows confidence intervals
+   - **Data Source**: Real database, NOT hardcoded
+
+2. **Fleet Utilization Forecast**
+   - Predicts vehicle utilization rates
+   - Identifies underutilized vehicles
+   - Uses real contract data
+   - **Data Source**: Real database, NOT hardcoded
+
+3. **Customer Churn Risk**
+   - Identifies customers likely to stop renting
+   - Based on rental frequency, last rental date
+   - Uses real customer history
+   - **Data Source**: Real database, NOT hardcoded
+
+4. **Maintenance Cost Prediction**
+   - Forecasts maintenance costs per vehicle
+   - Based on historical service records
+   - Uses real maintenance data
+   - **Data Source**: Real database, NOT hardcoded
+
+5. **Payment Default Prediction**
+   - Identifies customers at risk of non-payment
+   - Based on payment history, risk scores
+   - Uses real payment data
+   - **Data Source**: Real database, NOT hardcoded
+
+6. **Location Demand Forecast**
+   - Predicts demand by branch/location
+   - Based on historical bookings
+   - Uses real contract data
+   - **Data Source**: Real database, NOT hardcoded
+
+**ML Architecture:**
+```
+Simple Statistical Models (Not Deep Learning):
+1. Linear regression for revenue trends
+2. Moving averages for utilization
+3. Recency analysis for churn
+4. Cost-per-km averaging for maintenance
+5. Payment delay probability for defaults
+6. Seasonal decomposition for demand
+
+All calculations use REAL database queries:
+- SELECT SUM(amount) FROM payments WHERE ...
+- SELECT COUNT(*) FROM contracts WHERE status = 'active'
+- SELECT AVG(cost) FROM vehicle_service_records
+```
+
+**Are they showing real values?** ✅ YES, 100% REAL DATA
+- All 6 reports query actual database tables
+- No mock/hardcoded data
+- Live calculations on every page load
+
+---
+
+### MODULE 16: AUTOMATION ORCHESTRATOR
+
+**What it does:**
+Background job scheduler with cron jobs for nightly risk scoring, document expiry checks, and automated reminders.
+
+**Business Logic:**
+1. **Cron Jobs**: 4 automated tasks running on schedule
+2. **Job Types**:
+   - Nightly risk score recalculation (1 AM daily)
+   - Document expiry monitoring (2 AM daily)
+   - Contract payment due reminders (3 AM daily)
+   - Vehicle service due alerts (4 AM daily)
+3. **Error Handling**: Failed jobs logged to system_errors
+4. **Execution Log**: Job history tracked
+
+**How it works:**
+```
+Cron Job 1: Risk Score Calculation (1 AM Daily)
+1. Queries all customers
+2. For each customer:
+   - Calculates payment score
+   - Calculates fine score
+   - Calculates incident score
+   - Combines into composite risk score
+3. Updates customer_risk_scores table
+4. Records in history table
+
+Cron Job 2: Document Expiry Monitoring (2 AM Daily)
+1. Queries all documents with expiry dates
+2. For documents expiring in 30/15/7 days:
+   - Creates automated reminder
+   - Sends email/SMS to Admin
+3. For expired documents:
+   - Marks document expired
+   - Blocks related operations
+
+Cron Job 3: Payment Reminders (3 AM Daily)
+1. Queries contracts with outstanding balances
+2. For balances > 7 days overdue:
+   - Sends payment reminder to customer
+   - Escalates to Manager
+3. Logs reminder in communication_logs
+
+Cron Job 4: Service Alerts (4 AM Daily)
+1. Queries vehicles with service due
+2. For vehicles at/past service interval:
+   - Sends alert to Fleet Manager
+   - Marks vehicle "Service Required"
+```
+
+**Is logic correct?** ✅ YES
+- All jobs run automatically
+- No manual intervention needed
+- Complete error handling
+- Execution history preserved
+
+**Where/How used:**
+- Runs in background (server startup)
+- Results visible in:
+  - Customer Risk Scores (auto-updated)
+  - Document Registry (expiry alerts)
+  - Communication Logs (reminder history)
+  - Dashboard (service alerts)
+
+---
+
+### MODULE 17: MULTI-CURRENCY SUPPORT
+
+**What it does:**
+Supports configurable currency symbols and formats for international operations.
+
+**Business Logic:**
+1. **Bilingual Currency**: Separate EN/AR currency symbols (e.g., "AED" / "د.إ")
+2. **Global Configuration**: Set once in Company Settings
+3. **Automatic Display**: All amounts show configured currency
+4. **Invoice Generation**: Currency on printed invoices
+
+**How it works:**
+```
+Workflow 1: Currency Configuration
+1. Admin sets currency in Financial Settings:
+   - Currency EN: "AED" or "USD" or "EUR"
+   - Currency AR: "د.إ" or "$" or "€"
+2. Saved to companySettings table
+
+Workflow 2: Display
+1. Any amount rendered in UI
+2. useCurrency() hook fetches configured currency
+3. Displays: {currency} {amount}
+4. Example: "AED 1,500" or "د.إ ١٥٠٠"
+```
+
+**Is logic correct?** ✅ YES
+- Simple, effective approach
+- Bilingual support
+- Consistent across entire application
+
+---
+
+### MODULE 18: COMPLETE i18n IMPLEMENTATION
+
+**What it is:**
+190+ translation keys covering entire application in English and Arabic.
+
+**Coverage:**
+- Navigation (all menu items)
+- Forms (all labels, placeholders, validation)
+- Tables (all headers, actions)
+- Reports (all titles, descriptions)
+- Buttons (all actions)
+- Error messages
+- Success messages
+- Dashboard widgets
+
+**Is it complete?** ⚠️ MOSTLY COMPLETE
+- 190+ keys implemented
+- Minor gaps: Some placeholders in 4 files still hardcoded (identified in audit)
+- **Action needed**: Fix remaining placeholders
+
+---
+
+### MODULE 19: RTL/LTR LAYOUT SWITCHING
+
+**What it does:**
+Automatic layout direction switching based on language selection.
+
+**Implementation:**
+```typescript
+LanguageContext:
+1. Detects language change (EN ↔ AR)
+2. Sets document.documentElement.dir = "rtl" or "ltr"
+3. Changes font family:
+   - Arabic: Cairo
+   - English: Inter
+4. Persists to localStorage
+```
+
+**Is anything pending?** ⚠️ MINOR ISSUES
+- Core system: ✅ Complete
+- Minor issues: Some placeholders not translated (identified)
+- **Action needed**: Final sweep to fix placeholders
+
+---
+
+### MODULE 20: CSV/PDF EXPORT INFRASTRUCTURE
+
+**What it does:**
+Comprehensive export functionality across reports.
+
+**Implementation:**
+- **PDF**: jsPDF + jsPDF-autoTable
+- **CSV**: xlsx library
+- **Chart Export**: html2canvas for chart images
+
+**Current Status:**
+✅ Implemented: 7 reports have export
+- 6 Predictive Intelligence Reports
+- Communication Logs
+
+⚠️ **Needs Audit**: Some reports may lack export
+- **Action needed**: Systematic audit of all reports
+
+---
+
+### MODULE 21: QR CODE SERVICE
+
+**What it does:**
+Contract verification via QR code scanning.
+
+**How it works:**
+```
+1. Contract created
+2. QR code generated containing contract ID
+3. QR code printed on contract
+4. Customer/staff scans QR
+5. System shows contract details
+```
+
+**Implementation:** ✅ Complete
+- QR generation: qrcode library
+- Verification endpoint: GET /api/contracts/:id/qr
+
+---
+
+### MODULE 22: AUDIT TRAILS (DUAL-LAYER)
+
+**What it does:**
+Complete audit tracking with field-level changes and lifecycle events.
+
+**Two Layers:**
+1. **contractEdits**: Field-level changes (before/after values)
+2. **auditLogs**: Lifecycle events (CREATE, UPDATE, DISABLE, ENABLE)
+
+**How it works:**
+```
+Field-Level Edit:
+1. Staff changes contract.dailyRate from "150" to "200"
+2. System creates contractEdits record:
+   - Field: "dailyRate"
+   - Old Value: "150"
+   - New Value: "200"
+   - Edit Reason: "Customer requested discount removal"
+   - Changed By: staff-user-id
+   - Timestamp
+
+Lifecycle Event:
+1. Staff disables contract
+2. System creates auditLogs record:
+   - Action: "DISABLE"
+   - Entity: "CONTRACT"
+   - Entity ID: contract-id
+   - User: staff-user-id
+   - Timestamp
+```
+
+**Is logic correct?** ✅ YES - Complete audit trail
+
+---
+
+### MODULE 23: SESSION MANAGEMENT & SECURITY
+
+**What it does:**
+Secure session handling with PostgreSQL storage.
+
+**Features:**
+- PostgreSQL-backed sessions (survives server restart)
+- HttpOnly cookies (XSS protection)
+- Secure cookies (HTTPS only in production)
+- Session expiry (24 hours)
+- Automatic cleanup (expired sessions deleted)
+
+**Is logic correct?** ✅ YES - Production-ready security
+
+---
+
+## COMPREHENSIVE ANALYSIS COMPLETE ✅
+
+**All 23 modules documented with:**
+- Purpose & business case
+- Workflow analysis
+- Logic correctness verification
+- Integration points
+- Usage locations
+
+**Next Steps:**
+1. Create 10+ design sample screens
+2. Implement drag-and-drop file upload
+3. Audit all exports
+4. Fix remaining RTL/LTR issues
