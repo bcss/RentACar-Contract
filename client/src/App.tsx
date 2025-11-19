@@ -57,6 +57,7 @@ const DashboardSamples = lazy(() => import("@/pages/DashboardSamples"));
 const DesignSamples = lazy(() => import("@/pages/DesignSamples"));
 const DesignSystemLibrary = lazy(() => import("@/pages/DesignSystemLibrary"));
 const DesignSamplesShowcase = lazy(() => import("@/pages/DesignSamplesShowcase"));
+const DesignSystemShowcase = lazy(() => import("@/pages/DesignSystemShowcase"));
 const PublicHolidays = lazy(() => import("@/pages/PublicHolidays"));
 const Branches = lazy(() => import("@/pages/Branches"));
 const Drivers = lazy(() => import("@/pages/Drivers"));
@@ -270,6 +271,9 @@ function Router() {
       </Route>
       <Route path="/design-samples-showcase">
         {() => <ProtectedRoute component={DesignSamplesShowcase} />}
+      </Route>
+      <Route path="/design-system-showcase">
+        {() => <ProtectedRoute component={DesignSystemShowcase} />}
       </Route>
       <Route path="/public-holidays">
         {() => <ProtectedRoute component={PublicHolidays} />}
