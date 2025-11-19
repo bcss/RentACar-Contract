@@ -10,7 +10,7 @@ async function throwIfResNotOk(res: Response) {
 /**
  * Get CSRF token from cookie
  */
-function getCsrfToken(): string | null {
+export function getCsrfToken(): string | null {
   const name = 'csrf_token=';
   const decodedCookie = decodeURIComponent(document.cookie);
   const cookies = decodedCookie.split(';');
