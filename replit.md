@@ -16,10 +16,11 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Improvements
 - **Sidebar Reorganization:** Restructured navigation into 6 logical categories (Dashboard, Operations, Masters, Reports, Administration, Settings) with full bilingual tooltips and RTL/LTR support
 - **RTL/LTR Support:** Automatic direction switching (`dir` attribute) and font family changes (Cairo for Arabic, Inter for English) in LanguageContext
-- **Export Functionality:** Comprehensive PDF/CSV export infrastructure using jsPDF, jsPDF-autoTable, xlsx, and html2canvas with bilingual support across 6 predictive intelligence reports + Communication Logs (7 total reports)
+- **Export Functionality:** Universal RFC 4180 compliant CSV export across ALL reports (Financial, Operational, Customer, Insurance, Audit, 6 Predictive Intelligence, 8 Specialized Operational, and 5 Enhanced Analytics reports). PDF export available for major report categories with chart embedding.
 
 ### Technical Infrastructure
 - **Export Utilities:**
+  - `client/src/utils/csvExport.ts` - RFC 4180 compliant CSV generation with proper field escaping, null safety, and memory leak prevention
   - `client/src/utils/contractPDF.ts` - Contract PDF generation with multi-page support
   - `client/src/utils/chartExport.ts` - Chart image capture for PDF embedding
   - `server/utils/exportHelpers.ts` - Server-side PDF/Excel generation with company headers, tables, and chart integration
@@ -54,7 +55,7 @@ Preferred communication style: Simple, everyday language.
 ### Core Features
 - **Rental Lifecycle Management:** 4-state workflow, hardened edit validation, contract timeline.
 - **Financials:** Automated calculations, configurable settings, enhanced payment tracking.
-- **Reporting & Analytics:** Comprehensive reporting with `recharts`, PDF/Excel export across 7 reports (6 predictive intelligence + Communication Logs). Predictive reports: revenue forecast, fleet utilization, customer churn risk, maintenance cost, payment default prediction, and location demand forecast.
+- **Reporting & Analytics:** Comprehensive reporting with `recharts`, production-ready CSV/PDF export across all 20+ reports. Universal RFC 4180 compliant CSV utility ensures data integrity with proper escaping and null safety. Predictive reports: revenue forecast, fleet utilization, customer churn risk, maintenance cost, payment default prediction, and location demand forecast.
 - **Vehicle Management:** Enhanced inspection, automatic status synchronization, inter-branch transfers. Complete UAE toll integration, traffic fines tracking, accidents & incidents management, fleet maintenance, dynamic pricing, and accessories management.
 - **Driver Service Module:** Professional driver assignment infrastructure, UAE market compliance, driver master data, outsource companies management, rate cards, and schedule management.
 - **Customer Risk Scoring:** Production-ready hybrid override algorithm with automated nightly recalculations.

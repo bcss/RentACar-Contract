@@ -10,6 +10,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Icon } from '@/components/Icon';
+import { Download } from 'lucide-react';
+import { format } from 'date-fns';
+import { generateCSV, downloadCSV, safeToFixed } from '@/utils/csvExport';
 
 export default function FleetPerformanceReport() {
   const { t, i18n } = useTranslation();
@@ -89,6 +92,36 @@ export default function FleetPerformanceReport() {
 
   const isLoading = vehiclesLoading || contractsLoading;
 
+  const handleExportCSV = () => {
+    const csvData = [
+      ['Fleet Performance Report', '', format(new Date(), 'yyyy-MM-dd HH:mm')],
+      [],
+      ['Summary'],
+      ['Total Vehicles', totalVehicles],
+      ['Active Vehicles', activeVehicles],
+      ['Utilization Rate', `${safeToFixed(utilizationRate)}%`],
+      ['Total Fleet Revenue', totalFleetRevenue],
+      ['Avg Revenue Per Vehicle', avgRevenuePerVehicle],
+      [],
+      ['Vehicle Performance'],
+      ['Make', 'Model', 'Year', 'Registration', 'Contracts', 'Total Days', 'Total Revenue', 'Avg Revenue/Day', 'Status'],
+      ...sortedVehicles.map(v => [
+        v.make ?? '',
+        v.model ?? '',
+        v.year ?? '',
+        v.registration ?? '',
+        v.contractCount ?? 0,
+        v.totalDays ?? 0,
+        v.totalRevenue ?? 0,
+        safeToFixed(v.avgRevenuePerDay),
+        v.isActive ? 'Active' : 'Inactive'
+      ])
+    ];
+
+    const csv = generateCSV(csvData);
+    downloadCSV(csv, `fleet-performance-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  };
+
   if (!isAdmin && !isManager) {
     return (
       <div className="container max-w-7xl px-6 py-8">
@@ -113,6 +146,10 @@ export default function FleetPerformanceReport() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={isLoading} data-testid="button-export-csv">
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
           <Button variant="outline" size="sm" data-testid="button-refresh">
             <Icon name="refresh" className="mr-2" />
             Refresh

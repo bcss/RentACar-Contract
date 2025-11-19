@@ -11,6 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Icon } from '@/components/Icon';
 import { Link } from 'wouter';
+import { Download } from 'lucide-react';
+import { format } from 'date-fns';
+import { generateCSV, downloadCSV, safeToFixed } from '@/utils/csvExport';
 
 export default function CollectionPerformanceReport() {
   const { t, i18n } = useTranslation();
@@ -34,6 +37,38 @@ export default function CollectionPerformanceReport() {
 
   const COLORS = ['#0891b2', '#06b6d4', '#67e8f9', '#a5f3fc'];
 
+  const handleExportCSV = () => {
+    if (!report) return;
+
+    const csvData = [
+      ['Collection Performance Report', '', '', format(new Date(), 'yyyy-MM-dd HH:mm')],
+      [],
+      ['Summary'],
+      ['Total Collected', report.summary.totalCollected ?? 0],
+      ['Total Outstanding', report.summary.totalOutstanding ?? 0],
+      ['Total Revenue', report.summary.totalRevenue ?? 0],
+      ['Collection Rate', `${safeToFixed(report.summary.collectionRate)}%`],
+      [],
+      ['Payment Methods'],
+      ['Method', 'Amount'],
+      ...(report.methodBreakdown || []).map((method: any) => [method.method ?? '', method.amount ?? 0]),
+      [],
+      ['Outstanding Payments'],
+      ['Contract', 'Customer', 'Total', 'Collected', 'Outstanding', 'Status'],
+      ...(report.outstandingPayments || []).map((payment: any) => [
+        payment.contractNumber ?? '',
+        payment.customerName ?? '',
+        payment.totalAmount ?? 0,
+        payment.collected ?? 0,
+        payment.outstanding ?? 0,
+        payment.status ?? ''
+      ])
+    ];
+
+    const csv = generateCSV(csvData);
+    downloadCSV(csv, `collection-performance-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  };
+
   if (!isAdmin && !isManager) {
     return (
       <div className="container max-w-7xl px-6 py-8">
@@ -54,10 +89,16 @@ export default function CollectionPerformanceReport() {
           <h1 className="text-3xl font-bold" data-testid="heading-collection">Collection Performance</h1>
           <p className="text-sm text-muted-foreground mt-1">Payment collection analysis and outstanding balances</p>
         </div>
-        <Button variant="outline" size="sm" data-testid="button-refresh">
-          <Icon name="refresh" className="mr-2" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={isLoading || !report} data-testid="button-export-csv">
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
+          <Button variant="outline" size="sm" data-testid="button-refresh">
+            <Icon name="refresh" className="mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

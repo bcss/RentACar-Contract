@@ -13,6 +13,8 @@ import { format } from 'date-fns';
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Icon } from '@/components/Icon';
 import {TrendIndicator} from '@/components/TrendIndicator';
+import { Download } from 'lucide-react';
+import { generateCSV, downloadCSV, safeToFixed } from '@/utils/csvExport';
 
 export default function RevenueTrendsReport() {
   const { t, i18n } = useTranslation();
@@ -60,6 +62,31 @@ export default function RevenueTrendsReport() {
     ? ((recentMonth?.totalRevenue || 0) - previousMonth.totalRevenue) / previousMonth.totalRevenue * 100
     : 0;
 
+  const handleExportCSV = () => {
+    const csvData = [
+      ['Revenue Trends Report', '', format(new Date(), 'yyyy-MM-dd HH:mm')],
+      [],
+      ['Summary'],
+      ['Total Revenue', totalRevenue],
+      ['Total Contracts', totalContracts],
+      ['Avg Revenue Per Month', avgRevenuePerMonth],
+      ['Avg Revenue Per Contract', avgRevenuePerContract],
+      ['Month-over-Month Growth', `${safeToFixed(revenueGrowth)}%`],
+      [],
+      ['Monthly Trends'],
+      ['Month', 'Total Revenue', 'Contracts', 'Avg per Contract'],
+      ...trendData.map(t => [
+        t.month ?? '',
+        t.totalRevenue ?? 0,
+        t.contractCount ?? 0,
+        t.contractCount > 0 ? safeToFixed(t.totalRevenue / t.contractCount) : '0.00'
+      ])
+    ];
+
+    const csv = generateCSV(csvData);
+    downloadCSV(csv, `revenue-trends-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  };
+
   if (!isAdmin && !isManager) {
     return (
       <div className="container max-w-7xl px-6 py-8">
@@ -84,6 +111,10 @@ export default function RevenueTrendsReport() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={trendLoading} data-testid="button-export-csv">
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
           <Button variant="outline" size="sm" data-testid="button-refresh">
             <Icon name="refresh" className="mr-2" />
             Refresh

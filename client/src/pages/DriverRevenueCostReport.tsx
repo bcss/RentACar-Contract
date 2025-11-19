@@ -11,6 +11,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Icon } from '@/components/Icon';
+import { Download } from 'lucide-react';
+import { format } from 'date-fns';
+import { generateCSV, downloadCSV, safeToFixed } from '@/utils/csvExport';
 
 interface DriverRevenueCostReport {
   summary: {
@@ -96,6 +99,39 @@ export default function DriverRevenueCostReport() {
     profit: d.profit,
   })) || [];
 
+  const handleExportCSV = () => {
+    if (!report) return;
+
+    const csvData = [
+      ['Driver Revenue & Cost Report', '', format(new Date(), 'yyyy-MM-dd HH:mm')],
+      [],
+      ['Summary'],
+      ['Total Revenue', report.summary.totalRevenue ?? 0],
+      ['Total Cost', report.summary.totalCost ?? 0],
+      ['Total Profit', report.summary.totalProfit ?? 0],
+      ['Profit Margin', `${safeToFixed(report.summary.overallProfitMargin)}%`],
+      ['Total Assignments', report.summary.totalAssignments ?? 0],
+      [],
+      ['Driver Analysis'],
+      ['Driver Code', 'Driver Name', 'Employment Type', 'Assignments', 'Days Worked', 'Revenue', 'Cost', 'Profit', 'Profit Margin %', 'ROI %'],
+      ...report.driverAnalysis.map(d => [
+        d.driverCode ?? '',
+        d.driverName ?? '',
+        d.employmentType ?? '',
+        d.totalAssignments ?? 0,
+        d.totalDaysWorked ?? 0,
+        d.totalRevenue ?? 0,
+        d.totalCost ?? 0,
+        d.profit ?? 0,
+        safeToFixed(d.profitMargin),
+        safeToFixed(d.roi)
+      ])
+    ];
+
+    const csv = generateCSV(csvData);
+    downloadCSV(csv, `driver-revenue-cost-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -103,6 +139,10 @@ export default function DriverRevenueCostReport() {
           <h1 className="text-3xl font-bold tracking-tight">{t('reports.driverRevenueCost')}</h1>
           <p className="text-muted-foreground">{t('reports.driverRevenueCostDesc')}</p>
         </div>
+        <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={isLoading || !report} data-testid="button-export-csv">
+          <Download className="mr-2 h-4 w-4" />
+          Export CSV
+        </Button>
       </div>
 
       <Card>

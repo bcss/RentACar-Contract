@@ -10,6 +10,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Icon } from '@/components/Icon';
+import { Download } from 'lucide-react';
+import { format } from 'date-fns';
+import { generateCSV, downloadCSV, safeToFixed } from '@/utils/csvExport';
 
 export default function ContractAnalyticsReport() {
   const { t, i18n } = useTranslation();
@@ -59,6 +62,29 @@ export default function ContractAnalyticsReport() {
 
   const isLoading = contractsLoading || volumeLoading;
 
+  const handleExportCSV = () => {
+    const csvData = [
+      ['Contract Analytics Report', '', format(new Date(), 'yyyy-MM-dd HH:mm')],
+      [],
+      ['Summary'],
+      ['Total Contracts', totalContracts],
+      ['Active Contracts', activeContracts],
+      ['Completed Contracts', completedContracts + closedContracts],
+      ['Completion Rate', `${safeToFixed(completionRate)}%`],
+      [],
+      ['Status Distribution'],
+      ['Status', 'Count'],
+      ...statusDistributionData.map(s => [s.name ?? '', s.value ?? 0]),
+      [],
+      ['Contract Volume Trend'],
+      ['Month', 'Count'],
+      ...(contractVolumeData || []).map((v: any) => [v.month ?? '', v.count ?? 0])
+    ];
+
+    const csv = generateCSV(csvData);
+    downloadCSV(csv, `contract-analytics-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  };
+
   if (!isAdmin && !isManager) {
     return (
       <div className="container max-w-7xl px-6 py-8">
@@ -81,10 +107,16 @@ export default function ContractAnalyticsReport() {
             Comprehensive contract lifecycle and volume analysis
           </p>
         </div>
-        <Button variant="outline" size="sm" data-testid="button-refresh">
-          <Icon name="refresh" className="mr-2" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={isLoading} data-testid="button-export-csv">
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
+          <Button variant="outline" size="sm" data-testid="button-refresh">
+            <Icon name="refresh" className="mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
