@@ -198,9 +198,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   
   // Collapsible menu state management with localStorage persistence
   // Default to collapsed (false) on first login
+  const [operationsOpen, setOperationsOpen] = useState(false);
   const [mastersOpen, setMastersOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
-  const [auditOpen, setAuditOpen] = useState(false);
+  const [administrationOpen, setAdministrationOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpLegalOpen, setHelpLegalOpen] = useState(false);
   
@@ -209,15 +210,17 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   // Load collapsible state from localStorage on mount
   useEffect(() => {
+    const savedOperations = localStorage.getItem('sidebar_operations_open');
     const savedMasters = localStorage.getItem('sidebar_masters_open');
     const savedReports = localStorage.getItem('sidebar_reports_open');
-    const savedAudit = localStorage.getItem('sidebar_audit_open');
+    const savedAdministration = localStorage.getItem('sidebar_administration_open');
     const savedSettings = localStorage.getItem('sidebar_settings_open');
     const savedHelpLegal = localStorage.getItem('sidebar_helplegal_open');
 
+    if (savedOperations !== null) setOperationsOpen(savedOperations === 'true');
     if (savedMasters !== null) setMastersOpen(savedMasters === 'true');
     if (savedReports !== null) setReportsOpen(savedReports === 'true');
-    if (savedAudit !== null) setAuditOpen(savedAudit === 'true');
+    if (savedAdministration !== null) setAdministrationOpen(savedAdministration === 'true');
     if (savedSettings !== null) setSettingsOpen(savedSettings === 'true');
     if (savedHelpLegal !== null) setHelpLegalOpen(savedHelpLegal === 'true');
   }, []);
@@ -227,6 +230,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     if (sidebarState === 'expanded' && pendingSubmenuOpen) {
       // Sidebar has expanded, now open the pending submenu
       switch (pendingSubmenuOpen) {
+        case 'operations':
+          setOperationsOpen(true);
+          localStorage.setItem('sidebar_operations_open', 'true');
+          break;
         case 'masters':
           setMastersOpen(true);
           localStorage.setItem('sidebar_masters_open', 'true');
@@ -235,9 +242,9 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
           setReportsOpen(true);
           localStorage.setItem('sidebar_reports_open', 'true');
           break;
-        case 'audit':
-          setAuditOpen(true);
-          localStorage.setItem('sidebar_audit_open', 'true');
+        case 'administration':
+          setAdministrationOpen(true);
+          localStorage.setItem('sidebar_administration_open', 'true');
           break;
         case 'settings':
           setSettingsOpen(true);
@@ -277,16 +284,24 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     localStorage.setItem('sidebar_reports_open', String(open));
   };
 
-  const handleAuditToggle = (open: boolean) => {
-    // If sidebar is collapsed and user is trying to open submenu, expand sidebar first
-    // and defer opening the submenu until after expansion completes
+  const handleOperationsToggle = (open: boolean) => {
     if (open && sidebarState === 'collapsed') {
-      setPendingSubmenuOpen('audit');
+      setPendingSubmenuOpen('operations');
       toggleSidebar();
-      return; // Don't open submenu yet - wait for sidebar to expand
+      return;
     }
-    setAuditOpen(open);
-    localStorage.setItem('sidebar_audit_open', String(open));
+    setOperationsOpen(open);
+    localStorage.setItem('sidebar_operations_open', String(open));
+  };
+
+  const handleAdministrationToggle = (open: boolean) => {
+    if (open && sidebarState === 'collapsed') {
+      setPendingSubmenuOpen('administration');
+      toggleSidebar();
+      return;
+    }
+    setAdministrationOpen(open);
+    localStorage.setItem('sidebar_administration_open', String(open));
   };
 
   const handleSettingsToggle = (open: boolean) => {
@@ -317,6 +332,65 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     queryKey: ['/api/settings'],
   });
 
+  // Operations Items
+  const operationsItems = [
+    {
+      title: t('nav.contracts'),
+      icon: 'description',
+      url: '/contracts',
+      show: true,
+    },
+    {
+      title: t('nav.insuranceClaims'),
+      icon: 'health_and_safety',
+      url: '/insurance-claims',
+      show: true,
+    },
+    {
+      title: t('nav.tollManagement'),
+      icon: 'landmark',
+      url: '/toll-management',
+      show: true,
+    },
+    {
+      title: t('nav.trafficFines'),
+      icon: 'alert_octagon',
+      url: '/traffic-fines',
+      show: true,
+    },
+    {
+      title: t('nav.incidents'),
+      icon: 'file_warning',
+      url: '/incidents',
+      show: true,
+    },
+    {
+      title: t('nav.vehicleMaintenance'),
+      icon: 'wrench',
+      url: '/vehicle-maintenance',
+      show: true,
+    },
+    {
+      title: t('nav.driverScheduling'),
+      icon: 'calendar',
+      url: '/driver-scheduling',
+      show: true,
+    },
+    {
+      title: t('nav.communicationLogs'),
+      icon: 'message_square',
+      url: '/communication/logs',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.campaignManagement'),
+      icon: 'send',
+      url: '/campaigns',
+      show: isAdmin || isManager || user?.role === 'staff',
+    },
+  ];
+
+  // Master Data Items
   const masterItems = [
     {
       title: t('nav.customers'),
@@ -343,107 +417,96 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       show: isAdmin || isManager,
     },
     {
-      title: 'Branches',
+      title: t('nav.branches'),
       icon: 'business',
       url: '/branches',
       show: isAdmin || isManager,
     },
     {
-      title: 'Drivers',
+      title: t('nav.drivers'),
       icon: 'people',
       url: '/drivers',
       show: isAdmin || isManager,
     },
     {
-      title: 'Driver Companies',
+      title: t('nav.driverCompanies'),
       icon: 'business_center',
       url: '/driver-companies',
       show: isAdmin || isManager,
     },
-    // Wave 1 - Compliance & Operations
     {
-      title: 'Toll Management',
-      icon: 'landmark',
-      url: '/toll-management',
-      show: true,
-    },
-    {
-      title: 'Traffic Fines',
-      icon: 'alert_octagon',
-      url: '/traffic-fines',
-      show: true,
-    },
-    {
-      title: 'Incidents',
-      icon: 'file_warning',
-      url: '/incidents',
-      show: true,
-    },
-    {
-      title: 'Document Registry',
+      title: t('nav.documentRegistry'),
       icon: 'folder_open',
       url: '/documents',
       show: true,
     },
-    // Wave 2 - Fleet Economics
     {
-      title: 'Vehicle Maintenance',
-      icon: 'wrench',
-      url: '/vehicle-maintenance',
-      show: true,
-    },
-    {
-      title: 'Rental Rate Plans',
+      title: t('nav.rentalRatePlans'),
       icon: 'receipt',
       url: '/rate-plans',
       show: true,
     },
     {
-      title: 'Vehicle Accessories',
+      title: t('nav.vehicleAccessories'),
       icon: 'package',
       url: '/accessories',
       show: true,
     },
-    // Wave 3 - Workforce & Automation
     {
-      title: 'Driver Scheduling',
-      icon: 'calendar',
-      url: '/driver-scheduling',
-      show: true,
+      title: t('nav.publicHolidays'),
+      icon: 'default',
+      url: '/public-holidays',
+      show: isAdmin,
+    },
+  ];
+
+  // Administration Items
+  const administrationItems = [
+    {
+      title: t('nav.customerRiskScoring'),
+      icon: 'shield',
+      url: '/risk-scoring',
+      show: isAdmin || isManager,
     },
     {
-      title: 'Automated Reminders',
+      title: t('nav.approvalWorkflows'),
+      icon: 'check_square',
+      url: '/approvals',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.automatedReminders'),
       icon: 'bell',
       url: '/reminders',
       show: true,
     },
     {
-      title: 'Customer Risk Scoring',
-      icon: 'shield',
-      url: '/risk-scoring',
-      show: isAdmin || isManager,
-    },
-    // Wave 4 - Communications & Campaigns
-    {
-      title: 'Communication Providers',
+      title: t('nav.communicationProviders'),
       icon: 'mail',
       url: '/communication/providers',
       show: isAdmin,
     },
     {
-      title: 'Communication Logs',
-      icon: 'message_square',
-      url: '/communication/logs',
+      title: t('nav.auditLogs'),
+      icon: 'history',
+      url: '/audit-logs',
       show: isAdmin || isManager,
     },
     {
-      title: 'Campaign Management',
-      icon: 'send',
-      url: '/campaigns',
-      show: isAdmin || isManager || user?.role === 'staff',
+      title: t('nav.accessReport'),
+      icon: 'verified_user',
+      url: '/access-report',
+      show: isAdmin || isManager || user?.canAccessAppAccessReport === true,
+    },
+    {
+      title: t('nav.systemErrors'),
+      icon: 'error_outline',
+      url: '/system-errors',
+      show: isAdmin,
     },
   ];
 
+  // Settings Items
   const settingsItems = [
     {
       title: t('nav.companySettings'),
@@ -464,9 +527,9 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       show: isAdmin,
     },
     {
-      title: 'Public Holidays',
-      icon: 'default',
-      url: '/public-holidays',
+      title: t('nav.systemUsers'),
+      icon: 'people',
+      url: '/users',
       show: isAdmin,
     },
     {
@@ -475,21 +538,9 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/settings/import',
       show: isAdmin && (user?.isImmutable === true),
     },
-    {
-      title: t('nav.systemUsers'),
-      icon: 'people',
-      url: '/users',
-      show: isAdmin,
-    },
-    // Wave 3 - Approval Workflows
-    {
-      title: 'Approval Workflows',
-      icon: 'check_square',
-      url: '/approvals',
-      show: isAdmin || isManager,
-    },
   ];
 
+  // Help & Legal Items
   const helpLegalItems = [
     {
       title: 'Support & Help',
@@ -511,6 +562,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     },
   ];
 
+  // Report Items
   const reportItems = [
     // Predictive Intelligence Reports
     {
@@ -629,27 +681,6 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       icon: 'warning_amber',
       url: '/unclosed-contracts-report',
       show: isAdmin || isManager || canAccessReports,
-    },
-  ];
-
-  const auditItems = [
-    {
-      title: t('nav.auditLogs'),
-      icon: 'history',
-      url: '/audit-logs',
-      show: isAdmin || isManager,
-    },
-    {
-      title: 'Access Report',
-      icon: 'verified_user',
-      url: '/access-report',
-      show: isAdmin || isManager || user?.canAccessAppAccessReport === true,
-    },
-    {
-      title: t('nav.systemErrors'),
-      icon: 'error_outline',
-      url: '/system-errors',
-      show: isAdmin,
     },
   ];
 
@@ -835,41 +866,46 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              {/* Contracts */}
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={location === '/contracts'} 
-                  data-testid="nav-contracts"
-                  tooltip={{
-                    children: t('nav.contracts'),
-                    side: language === 'ar' ? 'left' : 'right'
-                  }}
-                >
-                  <Link href="/contracts">
-                    <FileText className="h-4 w-4" />
-                    {sidebarState === 'expanded' && <span>{t('nav.contracts')}</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              {/* Insurance Claims */}
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={location === '/insurance-claims'} 
-                  data-testid="nav-insurance-claims"
-                  tooltip={{
-                    children: 'Insurance Claims',
-                    side: language === 'ar' ? 'left' : 'right'
-                  }}
-                >
-                  <Link href="/insurance-claims">
-                    <Hospital className="h-4 w-4" />
-                    {sidebarState === 'expanded' && <span>Insurance Claims</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {/* Operations - Collapsible */}
+              <Collapsible open={operationsOpen} onOpenChange={handleOperationsToggle} className="group/collapsible">
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton data-testid="nav-operations">
+                          <Activity className="h-4 w-4" />
+                          {sidebarState === 'expanded' && <span>{t('nav.operations')}</span>}
+                          {sidebarState === 'expanded' && (
+                            <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                    </TooltipTrigger>
+                    {sidebarState === 'collapsed' && (
+                      <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                        <p>{t('nav.operations')}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {operationsItems.filter(item => item.show).map((item) => {
+                        const IconComponent = getIconComponent(item.icon);
+                        return (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                              <Link href={item.url}>
+                                <IconComponent className="h-4 w-4" />
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
 
               {/* Masters - Collapsible */}
               <Collapsible open={mastersOpen} onOpenChange={handleMastersToggle} className="group/collapsible">
@@ -955,16 +991,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 </Collapsible>
               )}
 
-              {/* Audit Logs & System Errors - Collapsible (Admin/Manager only) */}
+              {/* Administration - Collapsible (Admin/Manager only) */}
               {(isAdmin || isManager) && (
-                <Collapsible open={auditOpen} onOpenChange={handleAuditToggle} className="group/collapsible">
+                <Collapsible open={administrationOpen} onOpenChange={handleAdministrationToggle} className="group/collapsible">
                   <SidebarMenuItem>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <CollapsibleTrigger asChild>
-                          <SidebarMenuButton data-testid="nav-audit-parent">
+                          <SidebarMenuButton data-testid="nav-administration">
                             <ShieldCheck className="h-4 w-4" />
-                            {sidebarState === 'expanded' && <span>{t('nav.auditLogsAndErrors')}</span>}
+                            {sidebarState === 'expanded' && <span>{t('nav.administration')}</span>}
                             {sidebarState === 'expanded' && (
                               <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                             )}
@@ -973,17 +1009,17 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                       </TooltipTrigger>
                       {sidebarState === 'collapsed' && (
                         <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
-                          <p>{t('nav.auditLogsAndErrors')}</p>
+                          <p>{t('nav.administration')}</p>
                         </TooltipContent>
                       )}
                     </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {auditItems.filter(item => item.show).map((item) => {
+                        {administrationItems.filter(item => item.show).map((item) => {
                           const IconComponent = getIconComponent(item.icon);
                           return (
                             <SidebarMenuSubItem key={item.title}>
-                              <SidebarMenuSubButton asChild isActive={location.startsWith('/audit-logs') && window.location.search.includes(item.url.split('=')[1])} data-testid={`nav-${item.url.split('?')[0].replace('/', '')}-${item.url.split('=')[1]}`}>
+                              <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
                                 <Link href={item.url}>
                                   <IconComponent className="h-4 w-4" />
                                   {sidebarState === 'expanded' && <span>{item.title}</span>}
