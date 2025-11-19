@@ -12,8 +12,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function TermsOfServicePage() {
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<string>('acceptance');
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
@@ -107,17 +109,17 @@ export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">Terms of Service</h1>
-          <p className="text-sm text-muted-foreground mt-1">Last updated: December 2025</p>
+        <div className="mb-6" data-testid="header-terms-of-service">
+          <h1 className="text-3xl font-bold" data-testid="text-page-title">{t('legal.termsOfService', 'Terms of Service')}</h1>
+          <p className="text-sm text-muted-foreground mt-1" data-testid="text-last-updated">{t('legal.lastUpdated', 'Last updated:')} December 2025</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Table of Contents - Sticky on Desktop */}
           <div className="lg:col-span-1">
-            <Card className="lg:sticky lg:top-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Contents</CardTitle>
+            <Card className="lg:sticky lg:top-6" data-testid="card-table-of-contents">
+              <CardHeader data-testid="header-toc">
+                <CardTitle className="text-lg" data-testid="title-toc">{t('legal.contents', 'Contents')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
                 {sections.map((section) => {
