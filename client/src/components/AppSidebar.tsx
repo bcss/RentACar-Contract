@@ -159,6 +159,8 @@ const getIconComponent = (iconName: string) => {
     'target': Target,
     'line_chart': LineChart,
     'activity': Activity,
+    // Design System
+    'dashboard': LayoutDashboard,
     // Default
     'default': FileText,
   };
@@ -539,9 +541,9 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       show: isAdmin && (user?.isImmutable === true),
     },
     {
-      title: t('nav.designSystemLibrary'),
-      icon: 'description',
-      url: '/design-system-library',
+      title: t('nav.designShowcase', 'Design System Showcase'),
+      icon: 'dashboard',
+      url: '/design-system-showcase',
       show: isAdmin || isManager,
     },
   ];
