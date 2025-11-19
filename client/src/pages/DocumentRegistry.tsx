@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, DragEvent } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Plus, Edit, FileText, CheckCircle, Upload, X } from "lucide-react";
@@ -30,6 +30,7 @@ export default function DocumentRegistry() {
   const [selectedEntityType, setSelectedEntityType] = useState<string>("");
   const [uploadedFile, setUploadedFile] = useState<{ name: string; url: string; type: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: documents = [], isLoading } = useQuery<DocumentRegistryEntry[]>({
@@ -112,10 +113,7 @@ export default function DocumentRegistry() {
     onError: (error: Error) => showError(error, t("error")),
   });
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const processFileUpload = async (file: File) => {
     setIsUploading(true);
     try {
       const formData = new FormData();
@@ -155,6 +153,53 @@ export default function DocumentRegistry() {
       showError(error as Error, "File upload failed");
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await processFileUpload(file);
+  };
+
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      // Validate file type
+      const validTypes = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'];
+      const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!validTypes.includes(fileExt)) {
+        showError(new Error('Invalid file type'), 'Please upload PDF, JPG, PNG, DOC, or DOCX files only');
+        return;
+      }
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        showError(new Error('File too large'), 'Maximum file size is 10MB');
+        return;
+      }
+      await processFileUpload(file);
     }
   };
 
@@ -536,7 +581,19 @@ export default function DocumentRegistry() {
                         </Button>
                       </div>
                     ) : (
-                      <div>
+                      <div
+                        onDragEnter={handleDragEnter}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer hover-elevate ${
+                          isDragging
+                            ? 'border-primary bg-primary/5'
+                            : 'border-muted-foreground/25'
+                        }`}
+                        onClick={() => !isUploading && fileInputRef.current?.click()}
+                        data-testid="dropzone-file-upload"
+                      >
                         <input
                           ref={fileInputRef}
                           type="file"
@@ -545,19 +602,20 @@ export default function DocumentRegistry() {
                           className="hidden"
                           data-testid="input-file"
                         />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isUploading}
-                          data-testid="button-upload-file"
-                        >
-                          <Upload className="h-4 w-4 mr-2" />
-                          {isUploading ? "Uploading..." : "Upload File"}
-                        </Button>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Supported: PDF, JPG, PNG, DOC, DOCX (max 10MB)
-                        </p>
+                        <div className="flex flex-col items-center gap-2">
+                          <Upload className={`h-10 w-10 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <div>
+                            <p className="font-medium">
+                              {isUploading ? 'Uploading...' : isDragging ? 'Drop file here' : 'Drag & drop file here'}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              or click to browse
+                            </p>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Supported: PDF, JPG, PNG, DOC, DOCX (max 10MB)
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
