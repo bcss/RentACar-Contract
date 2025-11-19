@@ -16,7 +16,7 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Improvements
 - **Sidebar Reorganization:** Restructured navigation into 6 logical categories (Dashboard, Operations, Masters, Reports, Administration, Settings) with full bilingual tooltips and RTL/LTR support
 - **RTL/LTR Support:** Automatic direction switching (`dir` attribute) and font family changes (Cairo for Arabic, Inter for English) in LanguageContext
-- **Export Functionality:** Comprehensive PDF/CSV export infrastructure using jsPDF, jsPDF-autoTable, xlsx, and html2canvas with bilingual support across all 6 predictive intelligence reports
+- **Export Functionality:** Comprehensive PDF/CSV export infrastructure using jsPDF, jsPDF-autoTable, xlsx, and html2canvas with bilingual support across 6 predictive intelligence reports + Communication Logs (7 total reports)
 
 ### Technical Infrastructure
 - **Export Utilities:**
@@ -54,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 ### Core Features
 - **Rental Lifecycle Management:** 4-state workflow, hardened edit validation, contract timeline.
 - **Financials:** Automated calculations, configurable settings, enhanced payment tracking.
-- **Reporting & Analytics:** Comprehensive reporting with `recharts`, PDF/Excel export across various operational areas. Six predictive intelligence reports for revenue, fleet, churn, maintenance, payment default, and location demand.
+- **Reporting & Analytics:** Comprehensive reporting with `recharts`, PDF/Excel export across 7 reports (6 predictive intelligence + Communication Logs). Predictive reports: revenue forecast, fleet utilization, customer churn risk, maintenance cost, payment default prediction, and location demand forecast.
 - **Vehicle Management:** Enhanced inspection, automatic status synchronization, inter-branch transfers. Complete UAE toll integration, traffic fines tracking, accidents & incidents management, fleet maintenance, dynamic pricing, and accessories management.
 - **Driver Service Module:** Professional driver assignment infrastructure, UAE market compliance, driver master data, outsource companies management, rate cards, and schedule management.
 - **Customer Risk Scoring:** Production-ready hybrid override algorithm with automated nightly recalculations.
