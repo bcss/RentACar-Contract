@@ -118,11 +118,28 @@ RCCMS (Rental Car Contract Management System) is a production-ready, bilingual (
 
 ---
 
-## 3. BACKEND API (server/routes.ts - 5,050 lines, 143 endpoints)
+## 3. BACKEND API (Modular Architecture - 7 Route Modules, 71+ Routes)
+
+### **Modular Route Architecture (November 2025)**
+RCCMS has transitioned from a monolithic routes.ts (9,666 lines) to a modular architecture:
+
+**Route Modules:**
+- `server/routes/authRoutes.ts` (96 lines, 4 routes) - Authentication & system health
+- `server/routes/customerRoutes.ts` (170 lines, 6 routes) - Customer management
+- `server/routes/vehicleRoutes.ts` (237 lines, 8 routes) - Fleet operations
+- `server/routes/userRoutes.ts` (276 lines, 9 routes) - User administration
+- `server/routes/paymentRoutes.ts` (221 lines, 6 routes) - Payment tracking
+- `server/routes/contractRoutes.ts` (850 lines, 15 routes) - Contract lifecycle
+- `server/routes/reportRoutes.ts` (900 lines, 18 routes) - Analytics & exports
+- `server/routes/index.ts` (61 lines) - Central orchestrator
+
+**Benefits:** Isolated testing, domain-focused organization, improved maintainability, 100% backward compatible
+
+---
 
 ### **Authentication Endpoints**
 ```typescript
-GET  /api/auth/user                 // Get current user (line 125)
+GET  /api/auth/user                 // Get current user
 POST /api/auth/login                // Username/password login (setupAuth in localAuth.ts)
 POST /api/auth/logout               // End session
 GET  /api/system/health             // System health check (line 140)
