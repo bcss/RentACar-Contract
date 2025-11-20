@@ -93,14 +93,16 @@ export const pooledDb = drizzle(sql, { schema });
 
 ### P2-2: Redis Caching
 **Status:** ✅ Complete  
-**File:** `server/utils/cache.ts` (120 lines)
+**File:** `server/utils/cache.ts` (152 lines)
 
 **Features Implemented:**
 - Lazy Redis client initialization (no failure if Redis unavailable)
+- **Proper Redis URL validation** (redis:// or rediss:// protocol only)
 - TTL-based caching with sensible defaults
 - Cache key patterns for easy invalidation
 - Company settings caching (most frequently accessed data)
-- Support for both Upstash Redis (Replit-friendly) and standard Redis
+- Graceful degradation when Redis not configured
+- **Production-safe error handling** prevents crashes on connection failures
 
 **API:**
 ```typescript

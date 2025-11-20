@@ -142,7 +142,14 @@ export async function invalidateCompanySettingsCache() {
  * - Get your Redis-compatible URL from Upstash dashboard (NOT the REST URL)
  * - Set REDIS_URL with the redis:// URL (NOT https:// REST URL)
  * 
- * Option 3: No Redis (graceful degradation)
+ * Option 3: Upstash REST API (Alternative)
+ * - If you only have Upstash REST URL (https://...), you need to:
+ *   1. Install @upstash/redis package: npm install @upstash/redis
+ *   2. Replace this cache.ts file with Upstash REST client implementation
+ *   3. See Upstash docs: https://upstash.com/docs/redis/sdks/ts/overview
+ * - NOTE: This requires code changes - ioredis and Upstash REST are incompatible
+ * 
+ * Option 4: No Redis (graceful degradation)
  * - Don't set REDIS_URL
  * - App continues without caching (slightly slower but functional)
  */
