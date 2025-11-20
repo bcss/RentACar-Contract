@@ -4,8 +4,10 @@ import express from 'express';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import session from 'express-session';
+import cookieParser from 'cookie-parser';
 import { storage } from '../../server/storage';
 import { verifyPassword } from '../../server/auth/passwordUtils';
+import { csrfProtection, csrfTokenGenerator } from '../../server/middleware/csrf';
 import authRoutes from '../../server/routes/authRoutes';
 import customerRoutes from '../../server/routes/customerRoutes';
 import vehicleRoutes from '../../server/routes/vehicleRoutes';
@@ -20,6 +22,15 @@ import reportRoutes from '../../server/routes/reportRoutes';
  */
 
 /**
+ * Get CSRF token from the test app
+ */
+export async function getCsrfToken(app: express.Application): Promise<string> {
+  const request = (await import('supertest')).default;
+  const res = await request(app).get('/api/csrf-token');
+  return res.body.csrfToken;
+}
+
+/**
  * Setup Express app with all routes for integration testing
  */
 export async function setupTestApp(): Promise<express.Application> {
@@ -28,6 +39,7 @@ export async function setupTestApp(): Promise<express.Application> {
   // Middleware
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser()); // Required for CSRF protection
   
   // Session middleware
   app.use(session({
@@ -77,7 +89,10 @@ export async function setupTestApp(): Promise<express.Application> {
   app.use(passport.initialize());
   app.use(passport.session());
   
-  // Add login route (from localAuth.ts)
+  // CSRF token generation endpoint (must be before CSRF protection)
+  app.get('/api/csrf-token', csrfTokenGenerator);
+  
+  // Add login route (from localAuth.ts) - must be before CSRF protection
   app.post("/api/login", (req: any, res: any, next: any) => {
     passport.authenticate("local", async (err: any, user: any, info: any) => {
       if (err) {
@@ -135,6 +150,10 @@ export async function setupTestApp(): Promise<express.Application> {
       res.status(500).json({ message: "Failed to update settings" });
     }
   });
+  
+  // Apply CSRF protection to all routes AFTER login and csrf-token
+  // This protects POST/PUT/PATCH/DELETE while allowing /api/login and /api/csrf-token to bypass
+  app.use(csrfProtection);
   
   // Register all route modules (same pattern as server/routes/index.ts)
   app.use('/api', authRoutes);

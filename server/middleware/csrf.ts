@@ -32,7 +32,7 @@ export const csrfTokenGenerator: RequestHandler = (req, res) => {
   // This allows the client to include the token in X-CSRF-Token header
   res.cookie(CSRF_COOKIE_NAME, token, {
     httpOnly: false, // MUST be false so client can read cookie value
-    secure: true,
+    secure: process.env.NODE_ENV === 'production', // Only secure in production
     sameSite: 'strict',
     maxAge: 60 * 60 * 1000, // 1 hour
   });

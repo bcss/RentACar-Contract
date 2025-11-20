@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import { setupTestApp } from '../utils/testHelpers';
+import { setupTestApp, getCsrfToken } from '../utils/testHelpers';
 
 /**
  * Outstanding Balance Integration Tests
@@ -12,11 +12,15 @@ import { setupTestApp } from '../utils/testHelpers';
 describe('Outstanding Balance Integration', () => {
   let app: express.Application;
   let authToken: string;
+  let csrfToken: string;
   let customerId: string;
   let vehicleId: string;
 
   beforeEach(async () => {
     app = await setupTestApp();
+    
+    // Get CSRF token
+    csrfToken = await getCsrfToken(app);
     
     // Login to get auth token
     const loginRes = await request(app)
@@ -28,6 +32,8 @@ describe('Outstanding Balance Integration', () => {
     const customerRes = await request(app)
       .post('/api/customers')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         nameEn: 'Test Customer',
         nameAr: 'عميل تجريبي',
@@ -42,6 +48,7 @@ describe('Outstanding Balance Integration', () => {
     const vehicleRes = await request(app)
       .post('/api/vehicles')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         plateNumber: 'ABC123',
         make: 'Toyota',
@@ -58,6 +65,7 @@ describe('Outstanding Balance Integration', () => {
     const contractRes = await request(app)
       .post('/api/contracts')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         customerId,
         vehicleId,
@@ -88,6 +96,7 @@ describe('Outstanding Balance Integration', () => {
     const contractRes = await request(app)
       .post('/api/contracts')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         customerId,
         vehicleId,
@@ -110,6 +119,7 @@ describe('Outstanding Balance Integration', () => {
     await request(app)
       .post('/api/payments')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         contractId,
         amount: '2000',
@@ -135,6 +145,7 @@ describe('Outstanding Balance Integration', () => {
     const contractRes = await request(app)
       .post('/api/contracts')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         customerId,
         vehicleId,
@@ -157,6 +168,7 @@ describe('Outstanding Balance Integration', () => {
     await request(app)
       .post('/api/payments')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         contractId,
         amount: grandTotal.toString(),
@@ -181,6 +193,7 @@ describe('Outstanding Balance Integration', () => {
     const contractRes = await request(app)
       .post('/api/contracts')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         customerId,
         vehicleId,
@@ -203,6 +216,7 @@ describe('Outstanding Balance Integration', () => {
     await request(app)
       .post('/api/payments')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         contractId,
         amount: '1000',
@@ -214,6 +228,7 @@ describe('Outstanding Balance Integration', () => {
     await request(app)
       .post('/api/payments')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         contractId,
         amount: '2000',
@@ -225,6 +240,7 @@ describe('Outstanding Balance Integration', () => {
     await request(app)
       .post('/api/payments')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         contractId,
         amount: '1500',

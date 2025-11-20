@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import { setupTestApp } from '../utils/testHelpers';
+import { setupTestApp, getCsrfToken } from '../utils/testHelpers';
 
 /**
  * CSRF Protection Integration Tests

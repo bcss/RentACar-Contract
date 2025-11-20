@@ -1,22 +1,26 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import { setupTestApp } from '../utils/testHelpers';
+import { setupTestApp, getCsrfToken } from '../utils/testHelpers';
 
 /**
  * Contract State Machine Integration Tests
  * Tests the actual 4-state lifecycle via HTTP endpoints
- * State flow: Reserved → Active → Completed → (Void from Reserved/Active)
+ * State flow: draft → active → Completed → (Void from Reserved/Active)
  */
 
 describe('Contract State Machine Integration', () => {
   let app: express.Application;
   let authToken: string;
+  let csrfToken: string;
   let customerId: string;
   let vehicleId: string;
 
   beforeEach(async () => {
     app = await setupTestApp();
+    
+    // Get CSRF token
+    csrfToken = await getCsrfToken(app);
     
     // Login
     const loginRes = await request(app)
@@ -28,6 +32,8 @@ describe('Contract State Machine Integration', () => {
     const customerRes = await request(app)
       .post('/api/customers')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         nameEn: 'State Machine Test',
         nameAr: 'اختبار حالة',
@@ -42,6 +48,7 @@ describe('Contract State Machine Integration', () => {
     const vehicleRes = await request(app)
       .post('/api/vehicles')
       .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
       .send({
         plateNumber: 'SM001',
         make: 'Honda',
@@ -54,48 +61,51 @@ describe('Contract State Machine Integration', () => {
   });
 
   describe('Valid Transitions', () => {
-    it('should allow Reserved → Active transition', async () => {
+    it('should allow draft → active transition', async () => {
       // Create Reserved contract
       const contractRes = await request(app)
         .post('/api/contracts')
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
           customerId,
           vehicleId,
           startDate: '2024-01-01',
           endDate: '2024-01-05',
           dailyRate: '300',
-          status: 'Reserved'
+          status: 'draft'
         });
 
       const contractId = contractRes.body.id;
-      expect(contractRes.body.status).toBe('Reserved');
+      expect(contractRes.body.status).toBe('draft');
       
       // Transition to Active
       const updateRes = await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Active',
+          status: 'active',
           editReason: 'Customer picked up vehicle - activating contract as per standard procedure'
         });
 
       expect(updateRes.status).toBe(200);
-      expect(updateRes.body.status).toBe('Active');
+      expect(updateRes.body.status).toBe('active');
     });
 
-    it('should allow Active → Completed transition', async () => {
+    it('should allow active → completed transition', async () => {
       // Create and activate contract
       const contractRes = await request(app)
         .post('/api/contracts')
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
           customerId,
           vehicleId,
           startDate: '2024-01-01',
           endDate: '2024-01-05',
           dailyRate: '300',
-          status: 'Reserved'
+          status: 'draft'
         });
 
       const contractId = contractRes.body.id;
@@ -104,8 +114,9 @@ describe('Contract State Machine Integration', () => {
       await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Active',
+          status: 'active',
           editReason: 'Activating contract for testing state machine transitions and validating workflow'
         });
       
@@ -113,27 +124,29 @@ describe('Contract State Machine Integration', () => {
       const completeRes = await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Completed',
+          status: 'completed',
           editReason: 'Contract period ended - customer returned vehicle in good condition as expected'
         });
 
       expect(completeRes.status).toBe(200);
-      expect(completeRes.body.status).toBe('Completed');
+      expect(completeRes.body.status).toBe('completed');
     });
 
-    it('should allow Reserved → Void transition', async () => {
+    it('should allow draft → closed transition', async () => {
       // Create Reserved contract
       const contractRes = await request(app)
         .post('/api/contracts')
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
           customerId,
           vehicleId,
           startDate: '2024-01-01',
           endDate: '2024-01-05',
           dailyRate: '300',
-          status: 'Reserved'
+          status: 'draft'
         });
 
       const contractId = contractRes.body.id;
@@ -142,27 +155,29 @@ describe('Contract State Machine Integration', () => {
       const voidRes = await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Void',
+          status: 'closed',
           editReason: 'Customer cancelled reservation - voiding contract before activation as per policy'
         });
 
       expect(voidRes.status).toBe(200);
-      expect(voidRes.body.status).toBe('Void');
+      expect(voidRes.body.status).toBe('closed');
     });
 
-    it('should allow Active → Void transition', async () => {
+    it('should allow active → closed transition', async () => {
       // Create and activate
       const contractRes = await request(app)
         .post('/api/contracts')
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
           customerId,
           vehicleId,
           startDate: '2024-01-01',
           endDate: '2024-01-05',
           dailyRate: '300',
-          status: 'Reserved'
+          status: 'draft'
         });
 
       const contractId = contractRes.body.id;
@@ -170,8 +185,9 @@ describe('Contract State Machine Integration', () => {
       await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Active',
+          status: 'active',
           editReason: 'Activating contract to test void transition from active state in workflow'
         });
       
@@ -179,13 +195,14 @@ describe('Contract State Machine Integration', () => {
       const voidRes = await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Void',
+          status: 'closed',
           editReason: 'Customer requested cancellation during active period - voiding contract as requested'
         });
 
       expect(voidRes.status).toBe(200);
-      expect(voidRes.body.status).toBe('Void');
+      expect(voidRes.body.status).toBe('closed');
     });
   });
 
@@ -195,13 +212,14 @@ describe('Contract State Machine Integration', () => {
       const contractRes = await request(app)
         .post('/api/contracts')
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
           customerId,
           vehicleId,
           startDate: '2024-01-01',
           endDate: '2024-01-05',
           dailyRate: '300',
-          status: 'Reserved'
+          status: 'draft'
         });
 
       const contractId = contractRes.body.id;
@@ -210,8 +228,9 @@ describe('Contract State Machine Integration', () => {
       const res = await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Completed',
+          status: 'completed',
           editReason: 'Testing invalid transition from reserved to completed bypassing active state'
         });
 
@@ -224,13 +243,14 @@ describe('Contract State Machine Integration', () => {
       const contractRes = await request(app)
         .post('/api/contracts')
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
           customerId,
           vehicleId,
           startDate: '2024-01-01',
           endDate: '2024-01-05',
           dailyRate: '300',
-          status: 'Reserved'
+          status: 'draft'
         });
 
       const contractId = contractRes.body.id;
@@ -238,16 +258,18 @@ describe('Contract State Machine Integration', () => {
       await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Active',
+          status: 'active',
           editReason: 'Activating contract to reach completed state for terminal test'
         });
       
       await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Completed',
+          status: 'completed',
           editReason: 'Completing contract to test terminal state restrictions'
         });
       
@@ -255,8 +277,9 @@ describe('Contract State Machine Integration', () => {
       const voidRes = await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Void',
+          status: 'closed',
           editReason: 'Testing invalid transition - completed contracts cannot be voided'
         });
 
@@ -268,13 +291,14 @@ describe('Contract State Machine Integration', () => {
       const contractRes = await request(app)
         .post('/api/contracts')
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
           customerId,
           vehicleId,
           startDate: '2024-01-01',
           endDate: '2024-01-05',
           dailyRate: '300',
-          status: 'Reserved'
+          status: 'draft'
         });
 
       const contractId = contractRes.body.id;
@@ -282,8 +306,9 @@ describe('Contract State Machine Integration', () => {
       await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Void',
+          status: 'closed',
           editReason: 'Voiding contract to test terminal state restrictions'
         });
       
@@ -291,8 +316,9 @@ describe('Contract State Machine Integration', () => {
       const activateRes = await request(app)
         .patch(`/api/contracts/${contractId}`)
         .set('Cookie', authToken)
+      .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'Active',
+          status: 'active',
           editReason: 'Testing invalid transition - void contracts cannot be reactivated'
         });
 
