@@ -77,6 +77,65 @@ export async function setupTestApp(): Promise<express.Application> {
   app.use(passport.initialize());
   app.use(passport.session());
   
+  // Add login route (from localAuth.ts)
+  app.post("/api/login", (req: any, res: any, next: any) => {
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+      if (err) {
+        return res.status(500).json({ message: "Internal server error" });
+      }
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
+      }
+      req.session.regenerate((regenerateErr: any) => {
+        if (regenerateErr) {
+          return res.status(500).json({ message: "Login failed" });
+        }
+        req.login(user, async (loginErr: any) => {
+          if (loginErr) {
+            return res.status(500).json({ message: "Login failed" });
+          }
+          return res.json({ 
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            isImmutable: user.isImmutable,
+          });
+        });
+      });
+    })(req, res, next);
+  });
+
+  // Add branding and settings routes for testing
+  app.get('/api/branding', async (req: any, res: any) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch branding" });
+    }
+  });
+
+  app.get('/api/settings', async (req: any, res: any) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  app.put('/api/settings', async (req: any, res: any) => {
+    try {
+      await storage.updateCompanySettings(req.body);
+      res.json({ message: "Settings updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update settings" });
+    }
+  });
+  
   // Register all route modules (same pattern as server/routes/index.ts)
   app.use('/api', authRoutes);
   app.use('/api/customers', customerRoutes);

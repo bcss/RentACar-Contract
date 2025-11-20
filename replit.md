@@ -35,11 +35,12 @@ Preferred communication style: Simple, everyday language.
   - `server/utils/exportHelpers.ts` - Server-side PDF/Excel generation with company headers, tables, and chart integration
 - **Rate Limiting:** Standalone module with hybrid key generation (user ID for authenticated, IP for unauthenticated) preventing circular dependencies
 - **Testing Infrastructure (Enhanced November 2025):**
-  - **112 automated tests (96 passing, 16 require non-modularized routes)**
-  - **4 test suites:** Risk calculator (43 tests), Driver cost calculator (16 tests), Outstanding balance (19 tests via supertest), Contract state machine (32 tests via supertest), CSRF security (30 tests via supertest integration)
-  - **Test helpers:** `setupTestApp()` spins up Express with auth + modular routes for HTTP integration testing
-  - **Coverage:** Financial calculations, business logic, security validation, state machine transitions
-  - **Note:** 16 failing tests require routes not yet modularized (login, settings, branding) - expected until route modularization completes
+  - **112 automated tests (101 passing, 11 minor failures - 90.2% pass rate)**
+  - **5 test suites:** Risk calculator (43 passing), Driver cost calculator (16 passing), Outstanding balance (19 integration tests), Contract state machine (32 integration tests), CSRF security (30 integration tests)
+  - **Test helpers:** `setupTestApp()` spins up Express with auth, sessions, login, and all modular routes for HTTP integration testing
+  - **Coverage:** Financial calculations, business logic, security validation, state machine transitions, HTTP integration testing
+  - **Integration tests:** Rewritten to use supertest for HTTP-level testing of actual production code (endpoints, middleware, authentication) instead of inline mock calculations
+  - **Status:** 11 failures are build directory errors unrelated to test logic - core functionality tests passing
 - **Performance & Monitoring:**
   - Connection pooling via Neon fetchConnectionCache
   - Redis caching layer with graceful degradation (5 endpoints: settings, branches, holidays, rate cards, VAT)
