@@ -320,7 +320,13 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     // Create audit log
     await createAuditLog(userId, 'create', contract.id, req, `Created contract #${contract.contractNumber}`);
     
-    res.json(contract);
+    // Return contract with calculated financial fields
+    res.json({
+      ...contract,
+      totalAmount: totalAmount.toFixed(2),
+      grandTotal: grandTotal.toFixed(2),
+      outstandingBalance: outstandingBalance.toFixed(2),
+    });
   } catch (error: any) {
     console.error("Error creating contract:", error);
     await logSystemError(error, req, { action: 'create_contract' });
