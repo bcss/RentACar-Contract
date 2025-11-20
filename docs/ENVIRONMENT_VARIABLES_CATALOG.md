@@ -252,11 +252,11 @@ REPLIT_DEV_DOMAIN=myapp.username.replit.dev
 
 ---
 
-## 3. Optional Environment Variables (Application Configuration)
+## 3. Optional Environment Variables (Application)
 
 ### 3.1 PORT
 
-**Category:** Application Configuration  
+**Category:** Application  
 **Type:** Integer  
 **Required:** ❌ NO  
 **Default:** 5000
@@ -287,7 +287,48 @@ PORT=3000
 
 ---
 
-### 3.2 SESSION_MAX_AGE
+### 3.2 NODE_ENV
+
+**Category:** Application  
+**Type:** String (enum)  
+**Required:** ❌ NO  
+**Default:** "development"
+
+**Purpose:**  
+Application environment mode (affects logging, error handling, defaults).
+
+**Format:**
+```
+NODE_ENV=production
+```
+
+**Valid Values:**
+- `production` - Production mode
+- `development` - Development mode
+- `test` - Testing mode
+
+**Usage Locations:**
+- `server/auth/seedSuperAdmin.ts` (line 5) - Super admin password validation
+
+**Behavior:**
+- **production:** Enforces strong SUPER_ADMIN_PASSWORD requirement
+- **development:** Allows default passwords with warnings
+- **test:** Similar to development
+
+**Example:**
+```bash
+# Production deployment
+NODE_ENV=production npm start
+
+# Local development
+NODE_ENV=development npm run dev
+```
+
+---
+
+## 4. Optional Environment Variables (Authentication & Security)
+
+### 4.1 SESSION_MAX_AGE
 
 **Category:** Authentication & Security  
 **Type:** Integer (milliseconds)  
@@ -330,46 +371,7 @@ SESSION_MAX_AGE=86400000  # 24 hours
 
 ---
 
-### 3.3 NODE_ENV
-
-**Category:** Application Configuration  
-**Type:** String (enum)  
-**Required:** ❌ NO  
-**Default:** "development"
-
-**Purpose:**  
-Application environment mode (affects logging, error handling, defaults).
-
-**Format:**
-```
-NODE_ENV=production
-```
-
-**Valid Values:**
-- `production` - Production mode
-- `development` - Development mode
-- `test` - Testing mode
-
-**Usage Locations:**
-- `server/auth/seedSuperAdmin.ts` (line 5) - Super admin password validation
-
-**Behavior:**
-- **production:** Enforces strong SUPER_ADMIN_PASSWORD requirement
-- **development:** Allows default passwords with warnings
-- **test:** Similar to development
-
-**Example:**
-```bash
-# Production deployment
-NODE_ENV=production npm start
-
-# Local development
-NODE_ENV=development npm run dev
-```
-
----
-
-### 3.4 JWT_SECRET
+### 4.2 JWT_SECRET
 
 **Category:** Authentication & Security  
 **Type:** Secret (Random String)  
@@ -408,7 +410,7 @@ JWT_SECRET → SESSION_SECRET → 'rccms-jwt-secret-change-in-production'
 
 ---
 
-### 3.5 SUPER_ADMIN_USERNAME
+### 4.3 SUPER_ADMIN_USERNAME
 
 **Category:** Authentication & Security  
 **Type:** String  
@@ -438,7 +440,7 @@ SUPER_ADMIN_USERNAME=systemadmin
 
 ---
 
-## 4. PostgreSQL Connection Details (Platform-Provided, Not Used by Application)
+## 5. PostgreSQL Connection Details (Platform-Provided, Not Used by Application)
 
 **Note:** The following variables are available in the Replit environment but are **NOT referenced by the application code**. The application uses `DATABASE_URL` directly.
 
@@ -455,9 +457,9 @@ These variables are automatically extracted from `DATABASE_URL` by the Replit pl
 
 ---
 
-## 5. Environment Variable Security
+## 6. Environment Variable Security
 
-### 5.1 Secret Variables (Never Commit!)
+### 6.1 Secret Variables (Never Commit!)
 
 | Variable | Sensitivity | Risk if Exposed |
 |----------|-------------|----------------|
@@ -467,7 +469,7 @@ These variables are automatically extracted from `DATABASE_URL` by the Replit pl
 | `JWT_SECRET` | 🟠 HIGH | QR code forgery |
 | `PG*` variables | 🔴 CRITICAL | Database access |
 
-### 5.2 Security Best Practices
+### 6.2 Security Best Practices
 
 **DO:**
 - ✅ Use strong random secrets (min 32 bytes)
@@ -485,9 +487,9 @@ These variables are automatically extracted from `DATABASE_URL` by the Replit pl
 
 ---
 
-## 6. Environment Setup
+## 7. Environment Setup
 
-### 6.1 Replit Deployment (Recommended)
+### 7.1 Replit Deployment (Recommended)
 
 **Automatic Platform Variables:**
 Replit automatically injects these platform-specific variables:
@@ -510,7 +512,7 @@ SUPER_ADMIN_USERNAME=admin (optional, defaults to "superadmin")
 NODE_ENV=production (optional, defaults to "development")
 ```
 
-### 6.2 Local Development
+### 7.2 Local Development
 
 Create `.env.local` file (gitignored):
 ```bash
@@ -535,7 +537,7 @@ npm install dotenv
 node -r dotenv/config server/index.ts
 ```
 
-### 6.3 Production Deployment (Non-Replit)
+### 7.3 Production Deployment (Non-Replit)
 
 **Required Secrets:**
 ```bash
@@ -562,9 +564,9 @@ SUPER_ADMIN_USERNAME=admin
 
 ---
 
-## 7. Variable Usage Matrix
+## 8. Variable Usage Matrix
 
-### 7.1 By File
+### 8.1 By File
 
 | File | Variables Used |
 |------|---------------|
@@ -575,7 +577,7 @@ SUPER_ADMIN_USERNAME=admin
 | `server/auth/seedSuperAdmin.ts` | NODE_ENV, SUPER_ADMIN_USERNAME, SUPER_ADMIN_PASSWORD |
 | `server/services/qrCodeService.ts` | JWT_SECRET, SESSION_SECRET, REPLIT_DEV_DOMAIN |
 
-### 7.2 By Category
+### 8.2 By Category
 
 **Database (1 variable):**
 - DATABASE_URL (required)
@@ -595,13 +597,18 @@ SUPER_ADMIN_USERNAME=admin
 - REPL_ID (auto)
 - REPLIT_DEV_DOMAIN (auto)
 
-**Application Config (2 variables):**
+**Application (2 variables):**
 - PORT (optional)
 - NODE_ENV (optional)
 
+**Authentication & Security (3 variables):**
+- SESSION_MAX_AGE (optional)
+- JWT_SECRET (optional)
+- SUPER_ADMIN_USERNAME (optional)
+
 ---
 
-## 8. Frontend Environment Variables
+## 9. Frontend Environment Variables
 
 **Status:** ❌ NONE CURRENTLY USED
 
@@ -626,9 +633,9 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 ---
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
-### 9.1 Common Issues
+### 10.1 Common Issues
 
 **Issue:** "DATABASE_URL environment variable is not set"  
 **Solution:** Set DATABASE_URL in Replit Secrets or .env.local
@@ -647,7 +654,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 ---
 
-### 9.2 Verification Checklist
+### 10.2 Verification Checklist
 
 **Pre-Deployment:**
 - [ ] DATABASE_URL set and valid
@@ -668,9 +675,9 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 ---
 
-## 10. Security Audit Trail
+## 11. Security Audit Trail
 
-### 10.1 Secret Rotation Schedule
+### 11.1 Secret Rotation Schedule
 
 | Secret | Last Rotation | Next Rotation | Frequency |
 |--------|--------------|---------------|-----------|
@@ -679,7 +686,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 | SUPER_ADMIN_PASSWORD | N/A | As needed | On compromise |
 | DATABASE_URL | N/A | As needed | On migration |
 
-### 10.2 Access Control
+### 11.2 Access Control
 
 **Who Can Access Secrets:**
 - Super Admin: All secrets
@@ -694,9 +701,9 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 ---
 
-## 11. Future Enhancements
+## 12. Future Enhancements
 
-### 11.1 Planned Environment Variables
+### 12.1 Planned Environment Variables
 
 **Phase 1: Communications (Q1 2026)**
 ```
@@ -726,9 +733,15 @@ DATADOG_API_KEY=...
 
 ## Changelog
 
+### Version 1.1 (November 20, 2025)
+- Fixed categorization: Separated Application variables from Auth/Security variables
+- Reorganized Section 3 (Application: PORT, NODE_ENV)
+- Created Section 4 (Auth/Security: SESSION_MAX_AGE, JWT_SECRET, SUPER_ADMIN_USERNAME)
+- Corrected variable counts in summary (2 Application + 3 Auth/Security = 5 optional auth variables total)
+
 ### Version 1.0 (November 20, 2025)
 - Initial environment variables catalog
-- Documented all 14 environment variables
+- Documented all 12 environment variables
 - Categorized by purpose and requirement level
 - Added security best practices
 - Created setup guides for Replit and local development
