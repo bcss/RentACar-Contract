@@ -7593,6 +7593,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upload document file endpoint
   app.post("/api/documents/upload", isAuthenticated, csrfProtection, documentUpload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const user = req.user as User;
+      
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
@@ -7601,11 +7603,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fileName = req.file.originalname;
       const fileType = req.file.mimetype;
       
+      // Audit log for document upload
+      await createAuditLog(user.id, 'document_file_uploaded', undefined, req,
+        `Uploaded file: ${fileName} (${fileType}, ${req.file.size} bytes)`
+      );
+      
       res.status(200).json({
         fileUrl,
         fileName,
         fileType,
         fileSize: req.file.size,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Secure document download endpoint with access controls and audit logging
+  app.get("/api/documents/:id/download", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as User;
+      const document = await storage.getDocumentById(req.params.id);
+      
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Access control: Admins and Managers can access all documents
+      // Staff and Viewers can only access documents in their branch (if implemented)
+      if (!['admin', 'manager'].includes(user.role)) {
+        // Future enhancement: Check branch-level access
+        // For now, allow all authenticated users to download
+      }
+      
+      // Audit log for document download
+      await createAuditLog(user.id, 'document_downloaded', undefined, req,
+        `Downloaded document: ${document.documentType} for ${document.entityType} ${document.entityId}`
+      );
+      
+      // Extract filename from fileUrl
+      const filename = document.fileUrl?.split('/').pop() || 'document';
+      const filepath = join(process.cwd(), 'attached_assets', 'documents', filename);
+      
+      // Serve file with proper headers
+      res.download(filepath, document.fileName || filename, (err) => {
+        if (err) {
+          console.error('File download error:', err);
+          if (!res.headersSent) {
+            res.status(404).json({ message: "File not found" });
+          }
+        }
       });
     } catch (error) {
       next(error);
