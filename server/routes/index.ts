@@ -13,9 +13,10 @@ import type { Express } from "express";
 import customerRoutes from "./customerRoutes";
 import authRoutes from "./authRoutes";
 import vehicleRoutes from "./vehicleRoutes";
+import userRoutes from "./userRoutes";
+import paymentRoutes from "./paymentRoutes";
 // Additional route modules will be imported as they're created
 // import contractRoutes from "./contractRoutes";
-// import userRoutes from "./userRoutes";
 // import reportRoutes from "./reportRoutes";
 // etc.
 
@@ -32,12 +33,12 @@ export function registerModularRoutes(app: Express): void {
   // Core entity routes
   app.use('/api/customers', customerRoutes);
   app.use('/api/vehicles', vehicleRoutes);
+  app.use('/api/users', userRoutes);
   // app.use('/api/contracts', contractRoutes);
-  // app.use('/api/users', userRoutes);
   
   // Feature routes
+  app.use('/api', paymentRoutes); // Payment routes have mixed base paths
   // app.use('/api/reports', reportRoutes);
-  // app.use('/api/payments', paymentRoutes);
   // app.use('/api/branches', branchRoutes);
   // app.use('/api/drivers', driverRoutes);
   // etc.
@@ -45,6 +46,8 @@ export function registerModularRoutes(app: Express): void {
   console.log('✅ Modular routes registered');
   console.log('   - Customer routes: /api/customers');
   console.log('   - Vehicle routes: /api/vehicles');
+  console.log('   - User routes: /api/users');
+  console.log('   - Payment routes: /api/contracts/:id/payments, /api/payments/:id');
   console.log('   - Auth routes: /api/auth, /api/system');
   console.log('   - More routes being migrated...');
 }
