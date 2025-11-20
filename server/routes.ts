@@ -38,8 +38,13 @@ import {
   formatValidationErrors,
   type ValidationError,
 } from './importHelpers';
+import { performanceMonitoring } from "./middleware/performanceMonitoring";
+import { registerModularRoutes } from "./routes/index";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // APM Performance Monitoring (tracks all requests)
+  app.use(performanceMonitoring);
+  
   // Auth middleware (includes authLimiter for /api/login and /api/users/change-password)
   await setupAuth(app);
   
@@ -53,6 +58,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Seed company settings on startup
   await seedCompanySettings();
+  
+  // ============================================
+  // MODULAR ROUTES (P1 Infrastructure Improvement)
+  // ============================================
+  // Register modular route files (customers, auth, etc.)
+  // This improves code maintainability and enables isolated testing
+  registerModularRoutes(app);
   
   // Configure multer for document file uploads
   const documentStorage = multer.diskStorage({

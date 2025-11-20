@@ -62,7 +62,7 @@ export const sessions = pgTable(
 );
 
 // User storage table - Internal authentication with username/password
-export const users = pgTable("users", {
+export const users: ReturnType<typeof pgTable> = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: varchar("username").unique().notNull(),
   passwordHash: varchar("password_hash").notNull(),
@@ -500,7 +500,7 @@ export type Company = typeof companies.$inferSelect;
 // ========================================
 
 // Branches table - Multi-location branch management
-export const branches = pgTable("branches", {
+export const branches: ReturnType<typeof pgTable> = pgTable("branches", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   
   // Branch Identification
