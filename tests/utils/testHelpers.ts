@@ -1,10 +1,93 @@
 import { expect } from 'vitest';
 import type { Contract, Payment, Customer, Vehicle } from '../../shared/schema';
+import express from 'express';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import session from 'express-session';
+import { storage } from '../../server/storage';
+import { verifyPassword } from '../../server/auth/passwordUtils';
+import authRoutes from '../../server/routes/authRoutes';
+import customerRoutes from '../../server/routes/customerRoutes';
+import vehicleRoutes from '../../server/routes/vehicleRoutes';
+import userRoutes from '../../server/routes/userRoutes';
+import paymentRoutes from '../../server/routes/paymentRoutes';
+import contractRoutes from '../../server/routes/contractRoutes';
+import reportRoutes from '../../server/routes/reportRoutes';
 
 /**
  * Test Helper Functions
  * Common assertions and utilities for test suites
  */
+
+/**
+ * Setup Express app with all routes for integration testing
+ */
+export async function setupTestApp(): Promise<express.Application> {
+  const app = express();
+  
+  // Middleware
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  
+  // Session middleware
+  app.use(session({
+    secret: 'test-session-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 // 24 hours
+    }
+  }));
+  
+  // Passport configuration
+  passport.use(
+    new LocalStrategy(async (username, password, done) => {
+      try {
+        const user = await storage.getUserByUsername(username);
+        if (!user) {
+          return done(null, false, { message: "Invalid username or password" });
+        }
+        const isValid = await verifyPassword(password, user.passwordHash);
+        if (!isValid) {
+          return done(null, false, { message: "Invalid username or password" });
+        }
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    })
+  );
+
+  passport.serializeUser((user: Express.User, cb) => {
+    cb(null, (user as any).id);
+  });
+
+  passport.deserializeUser(async (id: string, cb) => {
+    try {
+      const user = await storage.getUser(id);
+      cb(null, user);
+    } catch (error) {
+      cb(error);
+    }
+  });
+  
+  // Passport middleware
+  app.use(passport.initialize());
+  app.use(passport.session());
+  
+  // Register all route modules (same pattern as server/routes/index.ts)
+  app.use('/api', authRoutes);
+  app.use('/api/customers', customerRoutes);
+  app.use('/api/vehicles', vehicleRoutes);
+  app.use('/api/users', userRoutes);
+  app.use('/api/contracts', contractRoutes);
+  app.use('/api', paymentRoutes);
+  app.use('/api/reports', reportRoutes);
+  
+  return app;
+}
 
 /**
  * Assert that a value is a valid UUID

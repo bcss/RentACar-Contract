@@ -12,6 +12,7 @@ Preferred communication style: Simple, everyday language.
 - **Comprehensive System Audit:** Complete 60-page audit document analyzing all 23 specialized modules with detailed workflow analysis, schema validation, and implementation correctness verification (`docs/COMPREHENSIVE_SYSTEM_AUDIT.md`)
 - **Unified Design System:** 1,200+ line design guidelines covering entire application with 15 sections including Material Design 3 principles, bilingual support, accessibility (WCAG 2.1 AA), and responsive design patterns (`design_guidelines.md`)
 - **Security Enhancements:** Implemented hybrid rate limiting with standalone `rateLimiters.ts` module, breaking circular dependencies and providing production-ready brute-force protection
+- **Test Infrastructure (NEW - November 2025):** Created `setupTestApp()` helper for integration testing via supertest HTTP requests. Supports full Express app with auth, sessions, and all modular routes. Enables testing actual production code instead of inline mocks.
 
 ### UI/UX Improvements
 - **Sidebar Reorganization:** Restructured navigation into 6 logical categories (Dashboard, Operations, Masters, Reports, Administration, Settings) with full bilingual tooltips and RTL/LTR support
@@ -33,15 +34,17 @@ Preferred communication style: Simple, everyday language.
   - `client/src/utils/chartExport.ts` - Chart image capture for PDF embedding
   - `server/utils/exportHelpers.ts` - Server-side PDF/Excel generation with company headers, tables, and chart integration
 - **Rate Limiting:** Standalone module with hybrid key generation (user ID for authenticated, IP for unauthenticated) preventing circular dependencies
-- **Testing Infrastructure:**
-  - Vitest with 33 automated tests (100% pass rate)
-  - Financial calculation verification (surcharge calculator)
-  - Security validation testing (XSS, SQL injection prevention)
+- **Testing Infrastructure (Enhanced November 2025):**
+  - **112 automated tests (96 passing, 16 require non-modularized routes)**
+  - **4 test suites:** Risk calculator (43 tests), Driver cost calculator (16 tests), Outstanding balance (19 tests via supertest), Contract state machine (32 tests via supertest), CSRF security (30 tests via supertest integration)
+  - **Test helpers:** `setupTestApp()` spins up Express with auth + modular routes for HTTP integration testing
+  - **Coverage:** Financial calculations, business logic, security validation, state machine transitions
+  - **Note:** 16 failing tests require routes not yet modularized (login, settings, branding) - expected until route modularization completes
 - **Performance & Monitoring:**
   - Connection pooling via Neon fetchConnectionCache
-  - Redis caching layer with graceful degradation
+  - Redis caching layer with graceful degradation (5 endpoints: settings, branches, holidays, rate cards, VAT)
   - APM middleware tracking request duration, memory, slow requests
-  - Performance metrics API endpoint
+  - Performance monitoring dashboard at /performance-monitoring with auto-refresh charts
 
 ## System Architecture
 
