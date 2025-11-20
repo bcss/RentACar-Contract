@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -56,6 +57,7 @@ export default function CampaignManagement() {
   const [templateId, setTemplateId] = useState('');
   const [channel, setChannel] = useState('email');
   const [scope, setScope] = useState('branch');
+  const [selectedBranches, setSelectedBranches] = useState<number[]>([]);
   const [recipientType, setRecipientType] = useState('all');
   const [scheduledAt, setScheduledAt] = useState('');
 
@@ -65,6 +67,10 @@ export default function CampaignManagement() {
 
   const { data: templates = [] } = useQuery<any[]>({
     queryKey: ['/api/notification-templates'],
+  });
+
+  const { data: branches = [] } = useQuery<any[]>({
+    queryKey: ['/api/branches'],
   });
 
   const createCampaignMutation = useMutation({
@@ -125,6 +131,7 @@ export default function CampaignManagement() {
     setTemplateId('');
     setChannel('email');
     setScope('branch');
+    setSelectedBranches([]);
     setRecipientType('all');
     setScheduledAt('');
   };
@@ -135,6 +142,16 @@ export default function CampaignManagement() {
         variant: 'destructive',
         title: t('common.error'),
         description: t('campaigns.nameRequired'),
+      });
+      return;
+    }
+
+    // Validate selected_branches scope
+    if (scope === 'selected_branches' && selectedBranches.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: t('campaigns.selectBranchesRequired'),
       });
       return;
     }
@@ -150,9 +167,26 @@ export default function CampaignManagement() {
       templateId,
       channel,
       scope,
+      selectedBranches: scope === 'selected_branches' ? selectedBranches : null,
       recipientFilter,
       scheduledAt: scheduledAt || null,
     });
+  };
+
+  const handleScopeChange = (newScope: string) => {
+    setScope(newScope);
+    // Clear selected branches if changing from selected_branches to another scope
+    if (newScope !== 'selected_branches') {
+      setSelectedBranches([]);
+    }
+  };
+
+  const toggleBranchSelection = (branchId: number) => {
+    setSelectedBranches(prev =>
+      prev.includes(branchId)
+        ? prev.filter(id => id !== branchId)
+        : [...prev, branchId]
+    );
   };
 
   const getStatusBadge = (status: string) => {
@@ -266,18 +300,68 @@ export default function CampaignManagement() {
 
               <div>
                 <Label>{t('campaigns.scope')}</Label>
-                <Select value={scope} onValueChange={setScope} disabled={!canCreateOrganizationCampaigns}>
+                <Select value={scope} onValueChange={handleScopeChange} disabled={!canCreateOrganizationCampaigns}>
                   <SelectTrigger data-testid="select-scope">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="branch">{t('campaigns.scopeBranch')}</SelectItem>
                     {canCreateOrganizationCampaigns && (
-                      <SelectItem value="organization">{t('campaigns.scopeOrganization')}</SelectItem>
+                      <>
+                        <SelectItem value="selected_branches">{t('campaigns.scopeSelectedBranches')}</SelectItem>
+                        <SelectItem value="organization">{t('campaigns.scopeOrganization')}</SelectItem>
+                      </>
                     )}
                   </SelectContent>
                 </Select>
+                {scope === 'selected_branches' && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t('campaigns.scopeSelectedBranchesHint')}
+                  </p>
+                )}
               </div>
+
+              {scope === 'selected_branches' && (
+                <div>
+                  <Label>{t('campaigns.selectBranches')} *</Label>
+                  <Card className="mt-2">
+                    <CardContent className="p-4 max-h-60 overflow-y-auto">
+                      {branches.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">{t('campaigns.noBranches')}</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {branches.map((branch: any) => (
+                            <div key={branch.id} className="flex items-center gap-3">
+                              <Checkbox
+                                id={`branch-${branch.id}`}
+                                checked={selectedBranches.includes(branch.id)}
+                                onCheckedChange={() => toggleBranchSelection(branch.id)}
+                                data-testid={`checkbox-branch-${branch.id}`}
+                              />
+                              <Label 
+                                htmlFor={`branch-${branch.id}`}
+                                className="flex-1 cursor-pointer text-sm font-normal"
+                              >
+                                {branch.nameEn || branch.name}
+                                {branch.emirate && (
+                                  <span className="text-muted-foreground ml-2">
+                                    ({branch.emirate})
+                                  </span>
+                                )}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                  {selectedBranches.length > 0 && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t('campaigns.branchesSelected', { count: selectedBranches.length })}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div>
                 <Label>{t('campaigns.recipientType')}</Label>
