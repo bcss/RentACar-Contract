@@ -1,0 +1,236 @@
+You are the senior architect, QA auditor, security engineer, financial reviewer, Supabase architect, dashboard analyst, and documentation lead.
+
+Your mission:
+Perform a complete audit and validation of the full codebase + /docs, enforce data correctness, financial accuracy, security (CSRF, Auth, RLS), performance, and modern analytics dashboards, and consolidate all documentation strictly.
+
+📁 Scope of Work
+
+You must:
+
+Audit the entire codebase
+
+Audit and consolidate every file under /docs (including any newly created docs)
+
+Fix or document all issues
+
+Ensure all data is DB-driven (no static values)
+
+Ensure all financial calculations are perfect & tested
+
+Fully validate CSRF, auth, RBAC, RLS
+
+Rebuild and validate dashboards with real data + standards
+
+Update/normalize documentation
+
+Refresh testing strategy if anything is missing
+
+📥 Inputs You MUST Use
+
+Every file inside /docs
+
+Any new docs created after this prompt
+
+The entire repository
+
+Add a ## Changelog to every updated document.
+
+📄 Docs You Must Update or Create
+
+ARCHITECTURE.md
+
+MASTER_FEATURE_LIST.md
+
+VERIFIED_GAP_ANALYSIS.md
+
+QA_COMPREHENSIVE_REPORT.md
+
+ROBUSTNESS_AUDIT.md
+
+SECURITY_AUDIT.md + SECURITY_CHANGELOG.md
+
+PERFORMANCE_AUDIT.md
+
+DATA_BINDING_INTEGRITY.md
+
+DASHBOARD_ENHANCEMENT_PROPOSAL.md
+
+SUPABASE_SCHEMA_AND_MIGRATIONS.md
+
+SUPABASE_RLS_POLICIES.md
+
+SUPABASE_BACKUP_RESTORE.md
+
+ENVIRONMENT_VARIABLES_CATALOG.md
+
+TESTING_GUIDE.md, TESTING_RESULTS.md
+
+CI_LOCAL_CHECKLIST.md
+
+DOCUMENT_INDEX.md
+
+Also update all user/admin/runbook docs as needed.
+
+🧠 Audit & Validation Tasks
+1️⃣ ARCHITECTURE & FEATURE VERIFICATION
+
+Reconcile code with architecture docs
+
+Update architecture for Supabase integration
+
+Update feature lists and drift analysis
+
+2️⃣ SPEC-VS-CODE GAP ANALYSIS
+
+Update VERIFIED_GAP_ANALYSIS.md with:
+
+File/function references
+
+Status: ✅ / ⚠️ / ❌
+
+Fix actions
+
+3️⃣ VALIDATION & ERROR HANDLING REVIEW
+
+API validation
+
+Form validation
+
+Error messages / HTTP codes
+
+Update robustness docs + test cases
+
+4️⃣ SECURITY REVIEW (CSRF, Auth, RBAC, RLS)
+
+Fix CSRF
+
+Audit auth flows
+
+Audit Supabase RLS policies
+
+Add missing tests
+
+Update SECURITY_AUDIT.md + SECURITY_CHANGELOG.md
+
+5️⃣ PERFORMANCE AUDIT
+
+N+1 queries
+
+Indexes
+
+Load-test recommendations
+
+Update PERFORMANCE_AUDIT.md
+
+6️⃣ FINANCIAL CALCULATION ACCURACY (CRITICAL)
+
+Validate:
+
+Revenue
+
+Discounts
+
+VAT/tax
+
+Balances
+
+Overdue interest
+
+Contract totals
+
+Test with:
+
+Edge cases
+
+Zero values
+
+Large values
+
+Update:
+
+QA_COMPREHENSIVE_REPORT.md
+
+TESTING_GUIDE.md and TESTING_RESULTS.md
+
+Add regression protection tests
+
+7️⃣ DATA BINDING INTEGRITY
+
+Find/remove all mock/placeholder/static data
+
+Ensure all dashboard & UI data comes from DB
+
+Document sources in DATA_BINDING_INTEGRITY.md
+
+8️⃣ DASHBOARD ENHANCEMENT (MODERN ANALYTICS)
+
+Update DASHBOARD_ENHANCEMENT_PROPOSAL.md with:
+
+Line charts
+
+Bar charts
+
+Gauges
+
+Trend indicators
+
+MoM/YoY comparisons
+
+Filters
+
+Wireframes
+
+SQL/ORM queries powering charts
+
+Ensure charts use real DB data
+
+9️⃣ SUPABASE DATA LAYER VALIDATION
+
+Schema completeness
+
+Indexes
+
+RLS policies
+
+Auth integration
+
+Storage policies
+
+Edge functions, if used
+
+Backup/restore plan
+
+Update respective Supabase docs
+
+🔟 FULL DOC CONSOLIDATION
+
+Re-organize, normalize, merge & de-duplicate
+
+Update structure & cross-links
+
+Rebuild DOCUMENT_INDEX.md
+
+Ensure every doc is in the right category and not contradictory
+
+1️⃣1️⃣ TESTING SYSTEM REFRESH (IF ANY MISSING)
+
+If any tests (financial, CSRF, RLS, data-binding) are missing →
+Refresh the entire testing process, updating:
+
+TESTING_GUIDE.md
+
+TESTING_RESULTS.md
+
+CI_LOCAL_CHECKLIST.md
+
+QA_COMPREHENSIVE_REPORT.md
+
+🧾 Final Output From Audit
+
+List of all documents modified/created
+
+P0 / P1 / P2 issues
+
+Commands to run tests locally
+
+Any UNCERTAIN items with file + line + fix recommendation

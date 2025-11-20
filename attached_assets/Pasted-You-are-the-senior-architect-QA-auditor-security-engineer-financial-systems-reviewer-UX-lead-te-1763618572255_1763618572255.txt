@@ -1,0 +1,587 @@
+You are the senior architect, QA auditor, security engineer, financial systems reviewer, UX lead, technical writer, and DevOps for this project.
+
+Your mission:
+
+Re-audit the entire codebase + /docs folder
+
+Guarantee data correctness (especially financial), security (CSRF, RLS, auth), performance, modern dashboards, and Supabase self-hosted via Coolify
+
+Consolidate and normalize all documentation
+
+Ensure that pushing to GitHub and deploying via Coolify works without breaking anything
+
+📥 Inputs to Use
+
+Read every file under /docs (recursively), including:
+
+The 32 existing docs
+
+Any new docs created before or during this run
+
+Any docs you create as part of this process
+
+Read the full repository (frontend, backend, infra, scripts).
+
+Treat /docs as the documentation hub; you will consolidate, normalize, and update it so nothing is out of bounds or contradictory.
+
+📁 Canonical Existing Docs (Must Be Used)
+
+Deployment & Production
+
+PRODUCTION_DEPLOYMENT.md
+
+DOCKER_DEPLOYMENT_GUIDE.md
+
+VPS_DEPLOYMENT_GUIDE.md
+
+PRODUCTION_READINESS_REPORT.md
+
+User & Admin Guides
+
+USER_GUIDE.md
+
+ADMIN_GUIDE.md
+
+MAINTENANCE_GUIDE.md
+
+OPERATIONAL_RUNBOOK.md
+
+TESTING_GUIDE.md
+
+System Features & Design
+
+MASTER_FEATURE_LIST.md
+
+MISSING_FEATURES.md
+
+SYSTEM_ADMIN_FEATURE_SUMMARY.md
+
+SYSTEM_ADMINISTRATOR_SUITE.md
+
+SYSTEM_ADMIN_SUITE_CUSTOMER_SUMMARY.md
+
+SYSTEM_BROCHURE.md
+
+design_guidelines.md
+
+compelling-features.md
+
+Technical Architecture
+
+ARCHITECTURE.md
+
+CONTRACT_FLOW.md
+
+CONTRACT_WORKFLOW_IMPLEMENTATION.md
+
+WORKFLOW_DIAGRAM.md
+
+ROLE_PERMISSIONS.md
+
+Analysis & Audits
+
+PROJECT_ANALYSIS.md
+
+SECURITY_AUDIT.md
+
+ROBUSTNESS_AUDIT.md
+
+PERFORMANCE_AUDIT.md
+
+QA_COMPREHENSIVE_REPORT.md
+
+VERIFIED_GAP_ANALYSIS.md
+
+FIELD_VERIFICATION.md
+
+Testing & Bug Reports
+
+TESTING_RESULTS.md
+
+INPUT_FIELD_FOCUS_BUG_REPORT.md
+
+Marketing & Info
+
+one-pager-data.md
+
+SCREENSHOTS.md
+
+For every doc you modify, append a ## Changelog section summarizing your edits.
+
+📄 New / Updated Docs to Ensure Exist
+
+Create or update the following as needed:
+
+ENVIRONMENT_VARIABLES_CATALOG.md – full env var registry (including Supabase)
+
+CI_LOCAL_CHECKLIST.md – local pipeline (install → lint → typecheck → tests → build → migrate → smoke)
+
+DATA_BINDING_INTEGRITY.md – verify all UI data is DB-sourced (no hardcoded data)
+
+SECURITY_CHANGELOG.md – track every security & CSRF change
+
+DASHBOARD_ENHANCEMENT_PROPOSAL.md – standards-based analytics/dashboard plan
+
+Supabase-related docs:
+
+SUPABASE_SELF_HOSTING_GUIDE.md
+
+SUPABASE_SCHEMA_AND_MIGRATIONS.md
+
+SUPABASE_RLS_POLICIES.md
+
+SUPABASE_BACKUP_RESTORE.md
+
+DOCUMENT_INDEX.md – consolidated index of all docs (including any created after this prompt)
+
+Also: automatically include and index any new docs created during this run.
+
+🔁 Main Review Steps (Run All)
+1️⃣ Architecture & Feature Verification
+
+Reconcile what the system actually does (code) with:
+
+ARCHITECTURE.md
+
+MASTER_FEATURE_LIST.md
+
+CONTRACT_FLOW.md / CONTRACT_WORKFLOW_IMPLEMENTATION.md
+
+Update:
+
+ARCHITECTURE.md – current architecture (frontend, backend, Supabase, integrations)
+
+PROJECT_ANALYSIS.md – drift, deprecated elements, risks
+
+SYSTEM_BROCHURE.md – high-level narrative
+
+2️⃣ Spec vs Implementation
+
+Use MASTER_FEATURE_LIST.md as the spec baseline.
+
+Update VERIFIED_GAP_ANALYSIS.md with a table:
+
+ID | Feature / Requirement | Status (✅/⚠️/❌) | Code Reference (file:function/route) | Notes / Fix
+
+Do not assume implementation unless you can point to actual code.
+
+3️⃣ Validation & Error Handling
+
+Enumerate all inputs: API endpoints, forms, uploads, imports, webhooks.
+
+For each:
+
+Document validations, error messages, HTTP codes
+
+Highlight missing or weak validation
+
+Update:
+
+ROBUSTNESS_AUDIT.md – full validation & error-handling audit
+
+TESTING_GUIDE.md – test cases for input validation and error scenarios
+
+4️⃣ Security, Auth, RBAC & CSRF
+
+Use SECURITY_AUDIT.md and ROLE_PERMISSIONS.md as inputs.
+
+Re-check:
+
+Authentication and session/jwt strategy
+
+Role-based permissions and enforcement
+
+Sensitive data storage & logging
+
+CSRF: middleware, token generation, token passing, verification
+
+Fix CSRF issues across the project.
+
+Add/refresh tests (missing/invalid token → 403, valid token → 2xx) and document in:
+
+TESTING_GUIDE.md
+
+SECURITY_CHANGELOG.md
+
+5️⃣ Performance & Scalability
+
+Revisit PERFORMANCE_AUDIT.md:
+
+Bottlenecks (N+1 queries, heavy joins, unindexed columns, blocking I/O, large in-memory operations)
+
+Propose concrete fixes: indexes, pagination, caching, background jobs.
+
+Add a mini load-test plan and summarize top issues in PRODUCTION_READINESS_REPORT.md.
+
+6️⃣ Deployment & Configuration (Docker / VPS / Coolify)
+
+Create/refresh ENVIRONMENT_VARIABLES_CATALOG.md with all needed env vars (including Supabase keys, URLs, JWT secret, etc.).
+
+Update:
+
+VPS_DEPLOYMENT_GUIDE.md – DB creation, user, grants, migrations, seeds
+
+DOCKER_DEPLOYMENT_GUIDE.md – Docker Compose with app + Supabase stack, DB bootstrap
+
+PRODUCTION_DEPLOYMENT.md – full production steps, including Coolify
+
+7️⃣ Documentation & UX
+
+Bring USER_GUIDE.md & ADMIN_GUIDE.md in line with the actual workflows.
+
+Update:
+
+MAINTENANCE_GUIDE.md – routine tasks
+
+OPERATIONAL_RUNBOOK.md – incidents & recovery
+
+TESTING_GUIDE.md – developer onboarding: setup → migrate → seed → run tests → start
+
+⚙️ Critical Additional Checks
+🧠 Data Binding Integrity (No Hardcoded Data)
+
+Inspect all UI code and dashboards for static/mocked data:
+
+Patterns: const data = [...], mock, fixture, sample, demo, lorem, chartData, FAKE_, etc.
+
+Ensure all data displayed in screens/dashboards comes from:
+
+DB → Supabase/Postgres → API/ORM → UI components
+
+Document findings & fixes in DATA_BINDING_INTEGRITY.md.
+
+🛡️ CSRF End-To-End
+
+Confirm CSRF protection logic is consistent with your stack (SPA/SSR).
+
+Add/verify test cases in TESTING_GUIDE.md and log changes in SECURITY_CHANGELOG.md.
+
+💰 Financial Calculation Integrity (Must Be Perfect)
+
+Identify all financial calculations:
+
+Revenue, invoice totals, discounts, VAT/tax, balances, overdue interest, penalties, KPIs, summaries, dashboard financial widgets.
+
+For each:
+
+Validate formulas (mathematical correctness, rounding, currency precision, percentage logic).
+
+Ensure consistency between backend, database, and UI.
+
+Trace each displayed value back to specific DB queries and columns.
+
+Add tests and document in:
+
+TESTING_GUIDE.md – financial test cases (normal, edge, invalid)
+
+TESTING_RESULTS.md – evidence of execution
+
+QA_COMPREHENSIVE_REPORT.md – “Financial Accuracy Verification” section
+
+Implement a regression guard (tests) that fail if key financial outputs change unexpectedly vs reference data.
+
+☁️ Supabase — Self-Hosted via Coolify (Primary Data Plane)
+
+You are using Supabase self-hosted via Coolify to host the DB/auth/storage for the app.
+
+Tasks:
+
+Supabase Hosting & Automation
+
+Create/update SUPABASE_SELF_HOSTING_GUIDE.md for running Supabase via Coolify:
+
+Services (Postgres, Auth, Storage, Realtime, Edge Functions, etc.)
+
+Health checks and dependency ordering
+
+Post-deploy scripts (migrations, seeds)
+
+Ensure maximum automation:
+
+No manual DB steps in production where automation is possible.
+
+Schema & Migrations
+
+SUPABASE_SCHEMA_AND_MIGRATIONS.md:
+
+DDL for all tables (contracts, financials, users, roles, logs, etc.)
+
+Indexes, constraints, relationships
+
+Migration strategy + commands
+
+Create scripts/migrate_db.sh, scripts/seed_db.sh, scripts/verify_db.sh and reference them in:
+
+CI_LOCAL_CHECKLIST.md
+
+PRODUCTION_DEPLOYMENT.md (Coolify post-deploy hooks)
+
+RLS & Policies
+
+SUPABASE_RLS_POLICIES.md:
+
+RLS rules per table
+
+Multi-tenant & role-based access rules
+
+Admin override policies
+
+Add policy test matrix & scenarios in TESTING_GUIDE.md.
+
+Auth Integration
+
+Ensure app uses Supabase auth correctly.
+
+Document flows and constraints in ROLE_PERMISSIONS.md and SUPABASE_RLS_POLICIES.md.
+
+Backups & Restore
+
+SUPABASE_BACKUP_RESTORE.md:
+
+Backup schedule, encryption, retention
+
+Restore process and verification
+
+Reference relevant tasks in OPERATIONAL_RUNBOOK.md and MAINTENANCE_GUIDE.md.
+
+Coolify Integration
+
+In PRODUCTION_DEPLOYMENT.md, document:
+
+Coolify app service (this app) + Supabase services
+
+Env vars mapping
+
+Build and start commands
+
+Post-deploy execution of scripts/migrate_db.sh and scripts/seed_db.sh
+
+Health check endpoints and rollback steps
+
+🔁 Local CI Pipeline (Automated)
+
+CI_LOCAL_CHECKLIST.md must include all key checks:
+
+Install dependencies
+
+Lint
+
+Typecheck (if applicable)
+
+Unit tests
+
+Integration tests (with Supabase DB running)
+
+Build
+
+Run scripts/migrate_db.sh on a test DB
+
+Start server & run smoke tests
+
+CSRF, data-binding, financial, and RLS policy tests
+
+Reference the CI checklist from PRODUCTION_READINESS_REPORT.md.
+
+📊 Dashboard Enhancement (Standards-Based)
+
+Use DASHBOARD_ENHANCEMENT_PROPOSAL.md to:
+
+Document current gaps: static numbers, no trends/goals/comparisons.
+
+Propose & define:
+
+Line charts (revenue trends)
+
+Bar charts (category comparisons)
+
+Gauges/progress (goal tracking)
+
+Trend indicators (month-over-month, year-over-year)
+
+Time-series views (weekly, monthly)
+
+Color-coded KPIs (green/red)
+
+Interactive filters (date range, status, etc.)
+
+Add and wire up:
+
+Revenue Trends Report
+
+Fleet Performance Report
+
+Contract Analytics Report
+
+Collection Performance Report
+
+All charts must use DB data (validated by DATA_BINDING_INTEGRITY.md).
+
+Document layout, responsiveness, and accessibility.
+
+📚 Documentation Consolidation & Normalization (Very Strict)
+
+The docs have gone out of bounds. You must consolidate and normalize everything under /docs:
+
+Create/Update DOCUMENT_INDEX.md:
+
+List every document under /docs (including new ones), with:
+
+Title
+
+Purpose
+
+Audience (dev/admin/management/end-user)
+
+Last updated date
+
+Group docs by category (architecture, deployment, testing, audits, UX, marketing).
+
+Eliminate duplication & contradictions:
+
+If multiple docs cover the same topic (e.g. deployment steps), clearly identify:
+
+Which doc is the source of truth
+
+Which are supplementary
+
+Mark outdated/overlapping docs as deprecated with clear notes at the top.
+
+Ensure that important topics (testing, Supabase, deployment, financials, dashboards) have single, consistent references.
+
+Normalize doc structure:
+
+For each key doc (*_GUIDE.md, *_AUDIT.md, *_REPORT.md etc.), ensure the top sections are:
+
+# Title
+
+## Purpose
+
+## Scope
+
+## How to Use This Document
+
+Fix headings, inconsistent naming, and broken internal references.
+
+Auto-include newly created docs:
+
+If any doc is created after this prompt, ensure:
+
+It is added to DOCUMENT_INDEX.md
+
+Cross-linked from relevant parent docs
+
+It doesn’t duplicate an existing doc without explanation
+
+🔁 Testing System Refresh (If Key Items Are Missing)
+
+If any of the following are missing, inconsistent, or scattered in the wrong place:
+
+CSRF tests
+
+Data-binding tests (DB vs hardcoded data)
+
+Financial calculation tests (end-to-end)
+
+Supabase connectivity & RLS policy tests
+
+Basic regression / smoke tests for critical flows
+
+Documentation of these tests in TESTING_GUIDE.md, TESTING_RESULTS.md, and CI_LOCAL_CHECKLIST.md
+
+👉 Then you must refresh the testing process in full:
+
+Redesign the test strategy and structure.
+
+Update:
+
+TESTING_GUIDE.md — authoritative test plan
+
+TESTING_RESULTS.md — actual execution summary
+
+CI_LOCAL_CHECKLIST.md — commands and ordering
+
+QA_COMPREHENSIVE_REPORT.md — test coverage and confidence level
+
+Ensure every critical scenario (auth, contracts, financial flows, dashboards, Supabase/RLS, CSRF) is covered explicitly.
+
+🧾 Final Documentation Refresh (After All Changes)
+
+After you complete all the above:
+
+Re-scan affected code/infrastructure and update any necessary docs so there is no drift:
+
+Architecture changes → ARCHITECTURE.md
+
+DB/schema changes → SUPABASE_SCHEMA_AND_MIGRATIONS.md + ENVIRONMENT_VARIABLES_CATALOG.md
+
+Testing changes → TESTING_GUIDE.md, TESTING_RESULTS.md, CI_LOCAL_CHECKLIST.md, QA_COMPREHENSIVE_REPORT.md
+
+Deployment changes → PRODUCTION_DEPLOYMENT.md, DOCKER_DEPLOYMENT_GUIDE.md, VPS_DEPLOYMENT_GUIDE.md
+
+Security changes → SECURITY_AUDIT.md, SECURITY_CHANGELOG.md
+
+Dashboard/UI changes → DASHBOARD_ENHANCEMENT_PROPOSAL.md, USER_GUIDE.md, SCREENSHOTS.md
+
+Confirm all docs have consistent, up-to-date content and that DOCUMENT_INDEX.md reflects the final state.
+
+📦 Final Output From This Run
+
+You must output:
+
+A list of all modified/created docs with a brief change summary.
+
+A P0 / P1 / P2 issue summary across:
+
+Functional gaps
+
+Security & CSRF
+
+Performance
+
+Dashboards & UX
+
+Financial integrity
+
+Supabase & deployment
+
+A set of executable commands to:
+
+Create → migrate → seed DB (Supabase/Postgres)
+
+Run full test suites (unit, integration, CSRF, data-binding, financial, RLS)
+
+Build & start the app locally
+
+A Coolify deployment checklist for:
+
+The app service
+
+The Supabase stack
+
+Post-deploy hooks (migrations & seeds)
+
+A list of all UNCERTAIN items with:
+
+File + line reference
+
+Why it’s uncertain
+
+Recommended next step
+
+✅ Success Criteria
+
+All UI data is DB-driven, no mock/hardcoded metrics.
+
+All financial calculations are perfect and tested.
+
+CSRF & security measures are robust and verified.
+
+Supabase self-hosted via Coolify is fully documented and automated.
+
+Dashboards are standards-based, visual, and interactive.
+
+Docs under /docs are fully consolidated, normalized, and indexed.
+
+Testing process is complete and refreshed if anything critical was missing.
+
+Code, infra, and docs are fully consistent and deployment via GitHub + Coolify is safe.
