@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import { csrfProtection } from "./middleware/csrf";
 
 // Sanitize request data to remove sensitive fields before logging
 export function sanitizeRequestData(data: any): any {
@@ -65,6 +66,9 @@ app.use(helmet({
 
 // Cookie parser for CSRF token validation
 app.use(cookieParser());
+
+// P1-4: CSRF Protection Middleware - validates all POST/PATCH/DELETE/PUT requests
+app.use(csrfProtection);
 
 // Increase payload limit for chart exports (base64 images can be large)
 app.use(express.json({ limit: '10mb' }));
