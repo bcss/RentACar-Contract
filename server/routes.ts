@@ -40,6 +40,23 @@ import {
 } from './importHelpers';
 import { performanceMonitoring } from "./middleware/performanceMonitoring";
 import { registerModularRoutes } from "./routes/index";
+import { 
+  getCachedCompanySettings, 
+  setCachedCompanySettings, 
+  invalidateCompanySettingsCache,
+  getCachedBranches,
+  setCachedBranches,
+  invalidateBranchesCache,
+  getCachedPublicHolidays,
+  setCachedPublicHolidays,
+  invalidatePublicHolidaysCache,
+  getCachedDriverRateCards,
+  setCachedDriverRateCards,
+  invalidateDriverRateCardsCache,
+  getCachedVatSettings,
+  setCachedVatSettings,
+  invalidateVatSettingsCache
+} from "./utils/cache";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // APM Performance Monitoring (tracks all requests)
@@ -4447,7 +4464,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public endpoint for company branding (no auth required)
   app.get('/api/branding', async (req, res) => {
     try {
-      const settings = await storage.getCompanySettings();
+      // Try cache first
+      let settings = await getCachedCompanySettings();
+      if (!settings) {
+        settings = await storage.getCompanySettings();
+        await setCachedCompanySettings(settings);
+      }
+      
       // Return only safe branding information
       res.json({
         companyNameEn: settings.companyNameEn,
@@ -4463,7 +4486,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company settings routes (Admin only)
   app.get('/api/settings', isAuthenticated, async (req: any, res) => {
     try {
-      const settings = await storage.getCompanySettings();
+      // Try cache first
+      let settings = await getCachedCompanySettings();
+      if (!settings) {
+        settings = await storage.getCompanySettings();
+        await setCachedCompanySettings(settings);
+      }
       res.json(settings);
     } catch (error) {
       console.error("Error fetching company settings:", error);
@@ -4479,6 +4507,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertCompanySettingsSchema.parse(req.body);
       
       const settings = await storage.updateCompanySettings(validatedData, userId);
+      
+      // Invalidate cache on update
+      await invalidateCompanySettingsCache();
+      await invalidateVatSettingsCache();
       
       // Create audit log
       await createAuditLog(
@@ -4499,7 +4531,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Financial Settings routes (subset of company settings)
   app.get('/api/settings/financial', isAuthenticated, async (req: any, res) => {
     try {
-      const settings = await storage.getCompanySettings();
+      // Try cache first
+      let settings = await getCachedCompanySettings();
+      if (!settings) {
+        settings = await storage.getCompanySettings();
+        await setCachedCompanySettings(settings);
+      }
       
       // Return only financial-related fields
       const financialSettings = {
@@ -6321,7 +6358,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const includeDisabled = req.query.includeDisabled === 'true';
-      const branches = await storage.getBranches(includeDisabled);
+      
+      // Try cache first (only for active branches)
+      let branches;
+      if (!includeDisabled) {
+        branches = await getCachedBranches();
+      }
+      
+      if (!branches) {
+        branches = await storage.getBranches(includeDisabled);
+        if (!includeDisabled) {
+          await setCachedBranches(branches);
+        }
+      }
+      
       res.json(branches);
     } catch (error) {
       next(error);
@@ -6367,6 +6417,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: user.id,
       });
       
+      // Invalidate branches cache
+      await invalidateBranchesCache();
+      
       await createAuditLog(user.id, 'branch_created', branch.id, req, `Created branch: ${branch.branchCode}`);
       res.status(201).json(branch);
     } catch (error) {
@@ -6390,6 +6443,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const branch = await storage.updateBranch(req.params.id, validationResult.data);
+      
+      // Invalidate branches cache
+      await invalidateBranchesCache();
+      
       await createAuditLog(user.id, 'branch_updated', branch.id, req, `Updated branch: ${branch.branchCode}`);
       res.json(branch);
     } catch (error) {
@@ -6609,7 +6666,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
         year: req.query.year ? parseInt(req.query.year as string) : undefined,
       };
-      const holidays = await storage.getPublicHolidays(filters);
+      
+      // Try cache first (with year scoping)
+      let holidays = await getCachedPublicHolidays(filters.year);
+      
+      if (!holidays) {
+        holidays = await storage.getPublicHolidays(filters);
+        await setCachedPublicHolidays(holidays, filters.year);
+      }
+      
       res.json(holidays);
     } catch (error) {
       next(error);
@@ -6643,6 +6708,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: user.id,
       });
       
+      // Invalidate holidays cache
+      await invalidatePublicHolidaysCache();
+      
       await createAuditLog(user.id, 'public_holiday_created', holiday.id, req, `Created public holiday: ${holiday.nameEn}`);
       res.status(201).json(holiday);
     } catch (error) {
@@ -6662,6 +6730,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const holiday = await storage.updatePublicHoliday(req.params.id, validationResult.data);
+      
+      // Invalidate holidays cache
+      await invalidatePublicHolidaysCache();
+      
       await createAuditLog(user.id, 'public_holiday_updated', holiday.id, req, `Updated public holiday: ${holiday.nameEn}`);
       res.json(holiday);
     } catch (error) {

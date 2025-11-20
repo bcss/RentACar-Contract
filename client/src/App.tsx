@@ -103,6 +103,7 @@ const FleetUtilizationForecast = lazy(() => import("@/pages/FleetUtilizationFore
 const CustomerChurnRiskReport = lazy(() => import("@/pages/CustomerChurnRiskReport"));
 const MaintenanceCostForecast = lazy(() => import("@/pages/MaintenanceCostForecast"));
 const PaymentDefaultPrediction = lazy(() => import("@/pages/PaymentDefaultPrediction"));
+const PerformanceMonitoring = lazy(() => import("@/pages/PerformanceMonitoring"));
 const LocationDemandForecast = lazy(() => import("@/pages/LocationDemandForecast"));
 
 // Professional loading skeleton
@@ -193,6 +194,9 @@ function Router() {
       </Route>
       <Route path="/system-errors">
         {() => <ProtectedRoute component={SystemErrors} />}
+      </Route>
+      <Route path="/performance-monitoring">
+        {() => <ProtectedRoute component={PerformanceMonitoring} />}
       </Route>
       <Route path="/settings">
         {() => <ProtectedRoute component={Settings} />}

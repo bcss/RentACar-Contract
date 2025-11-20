@@ -506,6 +506,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/system-errors',
       show: isAdmin,
     },
+    {
+      title: t('nav.performanceMonitoring'),
+      icon: 'speed',
+      url: '/performance-monitoring',
+      show: isAdmin,
+    },
   ];
 
   // Settings Items
