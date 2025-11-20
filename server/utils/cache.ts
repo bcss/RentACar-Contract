@@ -130,6 +130,112 @@ export async function invalidateCompanySettingsCache() {
 }
 
 /**
+ * Cache branches (frequently accessed for filtering/lookups)
+ */
+export async function getCachedBranches() {
+  return await cacheGet('branches:all');
+}
+
+export async function setCachedBranches(branches: any[]) {
+  // Cache for 30 minutes (branches change occasionally)
+  await cacheSet('branches:all', branches, 1800);
+}
+
+export async function invalidateBranchesCache() {
+  await cacheDel('branches:all');
+}
+
+/**
+ * Cache public holidays (rarely change, checked frequently)
+ */
+export async function getCachedPublicHolidays(year?: number) {
+  const key = year ? `holidays:${year}` : 'holidays:all';
+  return await cacheGet(key);
+}
+
+export async function setCachedPublicHolidays(holidays: any[], year?: number) {
+  const key = year ? `holidays:${year}` : 'holidays:all';
+  // Cache for 24 hours (holidays rarely change mid-year)
+  await cacheSet(key, holidays, 86400);
+}
+
+export async function invalidatePublicHolidaysCache(year?: number) {
+  if (year) {
+    await cacheDel(`holidays:${year}`);
+  } else {
+    // Clear all holiday caches
+    await cacheClear('holidays:*');
+  }
+}
+
+/**
+ * Cache driver rate cards (used for cost calculations)
+ */
+export async function getCachedDriverRateCards() {
+  return await cacheGet('driver_rate_cards:all');
+}
+
+export async function setCachedDriverRateCards(rateCards: any[]) {
+  // Cache for 15 minutes (rates may be updated during pricing changes)
+  await cacheSet('driver_rate_cards:all', rateCards, 900);
+}
+
+export async function invalidateDriverRateCardsCache() {
+  await cacheDel('driver_rate_cards:all');
+}
+
+/**
+ * Cache specific driver rate card by ID
+ */
+export async function getCachedDriverRateCard(cardId: string) {
+  return await cacheGet(`driver_rate_card:${cardId}`);
+}
+
+export async function setCachedDriverRateCard(cardId: string, rateCard: any) {
+  await cacheSet(`driver_rate_card:${cardId}`, rateCard, 900);
+}
+
+/**
+ * Cache VAT settings (critical for financial calculations)
+ */
+export async function getCachedVatSettings() {
+  return await cacheGet('vat_settings');
+}
+
+export async function setCachedVatSettings(settings: any) {
+  // Cache for 1 hour (VAT rate rarely changes)
+  await cacheSet('vat_settings', settings, 3600);
+}
+
+export async function invalidateVatSettingsCache() {
+  await cacheDel('vat_settings');
+}
+
+/**
+ * Bulk cache invalidation for data mutations
+ */
+export async function invalidateRelatedCaches(entity: string) {
+  switch (entity) {
+    case 'branch':
+      await invalidateBranchesCache();
+      break;
+    case 'holiday':
+      await invalidatePublicHolidaysCache();
+      break;
+    case 'driver_rate_card':
+      await invalidateDriverRateCardsCache();
+      break;
+    case 'company_settings':
+    case 'vat':
+      await Promise.all([
+        invalidateCompanySettingsCache(),
+        invalidateVatSettingsCache(),
+      ]);
+      break;
+  }
+}
+
+/**
  * REDIS SETUP INSTRUCTIONS:
  * 
  * Option 1: Standard Redis (recommended for production)
