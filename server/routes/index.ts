@@ -12,8 +12,8 @@
 import type { Express } from "express";
 import customerRoutes from "./customerRoutes";
 import authRoutes from "./authRoutes";
+import vehicleRoutes from "./vehicleRoutes";
 // Additional route modules will be imported as they're created
-// import vehicleRoutes from "./vehicleRoutes";
 // import contractRoutes from "./contractRoutes";
 // import userRoutes from "./userRoutes";
 // import reportRoutes from "./reportRoutes";
@@ -31,7 +31,7 @@ export function registerModularRoutes(app: Express): void {
 
   // Core entity routes
   app.use('/api/customers', customerRoutes);
-  // app.use('/api/vehicles', vehicleRoutes);
+  app.use('/api/vehicles', vehicleRoutes);
   // app.use('/api/contracts', contractRoutes);
   // app.use('/api/users', userRoutes);
   
@@ -44,6 +44,7 @@ export function registerModularRoutes(app: Express): void {
 
   console.log('✅ Modular routes registered');
   console.log('   - Customer routes: /api/customers');
+  console.log('   - Vehicle routes: /api/vehicles');
   console.log('   - Auth routes: /api/auth, /api/system');
   console.log('   - More routes being migrated...');
 }
