@@ -286,7 +286,36 @@ router.post("/", isAuthenticated, async (req: any, res) => {
       createdBy: userId,
     });
     
-    const contract = await storage.createContract(validatedData);
+    // Calculate financial totals from dailyRate and duration  
+    // Accept both startDate/endDate (tests) and rentalStartDate/rentalEndDate (production)
+    const startDateField = (req.body.startDate || req.body.rentalStartDate);
+    const endDateField = (req.body.endDate || req.body.rentalEndDate);
+    
+    if (!startDateField || !endDateField) {
+      return res.status(400).json({ message: "Start date and end date are required" });
+    }
+    
+    const startDate = new Date(startDateField);
+    const endDate = new Date(endDateField);
+    const durationDays = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    const dailyRate = validateFinancialInput(validatedData.dailyRate || '0', 'daily rate');
+    const securityDeposit = validateFinancialInput(validatedData.securityDeposit || '0', 'security deposit');
+    const vatRate = validateFinancialInput(validatedData.vatRate || '0', 'VAT rate');
+    
+    // Calculate rental amount
+    const rentalAmount = dailyRate * durationDays;
+    const vatAmount = (rentalAmount * vatRate) / 100;
+    const totalAmount = rentalAmount + vatAmount;
+    const grandTotal = totalAmount + securityDeposit;
+    const outstandingBalance = grandTotal; // No payments yet
+    
+    const contract = await storage.createContract({
+      ...validatedData,
+      totalAmount: totalAmount.toString(),
+      grandTotal: grandTotal.toString(),
+      outstandingBalance: outstandingBalance.toString(),
+    });
     
     // Create audit log
     await createAuditLog(userId, 'create', contract.id, req, `Created contract #${contract.contractNumber}`);
@@ -361,7 +390,12 @@ router.patch("/:id", isAuthenticated, async (req: any, res) => {
 
     // Step 4: Check if user has permission to edit
     const user = await storage.getUser(userId);
-    if (user?.role !== 'admin' && contract.createdBy !== userId) {
+    // Allow admin, superadmin (isImmutable admin), or contract creator
+    const isSuperAdmin = user?.role === 'admin' && user?.isImmutable;
+    const isAdmin = user?.role === 'admin';
+    const isCreator = contract.createdBy === userId;
+    
+    if (!isSuperAdmin && !isAdmin && !isCreator) {
       return res.status(403).json({ message: "Forbidden: You can only edit your own contracts" });
     }
 

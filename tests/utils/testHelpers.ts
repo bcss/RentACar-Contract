@@ -142,6 +142,20 @@ export async function setupTestApp(): Promise<express.Application> {
     }
   });
 
+  // Apply CSRF protection to all routes AFTER login and csrf-token
+  // This protects POST/PUT/PATCH/DELETE while allowing /api/login and /api/csrf-token to bypass
+  app.use(csrfProtection);
+  
+  // Add settings routes AFTER CSRF protection
+  app.get('/api/settings', async (req: any, res: any) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
   app.put('/api/settings', async (req: any, res: any) => {
     try {
       await storage.updateCompanySettings(req.body);
@@ -150,10 +164,6 @@ export async function setupTestApp(): Promise<express.Application> {
       res.status(500).json({ message: "Failed to update settings" });
     }
   });
-  
-  // Apply CSRF protection to all routes AFTER login and csrf-token
-  // This protects POST/PUT/PATCH/DELETE while allowing /api/login and /api/csrf-token to bypass
-  app.use(csrfProtection);
   
   // Register all route modules (same pattern as server/routes/index.ts)
   app.use('/api', authRoutes);
