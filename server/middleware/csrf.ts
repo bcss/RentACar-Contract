@@ -47,10 +47,9 @@ export const csrfTokenGenerator: RequestHandler = (req, res) => {
  */
 export const csrfProtection: RequestHandler = (req, res, next) => {
   // Skip CSRF validation for:
-  // 1. Login endpoint (no CSRF token available yet)
-  // 2. CSRF token generation endpoint
-  // 3. System error logging (error handling should not be blocked)
-  const skipPaths = ['/api/login', '/api/csrf-token', '/api/system-errors/log'];
+  // 1. CSRF token generation endpoint
+  // 2. System error logging (error handling should not be blocked)
+  const skipPaths = ['/api/csrf-token', '/api/system-errors/log'];
   
   if (skipPaths.includes(req.path)) {
     return next();

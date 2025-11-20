@@ -312,6 +312,7 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     
     const contract = await storage.createContract({
       ...validatedData,
+      status: 'draft',
       totalAmount: totalAmount.toString(),
       grandTotal: grandTotal.toString(),
       outstandingBalance: outstandingBalance.toString(),
