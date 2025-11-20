@@ -2047,5 +2047,90 @@ test('Back button returns to dashboard', async ({ page }) => {
 
 ---
 
+## Changelog
+
+### Version 1.1 (November 20, 2025) - Testing Gap Analysis
+**Comprehensive review of automated test coverage - 5 critical gaps identified**
+
+#### Current Test Coverage
+- **Existing Tests:** 33/33 passing (100% pass rate)
+  - `tests/utils/surchargeCalculator.test.ts` (12 tests) - Driver surcharge calculations
+  - `tests/utils/validation.test.ts` (21 tests) - Input validation functions
+- **Status:** ✅ All financial calculation core logic tested and verified
+
+#### Identified Test Gaps (P1 Priority)
+
+**Gap 1: CSRF Token Validation**
+- **Missing Coverage:** Double-submit cookie pattern, header/cookie mismatch detection, timing-safe comparison
+- **Recommended File:** `tests/security/csrf.test.ts` (create new)
+- **Test Cases:** 
+  - Token generation creates 64-char hex string
+  - Cookie and header must match exactly
+  - `crypto.timingSafeEqual()` prevents timing attacks
+  - Excluded paths bypass validation (`/api/login`, `/api/csrf-token`)
+  - Invalid/missing tokens return 403
+
+**Gap 2: Outstanding Balance Edge Cases**
+- **Missing Coverage:** Zero payments, negative balance handling, extraCharges with partial payments
+- **Recommended File:** `tests/financial/outstandingBalance.test.ts` (create new)
+- **Test Cases:**
+  - `MAX(0, ...)` ensures no negative balances
+  - Formula: `(totalAmount + extraCharges) - depositPaid - totalPaid`
+  - Proper 2-decimal rounding: `Math.round(value * 100) / 100`
+  - Consistency across 3 locations (contract retrieval, completion, closure)
+
+**Gap 3: Risk Score Escalation Triggers**
+- **Missing Coverage:** Payment escalation triggers, weighted scoring, hybrid override logic
+- **Recommended File:** `tests/services/riskCalculator.test.ts` (create new)
+- **Test Cases:**
+  - 95+ score forces critical risk when <10% paid
+  - 90+ score forces critical risk when 10-25% paid
+  - Weighted scoring: 45% payment + 25% violations + 20% incidents + 10% documents
+  - Hybrid override respects manual overrides when recent (within 30 days)
+
+**Gap 4: Contract State Machine Transitions**
+- **Missing Coverage:** State transition validation, inspection requirements, edit reason bypass prevention
+- **Recommended File:** `tests/workflows/contractStateMachine.test.ts` (create new)
+- **Test Cases:**
+  - draft → active requires pre-delivery inspection
+  - active → completed requires post-return inspection
+  - Edit reason validation (10+ meaningful words, 3+ chars each, 5+ unique)
+  - Closed contracts cannot be modified
+
+**Gap 5: Driver Cost Aggregation**
+- **Missing Coverage:** Multiple assignments summation, status filtering, VAT calculations
+- **Recommended File:** `tests/financial/driverCostCalculator.test.ts` (create new)
+- **Test Cases:**
+  - Multiple assignments for same contract sum correctly
+  - Only scheduled/active/completed statuses included
+  - VAT-inclusive total: `subtotal * 1.05` (UAE 5% VAT)
+  - Proper decimal rounding
+
+#### Test Expansion Recommendation
+- **Current:** 33 tests covering utilities and calculators
+- **Target:** 60+ tests covering end-to-end workflows, security, state machines
+- **Timeline:** Recommended before next major feature release
+- **Benefit:** Prevents regression bugs, documents expected behavior, enables safe refactoring
+
+#### How to Run Tests
+```bash
+# Run all existing tests
+npx vitest run
+
+# Run tests in watch mode
+npx vitest
+
+# Run specific test file
+npx vitest run tests/utils/surchargeCalculator.test.ts
+
+# Run with coverage report
+npx vitest run --coverage
+```
+
+**Document Status:** Updated with automated test gap analysis  
+**Test Suite Status:** 33/33 passing, 5 gaps identified for expansion
+
+---
+
 **End of Testing Procedures**
 
