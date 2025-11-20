@@ -68,7 +68,7 @@ export const csrfProtection: RequestHandler = (req, res, next) => {
   // Get token from cookie
   const cookieToken = req.cookies?.[CSRF_COOKIE_NAME];
   
-  // Validate tokens exist and match
+  // Validate tokens exist
   if (!headerToken || !cookieToken) {
     return res.status(403).json({ 
       message: 'CSRF token missing. Please refresh the page and try again.',
@@ -76,7 +76,21 @@ export const csrfProtection: RequestHandler = (req, res, next) => {
     });
   }
   
-  if (headerToken !== cookieToken) {
+  // SECURITY: Use constant-time comparison to prevent timing attacks
+  // Convert strings to Buffers for crypto.timingSafeEqual()
+  let tokensMatch = false;
+  try {
+    const headerBuffer = Buffer.from(headerToken, 'utf8');
+    const cookieBuffer = Buffer.from(cookieToken, 'utf8');
+    
+    // Constant-time comparison prevents timing side-channel attacks
+    tokensMatch = crypto.timingSafeEqual(headerBuffer, cookieBuffer);
+  } catch (error) {
+    // Buffer lengths don't match (tokens are different lengths)
+    tokensMatch = false;
+  }
+  
+  if (!tokensMatch) {
     return res.status(403).json({ 
       message: 'Invalid CSRF token. Possible CSRF attack detected.',
       csrfError: true
