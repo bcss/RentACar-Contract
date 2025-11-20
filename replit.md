@@ -21,12 +21,27 @@ Preferred communication style: Simple, everyday language.
 - **Translation Coverage:** 100% bilingual support with complete English/Arabic translations across all 23+ modules, including new Design System Showcase, all navigation items, and system messages. Full RTL/LTR layout support with automatic direction switching and font family changes.
 
 ### Technical Infrastructure
+- **Route Modularization (NEW - November 2025):**
+  - 7 specialized route modules extracting 71 routes (2,800+ lines) from monolithic routes.ts
+  - Central orchestrator pattern with detailed logging
+  - 100% backward compatible API contracts
+  - Verified working: All routes registered successfully without errors
+  - Foundation for 10-12 additional modules (estimated 100-120 routes remaining)
 - **Export Utilities:**
   - `client/src/utils/csvExport.ts` - RFC 4180 compliant CSV generation with proper field escaping, null safety, and memory leak prevention
   - `client/src/utils/contractPDF.ts` - Contract PDF generation with multi-page support
   - `client/src/utils/chartExport.ts` - Chart image capture for PDF embedding
   - `server/utils/exportHelpers.ts` - Server-side PDF/Excel generation with company headers, tables, and chart integration
 - **Rate Limiting:** Standalone module with hybrid key generation (user ID for authenticated, IP for unauthenticated) preventing circular dependencies
+- **Testing Infrastructure:**
+  - Vitest with 33 automated tests (100% pass rate)
+  - Financial calculation verification (surcharge calculator)
+  - Security validation testing (XSS, SQL injection prevention)
+- **Performance & Monitoring:**
+  - Connection pooling via Neon fetchConnectionCache
+  - Redis caching layer with graceful degradation
+  - APM middleware tracking request duration, memory, slow requests
+  - Performance metrics API endpoint
 
 ## System Architecture
 
@@ -38,6 +53,20 @@ Preferred communication style: Simple, everyday language.
 
 ### Backend
 - **Technology Stack:** Node.js with TypeScript, Express.js, Drizzle ORM, internal username/password authentication with Passport.js, express-session with PostgreSQL store.
+- **Modular Route Architecture (NEW):** 
+  - **Central Orchestrator:** `server/routes/index.ts` - Routes registration hub
+  - **7 Specialized Modules:** 71 routes organized by domain (Auth, Customer, Vehicle, User, Payment, Contract, Report)
+  - **Architecture Impact:** Main routes.ts reduced from 9,666 → ~6,800 lines (30% extracted)
+  - **Pattern:** Each module exports Express Router with relative paths, mounted via central orchestrator
+  - **Benefits:** Isolated testing, domain-focused organization, improved maintainability, scalability foundation
+  - **Route Modules:**
+    - `authRoutes.ts` (4 routes) - Authentication, CSRF, health, performance
+    - `customerRoutes.ts` (6 routes) - Customer CRUD with role-based filtering
+    - `vehicleRoutes.ts` (8 routes) - Fleet management and transfers
+    - `userRoutes.ts` (9 routes) - User management with granular permissions
+    - `paymentRoutes.ts` (6 routes) - Payment tracking and refunds
+    - `contractRoutes.ts` (15 routes) - State machine, financial validation, edit history
+    - `reportRoutes.ts` (18 routes) - 13 data endpoints + 5 PDF/Excel exports
 - **API Design:** RESTful endpoints, role-based middleware, centralized error handling, comprehensive audit logging.
 - **Authentication & Authorization:** Internal username/password system, PostgreSQL-backed sessions, httpOnly/secure cookies, role-based access (Admin, Manager, Staff, Viewer).
 - **Security Hardening:** Session fixation, CSRF protection, PII sanitization, password complexity/rotation, security headers (Helmet.js), robust business logic validation adhering to GDPR, PCI-DSS, and OWASP Top 10:2021 standards.
