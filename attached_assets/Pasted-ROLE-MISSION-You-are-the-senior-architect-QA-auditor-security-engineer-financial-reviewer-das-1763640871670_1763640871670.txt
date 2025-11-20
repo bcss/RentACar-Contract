@@ -1,0 +1,486 @@
+ROLE & MISSION
+
+You are the senior architect, QA auditor, security engineer, financial reviewer, dashboard/UX lead, and documentation owner for this project.
+
+Your mission:
+
+Audit the entire codebase and every document in /docs.
+
+Ensure:
+
+All functionality matches the intended requirements.
+
+All UI data is database-sourced, not hardcoded.
+
+All financial calculations are 100% correct and tested.
+
+Security is robust (esp. CSRF + auth checks).
+
+Performance issues are identified and documented.
+
+Dashboards follow modern analytics best practices.
+
+The testing process is complete and refreshed if anything key is missing.
+
+All documents under /docs are consolidated, normalized, and indexed.
+
+You are not doing hosting/infra/Supabase schema setup here — that will be handled in a separate deployment prompt.
+
+📥 INPUTS YOU MUST USE
+
+Read all files under /docs, including:
+
+The 32 existing documents listed by the user.
+
+Any additional documents that already exist or are created after this prompt.
+
+Read the entire repository (backend, frontend, tests, configs).
+
+For every document you change, append a ## Changelog section describing what you updated.
+
+📁 EXISTING CORE DOCS (MUST BE USED)
+
+Deployment & Production (read, don’t change hosting logic here)
+
+PRODUCTION_DEPLOYMENT.md
+
+DOCKER_DEPLOYMENT_GUIDE.md
+
+VPS_DEPLOYMENT_GUIDE.md
+
+PRODUCTION_READINESS_REPORT.md
+
+User & Admin Guides
+
+USER_GUIDE.md
+
+ADMIN_GUIDE.md
+
+MAINTENANCE_GUIDE.md
+
+OPERATIONAL_RUNBOOK.md
+
+TESTING_GUIDE.md
+
+System Features & Design
+
+MASTER_FEATURE_LIST.md
+
+MISSING_FEATURES.md
+
+SYSTEM_ADMIN_FEATURE_SUMMARY.md
+
+SYSTEM_ADMINISTRATOR_SUITE.md
+
+SYSTEM_ADMIN_SUITE_CUSTOMER_SUMMARY.md
+
+SYSTEM_BROCHURE.md
+
+design_guidelines.md
+
+compelling-features.md
+
+Technical Architecture
+
+ARCHITECTURE.md
+
+CONTRACT_FLOW.md
+
+CONTRACT_WORKFLOW_IMPLEMENTATION.md
+
+WORKFLOW_DIAGRAM.md
+
+ROLE_PERMISSIONS.md
+
+Analysis & Audits
+
+PROJECT_ANALYSIS.md
+
+SECURITY_AUDIT.md
+
+ROBUSTNESS_AUDIT.md
+
+PERFORMANCE_AUDIT.md
+
+QA_COMPREHENSIVE_REPORT.md
+
+VERIFIED_GAP_ANALYSIS.md
+
+FIELD_VERIFICATION.md
+
+Testing & Bug Reports
+
+TESTING_RESULTS.md
+
+INPUT_FIELD_FOCUS_BUG_REPORT.md
+
+Marketing & Info
+
+one-pager-data.md
+
+SCREENSHOTS.md
+
+📄 NEW / SUPPORTING DOCS TO ENSURE EXIST
+
+Create/update these audit-side docs (non-hosting):
+
+DATA_BINDING_INTEGRITY.md – DB vs hardcoded data report.
+
+DASHBOARD_ENHANCEMENT_PROPOSAL.md – standards-based dashboard plan.
+
+SECURITY_CHANGELOG.md – chronological log of security / CSRF fixes.
+
+CI_LOCAL_CHECKLIST.md – what must run locally before a release (test-oriented, not infra).
+
+DOCUMENT_INDEX.md – index of all docs under /docs with purpose and last updated.
+
+(Supabase schema, RLS, backups, and environment catalog belong to the deployment prompt, not here.)
+
+Also: auto-include and index any new docs you or the system create as part of this run.
+
+🧠 MAIN AUDIT & VALIDATION TASKS
+1️⃣ Architecture & Feature Verification
+
+Cross-check actual code against:
+
+ARCHITECTURE.md, CONTRACT_FLOW.md, CONTRACT_WORKFLOW_IMPLEMENTATION.md
+
+MASTER_FEATURE_LIST.md and MISSING_FEATURES.md
+
+Update:
+
+ARCHITECTURE.md with the true current architecture (components, modules, data flows).
+
+PROJECT_ANALYSIS.md with drift, risks, and misalignments.
+
+SYSTEM_BROCHURE.md to reflect reality (no fantasy features).
+
+2️⃣ Spec vs Implementation Gap Analysis
+
+Treat MASTER_FEATURE_LIST.md as your functional spec.
+
+Update VERIFIED_GAP_ANALYSIS.md with a table:
+
+ID | Feature / Requirement | Status (✅/⚠️/❌) | Code Reference (file:function/route) | Notes / Fix
+
+Don’t mark ✅ unless you can point to actual code.
+
+3️⃣ Validation & Error Handling
+
+Enumerate all inputs:
+
+HTTP endpoints, forms, file uploads, imports, background jobs that accept data.
+
+For each, answer:
+
+What validation exists?
+
+What error messages and HTTP codes are used?
+
+What edge cases are missing?
+
+Update:
+
+ROBUSTNESS_AUDIT.md – full list of gaps & suggested fixes.
+
+TESTING_GUIDE.md – test cases for validations and error paths.
+
+TESTING_RESULTS.md – summary of what has actually been executed.
+
+4️⃣ Security (CSRF, Auth, RBAC)
+
+Using SECURITY_AUDIT.md + ROLE_PERMISSIONS.md, check:
+
+Auth flows (login/out, sessions/JWT).
+
+Role-based access (who can do what, enforced where in code).
+
+Sensitive data handling (logs, exports, debug prints).
+
+CSRF:
+
+Middleware presence and configuration.
+
+Token generation, storage, injection into forms/headers.
+
+Verification on every mutating endpoint (POST/PUT/PATCH/DELETE).
+
+Fix any CSRF gaps and document:
+
+SECURITY_AUDIT.md – what was wrong and how it’s fixed.
+
+SECURITY_CHANGELOG.md – date, files, change summary.
+
+TESTING_GUIDE.md – CSRF negative + positive tests.
+
+5️⃣ Performance & Scalability
+
+Revisit PERFORMANCE_AUDIT.md with current code:
+
+N+1 queries, missing indexes, heavy joins, unbounded loops, large in-memory structures.
+
+Propose concrete fixes.
+
+Add a mini load-test plan:
+
+Critical endpoints.
+
+Test data volumes.
+
+Target latency/throughput thresholds.
+
+Summarize the top performance risks + mitigations in PRODUCTION_READINESS_REPORT.md (analysis only; no hosting steps here).
+
+💰 6️⃣ Financial Calculation Integrity (MUST BE PERFECT)
+
+Identify all financial logic:
+
+Contract values, revenue, daily/weekly/monthly totals.
+
+Discounts, VAT/tax, surcharges, overdue interest, penalties.
+
+Outstanding balances, collections, ageing reports.
+
+Dashboard financial KPIs and aggregations.
+
+For each:
+
+Verify formulas mathematically (including rounding, currency precision).
+
+Ensure formula consistency across:
+
+Backend calculations.
+
+Database views/stored logic (if any).
+
+Frontend display (no “recalculation” with different logic).
+
+Add or update tests:
+
+Edge cases: zero, negative, very large numbers, boundary percentages.
+
+Currency/rounding edge conditions.
+
+Update:
+
+TESTING_GUIDE.md – financial test scenarios & expected values.
+
+TESTING_RESULTS.md – execution evidence.
+
+QA_COMPREHENSIVE_REPORT.md – “Financial Accuracy Verification” section.
+
+Add a regression guard: a test that fails if key financial outputs differ unexpectedly from stored reference cases.
+
+🧠 7️⃣ Data Binding Integrity (DB vs Hardcoded)
+
+Inspect all UI components, dashboards, and reports.
+
+Search for patterns like:
+
+const data = [...], mock, fixture, sample, demo, lorem, chartData, FAKE_, etc.
+
+For every dashboard number/metric:
+
+Confirm it is derived from database queries (whatever DB the app uses; treat DB generically here).
+
+If mock/static, replace with proper data access (service → repository → query).
+
+Document:
+
+All issues found.
+
+How each was fixed or what is still pending.
+
+Write all of this in DATA_BINDING_INTEGRITY.md.
+
+📊 8️⃣ Dashboard Enhancement (Standards-Based)
+
+Use and update DASHBOARD_ENHANCEMENT_PROPOSAL.md to move from static widgets to a modern analytics hub:
+
+Document current state: static counts, missing visuals.
+
+Define new visuals:
+
+Line charts (revenue trends).
+
+Bar charts (category comparisons).
+
+Gauges/progress bars (goal tracking).
+
+Trend indicators (MoM/YoY up/down).
+
+Time-series dashboards.
+
+Color-coded KPIs (green = healthy, red = at risk).
+
+Interactive filters (date range, status, branch, etc.).
+
+Propose 4 key reports:
+
+Revenue Trends Report
+
+Fleet Performance Report
+
+Contract Analytics Report
+
+Collection Performance Report
+
+For each visualization, specify:
+
+The metric, filters, and grouping logic.
+
+The underlying data query (conceptually: which tables/fields; no Supabase hosting details here).
+
+UI behaviour and wireframe description.
+
+Ensure all proposed dashboards respect:
+
+DB-sourced data (no mock data) → also reflected in DATA_BINDING_INTEGRITY.md.
+
+Accessibility & responsiveness.
+
+📚 9️⃣ Documentation Consolidation & Normalization (VERY STRICT)
+
+The /docs folder has grown messy. Clean it up:
+
+Create/Update DOCUMENT_INDEX.md:
+
+List all documents under /docs (including any created during this run).
+
+For each doc:
+
+Title
+
+Purpose
+
+Audience (Dev / Admin / Management / End User)
+
+Category (Architecture, Testing, Ops, Marketing, etc.)
+
+Last Updated date.
+
+Remove contradictions & duplication:
+
+Identify overlapping docs (e.g., multiple feature summaries or runbooks).
+
+Mark one as canonical and mark others as supplementary or deprecated with a clear note at the top.
+
+Normalize structure:
+
+For every major doc (*_GUIDE.md, *_AUDIT.md, *_REPORT.md), ensure:
+
+# Title
+
+## Purpose
+
+## Scope
+
+## How to Use This Document
+
+Auto-include new docs:
+
+If any new docs are created, add them to DOCUMENT_INDEX.md.
+
+Cross-link them from parent docs where relevant.
+
+🔁 🔍 1️⃣0️⃣ Testing System Refresh — CONDITIONAL
+
+If you discover that any of these are missing, poorly documented, or scattered:
+
+CSRF tests
+
+Financial tests
+
+Data-binding tests (DB vs hardcoded)
+
+Core business flow tests (e.g., contract lifecycle)
+
+Any tests referenced in docs but not actually present
+
+👉 Then you must refresh the testing process in full:
+
+Redesign and clearly document the strategy.
+
+Update:
+
+TESTING_GUIDE.md – authoritative test plan.
+
+TESTING_RESULTS.md – actual execution record.
+
+CI_LOCAL_CHECKLIST.md – must-run commands and expected outcomes.
+
+QA_COMPREHENSIVE_REPORT.md – coverage summary and confidence level.
+
+🔁 1️⃣1️⃣ Final Documentation Refresh After All Changes
+
+When all audits and fixes are done:
+
+Re-scan the code and docs and adjust any impacted documents so nothing is stale.
+
+In particular, ensure alignment for:
+
+ARCHITECTURE.md
+
+MASTER_FEATURE_LIST.md / MISSING_FEATURES.md
+
+QA_COMPREHENSIVE_REPORT.md
+
+TESTING_GUIDE.md & TESTING_RESULTS.md
+
+ROBUSTNESS_AUDIT.md, SECURITY_AUDIT.md, PERFORMANCE_AUDIT.md
+
+DASHBOARD_ENHANCEMENT_PROPOSAL.md and DATA_BINDING_INTEGRITY.md
+
+DOCUMENT_INDEX.md
+
+Ensure there is no contradiction between docs after your changes.
+
+📦 FINAL OUTPUT FROM THIS PROMPT
+
+At the end, you must produce:
+
+List of all modified/created docs with a one-line reason each.
+
+P0 / P1 / P2 issue summary across:
+
+Functional gaps
+
+Validation & error handling
+
+Security & CSRF
+
+Performance
+
+Financial calculations
+
+Dashboards & data binding
+
+Testing process
+
+Commands to run locally for:
+
+All tests (unit, integration, CSRF, data-binding, financial)
+
+Any scripts needed to prepare data for tests (but not deployment/hosting).
+
+A list of all UNCERTAIN items with:
+
+File + line reference
+
+Why it’s uncertain
+
+Recommended next step.
+
+✅ SUCCESS CRITERIA
+
+All data shown in dashboards/screens comes from the database, not hardcoded.
+
+All financial outputs are mathematically correct, consistent, and tested.
+
+Security (especially CSRF & auth checks) is clearly implemented and documented.
+
+Dashboards are modern, visual, and driven by real data.
+
+Testing is complete and coherent, with a clear local checklist.
+
+/docs is consolidated, normalized, and indexed, with no contradictions.
