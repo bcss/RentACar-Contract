@@ -15,9 +15,11 @@ import authRoutes from "./authRoutes";
 import vehicleRoutes from "./vehicleRoutes";
 import userRoutes from "./userRoutes";
 import paymentRoutes from "./paymentRoutes";
+import contractRoutes from "./contractRoutes";
+import reportRoutes from "./reportRoutes";
 // Additional route modules will be imported as they're created
-// import contractRoutes from "./contractRoutes";
-// import reportRoutes from "./reportRoutes";
+// import branchRoutes from "./branchRoutes";
+// import driverRoutes from "./driverRoutes";
 // etc.
 
 /**
@@ -34,11 +36,11 @@ export function registerModularRoutes(app: Express): void {
   app.use('/api/customers', customerRoutes);
   app.use('/api/vehicles', vehicleRoutes);
   app.use('/api/users', userRoutes);
-  // app.use('/api/contracts', contractRoutes);
+  app.use('/api/contracts', contractRoutes);
   
   // Feature routes
   app.use('/api', paymentRoutes); // Payment routes have mixed base paths
-  // app.use('/api/reports', reportRoutes);
+  app.use('/api/reports', reportRoutes);
   // app.use('/api/branches', branchRoutes);
   // app.use('/api/drivers', driverRoutes);
   // etc.
@@ -47,7 +49,9 @@ export function registerModularRoutes(app: Express): void {
   console.log('   - Customer routes: /api/customers');
   console.log('   - Vehicle routes: /api/vehicles');
   console.log('   - User routes: /api/users');
+  console.log('   - Contract routes: /api/contracts (15 routes)');
   console.log('   - Payment routes: /api/contracts/:id/payments, /api/payments/:id');
+  console.log('   - Report routes: /api/reports (18 routes: 13 data + 5 exports)');
   console.log('   - Auth routes: /api/auth, /api/system');
   console.log('   - More routes being migrated...');
 }
