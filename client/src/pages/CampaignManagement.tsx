@@ -57,7 +57,7 @@ export default function CampaignManagement() {
   const [templateId, setTemplateId] = useState('');
   const [channel, setChannel] = useState('email');
   const [scope, setScope] = useState('branch');
-  const [selectedBranches, setSelectedBranches] = useState<number[]>([]);
+  const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
   const [recipientType, setRecipientType] = useState('all');
   const [scheduledAt, setScheduledAt] = useState('');
 
@@ -181,7 +181,7 @@ export default function CampaignManagement() {
     }
   };
 
-  const toggleBranchSelection = (branchId: number) => {
+  const toggleBranchSelection = (branchId: string) => {
     setSelectedBranches(prev =>
       prev.includes(branchId)
         ? prev.filter(id => id !== branchId)
@@ -334,8 +334,8 @@ export default function CampaignManagement() {
                             <div key={branch.id} className="flex items-center gap-3">
                               <Checkbox
                                 id={`branch-${branch.id}`}
-                                checked={selectedBranches.includes(branch.id)}
-                                onCheckedChange={() => toggleBranchSelection(branch.id)}
+                                checked={selectedBranches.includes(branch.id.toString())}
+                                onCheckedChange={() => toggleBranchSelection(branch.id.toString())}
                                 data-testid={`checkbox-branch-${branch.id}`}
                               />
                               <Label 
