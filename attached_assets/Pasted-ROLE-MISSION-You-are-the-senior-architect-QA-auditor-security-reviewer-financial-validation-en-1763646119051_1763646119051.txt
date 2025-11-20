@@ -1,0 +1,369 @@
+ROLE & MISSION
+
+You are the senior architect, QA auditor, security reviewer, financial validation engineer, dashboard/UX lead, and documentation owner.
+
+Your mission:
+
+Audit the entire codebase (backend, frontend, tests, configs).
+
+Scan all documents under /docs and classify them by role (architecture, features, testing, audits, security, dashboards, etc.).
+
+Update only existing documents that are relevant to the audits you perform.
+
+Do not create any new documents.
+
+🚫 HARD CONSTRAINTS
+
+Do NOT create, rename, delete, or move any files in /docs.
+
+You may only modify existing files.
+
+You must append a ## Changelog section only in the files you actually edit.
+
+📂 HOW TO HANDLE DOCUMENTS (VERY IMPORTANT)
+
+Scan all files under /docs and infer their purpose from:
+
+Filename
+
+Top-level heading (# ...)
+
+Content/sections
+
+If I refer to something like:
+
+ARCHITECTURE.md
+
+MASTER_FEATURE_LIST.md
+
+TESTING_GUIDE.md
+
+SECURITY_AUDIT.md
+
+ENVIRONMENT_VARIABLES_CATALOG (example)
+you must:
+
+First look for that exact file name.
+
+If not found, look for an equivalent document with:
+
+Similar name (e.g., architecture-overview.md, system_architecture.md)
+
+Or clear role from content (e.g., title “System Architecture” or “Architecture Overview”).
+
+If an equivalent exists under another name, use and update that file.
+
+If no equivalent exists, do nothing for that document role – do not create a new one.
+
+In short:
+👉 Always work with whatever is actually there in /docs, even if the name differs.
+👉 Never create new docs.
+
+🔍 AUDIT AREAS (AND WHICH DOCS TO UPDATE)
+
+For each area below:
+
+Identify all relevant docs in /docs by role, not just filename.
+
+Update those docs with your findings.
+
+Only touch files that actually relate to that area.
+
+1️⃣ Architecture & Features
+
+Tasks:
+
+Understand the real system architecture from code.
+
+Compare it against all architecture/flow/feature docs.
+
+Update any doc that clearly serves these purposes (even if name differs):
+
+Architecture overview
+
+Contract / workflow flow
+
+Feature list / feature summary
+
+System brochure / conceptual overview
+
+Examples of likely targets (if they exist under these or similar names):
+
+ARCHITECTURE.md
+
+CONTRACT_FLOW.md
+
+CONTRACT_WORKFLOW_IMPLEMENTATION.md
+
+WORKFLOW_DIAGRAM.md
+
+MASTER_FEATURE_LIST.md
+
+MISSING_FEATURES.md
+
+SYSTEM_BROCHURE.md
+
+SYSTEM_ADMIN_FEATURE_SUMMARY.md
+
+SYSTEM_ADMINISTRATOR_SUITE.md
+
+SYSTEM_ADMIN_SUITE_CUSTOMER_SUMMARY.md
+
+2️⃣ Spec vs Implementation Gap Analysis
+
+Tasks:
+
+Build or confirm a spec vs code view.
+
+Update:
+
+Any “gap analysis”, “verification”, “comparison” or “audit summary” docs you find, including but not limited to:
+
+VERIFIED_GAP_ANALYSIS.md
+
+Any doc whose title/heading suggests “Gap Analysis” / “Compliance vs Spec”.
+
+3️⃣ Validation & Error Handling
+
+Tasks:
+
+Identify all inputs:
+
+API payloads
+
+Forms
+
+Uploads
+
+Webhooks
+
+Check validation and error handling.
+
+Update:
+
+Docs that obviously relate to robustness, validation, and testing, e.g.:
+
+ROBUSTNESS_AUDIT.md
+
+TESTING_GUIDE.md
+
+TESTING_RESULTS.md
+
+Relevant sections in QA_COMPREHENSIVE_REPORT.md
+
+If some other doc clearly serves as a testing guide or validation checklist under another name → use that too.
+
+4️⃣ Security & CSRF
+
+Tasks:
+
+Review auth, permissions, CSRF, sensitive data.
+
+Fix CSRF handling in code if needed (middleware, tokens, headers, verification).
+
+Update:
+
+Security / auth / permission documents:
+
+SECURITY_AUDIT.md
+
+ROLE_PERMISSIONS.md
+
+Any doc clearly labeled as “Security”, “Auth”, “Access Control”.
+
+QA_COMPREHENSIVE_REPORT.md (Security section, if present).
+
+5️⃣ Performance & Scalability
+
+Tasks:
+
+Identify performance bottlenecks (N+1, missing indexes, heavy loops, etc.).
+
+Suggest mitigations and key metrics to watch.
+
+Update:
+
+Any doc clearly related to performance/load, such as:
+
+PERFORMANCE_AUDIT.md
+
+Performance section in QA_COMPREHENSIVE_REPORT.md
+
+Relevant section in PRODUCTION_READINESS_REPORT.md (if it talks about performance).
+
+6️⃣ Financial Calculation Integrity (CRITICAL)
+
+Tasks:
+
+Locate all financial calculations:
+
+Contract values
+
+Revenue & income reports
+
+VAT/taxes
+
+Discounts
+
+Penalties / overdue interest
+
+Outstanding balances
+
+Collection KPIs
+
+Verify formulas rigorously (including rounding, boundaries, percentages).
+
+Check consistency across backend, DB, and UI.
+
+Add/update tests.
+
+Update:
+
+Any doc that deals with testing, QA, or financial behaviour:
+
+QA_COMPREHENSIVE_REPORT.md – add a “Financial Calculation Verification” section if appropriate.
+
+TESTING_GUIDE.md – list financial test cases & expected outputs.
+
+TESTING_RESULTS.md – capture what was run and whether it passed.
+
+If there is another document clearly about financials or billing under another name, update that too.
+
+7️⃣ Data Binding Integrity (DB vs Hardcoded)
+
+Tasks:
+
+Scan UI/dashboards/reports for:
+
+Hardcoded numbers
+
+Static arrays used as chart data
+
+Fake “demo” content.
+
+Ensure all dashboard/screen values come from the database, not constants.
+
+Update:
+
+Any QA/audit/testing doc that speaks about data correctness, such as:
+
+QA_COMPREHENSIVE_REPORT.md
+
+VERIFIED_GAP_ANALYSIS.md
+
+TESTING_GUIDE.md
+
+If a doc clearly talks about dashboards or UI validation under another name, update that too.
+
+8️⃣ Dashboard Modernization
+
+Tasks:
+
+Evaluate current dashboard(s): static vs dynamic, visuals, trends, comparisons.
+
+Plan enhancements:
+
+Line charts (time-series)
+
+Bar charts (categories)
+
+Gauges / progress bars (targets vs actual)
+
+Trend indicators (MoM, YoY)
+
+Filters
+
+Color-coded KPIs
+
+Update:
+
+Any document that clearly describes:
+
+Dashboard / UI / analytics / reports
+
+Marketing/feature brochure for dashboard features
+Examples:
+
+SYSTEM_BROCHURE.md
+
+compelling-features.md
+
+Any “dashboard” or “analytics” section you find.
+
+9️⃣ Testing Framework – Refresh if Gaps Found
+
+If you find missing or weak tests for:
+
+CSRF
+
+Financial calculations
+
+Data-binding (DB vs hardcoded)
+
+Core workflows (e.g., contract lifecycle, critical flows)
+
+Then:
+
+Refresh and clarify the test plan only using existing docs:
+
+TESTING_GUIDE.md
+
+TESTING_RESULTS.md
+
+QA_COMPREHENSIVE_REPORT.md
+
+No new testing docs; just make these accurate and complete.
+
+📚 Final Documentation Behaviour
+
+For each doc you change:
+
+Add or update a ## Changelog section at the bottom with:
+
+Date
+
+What you changed
+
+Why
+
+For docs that are clearly outdated or conflicting:
+
+Fix them directly in place.
+
+If they conflict with another doc, pick a canonical truth and edit both to align – but do not create a “new master” doc.
+
+📦 FINAL OUTPUT FROM PROMPT 1
+
+Return:
+
+List of all documents modified (actual filenames).
+
+Reason for each modification.
+
+Summary of P0 / P1 / P2 issues across:
+
+Functional
+
+Validation
+
+Security (incl. CSRF)
+
+Performance
+
+Financial
+
+Dashboard / data binding
+
+Commands to run the updated tests locally.
+
+Any uncertainties with file + line and suggested next step.
+
+✅ SUCCESS CONDITIONS
+
+No new docs added.
+
+All relevant existing docs kept in sync with actual behaviour.
+
+Financials, security, data binding, and dashboards are audited and clearly documented.
+
+Testing strategy is complete and clearly documented – but only using the docs that already exist.
