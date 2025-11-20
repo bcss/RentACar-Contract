@@ -5706,11 +5706,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contract not found" });
       }
       
-      // For quick inspection, we need at least 3 photos: front, back, and damage (if any)
+      // For quick inspection, we need at least 2 photos: front and back
       if (!photos || !Array.isArray(photos) || photos.length < 2) {
         return res.status(400).json({ 
           message: "At least 2 photos required (front and back). Add damage photos if applicable." 
         });
+      }
+      
+      // P0-1: Validate photos server-side (size, format, headers)
+      const photoValidation = validateInspectionPhotos(photos);
+      if (!photoValidation.valid) {
+        return res.status(400).json({ message: photoValidation.error });
       }
       
       // Ensure required angles are present
