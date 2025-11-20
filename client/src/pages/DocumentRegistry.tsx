@@ -540,7 +540,7 @@ export default function DocumentRegistry() {
                     <FormItem>
                       <FormLabel>Document Number</FormLabel>
                       <FormControl>
-                        <Input {...field} data-testid="input-documentNumber" />
+                        <Input {...field} value={field.value || ''} data-testid="input-documentNumber" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -555,7 +555,7 @@ export default function DocumentRegistry() {
                   <FormItem>
                     <FormLabel>Issuing Authority</FormLabel>
                     <FormControl>
-                      <Input {...field} data-testid="input-issuingAuthority" placeholder="e.g. RTA Dubai" />
+                      <Input {...field} value={field.value || ''} data-testid="input-issuingAuthority" placeholder="e.g. RTA Dubai" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -628,7 +628,7 @@ export default function DocumentRegistry() {
                     <FormItem>
                       <FormLabel>Or Enter File URL (Optional)</FormLabel>
                       <FormControl>
-                        <Input {...field} data-testid="input-fileUrl" placeholder="https://..." disabled={!!uploadedFile} />
+                        <Input {...field} value={field.value || ''} data-testid="input-fileUrl" placeholder="https://..." disabled={!!uploadedFile} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -667,7 +667,7 @@ export default function DocumentRegistry() {
                   <FormItem>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
-                      <Textarea {...field} data-testid="input-notes" rows={3} />
+                      <Textarea {...field} value={field.value || ''} data-testid="input-notes" rows={3} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
