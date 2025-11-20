@@ -529,6 +529,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/customers/search", isAuthenticated, async (req: any, res) => {
     try {
       const query = req.query.q as string || '';
+      
+      // Validate search query length
+      const searchValidation = validateSearchQuery(query);
+      if (!searchValidation.valid) {
+        return res.status(400).json({ message: searchValidation.error });
+      }
+      
       const customers = await storage.searchCustomers(query);
       res.json(customers);
     } catch (error) {
@@ -659,6 +666,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/vehicles/search", isAuthenticated, async (req: any, res) => {
     try {
       const query = req.query.q as string || '';
+      
+      // Validate search query length
+      const searchValidation = validateSearchQuery(query);
+      if (!searchValidation.valid) {
+        return res.status(400).json({ message: searchValidation.error });
+      }
+      
       const vehicles = await storage.searchVehicles(query);
       res.json(vehicles);
     } catch (error) {
@@ -784,6 +798,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/sponsors/search", isAuthenticated, async (req: any, res) => {
     try {
       const query = req.query.q as string || '';
+      
+      // Validate search query length
+      const searchValidation = validateSearchQuery(query);
+      if (!searchValidation.valid) {
+        return res.status(400).json({ message: searchValidation.error });
+      }
+      
       const sponsors = await storage.searchSponsors(query);
       res.json(sponsors);
     } catch (error) {
@@ -889,6 +910,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/companies/search", isAuthenticated, async (req: any, res) => {
     try {
       const query = req.query.q as string || '';
+      
+      // Validate search query length
+      const searchValidation = validateSearchQuery(query);
+      if (!searchValidation.valid) {
+        return res.status(400).json({ message: searchValidation.error });
+      }
+      
       const companies = await storage.searchCompanies(query);
       res.json(companies);
     } catch (error) {
@@ -9365,11 +9393,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (key !== 'isSystemManaged' && key !== 'isCentralized' && key !== 'id' && key !== 'createdBy') {
             // Validate cost fields
             if (key === 'emailCostPerSend' || key === 'smsCostPerSend') {
-              const cost = parseFloat(value as string);
-              if (isNaN(cost) || cost < 0) {
-                return res.status(400).json({ message: `Invalid ${key}` });
+              try {
+                const cost = validateFinancialInput(value, key);
+                if (cost < 0) {
+                  return res.status(400).json({ message: `${key} must be non-negative` });
+                }
+                updateData[key] = cost.toFixed(2);
+              } catch (error: any) {
+                return res.status(400).json({ message: error.message });
               }
-              updateData[key] = cost.toFixed(2);
             } else {
               updateData[key] = value;
             }
