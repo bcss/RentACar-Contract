@@ -1,5 +1,5 @@
 # User Guide
-## RCCMS - Rental Car Contract Management System
+## KarāraOS - Rental Car Contract Management System
 
 **Version 1.0** | **For Daily Users (Manager, Staff, Viewer)**
 
@@ -8,7 +8,8 @@
 ## Table of Contents
 
 1. [Introduction](#introduction)
-2. [Getting Started](#getting-started)
+2. [System Requirements](#system-requirements)
+3. [Getting Started](#getting-started)
 3. [Legal Information & Your Rights](#legal-information--your-rights)
 4. [Dashboard Overview](#dashboard-overview)
 5. [Managing Customers](#managing-customers)
@@ -24,7 +25,35 @@
 ## Introduction
 
 ### Welcome
-Welcome to the RCCMS Rental Car Contract Management System. This guide will help you navigate daily operations, create contracts, manage customers and vehicles, and process payments efficiently.
+Welcome to KarāraOS (formerly RCCMS) - Rental Car Contract Management System. This guide will help you navigate daily operations, create contracts, manage customers and vehicles, and process payments efficiently.
+
+---
+
+## System Requirements
+
+### Desktop-Only Application
+KarāraOS is designed exclusively for desktop computers and larger tablets:
+
+**Supported Devices:**
+- ✅ Desktop computers (Windows, macOS, Linux)
+- ✅ Laptops (13" and larger)
+- ✅ Tablets in landscape mode (iPad Pro, Surface, etc.)
+- **Minimum screen width: 1024px**
+
+**Not Supported:**
+- ❌ Mobile phones (iPhone, Android)
+- ❌ Small tablets in portrait mode
+- ❌ Any device with screen width less than 1024px
+
+**Recommended Setup:**
+- Screen resolution: 1366×768 or higher
+- Modern browser: Chrome, Firefox, Safari, or Edge (latest version)
+- Stable internet connection
+
+**Why Desktop-Only?**
+Contract management requires detailed forms, multi-column tables, and complex workflows that work best on larger screens. This ensures you have the best experience while managing rental operations.
+
+---
 
 ### User Roles
 

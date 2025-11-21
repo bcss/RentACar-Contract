@@ -103,13 +103,13 @@ export default function Login() {
     : 'KarāraOS';
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen flex flex-row" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       {/* Left Panel - Rental Car Illustration */}
-      <div className="w-full lg:w-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center p-6 lg:p-12">
+      <div className="flex-1 max-w-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center p-12">
         <img 
           src={loginImage} 
           alt="Rental Car Management" 
-          className="w-full max-w-lg lg:max-w-2xl object-contain select-none"
+          className="w-full max-w-2xl object-contain select-none"
           draggable={false}
           onContextMenu={(e) => e.preventDefault()}
           onDragStart={(e) => e.preventDefault()}
@@ -119,7 +119,7 @@ export default function Login() {
       </div>
       
       {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
+      <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-6">
           {/* Header */}
           <div className="text-center space-y-3">

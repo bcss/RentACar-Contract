@@ -42,7 +42,7 @@ export function Header() {
         </Tooltip>
         
         {/* Company Name */}
-        <div className="hidden md:block">
+        <div className="block">
           <h1 className="text-base font-semibold text-foreground" data-testid="text-company-name">
             {settings 
               ? i18n.language === 'ar'

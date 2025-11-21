@@ -1,9 +1,14 @@
-# RCCMS - Comprehensive Architectural Analysis
+# KarāraOS - Comprehensive Architectural Analysis
 
 ## 1. APPLICATION OVERVIEW & CORE FEATURES
 
-### **What RCCMS Is**
-RCCMS (Rental Car Contract Management System) is a production-ready, bilingual (English/Arabic) enterprise application for managing the complete rental car lifecycle. It supports RTA (Roads & Transport Authority) compliance fields for UAE operations and implements a streamlined 4-state contract workflow with comprehensive audit trails, role-based access control, and extensive reporting capabilities.
+### **What KarāraOS Is**
+KarāraOS (formerly RCCMS - Rental Car Contract Management System) is a production-ready, bilingual (English/Arabic), **desktop-only** enterprise application for managing the complete rental car lifecycle. It supports RTA (Roads & Transport Authority) compliance fields for UAE operations and implements a streamlined 4-state contract workflow with comprehensive audit trails, role-based access control, and extensive reporting capabilities.
+
+**Desktop-Only Application (as of Nov 21, 2025):**
+- Minimum width: 1024px (tablets in landscape + desktops)
+- Blocks mobile phones and small tablets automatically
+- See `docs/MOBILE_CODE_REMOVAL_AUDIT.md` for details
 
 ---
 
