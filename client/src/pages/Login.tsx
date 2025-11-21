@@ -36,7 +36,7 @@ export default function Login() {
   useEffect(() => {
     const interval = setInterval(() => {
       setRotatingWord((prev) => (prev + 1) % words.length);
-    }, 2500); // Change word every 2.5 seconds
+    }, 1500); // Change word every 1.5 seconds (6s total cycle for 4 words)
     
     return () => clearInterval(interval);
   }, []);

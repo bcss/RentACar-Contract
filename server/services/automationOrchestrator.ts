@@ -7,7 +7,7 @@ import { users } from '../../shared/schema';
 import { and, or, eq } from 'drizzle-orm';
 
 /**
- * Automation Orchestrator for RCCMS
+ * Automation Orchestrator for KarāraOS
  * 
  * Manages cron jobs for automated background tasks:
  * - Nightly risk score calculations (2 AM)
@@ -333,7 +333,7 @@ export function initializeAutomationOrchestrator() {
                   contractNumber: contract.contractNumber.toString(),
                   customerName: customer.nameEn || '',
                   overdueAmount: overdueAmount.toFixed(2),
-                  paymentUrl: `https://app.rccms.ae/contracts/${contract.id}/payment`,
+                  paymentUrl: `https://app.kararaos.ae/contracts/${contract.id}/payment`,
                 },
                 language: 'en',
                 triggerType: 'automated',

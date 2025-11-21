@@ -109,7 +109,7 @@ export default function DesignSamplesShowcase() {
           <div>
             <h1 className="text-3xl font-bold" data-testid="text-page-title">Design System Showcase</h1>
             <p className="text-muted-foreground mt-1" data-testid="text-page-description">
-              Comprehensive visual guide to RCCMS UI components and patterns
+              Comprehensive visual guide to KarāraOS UI components and patterns
             </p>
           </div>
           <Button variant="outline" size="icon" data-testid="button-settings">

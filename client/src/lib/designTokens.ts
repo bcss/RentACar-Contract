@@ -1,5 +1,5 @@
 /**
- * RCCMS Design System Tokens
+ * KarāraOS Design System Tokens
  * Centralized design system for consistent UI theming
  * All components should reference these tokens instead of hardcoded values
  */

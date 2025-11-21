@@ -1,5 +1,5 @@
 /**
- * RCCMS Design System - Reusable Components
+ * KarāraOS Design System - Reusable Components
  * 
  * This module exports standardized, production-ready UI components
  * for consistent design across the application.

@@ -13,7 +13,7 @@ import { companySettings } from '@/shared/schema';
  * PRODUCTION-READY: Fetches support hotline from company settings database
  */
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'rccms-jwt-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'kararaos-jwt-secret-change-in-production';
 const JWT_EXPIRY = '30d'; // 30 days
 const BASE_URL = process.env.REPLIT_DEV_DOMAIN 
   ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
@@ -166,7 +166,7 @@ export async function generateContractQRBuffer(contractData: {
   const paymentUrl = `${BASE_URL}/payments?contract=${contractData.id}`;
 
   const qrPayload = {
-    type: 'RCCMS_CONTRACT',
+    type: 'KARARAOS_CONTRACT',
     contract: contractData.contractNumber,
     verify: verificationUrl,
     payment: paymentUrl,
