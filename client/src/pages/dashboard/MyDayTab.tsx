@@ -69,31 +69,32 @@ export function MyDayTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Welcome Section - Modern MD3 Typography */}
-      <div className="space-y-1">
-        <h2 className="text-3xl font-semibold tracking-tight" data-testid="text-my-day-title">
+      <div className="space-y-0.5">
+        <h2 className="text-xl font-semibold tracking-tight" data-testid="text-my-day-title">
           {t('dashboard.myDay')}
         </h2>
-        <p className="text-sm text-muted-foreground leading-6" data-testid="text-my-day-subtitle">
+        <p className="text-xs text-muted-foreground leading-5" data-testid="text-my-day-subtitle">
           {t('dashboard.myDaySubtitle')}
         </p>
       </div>
 
       {/* Quick Actions - Modern MD3 Assist Chips with Tonal Containers */}
       <Card className="shadow-lg border-transparent ring-1 ring-[hsl(var(--primary)/0.2)]" data-testid="card-quick-actions">
-        <CardHeader className="p-6">
-          <CardTitle className="text-base font-medium uppercase tracking-[0.08em]">{t('dashboard.quickActions')}</CardTitle>
+        <CardHeader className="p-4">
+          <CardTitle className="text-sm font-medium uppercase tracking-[0.08em]">{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
-        <CardContent className="p-6 pt-0">
+        <CardContent className="p-4 pt-0">
           <div className="flex gap-3 flex-wrap">
             {/* Primary Action - Filled Style */}
             <Link href="/contracts/create">
               <Button 
+                size="sm"
                 className="transition-all duration-200 ease-out shadow-md"
                 data-testid="button-create-contract"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
                 {t('contract.createContract')}
               </Button>
             </Link>
@@ -102,13 +103,14 @@ export function MyDayTab() {
             {myOverdueReturns.length > 0 && (
               <Link href="/contracts?status=active&overdue=true">
                 <Button 
+                  size="sm"
                   variant="destructive" 
                   className="transition-all duration-200 ease-out"
                   data-testid="button-view-overdue"
                 >
-                  <AlertCircle className="h-4 w-4 mr-2" />
+                  <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
                   {t('dashboard.overdueReturns')} 
-                  <Badge variant="outline" className="ml-2 bg-background/50">
+                  <Badge variant="outline" className="ml-1.5 bg-background/50 text-xs">
                     {myOverdueReturns.length}
                   </Badge>
                 </Button>
@@ -118,13 +120,14 @@ export function MyDayTab() {
             {myPendingRefunds.length > 0 && (
               <Link href="/contracts?status=completed&needsRefund=true">
                 <Button 
+                  size="sm"
                   variant="secondary" 
                   className="transition-all duration-200 ease-out"
                   data-testid="button-view-refunds"
                 >
-                  <DollarSign className="h-4 w-4 mr-2" />
+                  <DollarSign className="h-3.5 w-3.5 mr-1.5" />
                   {t('dashboard.pendingRefunds')} 
-                  <Badge variant="outline" className="ml-2">
+                  <Badge variant="outline" className="ml-1.5 text-xs">
                     {myPendingRefunds.length}
                   </Badge>
                 </Button>
@@ -134,13 +137,14 @@ export function MyDayTab() {
             {myUnclosedContracts.length > 0 && (
               <Link href="/contracts?status=completed&needsClosure=true">
                 <Button 
+                  size="sm"
                   variant="secondary" 
                   className="transition-all duration-200 ease-out"
                   data-testid="button-view-unclosed"
                 >
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
                   {t('dashboard.unclosedContracts')} 
-                  <Badge variant="outline" className="ml-2">
+                  <Badge variant="outline" className="ml-1.5 text-xs">
                     {myUnclosedContracts.length}
                   </Badge>
                 </Button>
@@ -150,11 +154,12 @@ export function MyDayTab() {
             {/* General Navigation - Outline Style */}
             <Link href="/contracts">
               <Button 
+                size="sm"
                 variant="outline" 
                 className="transition-all duration-200 ease-out"
                 data-testid="button-view-all-contracts"
               >
-                <FileText className="h-4 w-4 mr-2" />
+                <FileText className="h-3.5 w-3.5 mr-1.5" />
                 {t('dashboard.viewAllMyContracts')}
               </Button>
             </Link>
@@ -163,7 +168,7 @@ export function MyDayTab() {
       </Card>
 
       {/* Hero KPI Rail - Compact MD3 Design */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <DashboardMetricCard
           title={t('dashboard.myContracts')}
           value={myContracts.length}

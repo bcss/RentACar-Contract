@@ -48,7 +48,7 @@ export function CompanyTodayTab() {
 
   if (fleetStatusLoading || pendingActionsLoading || driverAvailabilityLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Skeleton className="h-96 w-full" />
         <Skeleton className="h-96 w-full" />
         <Skeleton className="h-48 w-full" />
@@ -57,10 +57,10 @@ export function CompanyTodayTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold tracking-tight" data-testid="text-company-today-title">
+        <h2 className="text-xl font-bold tracking-tight" data-testid="text-company-today-title">
           {t('dashboard.companyToday')}
         </h2>
         <p className="text-sm text-muted-foreground mt-1" data-testid="text-company-today-subtitle">
@@ -118,7 +118,7 @@ export function CompanyTodayTab() {
               </ResponsiveContainer>
               {/* Central Total */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <p className="text-3xl font-bold" data-testid="text-fleet-total">{totalVehicles}</p>
+                <p className="text-2xl font-bold" data-testid="text-fleet-total">{totalVehicles}</p>
                 <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.totalFleet')}</p>
               </div>
             </div>
@@ -127,19 +127,19 @@ export function CompanyTodayTab() {
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 rounded-lg bg-chart-1/10 border border-chart-1/20">
                 <p className="text-xs text-muted-foreground mb-1">{t('vehicle.status.available')}</p>
-                <p className="text-2xl font-bold" data-testid="text-fleet-available">{fleetStatusData?.available || 0}</p>
+                <p className="text-xl font-bold" data-testid="text-fleet-available">{fleetStatusData?.available || 0}</p>
               </div>
               <div className="p-3 rounded-lg bg-chart-2/10 border border-chart-2/20">
                 <p className="text-xs text-muted-foreground mb-1">{t('vehicle.status.rented')}</p>
-                <p className="text-2xl font-bold" data-testid="text-fleet-rented">{fleetStatusData?.rented || 0}</p>
+                <p className="text-xl font-bold" data-testid="text-fleet-rented">{fleetStatusData?.rented || 0}</p>
               </div>
               <div className="p-3 rounded-lg bg-chart-3/10 border border-chart-3/20">
                 <p className="text-xs text-muted-foreground mb-1">{t('vehicle.status.maintenance')}</p>
-                <p className="text-2xl font-bold" data-testid="text-fleet-maintenance">{fleetStatusData?.maintenance || 0}</p>
+                <p className="text-xl font-bold" data-testid="text-fleet-maintenance">{fleetStatusData?.maintenance || 0}</p>
               </div>
               <div className="p-3 rounded-lg bg-chart-4/10 border border-chart-4/20">
                 <p className="text-xs text-muted-foreground mb-1">{t('vehicle.status.damaged')}</p>
-                <p className="text-2xl font-bold" data-testid="text-fleet-damaged">{fleetStatusData?.damaged || 0}</p>
+                <p className="text-xl font-bold" data-testid="text-fleet-damaged">{fleetStatusData?.damaged || 0}</p>
               </div>
             </div>
           </div>
@@ -163,15 +163,15 @@ export function CompanyTodayTab() {
             <div className="grid grid-cols-3 gap-3">
               <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                 <p className="text-xs text-muted-foreground mb-1">Total Drivers</p>
-                <p className="text-2xl font-bold" data-testid="text-total-drivers">{driverAvailabilityData.totalDrivers}</p>
+                <p className="text-xl font-bold" data-testid="text-total-drivers">{driverAvailabilityData.totalDrivers}</p>
               </div>
               <div className="p-3 rounded-lg bg-chart-1/10 border border-chart-1/20">
                 <p className="text-xs text-muted-foreground mb-1">Available</p>
-                <p className="text-2xl font-bold" data-testid="text-available-drivers">{driverAvailabilityData.activeDrivers}</p>
+                <p className="text-xl font-bold" data-testid="text-available-drivers">{driverAvailabilityData.activeDrivers}</p>
               </div>
               <div className="p-3 rounded-lg bg-chart-2/10 border border-chart-2/20">
                 <p className="text-xs text-muted-foreground mb-1">On Assignment</p>
-                <p className="text-2xl font-bold" data-testid="text-on-assignment">{driverAvailabilityData.onAssignment}</p>
+                <p className="text-xl font-bold" data-testid="text-on-assignment">{driverAvailabilityData.onAssignment}</p>
               </div>
             </div>
             <div className="mt-3 p-3 rounded-lg bg-muted/30">
@@ -207,7 +207,7 @@ export function CompanyTodayTab() {
                   </p>
                   <Badge variant="destructive">{t('common.urgent')}</Badge>
                 </div>
-                <p className="text-3xl font-bold text-destructive" data-testid="text-overdue-count">
+                <p className="text-2xl font-bold text-destructive" data-testid="text-overdue-count">
                   {pendingActionsData?.overdueReturns?.length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">{t('dashboard.requiresImmediate Attention')}</p>
@@ -223,7 +223,7 @@ export function CompanyTodayTab() {
                   </p>
                   <Badge>{t('common.pending')}</Badge>
                 </div>
-                <p className="text-3xl font-bold" data-testid="text-refunds-count">
+                <p className="text-2xl font-bold" data-testid="text-refunds-count">
                   {pendingActionsData?.pendingRefunds?.length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">{t('dashboard.depositsToRefund')}</p>
@@ -239,7 +239,7 @@ export function CompanyTodayTab() {
                   </p>
                   <Badge variant="outline">{t('common.action')}</Badge>
                 </div>
-                <p className="text-3xl font-bold" data-testid="text-unclosed-count">
+                <p className="text-2xl font-bold" data-testid="text-unclosed-count">
                   {pendingActionsData?.unclosedContracts || 0}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">{t('dashboard.awaitingClosure')}</p>

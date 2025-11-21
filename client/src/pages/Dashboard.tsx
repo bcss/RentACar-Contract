@@ -84,7 +84,7 @@ export default function Dashboard() {
   const lastLoginText = getLastLoginText();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 space-y-4">
       {/* System Errors Banner */}
       {isAdmin && unacknowledgedErrors.length > 0 && !isErrorBannerDismissed && (
         <Alert variant="destructive" className="relative" data-testid="alert-system-errors">
@@ -117,14 +117,14 @@ export default function Dashboard() {
       {/* Welcome Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">{t('dashboard.title')}</h1>
+          <h1 className="text-2xl font-bold" data-testid="text-dashboard-title">{t('dashboard.title')}</h1>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-lg text-muted-foreground" data-testid="text-greeting">
+            <p className="text-base text-muted-foreground" data-testid="text-greeting">
               {greetingText}, <span className="font-semibold text-foreground">{firstName}</span>
             </p>
           </div>
-          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-            <Badge variant="outline" className="font-normal" data-testid="badge-user-role">
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+            <Badge variant="outline" className="font-normal text-xs" data-testid="badge-user-role">
               {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
             </Badge>
             <span>•</span>
@@ -132,7 +132,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild data-testid="button-new-contract">
+          <Button asChild size="sm" data-testid="button-new-contract">
             <Link href="/contracts/new">
               <Icon name="add" className="" />
               <span>{t('contracts.newContract')}</span>
@@ -162,17 +162,17 @@ export default function Dashboard() {
           )}
         </TabsList>
 
-        <TabsContent value="my-day" className="mt-6" data-testid="content-my-day">
+        <TabsContent value="my-day" className="mt-4" data-testid="content-my-day">
           <MyDayTab />
         </TabsContent>
 
         {canViewManagement && (
           <>
-            <TabsContent value="company-today" className="mt-6" data-testid="content-company-today">
+            <TabsContent value="company-today" className="mt-4" data-testid="content-company-today">
               <CompanyTodayTab />
             </TabsContent>
 
-            <TabsContent value="executive-overview" className="mt-6" data-testid="content-executive-overview">
+            <TabsContent value="executive-overview" className="mt-4" data-testid="content-executive-overview">
               <ExecutiveOverviewTab />
             </TabsContent>
 

@@ -37,7 +37,7 @@ export function ExecutiveOverviewTab() {
 
   if (revenueTrendLoading || topPerformersLoading || uaeGeographicLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Skeleton className="h-96 w-full" />
         <Skeleton className="h-96 w-full" />
         <Skeleton className="h-96 w-full" />
@@ -63,10 +63,10 @@ export function ExecutiveOverviewTab() {
   })) || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold tracking-tight" data-testid="text-executive-overview-title">
+        <h2 className="text-xl font-bold tracking-tight" data-testid="text-executive-overview-title">
           {t('dashboard.executiveOverview')}
         </h2>
         <p className="text-sm text-muted-foreground mt-1" data-testid="text-executive-overview-subtitle">
@@ -92,20 +92,20 @@ export function ExecutiveOverviewTab() {
           <div className="grid gap-4 md:grid-cols-3 mb-6">
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
               <p className="text-xs text-muted-foreground mb-1">{t('dashboard.totalRevenue')}</p>
-              <p className="text-2xl font-bold" data-testid="text-total-revenue">
+              <p className="text-xl font-bold" data-testid="text-total-revenue">
                 {currency} {totalRevenue.toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
             <div className="p-4 rounded-lg border">
               <p className="text-xs text-muted-foreground mb-1">{t('dashboard.thisMonth')}</p>
-              <p className="text-2xl font-bold" data-testid="text-current-month-revenue">
+              <p className="text-xl font-bold" data-testid="text-current-month-revenue">
                 {currency} {(latestMonth?.totalRevenue || 0).toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
             <div className="p-4 rounded-lg border">
               <p className="text-xs text-muted-foreground mb-1">{t('dashboard.growth')}</p>
               <div className="flex items-center gap-2">
-                <p className="text-2xl font-bold" data-testid="text-revenue-growth">
+                <p className="text-xl font-bold" data-testid="text-revenue-growth">
                   {revenueGrowth >= 0 ? '+' : ''}{revenueGrowth.toFixed(1)}%
                 </p>
                 <Badge variant={revenueGrowth >= 0 ? 'default' : 'destructive'}>
