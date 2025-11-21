@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/AppSidebar";
+import { DesktopOnly } from "@/components/DesktopOnly";
 import Login from "@/pages/Login";
 import "@/lib/i18n";
 import { useEffect, lazy, Suspense } from "react";
@@ -471,7 +472,9 @@ function App() {
       <ThemeProvider>
         <LanguageProvider>
           <TooltipProvider>
-            <AppContent />
+            <DesktopOnly>
+              <AppContent />
+            </DesktopOnly>
             <Toaster />
           </TooltipProvider>
         </LanguageProvider>

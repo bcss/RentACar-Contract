@@ -114,7 +114,7 @@ export default function Login() {
           onContextMenu={(e) => e.preventDefault()}
           onDragStart={(e) => e.preventDefault()}
           data-testid="img-login-illustration"
-          style={{ WebkitUserDrag: 'none', userSelect: 'none' }}
+          style={{ userSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}
         />
       </div>
       

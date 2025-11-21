@@ -5,14 +5,16 @@ KarāraOS is a production-ready, bilingual (English/Arabic) rental car managemen
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
+Desktop-only application: 1024px minimum width (tablets in landscape + desktops), blocks phones.
 
 ## System Architecture
 
 ### Frontend
 - **Technology Stack:** React with TypeScript, Wouter, TanStack Query, React Hook Form with Zod, Radix UI/shadcn/ui, Tailwind CSS, Vite.
 - **Design System:** Material Design 3 (cyan-blue primary), dual theme (light/dark), i18next for English/Arabic with RTL/LTR, custom fonts. Features a comprehensive Design System Showcase with 12 production-ready dashboard variations.
-- **UI/UX Decisions:** Hierarchical sidebar reorganized into 6 logical categories, bilingual tooltips, full RTL/LTR layout with automatic direction switching, data visualization (recharts), tabbed views, enhanced filtering, responsive design, context-based theme/language, custom authentication hooks, shared Zod schemas, print functionality.
+- **UI/UX Decisions:** Desktop-only application with 1024px minimum width (responsive wrapper blocks phones), bilingual tooltips, full RTL/LTR layout with automatic direction switching, data visualization (recharts), tabbed views, enhanced filtering, context-based theme/language, custom authentication hooks, shared Zod schemas, print functionality. Login screen features animated subtitle rotation (6s cycle), protected rental car illustration, and company branding.
 - **Key Features:** Dashboard, tabbed dialog forms, advanced analytics and reporting with PDF/Excel export, full CRUD pages for core entities, six production-ready predictive intelligence reports.
+- **Recent Changes (Nov 21, 2025):** System-wide rebranding to KarāraOS (replaced all RCCMS references), fixed QR code service to use "KARARAOS_CONTRACT" type, optimized login illustration from 1.7MB to 100KB WebP format, protected illustration from copying/dragging, removed mobile support (desktop/tablet-only with 1024px minimum), added DesktopOnly wrapper component showing professional desktop-required message with illustration.
 
 ### Backend
 - **Technology Stack:** Node.js with TypeScript, Express.js, Drizzle ORM, internal username/password authentication with Passport.js, express-session with PostgreSQL store.
