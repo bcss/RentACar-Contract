@@ -17,9 +17,14 @@ import userRoutes from "./userRoutes";
 import paymentRoutes from "./paymentRoutes";
 import contractRoutes from "./contractRoutes";
 import reportRoutes from "./reportRoutes";
+import sponsorRoutes from "./sponsorRoutes";
+import companyRoutes from "./companyRoutes";
+import branchRoutes from "./branchRoutes";
+import holidayRoutes from "./holidayRoutes";
+import driverRoutes from "./driverRoutes";
 // Additional route modules will be imported as they're created
-// import branchRoutes from "./branchRoutes";
-// import driverRoutes from "./driverRoutes";
+// import tollRoutes from "./tollRoutes";
+// import insuranceRoutes from "./insuranceRoutes";
 // etc.
 
 /**
@@ -37,21 +42,36 @@ export function registerModularRoutes(app: Express): void {
   app.use('/api/vehicles', vehicleRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/contracts', contractRoutes);
+  app.use('/api/sponsors', sponsorRoutes);
+  app.use('/api/companies', companyRoutes);
+  app.use('/api/branches', branchRoutes);
+  app.use('/api/public-holidays', holidayRoutes);
+  app.use('/api/drivers', driverRoutes);
+  app.use('/api/driver-companies', driverRoutes); // Driver companies sub-router
+  app.use('/api/driver-assignments', driverRoutes); // Driver assignments sub-router
+  app.use('/api/driver-schedules', driverRoutes); // Driver schedules sub-router
+  app.use('/api/driver-attendance', driverRoutes); // Driver attendance sub-router
+  app.use('/api/driver-rate-cards', driverRoutes); // Driver rate cards sub-router
+  app.use('/api/driver-schedule-blocks', driverRoutes); // Driver schedule blocks sub-router
+  app.use('/api/branch-transfers', branchRoutes); // Branch transfers sub-router
   
   // Feature routes
   app.use('/api', paymentRoutes); // Payment routes have mixed base paths
   app.use('/api/reports', reportRoutes);
-  // app.use('/api/branches', branchRoutes);
-  // app.use('/api/drivers', driverRoutes);
-  // etc.
+  // Additional modules being created...
 
-  console.log('✅ Modular routes registered');
-  console.log('   - Customer routes: /api/customers');
-  console.log('   - Vehicle routes: /api/vehicles');
-  console.log('   - User routes: /api/users');
+  console.log('✅ Modular routes registered (Phase 2)');
+  console.log('   - Customer routes: /api/customers (6 routes)');
+  console.log('   - Vehicle routes: /api/vehicles (8 routes)');
+  console.log('   - User routes: /api/users (9 routes)');
   console.log('   - Contract routes: /api/contracts (15 routes)');
-  console.log('   - Payment routes: /api/contracts/:id/payments, /api/payments/:id');
-  console.log('   - Report routes: /api/reports (18 routes: 13 data + 5 exports)');
-  console.log('   - Auth routes: /api/auth, /api/system');
-  console.log('   - More routes being migrated...');
+  console.log('   - Payment routes: /api/payments (6 routes)');
+  console.log('   - Report routes: /api/reports (18 routes)');
+  console.log('   - Auth routes: /api/auth (4 routes)');
+  console.log('   - Sponsor routes: /api/sponsors (7 routes)');
+  console.log('   - Company routes: /api/companies (7 routes)');
+  console.log('   - Branch routes: /api/branches + /api/branch-transfers (12 routes)');
+  console.log('   - Holiday routes: /api/public-holidays (5 routes)');
+  console.log('   - Driver routes: /api/drivers + related endpoints (38 routes)');
+  console.log('   Total: ~135 routes modularized | ~200 routes remaining');
 }

@@ -12,6 +12,7 @@ import { isAuthenticated, requireAdmin } from "../auth/localAuth";
 import { insertBranchSchema, insertBranchTransferSchema, type User } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import { notificationService } from "../services/notificationService";
+import { createAuditLog } from "../utils/routeHelpers";
 import {
   getCachedBranches,
   setCachedBranches,
@@ -19,35 +20,6 @@ import {
 } from "../utils/cache";
 
 const router = Router();
-
-/**
- * Helper: Create audit log
- */
-async function createAuditLog(
-  userId: string,
-  action: string,
-  contractId: string | undefined,
-  req: Request,
-  details?: string
-) {
-  try {
-    const ipAddress = req.ip;
-    const userAgent = req.get('user-agent');
-    const sessionId = req.session?.id;
-    
-    await storage.createAuditLog({
-      userId,
-      action,
-      contractId,
-      details,
-      ipAddress,
-      userAgent,
-      sessionId,
-    } as any);
-  } catch (error) {
-    console.error('Failed to create audit log:', error);
-  }
-}
 
 // ==================== BRANCH MANAGEMENT ====================
 

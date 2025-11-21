@@ -8,6 +8,7 @@ import { storage } from "../storage";
 import { isAuthenticated, requireManagerOrAdmin, requireAdmin } from "../auth/localAuth";
 import { insertPublicHolidaySchema, type User } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+import { createAuditLog } from "../utils/routeHelpers";
 import {
   getCachedPublicHolidays,
   setCachedPublicHolidays,
@@ -15,35 +16,6 @@ import {
 } from "../utils/cache";
 
 const router = Router();
-
-/**
- * Helper: Create audit log
- */
-async function createAuditLog(
-  userId: string,
-  action: string,
-  contractId: string | undefined,
-  req: Request,
-  details?: string
-) {
-  try {
-    const ipAddress = req.ip;
-    const userAgent = req.get('user-agent');
-    const sessionId = req.session?.id;
-    
-    await storage.createAuditLog({
-      userId,
-      action,
-      contractId,
-      details,
-      ipAddress,
-      userAgent,
-      sessionId,
-    } as any);
-  } catch (error) {
-    console.error('Failed to create audit log:', error);
-  }
-}
 
 // GET /api/public-holidays - List all public holidays
 router.get("/", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {

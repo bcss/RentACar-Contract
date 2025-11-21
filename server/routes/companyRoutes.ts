@@ -9,53 +9,9 @@ import { isAuthenticated, requireEditor, requireAdmin } from "../auth/localAuth"
 import { insertCompanySchema, type Company } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { createAuditLog, validateSearchQuery } from "../utils/routeHelpers";
 
 const router = Router();
-
-/**
- * Helper: Validate search query
- */
-function validateSearchQuery(query: string): { valid: boolean; error?: string } {
-  if (!query || query.trim().length === 0) {
-    return { valid: false, error: "Search query cannot be empty" };
-  }
-  if (query.length < 2) {
-    return { valid: false, error: "Search query must be at least 2 characters" };
-  }
-  if (query.length > 100) {
-    return { valid: false, error: "Search query must not exceed 100 characters" };
-  }
-  return { valid: true };
-}
-
-/**
- * Helper: Create audit log
- */
-async function createAuditLog(
-  userId: string,
-  action: string,
-  contractId: string | undefined,
-  req: Request,
-  details?: string
-) {
-  try {
-    const ipAddress = req.ip;
-    const userAgent = req.get('user-agent');
-    const sessionId = req.session?.id;
-    
-    await storage.createAuditLog({
-      userId,
-      action,
-      contractId,
-      details,
-      ipAddress,
-      userAgent,
-      sessionId,
-    } as any);
-  } catch (error) {
-    console.error('Failed to create audit log:', error);
-  }
-}
 
 // GET /api/companies - List all companies
 router.get("/", isAuthenticated, async (req: any, res: Response) => {
