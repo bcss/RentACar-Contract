@@ -85,16 +85,14 @@ export default function Login() {
     : 'RCCMS';
 
   return (
-    <div className="min-h-screen flex" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen flex flex-col lg:flex-row" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       {/* Left Panel - Rent-a-Car Illustration */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-background relative overflow-hidden">
-        <div className="relative z-10 flex flex-col items-center justify-center w-full p-12">
-          <img 
-            src={rentACarImage} 
-            alt="Rent-a-Car Management" 
-            className="w-full max-w-2xl object-contain"
-          />
-        </div>
+      <div className="w-full lg:w-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center p-6 lg:p-12">
+        <img 
+          src={rentACarImage} 
+          alt="Rent-a-Car Management" 
+          className="w-full max-w-md lg:max-w-2xl object-contain"
+        />
       </div>
       
       {/* Right Panel - Login Form */}
