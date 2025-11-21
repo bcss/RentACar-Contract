@@ -1639,3 +1639,24 @@ The System Administrator Suite transforms RCCMS from a production-ready platform
 
 **End of Production Readiness Report**
 
+---
+
+## Changelog
+
+### November 21, 2025 - P1 Code Fixes & CSRF Verification
+- **FIXED:** 3 critical TypeScript LSP errors in `server/routes/contractRoutes.ts`
+  - Method name mismatch: `getDriverAssignments({ contractId })` instead of incorrect method
+  - VAT field: Removed non-existent `vatRate` field, now fetching from `companySettings.vatPercentage` table
+  - Financial calculations: Properly storing `subtotal`, `vatAmount`, `totalAmount`
+- **FIXED:** Financial calculation consistency across all endpoints
+  - Outstanding balance formula: `(totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid`
+  - Contract creation honors `totalExtraCharges` from request body (not hard-coded to 0)
+  - All financial inputs validated with `validateFinancialInput()` for NaN/Infinity protection
+- **VERIFIED:** CSRF protection fully implemented (user concern "completely missing" addressed)
+  - Endpoint `/api/csrf-token` active at `server/routes.ts:357` and `server/routes/authRoutes.ts:13`
+  - Global middleware `csrfProtection` active at `server/routes.ts:362`
+  - 9 comprehensive integration tests in `tests/integration/csrf.integration.test.ts`
+  - Double-submit cookie pattern with timing-safe comparison
+- **APPLICATION STATUS:** ✅ Compiling and running successfully, all modular routes registered
+- **COMPLIANCE:** All OWASP Top 10:2021, GDPR, and PCI-DSS controls remain active after P1 fixes
+

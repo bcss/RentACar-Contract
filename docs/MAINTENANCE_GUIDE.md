@@ -48,7 +48,54 @@ This guide should be read in conjunction with:
 
 For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 
-### Recent Bug Fixes & Maintenance Notes (October 27, 2025)
+### Recent Bug Fixes & Maintenance Notes
+
+#### November 21, 2025 - P1 Critical Fixes & CSRF Verification
+
+**TypeScript LSP Errors Fixed (server/routes/contractRoutes.ts):**
+
+Three critical type errors discovered and resolved in contract creation endpoint:
+
+**Fix #1: Driver Assignments Method Name**
+- **Issue**: Calling non-existent `getDriverAssignmentsByContract()` method
+- **Fix**: Corrected to `getDriverAssignments({ contractId: contract.id })`
+- **Impact**: Driver costs now calculated correctly in contract details endpoint
+- **Location**: Line 182
+
+**Fix #2: VAT Field Schema Mismatch**
+- **Issue**: Code tried to store `vatRate` field which doesn't exist in contracts schema
+- **Fix**: Removed `vatRate` storage, VAT now fetched dynamically from `companySettings.vatPercentage` table
+- **Impact**: VAT calculations now centralized and admin-configurable
+- **Location**: Lines 306-316
+
+**Fix #3: Financial Calculation Consistency**
+- **Issue**: Inconsistent outstanding balance formulas across POST/GET/report endpoints
+- **Fix**: Standardized formula: `(totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid`
+- **Impact**: Financial reports now show accurate outstanding balances across all views
+- **Additional Fix**: Contract creation now honors `totalExtraCharges` from request body (was hard-coded to 0)
+- **Locations**: Lines 316, 319, 324-325, 333
+
+**CSRF Protection Verification:**
+- **User Concern**: Claimed "CSRF is completely missing" in system
+- **Verification**: Confirmed CSRF fully implemented with:
+  - Endpoint `/api/csrf-token` active at multiple routes
+  - Global middleware `csrfProtection` enforcing double-submit cookie pattern
+  - 9 comprehensive integration tests in `tests/integration/csrf.integration.test.ts`
+  - Timing-safe comparison preventing side-channel attacks
+- **Status**: User concern invalid - CSRF protection fully operational
+
+**Prevention Strategies:**
+1. Run `npm run typecheck` before all commits to catch LSP errors
+2. Cross-reference all schema field access with `shared/schema.ts`
+3. Standardize financial formulas in centralized utility (future enhancement)
+4. Execute integration test suites after any contract/financial endpoint changes
+
+**No Database Migrations Required:**
+All fixes were code-only changes. Full backward compatibility maintained.
+
+---
+
+#### October 27, 2025 - Schema Mismatch Bugs
 
 **Schema Mismatch Bugs Resolved:**
 
