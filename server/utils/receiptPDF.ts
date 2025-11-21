@@ -268,10 +268,10 @@ export function generateReceiptPDF(data: ReceiptData): jsPDF {
  *     email: 'ahmed@example.com',
  *   },
  *   company: {
- *     nameEn: 'MARMAR Rent a Car',
+ *     nameEn: 'KarāraOS Rent a Car',
  *     nameAr: 'مرمر لتأجير السيارات',
  *     phone: '+971 4 123 4567',
- *     email: 'info@marmar.ae',
+ *     email: 'info@kararaos.ae',
  *     taxNumber: '123456789012345',
  *   },
  *   payment: {

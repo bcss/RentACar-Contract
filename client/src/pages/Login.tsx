@@ -13,7 +13,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState, useEffect } from 'react';
-import kararaosLogo from '@assets/kararaos_logo_1763759128002.png';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -104,13 +103,15 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Left Panel - KarāraOS Logo */}
+      {/* Left Panel - Company Logo */}
       <div className="w-full lg:w-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center p-6 lg:p-12">
-        <img 
-          src={kararaosLogo} 
-          alt="KarāraOS" 
-          className="w-full max-w-md lg:max-w-lg object-contain"
-        />
+        {branding?.logoUrl && (
+          <img 
+            src={branding.logoUrl} 
+            alt={companyName} 
+            className="w-full max-w-md lg:max-w-lg object-contain"
+          />
+        )}
       </div>
       
       {/* Right Panel - Login Form */}
