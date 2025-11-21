@@ -20,7 +20,7 @@ router.get("/", isAuthenticated, async (req: Request, res: Response, next: NextF
       category: req.query.category as string | undefined,
       isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
     };
-    const accessories = await storage.getAccessories(filters);
+    const accessories = await storage.getVehicleAccessories(filters);
     res.json(accessories);
   } catch (error) {
     next(error);
@@ -45,7 +45,7 @@ router.get("/contract/:contractId", isAuthenticated, async (req: Request, res: R
 // GET /api/accessories/:id - Get single accessory (WILDCARD LAST FOR GET)
 router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const accessory = await storage.getAccessoryById(req.params.id);
+    const accessory = await storage.getVehicleAccessoryById(req.params.id);
     if (!accessory) {
       return res.status(404).json({ message: "Accessory not found" });
     }
@@ -59,7 +59,7 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: Ne
 router.post("/", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
-    const accessory = await storage.createAccessory({ ...req.body, createdBy: user.id });
+    const accessory = await storage.createVehicleAccessory({ ...req.body, createdBy: user.id });
     await createAuditLog(user.id, 'accessory_created', undefined, req, `Created accessory: ${accessory.itemName}`);
     res.status(201).json(accessory);
   } catch (error) {
@@ -99,7 +99,7 @@ router.patch("/contract-accessory/:id", isAuthenticated, requireEditor, async (r
 router.patch("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
-    const accessory = await storage.updateAccessory(req.params.id, req.body);
+    const accessory = await storage.updateVehicleAccessory(req.params.id, req.body);
     await createAuditLog(user.id, 'accessory_updated', undefined, req, `Updated accessory: ${accessory.itemName}`);
     res.json(accessory);
   } catch (error) {
@@ -126,7 +126,7 @@ router.delete("/contract-accessory/:id", isAuthenticated, requireEditor, async (
 router.delete("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
-    await storage.deleteAccessory(req.params.id);
+    await storage.deleteVehicleAccessory(req.params.id);
     await createAuditLog(user.id, 'accessory_deleted', undefined, req, `Deleted accessory`);
     res.status(204).send();
   } catch (error) {

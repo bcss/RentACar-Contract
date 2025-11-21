@@ -20,7 +20,7 @@ router.get("/", isAuthenticated, async (req: Request, res: Response, next: NextF
       documentType: req.query.documentType as string | undefined,
       status: req.query.status as string | undefined,
     };
-    const documents = await storage.getDocumentRegistry(filters);
+    const documents = await storage.getDocuments(filters);
     res.json(documents);
   } catch (error) {
     next(error);
@@ -51,7 +51,7 @@ router.get("/expired/list", isAuthenticated, async (req: Request, res: Response,
 // GET /api/document-registry/:id - Get document by ID (WILDCARD LAST)
 router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const document = await storage.getDocumentRegistryById(req.params.id);
+    const document = await storage.getDocumentById(req.params.id);
     if (!document) {
       return res.status(404).json({ message: "Document not found" });
     }
@@ -65,7 +65,7 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: Ne
 router.post("/", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
-    const document = await storage.createDocumentRegistry({ ...req.body, createdBy: user.id });
+    const document = await storage.createDocument({ ...req.body, createdBy: user.id });
     await createAuditLog(user.id, 'document_created', undefined, req, `Created document: ${document.documentType}`);
     res.status(201).json(document);
   } catch (error) {
@@ -77,7 +77,7 @@ router.post("/", isAuthenticated, requireEditor, async (req: Request, res: Respo
 router.patch("/:id", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
-    const document = await storage.updateDocumentRegistry(req.params.id, req.body);
+    const document = await storage.updateDocument(req.params.id, req.body);
     await createAuditLog(user.id, 'document_updated', undefined, req, `Updated document: ${document.documentType}`);
     res.json(document);
   } catch (error) {
@@ -89,7 +89,7 @@ router.patch("/:id", isAuthenticated, requireEditor, async (req: Request, res: R
 router.delete("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
-    await storage.deleteDocumentRegistry(req.params.id);
+    await storage.deleteDocument(req.params.id);
     await createAuditLog(user.id, 'document_deleted', undefined, req, `Deleted document`);
     res.status(204).send();
   } catch (error) {

@@ -5,7 +5,7 @@
 
 import { Router, type Request, type Response, type NextFunction } from "express";
 import { storage } from "../storage";
-import { isAuthenticated, requireAdmin, requireReportsAccess } from "../auth/localAuth";
+import { requireAdmin } from "../auth/localAuth";
 import type { User } from "@shared/schema";
 import { createAuditLog } from "../utils/routeHelpers";
 
@@ -17,9 +17,9 @@ router.post("/import/customers", requireAdmin, async (req: Request, res: Respons
   try {
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
-    // Import functionality requires storage.importCustomers() implementation
-    await createAuditLog(user.id, 'customers_import_attempted', undefined, req, `Import customers request received`);
-    res.status(501).json({ message: "Import functionality requires backend implementation" });
+    const results = await storage.importCustomers(records);
+    await createAuditLog(user.id, 'customers_imported', undefined, req, `Imported ${results.length} customers`);
+    res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
   }
@@ -29,8 +29,9 @@ router.post("/import/vehicles", requireAdmin, async (req: Request, res: Response
   try {
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
-    await createAuditLog(user.id, 'vehicles_import_attempted', undefined, req, `Import vehicles request received`);
-    res.status(501).json({ message: "Import functionality requires backend implementation" });
+    const results = await storage.importVehicles(records);
+    await createAuditLog(user.id, 'vehicles_imported', undefined, req, `Imported ${results.length} vehicles`);
+    res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
   }
@@ -40,8 +41,9 @@ router.post("/import/sponsors", requireAdmin, async (req: Request, res: Response
   try {
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
-    await createAuditLog(user.id, 'sponsors_import_attempted', undefined, req, `Import sponsors request received`);
-    res.status(501).json({ message: "Import functionality requires backend implementation" });
+    const results = await storage.importSponsors(records);
+    await createAuditLog(user.id, 'sponsors_imported', undefined, req, `Imported ${results.length} sponsors`);
+    res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
   }
@@ -51,8 +53,9 @@ router.post("/import/companies", requireAdmin, async (req: Request, res: Respons
   try {
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
-    await createAuditLog(user.id, 'companies_import_attempted', undefined, req, `Import companies request received`);
-    res.status(501).json({ message: "Import functionality requires backend implementation" });
+    const results = await storage.importCompanies(records);
+    await createAuditLog(user.id, 'companies_imported', undefined, req, `Imported ${results.length} companies`);
+    res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
   }
@@ -62,8 +65,9 @@ router.post("/import/contracts", requireAdmin, async (req: Request, res: Respons
   try {
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
-    await createAuditLog(user.id, 'contracts_import_attempted', undefined, req, `Import contracts request received`);
-    res.status(501).json({ message: "Import functionality requires backend implementation" });
+    const results = await storage.importContracts(records);
+    await createAuditLog(user.id, 'contracts_imported', undefined, req, `Imported ${results.length} contracts`);
+    res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
   }

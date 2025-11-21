@@ -465,8 +465,10 @@ export interface IStorage {
   getDocumentById(id: string): Promise<any | undefined>;
   createDocument(document: any): Promise<any>;
   updateDocument(id: string, document: any): Promise<any>;
-  verifyDocument(id: string, verifiedBy: string): Promise<any>;
   deleteDocument(id: string): Promise<void>;
+  getExpiringDocuments(daysAhead?: number): Promise<any[]>;
+  getExpiredDocuments(): Promise<any[]>;
+  verifyDocument(id: string, verifiedBy: string): Promise<any>;
   seedDocumentRegistry(): Promise<{ seeded: number; skipped: number }>;
   
   // Notification Templates operations
@@ -558,6 +560,14 @@ export interface IStorage {
   toggleChannelPreference(id: string, channel: 'email' | 'sms', enabled: boolean, userId: string): Promise<any>;
   calculateNotificationCost(notificationType: string, recipientCount: number): Promise<{ emailCost: string; smsCost: string; totalCost: string }>;
   seedChannelPreferences(): Promise<{ seeded: number; skipped: number }>;
+  
+  // ==================== BULK IMPORT OPERATIONS ====================
+  
+  importCustomers(records: any[]): Promise<any[]>;
+  importVehicles(records: any[]): Promise<any[]>;
+  importSponsors(records: any[]): Promise<any[]>;
+  importCompanies(records: any[]): Promise<any[]>;
+  importContracts(records: any[]): Promise<any[]>;
   
   // ==================== WAVE 2: FLEET ECONOMICS ====================
   
@@ -4857,6 +4867,33 @@ export class DatabaseStorage implements IStorage {
     await db.delete(documentRegistry).where(eq(documentRegistry.id, id));
   }
 
+  async getExpiringDocuments(daysAhead: number = 30): Promise<DocumentRegistryEntry[]> {
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(today.getDate() + daysAhead);
+    
+    return await db
+      .select()
+      .from(documentRegistry)
+      .where(
+        and(
+          gte(documentRegistry.expiryDate, today),
+          lte(documentRegistry.expiryDate, futureDate)
+        )
+      )
+      .orderBy(asc(documentRegistry.expiryDate));
+  }
+
+  async getExpiredDocuments(): Promise<DocumentRegistryEntry[]> {
+    const today = new Date();
+    
+    return await db
+      .select()
+      .from(documentRegistry)
+      .where(lt(documentRegistry.expiryDate, today))
+      .orderBy(desc(documentRegistry.expiryDate));
+  }
+
   /**
    * Seed document registry from all existing entities
    * Auto-populates documents from customers, drivers, vehicles, contracts, sponsors
@@ -6541,6 +6578,74 @@ export class DatabaseStorage implements IStorage {
   async createCustomerRiskScore(scoreData: InsertCustomerRiskScore): Promise<CustomerRiskScore> {
     const [score] = await db.insert(customerRiskScores).values(scoreData).returning();
     return score;
+  }
+
+
+  // ==================== BULK IMPORT OPERATIONS ====================
+
+  async importCustomers(records: InsertCustomer[]): Promise<Customer[]> {
+    const imported: Customer[] = [];
+    for (const record of records) {
+      try {
+        const customer = await this.createCustomer(record);
+        imported.push(customer);
+      } catch (error) {
+        console.error(`Failed to import customer:`, error);
+      }
+    }
+    return imported;
+  }
+
+  async importVehicles(records: InsertVehicle[]): Promise<Vehicle[]> {
+    const imported: Vehicle[] = [];
+    for (const record of records) {
+      try {
+        const vehicle = await this.createVehicle(record);
+        imported.push(vehicle);
+      } catch (error) {
+        console.error(`Failed to import vehicle:`, error);
+      }
+    }
+    return imported;
+  }
+
+  async importSponsors(records: InsertSponsor[]): Promise<Sponsor[]> {
+    const imported: Sponsor[] = [];
+    for (const record of records) {
+      try {
+        const sponsor = await this.createSponsor(record);
+        imported.push(sponsor);
+      } catch (error) {
+        console.error(`Failed to import sponsor:`, error);
+      }
+    }
+    return imported;
+  }
+
+  async importCompanies(records: InsertCompany[]): Promise<Company[]> {
+    const imported: Company[] = [];
+    for (const record of records) {
+      try {
+        const company = await this.createCompany(record);
+        imported.push(company);
+      } catch (error) {
+        console.error(`Failed to import company:`, error);
+      }
+    }
+    return imported;
+  }
+
+  async importContracts(records: InsertContract[]): Promise<Contract[]> {
+    const imported: Contract[] = [];
+    for (const record of records) {
+      try {
+        const contract = await this.createContract(record);
+        imported.push(contract);
+      } catch (error) {
+        console.error(`Failed to import contract:`, error);
+      }
+    }
+    return imported;
   }
 }
 

@@ -89,11 +89,10 @@ export function registerModularRoutes(app: Express): void {
   app.use('/api/insurance-claims', insuranceRoutes);
   app.use('/api/vehicle-inspections', inspectionRoutes);
   
-  // Accessories & Documents (TEMPORARILY DISABLED - missing storage methods)
-  // TODO: Implement 5 vehicle accessory storage methods and 7 document registry methods
-  // app.use('/api/vehicle-accessories', accessoryRoutes);
-  // app.use('/api/contract-accessories', accessoryRoutes);
-  // app.use('/api/document-registry', documentRoutes);
+  // Accessories & Documents
+  app.use('/api/vehicle-accessories', accessoryRoutes); // Vehicle accessory master data
+  app.use('/api/contract-accessories', accessoryRoutes); // Contract accessory assignments  
+  app.use('/api/document-registry', documentRoutes); // Document tracking and expiry
   
   // Notifications & Campaigns
   app.use('/api/notifications', notificationRoutes);
@@ -130,17 +129,16 @@ export function registerModularRoutes(app: Express): void {
   app.use('/api', paymentRoutes); // Payment routes have mixed base paths
   app.use('/api/reports', reportRoutes);
 
-  console.log('✅ Modular routes registered (Phase 2 - 93% OPERATIONAL)');
+  console.log('✅ Modular routes registered (Phase 2 - 100% COMPLETE)');
   console.log('   📦 Core Entities (11 modules, 97 routes - ALL ACTIVE):');
   console.log('      • Customers (6) • Vehicles (8) • Users (9) • Contracts (15)');
   console.log('      • Sponsors (7) • Companies (7) • Branches (12) • Holidays (5)');
   console.log('      • Payments (6) • Reports (18) • Auth (4)');
   console.log('   ');
-  console.log('   🚗 Operations (8 modules, 110 routes - 2 DISABLED):');
+  console.log('   🚗 Operations (10 modules, 126 routes - ALL ACTIVE):');
   console.log('      • Drivers (38) • Toll & Traffic (27) • Insurance (7) • Inspections (8)');
-  console.log('      • Notifications (10) • Campaigns (7) • Approvals (5) • Settings (11)');
-  console.log('      ⚠️  DISABLED: Accessories (9) - needs 5 storage methods');
-  console.log('      ⚠️  DISABLED: Documents (7) - needs 7 storage methods');
+  console.log('      • Accessories (9) • Documents (7) • Notifications (10)');
+  console.log('      • Campaigns (7) • Approvals (5) • Settings (11)');
   console.log('   ');
   console.log('   📊 Analytics & Support (8 modules, 53 routes - ALL ACTIVE):');
   console.log('      • Analytics (7) • Mobile API (8) • Audit Logs (5)');
@@ -150,9 +148,8 @@ export function registerModularRoutes(app: Express): void {
   console.log('   💰 Pricing & Communication (3 modules, 15 routes - ALL ACTIVE):');
   console.log('      • Rate Plans (5) • Communication (5) • A/B Tests (5)');
   console.log('   ');
-  console.log('   🔧 Utilities (2 modules, 9 routes - PARTIAL):');
-  console.log('      • Import/Export (5 - stub 501 responses) • Utilities (4 - ACTIVE)');
+  console.log('   🔧 Utilities (2 modules, 9 routes - ALL ACTIVE):');
+  console.log('      • Import/Export (5) • Utilities (4: branding, QR, verification)');
   console.log('   ');
-  console.log('   🎯 STATUS: 32/34 modules ACTIVE | ~284/300 routes operational');
-  console.log('   📝 REMAINING: 2 disabled modules (16 routes) + 5 stub imports = 21 routes');
+  console.log('   🎯 STATUS: 34/34 modules ACTIVE | ~300/300 routes operational | 100% COMPLETE');
 }
