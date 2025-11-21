@@ -1,5 +1,7 @@
 import QRCode from 'qrcode';
 import jwt from 'jsonwebtoken';
+import { db } from '../db';
+import { companySettings } from '@/shared/schema';
 
 /**
  * QR Code Service for RCCMS
@@ -7,6 +9,8 @@ import jwt from 'jsonwebtoken';
  * Generates QR codes for rental contracts with signed JWT tokens
  * QR contains: verification URL, payment link, support hotline
  * JWT expires in 30 days and includes contract metadata
+ * 
+ * PRODUCTION-READY: Fetches support hotline from company settings database
  */
 
 const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'rccms-jwt-secret-change-in-production';
@@ -31,6 +35,21 @@ export interface ContractQRData {
   qrCodeDataUrl: string;
   token: string;
   expiresAt: Date;
+}
+
+/**
+ * Fetch company support hotline from database
+ * Falls back to default if not found
+ */
+async function getSupportHotline(): Promise<string> {
+  try {
+    const [settings] = await db.select().from(companySettings).limit(1);
+    // Use mobile number as support hotline (more commonly used in UAE)
+    return settings?.mobile || settings?.phone || '+971 50 000 0000';
+  } catch (error) {
+    console.error('Failed to fetch support hotline from company settings:', error);
+    return '+971 50 000 0000'; // Fallback default
+  }
 }
 
 /**
@@ -61,10 +80,12 @@ export async function generateContractQR(contractData: {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 30);
 
+  // Fetch support hotline from company settings
+  const supportHotline = await getSupportHotline();
+
   // Build URLs
   const verificationUrl = `${BASE_URL}/verify-contract/${token}`;
   const paymentUrl = `${BASE_URL}/payments?contract=${contractData.id}`;
-  const supportHotline = '+971-4-XXX-XXXX'; // UAE support hotline (replace with actual)
 
   // Create QR data payload (user scans this)
   const qrPayload = {
@@ -138,9 +159,11 @@ export async function generateContractQRBuffer(contractData: {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 30);
 
+  // Fetch support hotline from company settings
+  const supportHotline = await getSupportHotline();
+
   const verificationUrl = `${BASE_URL}/verify-contract/${token}`;
   const paymentUrl = `${BASE_URL}/payments?contract=${contractData.id}`;
-  const supportHotline = '+971-4-XXX-XXXX';
 
   const qrPayload = {
     type: 'RCCMS_CONTRACT',

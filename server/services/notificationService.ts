@@ -1,6 +1,9 @@
 import { db } from '../db';
 import { communicationProviders, communicationLogs, notificationTemplates, customers, drivers, users, contracts, payments, documentRegistry, approvalRequests } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
+import twilio from 'twilio';
+import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 
 export interface SendNotificationParams {
   templateCode: string;
@@ -293,41 +296,72 @@ class NotificationService {
 
   /**
    * Send via SMS provider (Twilio, Generic API)
-   * TODO: Integrate with Replit Twilio connector when available
+   * PRODUCTION-READY: Direct Twilio integration
    */
   private async sendViaSmsProvider(
     provider: any,
     recipient: string,
     message: string
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    // STUB: In production, integrate with actual providers
-    // For Twilio: Use Replit connector or twilio npm package
-    // For Generic API: Use credentials.apiEndpoint with POST request
-    
     const credentials = provider.credentials as any;
 
     if (provider.provider === 'twilio') {
-      // TODO: Integrate with Replit Twilio connector
-      // const twilio = require('twilio')(credentials.accountSid, credentials.authToken);
-      // const result = await twilio.messages.create({
-      //   body: message,
-      //   from: credentials.fromPhone,
-      //   to: recipient
-      // });
-      // return { success: true, messageId: result.sid };
-      
-      console.log(`[SMS STUB] Twilio: ${recipient} - ${message.substring(0, 50)}...`);
-      return { success: true, messageId: `STUB_SMS_${Date.now()}` };
+      try {
+        // Direct Twilio integration using official SDK
+        const twilioClient = twilio(credentials.accountSid, credentials.authToken);
+        const result = await twilioClient.messages.create({
+          body: message,
+          from: credentials.fromPhone,
+          to: recipient
+        });
+        
+        console.log(`[SMS SUCCESS] Twilio: ${recipient} - MessageSID: ${result.sid}`);
+        return { success: true, messageId: result.sid };
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown Twilio error';
+        console.error(`[SMS ERROR] Twilio: ${recipient} - ${errorMsg}`);
+        return { success: false, error: errorMsg };
+      }
     }
 
-    // Generic API provider
-    console.log(`[SMS STUB] Generic API: ${recipient} - ${message.substring(0, 50)}...`);
-    return { success: true, messageId: `STUB_SMS_${Date.now()}` };
+    // Generic API provider with fetch
+    if (provider.provider === 'generic_api' && credentials.apiEndpoint) {
+      try {
+        const response = await fetch(credentials.apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': credentials.apiKey ? `Bearer ${credentials.apiKey}` : '',
+          },
+          body: JSON.stringify({
+            to: recipient,
+            message: message,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`[SMS SUCCESS] Generic API: ${recipient}`);
+          return { success: true, messageId: data.messageId || `API_${Date.now()}` };
+        } else {
+          const errorText = await response.text();
+          console.error(`[SMS ERROR] Generic API: ${recipient} - ${errorText}`);
+          return { success: false, error: errorText };
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown API error';
+        console.error(`[SMS ERROR] Generic API: ${recipient} - ${errorMsg}`);
+        return { success: false, error: errorMsg };
+      }
+    }
+
+    console.warn(`[SMS WARN] Unknown provider type: ${provider.provider}`);
+    return { success: false, error: 'Unknown provider type' };
   }
 
   /**
    * Send via Email provider (SendGrid, Gmail, SMTP)
-   * TODO: Integrate with Replit SendGrid/Gmail connectors when available
+   * PRODUCTION-READY: Direct SendGrid and Nodemailer integration
    */
   private async sendViaEmailProvider(
     provider: any,
@@ -335,31 +369,85 @@ class NotificationService {
     subject: string,
     message: string
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    // STUB: In production, integrate with actual providers
     const credentials = provider.credentials as any;
 
+    // SendGrid Integration
     if (provider.provider === 'sendgrid') {
-      // TODO: Integrate with Replit SendGrid connector
-      // const sgMail = require('@sendgrid/mail');
-      // sgMail.setApiKey(credentials.apiKey);
-      // const result = await sgMail.send({
-      //   to: recipient,
-      //   from: credentials.fromEmail,
-      //   subject,
-      //   text: message,
-      // });
-      // return { success: true, messageId: result[0].headers['x-message-id'] };
-      
-      console.log(`[EMAIL STUB] SendGrid: ${recipient} - ${subject}`);
-      return { success: true, messageId: `STUB_EMAIL_${Date.now()}` };
+      try {
+        // Direct SendGrid integration using official SDK
+        sgMail.setApiKey(credentials.apiKey);
+        
+        const msg = {
+          to: recipient,
+          from: credentials.fromEmail,
+          subject: subject,
+          text: message,
+          html: message.replace(/\n/g, '<br>'), // Basic HTML conversion
+        };
+        
+        const result = await sgMail.send(msg);
+        const messageId = result[0].headers['x-message-id'] || `SG_${Date.now()}`;
+        
+        console.log(`[EMAIL SUCCESS] SendGrid: ${recipient} - MessageID: ${messageId}`);
+        return { success: true, messageId };
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown SendGrid error';
+        console.error(`[EMAIL ERROR] SendGrid: ${recipient} - ${errorMsg}`);
+        return { success: false, error: errorMsg };
+      }
     }
 
+    // Nodemailer Integration (Gmail OAuth, SMTP)
     if (provider.provider === 'gmail_oauth' || provider.provider === 'smtp') {
-      // TODO: Integrate with Replit Gmail connector or nodemailer
-      console.log(`[EMAIL STUB] ${provider.provider}: ${recipient} - ${subject}`);
-      return { success: true, messageId: `STUB_EMAIL_${Date.now()}` };
+      try {
+        // Configure nodemailer transport based on provider type
+        let transporter;
+        
+        if (provider.provider === 'gmail_oauth') {
+          // Gmail with OAuth2
+          transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              type: 'OAuth2',
+              user: credentials.email,
+              clientId: credentials.clientId,
+              clientSecret: credentials.clientSecret,
+              refreshToken: credentials.refreshToken,
+              accessToken: credentials.accessToken,
+            },
+          });
+        } else {
+          // Generic SMTP
+          transporter = nodemailer.createTransport({
+            host: credentials.smtpHost,
+            port: credentials.smtpPort || 587,
+            secure: credentials.smtpPort === 465, // true for 465, false for other ports
+            auth: {
+              user: credentials.smtpUser,
+              pass: credentials.smtpPassword,
+            },
+          });
+        }
+
+        // Send email
+        const info = await transporter.sendMail({
+          from: credentials.fromEmail,
+          to: recipient,
+          subject: subject,
+          text: message,
+          html: message.replace(/\n/g, '<br>'), // Basic HTML conversion
+        });
+
+        console.log(`[EMAIL SUCCESS] ${provider.provider}: ${recipient} - MessageID: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown email error';
+        console.error(`[EMAIL ERROR] ${provider.provider}: ${recipient} - ${errorMsg}`);
+        return { success: false, error: errorMsg };
+      }
     }
 
+    console.warn(`[EMAIL WARN] Unknown provider type: ${provider.provider}`);
     return { success: false, error: 'Unknown provider type' };
   }
 
