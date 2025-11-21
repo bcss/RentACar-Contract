@@ -1204,16 +1204,28 @@ const resources = {
       
       // Login
       "login.subtitle": "Sign in to manage rental contracts",
+      "login.welcomeMessage": "Welcome to Yeastar P-Series PBX System",
       "login.username": "Username",
       "login.password": "Password",
       "login.usernamePlaceholder": "Enter your username",
       "login.passwordPlaceholder": "Enter your password",
-      "login.loginButton": "Log In",
+      "login.loginButton": "LOG IN",
       "login.loggingIn": "Logging in...",
       "login.success": "Login successful",
       "login.failed": "Login failed",
       "login.invalidCredentials": "Invalid username or password",
       "login.welcomeBack": "Welcome back, {{name}}!",
+      "login.forgotPassword": "Forgot Password?",
+      "login.showPassword": "Show password",
+      "login.hidePassword": "Hide password",
+      "login.representative": "Representative",
+      "login.routes": "Routes",
+      "login.support": "Support",
+      "login.secure": "Secure",
+      "login.poweredBy": "Powered by",
+      "login.copyright": "Copyright © {{year}} {{company}}. All rights reserved.",
+      "login.validation.usernameRequired": "Please enter the username.",
+      "login.validation.passwordRequired": "Please enter the password.",
       
       // Dashboard
       "dashboard.title": "Dashboard",
@@ -3441,6 +3453,7 @@ const resources = {
       
       // Login
       "login.subtitle": "سجل الدخول لإدارة عقود الإيجار",
+      "login.welcomeMessage": "مرحباً بك في نظام Yeastar P-Series PBX",
       "login.username": "اسم المستخدم",
       "login.password": "كلمة المرور",
       "login.usernamePlaceholder": "أدخل اسم المستخدم",
@@ -3451,6 +3464,17 @@ const resources = {
       "login.failed": "فشل تسجيل الدخول",
       "login.invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
       "login.welcomeBack": "مرحباً بعودتك، {{name}}!",
+      "login.forgotPassword": "نسيت كلمة المرور؟",
+      "login.showPassword": "إظهار كلمة المرور",
+      "login.hidePassword": "إخفاء كلمة المرور",
+      "login.representative": "ممثل",
+      "login.routes": "طرق",
+      "login.support": "دعم",
+      "login.secure": "آمن",
+      "login.poweredBy": "مدعوم من",
+      "login.copyright": "حقوق النشر © {{year}} {{company}}. جميع الحقوق محفوظة.",
+      "login.validation.usernameRequired": "الرجاء إدخال اسم المستخدم.",
+      "login.validation.passwordRequired": "الرجاء إدخال كلمة المرور.",
       
       // Dashboard
       "dashboard.title": "لوحة التحكم",
