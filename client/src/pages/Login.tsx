@@ -109,8 +109,12 @@ export default function Login() {
         <img 
           src={loginImage} 
           alt="Rental Car Management" 
-          className="w-full max-w-lg lg:max-w-2xl object-contain"
+          className="w-full max-w-lg lg:max-w-2xl object-contain select-none"
+          draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
+          onDragStart={(e) => e.preventDefault()}
           data-testid="img-login-illustration"
+          style={{ WebkitUserDrag: 'none', userSelect: 'none' }}
         />
       </div>
       
