@@ -301,7 +301,27 @@ After updates are completed, verify:
 ---
 
 **Report Prepared By:** Replit Agent  
-**Report Date:** October 27, 2025  
+**Report Date:** October 27, 2025 (Updated November 21, 2025)  
 **Report Status:** VERIFIED AND CORRECTED  
 **Previous Version:** Rejected by architect due to false positives  
 **Current Version:** Evidence-based, conservative analysis
+
+---
+
+## Changelog
+
+### November 21, 2025 - P1 Code Fixes & Financial Calculation Verification
+- **FIXED:** 3 critical TypeScript LSP errors in `server/routes/contractRoutes.ts`:
+  1. Changed `getDriverAssignmentsByContract()` to `getDriverAssignments({ contractId: contract.id })` - Method name mismatch
+  2. Removed non-existent `vatRate` field - Now fetching VAT from `companySettings.vatPercentage` table
+  3. Removed non-existent `grandTotal` field - Properly storing `subtotal`, `vatAmount`, `totalAmount`
+- **FIXED:** Financial calculation consistency:
+  - Outstanding balance formula now consistent: `(totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid`
+  - Contract creation honors `totalExtraCharges` from request body (not hard-coded to 0)
+  - All financial calculations use `validateFinancialInput()` for security
+- **VERIFIED:** CSRF protection is fully implemented (user concern addressed):
+  - Endpoint `/api/csrf-token` active at multiple routes
+  - Global middleware protection on all state-changing requests
+  - 9 comprehensive test cases in `tests/integration/csrf.integration.test.ts`
+- **ARCHITECT RECOMMENDATION:** Future enhancement - Create centralized `recalculateContractFinancials()` service for atomic financial updates across all endpoints
+- **SPEC VS IMPLEMENTATION:** ✅ All P1 fixes maintain 100% API compatibility, no breaking changes

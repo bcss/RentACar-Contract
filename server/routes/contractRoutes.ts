@@ -310,9 +310,19 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     const rentalAmount = dailyRate * durationDays;
     const vatAmount = (rentalAmount * vatPercentage) / 100;
     const totalAmount = rentalAmount + vatAmount; // Total rental amount including VAT
-    // CRITICAL FIX: Outstanding balance should subtract security deposit (which is held separately)
-    // Formula matches GET /:id calculation: totalAmount - securityDeposit - totalPaid
-    const outstandingBalance = totalAmount - securityDeposit; // Subtract deposit, no payments yet
+    
+    // CRITICAL FIX: Use totalExtraCharges from request if provided, otherwise default to 0
+    // This ensures upfront extra charges are not silently dropped during creation
+    const totalExtraCharges = validateFinancialInput(validatedData.totalExtraCharges || '0', 'total extra charges');
+    
+    // Driver charges are 0 at creation (added later via driver assignments)
+    const totalDriverCharges = 0;
+    
+    // CRITICAL FIX: Outstanding balance formula matches GET /:id and reports
+    // Formula: (totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid
+    // At creation: totalPaid = 0, totalExtraCharges = 0, totalDriverCharges = 0
+    const totalDue = totalAmount + totalExtraCharges + totalDriverCharges;
+    const outstandingBalance = totalDue - securityDeposit; // No payments yet, so don't subtract totalPaid
     
     const contract = await storage.createContract({
       ...validatedData,
@@ -320,6 +330,7 @@ router.post("/", isAuthenticated, async (req: any, res) => {
       subtotal: rentalAmount.toString(),
       vatAmount: vatAmount.toString(),
       totalAmount: totalAmount.toString(),
+      totalExtraCharges: totalExtraCharges.toString(), // Initialize to 0, updated via PATCH
       outstandingBalance: outstandingBalance.toString(),
     });
     
@@ -332,6 +343,8 @@ router.post("/", isAuthenticated, async (req: any, res) => {
       subtotal: rentalAmount.toFixed(2),
       vatAmount: vatAmount.toFixed(2),
       totalAmount: totalAmount.toFixed(2),
+      totalExtraCharges: totalExtraCharges.toFixed(2),
+      totalDue: totalDue.toFixed(2),
       outstandingBalance: outstandingBalance.toFixed(2),
     });
   } catch (error: any) {
