@@ -41,6 +41,12 @@ Preferred communication style: Simple, everyday language.
   - **Coverage:** Financial calculations, business logic, security validation, state machine transitions, HTTP integration testing
   - **Integration tests:** Completely rewritten using supertest for HTTP-level testing of actual production code (real endpoints, middleware, authentication) instead of invalid inline mock calculations
   - **Infrastructure improvements:** Fixed CSRF cookie secure flag for test environment, corrected contract status values (draft/active/completed/closed), added getCsrfToken() helper
+  - **P1 Code Fixes (November 21, 2025):**
+    - Fixed 3 critical TypeScript LSP errors in `server/routes/contractRoutes.ts` (method names, VAT field, financial calculations)
+    - Standardized outstanding balance formula across all endpoints: `(totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid`
+    - Contract creation now honors `totalExtraCharges` from request body (not hard-coded to 0)
+    - VAT percentage dynamically fetched from `companySettings` table
+    - CSRF protection verified fully implemented (user concern addressed: `/api/csrf-token` active, global middleware enforced, 9 test cases)
   - **Remaining issues:** Outstanding balance calculation returning 0 (needs investigation), some state transitions getting 403 errors (permissions/validation), CSRF protection edge cases
 - **Performance & Monitoring:**
   - Connection pooling via Neon fetchConnectionCache
