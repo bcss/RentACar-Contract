@@ -27,6 +27,7 @@ const Sponsors = lazy(() => import("@/pages/Sponsors"));
 const Companies = lazy(() => import("@/pages/Companies"));
 const Contracts = lazy(() => import("@/pages/Contracts"));
 const ContractForm = lazy(() => import("@/pages/ContractForm"));
+const ContractFormSample = lazy(() => import("@/pages/ContractFormSample"));
 const ContractView = lazy(() => import("@/pages/ContractView"));
 const Users = lazy(() => import("@/pages/Users"));
 const AuditLogs = lazy(() => import("@/pages/AuditLogs"));
@@ -178,6 +179,7 @@ function Router() {
       </Route>
       <Route path="/contracts" component={() => <ProtectedRoute component={Contracts} />} />
       <Route path="/contracts/new" component={() => <ProtectedRoute component={ContractForm} />} />
+      <Route path="/contracts/sample" component={() => <ProtectedRoute component={ContractFormSample} />} />
       <Route path="/contracts/:id/edit" component={() => <ProtectedRoute component={ContractForm} />} />
       <Route path="/contracts/:id" component={() => <ProtectedRoute component={ContractView} />} />
       <Route path="/insurance-claims" component={() => <ProtectedRoute component={InsuranceClaims} />} />

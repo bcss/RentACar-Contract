@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { MinimalInput } from '@/components/ui/minimal-input';
 import { ErrorDisplay, useErrorDisplay } from '@/components/design-system/ErrorDisplay';
 import { apiRequest, fetchCsrfToken } from '@/lib/queryClient';
 import { queryClient } from '@/lib/queryClient';
@@ -181,16 +181,14 @@ export default function Login() {
                   <FormItem>
                     <FormLabel data-testid="label-username">{t('login.username')}</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          {...field}
-                          placeholder={t('login.usernamePlaceholder')}
-                          className="pl-10"
-                          autoComplete="username"
-                          data-testid="input-username"
-                        />
-                      </div>
+                      <MinimalInput
+                        {...field}
+                        icon={<UserCircle className="h-4 w-4" />}
+                        placeholder={t('login.usernamePlaceholder')}
+                        autoComplete="username"
+                        error={!!form.formState.errors.username}
+                        data-testid="input-username"
+                      />
                     </FormControl>
                     <FormMessage data-testid="error-username" />
                   </FormItem>
@@ -205,30 +203,32 @@ export default function Login() {
                   <FormItem>
                     <FormLabel data-testid="label-password">{t('login.password')}</FormLabel>
                     <FormControl>
-                      <div className="relative" dir="ltr">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
-                        <Input
+                      <div dir="ltr">
+                        <MinimalInput
                           {...field}
                           type={showPassword ? 'text' : 'password'}
+                          icon={<Lock className="h-4 w-4" />}
                           placeholder={t('login.passwordPlaceholder')}
-                          className="pl-10 pr-12"
                           autoComplete="current-password"
+                          error={!!form.formState.errors.password}
+                          rightElement={
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              tabIndex={-1}
+                              data-testid="button-toggle-password"
+                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </button>
+                          }
                           data-testid="input-password"
                         />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
-                          tabIndex={-1}
-                          data-testid="button-toggle-password"
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
-                        </button>
                       </div>
                     </FormControl>
                     <FormMessage data-testid="error-password" />
