@@ -118,12 +118,13 @@ export default function Login() {
         <div className="w-full max-w-md space-y-6">
           {/* Header */}
           <div className="text-center space-y-3">
-            <h1 className="text-4xl font-bold text-foreground">KarāraOS</h1>
-            <p className="text-muted-foreground h-6">
+            <h1 className="text-4xl font-bold text-foreground" data-testid="text-app-name">KarāraOS</h1>
+            <p className="text-muted-foreground h-6" data-testid="text-subtitle">
               Sign in to manage{' '}
               <span 
                 className="inline-block font-semibold text-primary transition-all duration-500 ease-in-out"
                 key={rotatingWord}
+                data-testid="text-rotating-word"
                 style={{
                   animation: 'fadeSlideIn 0.5s ease-in-out'
                 }}
