@@ -165,22 +165,23 @@ export default function Login() {
                   <FormItem>
                     <FormLabel data-testid="label-password">{t('login.password')}</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <div className="relative" dir="ltr">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
                         <Input
                           {...field}
                           type={showPassword ? 'text' : 'password'}
                           placeholder={t('login.passwordPlaceholder')}
-                          className="pl-10 pr-10"
+                          className="pl-10 pr-12"
                           autoComplete="current-password"
                           data-testid="input-password"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover-elevate active-elevate-2 p-1 rounded"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
                           tabIndex={-1}
                           data-testid="button-toggle-password"
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                           {showPassword ? (
                             <EyeOff className="h-5 w-5" />
