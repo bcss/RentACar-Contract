@@ -18,7 +18,7 @@ router.post("/import/customers", requireAdmin, async (req: Request, res: Respons
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
     const results = await storage.importCustomers(records);
-    await createAuditLog(user.id, 'customers_imported', undefined, req, `Imported ${results.length} customers`);
+    await createAuditLog(user.id as string, 'customers_imported', undefined, req, `Imported ${results.length} customers`);
     res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
@@ -30,7 +30,7 @@ router.post("/import/vehicles", requireAdmin, async (req: Request, res: Response
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
     const results = await storage.importVehicles(records);
-    await createAuditLog(user.id, 'vehicles_imported', undefined, req, `Imported ${results.length} vehicles`);
+    await createAuditLog(user.id as string, 'vehicles_imported', undefined, req, `Imported ${results.length} vehicles`);
     res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
@@ -42,7 +42,7 @@ router.post("/import/sponsors", requireAdmin, async (req: Request, res: Response
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
     const results = await storage.importSponsors(records);
-    await createAuditLog(user.id, 'sponsors_imported', undefined, req, `Imported ${results.length} sponsors`);
+    await createAuditLog(user.id as string, 'sponsors_imported', undefined, req, `Imported ${results.length} sponsors`);
     res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
@@ -54,7 +54,7 @@ router.post("/import/companies", requireAdmin, async (req: Request, res: Respons
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
     const results = await storage.importCompanies(records);
-    await createAuditLog(user.id, 'companies_imported', undefined, req, `Imported ${results.length} companies`);
+    await createAuditLog(user.id as string, 'companies_imported', undefined, req, `Imported ${results.length} companies`);
     res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
@@ -66,7 +66,7 @@ router.post("/import/contracts", requireAdmin, async (req: Request, res: Respons
     const user = req.user as User;
     const records = Array.isArray(req.body) ? req.body : [req.body];
     const results = await storage.importContracts(records);
-    await createAuditLog(user.id, 'contracts_imported', undefined, req, `Imported ${results.length} contracts`);
+    await createAuditLog(user.id as string, 'contracts_imported', undefined, req, `Imported ${results.length} contracts`);
     res.json({ imported: results.length, records: results });
   } catch (error) {
     next(error);
