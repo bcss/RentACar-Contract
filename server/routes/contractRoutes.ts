@@ -324,7 +324,6 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     // CRITICAL FIX: Use totalExtraCharges from request if provided, otherwise default to 0
     // This ensures upfront extra charges are not silently dropped during creation
     const totalExtraCharges = validateFinancialInput(validatedData.totalExtraCharges || '0', 'total extra charges');
-    const securityDeposit = validateFinancialInput(validatedData.securityDeposit || '0', 'security deposit');
     
     // Driver charges are 0 at creation (added later via driver assignments)
     const totalDriverCharges = 0;
