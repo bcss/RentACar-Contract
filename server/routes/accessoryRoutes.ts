@@ -13,6 +13,7 @@ const router = Router();
 
 // ==================== ACCESSORIES MASTER ====================
 
+// GET /api/accessories - List all accessories
 router.get("/", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const filters = {
@@ -26,6 +27,22 @@ router.get("/", isAuthenticated, async (req: Request, res: Response, next: NextF
   }
 });
 
+// ==================== CONTRACT ACCESSORIES (SPECIFIC PATHS FIRST) ====================
+
+// GET /api/accessories/contract/:contractId - Get contract accessories
+router.get("/contract/:contractId", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const accessories = await storage.getContractAccessories(req.params.contractId);
+    res.json(accessories);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/accessories/contract-accessory/:id - Get contract accessory by ID
+// (This route would be GET if it existed - keeping structure for consistency)
+
+// GET /api/accessories/:id - Get single accessory (WILDCARD LAST FOR GET)
 router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const accessory = await storage.getAccessoryById(req.params.id);
@@ -38,6 +55,7 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: Ne
   }
 });
 
+// POST /api/accessories - Create new accessory
 router.post("/", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
@@ -49,39 +67,7 @@ router.post("/", isAuthenticated, requireManagerOrAdmin, async (req: Request, re
   }
 });
 
-router.patch("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user as User;
-    const accessory = await storage.updateAccessory(req.params.id, req.body);
-    await createAuditLog(user.id, 'accessory_updated', undefined, req, `Updated accessory: ${accessory.itemName}`);
-    res.json(accessory);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.delete("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user as User;
-    await storage.deleteAccessory(req.params.id);
-    await createAuditLog(user.id, 'accessory_deleted', undefined, req, `Deleted accessory`);
-    res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// ==================== CONTRACT ACCESSORIES ====================
-
-router.get("/contract/:contractId", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const accessories = await storage.getContractAccessories(req.params.contractId);
-    res.json(accessories);
-  } catch (error) {
-    next(error);
-  }
-});
-
+// POST /api/accessories/contract/:contractId - Add accessory to contract
 router.post("/contract/:contractId", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
@@ -97,6 +83,7 @@ router.post("/contract/:contractId", isAuthenticated, requireEditor, async (req:
   }
 });
 
+// PATCH /api/accessories/contract-accessory/:id - Update contract accessory (SPECIFIC PATH FIRST)
 router.patch("/contract-accessory/:id", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
@@ -108,6 +95,19 @@ router.patch("/contract-accessory/:id", isAuthenticated, requireEditor, async (r
   }
 });
 
+// PATCH /api/accessories/:id - Update accessory (WILDCARD LAST FOR PATCH)
+router.patch("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user as User;
+    const accessory = await storage.updateAccessory(req.params.id, req.body);
+    await createAuditLog(user.id, 'accessory_updated', undefined, req, `Updated accessory: ${accessory.itemName}`);
+    res.json(accessory);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/accessories/contract-accessory/:id - Delete contract accessory (SPECIFIC PATH FIRST)
 router.delete("/contract-accessory/:id", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
@@ -116,6 +116,18 @@ router.delete("/contract-accessory/:id", isAuthenticated, requireEditor, async (
       await storage.deleteContractAccessory(req.params.id);
       await createAuditLog(user.id, 'contract_accessory_deleted', contractAccessory.contractId, req, `Removed accessory from contract`);
     }
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/accessories/:id - Delete accessory (WILDCARD LAST FOR DELETE)
+router.delete("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user as User;
+    await storage.deleteAccessory(req.params.id);
+    await createAuditLog(user.id, 'accessory_deleted', undefined, req, `Deleted accessory`);
     res.status(204).send();
   } catch (error) {
     next(error);

@@ -27,7 +27,28 @@ router.get("/", isAuthenticated, async (req: Request, res: Response, next: NextF
   }
 });
 
-// GET /api/document-registry/:id - Get document by ID
+// GET /api/documents/expiring - Get expiring documents (SPECIFIC PATH FIRST)
+router.get("/expiring/soon", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const daysAhead = parseInt(req.query.days as string) || 30;
+    const documents = await storage.getExpiringDocuments(daysAhead);
+    res.json(documents);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/documents/expired - Get expired documents (SPECIFIC PATH FIRST)
+router.get("/expired/list", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const documents = await storage.getExpiredDocuments();
+    res.json(documents);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/document-registry/:id - Get document by ID (WILDCARD LAST)
 router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const document = await storage.getDocumentRegistryById(req.params.id);
@@ -71,27 +92,6 @@ router.delete("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Reques
     await storage.deleteDocumentRegistry(req.params.id);
     await createAuditLog(user.id, 'document_deleted', undefined, req, `Deleted document`);
     res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// GET /api/documents/expiring - Get expiring documents
-router.get("/expiring/soon", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const daysAhead = parseInt(req.query.days as string) || 30;
-    const documents = await storage.getExpiringDocuments(daysAhead);
-    res.json(documents);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// GET /api/documents/expired - Get expired documents
-router.get("/expired/list", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const documents = await storage.getExpiredDocuments();
-    res.json(documents);
   } catch (error) {
     next(error);
   }
