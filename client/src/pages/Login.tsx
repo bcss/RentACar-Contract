@@ -12,8 +12,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useState } from 'react';
-import rentACarImage from '@assets/Gemini_Generated_Image_lcmxsqlcmxsqlcmx_1763714633035.png';
+import { useState, useEffect } from 'react';
+import kararaosLogo from '@assets/kararaos_logo_1763759128002.png';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -27,6 +27,24 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { currentError, showError, dismissError } = useErrorDisplay();
+  const [rotatingWord, setRotatingWord] = useState(0);
+  
+  // Rotating words for animated subtitle
+  const words = ['customer', 'vehicle', 'business', 'finance'];
+  
+  // Animate subtitle words
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotatingWord((prev) => (prev + 1) % words.length);
+    }, 2500); // Change word every 2.5 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Set document title
+  useEffect(() => {
+    document.title = 'KarāraOS';
+  }, []);
   
   // Fetch company branding (public endpoint - no auth required)
   const { data: branding } = useQuery<{companyNameEn: string | null, companyNameAr: string | null, logoUrl: string | null}>({
@@ -80,28 +98,39 @@ export default function Login() {
 
   const companyName = branding 
     ? i18n.language === 'ar'
-      ? branding.companyNameAr || branding.companyNameEn || 'RCCMS'
-      : branding.companyNameEn || branding.companyNameAr || 'RCCMS'
-    : 'RCCMS';
+      ? branding.companyNameAr || branding.companyNameEn || 'KarāraOS'
+      : branding.companyNameEn || branding.companyNameAr || 'KarāraOS'
+    : 'KarāraOS';
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Left Panel - Rent-a-Car Illustration */}
+      {/* Left Panel - KarāraOS Logo */}
       <div className="w-full lg:w-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center p-6 lg:p-12">
         <img 
-          src={rentACarImage} 
-          alt="Rent-a-Car Management" 
-          className="w-full max-w-md lg:max-w-2xl object-contain"
+          src={kararaosLogo} 
+          alt="KarāraOS" 
+          className="w-full max-w-md lg:max-w-lg object-contain"
         />
       </div>
       
       {/* Right Panel - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-6">
           {/* Header */}
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">{companyName}</h1>
-            <p className="text-muted-foreground">{t('login.subtitle')}</p>
+          <div className="text-center space-y-3">
+            <h1 className="text-4xl font-bold text-foreground">KarāraOS</h1>
+            <p className="text-muted-foreground h-6">
+              Sign in to manage{' '}
+              <span 
+                className="inline-block font-semibold text-primary transition-all duration-500 ease-in-out"
+                key={rotatingWord}
+                style={{
+                  animation: 'fadeSlideIn 0.5s ease-in-out'
+                }}
+              >
+                {words[rotatingWord]}
+              </span>
+            </p>
           </div>
 
           {/* Language Selector */}
@@ -209,8 +238,9 @@ export default function Login() {
           </Form>
 
           {/* Footer */}
-          <div className="text-center text-sm text-muted-foreground">
-            <p>{t('login.footer')}</p>
+          <div className="text-center space-y-2">
+            <p className="text-sm text-muted-foreground">{t('login.footer')}</p>
+            <p className="text-xs text-muted-foreground/80">{t('login.madeWith')}</p>
           </div>
         </div>
       </div>
