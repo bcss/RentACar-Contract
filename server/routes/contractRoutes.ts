@@ -176,7 +176,7 @@ router.get("/:id", isAuthenticated, async (req: any, res) => {
     const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
     
     // BRANCH & DRIVER SERVICE INTEGRATION: Include driver service costs in total (VAT-inclusive)
-    const driverAssignments = await storage.getDriverAssignmentsByContract(contract.id);
+    const driverAssignments = await storage.getDriverAssignments({ contractId: contract.id });
     const { totalDriverCharges, totalDriverSurcharges, totalDriverVat } = calculateContractDriverCosts(driverAssignments);
     
     // CRITICAL FIX: totalDriverCharges now includes VAT when applicable
@@ -299,22 +299,27 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     const endDate = new Date(endDateField);
     const durationDays = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
     
+    // Fetch VAT percentage from company settings
+    const settings = await storage.getCompanySettings();
+    const vatPercentage = parseFloat(settings?.vatPercentage || '5');
+    
     const dailyRate = validateFinancialInput(validatedData.dailyRate || '0', 'daily rate');
     const securityDeposit = validateFinancialInput(validatedData.securityDeposit || '0', 'security deposit');
-    const vatRate = validateFinancialInput(validatedData.vatRate || '0', 'VAT rate');
     
-    // Calculate rental amount
+    // Calculate rental amount with VAT
     const rentalAmount = dailyRate * durationDays;
-    const vatAmount = (rentalAmount * vatRate) / 100;
-    const totalAmount = rentalAmount + vatAmount;
-    const grandTotal = totalAmount + securityDeposit;
-    const outstandingBalance = grandTotal; // No payments yet
+    const vatAmount = (rentalAmount * vatPercentage) / 100;
+    const totalAmount = rentalAmount + vatAmount; // Total rental amount including VAT
+    // CRITICAL FIX: Outstanding balance should subtract security deposit (which is held separately)
+    // Formula matches GET /:id calculation: totalAmount - securityDeposit - totalPaid
+    const outstandingBalance = totalAmount - securityDeposit; // Subtract deposit, no payments yet
     
     const contract = await storage.createContract({
       ...validatedData,
       status: 'draft',
+      subtotal: rentalAmount.toString(),
+      vatAmount: vatAmount.toString(),
       totalAmount: totalAmount.toString(),
-      grandTotal: grandTotal.toString(),
       outstandingBalance: outstandingBalance.toString(),
     });
     
@@ -324,8 +329,9 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     // Return contract with calculated financial fields
     res.json({
       ...contract,
+      subtotal: rentalAmount.toFixed(2),
+      vatAmount: vatAmount.toFixed(2),
       totalAmount: totalAmount.toFixed(2),
-      grandTotal: grandTotal.toFixed(2),
       outstandingBalance: outstandingBalance.toFixed(2),
     });
   } catch (error: any) {
