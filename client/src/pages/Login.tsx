@@ -109,7 +109,7 @@ export default function Login() {
         <img 
           src={loginImage} 
           alt="Rental Car Management" 
-          className="w-full max-w-md lg:max-w-lg object-contain"
+          className="w-full max-w-lg lg:max-w-2xl object-contain"
           data-testid="img-login-illustration"
         />
       </div>
