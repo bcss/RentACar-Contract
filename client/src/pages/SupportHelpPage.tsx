@@ -107,7 +107,7 @@ export default function SupportHelpPage() {
     },
     q4: {
       question: 'What payment methods are supported?',
-      answer: 'RCCMS supports Cash, Credit/Debit Card, Check, and Bank Transfer. Each method has specific required fields: cheque number for checks, last 4 card digits for card payments, and reference number for bank transfers.'
+      answer: 'KarāraOS supports Cash, Credit/Debit Card, Check, and Bank Transfer. Each method has specific required fields: cheque number for checks, last 4 card digits for card payments, and reference number for bank transfers.'
     },
     q5: {
       question: 'How do vehicle inspections work?',
@@ -115,7 +115,7 @@ export default function SupportHelpPage() {
     },
     q6: {
       question: 'What are the user roles and permissions?',
-      answer: 'RCCMS has 4 core roles: Admin (full system access), Manager (business operations, reports), Staff (daily operations, contract management), and Viewer (read-only access). Additional permission toggles include Reports Access, Close Contracts, and View All Contracts.'
+      answer: 'KarāraOS has 4 core roles: Admin (full system access), Manager (business operations, reports), Staff (daily operations, contract management), and Viewer (read-only access). Additional permission toggles include Reports Access, Close Contracts, and View All Contracts.'
     },
     q7: {
       question: 'How do I switch between English and Arabic?',
@@ -167,7 +167,7 @@ export default function SupportHelpPage() {
     },
     q19: {
       question: 'What reports are available?',
-      answer: 'RCCMS provides comprehensive reports: Financial Reports (revenue, payment collection, outstanding payments), Operational Reports (vehicle utilization, contract status, extra charges), and Customer Reports. All reports support date filtering and PDF/Excel export.'
+      answer: 'KarāraOS provides comprehensive reports: Financial Reports (revenue, payment collection, outstanding payments), Operational Reports (vehicle utilization, contract status, extra charges), and Customer Reports. All reports support date filtering and PDF/Excel export.'
     },
     q20: {
       question: 'How do I troubleshoot system errors?',
@@ -257,7 +257,7 @@ export default function SupportHelpPage() {
 
   const generateEmailBody = (error: SystemError, reason?: string) => {
     const body = `
-[RCCMS Error Report${reason ? ' - RESEND' : ''}]
+[KarāraOS Error Report${reason ? ' - RESEND' : ''}]
 
 ${reason ? `RESEND REASON: ${reason}\n\n` : ''}Error Type: ${error.errorType}
 Error Message: ${error.errorMessage}
@@ -297,7 +297,7 @@ Please attach a screenshot if available.
     const error = errors?.find(e => e.id === resendErrorId);
     if (!error) return;
 
-    const mailtoLink = `mailto:support@rccms.com?subject=${encodeURIComponent(`[RCCMS Error - RESEND] ${error.errorType} - ${error.createdAt ? format(new Date(error.createdAt), 'yyyy-MM-dd HH:mm') : ''}`)}&body=${generateEmailBody(error, resendReason)}`;
+    const mailtoLink = `mailto:support@rccms.com?subject=${encodeURIComponent(`[KarāraOS Error - RESEND] ${error.errorType} - ${error.createdAt ? format(new Date(error.createdAt), 'yyyy-MM-dd HH:mm') : ''}`)}&body=${generateEmailBody(error, resendReason)}`;
     window.location.href = mailtoLink;
 
     setResendReason('');
@@ -336,7 +336,7 @@ Please attach a screenshot if available.
               <>
                 <div className="flex justify-between items-center text-sm">
                   <span className="font-medium">Product</span>
-                  <span className="text-muted-foreground">RCCMS</span>
+                  <span className="text-muted-foreground">KarāraOS</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="font-medium">Version</span>
@@ -575,13 +575,13 @@ Please attach a screenshot if available.
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>RCCMS User Guide</DialogTitle>
-                  <DialogDescription>Comprehensive guide for using all RCCMS features</DialogDescription>
+                  <DialogTitle>KarāraOS User Guide</DialogTitle>
+                  <DialogDescription>Comprehensive guide for using all KarāraOS features</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 text-sm">
                   <section>
                     <h3 className="font-semibold text-base mb-2">Getting Started</h3>
-                    <p className="text-muted-foreground mb-2">Welcome to RCCMS - Your comprehensive rental car contract management system.</p>
+                    <p className="text-muted-foreground mb-2">Welcome to KarāraOS - Your comprehensive rental car contract management system.</p>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li>Login with your credentials provided by your administrator</li>
                       <li>Navigate using the sidebar menu on the left side</li>
@@ -675,7 +675,7 @@ Please attach a screenshot if available.
                   </DialogTrigger>
                   <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>RCCMS Admin Guide</DialogTitle>
+                      <DialogTitle>KarāraOS Admin Guide</DialogTitle>
                       <DialogDescription>Administrative tasks and system configuration</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 text-sm">
@@ -768,7 +768,7 @@ Please attach a screenshot if available.
                 <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Quick Start Guide</DialogTitle>
-                    <DialogDescription>Get started with RCCMS in 5 minutes</DialogDescription>
+                    <DialogDescription>Get started with KarāraOS in 5 minutes</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 text-sm">
                     <section>
@@ -852,7 +852,7 @@ Please attach a screenshot if available.
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>RCCMS Complete Feature List</DialogTitle>
+                    <DialogTitle>KarāraOS Complete Feature List</DialogTitle>
                     <DialogDescription>Comprehensive inventory of all system capabilities</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 text-sm">
@@ -1454,7 +1454,7 @@ Please attach a screenshot if available.
             <CardTitle>Report System Errors</CardTitle>
           </div>
           <CardDescription>
-            View and report critical system errors to RCCMS support
+            View and report critical system errors to KarāraOS support
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -1587,7 +1587,7 @@ Please attach a screenshot if available.
                             size="sm"
                             onClick={() => {
                               markSentMutation.mutate(error.id);
-                              const mailtoLink = `mailto:support@rccms.com?subject=${encodeURIComponent(`[RCCMS Error] ${error.errorType} - ${error.createdAt ? format(new Date(error.createdAt), 'yyyy-MM-dd HH:mm') : ''}`)}&body=${generateEmailBody(error)}`;
+                              const mailtoLink = `mailto:support@rccms.com?subject=${encodeURIComponent(`[KarāraOS Error] ${error.errorType} - ${error.createdAt ? format(new Date(error.createdAt), 'yyyy-MM-dd HH:mm') : ''}`)}&body=${generateEmailBody(error)}`;
                               window.location.href = mailtoLink;
                             }}
                             disabled={markSentMutation.isPending}
@@ -1680,7 +1680,7 @@ Please attach a screenshot if available.
       <Card>
         <CardHeader>
           <CardTitle>Key Features</CardTitle>
-          <CardDescription>Core capabilities of RCCMS</CardDescription>
+          <CardDescription>Core capabilities of KarāraOS</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 text-sm">

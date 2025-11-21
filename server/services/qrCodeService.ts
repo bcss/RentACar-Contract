@@ -4,7 +4,7 @@ import { db } from '../db';
 import { companySettings } from '@/shared/schema';
 
 /**
- * QR Code Service for RCCMS
+ * QR Code Service for KarāraOS
  * 
  * Generates QR codes for rental contracts with signed JWT tokens
  * QR contains: verification URL, payment link, support hotline
@@ -89,7 +89,7 @@ export async function generateContractQR(contractData: {
 
   // Create QR data payload (user scans this)
   const qrPayload = {
-    type: 'RCCMS_CONTRACT',
+    type: 'KARARAOS_CONTRACT',
     contract: contractData.contractNumber,
     verify: verificationUrl,
     payment: paymentUrl,

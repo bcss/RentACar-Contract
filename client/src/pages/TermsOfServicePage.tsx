@@ -156,7 +156,7 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 <p>
-                  By accessing and using RCCMS (Rental Car Contract Management System), you acknowledge that you have 
+                  By accessing and using KarāraOS (Rental Car Contract Management System), you acknowledge that you have 
                   read, understood, and agree to be bound by these Terms of Service and all applicable laws and regulations.
                 </p>
                 <div className="p-4 rounded-lg bg-muted">
@@ -186,7 +186,7 @@ export default function TermsOfServicePage() {
                     <AccordionTrigger>License Grant</AccordionTrigger>
                     <AccordionContent className="space-y-3 text-sm">
                       <p>
-                        Your organization has been granted a non-exclusive, non-transferable license to use RCCMS 
+                        Your organization has been granted a non-exclusive, non-transferable license to use KarāraOS 
                         for internal business operations related to rental car contract management.
                       </p>
                       <p className="text-muted-foreground">
@@ -222,7 +222,7 @@ export default function TermsOfServicePage() {
                     <AccordionTrigger>Scope of Use</AccordionTrigger>
                     <AccordionContent className="space-y-3 text-sm">
                       <p className="text-muted-foreground">
-                        RCCMS is designed exclusively for rental car contract management. Use for other purposes 
+                        KarāraOS is designed exclusively for rental car contract management. Use for other purposes 
                         requires prior written authorization. The system should be used solely within your organization 
                         and not as a service for external clients.
                       </p>
@@ -309,7 +309,7 @@ export default function TermsOfServicePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
-                <p>As a user of RCCMS, you agree to:</p>
+                <p>As a user of KarāraOS, you agree to:</p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="p-4 rounded-lg border">
                     <h4 className="font-semibold mb-2 flex items-center gap-2">
@@ -373,7 +373,7 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 <p>
-                  Users are solely responsible for the accuracy, completeness, and legality of data entered into RCCMS.
+                  Users are solely responsible for the accuracy, completeness, and legality of data entered into KarāraOS.
                 </p>
                 <Accordion type="multiple" className="w-full">
                   <AccordionItem value="customer-data" data-testid="accordion-customer-data-accuracy">
@@ -531,7 +531,7 @@ export default function TermsOfServicePage() {
                   <div>
                     <h4 className="font-semibold">Our Ownership</h4>
                     <p className="text-muted-foreground mt-2">
-                      RCCMS, including its source code, design, features, functionality, and documentation, is owned by 
+                      KarāraOS, including its source code, design, features, functionality, and documentation, is owned by 
                       us and protected by copyright, trademark, and other intellectual property laws. All rights are reserved.
                     </p>
                   </div>
@@ -545,7 +545,7 @@ export default function TermsOfServicePage() {
                   <div>
                     <h4 className="font-semibold">Limited License to Use Your Data</h4>
                     <p className="text-muted-foreground mt-2">
-                      By using RCCMS, you grant us a limited license to process and store your data for the purpose 
+                      By using KarāraOS, you grant us a limited license to process and store your data for the purpose 
                       of providing the service. This includes:
                     </p>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4 mt-2">
@@ -558,7 +558,7 @@ export default function TermsOfServicePage() {
                   <div>
                     <h4 className="font-semibold">Trademarks</h4>
                     <p className="text-muted-foreground mt-2">
-                      RCCMS and associated logos are trademarks. You may not use these marks without prior written permission.
+                      KarāraOS and associated logos are trademarks. You may not use these marks without prior written permission.
                     </p>
                   </div>
                 </div>
@@ -578,7 +578,7 @@ export default function TermsOfServicePage() {
                   <AccordionItem value="warranty" data-testid="accordion-warranty-disclaimer">
                     <AccordionTrigger>Warranty Disclaimer</AccordionTrigger>
                     <AccordionContent className="space-y-3 text-sm">
-                      <p className="font-semibold">RCCMS IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.</p>
+                      <p className="font-semibold">KarāraOS IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.</p>
                       <p className="text-muted-foreground">
                         We disclaim all warranties, express or implied, including but not limited to:
                       </p>
@@ -692,7 +692,7 @@ export default function TermsOfServicePage() {
                 </div>
                 <div className="p-4 rounded-lg bg-muted">
                   <p className="text-muted-foreground text-sm">
-                    While RCCMS provides tools to support compliance, ultimate responsibility for legal compliance 
+                    While KarāraOS provides tools to support compliance, ultimate responsibility for legal compliance 
                     rests with your organization and its designated compliance officers.
                   </p>
                 </div>
@@ -935,7 +935,7 @@ export default function TermsOfServicePage() {
                     <AccordionContent className="space-y-3 text-sm">
                       <p className="text-muted-foreground">
                         These Terms, together with our Privacy Policy, constitute the entire agreement between you 
-                        and us regarding use of RCCMS.
+                        and us regarding use of KarāraOS.
                       </p>
                     </AccordionContent>
                   </AccordionItem>
@@ -957,12 +957,12 @@ export default function TermsOfServicePage() {
             <div className="text-center text-sm text-muted-foreground py-6 border-t">
               <p className="font-semibold mb-2">Acknowledgment</p>
               <p>
-                By using RCCMS, you acknowledge that you have read, understood, and agree to be bound by these 
+                By using KarāraOS, you acknowledge that you have read, understood, and agree to be bound by these 
                 Terms of Service.
               </p>
-              <p className="mt-4">© 2025 RCCMS. All rights reserved.</p>
+              <p className="mt-4">© 2025 KarāraOS. All rights reserved.</p>
               <p className="mt-2 text-xs">
-                These Terms of Service are effective as of December 2025 and apply to all users of the RCCMS platform.
+                These Terms of Service are effective as of December 2025 and apply to all users of the KarāraOS platform.
               </p>
             </div>
           </div>

@@ -22,7 +22,7 @@ export default function AboutPage() {
         <CardHeader data-testid="header-about">
           <div className="flex items-center gap-2" data-testid="title-container">
             <Info className="h-5 w-5 text-primary" data-testid="icon-info" />
-            <CardTitle data-testid="text-title">{t('about.title', 'About RCCMS')}</CardTitle>
+            <CardTitle data-testid="text-title">{t('about.title', 'About KarāraOS')}</CardTitle>
           </div>
           <CardDescription data-testid="text-subtitle">
             {t('about.subtitle', 'Rental Car Contract Management System')}
@@ -111,7 +111,7 @@ export default function AboutPage() {
 
           <div className="pt-4 border-t" data-testid="section-footer">
             <p className="text-xs text-muted-foreground text-center" data-testid="text-footer-name">
-              {t('about.footerName', 'RCCMS - Rental Car Contract Management System')}
+              {t('about.footerName', 'KarāraOS - Rental Car Contract Management System')}
             </p>
             <p className="text-xs text-muted-foreground text-center mt-1" data-testid="text-footer-tagline">
               {t('about.footerTagline', 'Designed for professional rental car operations with enterprise-grade features')}

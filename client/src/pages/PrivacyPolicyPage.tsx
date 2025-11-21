@@ -152,12 +152,12 @@ export default function PrivacyPolicyPage() {
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 <p>
-                  Welcome to RCCMS (Rental Car Contract Management System). We are committed to protecting your privacy 
+                  Welcome to KarāraOS (Rental Car Contract Management System). We are committed to protecting your privacy 
                   and ensuring the security of your personal information. This Privacy Policy explains how we collect, 
                   use, store, and protect your data when you use our system.
                 </p>
                 <p className="text-muted-foreground">
-                  By using RCCMS, you agree to the collection and use of information in accordance with this policy. 
+                  By using KarāraOS, you agree to the collection and use of information in accordance with this policy. 
                   If you do not agree with any part of this policy, please do not use the system.
                 </p>
               </CardContent>
@@ -413,7 +413,7 @@ export default function PrivacyPolicyPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
-                <p>As a user of RCCMS, you have the following rights:</p>
+                <p>As a user of KarāraOS, you have the following rights:</p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="p-4 rounded-lg border">
                     <h4 className="font-semibold mb-2">Right to Access</h4>
@@ -458,7 +458,7 @@ export default function PrivacyPolicyPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
-                <p>RCCMS uses cookies and similar technologies for essential functionality:</p>
+                <p>KarāraOS uses cookies and similar technologies for essential functionality:</p>
                 <div className="space-y-3">
                   <div>
                     <h4 className="font-semibold">Essential Cookies (Required)</h4>
@@ -569,7 +569,7 @@ export default function PrivacyPolicyPage() {
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 <p>
-                  RCCMS is not intended for use by individuals under the age of 18. We do not knowingly collect 
+                  KarāraOS is not intended for use by individuals under the age of 18. We do not knowingly collect 
                   personal information from children.
                 </p>
                 <p className="text-muted-foreground">
@@ -593,7 +593,7 @@ export default function PrivacyPolicyPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
-                <p>RCCMS is designed to comply with major privacy regulations including:</p>
+                <p>KarāraOS is designed to comply with major privacy regulations including:</p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="p-4 rounded-lg border">
                     <h4 className="font-semibold mb-2">GDPR (EU)</h4>
@@ -658,7 +658,7 @@ export default function PrivacyPolicyPage() {
                   </ul>
                 </div>
                 <p className="text-muted-foreground">
-                  Continued use of RCCMS after changes constitutes acceptance of the updated policy. If you do not 
+                  Continued use of KarāraOS after changes constitutes acceptance of the updated policy. If you do not 
                   agree with changes, please discontinue use and contact your administrator.
                 </p>
               </CardContent>
@@ -710,9 +710,9 @@ export default function PrivacyPolicyPage() {
 
             {/* Footer */}
             <div className="text-center text-sm text-muted-foreground py-6">
-              <p>© 2025 RCCMS. All rights reserved.</p>
+              <p>© 2025 KarāraOS. All rights reserved.</p>
               <p className="mt-2">
-                This privacy policy is effective as of December 2025 and applies to all users of the RCCMS platform.
+                This privacy policy is effective as of December 2025 and applies to all users of the KarāraOS platform.
               </p>
             </div>
           </div>

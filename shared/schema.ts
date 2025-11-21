@@ -1819,7 +1819,7 @@ export type SystemError = typeof systemErrors.$inferSelect;
 export const companySettings = pgTable("company_settings", {
   id: varchar("id").primaryKey().default("singleton"),
   // Company Names
-  companyNameEn: varchar("company_name_en").notNull().default("RCCMS"),
+  companyNameEn: varchar("company_name_en").notNull().default("KarāraOS"),
   companyNameAr: varchar("company_name_ar").notNull().default("نظام إدارة عقود تأجير السيارات"),
   companyLegalNameEn: varchar("company_legal_name_en").notNull().default("RENTAL CAR COMPANY LLC"),
   companyLegalNameAr: varchar("company_legal_name_ar").notNull().default("شركة تأجير السيارات ش.ذ.م.م"),
