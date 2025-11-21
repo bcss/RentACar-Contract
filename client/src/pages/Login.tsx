@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState, useEffect } from 'react';
-import loginImage from '@assets/Gemini_Generated_Image_lcmxsqlcmxsqlcmx_1763761084135.png';
+import loginImage from '@assets/login_illustration_optimized.webp';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
