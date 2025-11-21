@@ -29,13 +29,16 @@ As of November 21, 2025, KarāraOS has transitioned to a **desktop-only applicat
 ### Desktop-Only Wrapper Component
 Created `client/src/components/DesktopOnly.tsx`:
 - Detects screen width on mount and resize events
-- Shows professional "Desktop Required" message for screens < 1024px
+- Shows beautiful card-based "Desktop Required" screen for devices < 1024px
 - Features:
-  - Bilingual message (English/Arabic)
-  - Rental car illustration
-  - Minimum resolution recommendation
-  - Company branding
-  - Responsive to window resize (allows user to rotate tablet)
+  - **Beautiful Modern Design**: Card-based layout with gradients and professional styling
+  - **Visual Elements**: Desktop monitor icon, background image with overlay, shadow effects
+  - **Information Cards**: Minimum width (1024px) and recommended resolution (1366×768) in styled cards
+  - **Device Badges**: Shows supported devices (Desktop Computers, Laptops, Large Tablets)
+  - **Bilingual Support**: Complete English/Arabic translations with RTL/LTR support
+  - **Responsive**: Card adapts to different screen sizes below 1024px
+  - **Branding**: KarāraOS logo and tagline with footer
+  - **Live Detection**: Responds to window resize (allows user to rotate tablet to landscape)
 
 ### App-Level Integration
 Modified `client/src/App.tsx`:
