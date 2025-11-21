@@ -4959,3 +4959,37 @@ POST /api/vehicle-transfers/:id/cancel      ✅ Cancel transfer
 *End of Comprehensive System Audit Report*
 *For detailed technical implementation, see: TECHNICAL_DOCUMENTATION.md*
 *For feature inventory, see: MASTER_FEATURE_LIST.md*
+
+---
+
+## Changelog
+
+### November 21, 2025 - P1 Critical Fixes Post-Audit
+
+**Code Fixes Applied After System Audit Completion:**
+
+Following the comprehensive November 18, 2025 system audit, 3 critical TypeScript LSP errors were discovered and resolved in `server/routes/contractRoutes.ts`:
+
+1. **Driver Assignments Method Correction** (Line 182)
+   - Fixed incorrect method name `getDriverAssignmentsByContract()` → `getDriverAssignments({ contractId })`
+   - Impact: Driver costs now calculated correctly in contract details endpoint
+
+2. **VAT Field Schema Alignment** (Lines 306-316)
+   - Removed non-existent `vatRate` storage field
+   - VAT now dynamically fetched from `companySettings.vatPercentage` table
+   - Impact: Centralized VAT configuration, admin-controllable
+
+3. **Financial Calculation Standardization** (Lines 316-333)
+   - Standardized outstanding balance formula: `(totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid`
+   - Contract creation now honors `totalExtraCharges` from request body (not hard-coded to 0)
+   - Impact: Consistent financial reporting across all endpoints
+
+**CSRF Security Verification:**
+- User concern "CSRF completely missing" investigated and dismissed
+- Confirmed full CSRF implementation:
+  - Endpoint `/api/csrf-token` active
+  - Global middleware protection on all state-changing requests
+  - 9 comprehensive integration tests
+  - Double-submit cookie pattern with timing-safe comparison
+
+**System Status:** ✅ All fixes applied successfully, application running without errors, all security controls active
