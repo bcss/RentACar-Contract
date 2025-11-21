@@ -27,6 +27,7 @@ import { validateFinancialInput, validateEditReason } from "../utils/validation"
 import { logSystemError } from "../utils/errorLogger";
 import { calculateContractDriverCosts } from "../utils/driverCostCalculator";
 import { notificationService } from "../services/notificationService";
+import { calculateContractTotals } from "../services/contractFinancials";
 
 const router = Router();
 
@@ -112,11 +113,21 @@ router.get("/unclosed-alerts", isAuthenticated, async (req: any, res) => {
           return sum + validateFinancialInput(payment.amount || '0', 'payment amount');
         }, 0);
         
-        // Calculate outstanding balance
-        const totalAmount = validateFinancialInput(contract.totalAmount || '0', 'total amount');
-        const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
-        const securityDeposit = validateFinancialInput(contract.securityDeposit || '0', 'security deposit');
-        const outstandingBalance = (totalAmount + totalExtraCharges) - securityDeposit - totalPaid;
+        // FIXED: Include driver charges in outstanding balance calculation
+        // Get driver assignments for this contract
+        const driverAssignments = await storage.getDriverAssignments({ contractId: contract.id });
+        const { totalDriverCharges } = calculateContractDriverCosts(driverAssignments);
+        
+        // Use centralized financial calculator for consistency
+        const financials = calculateContractTotals({
+          totalAmount: contract.totalAmount || '0',
+          totalExtraCharges: contract.totalExtraCharges || '0',
+          totalDriverCharges: totalDriverCharges,
+          securityDeposit: contract.securityDeposit || '0',
+          totalPaid: totalPaid,
+        });
+        
+        const outstandingBalance = financials.outstandingBalance;
         
         // Get handler info
         const handler = await storage.getUser(contract.createdBy);
@@ -172,20 +183,19 @@ router.get("/:id", isAuthenticated, async (req: any, res) => {
     const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
       return sum + validateFinancialInput(payment.amount || '0', 'payment amount');
     }, 0);
-    const totalAmount = validateFinancialInput(contract.totalAmount || '0', 'total amount');
-    const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
     
     // BRANCH & DRIVER SERVICE INTEGRATION: Include driver service costs in total (VAT-inclusive)
     const driverAssignments = await storage.getDriverAssignments({ contractId: contract.id });
     const { totalDriverCharges, totalDriverSurcharges, totalDriverVat } = calculateContractDriverCosts(driverAssignments);
     
-    // CRITICAL FIX: totalDriverCharges now includes VAT when applicable
-    const totalDue = totalAmount + totalExtraCharges + totalDriverCharges;
-    
-    // Calculate precise outstanding balance
-    const totalPaidRounded = Math.round(totalPaid * 100) / 100;
-    const totalDueRounded = Math.round(totalDue * 100) / 100;
-    const computedOutstanding = Math.max(0, totalDueRounded - totalPaidRounded);
+    // Use centralized financial calculator for consistency
+    const financials = calculateContractTotals({
+      totalAmount: contract.totalAmount || '0',
+      totalExtraCharges: contract.totalExtraCharges || '0',
+      totalDriverCharges: totalDriverCharges,
+      securityDeposit: contract.securityDeposit || '0',
+      totalPaid: totalPaid,
+    });
     
     // Return contract with complete financial breakdown including VAT-inclusive driver costs
     res.json({
@@ -195,9 +205,9 @@ router.get("/:id", isAuthenticated, async (req: any, res) => {
       totalDriverSurcharges: totalDriverSurcharges.toFixed(2),
       totalDriverVat: totalDriverVat.toFixed(2),
       // Update total due to include all charges (rental + extras + driver with VAT)
-      totalDue: totalDueRounded.toFixed(2),
+      totalDue: financials.totalDue.toFixed(2),
       // Recalculated outstanding balance includes driver charges with VAT
-      outstandingBalance: computedOutstanding.toFixed(2),
+      outstandingBalance: Math.max(0, financials.outstandingBalance).toFixed(2),
     });
   } catch (error) {
     console.error("Error fetching contract:", error);
@@ -314,15 +324,23 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     // CRITICAL FIX: Use totalExtraCharges from request if provided, otherwise default to 0
     // This ensures upfront extra charges are not silently dropped during creation
     const totalExtraCharges = validateFinancialInput(validatedData.totalExtraCharges || '0', 'total extra charges');
+    const securityDeposit = validateFinancialInput(validatedData.securityDeposit || '0', 'security deposit');
     
     // Driver charges are 0 at creation (added later via driver assignments)
     const totalDriverCharges = 0;
     
-    // CRITICAL FIX: Outstanding balance formula matches GET /:id and reports
-    // Formula: (totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid
-    // At creation: totalPaid = 0, totalExtraCharges = 0, totalDriverCharges = 0
-    const totalDue = totalAmount + totalExtraCharges + totalDriverCharges;
-    const outstandingBalance = totalDue - securityDeposit; // No payments yet, so don't subtract totalPaid
+    // Use centralized financial calculator for consistency
+    // At creation: totalPaid = 0, totalExtraCharges from form, totalDriverCharges = 0
+    const financials = calculateContractTotals({
+      totalAmount: totalAmount,
+      totalExtraCharges: totalExtraCharges,
+      totalDriverCharges: totalDriverCharges,
+      securityDeposit: securityDeposit,
+      totalPaid: 0, // No payments at creation
+    });
+    
+    const totalDue = financials.totalDue;
+    const outstandingBalance = financials.outstandingBalance;
     
     const contract = await storage.createContract({
       ...validatedData,
@@ -678,32 +696,10 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
       auditNote += ` | Fuel charge auto-calculated: ${fuelChargeDetails}`;
     }
     
-    // Calculate outstanding balance
-    const totalAmount = validateFinancialInput(contract.totalAmount, 'total amount');
+    // FIXED: Calculate outstanding balance using centralized calculator with driver charges
     const totalExtraChargesNum = validateFinancialInput(totalExtraCharges || '0', 'extra charges');
-    const securityDeposit = validateFinancialInput(contract.securityDeposit, 'security deposit');
     
-    if (!isFinite(totalAmount)) {
-      return res.status(400).json({ 
-        message: "Invalid total amount in contract. Contract data is corrupted or incomplete." 
-      });
-    }
-    if (!isFinite(totalExtraChargesNum)) {
-      return res.status(400).json({ 
-        message: "Invalid extra charges amount. Please verify the extra charges data." 
-      });
-    }
-    
-    let depositPaidAmount = 0;
-    if (contract.depositPaid) {
-      if (!isFinite(securityDeposit)) {
-        return res.status(400).json({ 
-          message: "Invalid security deposit amount. Contract marked as deposit paid but amount is missing or invalid." 
-        });
-      }
-      depositPaidAmount = securityDeposit;
-    }
-    
+    // Get contract payments
     const contractPayments = await storage.getPaymentsByContract(contract.id);
     
     const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
@@ -715,8 +711,27 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
       }
     }, 0);
     
-    const calculatedOutstandingBalance = Math.max(0, totalAmount + totalExtraChargesNum - depositPaidAmount - totalPaid);
-    const roundedOutstandingBalance = Math.round(calculatedOutstandingBalance * 100) / 100;
+    // Get driver assignments for this contract
+    const driverAssignments = await storage.getDriverAssignments({ contractId: contract.id });
+    const { totalDriverCharges } = calculateContractDriverCosts(driverAssignments);
+    
+    // Determine deposit amount based on depositPaid flag
+    let depositPaidAmount = 0;
+    const securityDeposit = validateFinancialInput(contract.securityDeposit, 'security deposit');
+    if (contract.depositPaid && isFinite(securityDeposit)) {
+      depositPaidAmount = securityDeposit;
+    }
+    
+    // Use centralized financial calculator for consistency
+    const financials = calculateContractTotals({
+      totalAmount: contract.totalAmount,
+      totalExtraCharges: totalExtraChargesNum,
+      totalDriverCharges: totalDriverCharges,
+      securityDeposit: depositPaidAmount,
+      totalPaid: totalPaid,
+    });
+    
+    const roundedOutstandingBalance = Math.max(0, financials.outstandingBalance);
     
     if (isNaN(roundedOutstandingBalance)) {
       console.error(`NaN outstanding balance detected for contract ${contract.id}`);
