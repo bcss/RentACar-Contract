@@ -46,6 +46,11 @@ export default function Login() {
     document.title = 'KarāraOS';
   }, []);
   
+  // Fetch CSRF token on mount
+  useEffect(() => {
+    fetchCsrfToken();
+  }, []);
+  
   // Fetch company branding (public endpoint - no auth required)
   const { data: branding } = useQuery<{companyNameEn: string | null, companyNameAr: string | null, logoUrl: string | null}>({
     queryKey: ['/api/branding'],
