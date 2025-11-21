@@ -3,7 +3,7 @@ import request from 'supertest';
 import express from 'express';
 import { setupTestApp, getCsrfToken } from '../utils/testHelpers';
 import { db } from '../../server/db';
-import { payments, vehicleInspections, contracts, vehicles, customers } from '../../shared/schema';
+import { payments, vehicleInspections, contracts, vehicles, customers, branches, users } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -49,19 +49,30 @@ describe('Payments UPDATE and Inspections UPDATE Runtime Verification', () => {
       .send({ username: 'superadmin', password: 'Admin@123456' });
 
     expect(loginRes.status).toBe(200);
-    const loginCookies = loginRes.headers['set-cookie'];
-    cookies = Array.isArray(loginCookies) ? loginCookies : [loginCookies || ''];
+    // Preserve session cookies from login (don't overwrite!)
+    cookies = loginRes.headers['set-cookie'] || cookies;
 
     // Refresh CSRF token after login
     const newTokenRes = await request(app)
       .get('/api/csrf-token')
       .set('Cookie', cookies);
     csrfToken = newTokenRes.body.csrfToken;
+    // Merge cookies (session + CSRF) - don't replace entirely
     const newCookies = newTokenRes.headers['set-cookie'];
-    cookies = Array.isArray(newCookies) ? newCookies : [newCookies || ''];
+    if (newCookies) {
+      cookies = Array.isArray(newCookies) ? newCookies : [newCookies];
+    }
+
+    // Get superadmin user ID for createdBy
+    const superadmins = await db.select().from(users).where(eq(users.username, 'superadmin')).limit(1);
+    if (superadmins.length === 0) {
+      throw new Error('Superadmin user not found in test database');
+    }
+    const superadmin = superadmins[0];
+    const createdBy: string = superadmin.id;
 
     // Create or get test customer
-    let existingCustomers = await db.select().from(customers).limit(1);
+    const existingCustomers = await db.select().from(customers).limit(1);
     let testCustomer;
     
     if (existingCustomers.length === 0) {
@@ -72,34 +83,51 @@ describe('Payments UPDATE and Inspections UPDATE Runtime Verification', () => {
         nationality: 'UAE',
         phone: '0501234567',
         licenseNumber: 'LICENSE123',
+        createdBy,
       }).returning();
       testCustomer = createdCustomer;
     } else {
       testCustomer = existingCustomers[0];
     }
 
+    // Ensure a branch exists
+    const existingBranches = await db.select().from(branches).limit(1);
+    let testBranch;
+    
+    if (existingBranches.length === 0) {
+      // Seed test branch if none exists
+      const [createdBranch] = await db.insert(branches).values({
+        branchCode: 'TEST-001',
+        nameEn: 'Test Branch',
+        nameAr: 'فرع تجريبي',
+        cityEn: 'Dubai',
+        cityAr: 'دبي',
+        phone: '0501234567',
+        isActive: true,
+        createdBy,
+      }).returning();
+      testBranch = createdBranch;
+    } else {
+      testBranch = existingBranches[0];
+    }
+
     // Create or get test vehicle  
-    let existingVehicles = await db.select().from(vehicles).limit(1);
+    const existingVehicles = await db.select().from(vehicles).limit(1);
     let testVehicle;
     
     if (existingVehicles.length === 0) {
-      // Get first branch for vehicle assignment
-      const [branch] = await db.select().from(branches).limit(1);
-      
       // Seed test vehicle if none exists
       const [createdVehicle] = await db.insert(vehicles).values({
         registration: 'TEST-123',
         make: 'Toyota',
         model: 'Camry',
-        year: 2024,
+        year: '2024',
         color: 'White',
-        category: 'standard',
         fuelType: 'petrol',
-        transmission: 'automatic',
         dailyRate: '100.00',
         status: 'available',
-        branchId: branch.id,
-        currentOdometer: 10000,
+        branchId: testBranch.id,
+        createdBy,
       }).returning();
       testVehicle = createdVehicle;
     } else {

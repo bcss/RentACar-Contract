@@ -8,13 +8,7 @@ import cookieParser from 'cookie-parser';
 import { storage } from '../../server/storage';
 import { verifyPassword } from '../../server/auth/passwordUtils';
 import { csrfProtection, csrfTokenGenerator } from '../../server/middleware/csrf';
-import authRoutes from '../../server/routes/authRoutes';
-import customerRoutes from '../../server/routes/customerRoutes';
-import vehicleRoutes from '../../server/routes/vehicleRoutes';
-import userRoutes from '../../server/routes/userRoutes';
-import paymentRoutes from '../../server/routes/paymentRoutes';
-import contractRoutes from '../../server/routes/contractRoutes';
-import reportRoutes from '../../server/routes/reportRoutes';
+import { registerRoutes } from '../../server/routes';
 
 /**
  * Test Helper Functions
@@ -142,37 +136,9 @@ export async function setupTestApp(): Promise<express.Application> {
     }
   });
 
-  // Apply CSRF protection to all routes AFTER login and csrf-token
-  // This protects POST/PUT/PATCH/DELETE while allowing /api/login and /api/csrf-token to bypass
-  app.use(csrfProtection);
-  
-  // Add settings routes AFTER CSRF protection
-  app.get('/api/settings', async (req: any, res: any) => {
-    try {
-      const settings = await storage.getCompanySettings();
-      res.json(settings);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch settings" });
-    }
-  });
-
-  app.put('/api/settings', async (req: any, res: any) => {
-    try {
-      await storage.updateCompanySettings(req.body);
-      res.json({ message: "Settings updated successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to update settings" });
-    }
-  });
-  
-  // Register all route modules (same pattern as server/routes/index.ts)
-  app.use('/api', authRoutes);
-  app.use('/api/customers', customerRoutes);
-  app.use('/api/vehicles', vehicleRoutes);
-  app.use('/api/users', userRoutes);
-  app.use('/api/contracts', contractRoutes);
-  app.use('/api', paymentRoutes);
-  app.use('/api/reports', reportRoutes);
+  // Register all routes using production route orchestrator
+  // This ensures auth/session/CSRF middleware ordering matches production
+  await registerRoutes(app);
   
   return app;
 }
@@ -182,8 +148,7 @@ export async function setupTestApp(): Promise<express.Application> {
  */
 export function assertUUID(value: unknown, fieldName: string = 'id'): void {
   expect(value).toBeTypeOf('string');
-  expect(value).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, 
-    `${fieldName} should be a valid UUID`);
+  expect(value).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
 }
 
 /**
