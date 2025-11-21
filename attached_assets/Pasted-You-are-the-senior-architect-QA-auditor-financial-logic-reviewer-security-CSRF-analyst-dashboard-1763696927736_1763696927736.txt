@@ -1,0 +1,358 @@
+You are the senior architect, QA auditor, financial logic reviewer, security/CSRF analyst, dashboard analyst, and documentation governor.
+
+Your mission is to execute a complete system audit across:
+	•	Functionality
+	•	Logic correctness
+	•	Validation & error handling
+	•	Financial calculation accuracy
+	•	Data storage and persistence correctness
+	•	Hard-coded data removal
+	•	Dashboard data integrity
+	•	Security (especially CSRF & permissions)
+	•	Performance
+	•	Testing completeness
+	•	Documentation consistency
+
+ONLY update existing documents in /docs.
+NEVER create new documents.
+
+⸻
+
+📥 MANDATORY PROCESSING RULES
+
+1️⃣ Scan all documents under /docs
+	•	Read every file recursively.
+	•	Detect document roles from:
+	•	Filename
+	•	Top-level heading
+	•	Section titles
+	•	Content
+
+2️⃣ Update only relevant documents
+	•	If a file already plays the role of:
+	•	architecture doc
+	•	feature list
+	•	gap analysis
+	•	financial logic summary
+	•	audit report
+	•	testing guide
+	•	security report
+	•	dashboard spec
+	•	performance report
+…then update that file, regardless of its exact name.
+
+3️⃣ DO NOT create new documents
+
+If a document is missing:
+	•	Do NOT create it.
+	•	Just update the closest equivalent that already exists.
+
+4️⃣ Add ## Changelog to any modified document
+
+Including:
+	•	Date
+	•	Sections updated
+	•	Summary of changes
+
+⸻
+
+🔍 WHAT TO AUDIT AND WHICH DOCS TO UPDATE
+
+Below is the complete audit scope.
+For each section, update only those documents under /docs that clearly match the role.
+
+⸻
+
+1️⃣ FUNCTIONALITY & LOGICAL CORRECTNESS
+
+Tasks
+	•	Understand the actual system behaviour from the codebase.
+	•	Compare against:
+	•	architecture docs
+	•	functional docs
+	•	flow diagrams
+	•	feature lists
+	•	admin/user guides
+
+Update any doc that matches roles like:
+	•	Architecture
+	•	Contract flow
+	•	Workflow behaviour
+	•	Feature list / capability list
+	•	System brochure
+	•	Admin suite documentation
+
+Matching examples (if they exist):
+	•	ARCHITECTURE.md
+	•	MASTER_FEATURE_LIST.md
+	•	MISSING_FEATURES.md
+	•	CONTRACT_FLOW.md
+	•	CONTRACT_WORKFLOW_IMPLEMENTATION.md
+	•	WORKFLOW_DIAGRAM.md
+	•	SYSTEM_BROCHURE.md
+	•	SYSTEM_ADMINISTRATOR_SUITE.md
+
+⸻
+
+2️⃣ SPEC vs IMPLEMENTATION GAP ANALYSIS
+
+Tasks:
+	•	Cross-verify documented behaviour vs actual code.
+	•	Mark gaps:
+	•	Fully working (✅)
+	•	Partially working (⚠️)
+	•	Missing/broken (❌)
+	•	Reference actual file:function lines in code.
+
+Update:
+	•	Any document with a purpose similar to:
+	•	Verified gaps
+	•	Implementation vs spec
+	•	Audit summary
+	•	Functional deviations
+
+Matching existing files:
+	•	VERIFIED_GAP_ANALYSIS.md
+	•	Or any other file with a similar purpose/structure.
+
+⸻
+
+3️⃣ VALIDATION & ERROR HANDLING
+
+Tasks:
+	•	Identify all inputs:
+	•	API endpoints
+	•	Web forms
+	•	File uploads
+	•	Webhooks
+	•	Background jobs
+	•	Check:
+	•	Validation rules
+	•	Sanitization
+	•	Error messages
+	•	HTTP response codes
+	•	Missing edge-case handling
+
+Update:
+	•	Whatever existing docs cover validation, robustness, testing, or QA.
+
+Matching examples:
+	•	ROBUSTNESS_AUDIT.md
+	•	TESTING_GUIDE.md
+	•	TESTING_RESULTS.md
+	•	QA_COMPREHENSIVE_REPORT.md
+
+⸻
+
+4️⃣ STORAGE & DATA PERSISTENCE VALIDATION (NEW – EXPLICIT)
+
+Tasks:
+	•	For all critical entities (e.g., contracts, invoices, payments, users, vehicles…):
+	•	Test full CRUD:
+	•	CREATE
+	•	READ
+	•	UPDATE
+	•	DELETE
+	•	Verify values written to the database remain correct after:
+	•	server restart
+	•	refresh
+	•	multi-step workflows
+	•	Check relational integrity:
+	•	foreign keys
+	•	cascading
+	•	required fields
+
+Update:
+	•	Any testing/QA/architecture doc clearly linked to data behaviour.
+
+Likely targets:
+	•	TESTING_GUIDE.md
+	•	TESTING_RESULTS.md
+	•	QA_COMPREHENSIVE_REPORT.md
+	•	PROJECT_ANALYSIS.md
+	•	ARCHITECTURE.md (if actual storage behaviour differs)
+
+⸻
+
+5️⃣ NO HARDCODED DATA (DATA BINDING INTEGRITY)
+
+Tasks:
+	•	Scan entire frontend/backend for:
+	•	const data = [...]
+	•	sample or fake arrays
+	•	static dashboard values
+	•	placeholders (mock, demo, lorem, sample, fixture, FAKE_)
+	•	Ensure:
+	•	All dashboard metrics
+	•	All list/table contents
+	•	All financial numbers
+come from the database, not constants.
+
+Update:
+	•	Documentation in any file related to QA, testing, dashboard, or system correctness.
+
+Likely targets:
+	•	QA_COMPREHENSIVE_REPORT.md
+	•	VERIFIED_GAP_ANALYSIS.md
+	•	TESTING_GUIDE.md
+	•	Any dashboard-related doc (SYSTEM_BROCHURE.md, etc.)
+
+⸻
+
+6️⃣ FINANCIAL CALCULATION INTEGRITY (CRITICAL)
+
+Tasks:
+	•	Identify ALL financial formulas:
+	•	Revenue
+	•	Contract totals
+	•	VAT/tax
+	•	Discounts
+	•	Surcharges
+	•	Penalties
+	•	Overdue interest
+	•	Outstanding balances
+	•	Collection KPIs
+	•	Validate each formula:
+	•	correct math
+	•	correct rounding
+	•	correct boundaries
+	•	correct currency precision
+	•	Ensure backend, DB, and UI all compute the same values.
+	•	Add missing tests.
+
+Update relevant documents such as:
+	•	QA_COMPREHENSIVE_REPORT.md (financial correctness section)
+	•	TESTING_GUIDE.md (financial test cases)
+	•	TESTING_RESULTS.md (execution summary)
+
+If the /docs folder includes additional financial-relevant docs under different names, update them too.
+
+⸻
+
+7️⃣ SECURITY & CSRF
+
+Tasks:
+	•	Check:
+	•	Authentication logic
+	•	Role/permissions logic
+	•	Sensitive data protection
+	•	CSRF middleware presence
+	•	Token generation
+	•	Token injection
+	•	Token verification
+	•	Verify all mutating endpoints enforce CSRF correctly.
+	•	Add negative (403 expected) and positive tests.
+
+Update:
+	•	Any file dealing with security, roles, or testing.
+
+Example matches:
+	•	SECURITY_AUDIT.md
+	•	ROLE_PERMISSIONS.md
+	•	QA_COMPREHENSIVE_REPORT.md (security section)
+	•	TESTING_GUIDE.md
+
+⸻
+
+8️⃣ PERFORMANCE
+
+Tasks:
+	•	Detect bottlenecks:
+	•	N+1 queries
+	•	Missing indexes
+	•	Heavy loops
+	•	Excessive memory usage
+	•	Inefficient pagination
+	•	Provide actionable mitigation guidance.
+
+Update:
+	•	PERFORMANCE_AUDIT.md
+	•	QA_COMPREHENSIVE_REPORT.md (if it includes performance)
+	•	PRODUCTION_READINESS_REPORT.md (performance section only)
+
+⸻
+
+9️⃣ DASHBOARD LOGIC & MODERNIZATION
+
+Tasks:
+	•	Validate dashboard flows:
+	•	All data DB-driven
+	•	No hardcoded KPIs
+	•	Correct filters
+	•	Correct time ranges
+	•	Recommend visual improvements:
+	•	Line charts
+	•	Bar charts
+	•	Gauges
+	•	Trends
+	•	Comparisons
+	•	Colour-coded indicators
+	•	Interactive filters
+
+Update:
+
+Any document that clearly covers dashboards/features/analytics, such as:
+	•	SYSTEM_BROCHURE.md
+	•	compelling-features.md
+	•	Any analytics/reporting/dashboards doc under a different name.
+
+⸻
+
+🔟 TESTING FRAMEWORK COMPLETENESS
+
+If tests for ANY of the following are missing or weak:
+	•	CSRF
+	•	Financial calculations
+	•	CRUD persistence
+	•	Hardcoded vs DB data
+	•	Workflow/business logic
+	•	Error handling
+	•	Validation
+
+→ Then update:
+	•	TESTING_GUIDE.md
+	•	TESTING_RESULTS.md
+	•	QA_COMPREHENSIVE_REPORT.md
+
+ONLY update docs that exist.
+
+⸻
+
+1️⃣1️⃣ DOCUMENT CONSISTENCY & CORRECTION
+
+Tasks:
+	•	Fix contradictions between existing docs.
+	•	Update outdated sections.
+	•	Align feature descriptions, flows, and architecture with actual code.
+	•	DO NOT restructure folders or create new docs.
+
+Update only those docs that need correction.
+
+⸻
+
+📦 FINAL OUTPUT REQUIRED
+
+Replit must output:
+	1.	List of updated documents (actual filenames)
+	2.	Reason for each update
+	3.	P0 / P1 / P2 issue summary, covering:
+	•	Functional logic
+	•	Validation
+	•	Security/CSRF
+	•	Performance
+	•	Financial logic
+	•	Data binding & dashboards
+	•	Storage/persistence
+	4.	Commands to run updated tests
+	5.	Any uncertain items with file + line + recommended fix
+
+⸻
+
+🎯 SUCCESS CRITERIA
+	•	No new docs created
+	•	Only relevant docs updated
+	•	All major system behaviours correctly audited
+	•	All financial and dashboard values DB-driven
+	•	All formulas correct
+	•	All security patterns validated
+	•	Documentation finally reflects the system truth
