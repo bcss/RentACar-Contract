@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState, useEffect } from 'react';
+import loginImage from '@assets/Gemini_Generated_Image_lcmxsqlcmxsqlcmx_1763761084135.png';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -103,15 +104,14 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Left Panel - Company Logo */}
+      {/* Left Panel - Rental Car Illustration */}
       <div className="w-full lg:w-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center p-6 lg:p-12">
-        {branding?.logoUrl && (
-          <img 
-            src={branding.logoUrl} 
-            alt={companyName} 
-            className="w-full max-w-md lg:max-w-lg object-contain"
-          />
-        )}
+        <img 
+          src={loginImage} 
+          alt="Rental Car Management" 
+          className="w-full max-w-md lg:max-w-lg object-contain"
+          data-testid="img-login-illustration"
+        />
       </div>
       
       {/* Right Panel - Login Form */}
