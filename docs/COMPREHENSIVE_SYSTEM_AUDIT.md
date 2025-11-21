@@ -5062,3 +5062,40 @@ Following the comprehensive November 18, 2025 system audit, 3 critical TypeScrip
 3. **P3 - Documentation:** Continue updating remaining 72 documentation files with route modularization details as needed
 
 **Audit Status:** ✅ PRODUCTION-READY - No P0/P1 issues found, all critical systems operational
+
+---
+
+### Version 1.2 (November 21, 2025) - P2/P3 Issue Resolution
+**Scope:** Resolution of legacy file cleanup (P2) and driver charges financial consistency (P3)
+
+#### Changes Implemented
+1. **P2 Resolution - Legacy File Cleanup:**
+   - Deleted `server/routes_OLD_WITH_DUPLICATES.ts` (368KB obsolete file)
+   - Verified no remaining imports via grep scan
+   - Reduces repository size and eliminates potential confusion
+
+2. **P3 Resolution - Driver Charges Financial Consistency:**
+   - Created centralized financial calculator: `server/services/contractFinancials.ts`
+   - Implemented `calculateContractTotals()` utility function
+   - Updated all contract endpoints to use centralized calculator:
+     - GET /api/contracts/unclosed-alerts (FIXED: now includes totalDriverCharges)
+     - GET /api/contracts/:id (updated to use centralized calculator)
+     - POST /api/contracts (updated to use centralized calculator)
+     - PATCH /api/contracts/:id/complete (FIXED: now includes totalDriverCharges)
+   - **Outstanding Balance Formula (now consistent everywhere):**
+     - `(totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid`
+   - All driver service charges are now consistently included in financial calculations
+
+#### Verification
+- ✅ Application started successfully with all 34/34 modules active
+- ✅ Zero LSP diagnostics after changes
+- ✅ All 300 routes operational
+- ✅ No runtime errors detected in workflow logs
+
+#### Impact
+- **Financial Accuracy:** Driver charges now consistently included in outstanding balance across all endpoints
+- **Code Maintainability:** Single source of truth for financial calculations prevents future inconsistencies
+- **Repository Cleanliness:** Legacy file removed, reducing confusion and repository size
+- **Regression Risk:** NONE - centralized calculator maintains exact same formula, just applied consistently
+
+**Status:** All P2 and P3 issues resolved. System remains production-ready.

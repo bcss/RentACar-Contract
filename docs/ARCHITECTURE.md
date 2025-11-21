@@ -177,6 +177,42 @@ RCCMS has completed a comprehensive modularization transformation from a monolit
 
 ---
 
+### **Financial Calculation Service**
+**Location:** `server/services/contractFinancials.ts`
+
+Centralized financial calculator ensuring consistency across all contract endpoints. Created November 21, 2025 to resolve driver charges calculation inconsistencies.
+
+**Core Function:**
+```typescript
+calculateContractTotals(inputs: ContractFinancialInputs): ContractFinancialBreakdown
+```
+
+**Outstanding Balance Formula:**
+```
+(totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid
+```
+
+**Where:**
+- `totalAmount`: Base rental amount (including VAT)
+- `totalExtraCharges`: Extra km, fuel, damage, fines, other charges
+- `totalDriverCharges`: Driver service costs (VAT-inclusive)
+- `securityDeposit`: Initial deposit paid
+- `totalPaid`: Sum of all payments made
+
+**Used By:**
+- POST /api/contracts (contract creation)
+- GET /api/contracts/:id (contract retrieval)
+- GET /api/contracts/unclosed-alerts (alert system)
+- PATCH /api/contracts/:id/complete (contract completion)
+
+**Benefits:**
+- Single source of truth prevents calculation inconsistencies
+- Reduces code duplication across endpoints
+- Ensures driver charges consistently included in totals
+- Simplifies testing and validation
+
+---
+
 ### **Authentication Endpoints**
 ```typescript
 GET  /api/auth/user                 // Get current user

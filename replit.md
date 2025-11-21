@@ -24,6 +24,7 @@ Preferred communication style: Simple, everyday language.
 - **Mobile Backend Infrastructure:** Prepared endpoints for future mobile applications.
 - **Automation Orchestrator:** Background job scheduler with cron jobs for risk scoring, document expiry, and reminders.
 - **Communications Platform:** Multi-provider SMS/Email infrastructure with priority-based routing and automatic failover.
+- **Financial Calculation Service:** Centralized calculator (`server/services/contractFinancials.ts`) ensuring consistent outstanding balance formula across all endpoints: `(totalAmount + totalExtraCharges + totalDriverCharges) - securityDeposit - totalPaid`. Single source of truth prevents calculation inconsistencies.
 - **Testing:** Enhanced infrastructure with `setupTestApp()` for integration testing via supertest, covering financial calculations, business logic, security validation, and state machine transitions.
 
 ### Data Storage
