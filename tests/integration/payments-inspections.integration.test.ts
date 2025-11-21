@@ -60,9 +60,51 @@ describe('Payments UPDATE and Inspections UPDATE Runtime Verification', () => {
     const newCookies = newTokenRes.headers['set-cookie'];
     cookies = Array.isArray(newCookies) ? newCookies : [newCookies || ''];
 
-    // Create test contract
-    const [testCustomer] = await db.select().from(customers).limit(1);
-    const [testVehicle] = await db.select().from(vehicles).limit(1);
+    // Create or get test customer
+    let existingCustomers = await db.select().from(customers).limit(1);
+    let testCustomer;
+    
+    if (existingCustomers.length === 0) {
+      // Seed test customer if none exists
+      const [createdCustomer] = await db.insert(customers).values({
+        nameEn: 'Test Customer',
+        nationalId: 'TEST123456',
+        nationality: 'UAE',
+        phone: '0501234567',
+        licenseNumber: 'LICENSE123',
+      }).returning();
+      testCustomer = createdCustomer;
+    } else {
+      testCustomer = existingCustomers[0];
+    }
+
+    // Create or get test vehicle  
+    let existingVehicles = await db.select().from(vehicles).limit(1);
+    let testVehicle;
+    
+    if (existingVehicles.length === 0) {
+      // Get first branch for vehicle assignment
+      const [branch] = await db.select().from(branches).limit(1);
+      
+      // Seed test vehicle if none exists
+      const [createdVehicle] = await db.insert(vehicles).values({
+        registration: 'TEST-123',
+        make: 'Toyota',
+        model: 'Camry',
+        year: 2024,
+        color: 'White',
+        category: 'standard',
+        fuelType: 'petrol',
+        transmission: 'automatic',
+        dailyRate: '100.00',
+        status: 'available',
+        branchId: branch.id,
+        currentOdometer: 10000,
+      }).returning();
+      testVehicle = createdVehicle;
+    } else {
+      testVehicle = existingVehicles[0];
+    }
 
     const contractData = {
       customerId: testCustomer.id,
