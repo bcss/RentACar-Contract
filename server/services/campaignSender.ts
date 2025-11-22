@@ -141,7 +141,7 @@ export async function sendMessage(
   recipient: string,
   subject: string,
   message: string
-): Promise<{ success: boolean; externalId?: string; error?: string; providerId?: string; providerName?: string }> {
+): Promise<{ success: boolean; externalId?: string; error?: string; providerId?: string; providerName?: string; cost?: number }> {
   try {
     if (channel === 'email') {
       return await sendEmail({
