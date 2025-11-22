@@ -8,6 +8,7 @@ import { storage } from "../storage";
 import { isAuthenticated, requireEditor, requireManagerOrAdmin } from "../auth/localAuth";
 import type { User } from "@shared/schema";
 import { createAuditLog } from "../utils/routeHelpers";
+import { triggerNotification } from "../services/notificationTrigger";
 
 const router = Router();
 
@@ -67,6 +68,25 @@ router.post("/", isAuthenticated, requireEditor, async (req: Request, res: Respo
     const user = req.user as User;
     const document = await storage.createDocument({ ...req.body, createdBy: user.id });
     await createAuditLog(user.id, 'document_created', undefined, req, `Created document: ${document.documentType}`);
+    
+    // Send document uploaded notification (non-blocking)
+    if (document.entityType === 'customer' && document.entityId) {
+      const customer = await storage.getCustomer(document.entityId);
+      if (customer) {
+        const settings = await storage.getCompanySettings();
+        triggerNotification('document_uploaded', {
+          customerName: customer.nameEn || customer.nameAr || 'Customer',
+          mobile: customer.phone,
+          email: customer.email,
+          language: customer.preferredLanguage || 'en',
+        }, {
+          documentType: document.documentType,
+          documentNumber: document.documentNumber || 'N/A',
+          companyName: settings.companyNameEn || 'KarāraOS',
+        }).catch(err => console.error('[Document] Notification failed:', err));
+      }
+    }
+    
     res.status(201).json(document);
   } catch (error) {
     next(error);

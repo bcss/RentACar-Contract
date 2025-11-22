@@ -17,7 +17,7 @@ import { isAuthenticated, requireEditor, requireManagerOrAdmin, requireAdmin } f
 import { createAuditLog } from "../utils/auditLogger";
 import { validateFinancialInput } from "../utils/validation";
 import { logSystemError } from "../utils/errorLogger";
-import { notificationService } from "../services/notificationService";
+import { triggerNotification } from "../services/notificationTrigger";
 
 const router = Router();
 
@@ -200,6 +200,24 @@ router.post("/contracts/:contractId/payments", isAuthenticated, requireManagerOr
 
     // Create audit log
     await createAuditLog(userId, 'create', contractId, req, `Added payment of ${payment.amount} ${payment.currency} via ${payment.paymentMethod}`);
+
+    // Send payment received notification (non-blocking)
+    const customer = await storage.getCustomer(contract.customerId);
+    if (customer) {
+      const settings = await storage.getCompanySettings();
+      triggerNotification('payment_received', {
+        customerName: customer.nameEn || customer.nameAr || 'Customer',
+        mobile: customer.phone,
+        email: customer.email,
+        language: customer.preferredLanguage || 'en',
+      }, {
+        contractNumber: contract.contractNumber.toString(),
+        paymentAmount: payment.amount,
+        paymentMethod: payment.paymentMethod,
+        currency: payment.currency,
+        companyName: settings.companyNameEn || 'KarāraOS',
+      }).catch(err => console.error('[Payment] Notification failed:', err));
+    }
 
     res.json(payment);
   } catch (error: any) {
