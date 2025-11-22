@@ -10,7 +10,7 @@
 
 import { storage } from '../storage';
 import type { Campaign, NotificationTemplate, Customer, Driver, User } from '@shared/schema';
-import { sendEmail, sendSms } from './providerSelector';
+import { sendEmail, sendSms } from './enhancedProviderSelector';
 import { renderTemplate } from './templateRenderer';
 
 interface RecipientFilter {
