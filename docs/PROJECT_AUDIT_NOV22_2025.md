@@ -197,6 +197,47 @@ All input fields follow inline icon pattern:
 
 ---
 
+## 🔄 Development Workflows
+
+### Replit Workflow: "Start application"
+**Command:** `npm run dev`  
+**Status:** ✅ Running  
+**Description:** Starts both backend and frontend development servers
+
+**What it does:**
+1. Starts Express backend server (Node.js + TypeScript via tsx)
+2. Starts Vite frontend development server
+3. Serves frontend on port 5000
+4. Enables hot module replacement (HMR)
+5. Watches for file changes and auto-reloads
+
+**Environment:** Development (`NODE_ENV=development`)
+
+### NPM Scripts
+**Available in `package.json`:**
+
+| Script | Command | Purpose |
+|--------|---------|---------|
+| `dev` | `NODE_ENV=development tsx server/index.ts` | Development server (used by workflow) |
+| `build` | `vite build && esbuild...` | Production build (frontend + backend) |
+| `start` | `NODE_ENV=production node dist/index.js` | Production server |
+| `check` | `tsc` | TypeScript type checking |
+| `db:push` | `drizzle-kit push` | Sync database schema with Drizzle |
+
+### Build Process
+**Development:**
+- Frontend: Vite dev server with HMR
+- Backend: tsx (TypeScript execution without compilation)
+- No build step required
+
+**Production:**
+1. Frontend: `vite build` → optimized static assets
+2. Backend: `esbuild` → bundled Node.js application
+3. Output: `dist/` directory
+4. Run: `npm start`
+
+---
+
 ## 🤖 Automation & Background Jobs
 
 ### Cron Job Orchestrator
@@ -226,6 +267,13 @@ All input fields follow inline icon pattern:
 ### Laravel-Style Failure Notifications
 **Documentation:** `docs/CRON_FAILURE_NOTIFICATIONS.md`
 
+**Email Configuration:**
+- ✅ **Settings Screen:** `/communication-providers` (Admin UI)
+- ✅ **Multi-Provider:** SendGrid (primary) + Gmail SMTP (fallback)
+- ✅ **Auto-Recipients:** Fetches all Admin users from database
+- ✅ **Custom Emails:** Optional additional recipients per job
+- ✅ **No New Settings Required:** Uses existing infrastructure
+
 **Features (More than Laravel's `emailOutputOnFailure()`):**
 - ✅ Automatic failure detection
 - ✅ Retry logic with exponential backoff (2s, 4s, 8s...)
@@ -242,6 +290,334 @@ All input fields follow inline icon pattern:
 - 📘 **Documentation:** Complete and production-ready
 - 🔄 **Code:** Ready to implement (copy-paste from guide)
 - ⏳ **Deployment:** Pending user decision
+
+---
+
+## 🔀 Business Workflows
+
+### 1. Contract Lifecycle Workflow (4-State)
+**States:** Draft → Active → Completed → Closed  
+**File:** Contract management system  
+**Database:** `contracts` table with `status` field
+
+**Workflow:**
+1. **Draft** - Contract created, editable, not yet active
+   - Customer/vehicle selection
+   - Financial calculations
+   - Pre-delivery inspection
+   - Can be edited freely
+   
+2. **Active** - Contract signed and vehicle delivered
+   - Rental period started
+   - Payments tracked
+   - Edits require mandatory reason
+   - Field-level audit trail (`contractEdits`)
+   
+3. **Completed** - Vehicle returned, rental ended
+   - Post-return inspection
+   - Damage assessment (if applicable)
+   - Final payment settlement
+   - Outstanding balance calculation
+   
+4. **Closed** - Contract archived
+   - All payments settled
+   - All inspections completed
+   - Read-only state
+   - Historical record
+
+**Audit Trail:**
+- ✅ Dual tracking: `contractEdits` + `auditLogs`
+- ✅ Before/after snapshots for all edits
+- ✅ Mandatory edit reasons (Active → Completed → Closed)
+
+---
+
+### 2. Insurance Claim Workflow (5-State)
+**States:** Pending → Under Review → Approved/Rejected → Closed  
+**File:** Insurance claim management  
+**Database:** `insurance_claims` table
+
+**Workflow:**
+1. **Pending** - Claim submitted
+   - Incident details captured
+   - Initial documentation uploaded
+   - Awaiting insurer review
+   
+2. **Under Review** - Insurer investigating
+   - Progress updates tracked (`claim_progress_updates`)
+   - Additional documentation requested
+   - Investigation ongoing
+   
+3. **Approved** - Claim accepted
+   - Settlement amount determined
+   - Payment processing
+   
+4. **Rejected** - Claim denied
+   - Rejection reason documented
+   - Appeal option available
+   
+5. **Closed** - Claim finalized
+   - Settlement paid (if approved)
+   - Case archived
+
+**Features:**
+- ✅ Progress tracking with timeline
+- ✅ Document attachment support
+- ✅ Settlement amount tracking
+- ✅ Integration with `incidents` table
+
+---
+
+### 3. Approval Request Workflow
+**File:** `server/routes/approvalRequests.ts`  
+**Database:** `approval_requests`, `approval_logs`
+
+**Purpose:** Multi-level authorization for high-value transactions
+
+**Workflow:**
+1. **Request Created** - Staff initiates approval
+   - Request type: Contract edit, high-value payment, etc.
+   - Request reason documented
+   - Auto-assigned to manager/admin
+   
+2. **Pending Review** - Awaiting approver action
+   - Notification sent to approver
+   - Request details visible
+   - Approver can approve/reject
+   
+3. **Approved** - Request accepted
+   - Action executed
+   - Approval logged
+   - Requester notified
+   
+4. **Rejected** - Request denied
+   - Rejection reason required
+   - No action taken
+   - Requester notified
+
+**RBAC Enforcement:**
+- ✅ Staff can request
+- ✅ Manager/Admin can approve
+- ✅ Approval hierarchy respected
+
+---
+
+### 4. Document Approval Workflow
+**File:** Document registry system  
+**Database:** `document_registry`, `document_approvals`
+
+**Workflow:**
+1. **Uploaded** - Document submitted
+   - Scanned/uploaded by staff
+   - Awaiting verification
+   
+2. **Under Review** - Being verified
+   - Checked for authenticity
+   - Expiry dates validated
+   - Quality assessment
+   
+3. **Approved** - Document verified
+   - Marked as verified (`isVerified = true`)
+   - Usable for contracts
+   - Expiry monitoring begins
+   
+4. **Rejected** - Document invalid
+   - Rejection reason provided
+   - Re-upload required
+
+**Automation:**
+- ✅ Expiry monitoring (30-day alerts)
+- ✅ Automated renewal reminders (8 AM cron)
+- ✅ Multi-channel notifications
+
+---
+
+### 5. Driver Assignment Workflow
+**File:** Driver scheduling system  
+**Database:** `driver_assignments`, `driver_schedules`
+
+**Workflow:**
+1. **Schedule Created** - Driver shift planned
+   - Branch assignment
+   - Vehicle assignment (optional)
+   - Shift times defined
+   
+2. **Driver Assigned to Contract** - Professional driver requested
+   - Contract specifies driver service
+   - Driver selected from available pool
+   - Rate calculated (hourly/daily/monthly)
+   - Emirate surcharges applied
+   
+3. **Service Active** - Driver performing duties
+   - Attendance tracking (`driver_attendance`)
+   - Check-in/check-out recorded
+   - Overtime calculated
+   
+4. **Service Completed** - Assignment finished
+   - Performance metrics recorded
+   - Final cost calculated
+   - Payment processed
+
+**Features:**
+- ✅ Availability checking
+- ✅ Overtime calculation
+- ✅ Performance tracking
+- ✅ Multi-emirate surcharge support
+
+---
+
+### 6. Vehicle Transfer Workflow
+**File:** Inter-branch vehicle transfers  
+**Database:** `branch_transfers`
+
+**Workflow:**
+1. **Transfer Requested** - Source branch initiates
+   - Vehicle selected
+   - Target branch specified
+   - Transfer reason documented
+   - Approval required (if configured)
+   
+2. **Pending Approval** - Awaiting manager approval
+   - Transfer details reviewed
+   - Vehicle availability checked
+   - Can be approved/rejected
+   
+3. **In Transit** - Vehicle being moved
+   - Transfer in progress
+   - Vehicle status: "In Transfer"
+   - Unavailable for new contracts
+   
+4. **Completed** - Transfer finalized
+   - Vehicle at target branch
+   - Vehicle status updated
+   - Branch assignment changed
+   - Available for rental
+
+**Audit:**
+- ✅ Full transfer history tracked
+- ✅ Approval logs maintained
+- ✅ Vehicle status synchronized
+
+---
+
+### 7. Payment Processing Workflow
+**File:** Payment management  
+**Database:** `payments` table
+
+**Types:** Deposit, Final Payment, Refund, Additional Charge
+
+**Workflow:**
+1. **Payment Initiated** - Customer makes payment
+   - Payment type selected
+   - Amount entered
+   - Payment method recorded (Cash, Card, Bank Transfer)
+   
+2. **Payment Recorded** - Transaction logged
+   - Payment linked to contract
+   - Outstanding balance recalculated
+   - Receipt generated
+   
+3. **Payment Verified** - Confirmed by staff
+   - Bank transfer verification (if applicable)
+   - Payment status: Completed
+   - Financial reports updated
+
+**Features:**
+- ✅ Multiple payment methods
+- ✅ Partial payment support
+- ✅ Automatic balance calculation
+- ✅ Refund processing
+- ✅ Payment history tracking
+
+---
+
+### 8. Vehicle Inspection Workflow (2-Stage)
+**File:** Vehicle inspection system  
+**Database:** `vehicle_inspections`
+
+**Stages:**
+1. **Pre-Delivery Inspection** - Before rental starts
+   - 6 mandatory photos (exterior, interior, odometer, fuel, tires, damages)
+   - Condition checklist
+   - Damage documentation
+   - Fuel level recorded
+   - Odometer reading
+   
+2. **Post-Return Inspection** - After rental ends
+   - Same 6 photo requirements
+   - Condition comparison
+   - New damage identification
+   - Damage assessment creation (if needed)
+   - Final settlement calculation
+
+**Automation:**
+- ✅ Photo requirement enforcement
+- ✅ Automatic damage comparison
+- ✅ Integration with `damage_assessments`
+
+---
+
+### 9. Automated Reminder Workflow
+**File:** `server/services/automationOrchestrator.ts`  
+**Database:** `automated_reminders`
+
+**Triggers:**
+1. **Document Expiry** - 30 days before expiration
+2. **Contract Expiry** - 7 days before end date
+3. **Payment Overdue** - Daily for active contracts with outstanding balance
+4. **Risk Level Change** - When customer risk score changes
+
+**Process:**
+1. Cron job detects condition
+2. Check if reminder already sent recently
+3. Render bilingual template
+4. Send via preferred channel (SMS/Email/Both)
+5. Log delivery status
+6. Create reminder record
+
+**Features:**
+- ✅ Duplicate prevention
+- ✅ Multi-channel delivery
+- ✅ Bilingual templates
+- ✅ Delivery tracking
+- ✅ Non-blocking execution
+
+---
+
+### 10. Campaign Management Workflow
+**File:** Campaign management system  
+**Database:** `notification_campaigns`, `campaign_recipients`
+
+**Workflow:**
+1. **Campaign Created** - Admin/Manager creates campaign
+   - Target audience selected
+   - Message template designed
+   - Schedule set
+   - Branch scope defined (optional)
+   
+2. **Pending Approval** - Requires approval (if org-wide)
+   - Review by senior admin
+   - Can be approved/rejected/edited
+   
+3. **Scheduled** - Campaign approved, awaiting send time
+   - Recipients calculated
+   - Template rendered
+   - Waiting for scheduled time
+   
+4. **Sending** - Campaign in progress
+   - Batch processing recipients
+   - Multi-provider routing
+   - Delivery tracking
+   
+5. **Completed** - Campaign finished
+   - Delivery statistics calculated
+   - Open/click rates tracked (email)
+   - Performance analytics available
+
+**RBAC:**
+- ✅ Branch-scoped: Manager can create for their branch
+- ✅ Org-wide: Requires Admin approval
+- ✅ Analytics: Available to all authorized users
 
 ---
 

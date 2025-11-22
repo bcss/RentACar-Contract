@@ -4,6 +4,13 @@
 
 This document explains how to implement Laravel-style `emailOutputOnFailure()` functionality in KarāraOS to automatically send email notifications when scheduled cron jobs fail.
 
+**Key Points:**
+- ✅ **NO separate settings screen required** - uses existing Communication Providers infrastructure
+- ✅ **Email configuration managed via UI** - Admin can configure providers at `/communication-providers`
+- ✅ **Multi-provider support** - SendGrid (primary) + Gmail SMTP (fallback)
+- ✅ **Auto-detects admin emails** - fetches from database (users with role='admin')
+- ✅ **Production-ready** - integrates with existing NotificationService
+
 ## What is Laravel's `emailOutputOnFailure()`?
 
 Laravel's `emailOutputOnFailure()` is a scheduled task feature that automatically emails you when a scheduled command fails (exits with non-zero code):
@@ -20,6 +27,84 @@ $schedule->command('report:generate')
 - Only sends email on failure (non-zero exit code)
 - Includes command output in email
 - No email sent on success
+
+---
+
+## Email Settings & Configuration
+
+### Where Are Email Settings Configured?
+
+**Settings Screen:** `/communication-providers` (Communication Providers page)
+
+**Access Control:** Admin and Manager only
+
+**What You Can Configure:**
+1. **Email Providers:**
+   - SendGrid (primary)
+   - Gmail SMTP (fallback)
+   - Custom SMTP servers
+
+2. **Provider Settings:**
+   - API keys / credentials
+   - Priority order (for failover)
+   - Active/inactive status
+   - Configuration options
+
+3. **Database Storage:**
+   - All settings stored in `communication_providers` table
+   - Encrypted credentials
+   - Multi-provider support
+
+### How Failure Notifications Send Emails
+
+**Automatic Process:**
+1. Cron job fails → CronJobManager detects failure
+2. System queries database for admin users (`role='admin'` or `role='super_admin'`)
+3. System fetches active email providers from `communication_providers` table
+4. NotificationService sends email using primary provider (SendGrid)
+5. If SendGrid fails → automatically tries Gmail SMTP fallback
+6. Email includes: job name, error message, stack trace, execution duration
+
+**Email Recipients:**
+- **Automatic:** All users with Admin role (from database)
+- **Custom:** Additional emails can be specified when scheduling jobs (optional)
+
+### No Additional Configuration Needed!
+
+The cron failure notification system leverages KarāraOS's existing communication infrastructure:
+- ✅ Uses Communication Providers configured in UI
+- ✅ Uses NotificationService for email delivery
+- ✅ Uses existing multi-provider failover logic
+- ✅ No new environment variables required
+- ✅ No new settings screens needed
+
+**Example Email Provider Configuration (via UI):**
+
+```typescript
+// Administrators configure via UI at /communication-providers
+{
+  name: "SendGrid Primary",
+  type: "email",
+  provider: "sendgrid",
+  isActive: true,
+  priority: 1,
+  credentials: {
+    apiKey: "SG.xxxxx" // Set via UI
+  }
+}
+
+{
+  name: "Gmail SMTP Backup",
+  type: "email", 
+  provider: "gmail",
+  isActive: true,
+  priority: 2,
+  credentials: {
+    user: "[email protected]",
+    password: "app-password" // Set via UI
+  }
+}
+```
 
 ## KarāraOS Implementation
 
