@@ -88,6 +88,7 @@ const CommunicationProviders = lazy(() => import("@/pages/CommunicationProviders
 const CommunicationLogs = lazy(() => import("@/pages/CommunicationLogs"));
 const ManualNotificationSender = lazy(() => import("@/pages/ManualNotificationSender"));
 const CampaignManagement = lazy(() => import("@/pages/CampaignManagement"));
+const CampaignAnalytics = lazy(() => import("@/pages/CampaignAnalytics"));
 
 // Advanced Analytics Reports
 const CustomerRiskTrends = lazy(() => import("@/pages/reports/CustomerRiskTrends"));
@@ -349,6 +350,9 @@ function Router() {
       </Route>
       <Route path="/campaigns">
         {() => <ProtectedRoute component={CampaignManagement} />}
+      </Route>
+      <Route path="/campaign-analytics">
+        {() => <ProtectedRoute component={CampaignAnalytics} />}
       </Route>
       
       {/* Advanced Analytics Reports */}

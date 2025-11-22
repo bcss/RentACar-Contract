@@ -390,6 +390,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/campaigns',
       show: isAdmin || isManager || user?.role === 'staff',
     },
+    {
+      title: t('nav.manualNotificationSender'),
+      icon: 'mail',
+      url: '/notifications/send',
+      show: isAdmin || isManager || user?.role === 'staff',
+    },
   ];
 
   // Master Data Items
@@ -578,6 +584,13 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   // Report Items
   const reportItems = [
+    // Communication & Campaign Analytics
+    {
+      title: t('nav.campaignAnalytics'),
+      icon: 'activity',
+      url: '/campaign-analytics',
+      show: isAdmin || isManager,
+    },
     // Predictive Intelligence Reports
     {
       title: 'Revenue Forecast',
