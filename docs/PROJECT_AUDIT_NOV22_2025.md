@@ -20,11 +20,12 @@ This audit provides a complete snapshot of the KarāraOS project as of November 
 ## 📊 System Statistics
 
 ### Database Architecture
-- **Total Tables:** 63+
+- **Total Tables:** 63 tables
 - **Database Type:** PostgreSQL (Neon serverless)
-- **ORM:** Drizzle ORM
+- **ORM:** Drizzle ORM with TypeScript
 - **Schema Management:** Type-safe with Zod validation
 - **Audit System:** Dual-layer (contractEdits + auditLogs)
+- **Schema File:** `shared/schema.ts` (3,808 lines)
 
 ### Backend API
 - **Total Modules:** 34 specialized modules
@@ -194,6 +195,149 @@ All input fields follow inline icon pattern:
 - ✅ localStorage persistence for open/close state
 - ✅ Collapsed/expanded sidebar support
 - ✅ Intelligent tooltip positioning
+
+---
+
+## 🗄️ Database Structure (63 Tables)
+
+### Core System Tables (6 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **sessions** | Session storage for authentication | PostgreSQL-backed sessions, auto-expiry indexing |
+| **users** | Internal username/password auth | RBAC (Admin/Manager/Staff/Viewer), granular permissions, branch assignment |
+| **customers** | Master customer/hirer data | Bilingual fields (En/Ar), Emirates ID/Passport, risk scoring, UAE compliance |
+| **vehicles** | Fleet master data | Bilingual support, status tracking, automatic sync, toll/fine tracking |
+| **sponsors** | Individual sponsor data | Emirates ID verification, bilingual names |
+| **companies** | Corporate sponsor data | Exposure limits, bilingual names, signatory management |
+
+### Contract & Transaction Tables (9 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **contracts** | Core rental contracts | 4-state lifecycle (Draft→Active→Completed→Closed), financial calculations |
+| **payments** | Payment tracking | Multiple types (Deposit/Final/Refund), multiple methods, receipt generation |
+| **vehicle_inspections** | Pre/post-rental inspections | 6 mandatory photos, damage documentation, condition tracking |
+| **damage_assessments** | Post-rental damage tracking | Cost estimation, repair tracking, insurance integration |
+| **contract_counter** | Auto-incrementing contract numbers | Singleton pattern, thread-safe incrementing |
+| **contract_edits** | Field-level modification tracking | Before/after snapshots, mandatory edit reasons, audit trail |
+| **contract_accessories** | Contract accessory assignments | Pricing, quantity tracking |
+| **driver_assignments** | Professional driver assignments | Rate calculation, emirate surcharges, performance tracking |
+| **digital_signatures** | Digital signature capture | Base64 image storage, signatory tracking |
+
+### Audit & System Tables (5 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **audit_logs** | Comprehensive lifecycle tracking | CREATE/UPDATE/DELETE operations, entity tracking |
+| **system_errors** | System error logging | Acknowledgment workflow, stack traces, error categorization |
+| **access_logs** | Application access logging | Login attempts, IP tracking, security compliance |
+| **company_settings** | Global system configuration | Singleton pattern, bilingual company info, financial settings |
+| **company_signatories** | Authorized signatories | Digital signature support, role definitions |
+
+### Toll Management System (4 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **toll_systems** | UAE toll systems | Salik/Darb/Aber configuration, pricing structures |
+| **toll_gates** | Toll gate locations | GPS coordinates, per-gate pricing, system assignment |
+| **toll_passes** | Vehicle toll pass assignments | Pass numbers, expiry tracking, vehicle linkage |
+| **toll_transactions** | Toll charge tracking (implied) | Per-contract toll tracking, cost allocation |
+
+### Traffic Compliance & Safety (4 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **traffic_fines** | RTA traffic violations | Black points tracking, fine amounts, payment status |
+| **incidents** | Accident/incident management | Severity classification, insurance integration, police reports |
+| **insurance_claims** | Insurance claim workflow | 5-state lifecycle, settlement tracking, document management |
+| **claim_progress_updates** | Claim progress tracking | Timeline tracking, status updates, insurer communication |
+
+### Fleet Operations & Maintenance (3 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **vehicle_service_records** | Maintenance history | Odometer tracking, cost tracking, next service scheduling |
+| **rental_rate_plans** | Dynamic pricing system | Daily/weekly/monthly rates, seasonal pricing, vehicle-specific |
+| **vehicle_accessories** | Accessory master catalog | Pricing, availability, categorization |
+
+### Driver Service Module (8 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **drivers** | Professional driver master data | Bilingual names, licensing, availability, outsource company linking |
+| **driver_outsource_companies** | Outsource driver companies | Company details, commission tracking |
+| **driver_schedules** | Driver shift management | Branch/vehicle assignment, shift times, recurring schedules |
+| **driver_schedule_blocks** | Recurring schedule templates | Template-based scheduling, bulk assignment |
+| **driver_attendance** | Check-in/check-out tracking | Overtime calculation, attendance history |
+| **driver_rate_cards** | Driver service pricing | Hourly/daily/monthly rates, emirate surcharges |
+| **driver_assignments** | Driver-to-contract assignments | (Duplicate of earlier entry) Service period tracking |
+| **driver_performance_metrics** | Performance tracking (implied) | Rating systems, KPI tracking |
+
+### Branch Management (2 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **branches** | Multi-location branch data | Bilingual names, contact info, emirate assignment |
+| **branch_transfers** | Inter-branch vehicle transfers | Approval workflow, transfer tracking, vehicle status sync |
+
+### Public Holidays & Calendar (1 table)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **public_holidays** | UAE public holidays | Emirate-specific configuration, date management |
+
+### Customer Risk & Compliance (3 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **customer_risk_scores** | Hybrid risk algorithm | Payment history, violations, incidents, blacklist status |
+| **customer_risk_score_history** | Historical risk tracking | Trend analysis, score change tracking |
+| **customer_company_links** | Customer-company relationships | Corporate customer tracking, relationship management |
+
+### Document Management (3 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **document_registry** | Centralized document tracking | Intelligent auto-seeding, expiry monitoring, entity linking |
+| **document_files** | Document file storage | Metadata, file types, upload tracking |
+| **document_approvals** | Document approval workflow | Verification process, approval hierarchy |
+
+### Communications Platform (9 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **communication_providers** | Multi-provider configuration | Twilio/SendGrid/Gmail/Mock, priority-based routing |
+| **communication_logs** | Delivery tracking | Success/failure status, cost tracking, retry logic |
+| **notification_templates** | Bilingual reminder templates | 30+ default templates, variable substitution |
+| **notification_channel_preferences** | Channel-specific settings | Email/SMS costs, priorities, provider selection |
+| **notification_preferences** | User-level preferences | Opt-in/opt-out, channel preferences |
+| **automated_reminders** | Automated reminder scheduling | Cron-triggered reminders, delivery tracking |
+| **notification_campaigns** | Campaign management | RBAC enforcement, branch scoping, approval workflows |
+| **campaign_recipients** | Campaign recipient tracking | Delivery status, engagement metrics |
+| **push_notification_tokens** | Mobile push tokens | Device registration, platform tracking |
+
+### Advanced Analytics & Intelligence (3 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **template_analytics** | Template performance analytics | Open rates, click rates, A/B testing |
+| **ab_test_variants** | A/B testing variants | Variant tracking, performance comparison |
+| **pricing_rules** | Dynamic pricing engine (implied) | Rule-based pricing, condition evaluation |
+
+### Approval & Workflow (2 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **approval_requests** | Multi-level authorization | High-value transaction approval, hierarchy enforcement |
+| **approval_logs** | Approval decision audit trail | Approver tracking, reason documentation |
+
+### Payment Gateway Integration (2 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **payment_gateways** | Payment gateway configuration | Multiple gateway support, credential management |
+| **payment_transactions** | Payment transaction tracking | Transaction IDs, status tracking, reconciliation |
+
+### Support & Customer Service (2 tables)
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **support_tickets** | Customer support tickets | Priority levels, assignment, resolution tracking |
+| **renewal_requests** | Contract renewal requests | Renewal workflow, approval process |
+
+### Database Design Principles
+- ✅ **Bilingual Support:** En/Ar fields throughout (nameEn/nameAr pattern)
+- ✅ **Disable-Only Architecture:** No deletions, only disable flags with audit
+- ✅ **Dual Audit Trails:** Field-level (contractEdits) + Entity-level (auditLogs)
+- ✅ **Type Safety:** Drizzle ORM with TypeScript + Zod validation
+- ✅ **UAE Compliance:** Emirates ID, Visa, RTA fields, Emirates enum
+- ✅ **Performance:** Strategic indexing on frequently queried fields
+- ✅ **Scalability:** Normalized design with proper foreign key relationships
 
 ---
 
@@ -618,6 +762,103 @@ All input fields follow inline icon pattern:
 - ✅ Branch-scoped: Manager can create for their branch
 - ✅ Org-wide: Requires Admin approval
 - ✅ Analytics: Available to all authorized users
+
+---
+
+### 11. Cron Job Failure Notification Workflow ⭐ NEW
+**File:** `server/services/cronJobManager.ts` (Ready to implement)  
+**Database:** Uses `users` table + existing `communication_providers`  
+**Documentation:** `docs/CRON_FAILURE_NOTIFICATIONS.md`
+
+**Purpose:** Laravel-style `emailOutputOnFailure()` for automated cron job monitoring
+
+**Workflow:**
+1. **Job Execution** - Cron job runs on schedule
+   - Job function wrapped in try-catch
+   - Timeout protection (configurable per job)
+   - Execution duration tracked
+   
+2. **Retry Logic** - Automatic retry on failure
+   - Exponential backoff (2s, 4s, 8s...)
+   - Configurable max retries (default: 3)
+   - Each attempt logged
+   
+3. **Failure Detection** - All retries exhausted
+   - Error captured with stack trace
+   - Consecutive failure counter incremented
+   - Execution duration recorded
+   
+4. **Notification Threshold Check** - Should we notify?
+   - Check consecutive failure count
+   - Compare against notification threshold
+   - Skip if threshold not met (prevents spam)
+   
+5. **Admin Recipient Lookup** - Automatic recipient discovery
+   - Query database for `role='admin'` or `role='super_admin'`
+   - Extract email addresses
+   - Merge with custom alert emails (if specified)
+   
+6. **Email Provider Selection** - Use existing infrastructure
+   - Fetch active email providers from `communication_providers` table
+   - Primary: SendGrid (if configured)
+   - Fallback: Gmail SMTP (if SendGrid fails)
+   
+7. **Notification Sent** - Professional HTML email
+   - Email subject: "🚨 Cron Job Failure: {JobName}"
+   - Includes: Job details, error message, stack trace, execution duration
+   - Includes: Consecutive failure count, timestamp, server info
+   - Includes: Action items for administrators
+   
+8. **Success Path** - Job eventually succeeds
+   - Consecutive failure counter reset to 0
+   - No notification sent
+   - Normal operation resumed
+
+**Email Configuration:**
+- ✅ **Settings UI:** `/communication-providers` (Admin only)
+- ✅ **No Code Changes:** All settings managed via database
+- ✅ **Multi-Provider:** Automatic failover between providers
+- ✅ **Auto-Recipients:** Fetches admins from database automatically
+
+**Features (More than Laravel):**
+- ✅ Retry logic with exponential backoff
+- ✅ Timeout protection
+- ✅ Consecutive failure tracking
+- ✅ Configurable notification thresholds
+- ✅ Multi-provider email support
+- ✅ Professional HTML email templates
+- ✅ Stack trace inclusion
+- ✅ Execution duration tracking
+- ✅ Non-blocking notification pattern
+
+**Current Jobs That Will Benefit:**
+1. Nightly Risk Score Calculation (2 AM)
+2. Document Expiry Check (8 AM)
+3. Contract Expiry Reminders (9 AM)
+4. Payment Due Reminders (10 AM)
+
+**Implementation Status:**
+- 📘 Complete documentation in `docs/CRON_FAILURE_NOTIFICATIONS.md`
+- 📋 Production-ready code examples (copy-paste ready)
+- 🔄 Ready to deploy (no dependencies, uses existing infrastructure)
+- ⏳ Awaiting user approval to implement
+
+**Example Configuration:**
+```typescript
+// In automationOrchestrator.ts - after implementation
+cronJobManager.schedule(
+  '0 2 * * *',
+  'Nightly Risk Score Calculation',
+  async () => { /* job logic */ },
+  {
+    maxRetries: 2,
+    timeout: 600000, // 10 minutes
+    notifyOnFailure: true,
+    suppressNotificationUntilFailureCount: 2, // Notify after 2 consecutive failures
+    alertEmails: ['[email protected]'], // Optional custom emails
+  }
+);
+```
 
 ---
 
