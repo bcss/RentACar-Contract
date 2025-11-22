@@ -108,7 +108,7 @@ export async function seedCompanySettings() {
         termsSection2Ar: TERMS_SECTION_2_AR,
         termsSection3En: TERMS_SECTION_3_EN,
         termsSection3Ar: TERMS_SECTION_3_AR,
-      }, superadmin.id);
+      }, superadmin.id as string);
     }
     
     console.log("Company settings seeded successfully");
