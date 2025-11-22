@@ -24,6 +24,10 @@ import { MinimalSelect, MinimalSelectItem } from '@/components/ui/minimal-select
 import { MinimalTextarea } from '@/components/ui/minimal-textarea';
 import { MinimalDateInput } from '@/components/ui/minimal-date-input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 
 // Comprehensive contract form schema
@@ -104,6 +108,15 @@ export default function ContractFormSample() {
   const params = useParams<{ id?: string }>();
   const isEditing = !!params.id && params.id !== 'new';
   const [activeTab, setActiveTab] = useState('customer');
+
+  // Search state for type-ahead
+  const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  
+  const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
+  const [vehicleSearchQuery, setVehicleSearchQuery] = useState('');
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   // Auth guard
   useEffect(() => {
@@ -452,32 +465,85 @@ export default function ContractFormSample() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Customer Selection */}
+                    {/* Customer Selection - Type-ahead Search */}
                     <FormField
                       control={form.control}
                       name="customerId"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel data-testid="label-customer">Customer *</FormLabel>
-                          <FormControl>
-                            <MinimalSelect
-                              icon={<User className="h-4 w-4" />}
-                              placeholder="Select customer"
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              error={!!form.formState.errors.customerId}
-                            >
-                              {customers.map((customer: any) => (
-                                <MinimalSelectItem
-                                  key={customer.id}
-                                  value={customer.id.toString()}
-                                  data-testid={`option-customer-${customer.id}`}
-                                >
-                                  {customer.nameEn}
-                                </MinimalSelectItem>
-                              ))}
-                            </MinimalSelect>
-                          </FormControl>
+                          <Popover open={customerSearchOpen} onOpenChange={setCustomerSearchOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-customer-search">
+                                  <User className="h-4 w-4 text-muted-foreground" />
+                                  <div className="flex-1 flex items-center justify-between">
+                                    <span className={cn(
+                                      "text-sm",
+                                      !field.value && "text-muted-foreground"
+                                    )}>
+                                      {selectedCustomer ? `${selectedCustomer.nameEn} - ${selectedCustomer.phone}` : "Search and select customer"}
+                                    </span>
+                                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                </div>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[400px] p-0" align="start">
+                              <Command shouldFilter={false}>
+                                <CommandInput
+                                  placeholder="Type to search customers..."
+                                  value={customerSearchQuery}
+                                  onValueChange={setCustomerSearchQuery}
+                                  data-testid="input-customer-search"
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    {customerSearchQuery.length > 0 ? "No customers found" : "Start typing to search"}
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {customers
+                                      .filter((customer: any) => 
+                                        !customerSearchQuery || 
+                                        customer.nameEn?.toLowerCase().includes(customerSearchQuery.toLowerCase()) ||
+                                        customer.nameAr?.includes(customerSearchQuery) ||
+                                        customer.phone?.includes(customerSearchQuery) ||
+                                        customer.email?.toLowerCase().includes(customerSearchQuery.toLowerCase())
+                                      )
+                                      .map((customer: any) => (
+                                        <CommandItem
+                                          key={customer.id}
+                                          value={customer.id}
+                                          onSelect={() => {
+                                            field.onChange(customer.id.toString());
+                                            setSelectedCustomer(customer);
+                                            setCustomerSearchOpen(false);
+                                            setCustomerSearchQuery('');
+                                          }}
+                                          data-testid={`item-customer-${customer.id}`}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === customer.id.toString() ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{customer.nameEn}</span>
+                                            {customer.nameAr && (
+                                              <span className="text-sm text-muted-foreground">{customer.nameAr}</span>
+                                            )}
+                                            <span className="text-xs text-muted-foreground">
+                                              {customer.phone} {customer.email && `• ${customer.email}`}
+                                            </span>
+                                          </div>
+                                        </CommandItem>
+                                      ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage data-testid="error-customer" />
                         </FormItem>
                       )}
@@ -579,28 +645,87 @@ export default function ContractFormSample() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Vehicle Selection */}
+                    {/* Vehicle Selection - Type-ahead Search */}
                     <FormField
                       control={form.control}
                       name="vehicleId"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel>Vehicle *</FormLabel>
-                          <FormControl>
-                            <MinimalSelect
-                              icon={<Car className="h-4 w-4" />}
-                              placeholder="Select vehicle"
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              error={!!form.formState.errors.vehicleId}
-                            >
-                              {vehicles.map((vehicle: any) => (
-                                <MinimalSelectItem key={vehicle.id} value={vehicle.id.toString()}>
-                                  {vehicle.make} {vehicle.model} - {vehicle.registration}
-                                </MinimalSelectItem>
-                              ))}
-                            </MinimalSelect>
-                          </FormControl>
+                          <Popover open={vehicleSearchOpen} onOpenChange={setVehicleSearchOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-vehicle-search">
+                                  <Car className="h-4 w-4 text-muted-foreground" />
+                                  <div className="flex-1 flex items-center justify-between">
+                                    <span className={cn(
+                                      "text-sm",
+                                      !field.value && "text-muted-foreground"
+                                    )}>
+                                      {selectedVehicle 
+                                        ? `${selectedVehicle.registration} - ${selectedVehicle.make} ${selectedVehicle.model} (${selectedVehicle.year})` 
+                                        : "Search and select vehicle"}
+                                    </span>
+                                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                </div>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[450px] p-0" align="start">
+                              <Command shouldFilter={false}>
+                                <CommandInput
+                                  placeholder="Type to search vehicles..."
+                                  value={vehicleSearchQuery}
+                                  onValueChange={setVehicleSearchQuery}
+                                  data-testid="input-vehicle-search"
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    {vehicleSearchQuery.length > 0 ? "No vehicles found" : "Start typing to search"}
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {vehicles
+                                      .filter((vehicle: any) => 
+                                        !vehicleSearchQuery ||
+                                        vehicle.registration?.toLowerCase().includes(vehicleSearchQuery.toLowerCase()) ||
+                                        vehicle.make?.toLowerCase().includes(vehicleSearchQuery.toLowerCase()) ||
+                                        vehicle.model?.toLowerCase().includes(vehicleSearchQuery.toLowerCase()) ||
+                                        vehicle.year?.toString().includes(vehicleSearchQuery)
+                                      )
+                                      .map((vehicle: any) => (
+                                        <CommandItem
+                                          key={vehicle.id}
+                                          value={vehicle.id}
+                                          onSelect={() => {
+                                            field.onChange(vehicle.id.toString());
+                                            setSelectedVehicle(vehicle);
+                                            setVehicleSearchOpen(false);
+                                            setVehicleSearchQuery('');
+                                          }}
+                                          data-testid={`item-vehicle-${vehicle.id}`}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === vehicle.id.toString() ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{vehicle.registration}</span>
+                                            <span className="text-sm text-muted-foreground">
+                                              {vehicle.make} {vehicle.model} ({vehicle.year})
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                              {vehicle.color} • {vehicle.category || 'N/A'}
+                                            </span>
+                                          </div>
+                                        </CommandItem>
+                                      ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}
