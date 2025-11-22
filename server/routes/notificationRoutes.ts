@@ -8,6 +8,8 @@ import { storage } from "../storage";
 import { isAuthenticated, requireEditor, requireManagerOrAdmin } from "../auth/localAuth";
 import type { User } from "@shared/schema";
 import { createAuditLog } from "../utils/routeHelpers";
+import { z } from "zod";
+import { sendEmail, sendSms } from "../services/providerSelector";
 
 const router = Router();
 
@@ -43,7 +45,7 @@ router.post("/templates", isAuthenticated, requireManagerOrAdmin, async (req: Re
   try {
     const user = req.user as User;
     const template = await storage.createNotificationTemplate({ ...req.body, createdBy: user.id });
-    await createAuditLog(user.id, 'notification_template_created', undefined, req, `Created template: ${template.templateName}`);
+    await createAuditLog(user.id as string, 'notification_template_created', undefined, req, `Created template: ${template.name}`);
     res.status(201).json(template);
   } catch (error) {
     next(error);
@@ -54,7 +56,7 @@ router.patch("/templates/:id", isAuthenticated, requireManagerOrAdmin, async (re
   try {
     const user = req.user as User;
     const template = await storage.updateNotificationTemplate(req.params.id, req.body);
-    await createAuditLog(user.id, 'notification_template_updated', undefined, req, `Updated template: ${template.templateName}`);
+    await createAuditLog(user.id as string, 'notification_template_updated', undefined, req, `Updated template: ${template.name}`);
     res.json(template);
   } catch (error) {
     next(error);
@@ -65,7 +67,7 @@ router.delete("/templates/:id", isAuthenticated, requireManagerOrAdmin, async (r
   try {
     const user = req.user as User;
     await storage.deleteNotificationTemplate(req.params.id);
-    await createAuditLog(user.id, 'notification_template_deleted', undefined, req, `Deleted template`);
+    await createAuditLog(user.id as string, 'notification_template_deleted', undefined, req, `Deleted template`);
     res.status(204).send();
   } catch (error) {
     next(error);
@@ -103,7 +105,7 @@ router.post("/reminders", isAuthenticated, requireManagerOrAdmin, async (req: Re
   try {
     const user = req.user as User;
     const reminder = await storage.createAutomatedReminder({ ...req.body, createdBy: user.id });
-    await createAuditLog(user.id, 'reminder_created', undefined, req, `Created reminder: ${reminder.reminderName}`);
+    await createAuditLog(user.id as string, 'reminder_created', undefined, req, `Created reminder: ${reminder.reminderType}`);
     res.status(201).json(reminder);
   } catch (error) {
     next(error);
@@ -114,7 +116,7 @@ router.patch("/reminders/:id", isAuthenticated, requireManagerOrAdmin, async (re
   try {
     const user = req.user as User;
     const reminder = await storage.updateAutomatedReminder(req.params.id, req.body);
-    await createAuditLog(user.id, 'reminder_updated', undefined, req, `Updated reminder: ${reminder.reminderName}`);
+    await createAuditLog(user.id as string, 'reminder_updated', undefined, req, `Updated reminder: ${reminder.reminderType}`);
     res.json(reminder);
   } catch (error) {
     next(error);
@@ -125,8 +127,96 @@ router.delete("/reminders/:id", isAuthenticated, requireManagerOrAdmin, async (r
   try {
     const user = req.user as User;
     await storage.deleteAutomatedReminder(req.params.id);
-    await createAuditLog(user.id, 'reminder_deleted', undefined, req, `Deleted reminder`);
+    await createAuditLog(user.id as string, 'reminder_deleted', undefined, req, `Deleted reminder`);
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ==================== MANUAL NOTIFICATION SENDER ====================
+
+// Validation schema for manual send
+const manualSendSchema = z.object({
+  channel: z.enum(['sms', 'email']),
+  recipient: z.string().min(1, "Recipient is required"),
+  subject: z.string().optional(),
+  message: z.string().min(1, "Message is required"),
+  templateId: z.string().optional().nullable(),
+});
+
+router.post("/send", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user as User;
+    
+    // Validate request body
+    const validationResult = manualSendSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        message: "Invalid request data", 
+        errors: validationResult.error.errors 
+      });
+    }
+    
+    const { channel, recipient, subject, message, templateId } = validationResult.data;
+    
+    // Create communication log for manual send
+    const log = await storage.createCommunicationLog({
+      channel,
+      recipient,
+      subject: subject || '',
+      message: message || '',
+      status: 'pending',
+      templateId: templateId || null,
+      triggeredBy: user.id as string,
+      recipientType: 'manual',
+      recipientId: 'manual-' + Date.now(),
+      triggerType: 'manual',
+    });
+    
+    // Actually send via provider
+    let sendResult;
+    if (channel === 'email') {
+      sendResult = await sendEmail({
+        to: recipient,
+        subject: subject || 'Notification',
+        body: message,
+        html: false,
+      });
+    } else {
+      sendResult = await sendSms({
+        to: recipient,
+        message,
+      });
+    }
+    
+    // Update log based on send result
+    if (sendResult.success) {
+      await storage.updateCommunicationLogStatus(log.id, 'sent', {
+        externalId: sendResult.externalId,
+        providerId: sendResult.providerId,
+        providerName: sendResult.providerName,
+      });
+      await createAuditLog(user.id as string, 'manual_notification_sent', undefined, req, `Sent ${channel} to ${recipient}`);
+      
+      res.status(201).json({ 
+        success: true,
+        message: "Notification sent successfully",
+        logId: log.id,
+        externalId: sendResult.externalId 
+      });
+    } else {
+      await storage.updateCommunicationLogStatus(log.id, 'failed', {
+        error: sendResult.error,
+      });
+      
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to send notification",
+        error: sendResult.error,
+        logId: log.id 
+      });
+    }
   } catch (error) {
     next(error);
   }

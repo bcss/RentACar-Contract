@@ -22,7 +22,7 @@ router.get("/providers", isAuthenticated, requireAdmin, async (req: Request, res
 
 router.get("/providers/:id", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const provider = await storage.getCommunicationProvider(req.params.id);
+    const provider = await storage.getCommunicationProviderById(req.params.id);
     if (!provider) {
       return res.status(404).json({ message: "Communication provider not found" });
     }
@@ -35,8 +35,8 @@ router.get("/providers/:id", isAuthenticated, requireAdmin, async (req: Request,
 router.post("/providers", isAuthenticated, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
-    const provider = await storage.createCommunicationProvider(req.body);
-    await createAuditLog(user.id, 'communication_provider_created', undefined, req, `Created ${req.body.type} provider: ${req.body.name}`);
+    const provider = await storage.createCommunicationProvider(req.body, user.id as string);
+    await createAuditLog(user.id as string, 'communication_provider_created', undefined, req, `Created ${req.body.type} provider: ${req.body.name}`);
     res.status(201).json(provider);
   } catch (error) {
     next(error);
@@ -47,7 +47,7 @@ router.patch("/providers/:id", isAuthenticated, requireAdmin, async (req: Reques
   try {
     const user = req.user as User;
     const provider = await storage.updateCommunicationProvider(req.params.id, req.body);
-    await createAuditLog(user.id, 'communication_provider_updated', undefined, req, `Updated communication provider`);
+    await createAuditLog(user.id as string, 'communication_provider_updated', undefined, req, `Updated communication provider`);
     res.json(provider);
   } catch (error) {
     next(error);
@@ -58,8 +58,39 @@ router.delete("/providers/:id", isAuthenticated, requireAdmin, async (req: Reque
   try {
     const user = req.user as User;
     await storage.deleteCommunicationProvider(req.params.id);
-    await createAuditLog(user.id, 'communication_provider_deleted', undefined, req, `Deleted communication provider`);
+    await createAuditLog(user.id as string, 'communication_provider_deleted', undefined, req, `Deleted communication provider`);
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ==================== COMMUNICATION LOGS ====================
+
+router.get("/logs", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filters = {
+      channel: req.query.channel as string | undefined,
+      status: req.query.status as string | undefined,
+      recipientId: req.query.recipientId as string | undefined,
+      startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+      endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+    };
+    const logs = await storage.getCommunicationLogs(filters);
+    res.json(logs);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/logs/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const log = await storage.getCommunicationLogById(req.params.id);
+    if (!log) {
+      return res.status(404).json({ message: "Communication log not found" });
+    }
+    res.json(log);
   } catch (error) {
     next(error);
   }
