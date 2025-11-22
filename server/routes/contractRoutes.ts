@@ -28,6 +28,7 @@ import { logSystemError } from "../utils/errorLogger";
 import { calculateContractDriverCosts } from "../utils/driverCostCalculator";
 import { notificationService } from "../services/notificationService";
 import { calculateContractTotals } from "../services/contractFinancials";
+import { triggerNotification } from "../services/notificationTrigger";
 
 const router = Router();
 
@@ -353,6 +354,33 @@ router.post("/", isAuthenticated, async (req: any, res) => {
     
     // Create audit log
     await createAuditLog(userId, 'create', contract.id, req, `Created contract #${contract.contractNumber}`);
+    
+    // Trigger notification: contract_created
+    try {
+      const customer = await storage.getCustomerById(contract.customerId);
+      const vehicle = await storage.getVehicleById(contract.vehicleId);
+      if (customer && (customer.phone || customer.email)) {
+        await triggerNotification('contract_created', {
+          customerId: customer.id,
+          customerName: customer.nameEn,
+          mobile: customer.phone,
+          email: customer.email,
+          language: 'en',
+        }, {
+          contractNumber: contract.contractNumber.toString(),
+          customerName: customer.nameEn,
+          vehiclePlate: vehicle?.registration || 'N/A',
+          startDate: startDate.toLocaleDateString('en-GB'),
+          endDate: endDate.toLocaleDateString('en-GB'),
+          totalAmount: totalAmount.toFixed(2),
+          durationDays: durationDays.toString(),
+          companyName: settings?.companyNameEn || 'KarāraOS',
+        });
+      }
+    } catch (notifError) {
+      console.error('[Contract] Notification failed for contract_created:', notifError);
+      // Don't fail the contract creation if notification fails
+    }
     
     // Return contract with calculated financial fields
     res.json({

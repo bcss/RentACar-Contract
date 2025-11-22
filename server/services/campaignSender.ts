@@ -141,7 +141,7 @@ export async function sendMessage(
   recipient: string,
   subject: string,
   message: string
-): Promise<{ success: boolean; externalId?: string; error?: string; providerId?: string; providerName?: string; cost?: number }> {
+): Promise<{ success: boolean; externalId?: string; error?: string; providerId?: string; providerName?: string; cost?: string }> {
   try {
     if (channel === 'email') {
       return await sendEmail({
@@ -223,17 +223,17 @@ export async function executeCampaign(campaignId: string, user: User): Promise<S
         }
         
         // Render template with variables
-        const { subject, message } = await renderTemplate(template, recipient.variables, recipient.language);
+        const rendered = renderTemplate(template, recipient.variables, { language: recipient.language as 'en' | 'ar' });
         
         // Send message
-        const sendResult = await sendMessage(channel, recipientContact, subject, message);
+        const sendResult = await sendMessage(channel, recipientContact, rendered.subject, rendered.body);
         
         // Create communication log with provider details
         await storage.createCommunicationLog({
           channel,
           recipient: recipientContact,
-          subject,
-          message,
+          subject: rendered.subject,
+          message: rendered.body,
           status: sendResult.success ? 'sent' : 'failed',
           providerId: sendResult.providerId,
           providerName: sendResult.providerName,
