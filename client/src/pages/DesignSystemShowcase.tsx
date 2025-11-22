@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
   DollarSign, Car, Users, TrendingUp, AlertTriangle, CheckCircle, 
-  Clock, Settings, Shield, Bell, Target, LineChart, Activity,
+  Clock, Settings, Shield, Bell, Target, Activity,
   FileText, ArrowUp, ArrowDown, Minus
 } from 'lucide-react';
 import { layout, dashboard } from '@/lib/designTokens';
