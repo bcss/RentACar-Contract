@@ -109,8 +109,8 @@ export default function CommunicationProviders() {
   const emailProviders = providers.filter(p => p.type === 'email');
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">{t('communications.providers')}</h1>
           <p className="text-muted-foreground mt-1">{t('communications.providersDescription')}</p>
@@ -270,7 +270,7 @@ export default function CommunicationProviders() {
 
                 <FormField
                   control={form.control}
-                  name="providerName"
+                  name="provider"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t('communications.service')}</FormLabel>
@@ -330,15 +330,24 @@ export default function CommunicationProviders() {
                 />
               </div>
 
-              <div className="p-4 border rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground">
-                  <strong>{t('common.note')}:</strong> {t('communications.credentialsNote')}
+              <div className="p-4 border rounded-lg bg-muted/50 space-y-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium">{t('communications.credentialsRequired')}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t('communications.credentialsNote')}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1 ml-7">
+                  <div><strong>Twilio SMS:</strong> TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER</div>
+                  <div><strong>SendGrid Email:</strong> SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, SENDGRID_FROM_NAME</div>
+                  <div><strong>Gmail OAuth:</strong> GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN</div>
+                </div>
+                <p className="text-xs text-muted-foreground ml-7">
+                  💡 {t('communications.credentialsHint')}
                 </p>
-                <ul className="text-sm text-muted-foreground mt-2 ml-4 list-disc space-y-1">
-                  <li><strong>{t('communications.twilioSms')}:</strong> TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER</li>
-                  <li><strong>{t('communications.sendgridEmail')}:</strong> SENDGRID_API_KEY, SENDGRID_FROM_EMAIL</li>
-                  <li><strong>{t('communications.gmailOauth')}:</strong> GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN</li>
-                </ul>
               </div>
 
               <div className="flex gap-3 pt-4">
