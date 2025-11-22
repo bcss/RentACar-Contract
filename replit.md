@@ -46,6 +46,87 @@ Desktop-only application: 1024px minimum width (tablets in landscape + desktops)
 - **Internationalization:** Complete English/Arabic translations via i18next for all features, including RTL/LTR layout support and localized CSV exports.
 - **Security & Compliance:** App access logging, granular role-based permissions, QR Code Service for contract verification.
 
+### Campaign & Notification System (November 22, 2025)
+
+**Architecture Overview:**
+Production-ready automated notification system with 30 pre-configured templates covering the complete rental lifecycle. Features smart template-driven notifications, multi-provider routing, and comprehensive communication logging.
+
+**Core Components:**
+
+1. **Notification Templates (30 System Templates):**
+   - **Contract Lifecycle (10 templates):** CONTRACT_CREATED, CONTRACT_ACTIVATED, CONTRACT_COMPLETED, CONTRACT_CLOSED, CONTRACT_CANCELLED, CONTRACT_EXPIRING_SOON, CONTRACT_EXPIRED, CONTRACT_EXTENSION_APPROVED, CONTRACT_MODIFIED, CONTRACT_OVERDUE
+   - **Payment Events (8 templates):** PAYMENT_RECEIVED, PAYMENT_PENDING, PAYMENT_OVERDUE, PAYMENT_FAILED, PAYMENT_REFUND_PROCESSED, SECURITY_DEPOSIT_REFUNDED, PAYMENT_REMINDER, FINAL_PAYMENT_REMINDER
+   - **Document Management (6 templates):** DOCUMENT_EXPIRING_SOON, DOCUMENT_EXPIRED, DOCUMENT_UPLOADED, DOCUMENT_APPROVED, DOCUMENT_REJECTED, DOCUMENT_RENEWAL_REQUIRED
+   - **Operational Events (6 templates):** VEHICLE_INSPECTION_REQUIRED, VEHICLE_INSPECTION_COMPLETED, DRIVER_ASSIGNED, TOLL_CHARGE_APPLIED, TRAFFIC_FINE_APPLIED, MAINTENANCE_SCHEDULED
+   - All templates bilingual (English/Arabic) with SMS and Email support
+   - Smart seeding logic prevents duplicates while allowing updates
+   - Template fields: name, description, category, templateCode, subjectEn/Ar, bodyEn/Ar, supportsSms, supportsEmail, isActive, variables
+
+2. **Automated Notification Trigger Service:**
+   - **File:** `server/services/notificationTrigger.ts`
+   - **Function:** `triggerNotification(templateCode, recipientInfo, variables, options?)`
+   - **Features:**
+     - Case-insensitive template code lookup (prevents silent failures)
+     - Automatic template rendering with variable substitution
+     - Intelligent provider selection with failover support
+     - Comprehensive communication logging with cost tracking
+     - Respects template active/inactive state
+     - Supports force send and channel override options
+   - **Integration:** Called directly from business logic endpoints after entity state changes
+
+3. **Supporting Services:**
+   - **Template Renderer** (`server/services/templateRenderer.ts`): Variable substitution engine for SMS/Email body rendering
+   - **Provider Selector** (`server/services/providerSelector.ts`): Multi-provider routing with priority-based selection and automatic failover
+   - **Campaign Sender** (`server/services/campaignSender.ts`): Batch notification delivery for campaigns with recipient filtering
+   - **Communication Logs:** All notifications logged in `communicationLogs` table with recipient, channel, provider, status, cost, and delivery timestamps
+
+4. **Contract Lifecycle Integration (November 22, 2025):**
+   - **CREATE:** Auto-sends CONTRACT_CREATED notification with contract number, vehicle plate, dates, total amount
+   - **ACTIVATE:** Auto-sends CONTRACT_ACTIVATED notification when draft→active transition occurs
+   - **COMPLETE:** Auto-sends CONTRACT_COMPLETED notification with final charges and outstanding balance
+   - All triggers include customer info, vehicle details, and company branding
+   - Non-blocking design: notifications failures don't block contract operations
+
+5. **Database Schema:**
+   - **notificationTemplates:** 30 system templates with bilingual content
+   - **communicationLogs:** Complete audit trail of all sent communications (recipientId, channel, provider, cost, status, metadata)
+   - **campaigns:** Campaign definitions with approval workflow and scheduling
+   - **campaignRecipients:** Recipient tracking with delivery status per recipient
+   - **communicationProviders:** Multi-provider configuration (Twilio SMS, SendGrid Email, Gmail SMTP)
+
+**Key Technical Decisions:**
+- Case-insensitive template lookup prevents integration errors
+- Template codes use UPPERCASE convention (e.g., CONTRACT_CREATED)
+- Non-blocking notification pattern: business operations never fail due to notification errors
+- Communication logs use recipientId (flexible FK) instead of customerId for extensibility
+- Cost tracking as string type for precise decimal handling
+- All notification variables passed as key-value objects for template rendering
+
+**Integration Pattern:**
+```typescript
+// After entity state change (e.g., contract creation)
+await triggerNotification('contract_created', {
+  customerId: customer.id,
+  customerName: customer.nameEn,
+  mobile: customer.phone,
+  email: customer.email,
+  language: 'en',
+}, {
+  contractNumber: contract.contractNumber.toString(),
+  vehiclePlate: vehicle.registration,
+  startDate: formatDate(contract.rentalStartDate),
+  // ... other template variables
+});
+```
+
+**Future Enhancements:**
+- Payment notification triggers (PAYMENT_RECEIVED, PAYMENT_OVERDUE)
+- Document expiry notification triggers
+- Manual notification sender UI
+- Campaign analytics dashboard
+- Communication logs viewer
+- Arabic template rendering with RTL support
+
 ## External Dependencies
 
 ### Third-Party Services

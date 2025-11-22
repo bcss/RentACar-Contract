@@ -583,35 +583,30 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
     // Create audit log
     await createAuditLog(userId, 'activate', activated.id, req, `Activated contract #${activated.contractNumber} - vehicle handed over at ${timeOut || 'N/A'}`);
     
-    // Send activation notification
+    // Trigger notification: contract_activated
     try {
       const customer = await storage.getCustomerById(activated.customerId);
       const vehicle = await storage.getVehicleById(activated.vehicleId);
+      const settings = await storage.getCompanySettings();
       
-      if (customer && vehicle) {
-        await notificationService.sendNotification({
-          templateCode: 'CONTRACT_ACTIVATED',
-          channel: 'both',
-          recipientType: 'customer',
-          recipientId: customer.id,
-          variables: {
-            contractNumber: activated.contractNumber.toString(),
-            customerName: customer.nameEn || '',
-            vehicleMake: vehicle.make || '',
-            vehicleModel: vehicle.model || '',
-            vehicleRegistration: vehicle.registration || '',
-            startDate: new Date(activated.rentalStartDate).toLocaleDateString('en-AE'),
-            endDate: new Date(activated.rentalEndDate).toLocaleDateString('en-AE'),
-          },
+      if (customer && (customer.phone || customer.email)) {
+        await triggerNotification('contract_activated', {
+          customerId: customer.id,
+          customerName: customer.nameEn,
+          mobile: customer.phone,
+          email: customer.email,
           language: 'en',
-          triggerType: 'event_driven',
-          triggeredBy: userId,
-          entityType: 'contract',
-          entityId: activated.id,
+        }, {
+          contractNumber: activated.contractNumber.toString(),
+          customerName: customer.nameEn,
+          vehiclePlate: vehicle?.registration || 'N/A',
+          startDate: new Date(activated.rentalStartDate).toLocaleDateString('en-GB'),
+          endDate: new Date(activated.rentalEndDate).toLocaleDateString('en-GB'),
+          companyName: settings?.companyNameEn || 'KarāraOS',
         });
       }
     } catch (notifError) {
-      console.error('[Notification] Failed to send contract activation notification:', notifError);
+      console.error('[Contract] Notification failed for contract_activated:', notifError);
     }
     
     res.json(activated);
@@ -798,35 +793,31 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
     const finalAuditNote = `${auditNote}${timeIn ? ` | Vehicle returned at ${timeIn}` : ''}`;
     await createAuditLog(userId, 'complete', completed.id, req, finalAuditNote);
     
-    // Send completion notification
+    // Trigger notification: contract_completed
     try {
       const customer = await storage.getCustomerById(completed.customerId);
       const vehicle = await storage.getVehicleById(completed.vehicleId);
+      const settings = await storage.getCompanySettings();
       
-      if (customer && vehicle) {
-        await notificationService.sendNotification({
-          templateCode: 'CONTRACT_COMPLETED',
-          channel: 'both',
-          recipientType: 'customer',
-          recipientId: customer.id,
-          variables: {
-            contractNumber: completed.contractNumber.toString(),
-            customerName: customer.nameEn || '',
-            vehicleMake: vehicle.make || '',
-            vehicleModel: vehicle.model || '',
-            totalAmount: completed.totalAmount || '0',
-            outstandingBalance: completed.outstandingBalance || '0',
-            returnDate: new Date().toLocaleDateString('en-AE'),
-          },
+      if (customer && (customer.phone || customer.email)) {
+        await triggerNotification('contract_completed', {
+          customerId: customer.id,
+          customerName: customer.nameEn,
+          mobile: customer.phone,
+          email: customer.email,
           language: 'en',
-          triggerType: 'event_driven',
-          triggeredBy: userId,
-          entityType: 'contract',
-          entityId: completed.id,
+        }, {
+          contractNumber: completed.contractNumber.toString(),
+          customerName: customer.nameEn,
+          vehiclePlate: vehicle?.registration || 'N/A',
+          totalAmount: completed.totalAmount || '0',
+          outstandingBalance: completed.outstandingBalance || '0',
+          returnDate: new Date().toLocaleDateString('en-GB'),
+          companyName: settings?.companyNameEn || 'KarāraOS',
         });
       }
     } catch (notifError) {
-      console.error('[Notification] Failed to send contract completion notification:', notifError);
+      console.error('[Contract] Notification failed for contract_completed:', notifError);
     }
     
     res.json(completed);
