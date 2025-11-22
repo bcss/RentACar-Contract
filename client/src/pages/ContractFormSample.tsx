@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'wouter';
+import { useLocation, useParams } from 'wouter';
 import { z } from 'zod';
+import { type Contract, type CompanySettings, type Customer, type Vehicle } from '@shared/schema';
+import { isUnauthorizedError } from '@/lib/authUtils';
 import { 
   User, Car, Calendar, DollarSign, Clipboard, UserPlus, 
   Truck, MapPin, FileText, Wrench, Shield, Hash, Fuel,
@@ -97,16 +99,59 @@ type ContractFormData = z.infer<typeof contractFormSchema>;
 export default function ContractFormSample() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [, navigate] = useLocation();
+  const params = useParams<{ id?: string }>();
+  const isEditing = !!params.id && params.id !== 'new';
   const [activeTab, setActiveTab] = useState('customer');
 
+  // Auth guard
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast({
+        title: t('common.error'),
+        description: t('msg.noPermission'),
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+    }
+  }, [isAuthenticated, authLoading, toast, t]);
+
+  // Edit reason guard
+  useEffect(() => {
+    if (isEditing && params.id) {
+      const editReason = sessionStorage.getItem(`editReason_${params.id}`);
+      if (!editReason) {
+        toast({
+          title: t('common.error'),
+          description: 'Please provide an edit reason before modifying this contract.',
+          variant: "destructive",
+        });
+        navigate('/contracts');
+      }
+    }
+  }, [isEditing, params.id, navigate, toast, t]);
+
+  // Query for existing contract (edit mode)
+  const { data: existingContract, isLoading: contractLoading } = useQuery<Contract>({
+    queryKey: ['/api/contracts', params.id],
+    enabled: isEditing && isAuthenticated,
+  });
+
+  // Query for company settings
+  const { data: settings } = useQuery<CompanySettings>({
+    queryKey: ['/api/settings'],
+    enabled: isAuthenticated,
+  });
+
   // Fetch customers, vehicles, and branches
-  const { data: customers = [] } = useQuery<any[]>({
+  const { data: customers = [] } = useQuery<Customer[]>({
     queryKey: ['/api/customers'],
   });
 
-  const { data: vehicles = [] } = useQuery<any[]>({
+  const { data: vehicles = [] } = useQuery<Vehicle[]>({
     queryKey: ['/api/vehicles'],
   });
 
@@ -142,6 +187,84 @@ export default function ContractFormSample() {
       pickUpEnabled: false,
       requiresDriver: false,
       createdBy: user?.id || '',
+    },
+  });
+
+  // Mutations for contract CRUD
+  const createMutation = useMutation({
+    mutationFn: async (data: ContractFormData) => {
+      return await apiRequest('POST', '/api/contracts', data);
+    },
+    onSuccess: () => {
+      toast({
+        title: t('common.success'),
+        description: t('msg.contractCreated'),
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
+      navigate('/contracts');
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: ContractFormData) => {
+      const editReason = sessionStorage.getItem(`editReason_${params.id}`);
+      
+      if (!editReason) {
+        throw new Error('Edit reason is required. Please start editing from the contracts list.');
+      }
+      
+      return await apiRequest('PATCH', `/api/contracts/${params.id}`, {
+        ...data,
+        editReason,
+      });
+    },
+    onSuccess: () => {
+      if (params.id) {
+        sessionStorage.removeItem(`editReason_${params.id}`);
+      }
+      
+      toast({
+        title: t('common.success'),
+        description: t('msg.contractUpdated'),
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
+      navigate('/contracts');
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -183,25 +306,77 @@ export default function ContractFormSample() {
     }
   }, [watchedDailyRate, watchedTotalDays, form]);
 
+  // Edit mode: Hydrate form with existing contract data
+  useEffect(() => {
+    if (existingContract && !contractLoading) {
+      form.reset({
+        customerId: existingContract.customerId || '',
+        vehicleId: existingContract.vehicleId || '',
+        branchId: existingContract.branchId || '',
+        hirerType: (existingContract.hirerType as 'direct' | 'with_sponsor' | 'from_company') || 'direct',
+        sponsorId: existingContract.sponsorId || null,
+        companySponsorId: existingContract.companySponsorId || null,
+        rentalStartDate: existingContract.rentalStartDate ? new Date(existingContract.rentalStartDate) : new Date(),
+        rentalEndDate: existingContract.rentalEndDate ? new Date(existingContract.rentalEndDate) : new Date(),
+        rentalType: (existingContract.rentalType as 'daily' | 'weekly' | 'monthly') || 'daily',
+        pickupLocation: existingContract.pickupLocation || '',
+        dropoffLocation: existingContract.dropoffLocation || '',
+        dailyRate: existingContract.dailyRate || '',
+        weeklyRate: existingContract.weeklyRate || '',
+        monthlyRate: existingContract.monthlyRate || '',
+        subtotal: existingContract.subtotal || '',
+        vatAmount: existingContract.vatAmount || '',
+        totalAmount: existingContract.totalAmount || '',
+        totalDays: existingContract.totalDays || 1,
+        mileageLimit: existingContract.mileageLimit || null,
+        extraKmRate: existingContract.extraKmRate || '',
+        odometerStart: existingContract.odometerStart || null,
+        securityDeposit: existingContract.securityDeposit || '',
+        inspectionTools: existingContract.inspectionTools || false,
+        inspectionSpareTyre: existingContract.inspectionSpareTyre || false,
+        inspectionGps: existingContract.inspectionGps || false,
+        inspectionFuelPercentage: existingContract.inspectionFuelPercentage || 100,
+        inspectionDamageNotes: existingContract.inspectionDamageNotes || '',
+        salikCharge: existingContract.salikCharge || '',
+        trafficFineCharge: existingContract.trafficFineCharge || '',
+        dropOffEnabled: existingContract.dropOffEnabled || false,
+        dropOffCharge: existingContract.dropOffCharge || '',
+        dropOffAddressEn: existingContract.dropOffAddressEn || '',
+        pickUpEnabled: existingContract.pickUpEnabled || false,
+        pickUpCharge: existingContract.pickUpCharge || '',
+        pickUpAddressEn: existingContract.pickUpAddressEn || '',
+        requiresDriver: existingContract.requiresDriver || false,
+        driverServiceType: existingContract.driverServiceType || '',
+        driverServiceRate: existingContract.driverServiceRate || '',
+        driverServiceQuantity: existingContract.driverServiceQuantity || '',
+        driverServiceTotal: existingContract.driverServiceTotal || '',
+        notes: existingContract.notes || '',
+        createdBy: existingContract.createdBy || user?.id || '',
+      });
+    }
+  }, [existingContract, contractLoading, form, user?.id]);
+
   const onSubmit = async (data: ContractFormData) => {
     try {
-      const res = await apiRequest('POST', '/api/contracts', {
+      const payload = {
         ...data,
-        rentalStartDate: data.rentalStartDate.toISOString(),
-        rentalEndDate: data.rentalEndDate.toISOString(),
-      });
+        rentalStartDate: data.rentalStartDate instanceof Date 
+          ? data.rentalStartDate.toISOString() 
+          : data.rentalStartDate,
+        rentalEndDate: data.rentalEndDate instanceof Date 
+          ? data.rentalEndDate.toISOString() 
+          : data.rentalEndDate,
+      };
 
-      toast({
-        title: t('common.success'),
-        description: 'Contract created successfully with minimal inputs!',
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
-      navigate('/contracts');
+      if (isEditing) {
+        updateMutation.mutate(payload as ContractFormData);
+      } else {
+        createMutation.mutate(payload as ContractFormData);
+      }
     } catch (error: any) {
       toast({
         title: t('common.error'),
-        description: error.message || 'Failed to create contract',
+        description: error.message || 'Failed to save contract',
         variant: 'destructive',
       });
     }

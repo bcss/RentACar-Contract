@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Communication Provider Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-slate-50 flex items-center justify-center">
+  <main class="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-8 space-y-8">
+
+    <!-- HEADER -->
+    <header class="flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-semibold text-slate-900">
+          Communication Providers
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">
+          Configure SMS / WhatsApp / Email providers with Production and Sandbox environments and built-in testing.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button
+          id="btnOpenTestModal"
+          type="button"
+          class="px-3 py-2 text-xs font-medium text-slate-700 border border-slate-300 rounded-none hover:bg-slate-50">
+          Test configuration
+        </button>
+        <button
+          id="btnNewProvider"
+          type="button"
+          class="px-3 py-2 text-xs font-medium text-white bg-slate-900 rounded-none hover:bg-slate-800">
+          + New provider
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN TWO-COLUMN LAYOUT -->
+    <section class="grid grid-cols-12 gap-8">
+
+      <!-- LEFT: PROVIDER LIST -->
+      <div class="col-span-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-medium text-slate-700">
+            Providers
+          </h2>
+        </div>
+
+        <div class="border border-slate-100 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-500">
+              <tr>
+                <th class="px-3 py-2 font-medium">Name</th>
+                <th class="px-3 py-2 font-medium">Code</th>
+                <th class="px-3 py-2 font-medium">Status</th>
+                <th class="px-3 py-2 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="providerTableBody" class="divide-y divide-slate-100">
+              <!-- Example static rows; replace with server-side or JS rendering -->
+              <tr class="hover:bg-slate-50 cursor-pointer" data-provider-id="1">
+                <td class="px-3 py-2 text-slate-900">Twilio</td>
+                <td class="px-3 py-2 text-slate-500 text-[11px]">TWILIO</td>
+                <td class="px-3 py-2">
+                  <span class="inline-flex items-center gap-1 text-[11px] text-emerald-600">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                    Active
+                  </span>
+                </td>
+                <td class="px-3 py-2 text-right">
+                  <button
+                    type="button"
+                    class="text-[11px] text-slate-600 hover:text-slate-900"
+                    onclick="openEditProvider()">
+                    Edit
+                  </button>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-slate-50 cursor-pointer" data-provider-id="2">
+                <td class="px-3 py-2 text-slate-900">MessageBird</td>
+                <td class="px-3 py-2 text-slate-500 text-[11px]">MSGBIRD</td>
+                <td class="px-3 py-2">
+                  <span class="inline-flex items-center gap-1 text-[11px] text-slate-400">
+                    <span class="w-1.5 h-1.5 bg-slate-300 rounded-full"></span>
+                    Inactive
+                  </span>
+                </td>
+                <td class="px-3 py-2 text-right">
+                  <button
+                    type="button"
+                    class="text-[11px] text-slate-600 hover:text-slate-900"
+                    onclick="openEditProvider()">
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT: PROVIDER FORM (CREATE / EDIT) -->
+      <div class="col-span-7">
+        <div id="providerFormContainer" class="space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-medium text-slate-700">
+                Provider configuration
+              </h2>
+              <p class="text-xs text-slate-500 mt-1">
+                Global configuration for this provider, including Production and Sandbox environments.
+              </p>
+            </div>
+            <button
+              id="btnDeleteProvider"
+              type="button"
+              class="px-3 py-2 text-[11px] font-medium text-red-600 border border-red-200 rounded-none hover:bg-red-50">
+              Delete
+            </button>
+          </div>
+
+          <form id="providerForm" class="space-y-6">
+
+            <!-- BASIC PROVIDER DETAILS -->
+            <section class="space-y-4">
+              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                Provider details
+              </h3>
+
+              <!-- Name -->
+              <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                     stroke-width="1.8" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path d="M9 12h6M12 9v6"></path>
+                </svg>
+                <input type="text" name="name" placeholder="Provider name (e.g. Twilio)"
+                       class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+              </div>
+
+              <!-- Code -->
+              <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                     stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M4 5h16v14H4z"></path>
+                  <path d="M8 9h8"></path>
+                </svg>
+                <input type="text" name="code" placeholder="Unique code (e.g. TWILIO)"
+                       class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500 uppercase" />
+              </div>
+
+              <!-- Description -->
+              <div class="border-b border-slate-200 pb-2">
+                <div class="flex items-center gap-3 mb-1">
+                  <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                       stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M4 4h16v16H4z"></path>
+                    <path d="M8 8h8M8 12h5M8 16h3"></path>
+                  </svg>
+                  <span class="text-sm text-slate-500">Description</span>
+                </div>
+                <textarea
+                  name="description"
+                  rows="2"
+                  class="w-full bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500 resize-none"
+                  placeholder="Internal notes about this provider"></textarea>
+              </div>
+
+              <!-- Active toggle (visual only here) -->
+              <div class="flex items-center justify-between pt-1">
+                <span class="text-xs text-slate-500">Provider active</span>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <span class="text-[11px] text-slate-500">Off</span>
+                  <input type="checkbox" name="is_active" class="sr-only" checked />
+                  <span class="w-8 h-4 border border-slate-300 flex items-center px-0.5 rounded-none">
+                    <span class="w-3 h-3 bg-slate-400 translate-x-0 transition-transform"
+                          id="providerActiveKnob"></span>
+                  </span>
+                  <span class="text-[11px] text-slate-900">On</span>
+                </label>
+              </div>
+            </section>
+
+            <!-- ENVIRONMENT TABS -->
+            <section class="space-y-4">
+              <div class="border-b border-slate-200 flex items-center gap-4">
+                <button
+                  type="button"
+                  id="tabProd"
+                  class="px-3 py-2 text-xs font-medium text-slate-900 border-b-2 border-slate-900 rounded-none">
+                  Production
+                </button>
+                <button
+                  type="button"
+                  id="tabSandbox"
+                  class="px-3 py-2 text-xs font-medium text-slate-500 border-b-2 border-transparent rounded-none">
+                  Sandbox
+                </button>
+              </div>
+
+              <!-- PRODUCTION PANEL -->
+              <div id="panelProd" class="space-y-6">
+
+                <!-- HTTP / REST – PROD -->
+                <section class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                      HTTP / REST – Production
+                    </h3>
+                    <p class="text-[11px] text-slate-400">
+                      Last test: <span id="prodLastTestStatus">Never</span>
+                    </p>
+                  </div>
+
+                  <!-- Base URL -->
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M3 6h18M3 12h18M3 18h18"></path>
+                    </svg>
+                    <input type="url" name="prod_base_url"
+                           placeholder="Base URL (e.g. https://api.twilio.com)"
+                           class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                  </div>
+
+                  <!-- API version -->
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M6 7h12M6 12h8M6 17h6"></path>
+                    </svg>
+                    <input type="text" name="prod_api_version"
+                           placeholder="API version (e.g. 2010-04-01)"
+                           class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                  </div>
+
+                  <!-- Formats & method -->
+                  <div class="grid grid-cols-3 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                        <path d="M8 9h8M8 13h5"></path>
+                      </svg>
+                      <select name="prod_request_format"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="JSON" selected>Req: JSON</option>
+                        <option value="XML">Req: XML</option>
+                        <option value="FORM">Req: Form</option>
+                      </select>
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                        <path d="M8 9h6M8 13h8"></path>
+                      </svg>
+                      <select name="prod_response_format"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="JSON" selected>Res: JSON</option>
+                        <option value="XML">Res: XML</option>
+                      </select>
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M5 12h14M13 6l6 6-6 6"></path>
+                      </svg>
+                      <select name="prod_default_method"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="POST" selected>POST</option>
+                        <option value="GET">GET</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Timeout / retries / rate limit -->
+                  <div class="grid grid-cols-3 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M12 7v5l3 3"></path>
+                      </svg>
+                      <input type="number" name="prod_timeout_ms" min="1000"
+                             placeholder="Timeout ms (e.g. 10000)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 4v6h6M20 20v-6h-6"></path>
+                        <path d="M5 13a7 7 0 0112-4M19 11a7 7 0 01-12 4"></path>
+                      </svg>
+                      <input type="number" name="prod_max_retries" min="0"
+                             placeholder="Retries (e.g. 2)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 18h16M6 18V8M12 18V4M18 18v-6"></path>
+                      </svg>
+                      <input type="number" name="prod_rate_limit_per_sec" min="0"
+                             placeholder="Req/sec (blank = none)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+                </section>
+
+                <!-- AUTH – PROD -->
+                <section class="space-y-4">
+                  <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Authentication – Production
+                  </h3>
+
+                  <!-- Auth type -->
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+                      <path d="M8 11V8a4 4 0 118 0v3"></path>
+                    </svg>
+                    <select name="prod_auth_type"
+                            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                      <option value="BASIC" selected>BASIC (username/password)</option>
+                      <option value="API_KEY">API key / secret</option>
+                      <option value="BEARER_TOKEN">Bearer token</option>
+                    </select>
+                  </div>
+
+                  <!-- Account / region -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 5h16v14H4z"></path>
+                        <path d="M8 9h8"></path>
+                      </svg>
+                      <input type="text" name="prod_account_id"
+                             placeholder="Account ID / SID"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M5 12h14M12 5a7 7 0 010 14"></path>
+                      </svg>
+                      <input type="text" name="prod_region"
+                             placeholder="Region (e.g. us1)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+
+                  <!-- Username / password -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M5 4h14v4H5z"></path>
+                        <path d="M5 12h7M5 16h5"></path>
+                      </svg>
+                      <input type="text" name="prod_username"
+                             placeholder="Username (optional)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+                        <path d="M8 11V8a4 4 0 118 0v3"></path>
+                      </svg>
+                      <input type="password" name="prod_password"
+                             placeholder="Password / Auth token"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+
+                  <!-- API key / secret -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 7h16M4 13h12"></path>
+                      </svg>
+                      <input type="password" name="prod_api_key"
+                             placeholder="API key (if used)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 7h16M4 13h12"></path>
+                      </svg>
+                      <input type="password" name="prod_api_secret"
+                             placeholder="API secret (if used)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+                </section>
+
+                <!-- CHANNEL – PROD -->
+                <section class="space-y-4">
+                  <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Channel – Production
+                  </h3>
+
+                  <!-- Channel type -->
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M19.4 15A8 8 0 104.6 9"></path>
+                    </svg>
+                    <select name="prod_channel_type"
+                            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                      <option value="SMS" selected>SMS</option>
+                      <option value="WHATSAPP">WhatsApp</option>
+                      <option value="EMAIL">Email</option>
+                    </select>
+                  </div>
+
+                  <!-- Default sender / messaging service -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 6h16v12H4z"></path>
+                        <path d="M4 7l8 5 8-5"></path>
+                      </svg>
+                      <input type="text" name="prod_default_sender"
+                             placeholder="Default sender (phone/email)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M5 5h14v6H5z"></path>
+                        <path d="M5 15h9v4H5z"></path>
+                      </svg>
+                      <input type="text" name="prod_messaging_service_or_namespace"
+                             placeholder="Messaging SID / WA namespace"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+
+                  <!-- Long message policy -->
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M4 6h16M4 10h10M4 14h7M4 18h4"></path>
+                    </svg>
+                    <select name="prod_long_message_policy"
+                            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                      <option value="SPLIT" selected>Split long messages</option>
+                      <option value="TRUNCATE">Truncate long messages</option>
+                      <option value="ERROR">Error on long messages</option>
+                    </select>
+                  </div>
+
+                  <!-- Test destination -->
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M4 6h16v12H4z"></path>
+                      <path d="M4 7l8 5 8-5"></path>
+                    </svg>
+                    <input type="text" name="prod_test_destination"
+                           placeholder="Test destination (live test number/email)"
+                           class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                  </div>
+                </section>
+
+                <!-- WEBHOOK – PROD -->
+                <section class="space-y-4">
+                  <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Webhook – Production
+                  </h3>
+
+                  <!-- Event type -->
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M5 4h14v7H5z"></path>
+                      <path d="M5 17h8v3H5z"></path>
+                    </svg>
+                    <select name="prod_event_type"
+                            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                      <option value="INBOUND_MESSAGE">Inbound message</option>
+                      <option value="DELIVERY_STATUS" selected>Delivery status</option>
+                      <option value="WHATSAPP_STATUS">WhatsApp status</option>
+                      <option value="GENERIC">Generic</option>
+                    </select>
+                  </div>
+
+                  <!-- URL + method -->
+                  <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2 flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M5 12h14"></path>
+                        <path d="M12 5l7 7-7 7"></path>
+                      </svg>
+                      <input type="url" name="prod_webhook_url"
+                             placeholder="Webhook URL (your endpoint)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 6h16M4 12h10M4 18h7"></path>
+                      </svg>
+                      <select name="prod_webhook_method"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="POST" selected>POST</option>
+                        <option value="GET">GET</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Auth / secret -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+                        <path d="M8 11V8a4 4 0 118 0v3"></path>
+                      </svg>
+                      <select name="prod_webhook_auth_type"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="SIGNATURE" selected>Signature (e.g. Twilio)</option>
+                        <option value="TOKEN">Bearer token</option>
+                        <option value="IP_WHITELIST">IP whitelist</option>
+                        <option value="NONE">No auth</option>
+                      </select>
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 7h16M4 13h12"></path>
+                      </svg>
+                      <input type="password" name="prod_webhook_secret"
+                             placeholder="Signing secret / token"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <!-- SANDBOX PANEL -->
+              <div id="panelSandbox" class="space-y-6 hidden">
+                <!-- HTTP / REST – SANDBOX -->
+                <section class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                      HTTP / REST – Sandbox
+                    </h3>
+                    <p class="text-[11px] text-slate-400">
+                      Last test: <span id="sandboxLastTestStatus">Never</span>
+                    </p>
+                  </div>
+
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M3 6h18M3 12h18M3 18h18"></path>
+                    </svg>
+                    <input type="url" name="sandbox_base_url"
+                           placeholder="Sandbox base URL"
+                           class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                  </div>
+
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M6 7h12M6 12h8M6 17h6"></path>
+                    </svg>
+                    <input type="text" name="sandbox_api_version"
+                           placeholder="API version (optional)"
+                           class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                        <path d="M8 9h8M8 13h5"></path>
+                      </svg>
+                      <select name="sandbox_request_format"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="JSON" selected>Req: JSON</option>
+                        <option value="XML">Req: XML</option>
+                        <option value="FORM">Req: Form</option>
+                      </select>
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                        <path d="M8 9h6M8 13h8"></path>
+                      </svg>
+                      <select name="sandbox_response_format"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="JSON" selected>Res: JSON</option>
+                        <option value="XML">Res: XML</option>
+                      </select>
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M5 12h14M13 6l6 6-6 6"></path>
+                      </svg>
+                      <select name="sandbox_default_method"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="POST" selected>POST</option>
+                        <option value="GET">GET</option>
+                      </select>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- AUTH – SANDBOX -->
+                <section class="space-y-4">
+                  <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Authentication – Sandbox
+                  </h3>
+
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+                      <path d="M8 11V8a4 4 0 118 0v3"></path>
+                    </svg>
+                    <select name="sandbox_auth_type"
+                            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                      <option value="BASIC" selected>BASIC (username/password)</option>
+                      <option value="API_KEY">API key / secret</option>
+                      <option value="BEARER_TOKEN">Bearer token</option>
+                    </select>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 5h16v14H4z"></path>
+                        <path d="M8 9h8"></path>
+                      </svg>
+                      <input type="text" name="sandbox_account_id"
+                             placeholder="Account ID / SID (test)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M5 12h14M12 5a7 7 0 010 14"></path>
+                      </svg>
+                      <input type="text" name="sandbox_region"
+                             placeholder="Region (optional)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M5 4h14v4H5z"></path>
+                        <path d="M5 12h7M5 16h5"></path>
+                      </svg>
+                      <input type="text" name="sandbox_username"
+                             placeholder="Username (optional)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+                        <path d="M8 11V8a4 4 0 118 0v3"></path>
+                      </svg>
+                      <input type="password" name="sandbox_password"
+                             placeholder="Password / Auth token (test)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 7h16M4 13h12"></path>
+                      </svg>
+                      <input type="password" name="sandbox_api_key"
+                             placeholder="API key (test)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 7h16M4 13h12"></path>
+                      </svg>
+                      <input type="password" name="sandbox_api_secret"
+                             placeholder="API secret (test)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+                </section>
+
+                <!-- CHANNEL – SANDBOX -->
+                <section class="space-y-4">
+                  <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Channel – Sandbox
+                  </h3>
+
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M19.4 15A8 8 0 104.6 9"></path>
+                    </svg>
+                    <select name="sandbox_channel_type"
+                            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                      <option value="SMS" selected>SMS</option>
+                      <option value="WHATSAPP">WhatsApp</option>
+                      <option value="EMAIL">Email</option>
+                    </select>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 6h16v12H4z"></path>
+                        <path d="M4 7l8 5 8-5"></path>
+                      </svg>
+                      <input type="text" name="sandbox_default_sender"
+                             placeholder="Test sender (phone/email)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M5 5h14v6H5z"></path>
+                        <path d="M5 15h9v4H5z"></path>
+                      </svg>
+                      <input type="text" name="sandbox_messaging_service_or_namespace"
+                             placeholder="Messaging SID / namespace (test)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M4 6h16M4 10h10M4 14h7M4 18h4"></path>
+                    </svg>
+                    <select name="sandbox_long_message_policy"
+                            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                      <option value="SPLIT" selected>Split long messages</option>
+                      <option value="TRUNCATE">Truncate long messages</option>
+                      <option value="ERROR">Error on long messages</option>
+                    </select>
+                  </div>
+
+                  <!-- Test destination -->
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M4 6h16v12H4z"></path>
+                      <path d="M4 7l8 5 8-5"></path>
+                    </svg>
+                    <input type="text" name="sandbox_test_destination"
+                           placeholder="Test destination (sandbox number/email)"
+                           class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                  </div>
+                </section>
+
+                <!-- WEBHOOK – SANDBOX -->
+                <section class="space-y-4">
+                  <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Webhook – Sandbox
+                  </h3>
+
+                  <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                         stroke-width="1.8" viewBox="0 0 24 24">
+                      <path d="M5 4h14v7H5z"></path>
+                      <path d="M5 17h8v3H5z"></path>
+                    </svg>
+                    <select name="sandbox_event_type"
+                            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                      <option value="INBOUND_MESSAGE">Inbound message</option>
+                      <option value="DELIVERY_STATUS" selected>Delivery status</option>
+                      <option value="WHATSAPP_STATUS">WhatsApp status</option>
+                      <option value="GENERIC">Generic</option>
+                    </select>
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2 flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M5 12h14"></path>
+                        <path d="M12 5l7 7-7 7"></path>
+                      </svg>
+                      <input type="url" name="sandbox_webhook_url"
+                             placeholder="Sandbox webhook URL"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 6h16M4 12h10M4 18h7"></path>
+                      </svg>
+                      <select name="sandbox_webhook_method"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="POST" selected>POST</option>
+                        <option value="GET">GET</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+                        <path d="M8 11V8a4 4 0 118 0v3"></path>
+                      </svg>
+                      <select name="sandbox_webhook_auth_type"
+                              class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+                        <option value="SIGNATURE" selected>Signature</option>
+                        <option value="TOKEN">Bearer token</option>
+                        <option value="IP_WHITELIST">IP whitelist</option>
+                        <option value="NONE">No auth</option>
+                      </select>
+                    </div>
+
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+                      <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                           stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 7h16M4 13h12"></path>
+                      </svg>
+                      <input type="password" name="sandbox_webhook_secret"
+                             placeholder="Signing secret / token (test)"
+                             class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <!-- FORM ACTIONS -->
+            <div class="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                class="px-4 py-2 text-xs font-medium text-slate-700 border border-slate-300 rounded-none hover:bg-slate-50">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 text-xs font-medium text-white bg-slate-900 rounded-none hover:bg-slate-800">
+                Save provider
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- TEST CONFIG MODAL -->
+  <div id="testModal"
+       class="fixed inset-0 bg-black/20 flex items-center justify-center z-20 hidden">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6 space-y-4">
+      <h3 class="text-sm font-semibold text-slate-900">
+        Test configuration
+      </h3>
+      <p class="text-xs text-slate-500">
+        Choose an environment to run a connection test or send a controlled test message.
+      </p>
+
+      <div class="space-y-3">
+        <!-- Provider + env selector (placeholder; wire to backend) -->
+        <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+          <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+               stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M4 5h16v14H4z"></path>
+            <path d="M8 9h8"></path>
+          </svg>
+          <select id="testEnvSelector"
+            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+            <option>Twilio – Production</option>
+            <option>Twilio – Sandbox</option>
+          </select>
+        </div>
+
+        <!-- Test mode: connection only vs send -->
+        <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+          <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+               stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M9 12h6"></path>
+          </svg>
+          <select id="testMode"
+            class="flex-1 bg-transparent outline-none text-sm text-slate-900 appearance-none">
+            <option value="connection" selected>Connection only (no send)</option>
+            <option value="send">Send test message</option>
+          </select>
+        </div>
+
+        <!-- Destination override (optional) -->
+        <div class="flex items-center gap-3 border-b border-slate-200 pb-2">
+          <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+               stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M4 6h16v12H4z"></path>
+            <path d="M4 7l8 5 8-5"></path>
+          </svg>
+          <input id="testDestinationOverride"
+                 type="text"
+                 placeholder="Override test destination (optional)"
+                 class="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500" />
+        </div>
+
+        <!-- Message (only used if send) -->
+        <div class="border-b border-slate-200 pb-2">
+          <div class="flex items-center gap-3 mb-1">
+            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor"
+                 stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M4 4h16v16H4z"></path>
+              <path d="M8 8h8M8 12h6M8 16h4"></path>
+            </svg>
+            <span class="text-sm text-slate-500">Message</span>
+          </div>
+          <textarea id="testMessage" rows="2"
+            class="w-full bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-500 resize-none"
+            placeholder="Test message text (used only for send mode)"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button
+          type="button"
+          id="btnCloseTestModal"
+          class="px-3 py-2 text-xs font-medium text-slate-700 border border-slate-300 rounded-none hover:bg-slate-50">
+          Close
+        </button>
+        <button
+          type="button"
+          class="px-3 py-2 text-xs font-medium text-white bg-slate-900 rounded-none hover:bg-slate-800">
+          Run test
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRMATION MODAL -->
+  <div id="deleteModal"
+       class="fixed inset-0 bg-black/20 flex items-center justify-center z-20 hidden">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6 space-y-4">
+      <h3 class="text-sm font-semibold text-slate-900">
+        Delete provider
+      </h3>
+      <p class="text-xs text-slate-500">
+        This will remove the provider and all environment configurations. Existing message logs (if any) will not be deleted.
+      </p>
+      <div class="flex justify-end gap-3 pt-2">
+        <button
+          type="button"
+          id="btnCancelDelete"
+          class="px-3 py-2 text-xs font-medium text-slate-700 border border-slate-300 rounded-none hover:bg-slate-50">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="px-3 py-2 text-xs font-medium text-white bg-red-600 rounded-none hover:bg-red-700">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMPLE JS TO HANDLE TABS / MODALS -->
+  <script>
+    const tabProd = document.getElementById('tabProd');
+    const tabSandbox = document.getElementById('tabSandbox');
+    const panelProd = document.getElementById('panelProd');
+    const panelSandbox = document.getElementById('panelSandbox');
+
+    tabProd.addEventListener('click', () => {
+      tabProd.classList.replace('text-slate-500', 'text-slate-900');
+      tabProd.classList.replace('border-transparent', 'border-slate-900');
+      tabSandbox.classList.replace('text-slate-900', 'text-slate-500');
+      tabSandbox.classList.replace('border-slate-900', 'border-transparent');
+      panelProd.classList.remove('hidden');
+      panelSandbox.classList.add('hidden');
+    });
+
+    tabSandbox.addEventListener('click', () => {
+      tabSandbox.classList.replace('text-slate-500', 'text-slate-900');
+      tabSandbox.classList.replace('border-transparent', 'border-slate-900');
+      tabProd.classList.replace('text-slate-900', 'text-slate-500');
+      tabProd.classList.replace('border-slate-900', 'border-transparent');
+      panelSandbox.classList.remove('hidden');
+      panelProd.classList.add('hidden');
+    });
+
+    // Test modal
+    const testModal = document.getElementById('testModal');
+    document.getElementById('btnOpenTestModal').addEventListener('click', () => {
+      testModal.classList.remove('hidden');
+    });
+    document.getElementById('btnCloseTestModal').addEventListener('click', () => {
+      testModal.classList.add('hidden');
+    });
+
+    // Delete modal
+    const deleteModal = document.getElementById('deleteModal');
+    document.getElementById('btnDeleteProvider').addEventListener('click', () => {
+      deleteModal.classList.remove('hidden');
+    });
+    document.getElementById('btnCancelDelete').addEventListener('click', () => {
+      deleteModal.classList.add('hidden');
+    });
+
+    // Stub for "Edit" action from table
+    function openEditProvider() {
+      // In a real implementation, load provider+envs+auth+channel+webhook+test metadata
+      // into the form via AJAX / backend.
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
+

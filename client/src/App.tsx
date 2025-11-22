@@ -60,6 +60,8 @@ const DesignSamples = lazy(() => import("@/pages/DesignSamples"));
 const DesignSystemLibrary = lazy(() => import("@/pages/DesignSystemLibrary"));
 const DesignSamplesShowcase = lazy(() => import("@/pages/DesignSamplesShowcase"));
 const DesignSystemShowcase = lazy(() => import("@/pages/DesignSystemShowcase"));
+const ProviderComparison = lazy(() => import("@/pages/ProviderComparison"));
+const FieldStyleShowcase = lazy(() => import("@/pages/FieldStyleShowcase"));
 const PublicHolidays = lazy(() => import("@/pages/PublicHolidays"));
 const Branches = lazy(() => import("@/pages/Branches"));
 const Drivers = lazy(() => import("@/pages/Drivers"));
@@ -180,7 +182,6 @@ function Router() {
       </Route>
       <Route path="/contracts" component={() => <ProtectedRoute component={Contracts} />} />
       <Route path="/contracts/new" component={() => <ProtectedRoute component={ContractForm} />} />
-      <Route path="/contracts/sample" component={() => <ProtectedRoute component={ContractFormSample} />} />
       <Route path="/contracts/:id/edit" component={() => <ProtectedRoute component={ContractForm} />} />
       <Route path="/contracts/:id" component={() => <ProtectedRoute component={ContractView} />} />
       <Route path="/insurance-claims" component={() => <ProtectedRoute component={InsuranceClaims} />} />
@@ -283,6 +284,18 @@ function Router() {
       <Route path="/design-system-showcase">
         {() => <ProtectedRoute component={DesignSystemShowcase} />}
       </Route>
+
+      {/* Sample & Demo Pages */}
+      <Route path="/contract-form-sample">
+        {() => <ProtectedRoute component={ContractFormSample} />}
+      </Route>
+      <Route path="/provider-comparison">
+        {() => <ProtectedRoute component={ProviderComparison} />}
+      </Route>
+      <Route path="/field-style-showcase">
+        {() => <ProtectedRoute component={FieldStyleShowcase} />}
+      </Route>
+
       <Route path="/public-holidays">
         {() => <ProtectedRoute component={PublicHolidays} />}
       </Route>

@@ -206,6 +206,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const [administrationOpen, setAdministrationOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpLegalOpen, setHelpLegalOpen] = useState(false);
+  const [sampleOpen, setSampleOpen] = useState(false);
   
   // Track which submenu should open after sidebar expands
   const [pendingSubmenuOpen, setPendingSubmenuOpen] = useState<string | null>(null);
@@ -218,6 +219,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     const savedAdministration = localStorage.getItem('sidebar_administration_open');
     const savedSettings = localStorage.getItem('sidebar_settings_open');
     const savedHelpLegal = localStorage.getItem('sidebar_helplegal_open');
+    const savedSample = localStorage.getItem('sidebar_sample_open');
 
     if (savedOperations !== null) setOperationsOpen(savedOperations === 'true');
     if (savedMasters !== null) setMastersOpen(savedMasters === 'true');
@@ -225,6 +227,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     if (savedAdministration !== null) setAdministrationOpen(savedAdministration === 'true');
     if (savedSettings !== null) setSettingsOpen(savedSettings === 'true');
     if (savedHelpLegal !== null) setHelpLegalOpen(savedHelpLegal === 'true');
+    if (savedSample !== null) setSampleOpen(savedSample === 'true');
   }, []);
 
   // When sidebar expands and there's a pending submenu, open it
@@ -255,6 +258,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
         case 'helplegal':
           setHelpLegalOpen(true);
           localStorage.setItem('sidebar_helplegal_open', 'true');
+          break;
+        case 'sample':
+          setSampleOpen(true);
+          localStorage.setItem('sidebar_sample_open', 'true');
           break;
       }
       setPendingSubmenuOpen(null); // Clear pending state
@@ -328,6 +335,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     }
     setHelpLegalOpen(open);
     localStorage.setItem('sidebar_helplegal_open', String(open));
+  };
+
+  const handleSampleToggle = (open: boolean) => {
+    if (open && sidebarState === 'collapsed') {
+      setPendingSubmenuOpen('sample');
+      toggleSidebar();
+      return;
+    }
+    setSampleOpen(open);
+    localStorage.setItem('sidebar_sample_open', String(open));
   };
   
   const { data: settings } = useQuery<CompanySettings>({
@@ -552,10 +569,32 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       url: '/settings/import',
       show: isAdmin && (user?.isImmutable === true),
     },
+  ];
+
+  // Sample & Demo Items
+  const sampleItems = [
     {
-      title: t('nav.designShowcase', 'Design System Showcase'),
+      title: t('nav.designShowcase'),
       icon: 'dashboard',
       url: '/design-system-showcase',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.contractFormSample'),
+      icon: 'description',
+      url: '/contract-form-sample',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.providerComparison'),
+      icon: 'mail',
+      url: '/provider-comparison',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.fieldStyleShowcase'),
+      icon: 'default',
+      url: '/field-style-showcase',
       show: isAdmin || isManager,
     },
   ];
@@ -1086,6 +1125,49 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {settingsItems.filter(item => item.show).map((item) => {
+                          const IconComponent = getIconComponent(item.icon);
+                          return (
+                            <SidebarMenuSubItem key={item.title}>
+                              <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                                <Link href={item.url}>
+                                  <IconComponent className="h-4 w-4" />
+                                  {sidebarState === 'expanded' && <span>{item.title}</span>}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
+
+              {/* Sample & Demos - Collapsible (Admin/Manager only) */}
+              {(isAdmin || isManager) && (
+                <Collapsible open={sampleOpen} onOpenChange={handleSampleToggle} className="group/collapsible">
+                  <SidebarMenuItem>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton data-testid="nav-sample">
+                            <LayoutDashboard className="h-4 w-4" />
+                            {sidebarState === 'expanded' && <span>{t('nav.sample')}</span>}
+                            {sidebarState === 'expanded' && (
+                              <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                            )}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                      </TooltipTrigger>
+                      {sidebarState === 'collapsed' && (
+                        <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+                          <p>{t('nav.sample')}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {sampleItems.filter(item => item.show).map((item) => {
                           const IconComponent = getIconComponent(item.icon);
                           return (
                             <SidebarMenuSubItem key={item.title}>

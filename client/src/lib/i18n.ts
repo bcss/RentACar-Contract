@@ -58,6 +58,10 @@ const resources = {
       "nav.accessReport": "Access Report",
       "nav.designSystemLibrary": "Design System Library",
       "nav.designShowcase": "Design System Showcase",
+      "nav.sample": "Sample & Demos",
+      "nav.contractFormSample": "Contract Form (New Design)",
+      "nav.providerComparison": "Provider Layouts Comparison",
+      "nav.fieldStyleShowcase": "Field Style Demo",
       
       // Design System Showcase
       "designShowcase.title": "Design System Showcase",
@@ -2331,6 +2335,10 @@ const resources = {
       "nav.accessReport": "تقرير الوصول",
       "nav.designSystemLibrary": "مكتبة نظام التصميم",
       "nav.designShowcase": "عرض نظام التصميم",
+      "nav.sample": "عينات وعروض توضيحية",
+      "nav.contractFormSample": "نموذج العقد (التصميم الجديد)",
+      "nav.providerComparison": "مقارنة تخطيطات الموفر",
+      "nav.fieldStyleShowcase": "عرض توضيحي لأنماط الحقول",
       
       // Design System Showcase
       "designShowcase.title": "عرض نظام التصميم",
