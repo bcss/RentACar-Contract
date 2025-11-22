@@ -118,6 +118,18 @@ export default function ContractFormSample() {
   const [vehicleSearchQuery, setVehicleSearchQuery] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
+  const [branchSearchOpen, setBranchSearchOpen] = useState(false);
+  const [branchSearchQuery, setBranchSearchQuery] = useState('');
+  const [selectedBranch, setSelectedBranch] = useState<any | null>(null);
+
+  const [sponsorSearchOpen, setSponsorSearchOpen] = useState(false);
+  const [sponsorSearchQuery, setSponsorSearchQuery] = useState('');
+  const [selectedSponsor, setSelectedSponsor] = useState<any | null>(null);
+
+  const [companySearchOpen, setCompanySearchOpen] = useState(false);
+  const [companySearchQuery, setCompanySearchQuery] = useState('');
+  const [selectedCompany, setSelectedCompany] = useState<any | null>(null);
+
   // Auth guard
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -573,56 +585,156 @@ export default function ContractFormSample() {
                       )}
                     />
 
-                    {/* Conditional Sponsor Selection */}
+                    {/* Conditional Sponsor Selection - Type-ahead Search */}
                     {watchedHirerType === 'with_sponsor' && (
                       <FormField
                         control={form.control}
                         name="sponsorId"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="flex flex-col">
                             <FormLabel>Sponsor *</FormLabel>
-                            <FormControl>
-                              <MinimalSelect
-                                icon={<UserPlus className="h-4 w-4" />}
-                                placeholder="Select sponsor"
-                                value={field.value || ''}
-                                onValueChange={field.onChange}
-                              >
-                                {sponsors.map((sponsor: any) => (
-                                  <MinimalSelectItem key={sponsor.id} value={sponsor.id.toString()}>
-                                    {sponsor.name}
-                                  </MinimalSelectItem>
-                                ))}
-                              </MinimalSelect>
-                            </FormControl>
+                            <Popover open={sponsorSearchOpen} onOpenChange={setSponsorSearchOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-sponsor-search">
+                                    <UserPlus className="h-4 w-4 text-muted-foreground" />
+                                    <div className="flex-1 flex items-center justify-between">
+                                      <span className={cn(
+                                        "text-sm",
+                                        !field.value && "text-muted-foreground"
+                                      )}>
+                                        {selectedSponsor ? selectedSponsor.name : "Search and select sponsor"}
+                                      </span>
+                                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                    </div>
+                                  </div>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[350px] p-0" align="start">
+                                <Command shouldFilter={false}>
+                                  <CommandInput
+                                    placeholder="Type to search sponsors..."
+                                    value={sponsorSearchQuery}
+                                    onValueChange={setSponsorSearchQuery}
+                                    data-testid="input-sponsor-search"
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {sponsorSearchQuery.length > 0 ? "No sponsors found" : "Start typing to search"}
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {sponsors
+                                        .filter((sponsor: any) => 
+                                          !sponsorSearchQuery ||
+                                          sponsor.name?.toLowerCase().includes(sponsorSearchQuery.toLowerCase())
+                                        )
+                                        .map((sponsor: any) => (
+                                          <CommandItem
+                                            key={sponsor.id}
+                                            value={sponsor.id}
+                                            onSelect={() => {
+                                              field.onChange(sponsor.id.toString());
+                                              setSelectedSponsor(sponsor);
+                                              setSponsorSearchOpen(false);
+                                              setSponsorSearchQuery('');
+                                            }}
+                                            data-testid={`item-sponsor-${sponsor.id}`}
+                                          >
+                                            <Check
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                field.value === sponsor.id.toString() ? "opacity-100" : "opacity-0"
+                                              )}
+                                            />
+                                            <span className="font-medium">{sponsor.name}</span>
+                                          </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     )}
 
-                    {/* Conditional Company Selection */}
+                    {/* Conditional Company Selection - Type-ahead Search */}
                     {watchedHirerType === 'from_company' && (
                       <FormField
                         control={form.control}
                         name="companySponsorId"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="flex flex-col">
                             <FormLabel>Company *</FormLabel>
-                            <FormControl>
-                              <MinimalSelect
-                                icon={<Building className="h-4 w-4" />}
-                                placeholder="Select company"
-                                value={field.value || ''}
-                                onValueChange={field.onChange}
-                              >
-                                {companies.map((company: any) => (
-                                  <MinimalSelectItem key={company.id} value={company.id.toString()}>
-                                    {company.nameEn}
-                                  </MinimalSelectItem>
-                                ))}
-                              </MinimalSelect>
-                            </FormControl>
+                            <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-company-search">
+                                    <Building className="h-4 w-4 text-muted-foreground" />
+                                    <div className="flex-1 flex items-center justify-between">
+                                      <span className={cn(
+                                        "text-sm",
+                                        !field.value && "text-muted-foreground"
+                                      )}>
+                                        {selectedCompany ? selectedCompany.nameEn : "Search and select company"}
+                                      </span>
+                                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                    </div>
+                                  </div>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[350px] p-0" align="start">
+                                <Command shouldFilter={false}>
+                                  <CommandInput
+                                    placeholder="Type to search companies..."
+                                    value={companySearchQuery}
+                                    onValueChange={setCompanySearchQuery}
+                                    data-testid="input-company-search"
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {companySearchQuery.length > 0 ? "No companies found" : "Start typing to search"}
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {companies
+                                        .filter((company: any) => 
+                                          !companySearchQuery ||
+                                          company.nameEn?.toLowerCase().includes(companySearchQuery.toLowerCase()) ||
+                                          company.nameAr?.includes(companySearchQuery)
+                                        )
+                                        .map((company: any) => (
+                                          <CommandItem
+                                            key={company.id}
+                                            value={company.id}
+                                            onSelect={() => {
+                                              field.onChange(company.id.toString());
+                                              setSelectedCompany(company);
+                                              setCompanySearchOpen(false);
+                                              setCompanySearchQuery('');
+                                            }}
+                                            data-testid={`item-company-${company.id}`}
+                                          >
+                                            <Check
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                field.value === company.id.toString() ? "opacity-100" : "opacity-0"
+                                              )}
+                                            />
+                                            <div className="flex flex-col">
+                                              <span className="font-medium">{company.nameEn}</span>
+                                              {company.nameAr && (
+                                                <span className="text-sm text-muted-foreground">{company.nameAr}</span>
+                                              )}
+                                            </div>
+                                          </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -731,28 +843,80 @@ export default function ContractFormSample() {
                       )}
                     />
 
-                    {/* Branch Selection */}
+                    {/* Branch Selection - Type-ahead Search */}
                     <FormField
                       control={form.control}
                       name="branchId"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel>Branch *</FormLabel>
-                          <FormControl>
-                            <MinimalSelect
-                              icon={<Building className="h-4 w-4" />}
-                              placeholder="Select branch"
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              error={!!form.formState.errors.branchId}
-                            >
-                              {branches.map((branch: any) => (
-                                <MinimalSelectItem key={branch.id} value={branch.id.toString()}>
-                                  {branch.nameEn}
-                                </MinimalSelectItem>
-                              ))}
-                            </MinimalSelect>
-                          </FormControl>
+                          <Popover open={branchSearchOpen} onOpenChange={setBranchSearchOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-branch-search">
+                                  <Building className="h-4 w-4 text-muted-foreground" />
+                                  <div className="flex-1 flex items-center justify-between">
+                                    <span className={cn(
+                                      "text-sm",
+                                      !field.value && "text-muted-foreground"
+                                    )}>
+                                      {selectedBranch ? selectedBranch.nameEn : "Search and select branch"}
+                                    </span>
+                                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                </div>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[350px] p-0" align="start">
+                              <Command shouldFilter={false}>
+                                <CommandInput
+                                  placeholder="Type to search branches..."
+                                  value={branchSearchQuery}
+                                  onValueChange={setBranchSearchQuery}
+                                  data-testid="input-branch-search"
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    {branchSearchQuery.length > 0 ? "No branches found" : "Start typing to search"}
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {branches
+                                      .filter((branch: any) => 
+                                        !branchSearchQuery ||
+                                        branch.nameEn?.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
+                                        branch.nameAr?.includes(branchSearchQuery)
+                                      )
+                                      .map((branch: any) => (
+                                        <CommandItem
+                                          key={branch.id}
+                                          value={branch.id}
+                                          onSelect={() => {
+                                            field.onChange(branch.id.toString());
+                                            setSelectedBranch(branch);
+                                            setBranchSearchOpen(false);
+                                            setBranchSearchQuery('');
+                                          }}
+                                          data-testid={`item-branch-${branch.id}`}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === branch.id.toString() ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{branch.nameEn}</span>
+                                            {branch.nameAr && (
+                                              <span className="text-sm text-muted-foreground">{branch.nameAr}</span>
+                                            )}
+                                          </div>
+                                        </CommandItem>
+                                      ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}
