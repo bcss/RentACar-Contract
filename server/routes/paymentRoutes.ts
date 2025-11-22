@@ -60,9 +60,21 @@ router.post("/contracts/:id/deposit", isAuthenticated, requireEditor, async (req
     await createAuditLog(userId, 'payment', contract.id, req, `Recorded deposit payment of ${contract.securityDeposit || '0'} ${currency} for contract #${contract.contractNumber}`);
     
     // Send payment received notification (non-blocking)
-    notificationService.sendPaymentReceivedNotification(contract.id, payment.id).catch(err => {
-      console.error('[Notification] Failed to send payment received notification:', err);
-    });
+    const customer = await storage.getCustomer(contract.customerId);
+    if (customer) {
+      triggerNotification('payment_received', {
+        customerName: customer.nameEn || customer.nameAr || 'Customer',
+        mobile: customer.phone,
+        email: customer.email,
+        language: customer.preferredLanguage || 'en',
+      }, {
+        contractNumber: contract.contractNumber.toString(),
+        paymentAmount: payment.amount,
+        paymentMethod: payment.paymentMethod,
+        currency: payment.currency,
+        companyName: settings.companyNameEn || 'KarāraOS',
+      }).catch(err => console.error('[Payment] Deposit notification failed:', err));
+    }
     
     res.json(payment);
   } catch (error: any) {
@@ -117,9 +129,21 @@ router.post("/contracts/:id/final-payment", isAuthenticated, requireEditor, asyn
     await createAuditLog(userId, 'payment', contract.id, req, `Recorded final payment of ${finalPaymentAmount.toFixed(2)} ${currency} for contract #${contract.contractNumber}`);
     
     // Send payment received notification (non-blocking)
-    notificationService.sendPaymentReceivedNotification(contract.id, payment.id).catch(err => {
-      console.error('[Notification] Failed to send payment received notification:', err);
-    });
+    const customer = await storage.getCustomer(contract.customerId);
+    if (customer) {
+      triggerNotification('payment_received', {
+        customerName: customer.nameEn || customer.nameAr || 'Customer',
+        mobile: customer.phone,
+        email: customer.email,
+        language: customer.preferredLanguage || 'en',
+      }, {
+        contractNumber: contract.contractNumber.toString(),
+        paymentAmount: payment.amount,
+        paymentMethod: payment.paymentMethod,
+        currency: payment.currency,
+        companyName: settings.companyNameEn || 'KarāraOS',
+      }).catch(err => console.error('[Payment] Final payment notification failed:', err));
+    }
     
     res.json(payment);
   } catch (error: any) {
