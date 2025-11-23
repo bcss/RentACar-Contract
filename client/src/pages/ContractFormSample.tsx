@@ -13,7 +13,7 @@ import {
   User, Car, Calendar, DollarSign, Clipboard, UserPlus, 
   Truck, MapPin, FileText, Wrench, Shield, Hash, Fuel,
   Mail, Phone, CreditCard, Building, IdCard, Globe,
-  Clock, Percent, Calculator
+  Clock, Percent, Calculator, CheckCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -476,31 +476,32 @@ export default function ContractFormSample() {
                       Select customer and hirer type
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Customer Selection - Type-ahead Search */}
-                    <FormField
-                      control={form.control}
-                      name="customerId"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel data-testid="label-customer">Customer *</FormLabel>
-                          <Popover open={customerSearchOpen} onOpenChange={setCustomerSearchOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-customer-search">
-                                  <User className="h-4 w-4 text-muted-foreground" />
-                                  <div className="flex-1 flex items-center justify-between">
-                                    <span className={cn(
-                                      "text-sm",
-                                      !field.value && "text-muted-foreground"
-                                    )}>
-                                      {selectedCustomer ? `${selectedCustomer.nameEn} - ${selectedCustomer.phone}` : "Search and select customer"}
-                                    </span>
-                                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Customer Selection - Type-ahead Search */}
+                      <FormField
+                        control={form.control}
+                        name="customerId"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel data-testid="label-customer">Customer *</FormLabel>
+                            <Popover open={customerSearchOpen} onOpenChange={setCustomerSearchOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-customer-search">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                    <div className="flex-1 flex items-center justify-between">
+                                      <span className={cn(
+                                        "text-sm",
+                                        !field.value && "text-muted-foreground"
+                                      )}>
+                                        {selectedCustomer ? `${selectedCustomer.nameEn} - ${selectedCustomer.phone}` : "Search and select customer"}
+                                      </span>
+                                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                    </div>
                                   </div>
-                                </div>
-                              </FormControl>
-                            </PopoverTrigger>
+                                </FormControl>
+                              </PopoverTrigger>
                             <PopoverContent className="w-[400px] p-0" align="start">
                               <Command shouldFilter={false}>
                                 <CommandInput
@@ -556,36 +557,37 @@ export default function ContractFormSample() {
                               </Command>
                             </PopoverContent>
                           </Popover>
-                          <FormMessage data-testid="error-customer" />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage data-testid="error-customer" />
+                          </FormItem>
+                        )}
+                      />
 
-                    {/* Hirer Type */}
-                    <FormField
-                      control={form.control}
-                      name="hirerType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel data-testid="label-hirer-type">Hirer Type *</FormLabel>
-                          <FormControl>
-                            <MinimalSelect
-                              icon={<IdCard className="h-4 w-4" />}
-                              placeholder="Select hirer type"
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
-                              <MinimalSelectItem value="direct">Direct Customer</MinimalSelectItem>
-                              <MinimalSelectItem value="with_sponsor">With Sponsor</MinimalSelectItem>
-                              <MinimalSelectItem value="from_company">From Company</MinimalSelectItem>
-                            </MinimalSelect>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      {/* Hirer Type */}
+                      <FormField
+                        control={form.control}
+                        name="hirerType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel data-testid="label-hirer-type">Hirer Type *</FormLabel>
+                            <FormControl>
+                              <MinimalSelect
+                                icon={<IdCard className="h-4 w-4" />}
+                                placeholder="Select hirer type"
+                                value={field.value}
+                                onValueChange={field.onChange}
+                              >
+                                <MinimalSelectItem value="direct">Direct Customer</MinimalSelectItem>
+                                <MinimalSelectItem value="with_sponsor">With Sponsor</MinimalSelectItem>
+                                <MinimalSelectItem value="from_company">From Company</MinimalSelectItem>
+                              </MinimalSelect>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                    {/* Conditional Sponsor Selection - Type-ahead Search */}
+                    {/* Conditional Sponsor Selection - Type-ahead Search (Full Width) */}
                     {watchedHirerType === 'with_sponsor' && (
                       <FormField
                         control={form.control}
@@ -756,33 +758,34 @@ export default function ContractFormSample() {
                       Select vehicle and branch location
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Vehicle Selection - Type-ahead Search */}
-                    <FormField
-                      control={form.control}
-                      name="vehicleId"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Vehicle *</FormLabel>
-                          <Popover open={vehicleSearchOpen} onOpenChange={setVehicleSearchOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-vehicle-search">
-                                  <Car className="h-4 w-4 text-muted-foreground" />
-                                  <div className="flex-1 flex items-center justify-between">
-                                    <span className={cn(
-                                      "text-sm",
-                                      !field.value && "text-muted-foreground"
-                                    )}>
-                                      {selectedVehicle 
-                                        ? `${selectedVehicle.registration} - ${selectedVehicle.make} ${selectedVehicle.model} (${selectedVehicle.year})` 
-                                        : "Search and select vehicle"}
-                                    </span>
-                                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Vehicle Selection - Type-ahead Search */}
+                      <FormField
+                        control={form.control}
+                        name="vehicleId"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Vehicle *</FormLabel>
+                            <Popover open={vehicleSearchOpen} onOpenChange={setVehicleSearchOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-vehicle-search">
+                                    <Car className="h-4 w-4 text-muted-foreground" />
+                                    <div className="flex-1 flex items-center justify-between">
+                                      <span className={cn(
+                                        "text-sm",
+                                        !field.value && "text-muted-foreground"
+                                      )}>
+                                        {selectedVehicle 
+                                          ? `${selectedVehicle.registration} - ${selectedVehicle.make} ${selectedVehicle.model} (${selectedVehicle.year})` 
+                                          : "Search and select vehicle"}
+                                      </span>
+                                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                    </div>
                                   </div>
-                                </div>
-                              </FormControl>
-                            </PopoverTrigger>
+                                </FormControl>
+                              </PopoverTrigger>
                             <PopoverContent className="w-[450px] p-0" align="start">
                               <Command shouldFilter={false}>
                                 <CommandInput
@@ -838,89 +841,90 @@ export default function ContractFormSample() {
                               </Command>
                             </PopoverContent>
                           </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    {/* Branch Selection - Type-ahead Search */}
-                    <FormField
-                      control={form.control}
-                      name="branchId"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Branch *</FormLabel>
-                          <Popover open={branchSearchOpen} onOpenChange={setBranchSearchOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-branch-search">
-                                  <Building className="h-4 w-4 text-muted-foreground" />
-                                  <div className="flex-1 flex items-center justify-between">
-                                    <span className={cn(
-                                      "text-sm",
-                                      !field.value && "text-muted-foreground"
-                                    )}>
-                                      {selectedBranch ? selectedBranch.nameEn : "Search and select branch"}
-                                    </span>
-                                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                      {/* Branch Selection - Type-ahead Search */}
+                      <FormField
+                        control={form.control}
+                        name="branchId"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Branch *</FormLabel>
+                            <Popover open={branchSearchOpen} onOpenChange={setBranchSearchOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <div className="flex items-center gap-3 border-b border-border pb-2 cursor-pointer hover-elevate active-elevate-2" data-testid="trigger-branch-search">
+                                    <Building className="h-4 w-4 text-muted-foreground" />
+                                    <div className="flex-1 flex items-center justify-between">
+                                      <span className={cn(
+                                        "text-sm",
+                                        !field.value && "text-muted-foreground"
+                                      )}>
+                                        {selectedBranch ? selectedBranch.nameEn : "Search and select branch"}
+                                      </span>
+                                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                    </div>
                                   </div>
-                                </div>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[350px] p-0" align="start">
-                              <Command shouldFilter={false}>
-                                <CommandInput
-                                  placeholder="Type to search branches..."
-                                  value={branchSearchQuery}
-                                  onValueChange={setBranchSearchQuery}
-                                  data-testid="input-branch-search"
-                                />
-                                <CommandList>
-                                  <CommandEmpty>
-                                    {branchSearchQuery.length > 0 ? "No branches found" : "Start typing to search"}
-                                  </CommandEmpty>
-                                  <CommandGroup>
-                                    {branches
-                                      .filter((branch: any) => 
-                                        !branchSearchQuery ||
-                                        branch.nameEn?.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
-                                        branch.nameAr?.includes(branchSearchQuery)
-                                      )
-                                      .map((branch: any) => (
-                                        <CommandItem
-                                          key={branch.id}
-                                          value={branch.id}
-                                          onSelect={() => {
-                                            field.onChange(branch.id.toString());
-                                            setSelectedBranch(branch);
-                                            setBranchSearchOpen(false);
-                                            setBranchSearchQuery('');
-                                          }}
-                                          data-testid={`item-branch-${branch.id}`}
-                                        >
-                                          <Check
-                                            className={cn(
-                                              "mr-2 h-4 w-4",
-                                              field.value === branch.id.toString() ? "opacity-100" : "opacity-0"
-                                            )}
-                                          />
-                                          <div className="flex flex-col">
-                                            <span className="font-medium">{branch.nameEn}</span>
-                                            {branch.nameAr && (
-                                              <span className="text-sm text-muted-foreground">{branch.nameAr}</span>
-                                            )}
-                                          </div>
-                                        </CommandItem>
-                                      ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[350px] p-0" align="start">
+                                <Command shouldFilter={false}>
+                                  <CommandInput
+                                    placeholder="Type to search branches..."
+                                    value={branchSearchQuery}
+                                    onValueChange={setBranchSearchQuery}
+                                    data-testid="input-branch-search"
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {branchSearchQuery.length > 0 ? "No branches found" : "Start typing to search"}
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {branches
+                                        .filter((branch: any) => 
+                                          !branchSearchQuery ||
+                                          branch.nameEn?.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
+                                          branch.nameAr?.includes(branchSearchQuery)
+                                        )
+                                        .map((branch: any) => (
+                                          <CommandItem
+                                            key={branch.id}
+                                            value={branch.id}
+                                            onSelect={() => {
+                                              field.onChange(branch.id.toString());
+                                              setSelectedBranch(branch);
+                                              setBranchSearchOpen(false);
+                                              setBranchSearchQuery('');
+                                            }}
+                                            data-testid={`item-branch-${branch.id}`}
+                                          >
+                                            <Check
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                field.value === branch.id.toString() ? "opacity-100" : "opacity-0"
+                                              )}
+                                            />
+                                            <div className="flex flex-col">
+                                              <span className="font-medium">{branch.nameEn}</span>
+                                              {branch.nameAr && (
+                                                <span className="text-sm text-muted-foreground">{branch.nameAr}</span>
+                                              )}
+                                            </div>
+                                          </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -1271,106 +1275,114 @@ export default function ContractFormSample() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Odometer */}
-                    <FormField
-                      control={form.control}
-                      name="odometerStart"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Odometer Reading (km)</FormLabel>
-                          <FormControl>
-                            <MinimalInput
-                              icon={<Hash className="h-4 w-4" />}
-                              type="number"
-                              placeholder="Enter odometer reading"
-                              {...field}
-                              value={field.value ?? ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Readings Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Odometer */}
+                      <FormField
+                        control={form.control}
+                        name="odometerStart"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Odometer Reading (km)</FormLabel>
+                            <FormControl>
+                              <MinimalInput
+                                icon={<Hash className="h-4 w-4" />}
+                                type="number"
+                                placeholder="Enter odometer reading"
+                                {...field}
+                                value={field.value ?? ''}
+                                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    {/* Fuel Percentage */}
-                    <FormField
-                      control={form.control}
-                      name="inspectionFuelPercentage"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Fuel Level (%)</FormLabel>
-                          <FormControl>
-                            <MinimalInput
-                              icon={<Fuel className="h-4 w-4" />}
-                              type="number"
-                              min="0"
-                              max="100"
-                              placeholder="0-100"
-                              {...field}
-                              value={field.value ?? ''}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      {/* Fuel Percentage */}
+                      <FormField
+                        control={form.control}
+                        name="inspectionFuelPercentage"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fuel Level (%)</FormLabel>
+                            <FormControl>
+                              <MinimalInput
+                                icon={<Fuel className="h-4 w-4" />}
+                                type="number"
+                                min="0"
+                                max="100"
+                                placeholder="0-100"
+                                {...field}
+                                value={field.value ?? ''}
+                                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                    {/* Inspection Checkboxes */}
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium">Equipment Check</h3>
+                    {/* Equipment Check Section */}
+                    <div className="space-y-4 pt-4 border-t">
+                      <h3 className="text-sm font-semibold flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Equipment Check
+                      </h3>
                       
-                      <FormField
-                        control={form.control}
-                        name="inspectionTools"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center space-x-3">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value || false}
-                                onCheckedChange={field.onChange}
-                                data-testid="checkbox-tools"
-                              />
-                            </FormControl>
-                            <FormLabel className="!mt-0">Tools Present</FormLabel>
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="inspectionTools"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-3">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value || false}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="checkbox-tools"
+                                />
+                              </FormControl>
+                              <FormLabel className="!mt-0">Tools Present</FormLabel>
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="inspectionSpareTyre"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center space-x-3">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value || false}
-                                onCheckedChange={field.onChange}
-                                data-testid="checkbox-spare-tyre"
-                              />
-                            </FormControl>
-                            <FormLabel className="!mt-0">Spare Tyre Present</FormLabel>
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                          control={form.control}
+                          name="inspectionSpareTyre"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-3">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value || false}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="checkbox-spare-tyre"
+                                />
+                              </FormControl>
+                              <FormLabel className="!mt-0">Spare Tyre Present</FormLabel>
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="inspectionGps"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center space-x-3">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value || false}
-                                onCheckedChange={field.onChange}
-                                data-testid="checkbox-gps"
-                              />
-                            </FormControl>
-                            <FormLabel className="!mt-0">GPS Device Present</FormLabel>
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                          control={form.control}
+                          name="inspectionGps"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-3">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value || false}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="checkbox-gps"
+                                />
+                              </FormControl>
+                              <FormLabel className="!mt-0">GPS Device Present</FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
 
                     {/* Damage Notes */}
@@ -1429,46 +1441,48 @@ export default function ContractFormSample() {
                       />
 
                       {watchedDropOffEnabled && (
-                        <div className="pl-7 space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="dropOffAddressEn"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Drop-off Address</FormLabel>
-                                <FormControl>
-                                  <MinimalInput
-                                    icon={<MapPin className="h-4 w-4" />}
-                                    placeholder="Enter delivery address"
-                                    {...field}
-                                    value={field.value || ''}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <div className="pl-7">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="dropOffAddressEn"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Drop-off Address</FormLabel>
+                                  <FormControl>
+                                    <MinimalInput
+                                      icon={<MapPin className="h-4 w-4" />}
+                                      placeholder="Enter delivery address"
+                                      {...field}
+                                      value={field.value || ''}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
 
-                          <FormField
-                            control={form.control}
-                            name="dropOffCharge"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Drop-off Charge</FormLabel>
-                                <FormControl>
-                                  <MinimalInput
-                                    icon={<DollarSign className="h-4 w-4" />}
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    {...field}
-                                    value={field.value || ''}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                            <FormField
+                              control={form.control}
+                              name="dropOffCharge"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Drop-off Charge</FormLabel>
+                                  <FormControl>
+                                    <MinimalInput
+                                      icon={<DollarSign className="h-4 w-4" />}
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      {...field}
+                                      value={field.value || ''}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1493,46 +1507,48 @@ export default function ContractFormSample() {
                       />
 
                       {watchedPickUpEnabled && (
-                        <div className="pl-7 space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="pickUpAddressEn"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Pick-up Address</FormLabel>
-                                <FormControl>
-                                  <MinimalInput
-                                    icon={<MapPin className="h-4 w-4" />}
-                                    placeholder="Enter pickup address"
-                                    {...field}
-                                    value={field.value || ''}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <div className="pl-7">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="pickUpAddressEn"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Pick-up Address</FormLabel>
+                                  <FormControl>
+                                    <MinimalInput
+                                      icon={<MapPin className="h-4 w-4" />}
+                                      placeholder="Enter pickup address"
+                                      {...field}
+                                      value={field.value || ''}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
 
-                          <FormField
-                            control={form.control}
-                            name="pickUpCharge"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Pick-up Charge</FormLabel>
-                                <FormControl>
-                                  <MinimalInput
-                                    icon={<DollarSign className="h-4 w-4" />}
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    {...field}
-                                    value={field.value || ''}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                            <FormField
+                              control={form.control}
+                              name="pickUpCharge"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Pick-up Charge</FormLabel>
+                                  <FormControl>
+                                    <MinimalInput
+                                      icon={<DollarSign className="h-4 w-4" />}
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      {...field}
+                                      value={field.value || ''}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
