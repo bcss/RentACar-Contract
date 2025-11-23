@@ -17,7 +17,6 @@ import { Icon } from '@/components/Icon';
 import { MyDayTab } from './dashboard/MyDayTab';
 import { CompanyTodayTab } from './dashboard/CompanyTodayTab';
 import { ExecutiveOverviewTab } from './dashboard/ExecutiveOverviewTab';
-import { DesignSamplesTab } from './dashboard/DesignSamplesTab';
 
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
@@ -143,7 +142,7 @@ export default function Dashboard() {
 
       {/* Tabbed Dashboard */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full max-w-4xl" style={{ gridTemplateColumns: canViewManagement ? '1fr 1fr 1fr 1fr' : '1fr' }}>
+        <TabsList className="grid w-full max-w-4xl" style={{ gridTemplateColumns: canViewManagement ? '1fr 1fr 1fr' : '1fr' }}>
           <TabsTrigger value="my-day" data-testid="tab-my-day">
             {t('dashboard.myDay')}
           </TabsTrigger>
@@ -154,9 +153,6 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger value="executive-overview" data-testid="tab-executive-overview">
                 {t('dashboard.executiveOverview')}
-              </TabsTrigger>
-              <TabsTrigger value="design-samples" data-testid="tab-design-samples">
-                Design Samples
               </TabsTrigger>
             </>
           )}
@@ -174,10 +170,6 @@ export default function Dashboard() {
 
             <TabsContent value="executive-overview" className="mt-4" data-testid="content-executive-overview">
               <ExecutiveOverviewTab />
-            </TabsContent>
-
-            <TabsContent value="design-samples" className="mt-6" data-testid="content-design-samples">
-              <DesignSamplesTab />
             </TabsContent>
           </>
         )}
