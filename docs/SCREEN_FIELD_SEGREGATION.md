@@ -1,7 +1,8 @@
 # SCREEN-BASED FIELD SEGREGATION
 
 **Document Purpose:** Comprehensive inventory of all screens and their associated input fields, organized by functional module  
-**Total Screens:** 88 screens/pages  
+**Total Screens:** 77 full-page screens  
+**Total Modals:** 15 modal dialogs and popups  
 **Total Form Fields:** 528+ fields across the application  
 **Last Updated:** November 23, 2025
 
@@ -24,6 +25,7 @@
 13. [Workflows & Documents](#workflows--documents)
 14. [Design & Samples](#design--samples)
 15. [Public Pages](#public-pages)
+16. [Modal Dialogs & Popups](#modal-dialogs--popups)
 
 ---
 
@@ -1503,6 +1505,278 @@
 
 ---
 
+## MODAL DIALOGS & POPUPS
+
+### 78. Driver Assignment Modal
+**File:** `client/src/components/DriverAssignmentModal.tsx`  
+**Type:** Modal Dialog with Form  
+**Trigger:** From Contract View or Driver Scheduling screens  
+**Purpose:** Assign a driver to a rental contract  
+**Form Fields (4):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `driverId` | select | Required (active drivers only) |
+| `startDateTime` | datetime-local | Required, auto-filled from contract dates |
+| `endDateTime` | datetime-local | Required, >startDateTime |
+| `assignmentNotes` | textarea | Optional |
+
+**Features:**
+- Real-time driver availability checking
+- Conflict detection (shows overlapping assignments)
+- Auto-fills dates from contract rental period
+- Displays driver details (name, type, rate, emirate)
+- Color-coded availability status indicators
+
+### 79. Vehicle Inspection Form Modal
+**File:** `client/src/components/VehicleInspectionForm.tsx`  
+**Type:** Modal Dialog with Complex Form  
+**Trigger:** From Contract View (Pre-delivery or Post-return inspection)  
+**Purpose:** Record detailed vehicle condition with photos  
+**Form Fields (4 + photo uploads):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `inspectorName` | text | Required, auto-filled from logged-in user |
+| `odometerReading` | number | Required, ≥0 |
+| `fuelLevel` | number | Required, 0-100 (percentage) |
+| `conditionNotes` | textarea | Required, detailed description |
+
+**Photo Upload Fields (6 required + unlimited extra):**
+- Front angle photo
+- Back angle photo
+- Left side photo
+- Right side photo
+- Top view photo
+- Dashboard photo
+- Extra photos (optional, with descriptions)
+
+**Features:**
+- Image compression (max 1920x1080, JPEG 85% quality)
+- File size limit: 10MB per photo
+- Photo preview with zoom
+- Photo description fields for damages
+- Pre-delivery vs Post-return inspection types
+- Bilingual interface
+
+### 80. PDF Preview Modal
+**File:** `client/src/components/PDFPreviewModal.tsx`  
+**Type:** Modal Dialog (Display only)  
+**Trigger:** From any screen that generates PDF documents  
+**Purpose:** Preview and download/print PDF documents  
+**Fields:** None (Display only)  
+**Actions:**
+- Print PDF (opens in new window)
+- Download PDF (saves to local machine)
+- Close modal
+
+**Supported Documents:**
+- Contract PDF
+- Invoice PDF
+- Receipt PDF
+- Report exports
+- Insurance claim documents
+- Inspection reports
+
+### 81. Edit Reason Dialog
+**File:** `client/src/components/EditReasonDialog.tsx`  
+**Type:** Modal Dialog with Form  
+**Trigger:** Before editing Active or Completed contracts  
+**Purpose:** Capture audit trail justification for record modifications  
+**Form Fields (1):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `editReason` | textarea | Required, complex validation based on contract status |
+
+**Validation Rules:**
+- **Draft/Pending Contracts:** Minimum 1 word (3+ characters)
+- **Active/Completed Contracts:** Minimum 10 meaningful words (3+ characters each)
+- Real-time word count display
+- Validation error messages with current word count
+
+**Features:**
+- Displays contract number and status
+- Color-coded status badge
+- Real-time validation feedback
+- Stores reason in sessionStorage
+- Prevents form access until valid reason provided
+
+### 82. Payment Recording Modal
+**File:** Inline in `client/src/pages/ContractView.tsx`  
+**Type:** Modal Dialog with Form  
+**Trigger:** "Record Payment" button in Contract View  
+**Purpose:** Record customer payments against contract balance  
+**Form Fields (5):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `paymentDate` | date | Required, ≤today |
+| `amount` | number | Required, 2 decimals, >0, ≤outstandingBalance |
+| `paymentMethod` | select | Required (cash/card/bank-transfer/cheque) |
+| `referenceNumber` | text | Conditional (required for card/transfer/cheque) |
+| `notes` | textarea | Optional |
+
+**Features:**
+- Displays current outstanding balance
+- Validates payment amount doesn't exceed balance
+- Auto-calculates remaining balance
+- Shows warning if overpayment attempted
+
+### 83. Vehicle Quick View Modal
+**File:** Inline in `client/src/pages/Vehicles.tsx`  
+**Type:** Modal Dialog (Display with Actions)  
+**Trigger:** Click vehicle row in Vehicles list  
+**Purpose:** View vehicle details without navigating away  
+**Display Fields:** All vehicle details (readonly)  
+**Actions:**
+- Edit vehicle (navigates to edit form)
+- View rental history
+- View maintenance records
+- Schedule maintenance
+- Transfer to another branch
+
+### 84. Customer Quick View Modal
+**File:** Inline in `client/src/pages/Customers.tsx`  
+**Type:** Modal Dialog (Display with Actions)  
+**Trigger:** Click customer row in Customers list  
+**Purpose:** View customer details and risk score  
+**Display Fields:** 
+- Customer profile (all fields)
+- Risk score with ML breakdown
+- Active contracts count
+- Total rental history
+- Outstanding balance
+- Recent activity
+
+**Actions:**
+- Edit customer
+- Create new contract
+- View all contracts
+- View payment history
+
+### 85. Delete Confirmation Dialog
+**File:** Used throughout application (inline)  
+**Type:** Modal Dialog with Confirmation  
+**Trigger:** Delete action on any entity  
+**Purpose:** Prevent accidental deletions  
+**Fields (1):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `confirmationText` | text | Required, must match entity identifier |
+
+**Features:**
+- Displays entity type and identifier
+- Warning icon and destructive styling
+- Requires typing confirmation text
+- Cancel and Confirm buttons
+
+### 86. Branch Selection Dialog
+**File:** Inline in multiple screens  
+**Type:** Modal Dialog with Selection  
+**Trigger:** Multi-branch operations (transfers, reports, etc.)  
+**Purpose:** Select branch for filtered operations  
+**Fields (1):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `branchId` | select/radio | Required |
+
+### 87. Date Range Picker Dialog
+**File:** Inline in all report screens  
+**Type:** Modal Dialog with Form  
+**Trigger:** Date filter buttons in reports  
+**Purpose:** Quick date range selection  
+**Fields (2):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `dateFrom` | date | Required, ≤dateTo |
+| `dateTo` | date | Required, ≥dateFrom |
+
+**Presets:**
+- Today
+- Last 7 days
+- Last 30 days
+- Last 90 days
+- This month
+- Last month
+- This year
+- Custom range
+
+### 88. Export Options Dialog
+**File:** Inline in all list/report screens  
+**Type:** Modal Dialog with Options  
+**Trigger:** Export button  
+**Purpose:** Configure export format and options  
+**Fields (4):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `format` | radio | Required (CSV/PDF/Excel) |
+| `includeHeaders` | checkbox | Optional, default true |
+| `dateFormat` | select | Required (DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD) |
+| `language` | select | Required (English/Arabic/Both) |
+
+### 89. Notification Preview Dialog
+**File:** Inline in `client/src/pages/NotificationTemplates.tsx`  
+**Type:** Modal Dialog (Display)  
+**Trigger:** Preview button in notification template editor  
+**Purpose:** Preview notification with sample data  
+**Display:**
+- Email subject (if email template)
+- Email body with rendered variables (if email)
+- SMS message with rendered variables (if SMS)
+- Variable substitution preview
+- Character count (for SMS)
+
+### 90. Campaign Approval Dialog
+**File:** Inline in `client/src/pages/CampaignManagement.tsx`  
+**Type:** Modal Dialog with Form  
+**Trigger:** Submit campaign for approval  
+**Purpose:** Request approval for campaign launch  
+**Fields (3):**
+
+| Field Name | Type | Validation |
+|------------|------|-----------|
+| `approverUserId` | select | Required (managers/admins only) |
+| `requestNotes` | textarea | Optional |
+| `urgency` | select | Required (normal/urgent) |
+
+### 91. Image Preview/Lightbox Modal
+**File:** Used in various screens (inspection photos, documents)  
+**Type:** Modal Dialog (Display)  
+**Trigger:** Click on image thumbnail  
+**Purpose:** Full-size image viewing  
+**Features:**
+- Full-screen image display
+- Zoom in/out controls
+- Navigation arrows (for galleries)
+- Download image option
+- Close button
+
+### 92. Error Details Dialog
+**File:** Inline in `client/src/pages/SystemErrors.tsx`  
+**Type:** Modal Dialog (Display)  
+**Trigger:** Click error row  
+**Purpose:** View complete error details and stack trace  
+**Display:**
+- Error message
+- Error type
+- Stack trace (formatted)
+- Timestamp
+- User context
+- Request details
+- Severity level
+
+**Actions:**
+- Mark as resolved
+- Copy error details
+- Export error log
+
+---
+
 ## SUMMARY STATISTICS
 
 ### Field Count by Category
@@ -1524,7 +1798,8 @@
 | Workflows & Documents | 3 | 27 | 22 | 5 |
 | Design & Samples | 7 | 0 | 0 | 0 |
 | Public Pages | 6 | 10 | 7 | 3 |
-| **TOTAL** | **77** | **612** | **373** | **239** |
+| Modal Dialogs & Popups | 15 | 31 | 31 | 0 |
+| **TOTAL** | **92** | **643** | **404** | **239** |
 
 ### Field Type Distribution
 
@@ -1565,5 +1840,5 @@
 ---
 
 **Document Status:** Complete  
-**Coverage:** All 77 screens documented  
+**Coverage:** All 77 screens + 15 modal dialogs documented  
 **Last Verified:** November 23, 2025
