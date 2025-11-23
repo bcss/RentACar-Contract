@@ -120,7 +120,7 @@ export function DesktopOnly({ children }: { children: React.ReactNode }) {
                     }
                   </p>
                   <p className="text-xs text-muted-foreground pt-2">
-                    Made with ❤️ from 🇮🇳
+                    Crafted with ❤️ from 🇮🇳
                   </p>
                 </div>
               </div>

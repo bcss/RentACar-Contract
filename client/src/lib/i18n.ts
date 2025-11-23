@@ -1228,7 +1228,7 @@ const resources = {
       "login.showPassword": "Show password",
       "login.hidePassword": "Hide password",
       "login.footer": "Copyright © KarāraOS by AKN Consulting",
-      "login.madeWith": "Made with ❤️ from 🇮🇳",
+      "login.madeWith": "Crafted with ❤️ from 🇮🇳",
       "login.representative": "Representative",
       "login.routes": "Routes",
       "login.support": "Support",
