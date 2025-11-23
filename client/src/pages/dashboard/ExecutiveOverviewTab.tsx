@@ -69,9 +69,6 @@ export function ExecutiveOverviewTab() {
         <h2 className="text-xl font-bold tracking-tight" data-testid="text-executive-overview-title">
           {t('dashboard.executiveOverview')}
         </h2>
-        <p className="text-sm text-muted-foreground mt-1" data-testid="text-executive-overview-subtitle">
-          {t('dashboard.executiveOverviewSubtitle')}
-        </p>
       </div>
 
       {/* Revenue Trends */}

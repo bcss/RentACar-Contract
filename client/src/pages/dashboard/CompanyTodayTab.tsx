@@ -63,9 +63,6 @@ export function CompanyTodayTab() {
         <h2 className="text-xl font-bold tracking-tight" data-testid="text-company-today-title">
           {t('dashboard.companyToday')}
         </h2>
-        <p className="text-sm text-muted-foreground mt-1" data-testid="text-company-today-subtitle">
-          {t('dashboard.companyTodaySubtitle')}
-        </p>
       </div>
 
       {/* Fleet Status Distribution */}

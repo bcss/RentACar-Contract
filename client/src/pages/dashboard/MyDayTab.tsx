@@ -75,9 +75,6 @@ export function MyDayTab() {
         <h2 className="text-xl font-semibold tracking-tight" data-testid="text-my-day-title">
           {t('dashboard.myDay')}
         </h2>
-        <p className="text-xs text-muted-foreground leading-5" data-testid="text-my-day-subtitle">
-          {t('dashboard.myDaySubtitle')}
-        </p>
       </div>
 
       {/* Quick Actions - Modern MD3 Assist Chips with Tonal Containers */}

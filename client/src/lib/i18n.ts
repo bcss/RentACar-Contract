@@ -1280,9 +1280,6 @@ const resources = {
       "dashboard.myDay": "My Day",
       "dashboard.companyToday": "Company Today",
       "dashboard.executiveOverview": "Executive Overview",
-      "dashboard.myDaySubtitle": "Your personal performance and pending tasks",
-      "dashboard.companyTodaySubtitle": "Real-time operational snapshot",
-      "dashboard.executiveOverviewSubtitle": "Strategic analytics and insights",
       
       // My Day Tab
       "dashboard.myContracts": "My Contracts",
@@ -3559,9 +3556,6 @@ const resources = {
       "dashboard.myDay": "يومي",
       "dashboard.companyToday": "الشركة اليوم",
       "dashboard.executiveOverview": "النظرة التنفيذية",
-      "dashboard.myDaySubtitle": "أدائك الشخصي والمهام المعلقة",
-      "dashboard.companyTodaySubtitle": "لمحة تشغيلية في الوقت الفعلي",
-      "dashboard.executiveOverviewSubtitle": "التحليلات والرؤى الاستراتيجية",
       
       // My Day Tab
       "dashboard.myContracts": "عقودي",
