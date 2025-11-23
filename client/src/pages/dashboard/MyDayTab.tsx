@@ -70,13 +70,6 @@ export function MyDayTab() {
 
   return (
     <div className="space-y-4">
-      {/* Welcome Section - Modern MD3 Typography */}
-      <div className="space-y-0.5">
-        <h2 className="text-xl font-semibold tracking-tight" data-testid="text-my-day-title">
-          {t('dashboard.myDay')}
-        </h2>
-      </div>
-
       {/* Quick Actions - Modern MD3 Assist Chips with Tonal Containers */}
       <Card className="shadow-lg border-transparent ring-1 ring-[hsl(var(--primary)/0.2)]" data-testid="card-quick-actions">
         <CardHeader className="p-4">

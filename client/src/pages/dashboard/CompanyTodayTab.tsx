@@ -58,13 +58,6 @@ export function CompanyTodayTab() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold tracking-tight" data-testid="text-company-today-title">
-          {t('dashboard.companyToday')}
-        </h2>
-      </div>
-
       {/* Fleet Status Distribution */}
       <Card data-testid="card-fleet-status">
         <CardHeader>

@@ -64,13 +64,6 @@ export function ExecutiveOverviewTab() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold tracking-tight" data-testid="text-executive-overview-title">
-          {t('dashboard.executiveOverview')}
-        </h2>
-      </div>
-
       {/* Revenue Trends */}
       <Card data-testid="card-revenue-trends">
         <CardHeader>
