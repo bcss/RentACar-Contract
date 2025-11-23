@@ -16,7 +16,9 @@ The application is desktop-only with a minimum width of 1024px, ensuring a consi
 
 #### Sample Menu Infrastructure
 A dedicated **Sample** section in the sidebar (Admin/Manager only) provides access to:
-- **Design System Showcase** (`/design-system-showcase`) - Comprehensive design pattern library
+- **Design System Showcase** (`/design-system-showcase`) - Comprehensive design pattern library with 12 dashboard variations
+- **Dashboard Design Samples** (`/dashboard-samples`) - Interactive dashboard design gallery with 12+ layout variations (Clean Modern, Bold Minimal, etc.)
+- **Design Samples** (`/design-samples`) - Component showcase organized by category: Dashboards, Forms, Tables, Cards, Components
 - **Contract Form Sample** (`/contract-form-sample`) - Full-featured contract form with type-ahead search implementation
 - **Provider Comparison** (`/provider-comparison`) - Communication provider comparison tools
 - **Field Style Showcase** (`/field-style-showcase`) - Input field styling patterns
@@ -162,8 +164,11 @@ The architecture emphasizes modularity, security, and scalability. The database 
 ### Sample Menu Infrastructure
 - ✅ Dedicated Sample section in sidebar with localStorage persistence
 - ✅ Admin/Manager-only access control
-- ✅ 4+ demo pages for design comparison and testing
+- ✅ 6 demo pages for design comparison and testing (includes Dashboard Samples and Design Samples)
+- ✅ Dashboard Design Samples: Interactive gallery with 12+ layout variations
+- ✅ Design Samples: Component showcase (Dashboards, Forms, Tables, Cards, Components)
 - ✅ Intelligent tooltip positioning for collapsed sidebar mode
+- ✅ Bilingual navigation labels (English/Arabic)
 
 ### UI/UX Enhancements
 - ✅ Square buttons (rounded-none) enforced across all components
