@@ -580,6 +580,18 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       show: isAdmin || isManager,
     },
     {
+      title: t('nav.dashboardSamples'),
+      icon: 'view_quilt',
+      url: '/dashboard-samples',
+      show: isAdmin || isManager,
+    },
+    {
+      title: t('nav.designSamples'),
+      icon: 'palette',
+      url: '/design-samples',
+      show: isAdmin || isManager,
+    },
+    {
       title: t('nav.contractFormSample'),
       icon: 'description',
       url: '/contract-form-sample',
