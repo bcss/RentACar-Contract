@@ -31,6 +31,8 @@ import { notificationService } from "../services/notificationService";
 import { calculateContractTotals } from "../services/contractFinancials";
 import { triggerNotification } from "../services/notificationTrigger";
 import { settingsService } from "../services/settingsService";
+import { otpService } from "../services/otpService";
+import { availabilityEngine } from "../services/availabilityEngine";
 
 const router = Router();
 
@@ -485,11 +487,26 @@ router.patch("/:id", isAuthenticated, async (req: any, res) => {
     // Step 5: Capture state before edit
     const fieldsBefore = { ...contract };
     
-    // Step 6: Update the contract
-    const updated = await storage.updateContract(req.params.id, {
-      ...contractData,
-      editReason: trimmedReason,
-    });
+    // Step 6: Update the contract with optimistic locking
+    // Per Master Spec Part 6.5.2: Pass version for concurrent modification detection
+    const expectedVersion = req.body.version as number | undefined;
+    
+    let updated;
+    try {
+      updated = await storage.updateContract(req.params.id, {
+        ...contractData,
+        editReason: trimmedReason,
+      }, expectedVersion);
+    } catch (error: any) {
+      if (error.message.includes('modified by another user')) {
+        return res.status(409).json({ 
+          message: error.message,
+          code: 'CONFLICT',
+          currentVersion: contract.version
+        });
+      }
+      throw error;
+    }
     
     // Step 7: Capture state after edit
     const fieldsAfter = { ...updated };
@@ -585,6 +602,29 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
       }
     }
 
+    // OTP VERIFICATION - Per Master Spec Part 3.3: OTP required for contract activation
+    const otpEnabled = await settingsService.getSettingAsBoolean(
+      'otp_enabled',
+      'BRANCH',
+      contract.branchId || undefined
+    );
+    
+    if (otpEnabled) {
+      const isOtpVerified = await otpService.checkEntityVerification(
+        'contract',
+        req.params.id,
+        'activation'
+      );
+      
+      if (!isOtpVerified) {
+        return res.status(400).json({ 
+          message: "OTP verification is required before activating the rental. Please complete OTP verification with the hirer first.",
+          requiresOtp: true,
+          otpPurpose: 'activation'
+        });
+      }
+    }
+
     // DOUBLE-BOOKING PREVENTION
     const isAvailable = await storage.checkVehicleAvailability(
       contract.vehicleId,
@@ -615,6 +655,18 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
     
     // Update vehicle status to "rented"
     await storage.updateVehicle(activated.vehicleId, { status: "rented" });
+    
+    // Update availability engine cache - Per Master Spec Part B.4
+    try {
+      await availabilityEngine.handleContractActivation(
+        activated.vehicleId,
+        new Date(activated.rentalStartDate),
+        new Date(activated.rentalEndDate),
+        activated.id
+      );
+    } catch (cacheError) {
+      console.error('[Contract] Availability engine update failed:', cacheError);
+    }
     
     // Create audit log
     await createAuditLog(userId, 'activate', activated.id, req, `Activated contract #${activated.contractNumber} - vehicle handed over at ${timeOut || 'N/A'}`);
@@ -691,6 +743,29 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
       if (!hasPostReturnInspection) {
         return res.status(400).json({ 
           message: "Post-return vehicle inspection is required before completing the rental. Please complete the inspection first." 
+        });
+      }
+    }
+
+    // OTP VERIFICATION - Per Master Spec Part 3.11: OTP required for contract completion
+    const otpEnabled = await settingsService.getSettingAsBoolean(
+      'otp_enabled',
+      'BRANCH',
+      contract.branchId || undefined
+    );
+    
+    if (otpEnabled) {
+      const isOtpVerified = await otpService.checkEntityVerification(
+        'contract',
+        req.params.id,
+        'closure' // completion uses closure OTP purpose
+      );
+      
+      if (!isOtpVerified) {
+        return res.status(400).json({ 
+          message: "OTP verification is required before completing the rental. Please complete OTP verification with the hirer first.",
+          requiresOtp: true,
+          otpPurpose: 'closure'
         });
       }
     }
@@ -833,6 +908,18 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
     
     // Update vehicle status to "available"
     await storage.updateVehicle(completed.vehicleId, { status: "available" });
+    
+    // Update availability engine cache - Per Master Spec Part B.4
+    try {
+      await availabilityEngine.handleContractClosure(
+        completed.vehicleId,
+        new Date(completed.rentalStartDate),
+        new Date(completed.rentalEndDate),
+        completed.id
+      );
+    } catch (cacheError) {
+      console.error('[Contract] Availability engine update failed on complete:', cacheError);
+    }
     
     const finalAuditNote = `${auditNote}${timeIn ? ` | Vehicle returned at ${timeIn}` : ''}`;
     await createAuditLog(userId, 'complete', completed.id, req, finalAuditNote);
@@ -1024,6 +1111,29 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       }
     }
 
+    // OTP VERIFICATION - Per Master Spec Part 3.11: OTP required for contract closure
+    const otpEnabled = await settingsService.getSettingAsBoolean(
+      'otp_enabled',
+      'BRANCH',
+      contract.branchId || undefined
+    );
+    
+    if (otpEnabled) {
+      const isOtpVerified = await otpService.checkEntityVerification(
+        'contract',
+        req.params.id,
+        'closure'
+      );
+      
+      if (!isOtpVerified) {
+        return res.status(400).json({ 
+          message: "OTP verification is required before closing the rental. Please complete OTP verification with the hirer first.",
+          requiresOtp: true,
+          otpPurpose: 'closure'
+        });
+      }
+    }
+
     // PAYMENT VERIFICATION
     const contractPayments = await storage.getPaymentsByContract(contract.id);
     
@@ -1081,6 +1191,18 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       
       await storage.updateVehicle(closed.vehicleId, { status: "available" });
       
+      // Update availability engine cache - Per Master Spec Part B.4
+      try {
+        await availabilityEngine.handleContractClosure(
+          closed.vehicleId,
+          new Date(closed.rentalStartDate),
+          new Date(closed.rentalEndDate),
+          closed.id
+        );
+      } catch (cacheError) {
+        console.error('[Contract] Availability engine update failed on close:', cacheError);
+      }
+      
       await createAuditLog(
         userId, 
         'close', 
@@ -1127,6 +1249,18 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
     const closed = await storage.closeContract(req.params.id, userId);
     
     await storage.updateVehicle(closed.vehicleId, { status: "available" });
+    
+    // Update availability engine cache - Per Master Spec Part B.4
+    try {
+      await availabilityEngine.handleContractClosure(
+        closed.vehicleId,
+        new Date(closed.rentalStartDate),
+        new Date(closed.rentalEndDate),
+        closed.id
+      );
+    } catch (cacheError) {
+      console.error('[Contract] Availability engine update failed on close:', cacheError);
+    }
     
     await createAuditLog(userId, 'close', closed.id, req, `Closed contract #${closed.contractNumber} - all payments settled and verified`);
     

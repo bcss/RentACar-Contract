@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { storage } from '../storage';
 import { RiskCalculator } from './riskCalculator';
 import { notificationService } from './notificationService';
+import { availabilityEngine } from './availabilityEngine';
 import { db } from '../db';
 import { users } from '../../shared/schema';
 import { and, or, eq } from 'drizzle-orm';
@@ -11,9 +12,11 @@ import { and, or, eq } from 'drizzle-orm';
  * 
  * Manages cron jobs for automated background tasks:
  * - Nightly risk score calculations (2 AM)
+ * - Nightly availability cache validation (3 AM) - Per Master Spec Part 3.26
  * - Document expiry checks (8 AM)
  * - Contract expiry reminders (9 AM)
  * - Payment due reminders (10 AM)
+ * - Reservation auto-expiry (11 AM) - Per Master Spec Part 3.25
  */
 
 let isInitialized = false;
@@ -370,16 +373,123 @@ export function initializeAutomationOrchestrator() {
     }
   });
 
+  // Job 5: Nightly Availability Cache Validation (3 AM daily)
+  // Per Master Spec Part 3.26: Validates and repairs cache integrity
+  const cacheValidationJob = cron.schedule('0 3 * * *', async () => {
+    console.log('[Automation] Starting nightly availability cache validation...');
+    try {
+      const validationResult = await availabilityEngine.validateCacheIntegrity();
+      
+      if (!validationResult.valid) {
+        console.warn(`[Automation] Cache validation found ${validationResult.issues.length} issues:`);
+        validationResult.issues.forEach(issue => console.warn(`  - ${issue}`));
+        
+        // Rebuild cache for all branches to repair issues
+        console.log('[Automation] Rebuilding cache to repair issues...');
+        const branches = await storage.getBranches();
+        for (const branch of branches) {
+          await availabilityEngine.rebuildBranchCache(branch.id);
+        }
+        console.log('[Automation] Cache rebuild complete');
+      } else {
+        console.log('[Automation] Cache validation passed - no issues found');
+      }
+    } catch (error) {
+      console.error('[Automation] Cache validation job failed:', error);
+    }
+  });
+
+  // Job 6: Reservation Auto-Expiry (11 AM daily)
+  // Per Master Spec Part 3.25: Expires reservations that haven't been activated
+  const reservationExpiryJob = cron.schedule('0 11 * * *', async () => {
+    console.log('[Automation] Starting reservation auto-expiry check...');
+    try {
+      const allContracts = await storage.getAllContracts();
+      const reservations = allContracts.filter(c => c.status === 'draft');
+      
+      const now = new Date();
+      let expiredCount = 0;
+      let errorCount = 0;
+      
+      for (const reservation of reservations) {
+        try {
+          const startDate = new Date(reservation.rentalStartDate);
+          const hoursSinceStart = (now.getTime() - startDate.getTime()) / (1000 * 60 * 60);
+          
+          // Auto-expire reservations that are more than 24 hours past their start date
+          if (hoursSinceStart > 24) {
+            await storage.updateContract(reservation.id, {
+              status: 'cancelled',
+              closureRemark: 'Auto-expired: Reservation not activated within 24 hours of start date',
+            });
+            
+            // Release the vehicle availability - only if vehicle is assigned
+            if (reservation.vehicleId) {
+              try {
+                await availabilityEngine.handleContractClosure(
+                  reservation.vehicleId,
+                  new Date(reservation.rentalStartDate),
+                  new Date(reservation.rentalEndDate),
+                  reservation.id
+                );
+              } catch (cacheError) {
+                console.warn(`[Automation] Cache update failed for reservation ${reservation.contractNumber}:`, cacheError);
+              }
+            }
+            
+            // Notify customer (non-blocking)
+            try {
+              const customer = await storage.getCustomerById(reservation.customerId);
+              if (customer) {
+                await notificationService.sendNotification({
+                  templateCode: 'RESERVATION_EXPIRED',
+                  channel: 'both',
+                  recipientType: 'customer',
+                  recipientId: customer.id,
+                  variables: {
+                    contractNumber: reservation.contractNumber.toString(),
+                    customerName: customer.nameEn || '',
+                    startDate: startDate.toLocaleDateString('en-AE'),
+                  },
+                  language: 'en',
+                  triggerType: 'automated',
+                  triggeredBy: 'system',
+                  entityType: 'contract',
+                  entityId: reservation.id,
+                });
+              }
+            } catch (notifError) {
+              console.warn(`[Automation] Notification failed for reservation ${reservation.contractNumber}:`, notifError);
+            }
+            
+            expiredCount++;
+            console.log(`[Automation] Expired reservation ${reservation.contractNumber}`);
+          }
+        } catch (expireError) {
+          errorCount++;
+          console.error(`[Automation] Failed to expire reservation ${reservation.contractNumber}:`, expireError);
+          // Continue processing other reservations
+        }
+      }
+      
+      console.log(`[Automation] Reservation expiry check complete: ${expiredCount} reservations expired, ${errorCount} errors`);
+    } catch (error) {
+      console.error('[Automation] Reservation expiry job failed:', error);
+    }
+  });
+
   // Store jobs for cleanup
-  activeJobs.push(riskScoreJob, documentExpiryJob, contractExpiryJob, paymentReminderJob);
+  activeJobs.push(riskScoreJob, documentExpiryJob, contractExpiryJob, paymentReminderJob, cacheValidationJob, reservationExpiryJob);
 
   isInitialized = true;
   console.log('[Automation] ✓ Automation Orchestrator initialized successfully');
   console.log('[Automation] Active cron jobs:');
   console.log('  - Nightly Risk Score Calculation: 2:00 AM daily');
+  console.log('  - Nightly Cache Validation: 3:00 AM daily');
   console.log('  - Document Expiry Check: 8:00 AM daily');
   console.log('  - Contract Expiry Reminders: 9:00 AM daily');
   console.log('  - Payment Due Reminders: 10:00 AM daily');
+  console.log('  - Reservation Auto-Expiry: 11:00 AM daily');
 }
 
 /**

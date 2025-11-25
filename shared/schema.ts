@@ -1407,6 +1407,9 @@ export const contracts = pgTable("contracts", {
   disabledAt: timestamp("disabled_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  
+  // Optimistic Locking - Per Master Spec Part 6.5.2 and A.3
+  version: integer("version").notNull().default(1),
 }, (table) => [
   index("idx_contracts_customer_id").on(table.customerId),
   index("idx_contracts_vehicle_id").on(table.vehicleId),
@@ -1467,6 +1470,7 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   finalizedAt: true,
   disabledBy: true,
   disabledAt: true,
+  version: true, // Optimistic locking field - auto-managed
 }).extend({
   // Coerce date strings to Date objects for all date fields
   rentalStartDate: z.coerce.date().refine((date) => {

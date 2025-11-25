@@ -900,12 +900,36 @@ export class DatabaseStorage implements IStorage {
     return newContract;
   }
 
-  async updateContract(id: string, contractData: Partial<InsertContract>): Promise<Contract> {
+  async updateContract(id: string, contractData: Partial<InsertContract>, expectedVersion?: number): Promise<Contract> {
+    // Optimistic locking implementation - Per Master Spec Part 6.5.2 and A.3
+    if (expectedVersion !== undefined) {
+      const [updated] = await db
+        .update(contracts)
+        .set({
+          ...contractData,
+          updatedAt: new Date(),
+          version: sql`${contracts.version} + 1`,
+        })
+        .where(and(
+          eq(contracts.id, id),
+          eq(contracts.version, expectedVersion)
+        ))
+        .returning();
+      
+      if (!updated) {
+        throw new Error('Contract was modified by another user. Please refresh and try again.');
+      }
+      
+      return updated;
+    }
+    
+    // Without version check (backward compatible)
     const [updated] = await db
       .update(contracts)
       .set({
         ...contractData,
         updatedAt: new Date(),
+        version: sql`${contracts.version} + 1`,
       })
       .where(eq(contracts.id, id))
       .returning();
@@ -925,6 +949,7 @@ export class DatabaseStorage implements IStorage {
         activatedAt: new Date(),
         timeOut: timeOut, // Capture actual vehicle handover time
         updatedAt: new Date(),
+        version: sql`${contracts.version} + 1`,
       })
       .where(eq(contracts.id, id))
       .returning();
@@ -950,6 +975,7 @@ export class DatabaseStorage implements IStorage {
         completedAt: new Date(),
         ...chargeData,
         updatedAt: new Date(),
+        version: sql`${contracts.version} + 1`,
       })
       .where(eq(contracts.id, id))
       .returning();
@@ -967,6 +993,7 @@ export class DatabaseStorage implements IStorage {
         closureRemark: closureRemark || null,
         paymentStatus: 'paid', // Mark as fully paid when closing
         updatedAt: new Date(),
+        version: sql`${contracts.version} + 1`,
       })
       .where(eq(contracts.id, id))
       .returning();
