@@ -290,13 +290,13 @@ export const vehicles = pgTable("vehicles", {
   gpsDeviceId: varchar("gps_device_id"),
   trackerSerial: varchar("tracker_serial"),
   
-  // Pricing (default rates)
-  dailyRate: varchar("daily_rate").notNull(),
-  weeklyRate: varchar("weekly_rate"),
-  monthlyRate: varchar("monthly_rate"),
+  // Pricing (default rates) - Per Master Spec Part 5.2 DECIMAL(12,2) requirement
+  dailyRate: numeric("daily_rate", { precision: 12, scale: 2 }).notNull(),
+  weeklyRate: numeric("weekly_rate", { precision: 12, scale: 2 }),
+  monthlyRate: numeric("monthly_rate", { precision: 12, scale: 2 }),
   
-  // Availability Status
-  status: varchar("status", { length: 20 }).notNull().default("available"), // available, rented, maintenance, damaged
+  // Availability Status - Per Master Spec Part 2.10 Vehicle Status Enums
+  status: varchar("status", { length: 20 }).notNull().default("available"), // available, reserved, out, under_maintenance, under_repair, in_transfer, retired, lost_stolen
   
   // Additional Information
   notes: text("notes"),
@@ -907,8 +907,8 @@ export const drivers = pgTable("drivers", {
   employmentType: varchar("employment_type", { length: 20 }).notNull(), // in_house, outsourced
   outsourceCompanyId: varchar("outsource_company_id").references(() => driverOutsourceCompanies.id), // If outsourced
   
-  // Cost Rate (for profit tracking - internal use only)
-  costRate: varchar("cost_rate"), // Daily cost rate to company
+  // Cost Rate (for profit tracking - internal use only) - Per Master Spec Part 5.5.1 DECIMAL(12,2)
+  costRate: numeric("cost_rate", { precision: 12, scale: 2 }), // Daily cost rate to company
   
   // Availability
   availability: varchar("availability", { length: 20 }).notNull().default("available"), // available, on_assignment, off_duty, on_leave
@@ -1324,20 +1324,20 @@ export const contracts = pgTable("contracts", {
   pickupLocation: varchar("pickup_location").notNull(),
   dropoffLocation: varchar("dropoff_location").notNull(),
   
-  // Pricing
-  dailyRate: varchar("daily_rate").notNull(),
-  weeklyRate: varchar("weekly_rate"),
-  monthlyRate: varchar("monthly_rate"),
+  // Pricing - Per Master Spec Part 5.5.1 DECIMAL(12,2) requirement
+  dailyRate: numeric("daily_rate", { precision: 12, scale: 2 }).notNull(),
+  weeklyRate: numeric("weekly_rate", { precision: 12, scale: 2 }),
+  monthlyRate: numeric("monthly_rate", { precision: 12, scale: 2 }),
   mileageLimit: integer("mileage_limit"), // e.g., 300 km per day
-  extraKmRate: varchar("extra_km_rate"), // e.g., "0.50" AED per km
+  extraKmRate: numeric("extra_km_rate", { precision: 12, scale: 4 }), // Per Master Spec: DECIMAL(12,4) for rates
   totalDays: integer("total_days").notNull(),
   
-  // Financial Breakdown (Phase 1 & 2)
-  subtotal: varchar("subtotal"), // Base rental amount before VAT
-  vatAmount: varchar("vat_amount"), // Calculated VAT
-  totalAmount: varchar("total_amount").notNull(), // Grand total including VAT
-  securityDeposit: varchar("security_deposit"), // Refundable deposit amount
-  accidentLiability: varchar("accident_liability"), // e.g., "2500" AED hirer responsibility
+  // Financial Breakdown - Per Master Spec Part 5.5.1 DECIMAL(12,2) requirement
+  subtotal: numeric("subtotal", { precision: 12, scale: 2 }), // Base rental amount before VAT
+  vatAmount: numeric("vat_amount", { precision: 12, scale: 2 }), // Calculated VAT
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).notNull(), // Grand total including VAT
+  securityDeposit: numeric("security_deposit", { precision: 12, scale: 2 }), // Refundable deposit amount
+  accidentLiability: numeric("accident_liability", { precision: 12, scale: 2 }), // e.g., "2500" AED hirer responsibility
   
   // Payment Tracking (Phase 1)
   depositPaid: boolean("deposit_paid").notNull().default(false),
@@ -1349,34 +1349,34 @@ export const contracts = pgTable("contracts", {
   finalPaymentDate: timestamp("final_payment_date"),
   finalPaymentMethod: varchar("final_payment_method", { length: 50 }),
   paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"), // pending, partial, paid, refunded
-  outstandingBalance: varchar("outstanding_balance"), // Remaining amount to be paid
+  outstandingBalance: numeric("outstanding_balance", { precision: 12, scale: 2 }), // Remaining amount to be paid
   
-  // Extra Charges (Phase 2) - Detailed breakdown for rental charges
-  extraKmCharge: varchar("extra_km_charge"), // Calculated overage charge
+  // Extra Charges (Phase 2) - Per Master Spec Part 5.5.1 DECIMAL(12,2) requirement
+  extraKmCharge: numeric("extra_km_charge", { precision: 12, scale: 2 }), // Calculated overage charge
   extraKmDriven: integer("extra_km_driven"), // Km over the limit
-  fuelCharge: varchar("fuel_charge"), // Fuel refill charge
-  salikCharge: varchar("salik_charge"), // SALIK toll charges
-  trafficFineCharge: varchar("traffic_fine_charge"), // Traffic fines
-  damageCharge: varchar("damage_charge"), // Total damage repair cost
-  otherCharges: varchar("other_charges"), // Any additional charges
-  totalExtraCharges: varchar("total_extra_charges"), // Sum of all extra charges
+  fuelCharge: numeric("fuel_charge", { precision: 12, scale: 2 }), // Fuel refill charge
+  salikCharge: numeric("salik_charge", { precision: 12, scale: 2 }), // SALIK toll charges
+  trafficFineCharge: numeric("traffic_fine_charge", { precision: 12, scale: 2 }), // Traffic fines
+  damageCharge: numeric("damage_charge", { precision: 12, scale: 2 }), // Total damage repair cost
+  otherCharges: numeric("other_charges", { precision: 12, scale: 2 }), // Any additional charges
+  totalExtraCharges: numeric("total_extra_charges", { precision: 12, scale: 2 }), // Sum of all extra charges
   
   // Delivery Service (Drop-off and Pick-up)
   dropOffEnabled: boolean("drop_off_enabled").notNull().default(false),
-  dropOffCharge: varchar("drop_off_charge"), // Charge for delivering vehicle to customer
+  dropOffCharge: numeric("drop_off_charge", { precision: 12, scale: 2 }), // Charge for delivering vehicle to customer
   dropOffAddressEn: text("drop_off_address_en"), // Drop-off address in English
   dropOffAddressAr: text("drop_off_address_ar"), // Drop-off address in Arabic
   pickUpEnabled: boolean("pick_up_enabled").notNull().default(false),
-  pickUpCharge: varchar("pick_up_charge"), // Charge for picking up vehicle from customer
+  pickUpCharge: numeric("pick_up_charge", { precision: 12, scale: 2 }), // Charge for picking up vehicle from customer
   pickUpAddressEn: text("pick_up_address_en"), // Pick-up address in English
   pickUpAddressAr: text("pick_up_address_ar"), // Pick-up address in Arabic
   
   // Driver Service (Phase 3 - Driver Assignment Integration)
   requiresDriver: boolean("requires_driver").notNull().default(false), // Whether driver service is required
   driverServiceType: varchar("driver_service_type", { length: 20 }).default("none"), // 'daily', 'hourly', 'flat', 'none'
-  driverServiceRate: varchar("driver_service_rate"), // Rate per unit (day/hour/flat)
-  driverServiceQuantity: varchar("driver_service_quantity"), // Number of days, hours, or trips
-  driverServiceTotal: varchar("driver_service_total"), // Total driver service charge
+  driverServiceRate: numeric("driver_service_rate", { precision: 12, scale: 2 }), // Rate per unit (day/hour/flat)
+  driverServiceQuantity: numeric("driver_service_quantity", { precision: 10, scale: 2 }), // Number of days, hours, or trips
+  driverServiceTotal: numeric("driver_service_total", { precision: 12, scale: 2 }), // Total driver service charge
   assignedDriverId: varchar("assigned_driver_id").references(() => drivers.id), // FK to drivers table
   driverServiceNotes: text("driver_service_notes"), // Driver service notes in English
   driverServiceNotesAr: text("driver_service_notes_ar"), // Driver service notes in Arabic
@@ -1516,8 +1516,8 @@ export const payments = pgTable("payments", {
   // Branch Assignment
   branchId: varchar("branch_id").references(() => branches.id),
   
-  // Payment Details
-  amount: varchar("amount").notNull(), // Payment amount (stored as string for precision)
+  // Payment Details - Per Master Spec Part 5.5.1 DECIMAL(12,2) requirement
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(), // Payment amount with proper precision
   paymentMethod: varchar("payment_method", { length: 50 }).notNull(), // cash, card, bank_transfer, check, etc.
   currency: varchar("currency", { length: 10 }).notNull().default(""), // Currency from company settings
   
@@ -1604,6 +1604,346 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
 
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
+
+// ============================================================================
+// MASTER SPEC COMPLIANCE TABLES - Per Part 4 & 5 of Master System Specification
+// ============================================================================
+
+// Contract Charges table - Per Master Spec Part 5.5.1 - Itemized charges per contract
+export const contractCharges = pgTable("contract_charges", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  
+  // Charge Details - Per Master Spec Part 5.5.1
+  type: varchar("type", { length: 64 }).notNull(), // 'RENT', 'EXTRA_KM', 'FUEL', 'PENALTY', 'ADDON', 'DAMAGE', 'SALIK', 'FINE', 'ONE_WAY', 'DRIVER', 'OTHER'
+  description: varchar("description", { length: 255 }),
+  quantity: numeric("quantity", { precision: 10, scale: 2 }),
+  unitPrice: numeric("unit_price", { precision: 12, scale: 4 }),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  taxCategory: varchar("tax_category", { length: 64 }), // 'VAT', 'EXEMPT', etc.
+  taxAmount: numeric("tax_amount", { precision: 12, scale: 2 }),
+  isManual: boolean("is_manual").notNull().default(false), // Manual override by manager
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_contract_charges_contract_id").on(table.contractId),
+  index("idx_contract_charges_type").on(table.type),
+]);
+
+export const contractChargesRelations = relations(contractCharges, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [contractCharges.contractId],
+    references: [contracts.id],
+  }),
+  creator: one(users, {
+    fields: [contractCharges.createdBy],
+    references: [users.id],
+    relationName: "chargeCreator",
+  }),
+}));
+
+export const insertContractChargeSchema = createInsertSchema(contractCharges).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertContractCharge = z.infer<typeof insertContractChargeSchema>;
+export type ContractCharge = typeof contractCharges.$inferSelect;
+
+// Contract Amendments table - Per Master Spec Part 5.5.1 - Track all contract changes
+export const contractAmendments = pgTable("contract_amendments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  
+  // Amendment Details - Per Master Spec Part 7.1.2
+  type: varchar("type", { length: 64 }).notNull(), // 'EXTENSION', 'RATE_CHANGE', 'VEHICLE_SWAP', 'DRIVER_CHANGE', 'EARLY_RETURN', 'TARIFF_DOWNGRADE', 'DISCOUNT'
+  oldValueJson: jsonb("old_value_json"),
+  newValueJson: jsonb("new_value_json"),
+  penaltyAmount: numeric("penalty_amount", { precision: 12, scale: 2 }),
+  reason: text("reason"),
+  
+  // Approval tracking - Per Master Spec Part 13
+  requiresApproval: boolean("requires_approval").notNull().default(false),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_contract_amendments_contract_id").on(table.contractId),
+  index("idx_contract_amendments_type").on(table.type),
+]);
+
+export const contractAmendmentsRelations = relations(contractAmendments, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [contractAmendments.contractId],
+    references: [contracts.id],
+  }),
+  creator: one(users, {
+    fields: [contractAmendments.createdBy],
+    references: [users.id],
+    relationName: "amendmentCreator",
+  }),
+  approver: one(users, {
+    fields: [contractAmendments.approvedBy],
+    references: [users.id],
+    relationName: "amendmentApprover",
+  }),
+}));
+
+export const insertContractAmendmentSchema = createInsertSchema(contractAmendments).omit({
+  id: true,
+  createdAt: true,
+  createdBy: true,
+  approvedBy: true,
+  approvedAt: true,
+});
+
+export type InsertContractAmendment = z.infer<typeof insertContractAmendmentSchema>;
+export type ContractAmendment = typeof contractAmendments.$inferSelect;
+
+// Contract Status History table - Per Master Spec Part 5.5.1 - Track lifecycle transitions
+export const contractStatusHistory = pgTable("contract_status_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").notNull().references(() => contracts.id),
+  
+  // Status Change Details - Per Master Spec Part 3
+  fromStatus: varchar("from_status", { length: 35 }),
+  toStatus: varchar("to_status", { length: 35 }).notNull(),
+  reason: text("reason"),
+  
+  // Audit fields
+  changedBy: varchar("changed_by").notNull().references(() => users.id),
+  changedAt: timestamp("changed_at").defaultNow(),
+}, (table) => [
+  index("idx_contract_status_history_contract_id").on(table.contractId),
+  index("idx_contract_status_history_changed_at").on(table.changedAt),
+]);
+
+export const contractStatusHistoryRelations = relations(contractStatusHistory, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [contractStatusHistory.contractId],
+    references: [contracts.id],
+  }),
+  changer: one(users, {
+    fields: [contractStatusHistory.changedBy],
+    references: [users.id],
+    relationName: "statusChanger",
+  }),
+}));
+
+export const insertContractStatusHistorySchema = createInsertSchema(contractStatusHistory).omit({
+  id: true,
+  changedAt: true,
+  changedBy: true,
+});
+
+export type InsertContractStatusHistory = z.infer<typeof insertContractStatusHistorySchema>;
+export type ContractStatusHistory = typeof contractStatusHistory.$inferSelect;
+
+// OTP Logs table - Per Master Spec Part 5.9 - 3-minute expiry, rate limiting
+export const otpLogs = pgTable("otp_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").references(() => contracts.id),
+  
+  // OTP Details - Per Master Spec Part 5.9 and Part 8
+  purpose: varchar("purpose", { length: 64 }).notNull(), // 'ACTIVATION', 'CLOSURE', 'AMENDMENT', 'PAYMENT'
+  channel: varchar("channel", { length: 32 }).notNull(), // 'SMS', 'EMAIL', 'WHATSAPP'
+  target: varchar("target", { length: 255 }).notNull(), // Phone number or email
+  otpHash: varchar("otp_hash", { length: 255 }).notNull(), // Hashed OTP for security
+  
+  // Expiry and Verification - Per Master Spec: 3-minute expiry
+  expiresAt: timestamp("expires_at").notNull(),
+  verifiedAt: timestamp("verified_at"),
+  attempts: integer("attempts").notNull().default(0),
+  
+  // Audit fields
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_otp_logs_contract_id").on(table.contractId),
+  index("idx_otp_logs_target").on(table.target),
+  index("idx_otp_logs_expires_at").on(table.expiresAt),
+]);
+
+export const otpLogsRelations = relations(otpLogs, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [otpLogs.contractId],
+    references: [contracts.id],
+  }),
+}));
+
+export const insertOtpLogSchema = createInsertSchema(otpLogs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  verifiedAt: true,
+  attempts: true,
+});
+
+export type InsertOtpLog = z.infer<typeof insertOtpLogSchema>;
+export type OtpLog = typeof otpLogs.$inferSelect;
+
+// Tariffs table - Per Master Spec Part 5.4.3 - Pricing plans
+export const tariffs = pgTable("tariffs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Branch and Vehicle Class Scope - Per Master Spec Part 5.4.3
+  branchId: varchar("branch_id").references(() => branches.id),
+  vehicleClassId: varchar("vehicle_class_id"), // FK to vehicle_classes when created
+  vehicleGroupId: varchar("vehicle_group_id"), // FK to vehicle_groups when created
+  
+  // Tariff Details
+  name: varchar("name", { length: 255 }).notNull(),
+  nameAr: varchar("name_ar", { length: 255 }),
+  code: varchar("code", { length: 64 }).unique(),
+  
+  // Rates - Per Master Spec Part 5.5.1 DECIMAL(12,2) requirement
+  rateHourly: numeric("rate_hourly", { precision: 12, scale: 2 }),
+  rateDaily: numeric("rate_daily", { precision: 12, scale: 2 }),
+  rateWeekly: numeric("rate_weekly", { precision: 12, scale: 2 }),
+  rateMonthly: numeric("rate_monthly", { precision: 12, scale: 2 }),
+  
+  // Mileage Settings
+  includedKmPerDay: numeric("included_km_per_day", { precision: 10, scale: 2 }),
+  extraKmRate: numeric("extra_km_rate", { precision: 12, scale: 4 }),
+  
+  // Deposit Settings
+  depositRequired: boolean("deposit_required").notNull().default(true),
+  defaultDeposit: numeric("default_deposit", { precision: 12, scale: 2 }),
+  
+  // Rental Rules
+  minimumRentalHours: integer("minimum_rental_hours"),
+  minimumRentalDays: integer("minimum_rental_days"),
+  returnGraceMinutes: integer("return_grace_minutes").default(0),
+  downgradePenaltyRate: numeric("downgrade_penalty_rate", { precision: 12, scale: 2 }),
+  
+  // Status
+  isActive: boolean("is_active").notNull().default(true),
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_tariffs_branch_id").on(table.branchId),
+  index("idx_tariffs_vehicle_class_id").on(table.vehicleClassId),
+  index("idx_tariffs_is_active").on(table.isActive),
+]);
+
+export const tariffsRelations = relations(tariffs, ({ one }) => ({
+  branch: one(branches, {
+    fields: [tariffs.branchId],
+    references: [branches.id],
+  }),
+  creator: one(users, {
+    fields: [tariffs.createdBy],
+    references: [users.id],
+    relationName: "tariffCreator",
+  }),
+}));
+
+export const insertTariffSchema = createInsertSchema(tariffs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+});
+
+export type InsertTariff = z.infer<typeof insertTariffSchema>;
+export type Tariff = typeof tariffs.$inferSelect;
+
+// Reservations table - Per Master Spec Part 4.5.1 - Booking before contract
+export const reservations = pgTable("reservations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Reservation Number - Auto-generated
+  reservationNumber: integer("reservation_number").notNull().unique(),
+  
+  // References - Per Master Spec Part 4.5.1
+  branchId: varchar("branch_id").notNull().references(() => branches.id),
+  contractId: varchar("contract_id").references(() => contracts.id), // Set when converted
+  hirerId: varchar("hirer_id").notNull().references(() => customers.id),
+  vehicleId: varchar("vehicle_id").references(() => vehicles.id), // Specific vehicle
+  vehicleGroupId: varchar("vehicle_group_id"), // Or vehicle group for flexibility
+  tariffId: varchar("tariff_id").references(() => tariffs.id),
+  
+  // Reservation Details
+  startDatetime: timestamp("start_datetime").notNull(),
+  endDatetime: timestamp("end_datetime").notNull(),
+  
+  // Status - Per Master Spec Part 2.9
+  status: varchar("status", { length: 32 }).notNull().default("pending"), // 'pending', 'confirmed', 'expired', 'cancelled', 'converted'
+  
+  // Financial
+  depositExpected: numeric("deposit_expected", { precision: 12, scale: 2 }),
+  depositReceived: numeric("deposit_received", { precision: 12, scale: 2 }),
+  
+  // Additional
+  notes: text("notes"),
+  cancellationReason: text("cancellation_reason"),
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_reservations_branch_id").on(table.branchId),
+  index("idx_reservations_hirer_id").on(table.hirerId),
+  index("idx_reservations_vehicle_id").on(table.vehicleId),
+  index("idx_reservations_status").on(table.status),
+  index("idx_reservations_start_datetime").on(table.startDatetime),
+]);
+
+export const reservationsRelations = relations(reservations, ({ one }) => ({
+  branch: one(branches, {
+    fields: [reservations.branchId],
+    references: [branches.id],
+  }),
+  contract: one(contracts, {
+    fields: [reservations.contractId],
+    references: [contracts.id],
+  }),
+  hirer: one(customers, {
+    fields: [reservations.hirerId],
+    references: [customers.id],
+  }),
+  vehicle: one(vehicles, {
+    fields: [reservations.vehicleId],
+    references: [vehicles.id],
+  }),
+  tariff: one(tariffs, {
+    fields: [reservations.tariffId],
+    references: [tariffs.id],
+  }),
+  creator: one(users, {
+    fields: [reservations.createdBy],
+    references: [users.id],
+    relationName: "reservationCreator",
+  }),
+}));
+
+export const insertReservationSchema = createInsertSchema(reservations).omit({
+  id: true,
+  reservationNumber: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+  contractId: true,
+});
+
+export type InsertReservation = z.infer<typeof insertReservationSchema>;
+export type Reservation = typeof reservations.$inferSelect;
+
+// ============================================================================
+// END MASTER SPEC COMPLIANCE TABLES
+// ============================================================================
 
 // Vehicle Inspections table - Track pre-delivery and post-return inspections with photos
 export const vehicleInspections = pgTable("vehicle_inspections", {
