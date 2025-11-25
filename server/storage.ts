@@ -237,8 +237,10 @@ export interface IStorage {
   
   // Vehicle inspection operations
   createVehicleInspection(inspection: InsertVehicleInspection): Promise<VehicleInspection>;
+  getVehicleInspections(filters?: { vehicleId?: string; contractId?: string; inspectionType?: string }): Promise<VehicleInspection[]>;
   getVehicleInspectionsByContract(contractId: string): Promise<VehicleInspection[]>;
   getVehicleInspection(id: string): Promise<VehicleInspection | undefined>;
+  updateVehicleInspection(id: string, data: Partial<InsertVehicleInspection>): Promise<VehicleInspection>;
   
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
@@ -1469,6 +1471,28 @@ export class DatabaseStorage implements IStorage {
       .where(eq(vehicleInspections.id, id))
       .limit(1);
     return inspection;
+  }
+
+  async getVehicleInspections(filters?: { vehicleId?: string; contractId?: string; inspectionType?: string }): Promise<VehicleInspection[]> {
+    const conditions = [];
+    if (filters?.vehicleId) conditions.push(eq(vehicleInspections.vehicleId, filters.vehicleId));
+    if (filters?.contractId) conditions.push(eq(vehicleInspections.contractId, filters.contractId));
+    if (filters?.inspectionType) conditions.push(eq(vehicleInspections.inspectionType, filters.inspectionType));
+    
+    return await db
+      .select()
+      .from(vehicleInspections)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(vehicleInspections.createdAt));
+  }
+
+  async updateVehicleInspection(id: string, data: Partial<InsertVehicleInspection>): Promise<VehicleInspection> {
+    const [updated] = await db
+      .update(vehicleInspections)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(vehicleInspections.id, id))
+      .returning();
+    return updated;
   }
 
   // Audit log operations

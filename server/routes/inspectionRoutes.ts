@@ -30,7 +30,7 @@ router.get("/", isAuthenticated, async (req: Request, res: Response, next: NextF
 
 router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const inspection = await storage.getVehicleInspectionById(req.params.id);
+    const inspection = await storage.getVehicleInspection(req.params.id);
     if (!inspection) {
       return res.status(404).json({ message: "Inspection not found" });
     }
@@ -46,10 +46,10 @@ router.post("/", isAuthenticated, requireEditor, async (req: Request, res: Respo
     const data = insertVehicleInspectionSchema.parse(req.body);
     const inspection = await storage.createVehicleInspection({
       ...data,
-      inspectedBy: user.id,
+      createdBy: user.id,
     } as any);
     
-    await createAuditLog(user.id, 'inspection_created', inspection.contractId, req, `Created vehicle inspection`);
+    await createAuditLog(user.id, 'inspection_created', inspection.contractId ?? undefined, req, `Created vehicle inspection`);
     res.status(201).json(inspection);
   } catch (error) {
     next(error);
@@ -65,7 +65,7 @@ router.patch("/:id", isAuthenticated, requireEditor, async (req: Request, res: R
     }
     
     const inspection = await storage.updateVehicleInspection(req.params.id, validationResult.data);
-    await createAuditLog(user.id, 'inspection_updated', inspection.contractId, req, `Updated vehicle inspection`);
+    await createAuditLog(user.id, 'inspection_updated', inspection.contractId ?? undefined, req, `Updated vehicle inspection`);
     res.json(inspection);
   } catch (error) {
     next(error);

@@ -504,8 +504,8 @@ class NotificationService {
       const [user] = await db.select().from(users).where(eq(users.id, id));
       if (!user) return null;
       return {
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
-        email: user.email || undefined,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || String(user.username),
+        email: user.email ? String(user.email) : undefined,
         phone: undefined,
         preferredLanguage: 'en',
       };
@@ -731,7 +731,7 @@ class NotificationService {
         templateCode: 'approval_required',
         channel: 'both',
         recipientType: 'user',
-        recipientId: managerUsers.id,
+        recipientId: String(managerUsers.id),
         variables: {
           approvalType: approval.entityType,
           requester: '',
@@ -792,7 +792,7 @@ class NotificationService {
         templateCode: 'risk_score_elevated',
         channel: 'both',
         recipientType: 'user',
-        recipientId: managerUser.id,
+        recipientId: String(managerUser.id),
         variables: {
           customerName: '',
           oldLevel,
