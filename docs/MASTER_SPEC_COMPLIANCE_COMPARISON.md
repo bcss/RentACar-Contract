@@ -1,429 +1,513 @@
-# MASTER SYSTEM SPECIFICATION v1.0 + ADDENDUM v1.1 — BRUTALLY HONEST COMPLIANCE
+# MASTER SYSTEM SPECIFICATION v1.0 + ADDENDUM v1.1 — DEEP CRITICAL COMPLIANCE
 
 **Analysis Date:** November 25, 2025  
-**Methodology:** Deep line-by-line code verification against specification  
-**Previous Assessments:** ~89% → ~50% (STILL TOO OPTIMISTIC)  
-**Actual Compliance:** **~25-30%**
+**Methodology:** Exhaustive line-by-line code verification + business logic validation  
+**Previous Assessments:** ~89% → ~50% → ~30% (ALL TOO OPTIMISTIC)  
+**Actual Compliance:** **~20-25%**
 
 ---
 
 ## EXECUTIVE SUMMARY
 
-After exhaustive verification of actual implementation code against the Master Specification, the system is approximately **25-30% compliant**. Earlier assessments (~89%, ~50%) were overly optimistic because they checked for surface-level feature presence rather than:
-
-1. **Actual service architecture** vs specification requirements
-2. **Complete database schema** vs specification tables
-3. **Business rule enforcement** in workflow code
-4. **Domain event system** existence
-5. **Notification wiring completeness**
+After exhaustive verification checking not just feature presence but actual business logic enforcement, the system is approximately **20-25% compliant**. Most "implemented" features exist only as:
+- Settings that are not enforced
+- Routes without validation
+- Partial workflows without spec-required checks
+- Missing core services entirely
 
 ---
 
-# PART 4 — DATABASE SCHEMA COMPLIANCE
+# SECTION 1 — DATABASE SCHEMA COMPLIANCE: ~30%
 
-## Summary: **~35% Complete**
+## COMPLETELY MISSING TABLES (17 of ~45)
 
-### SPEC-REQUIRED TABLES — COMPLETELY MISSING (17 tables)
+| Table | Spec Section | Purpose | Impact |
+|-------|--------------|---------|--------|
+| `contract_status_history` | 4.4.2 | Lifecycle audit | No transition history |
+| `contract_amendments` | 4.4.3 | Amendment tracking | No change logging |
+| `contract_charges` | 4.4.4 | Itemized charges | Cannot audit charges |
+| `contract_disputes` | 4.4.5 | Dispute workflow | No dispute management |
+| `reservations` | 4.5.1 | Reservation entity | No reservations |
+| `vehicle_classes` | 4.3.1 | Classification | No class-based pricing |
+| `vehicle_groups` | 4.3.2 | Grouping | No group availability |
+| `tariffs` | 4.9.1 | Pricing structure | No tariff engine |
+| `seasonal_tariffs` | 4.9.2 | Seasonal pricing | No seasonal rates |
+| `addons` | 4.9.3 | Add-on products | No addon management |
+| `packages` | 4.9.4 | Package bundling | No packages |
+| `package_addons` | 4.9.5 | Package-addon links | No package addons |
+| `maintenance_jobs` | 4.11.2 | Maintenance tracking | No maintenance workflow |
+| `notification_purposes` | 4.13.2 | Purpose definitions | No purpose config |
+| `notification_routes` | 4.13.3 | Purpose routing | Hard-coded routing |
+| `cron_job_definitions` | 4.14.1 | Job configuration | No job management |
+| `cron_job_executions` | 4.14.2 | Execution tracking | No execution history |
 
-| # | Table Name | Spec Section | Purpose |
-|---|------------|--------------|---------|
-| 1 | `contract_status_history` | 4.4.2 | Lifecycle transition audit |
-| 2 | `contract_amendments` | 4.4.3 | Amendment tracking |
-| 3 | `contract_charges` | 4.4.4 | Itemized charge lines |
-| 4 | `contract_disputes` | 4.4.5 | Dispute workflow |
-| 5 | `reservations` | 4.5.1 | Separate reservation entity |
-| 6 | `vehicle_classes` | 4.3.1 | Vehicle classification |
-| 7 | `vehicle_groups` | 4.3.2 | Vehicle grouping |
-| 8 | `tariffs` | 4.9.1 | Pricing structure |
-| 9 | `seasonal_tariffs` | 4.9.2 | Seasonal pricing overrides |
-| 10 | `addons` | 4.9.3 | Add-on products |
-| 11 | `packages` | 4.9.4 | Package bundling |
-| 12 | `package_addons` | 4.9.5 | Package-addon links |
-| 13 | `maintenance_jobs` | 4.11.2 | Maintenance tracking |
-| 14 | `notification_purposes` | 4.13.2 | Purpose definitions |
-| 15 | `notification_routes` | 4.13.3 | Purpose-to-provider routing |
-| 16 | `cron_job_definitions` | 4.14.1 | Job configuration |
-| 17 | `cron_job_executions` | 4.14.2 | Job execution tracking |
+## MISSING CRITICAL CONTRACT FIELDS
 
-### SPEC-REQUIRED FIELDS ON CONTRACTS — MISSING
+| Field | Spec Requirement | Current State |
+|-------|------------------|---------------|
+| `tariff_id` | FK → tariffs | ❌ Missing - inline rates |
+| `start_datetime_actual` | Activation timestamp | ❌ Missing |
+| `end_datetime_actual` | Return timestamp | ❌ Missing |
+| `return_branch_id` | Return branch FK | ❌ Only text field |
+| `deposit_expected` | Expected deposit (DECIMAL) | ⚠️ `securityDeposit` varchar |
+| `deposit_received` | Sum of IN payments | ❌ Only boolean flag |
+| `deposit_refunded` | Sum of OUT payments | ❌ Only boolean flag |
+| `total_charges` | Derived from charges table | ❌ Flat field instead |
+| `total_payments_in` | Sum payments IN | ❌ Not tracked |
+| `total_payments_out` | Sum payments OUT | ❌ Not tracked |
+| `has_active_dispute` | Dispute flag | ❌ Missing |
+| `has_pending_incident` | Incident flag | ❌ Missing |
 
-| Field | Spec Requirement | What We Have | Gap |
-|-------|-----------------|--------------|-----|
-| `party_type` | DIRECT_HIRER/SPONSORED_INDIVIDUAL/SPONSORED_COMPANY | `hirerType` = direct/with_sponsor/from_company | Different naming, same concept ⚠️ |
-| `tariff_id` | FK → tariffs | None | No tariff linking ❌ |
-| `start_datetime_planned` | Planned start time | `rentalStartDate` | Similar ⚠️ |
-| `start_datetime_actual` | Actual activation time | None explicit | Missing ❌ |
-| `end_datetime_actual` | Actual return time | None explicit | Missing ❌ |
-| `original_branch_id` | Pickup branch | `branchId` | Partial ⚠️ |
-| `return_branch_id` | Return branch | `dropoffLocation` (text) | Not FK ❌ |
-| `deposit_expected` | Expected deposit (DECIMAL) | `securityDeposit` (varchar) | Type mismatch ⚠️ |
-| `deposit_received` | Sum of deposit IN | `depositPaid` (boolean) | Not tracked as sum ❌ |
-| `deposit_refunded` | Sum of deposit OUT | `depositRefunded` (boolean) | Not tracked as sum ❌ |
-| `total_charges` | Derived total | Flat fields | Not derived from charges ❌ |
-| `total_payments_in` | Sum IN | Not tracked | Missing ❌ |
-| `total_payments_out` | Sum OUT | Not tracked | Missing ❌ |
-| `has_active_dispute` | Dispute flag | None | Missing ❌ |
-| `has_pending_incident` | Incident flag | None | Missing ❌ |
-| `otp_activation_verified_at` | OTP timestamp | Via `otpVerifications` table | Different structure ⚠️ |
-| `otp_closure_verified_at` | OTP timestamp | Via `otpVerifications` table | Different structure ⚠️ |
+## MISSING VEHICLE FIELDS
 
-### SPEC-REQUIRED FIELDS ON VEHICLES — MISSING
-
-| Field | Spec Requirement | What We Have | Gap |
-|-------|-----------------|--------------|-----|
-| `vehicle_class_id` | FK → vehicle_classes | None | Missing ❌ |
-| `vehicle_group_id` | FK → vehicle_groups | None | Missing ❌ |
-| `tank_capacity_litres` | Fuel tank capacity | None | Missing ❌ |
-
-### TABLES IMPLEMENTED — PARTIAL COMPLIANCE
-
-| Spec Table | Schema Table | Field Coverage | Notes |
-|------------|--------------|----------------|-------|
-| contracts | contracts | ~50% | Missing structured fields, using flat charges |
-| customers | customers | ~80% | Good coverage |
-| vehicles | vehicles | ~60% | Missing class/group links |
-| branches | branches | ~65% | Missing some address fields |
-| payments | payments | ~75% | Missing direction enum properly |
-| vehicle_inspections | vehicleInspections | ~70% | Missing photo separation |
-| incidents | incidents | ~70% | Good coverage |
-| insurance_claims | insuranceClaims | ~80% | Good coverage |
-| communication_providers | communicationProviders | ~85% | Good CRUD |
-| notification_templates | notificationTemplates | ~60% | Missing purpose_id FK |
-| otp_logs | otpVerifications | ~70% | Different structure |
-| vehicle_availability_cache | vehicleAvailabilityCache | ~90% | Good implementation |
+| Field | Spec Requirement | Current State |
+|-------|------------------|---------------|
+| `vehicle_class_id` | FK → vehicle_classes | ❌ Missing |
+| `vehicle_group_id` | FK → vehicle_groups | ❌ Missing |
+| `tank_capacity_litres` | Fuel tank size | ❌ Missing |
 
 ---
 
-# PART 7 — SERVICE ARCHITECTURE COMPLIANCE
+# SECTION 2 — SERVICE ARCHITECTURE COMPLIANCE: ~10%
 
-## Summary: **~15% Complete**
+## SPEC-REQUIRED SERVICES — COMPLETELY MISSING
 
-### SPEC-REQUIRED SERVICES — COMPLETELY MISSING
+### Contracting Module (7.1) — 0%
+| Service | Status | Methods Missing |
+|---------|--------|-----------------|
+| `ContractLifecycleService` | ❌ | createDraft, activate, complete, close, cancel |
+| `ContractAmendmentService` | ❌ | extend, changeTariff, vehicleSwap, driverChange, earlyReturn |
+| `ContractValidationService` | ❌ | validatePartyType, validateDeposit, validateBlacklist |
 
-The specification defines a modular service architecture. These services DO NOT EXIST:
+### Fleet Module (7.2) — 0%
+| Service | Status | Methods Missing |
+|---------|--------|-----------------|
+| `VehicleService` | ❌ | create, update, changeStatus (as service) |
+| `MaintenanceService` | ❌ | create, start, complete, cancel |
+| `TransferService` | ❌ | request, approve, dispatch, receive, cancel (as service) |
 
-#### Contracting Module (7.1)
-| Service | Status | Impact |
-|---------|--------|--------|
-| `ContractLifecycleService` | ❌ NOT IMPLEMENTED | No centralized lifecycle management |
-| `ContractAmendmentService` | ❌ NOT IMPLEMENTED | No amendment tracking |
-| `ContractValidationService` | ❌ NOT IMPLEMENTED | Validation is inline in routes |
+### Inspections Module (7.3) — 0%
+| Service | Status | Methods Missing |
+|---------|--------|-----------------|
+| `InspectionService` | ❌ | createCheckout, createReturn, createTransfer, getSummary |
+| `DamageAssessmentService` | ❌ | evaluateDamage, comparePhotos |
 
-#### Fleet & Operations Module (7.2)
-| Service | Status | Impact |
-|---------|--------|--------|
-| `VehicleService` | ❌ NOT IMPLEMENTED | Vehicle ops scattered in routes |
-| `MaintenanceService` | ❌ NOT IMPLEMENTED | No maintenance workflow |
-| `TransferService` | ❌ NOT IMPLEMENTED | Transfer ops in routes, no service |
+### Pricing Module (7.4) — 0%
+| Service | Status | Methods Missing |
+|---------|--------|-----------------|
+| `PricingEngineService` | ❌ | calculateRentalCharges, applySeasonalRates |
+| `TariffService` | ❌ | getTariff, getSeasonalOverrides |
 
-#### Inspections & Damage Module (7.3)
-| Service | Status | Impact |
-|---------|--------|--------|
-| `InspectionService` | ❌ NOT IMPLEMENTED | Inspection ops inline |
-| `DamageAssessmentService` | ❌ NOT IMPLEMENTED | No damage comparison |
-
-#### Pricing Module (7.4)
-| Service | Status | Impact |
-|---------|--------|--------|
-| `PricingEngineService` | ❌ NOT IMPLEMENTED | No tariff calculation |
-| `TariffService` | ❌ NOT IMPLEMENTED | No tariff management |
-
-#### Finance Module (7.5)
-| Service | Status | Impact |
-|---------|--------|--------|
-| `PaymentService` | ⚠️ PARTIAL | Routes exist, not proper service |
-| `DepositService` | ❌ NOT IMPLEMENTED | No deposit workflow service |
-| `BillingService` | ⚠️ PARTIAL | `contractFinancials.ts` exists but limited |
-
-#### Customer/Risk Module (7.6)
-| Service | Status | Impact |
-|---------|--------|--------|
-| `CustomerService` | ⚠️ PARTIAL | Routes exist |
-| `BlacklistService` | ❌ NOT IMPLEMENTED | No blacklist checking |
-| `RiskScoringService` | ✅ IMPLEMENTED | `riskCalculator.ts` exists |
-
-#### Notifications Module (7.8)
-| Service | Status | Impact |
-|---------|--------|--------|
-| `NotificationService` | ✅ IMPLEMENTED | `notificationService.ts` works |
-| `NotificationRoutingService` | ❌ NOT IMPLEMENTED | Routing is hard-coded |
-| `NotificationTemplateService` | ⚠️ PARTIAL | Templates exist, no version control |
-| `OtpService` | ✅ IMPLEMENTED | `otpService.ts` works |
-
-#### Cron/Monitoring Module (7.9)
-| Service | Status | Impact |
-|---------|--------|--------|
-| `CronSchedulerService` | ❌ NOT IMPLEMENTED | Using inline node-cron |
-| `CronExecutionService` | ❌ NOT IMPLEMENTED | No execution tracking |
-| `CronFailureAlertService` | ⚠️ PARTIAL | Failure alerts work, no tracking table |
-
-### SERVICES THAT ACTUALLY EXIST
-
-```
-server/services/
-├── automationOrchestrator.ts  ✅ Job scheduling (basic)
-├── availabilityEngine.ts      ✅ Availability cache
-├── campaignSender.ts          ✅ Campaign broadcasts
-├── contractFinancials.ts      ⚠️ Basic calculations only
-├── enhancedProviderSelector.ts ✅ Provider selection
-├── geolocation.ts             ✅ Geolocation
-├── notificationService.ts     ✅ Multi-provider sending
-├── notificationTrigger.ts     ⚠️ Limited trigger wiring
-├── otpService.ts              ✅ OTP lifecycle
-├── providerSelector.ts        ✅ Provider fallback
-├── qrCodeService.ts           ✅ QR generation
-├── riskCalculator.ts          ✅ Risk scoring
-├── settingsService.ts         ✅ Settings management
-├── templateRenderer.ts        ✅ Template rendering
-└── providers/
-    ├── sendgridEmailProvider.ts ✅ SendGrid adapter
-    └── twilioSmsProvider.ts     ✅ Twilio adapter
-```
-
-**Verdict:** We have 14 service files. Spec requires ~25+ dedicated services. Most spec services don't exist as separate modules.
-
----
-
-# PART 3/ADDENDUM B — WORKFLOW COMPLIANCE
-
-## Summary: **~30% Complete**
-
-### CONTRACT LIFECYCLE WORKFLOWS
-
-| Workflow | Spec Requirement | Implementation | Compliance |
-|----------|------------------|----------------|------------|
-| Create Draft | Full validation + party_type enforcement | Basic POST + some validation | 40% |
-| Activate Contract | Inspection + Deposit + Blacklist + OTP + status_history | Inspection (settings-controlled) + OTP | 50% |
-| Complete Contract | Charges recalc + Inspection + status_history | Basic status change | 30% |
-| Close Contract | Settlement + OTP + status_history | Basic status change | 30% |
-| Cancel Contract | Reason + refund workflow | Not implemented | 0% |
-
-### SPEC ACTIVATION WORKFLOW (6.4.1) vs IMPLEMENTATION
-
-**SPEC REQUIRES:**
-1. Load contract ✅
-2. Validate via `ContractValidationService` ❌ (no such service)
-3. Check `DepositService.checkDepositRequirement` ❌ (no such service)  
-4. Check `BlacklistService.check` ❌ (no such service - CRITICAL)
-5. Check checkout inspection via `InspectionService` ⚠️ (inline check, not service)
-6. Send OTP via `OtpService` ✅
-7. Verify OTP ✅
-8. In DB transaction:
-   - Update status ✅
-   - Set `start_datetime_actual` ❌ (field doesn't exist)
-   - Update vehicle status ✅
-   - Insert `contract_status_history` ❌ (table doesn't exist)
-   - Append `audit_logs` ✅
-9. After commit:
-   - Publish `ContractActivated` domain event ❌ (no event bus)
-   - Send activation notification ✅
-   - Update availability cache ✅
-
-**Activation workflow compliance: ~45%**
-
-### AMENDMENT WORKFLOWS — NOT IMPLEMENTED
-
-| Amendment Type | Spec Requirement | Implementation | Compliance |
-|----------------|------------------|----------------|------------|
-| Rate Change | OTP + log to contract_amendments | Basic PATCH | 0% |
-| Vehicle Swap | Availability check + partial inspection | Not implemented | 0% |
-| Extension | Availability check + recalc charges | Basic date update | 10% |
-| Driver Change | Assignment change logging | Via driver assignments | 30% |
-| Early Return | Penalty calculation + refund | `earlyClosureReason` field only | 10% |
-
-### DOMAIN EVENTS — NOT IMPLEMENTED
-
-The spec requires internal domain events:
-- `ContractCreated` ❌
-- `ContractActivated` ❌
-- `ContractCompleted` ❌
-- `ContractClosed` ❌
-- `PaymentRecorded` ❌
-- `IncidentCreated` ❌
-- `MaintenanceStarted` ❌
-- `MaintenanceCompleted` ❌
-- `TransferStarted` ❌
-- `TransferCompleted` ❌
-- `CronJobFailed` ⚠️ (failure alerts exist, not proper events)
-
-**Event system compliance: 0%**
-
----
-
-# PART 11 — NOTIFICATION ENGINE COMPLIANCE
-
-## Summary: **~40% Complete**
-
-### NOTIFICATION PURPOSES — WIRING STATUS
-
-**SPEC DEFINES 30+ PURPOSES. ACTUAL WIRING:**
-
-| Purpose | Wired? | Where |
+### Finance Module (7.5) — 10%
+| Service | Status | Notes |
 |---------|--------|-------|
+| `PaymentService` | ⚠️ | Routes exist, not proper service |
+| `DepositService` | ❌ | No deposit workflow service |
+| `BillingService` | ⚠️ | contractFinancials.ts is basic calculator only |
+
+### Customer Module (7.6) — 20%
+| Service | Status | Notes |
+|---------|--------|-------|
+| `CustomerService` | ⚠️ | CRUD routes exist |
+| `BlacklistService` | ❌ | **CRITICAL SECURITY GAP** |
+| `RiskScoringService` | ✅ | riskCalculator.ts exists |
+
+### Notifications Module (7.8) — 40%
+| Service | Status | Notes |
+|---------|--------|-------|
+| `NotificationService` | ✅ | notificationService.ts works |
+| `NotificationRoutingService` | ❌ | Routing is hard-coded |
+| `NotificationTemplateService` | ⚠️ | No version control |
+| `OtpService` | ✅ | otpService.ts works |
+
+### Cron Module (7.9) — 15%
+| Service | Status | Notes |
+|---------|--------|-------|
+| `CronSchedulerService` | ❌ | Using inline node-cron |
+| `CronExecutionService` | ❌ | No execution tracking |
+| `CronFailureAlertService` | ⚠️ | Alerts work, no tracking table |
+
+**SERVICES THAT EXIST: 5-6 of ~25 required = ~20%**
+
+---
+
+# SECTION 3 — WORKFLOW COMPLIANCE: ~15%
+
+## SPEC PART 3 WORKFLOWS — DETAILED ANALYSIS
+
+### 3.1 Customer Qualification — 0%
+| Requirement | Implemented |
+|-------------|-------------|
+| Blacklist hard-block check | ❌ NO BlacklistService |
+| Blacklist soft-block check | ❌ No soft-block bypass |
+| Document validity check | ❌ Not enforced |
+| Previous contract history | ❌ Not checked |
+
+### 3.2 Checkout Inspection — 20%
+| Requirement | Implemented |
+|-------------|-------------|
+| Odometer out required | ❌ Not enforced (setting only) |
+| Fuel out required | ❌ Not enforced (setting only) |
+| Photos OR remarks required | ❌ Not enforced |
+| Existing damages logged | ⚠️ Field exists |
+| Block activation if missing | ⚠️ Settings-controlled |
+
+### 3.3 Contract Activation — 40%
+| Requirement | Implemented |
+|-------------|-------------|
+| Checkout inspection present | ✅ Settings-controlled |
+| Deposit rule satisfied | ❌ Not checked |
+| OTP sent based on party type | ✅ Works |
+| OTP validated | ✅ Works |
+| Status → ACTIVE | ✅ Works |
+| Vehicle → OUT | ✅ Works |
+| Insert contract_status_history | ❌ Table missing |
+| Publish domain event | ❌ No event bus |
+| Notification sent | ✅ Wired |
+
+### 3.4 Vehicle Delivery Confirmation — 30%
+| Requirement | Implemented |
+|-------------|-------------|
+| Mark vehicle left branch | ⚠️ timeOut field exists |
+| Timestamp stored | ⚠️ Partial |
+
+### 3.5 Contract Completion — 25%
+| Requirement | Implemented |
+|-------------|-------------|
+| Return inspection required | ⚠️ Settings-controlled |
+| Odometer in | ❌ Not enforced |
+| Fuel in | ❌ Not enforced |
+| Recalculate charges | ⚠️ Basic calculation |
+| Status → COMPLETED | ✅ Works |
+
+### 3.6 Return Inspection — 15%
+| Requirement | Implemented |
+|-------------|-------------|
+| Capture odo-in | ❌ Not enforced |
+| Capture fuel-in | ❌ Not enforced |
+| Capture new photos | ❌ Not enforced |
+| Compare with checkout photos | ❌ No comparison engine |
+| Prompt for new damages | ❌ Not automated |
+
+### 3.7 Damage Detection — 10%
+| Requirement | Implemented |
+|-------------|-------------|
+| Checkout vs return diff | ❌ Not implemented |
+| Auto-create incident if damage | ❌ Manual only |
+| Status → COMPLETED_PENDING_ACCIDENT | ✅ Route exists |
+| Continue to settlement if no damage | ⚠️ Manual |
+
+### 3.8 Incident & Excess Workflow — 20%
+| Requirement | Implemented |
+|-------------|-------------|
+| Incident record created | ⚠️ Via incidents table |
+| Load insurer excess amount | ❌ Not implemented |
+| Provisional excess charge | ❌ Not implemented |
+| Customer notified | ❌ Not wired |
+| Cannot close until resolved | ❌ Not enforced |
+
+### 3.9 Deposit Adjustment Workflow — 15%
+| Requirement | Implemented |
+|-------------|-------------|
+| Compute total charges | ⚠️ Basic |
+| Compute deposit received | ⚠️ Basic |
+| Auto-apply deposit to balance | ⚠️ Partial on complete |
+| Calculate refund | ❌ Not automated |
+| Create negative payment for refund | ❌ Manual process |
+| Send refund confirmation | ⚠️ Template exists |
+
+### 3.10 Balance Clearance — 30%
+| Requirement | Implemented |
+|-------------|-------------|
+| Show outstanding balance | ✅ Works |
+| Record payment(s) | ✅ Works |
+| Apply FIFO | ❌ Not implemented |
+| Update balance | ✅ Works |
+| Send payment confirmation | ✅ Wired |
+
+### 3.11 Contract Closure — 35%
+| Requirement | Implemented |
+|-------------|-------------|
+| No pending incidents | ❌ Not checked |
+| Balance = 0 | ✅ Checked (with admin override) |
+| Deposits adjusted | ❌ Not automated |
+| Return inspection complete | ❌ Not enforced |
+| OTP if configured | ✅ Works |
+| Status → CLOSED | ✅ Works |
+| Contract becomes read-only | ✅ Works |
+
+### 3.12 Contract Cancellation — 0%
+| Requirement | Implemented |
+|-------------|-------------|
+| Select reason | ❌ Not implemented |
+| Check vehicle status | ❌ Not implemented |
+| Deposit refunded | ❌ Not implemented |
+| Status → CANCELLED | ❌ No route |
+
+### 3.13 Extension Workflow — 0%
+| Requirement | Implemented |
+|-------------|-------------|
+| Select new end date | ❌ No extension route |
+| Check vehicle availability | ❌ Not implemented |
+| Recalculate charges | ❌ Not implemented |
+| Create amendment record | ❌ No table |
+| OTP optional | ❌ Not implemented |
+| Update contract duration | ❌ No route |
+
+### 3.14 Early Return Workflow — 5%
+| Requirement | Implemented |
+|-------------|-------------|
+| Recalculate charges | ❌ Not implemented |
+| Apply minimum rental rule | ❌ Not enforced |
+| Apply early return penalty | ❌ Not implemented |
+| Payment adjustment notification | ❌ Not wired |
+| Setting exists | ✅ `contract_allow_early_return` |
+
+### 3.15 Contract Amendment — 0%
+| Requirement | Implemented |
+|-------------|-------------|
+| Rate change | ❌ No amendment logging |
+| Tariff upgrade/downgrade | ❌ No tariff system |
+| Discount adjustment | ❌ No structured tracking |
+| Log to contract_amendments | ❌ Table missing |
+| OTP if material | ❌ Not implemented |
+
+### 3.16 Vehicle Swap — 0%
+| Requirement | Implemented |
+|-------------|-------------|
+| Return inspection for current | ❌ Not implemented |
+| Checkout inspection for new | ❌ Not implemented |
+| Odometer/fuel reset | ❌ Not implemented |
+| Create amendment record | ❌ No table |
+| Continue with new vehicle | ❌ No route |
+
+### 3.17 Driver Change — 20%
+| Requirement | Implemented |
+|-------------|-------------|
+| Return inspection optional | ⚠️ Not enforced |
+| New driver ID/License verified | ❌ Not checked |
+| OTP from company | ❌ Not implemented |
+| Driver assigned | ⚠️ Via driver assignments |
+| Amendment logged | ❌ No table |
+
+### 3.18 Vehicle Status Transitions — 15%
+| Requirement | Implemented |
+|-------------|-------------|
+| Valid transitions only | ❌ No transition validation |
+| Reject invalid transitions | ❌ Not enforced |
+| Status changes via VehicleService | ❌ Inline updates |
+
+### 3.19 Maintenance Workflow — 0%
+| Requirement | Implemented |
+|-------------|-------------|
+| Create maintenance job | ❌ No table/route |
+| Vehicle → UNDER_MAINTENANCE | ❌ Not implemented |
+| Close job | ❌ Not implemented |
+| Vehicle → AVAILABLE | ❌ Not implemented |
+
+### 3.20 Transfer Workflow — 30%
+| Requirement | Implemented |
+|-------------|-------------|
+| Request transfer | ✅ Route exists |
+| Approval from destination | ⚠️ Basic approval |
+| Vehicle → IN_TRANSFER | ⚠️ Status exists |
+| Arrival inspection | ❌ Not enforced |
+| Vehicle → AVAILABLE @ new branch | ⚠️ Manual |
+| Damages → transfer incident | ⚠️ Partial |
+
+### 3.21 Transfer Accident — 40%
+| Requirement | Implemented |
+|-------------|-------------|
+| Log transfer accident | ⚠️ Via incidents |
+| Incident record created | ⚠️ Works |
+| Responsibility assigned | ⚠️ Partial |
+| Excess workflow triggered | ❌ Not implemented |
+
+### 3.22 Abandoned Vehicle — 0%
+| Requirement | Implemented |
+|-------------|-------------|
+| Overdue cron flags abnormal | ❌ Not implemented |
+| Operator attempts contact | ❌ Not tracked |
+| Abandoned status | ❌ Not implemented |
+| Police reference recorded | ❌ Not implemented |
+| Insurance informed | ❌ Not implemented |
+
+**WORKFLOW AVERAGE: ~15%**
+
+---
+
+# SECTION 4 — BUSINESS RULES COMPLIANCE: ~20%
+
+## CRITICAL VALIDATION RULES — NOT ENFORCED
+
+| Rule | Spec Requirement | Enforcement |
+|------|------------------|-------------|
+| Blacklist hard-block | Reject if customer hard-blocked | ❌ No check |
+| Blacklist soft-block | Allow with manager override | ❌ No check |
+| Minimum rental period | Enforce tariff minimum | ❌ No enforcement |
+| Maximum rental period | Enforce tariff maximum | ❌ No enforcement |
+| Grace period | Apply return grace minutes | ❌ Setting only |
+| One-way fee | Charge for different return branch | ❌ Not implemented |
+| FIFO payment | Apply payments in order | ❌ Not implemented |
+| Pending incident block | Cannot close with incidents | ❌ Not checked |
+| Deposit refund validation | Cannot refund > received | ❌ Not checked |
+| Document expiry block | Block if ID/license expired | ❌ Not checked |
+| Vehicle availability | Check before activation | ⚠️ Partial |
+
+## PRICE CALCULATION RULES — NOT ENFORCED
+
+| Rule | Spec Requirement | Implementation |
+|------|------------------|----------------|
+| Tariff lookup | Use tariff_id rates | ❌ Inline rates |
+| Seasonal override | Apply seasonal rates | ❌ No seasonal table |
+| Extra km calculation | From included_km_per_day | ⚠️ Basic calculation |
+| Early return penalty | Apply configured penalty | ❌ Not implemented |
+| Downgrade penalty | Monthly→daily recalc | ❌ Not implemented |
+
+---
+
+# SECTION 5 — NOTIFICATION WIRING: ~25%
+
+## PURPOSE WIRING STATUS
+
+| Purpose | Wired | Where |
+|---------|-------|-------|
 | `CONTRACT_OTP` | ✅ | OTP service |
 | `CONTRACT_ACTIVATED` | ✅ | contractRoutes.ts |
 | `CONTRACT_CREATED` | ✅ | contractRoutes.ts |
 | `CONTRACT_COMPLETED` | ✅ | contractRoutes.ts |
-| `CONTRACT_EXTENDED` | ❌ | Not wired |
-| `CONTRACT_AMENDED` | ❌ | Not wired |
+| `CONTRACT_EXTENDED` | ❌ | No extension workflow |
+| `CONTRACT_AMENDED` | ❌ | No amendment workflow |
 | `CONTRACT_CLOSED` | ❌ | Not wired |
-| `CONTRACT_CANCELLED` | ❌ | Not wired |
+| `CONTRACT_CANCELLED` | ❌ | No cancellation |
 | `PAYMENT_CONFIRMATION` | ✅ | paymentRoutes.ts |
 | `DEPOSIT_COLLECTED` | ✅ | paymentRoutes.ts |
 | `DEPOSIT_REFUNDED` | ✅ | paymentRoutes.ts |
-| `EXCESS_PAYMENT_REQUEST` | ❌ | Not wired |
+| `EXCESS_PAYMENT_REQUEST` | ❌ | No excess workflow |
 | `REFUND_PROCESSED` | ❌ | Not wired |
-| `RESERVATION_CONFIRMED` | ❌ | Not wired |
-| `RESERVATION_EXPIRING` | ❌ | Not wired |
-| `RESERVATION_CANCELLED` | ❌ | Not wired |
-| `DUE_TODAY_REMINDER` | ⚠️ | In automation |
-| `OVERDUE_RETURN_ALERT` | ⚠️ | In automation |
+| `RESERVATION_CONFIRMED` | ❌ | No reservations |
+| `RESERVATION_EXPIRING` | ❌ | No reservations |
+| `RESERVATION_CANCELLED` | ❌ | No reservations |
+| `DUE_TODAY_REMINDER` | ⚠️ | Automation exists |
+| `OVERDUE_RETURN_ALERT` | ⚠️ | Automation exists |
 | `VEHICLE_READY_FOR_PICKUP` | ❌ | Not wired |
 | `VEHICLE_TRANSFER_DISPATCHED` | ❌ | Not wired |
 | `VEHICLE_TRANSFER_ARRIVED` | ❌ | Not wired |
-| `MAINTENANCE_STARTED` | ❌ | Not wired |
-| `MAINTENANCE_COMPLETED` | ❌ | Not wired |
-| `ID_EXPIRY_REMINDER` | ⚠️ | In automation |
-| `LICENSE_EXPIRY_REMINDER` | ⚠️ | In automation |
-| `BLACKLIST_ALERT` | ❌ | Not wired |
+| `MAINTENANCE_STARTED` | ❌ | No maintenance |
+| `MAINTENANCE_COMPLETED` | ❌ | No maintenance |
+| `ID_EXPIRY_REMINDER` | ⚠️ | Automation exists |
+| `LICENSE_EXPIRY_REMINDER` | ⚠️ | Automation exists |
+| `BLACKLIST_ALERT` | ❌ | No blacklist |
 | `INCIDENT_CREATED` | ❌ | Not wired |
 | `INCIDENT_UPDATED` | ❌ | Not wired |
 | `INSURANCE_CLAIM_OPENED` | ❌ | Not wired |
 | `INSURANCE_CLAIM_SETTLED` | ❌ | Not wired |
-| `CRON_FAILURE_ALERT` | ✅ | automationOrchestrator.ts |
+| `CRON_FAILURE_ALERT` | ✅ | automationOrchestrator |
 | `CRON_RECOVERY_ALERT` | ❌ | Not wired |
 | `PROVIDER_HEALTH_ALERT` | ❌ | Not wired |
-| `CAMPAIGN_BROADCAST` | ✅ | campaignSender.ts |
 
 **Wired: 8-10 of 33+ = ~25%**
 
-### NOTIFICATION ROUTING — COMPLIANCE
+---
 
-| Requirement | Status |
-|-------------|--------|
-| `notification_purposes` table | ❌ Missing |
-| `notification_routes` table | ❌ Missing |
-| Purpose-based routing config | ❌ Hard-coded |
-| Provider sequence/fallback | ✅ Implemented |
-| Branch override routing | ❌ Missing |
-| UI for route management | ❌ Missing |
-| Test message feature | ❌ Missing |
+# SECTION 6 — DOMAIN EVENTS: 0%
 
-**Routing compliance: ~20%**
+The spec requires internal domain events for loose coupling:
+
+| Event | Status |
+|-------|--------|
+| `ContractCreated` | ❌ No event bus |
+| `ContractActivated` | ❌ No event bus |
+| `ContractCompleted` | ❌ No event bus |
+| `ContractClosed` | ❌ No event bus |
+| `ContractCancelled` | ❌ No event bus |
+| `PaymentRecorded` | ❌ No event bus |
+| `IncidentCreated` | ❌ No event bus |
+| `MaintenanceStarted` | ❌ No event bus |
+| `MaintenanceCompleted` | ❌ No event bus |
+| `TransferStarted` | ❌ No event bus |
+| `TransferCompleted` | ❌ No event bus |
+| `ReservationCreated` | ❌ No event bus |
+| `ReservationExpired` | ❌ No event bus |
+
+**Event System: 0%**
 
 ---
 
-# PART 14 — VALIDATION RULES COMPLIANCE
+# SECTION 7 — ADDENDUM v1.1 COMPLIANCE: ~25%
 
-## Summary: **~35% Complete**
-
-### CONTRACT VALIDATION RULES
-
-| Rule | Spec Requirement | Implemented |
-|------|------------------|-------------|
-| Party type enforcement | Validate hirer/sponsor/company relationships | ⚠️ Partial |
-| Blacklist hard-block | Reject if customer hard-blocked | ❌ Not checked |
-| Blacklist soft-block | Allow with manager override | ❌ Not checked |
-| Deposit requirement | Check deposit before activation | ⚠️ Settings-based |
-| Vehicle availability | Check via availability engine | ⚠️ Partial |
-| Driver license validity | Check expiry before activation | ❌ Not checked |
-| ID document validity | Check expiry before activation | ❌ Not checked |
-| Minimum rental period | Enforce tariff minimum | ❌ Not checked |
-| Maximum rental period | Enforce tariff maximum | ❌ Not checked |
-
-### FINANCIAL VALIDATION
-
-| Rule | Spec Requirement | Implemented |
-|------|------------------|-------------|
-| Outstanding balance check | Cannot close with balance | ⚠️ Partial |
-| Deposit refund validation | Cannot refund more than received | ❌ Not checked |
-| Payment amount validation | Cannot overpay | ⚠️ Basic |
-| Charge calculation | All charges from contract_charges | ❌ Flat fields instead |
-
----
-
-# ADDENDUM v1.1 COMPLIANCE
-
-## Summary: **~30% Complete**
-
-| Section | Requirement | Status |
-|---------|-------------|--------|
-| A.1 | Insurance Excess Workflow | ⚠️ Table exists, workflow incomplete |
-| A.2 | Subscription/Recurring | ❌ Not started |
-| A.3 | Optimistic Locking | ✅ Implemented |
-| A.4 | Signature Capture | ⚠️ Document upload only |
-| A.5 | Availability Engine | ✅ Implemented |
-| A.6 | Grace Periods | ⚠️ Return grace only |
-| A.7 | Minimum Rental Period | ❌ Not enforced |
-| A.8 | Cross-Branch Pricing | ❌ No one-way fees |
-| A.9 | VAT/Tax Handling | ❌ Not started |
-| A.10 | Data Privacy (Soft Delete) | ✅ Implemented |
-| A.11 | Contract Disputes | ❌ No disputes table |
-| A.12 | Abandoned Vehicles | ⚠️ Incident type only |
-| A.13 | Transfer Accident | ✅ Implemented |
+| Section | Requirement | Status | Compliance |
+|---------|-------------|--------|------------|
+| A.1 | Insurance Excess Workflow | Table exists, no workflow | 15% |
+| A.2 | Subscription/Recurring | Not started | 0% |
+| A.3 | Optimistic Locking | ✅ Implemented | 90% |
+| A.4 | Signature Capture | Document upload only | 20% |
+| A.5 | Availability Engine | ✅ Implemented | 85% |
+| A.6 | Grace Periods | Setting only, not enforced | 10% |
+| A.7 | Minimum Rental Period | Not enforced | 0% |
+| A.8 | Cross-Branch Pricing | Not implemented | 0% |
+| A.9 | VAT/Tax Handling | Not started | 0% |
+| A.10 | Data Privacy | ✅ Soft delete | 80% |
+| A.11 | Contract Disputes | No table | 0% |
+| A.12 | Abandoned Vehicles | Incident type only | 10% |
+| A.13 | Transfer Accident | ⚠️ Partial | 50% |
 
 ---
 
 # FINAL COMPLIANCE BREAKDOWN
 
-| Part | Description | Compliance |
-|------|-------------|------------|
-| Part 1 | Executive Summary | 90% |
-| Part 2 | Feature List | 30% |
-| Part 3 | Workflows | 25% |
-| Part 4 | Data Model | 35% |
-| Part 5 | SQL DDL | 35% |
-| Part 6 | Architecture | 50% |
-| Part 7 | Module Architecture (Services) | 15% |
-| Part 8/11 | Notification Engine | 40% |
-| Part 9 | Reports | 30% |
-| Part 10 | Availability Engine | 85% |
-| Part 12 | UI/UX | 60% |
-| Part 13 | Security & Audit | 55% |
-| Part 14 | Validation | 35% |
-| Part 15 | Mobile API | 0% (provision) |
-| Part 16 | Reference Lists | 50% |
-| Addendum A | Extended Requirements | 30% |
-| Addendum B | Workflows | 20% |
-| Addendum C | Data Model | 30% |
-| Addendum D | Rules | 35% |
+| Category | Score |
+|----------|-------|
+| Database Schema (Part 4/5) | 30% |
+| Service Architecture (Part 7) | 10% |
+| Workflow Implementation (Part 3) | 15% |
+| Business Rules (Part 14) | 20% |
+| Notification Wiring (Part 11) | 25% |
+| Domain Events (Part 6) | 0% |
+| Addendum v1.1 | 25% |
+| Availability Engine (Part 10) | 85% |
+| OTP System | 75% |
+| Communication Providers | 80% |
 
-## OVERALL COMPLIANCE: **~25-30%**
+## WEIGHTED OVERALL: **~20-25%**
 
 ---
 
-# WHAT IS GENUINELY WORKING
+# WHAT GENUINELY WORKS
 
-1. **Basic Contract CRUD** — Create, read, update, delete contracts
-2. **4-State Lifecycle** — Draft → Active → Completed → Closed (basic transitions)
-3. **OTP System** — Two-tier OTP with per-transition control
-4. **Optimistic Locking** — Version-based conflict detection (409 responses)
-5. **Communication Provider CRUD** — Full CRUD for SMS/Email providers
-6. **Multi-Provider Notification** — Primary + fallback with priority
-7. **Template Rendering** — Variable substitution in EN/AR
-8. **Availability Engine** — Cache table with event handlers
-9. **Risk Scoring** — Customer risk calculation
-10. **Document Upload** — File upload and registry
-11. **Driver Assignments** — Basic driver service
-12. **Audit Logging** — `auditLogs` + `contractEdits` tables
+1. **Basic Contract CRUD** — Create, read, update, delete
+2. **4-State Lifecycle** — Status transitions (basic)
+3. **OTP System** — Two-tier with per-transition control
+4. **Optimistic Locking** — Version conflicts
+5. **Communication Provider CRUD** — Full management
+6. **Multi-Provider Notifications** — Fallback works
+7. **Template Rendering** — Variable substitution
+8. **Availability Engine** — Cache with event handlers
+9. **Risk Scoring** — Calculation works
+10. **Closed Contract Immutability** — Cannot edit
 
 ---
 
-# TOP 10 CRITICAL GAPS
+# TOP 15 CRITICAL GAPS (SEVERITY ORDER)
 
-1. **No `contract_charges` table** — Cannot itemize or audit charges
-2. **No `contract_status_history`** — No lifecycle audit trail
-3. **No BlacklistService** — Critical security gap
-4. **No ContractLifecycleService** — No centralized lifecycle management
-5. **No domain event system** — No event-driven architecture
-6. **Only 8/33 notification purposes wired** — Most lifecycle events don't notify
-7. **No `notification_routes` table** — Cannot configure routing per purpose
-8. **No `tariffs` tables** — No proper pricing engine
-9. **No amendment tracking** — Rate changes/vehicle swaps not logged
-10. **No `maintenance_jobs`** — No maintenance workflow
+1. **No BlacklistService** — SECURITY: Cannot block bad actors
+2. **No contract_charges table** — FINANCIAL: Cannot audit charges
+3. **No contract_status_history** — AUDIT: No lifecycle trail
+4. **No contract_amendments** — AUDIT: No change tracking
+5. **No tariff system** — PRICING: Inline rates only
+6. **No ContractLifecycleService** — ARCHITECTURE: Logic in routes
+7. **No domain event bus** — ARCHITECTURE: Tight coupling
+8. **Only 8/33 notifications wired** — COMMUNICATION: Most events silent
+9. **No cancellation workflow** — WORKFLOW: Cannot cancel
+10. **No extension workflow** — WORKFLOW: Cannot extend
+11. **No vehicle swap** — WORKFLOW: Cannot swap
+12. **No maintenance_jobs** — FLEET: No maintenance
+13. **No reservations table** — BOOKING: No reservations
+14. **No FIFO payment** — FINANCIAL: Random application
+15. **No pending incident check** — CLOSURE: Can close with incidents
 
 ---
 
-**Document Version:** 3.0 (Brutally Honest)  
+**Document Version:** 4.0 (Deep Critical Analysis)  
 **Generated:** November 25, 2025  
-**Methodology:** Line-by-line code verification against specification
+**Methodology:** Line-by-line code verification + business logic validation
