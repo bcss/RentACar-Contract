@@ -44,6 +44,7 @@ import communicationRoutes from "./communicationRoutes";
 import abTestRoutes from "./abTestRoutes";
 import importExportRoutes from "./importExportRoutes";
 import utilityRoutes from "./utilityRoutes";
+import otpRoutes from "./otpRoutes";
 
 /**
  * Register all modular routes with the Express app
@@ -98,9 +99,10 @@ export function registerModularRoutes(app: Express): void {
   app.use('/api/notifications', notificationRoutes);
   app.use('/api/campaigns', campaignRoutes);
   
-  // Approvals & Settings
+  // Approvals, Settings & OTP
   app.use('/api/approvals', approvalRoutes);
   app.use('/api/settings', settingsRoutes);
+  app.use('/api/otp', otpRoutes);
   
   // Analytics & Mobile
   app.use('/api/analytics', analyticsRoutes);

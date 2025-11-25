@@ -2897,6 +2897,55 @@ export const insertApprovalLogSchema = createInsertSchema(approvalLogs).omit({
 export type InsertApprovalLog = z.infer<typeof insertApprovalLogSchema>;
 export type ApprovalLog = typeof approvalLogs.$inferSelect;
 
+// OTP Verifications table - Digital signature verification via OTP
+export const otpVerifications = pgTable("otp_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 30 }).notNull(), // contract, amendment, extension
+  entityId: varchar("entity_id").notNull(),
+  purpose: varchar("purpose", { length: 50 }).notNull(), // activation, closure, amendment_approval, extension_approval
+  recipientType: varchar("recipient_type", { length: 20 }).notNull(), // hirer, sponsor, driver
+  recipientId: varchar("recipient_id").notNull(),
+  recipientPhone: varchar("recipient_phone", { length: 20 }).notNull(),
+  recipientEmail: varchar("recipient_email", { length: 255 }),
+  otpCode: varchar("otp_code", { length: 100 }).notNull(), // Hashed OTP code
+  expiresAt: timestamp("expires_at").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  maxAttempts: integer("max_attempts").notNull().default(3),
+  verified: boolean("verified").notNull().default(false),
+  verifiedAt: timestamp("verified_at"),
+  deliveryChannel: varchar("delivery_channel", { length: 10 }).notNull().default("sms"), // sms, email, both
+  deliveryStatus: varchar("delivery_status", { length: 20 }).notNull().default("pending"), // pending, sent, delivered, failed
+  deliveryAttempts: integer("delivery_attempts").notNull().default(0),
+  lastDeliveryAt: timestamp("last_delivery_at"),
+  smsProviderMessageId: varchar("sms_provider_message_id", { length: 100 }),
+  emailProviderMessageId: varchar("email_provider_message_id", { length: 100 }),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdBy: varchar("created_by").references(() => users.id),
+  branchId: varchar("branch_id").references(() => branches.id),
+}, (table) => [
+  index("idx_otp_entity").on(table.entityType, table.entityId),
+  index("idx_otp_purpose").on(table.purpose),
+  index("idx_otp_recipient").on(table.recipientType, table.recipientId),
+  index("idx_otp_verified").on(table.verified),
+  index("idx_otp_expires").on(table.expiresAt),
+  index("idx_otp_created").on(table.createdAt),
+]);
+
+export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({
+  id: true,
+  createdAt: true,
+  attempts: true,
+  verified: true,
+  verifiedAt: true,
+  deliveryAttempts: true,
+  lastDeliveryAt: true,
+});
+
+export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;
+export type OtpVerification = typeof otpVerifications.$inferSelect;
+
 // Customer Risk Scores table - Risk assessment engine
 export const customerRiskScores = pgTable("customer_risk_scores", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

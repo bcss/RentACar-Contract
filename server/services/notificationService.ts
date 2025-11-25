@@ -295,6 +295,73 @@ class NotificationService {
   }
 
   /**
+   * Send direct SMS without template (for OTP and system messages)
+   */
+  async sendDirectSms(params: {
+    recipient: string;
+    message: string;
+  }): Promise<{ success: boolean; error?: string }> {
+    const providers = await db
+      .select()
+      .from(communicationProviders)
+      .where(and(eq(communicationProviders.type, 'sms'), eq(communicationProviders.isActive, true)))
+      .orderBy(communicationProviders.priority);
+
+    if (providers.length === 0) {
+      console.log('[NotificationService] No active SMS providers configured');
+      return { success: false, error: 'No active SMS providers configured' };
+    }
+
+    for (const provider of providers) {
+      try {
+        const sendResult = await this.sendViaSmsProvider(provider, params.recipient, params.message);
+        if (sendResult.success) {
+          return { success: true };
+        }
+      } catch (error) {
+        console.error(`[NotificationService] SMS provider ${provider.name} error:`, error);
+        continue;
+      }
+    }
+
+    return { success: false, error: 'All SMS providers failed' };
+  }
+
+  /**
+   * Send direct Email without template (for OTP and system messages)
+   */
+  async sendDirectEmail(params: {
+    recipient: string;
+    subject: string;
+    message: string;
+  }): Promise<{ success: boolean; error?: string }> {
+    const providers = await db
+      .select()
+      .from(communicationProviders)
+      .where(and(eq(communicationProviders.type, 'email'), eq(communicationProviders.isActive, true)))
+      .orderBy(communicationProviders.priority);
+
+    if (providers.length === 0) {
+      console.log('[NotificationService] No active Email providers configured');
+      return { success: false, error: 'No active Email providers configured' };
+    }
+
+    for (const provider of providers) {
+      try {
+        const sendResult = await this.sendViaEmailProvider(provider, params.recipient, params.subject, params.message);
+        if (sendResult.success) {
+          return { success: true };
+        }
+      } catch (error) {
+        console.error(`[NotificationService] Email provider ${provider.name} error:`, error);
+        continue;
+      }
+    }
+
+    return { success: false, error: 'All Email providers failed' };
+  }
+
+  /**
    * Send via SMS provider (Twilio, Generic API)
    * PRODUCTION-READY: Direct Twilio integration
    */
