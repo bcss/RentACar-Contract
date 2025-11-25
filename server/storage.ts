@@ -940,7 +940,12 @@ export class DatabaseStorage implements IStorage {
   // Legacy finalizeContract method removed - use new state machine methods below
 
   // Phase 2.1: State transition methods
-  async activateContract(id: string, userId: string, timeOut?: string): Promise<Contract> {
+  async activateContract(id: string, userId: string, timeOut?: string, expectedVersion?: number): Promise<Contract> {
+    // Per Master Spec Part 6.5.2: Conditional update with version check
+    const whereConditions = expectedVersion !== undefined
+      ? and(eq(contracts.id, id), eq(contracts.version, expectedVersion))
+      : eq(contracts.id, id);
+    
     const [activated] = await db
       .update(contracts)
       .set({
@@ -951,8 +956,12 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
         version: sql`${contracts.version} + 1`,
       })
-      .where(eq(contracts.id, id))
+      .where(whereConditions)
       .returning();
+    
+    if (!activated && expectedVersion !== undefined) {
+      throw new Error('Contract has been modified by another user. Please refresh and try again.');
+    }
     
     return activated;
   }
@@ -966,7 +975,12 @@ export class DatabaseStorage implements IStorage {
     otherCharges?: string;
     totalExtraCharges?: string;
     outstandingBalance?: string;
-  }): Promise<Contract> {
+  }, expectedVersion?: number): Promise<Contract> {
+    // Per Master Spec Part 6.5.2: Conditional update with version check
+    const whereConditions = expectedVersion !== undefined
+      ? and(eq(contracts.id, id), eq(contracts.version, expectedVersion))
+      : eq(contracts.id, id);
+    
     const [completed] = await db
       .update(contracts)
       .set({
@@ -977,13 +991,22 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
         version: sql`${contracts.version} + 1`,
       })
-      .where(eq(contracts.id, id))
+      .where(whereConditions)
       .returning();
+    
+    if (!completed && expectedVersion !== undefined) {
+      throw new Error('Contract has been modified by another user. Please refresh and try again.');
+    }
     
     return completed;
   }
 
-  async closeContract(id: string, userId: string, closureRemark?: string): Promise<Contract> {
+  async closeContract(id: string, userId: string, closureRemark?: string, expectedVersion?: number): Promise<Contract> {
+    // Per Master Spec Part 6.5.2: Conditional update with version check
+    const whereConditions = expectedVersion !== undefined
+      ? and(eq(contracts.id, id), eq(contracts.version, expectedVersion))
+      : eq(contracts.id, id);
+    
     const [closed] = await db
       .update(contracts)
       .set({
@@ -995,8 +1018,12 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
         version: sql`${contracts.version} + 1`,
       })
-      .where(eq(contracts.id, id))
+      .where(whereConditions)
       .returning();
+    
+    if (!closed && expectedVersion !== undefined) {
+      throw new Error('Contract has been modified by another user. Please refresh and try again.');
+    }
     
     return closed;
   }

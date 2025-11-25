@@ -553,12 +553,21 @@ router.patch("/:id", isAuthenticated, async (req: any, res) => {
 router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, res) => {
   try {
     const userId = req.user.id;
-    const { timeOut } = req.body;
+    const { timeOut, expectedVersion } = req.body;
     
     const contract = await storage.getContract(req.params.id);
     
     if (!contract) {
       return res.status(404).json({ message: "Contract not found" });
+    }
+
+    // OPTIMISTIC LOCKING - Per Master Spec Part 6.5.2
+    if (expectedVersion !== undefined && contract.version !== expectedVersion) {
+      return res.status(409).json({
+        message: "Contract has been modified by another user. Please refresh and try again.",
+        code: 'CONFLICT',
+        currentVersion: contract.version
+      });
     }
 
     // STATUS VALIDATION
@@ -602,7 +611,8 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
       }
     }
 
-    // OTP VERIFICATION - Per Master Spec Part 3.3: OTP required for contract activation
+    // OTP VERIFICATION - Per Master Spec Part 3.3 & 3.11: Two-tier OTP control
+    // Tier 1: Check if OTP is enabled globally for this branch
     const otpEnabled = await settingsService.getSettingAsBoolean(
       'otp_enabled',
       'BRANCH',
@@ -610,18 +620,28 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
     );
     
     if (otpEnabled) {
-      const isOtpVerified = await otpService.checkEntityVerification(
-        'contract',
-        req.params.id,
-        'activation'
+      // Tier 2: Check if activation-specific OTP is required (defaults to true when OTP enabled)
+      const activationOtpRequired = await settingsService.getSettingAsBoolean(
+        'contract_requires_activation_otp',
+        'BRANCH',
+        contract.branchId || undefined,
+        true // Default to true when OTP is enabled
       );
       
-      if (!isOtpVerified) {
-        return res.status(400).json({ 
-          message: "OTP verification is required before activating the rental. Please complete OTP verification with the hirer first.",
-          requiresOtp: true,
-          otpPurpose: 'activation'
-        });
+      if (activationOtpRequired) {
+        const isOtpVerified = await otpService.checkEntityVerification(
+          'contract',
+          req.params.id,
+          'activation' // Distinct purpose per Master Spec 3.11.4 & 9.6
+        );
+        
+        if (!isOtpVerified) {
+          return res.status(400).json({ 
+            message: "OTP verification is required before activating the rental. Please complete OTP verification with the hirer first.",
+            requiresOtp: true,
+            otpPurpose: 'activation'
+          });
+        }
       }
     }
 
@@ -651,7 +671,19 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
       });
     }
 
-    const activated = await storage.activateContract(req.params.id, userId, timeOut);
+    let activated;
+    try {
+      activated = await storage.activateContract(req.params.id, userId, timeOut, expectedVersion);
+    } catch (error: any) {
+      if (error.message.includes('modified by another user')) {
+        return res.status(409).json({ 
+          message: error.message,
+          code: 'CONFLICT',
+          currentVersion: contract.version
+        });
+      }
+      throw error;
+    }
     
     // Update vehicle status to "rented"
     await storage.updateVehicle(activated.vehicleId, { status: "rented" });
@@ -713,10 +745,20 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
 router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, res) => {
   try {
     const userId = req.user.id;
+    const { expectedVersion } = req.body;
     const contract = await storage.getContract(req.params.id);
     
     if (!contract) {
       return res.status(404).json({ message: "Contract not found" });
+    }
+
+    // OPTIMISTIC LOCKING - Per Master Spec Part 6.5.2
+    if (expectedVersion !== undefined && contract.version !== expectedVersion) {
+      return res.status(409).json({
+        message: "Contract has been modified by another user. Please refresh and try again.",
+        code: 'CONFLICT',
+        currentVersion: contract.version
+      });
     }
 
     // Edit reason validation for active contracts
@@ -747,7 +789,8 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
       }
     }
 
-    // OTP VERIFICATION - Per Master Spec Part 3.11: OTP required for contract completion
+    // OTP VERIFICATION - Per Master Spec Part 3.11: Two-tier OTP control
+    // Tier 1: Check if OTP is enabled globally for this branch
     const otpEnabled = await settingsService.getSettingAsBoolean(
       'otp_enabled',
       'BRANCH',
@@ -755,18 +798,28 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
     );
     
     if (otpEnabled) {
-      const isOtpVerified = await otpService.checkEntityVerification(
-        'contract',
-        req.params.id,
-        'closure' // completion uses closure OTP purpose
+      // Tier 2: Check if completion-specific OTP is required (defaults to true when OTP enabled)
+      const completionOtpRequired = await settingsService.getSettingAsBoolean(
+        'contract_requires_completion_otp',
+        'BRANCH',
+        contract.branchId || undefined,
+        true // Default to true when OTP is enabled
       );
       
-      if (!isOtpVerified) {
-        return res.status(400).json({ 
-          message: "OTP verification is required before completing the rental. Please complete OTP verification with the hirer first.",
-          requiresOtp: true,
-          otpPurpose: 'closure'
-        });
+      if (completionOtpRequired) {
+        const isOtpVerified = await otpService.checkEntityVerification(
+          'contract',
+          req.params.id,
+          'completion' // Distinct purpose per Master Spec 3.11.4 & 9.6
+        );
+        
+        if (!isOtpVerified) {
+          return res.status(400).json({ 
+            message: "OTP verification is required before completing the rental. Please complete OTP verification with the hirer first.",
+            requiresOtp: true,
+            otpPurpose: 'completion'
+          });
+        }
       }
     }
 
@@ -904,7 +957,19 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
       earlyClosureReason: earlyClosureReason || null,
     });
 
-    const completed = await storage.completeContract(req.params.id, userId, chargeData);
+    let completed;
+    try {
+      completed = await storage.completeContract(req.params.id, userId, chargeData, expectedVersion);
+    } catch (error: any) {
+      if (error.message.includes('modified by another user')) {
+        return res.status(409).json({ 
+          message: error.message,
+          code: 'CONFLICT',
+          currentVersion: contract.version
+        });
+      }
+      throw error;
+    }
     
     // Update vehicle status to "available"
     await storage.updateVehicle(completed.vehicleId, { status: "available" });
@@ -1079,10 +1144,20 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
   try {
     const userId = req.user.id;
     const userRole = req.user.role;
+    const { expectedVersion } = req.body;
     const contract = await storage.getContract(req.params.id);
     
     if (!contract) {
       return res.status(404).json({ message: "Contract not found" });
+    }
+
+    // OPTIMISTIC LOCKING - Per Master Spec Part 6.5.2
+    if (expectedVersion !== undefined && contract.version !== expectedVersion) {
+      return res.status(409).json({
+        message: "Contract has been modified by another user. Please refresh and try again.",
+        code: 'CONFLICT',
+        currentVersion: contract.version
+      });
     }
 
     // Edit reason validation
@@ -1111,7 +1186,8 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       }
     }
 
-    // OTP VERIFICATION - Per Master Spec Part 3.11: OTP required for contract closure
+    // OTP VERIFICATION - Per Master Spec Part 3.11: Two-tier OTP control
+    // Tier 1: Check if OTP is enabled globally for this branch
     const otpEnabled = await settingsService.getSettingAsBoolean(
       'otp_enabled',
       'BRANCH',
@@ -1119,18 +1195,28 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
     );
     
     if (otpEnabled) {
-      const isOtpVerified = await otpService.checkEntityVerification(
-        'contract',
-        req.params.id,
-        'closure'
+      // Tier 2: Check if closure-specific OTP is required (defaults to true when OTP enabled)
+      const closureOtpRequired = await settingsService.getSettingAsBoolean(
+        'contract_requires_closure_otp',
+        'BRANCH',
+        contract.branchId || undefined,
+        true // Default to true when OTP is enabled
       );
       
-      if (!isOtpVerified) {
-        return res.status(400).json({ 
-          message: "OTP verification is required before closing the rental. Please complete OTP verification with the hirer first.",
-          requiresOtp: true,
-          otpPurpose: 'closure'
-        });
+      if (closureOtpRequired) {
+        const isOtpVerified = await otpService.checkEntityVerification(
+          'contract',
+          req.params.id,
+          'closure' // Distinct purpose per Master Spec 3.11.4 & 9.6
+        );
+        
+        if (!isOtpVerified) {
+          return res.status(400).json({ 
+            message: "OTP verification is required before closing the rental. Please complete OTP verification with the hirer first.",
+            requiresOtp: true,
+            otpPurpose: 'closure'
+          });
+        }
       }
     }
 
@@ -1187,7 +1273,19 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
         });
       }
       
-      const closed = await storage.closeContract(req.params.id, userId, closureRemark);
+      let closed;
+      try {
+        closed = await storage.closeContract(req.params.id, userId, closureRemark, expectedVersion);
+      } catch (error: any) {
+        if (error.message.includes('modified by another user')) {
+          return res.status(409).json({ 
+            message: error.message,
+            code: 'CONFLICT',
+            currentVersion: contract.version
+          });
+        }
+        throw error;
+      }
       
       await storage.updateVehicle(closed.vehicleId, { status: "available" });
       
@@ -1246,7 +1344,19 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       });
     }
 
-    const closed = await storage.closeContract(req.params.id, userId);
+    let closed;
+    try {
+      closed = await storage.closeContract(req.params.id, userId, undefined, expectedVersion);
+    } catch (error: any) {
+      if (error.message.includes('modified by another user')) {
+        return res.status(409).json({ 
+          message: error.message,
+          code: 'CONFLICT',
+          currentVersion: contract.version
+        });
+      }
+      throw error;
+    }
     
     await storage.updateVehicle(closed.vehicleId, { status: "available" });
     
