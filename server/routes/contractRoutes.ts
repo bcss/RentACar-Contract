@@ -20,7 +20,8 @@ import {
   isAuthenticated, 
   requireAdmin, 
   requireEditor, 
-  requireContractCloseAccess 
+  requireContractCloseAccess,
+  requireManagerOrAdmin
 } from "../auth/localAuth";
 import { createAuditLog } from "../utils/auditLogger";
 import { validateFinancialInput, validateEditReason } from "../utils/validation";
@@ -29,6 +30,7 @@ import { calculateContractDriverCosts } from "../utils/driverCostCalculator";
 import { notificationService } from "../services/notificationService";
 import { calculateContractTotals } from "../services/contractFinancials";
 import { triggerNotification } from "../services/notificationTrigger";
+import { settingsService } from "../services/settingsService";
 
 const router = Router();
 
@@ -437,6 +439,16 @@ router.patch("/:id", isAuthenticated, async (req: any, res) => {
       });
     }
     
+    // Block status regression from completed_pending_accident
+    if (contract.status === 'completed_pending_accident') {
+      // Only allow non-status updates or updates to completed_pending_accident
+      if (contractData.status && contractData.status !== 'completed_pending_accident') {
+        return res.status(403).json({ 
+          message: "Cannot change status from 'completed_pending_accident'. Use the accident clearance route to resolve pending accidents." 
+        });
+      }
+    }
+    
     if (contract.status === 'active' || contract.status === 'completed') {
       // Active/Completed: Require 10+ meaningful words (3+ chars each)
       const validation = validateEditReason(trimmedReason);
@@ -539,14 +551,38 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
       });
     }
 
-    // INSPECTION VALIDATION
-    const inspections = await storage.getVehicleInspectionsByContract(req.params.id);
-    const hasPreDeliveryInspection = inspections.some(i => i.inspectionType === 'pre_delivery');
+    // INSPECTION VALIDATION - Check settings if inspection is required
+    const requirePickupInspection = await settingsService.getSettingAsBoolean(
+      'contract_requires_pickup_inspection',
+      'BRANCH',
+      contract.branchId || undefined
+    );
     
-    if (!hasPreDeliveryInspection) {
-      return res.status(400).json({ 
-        message: "Pre-delivery vehicle inspection is required before activating the rental. Please complete the inspection first." 
-      });
+    if (requirePickupInspection) {
+      const inspections = await storage.getVehicleInspectionsByContract(req.params.id);
+      const hasPreDeliveryInspection = inspections.some(i => i.inspectionType === 'pre_delivery');
+      
+      if (!hasPreDeliveryInspection) {
+        return res.status(400).json({ 
+          message: "Pre-delivery vehicle inspection is required before activating the rental. Please complete the inspection first." 
+        });
+      }
+    }
+
+    // DEPOSIT VALIDATION - Check settings if deposit is required before activation
+    const requireDepositBeforeActivation = await settingsService.getSettingAsBoolean(
+      'contract_requires_deposit_before_activation',
+      'BRANCH',
+      contract.branchId || undefined
+    );
+    
+    if (requireDepositBeforeActivation) {
+      const securityDeposit = parseFloat(contract.securityDeposit || '0');
+      if (securityDeposit > 0 && !contract.depositPaid) {
+        return res.status(400).json({ 
+          message: "Security deposit payment is required before activating the rental. Please collect the deposit first." 
+        });
+      }
     }
 
     // DOUBLE-BOOKING PREVENTION
@@ -641,14 +677,22 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
       }
     }
 
-    // VALIDATION: Post-return inspection required
-    const inspections = await storage.getVehicleInspectionsByContract(req.params.id);
-    const hasPostReturnInspection = inspections.some(i => i.inspectionType === 'post_return');
+    // VALIDATION: Post-return inspection required - Check settings
+    const requireReturnInspection = await settingsService.getSettingAsBoolean(
+      'contract_requires_return_inspection',
+      'BRANCH',
+      contract.branchId || undefined
+    );
     
-    if (!hasPostReturnInspection) {
-      return res.status(400).json({ 
-        message: "Post-return vehicle inspection is required before completing the rental. Please complete the inspection first." 
-      });
+    if (requireReturnInspection) {
+      const inspections = await storage.getVehicleInspectionsByContract(req.params.id);
+      const hasPostReturnInspection = inspections.some(i => i.inspectionType === 'post_return');
+      
+      if (!hasPostReturnInspection) {
+        return res.status(400).json({ 
+          message: "Post-return vehicle inspection is required before completing the rental. Please complete the inspection first." 
+        });
+      }
     }
 
     const { timeIn, odometerEnd, fuelLevelEnd, vehicleCondition, extraKmCharge, fuelCharge: clientFuelCharge, damageCharge, trafficFineCharge, otherCharges, totalExtraCharges, outstandingBalance, extraKmDriven, fuelChargeOverride, earlyClosureReason } = req.body;
@@ -828,6 +872,118 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
 });
 
 /**
+ * POST /api/contracts/:id/report-accident
+ * Mark contract as having pending accident (completed → completed_pending_accident)
+ * Used when damage is discovered during return inspection
+ */
+router.post("/:id/report-accident", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const contract = await storage.getContract(req.params.id);
+    
+    if (!contract) {
+      return res.status(404).json({ message: "Contract not found" });
+    }
+
+    if (contract.status !== 'completed') {
+      return res.status(400).json({ 
+        message: "Contract must be in 'completed' status to report accident. Current status: " + contract.status
+      });
+    }
+
+    const { accidentDescription, estimatedDamage, insuranceClaimRequired } = req.body;
+    
+    if (!accidentDescription) {
+      return res.status(400).json({ message: "Accident description is required" });
+    }
+
+    // Update contract status to completed_pending_accident
+    const updated = await storage.updateContract(req.params.id, {
+      status: 'completed_pending_accident',
+    });
+
+    // Log the accident report
+    await createAuditLog(
+      userId, 
+      'report_accident', 
+      updated.id, 
+      req, 
+      `Reported accident for contract #${updated.contractNumber}. Description: ${accidentDescription}. Estimated damage: ${estimatedDamage || 'Not specified'}. Insurance claim: ${insuranceClaimRequired ? 'Yes' : 'No'}`
+    );
+
+    res.json({
+      ...updated,
+      accidentDetails: {
+        description: accidentDescription,
+        estimatedDamage,
+        insuranceClaimRequired,
+        reportedAt: new Date().toISOString(),
+        reportedBy: userId,
+      }
+    });
+  } catch (error: any) {
+    console.error("Error reporting accident:", error);
+    res.status(400).json({ message: error.message || "Failed to report accident" });
+  }
+});
+
+/**
+ * POST /api/contracts/:id/clear-accident
+ * Clear accident status (completed_pending_accident → completed)
+ * Used when accident has been resolved/cleared
+ */
+router.post("/:id/clear-accident", isAuthenticated, requireManagerOrAdmin, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const contract = await storage.getContract(req.params.id);
+    
+    if (!contract) {
+      return res.status(404).json({ message: "Contract not found" });
+    }
+
+    if (contract.status !== 'completed_pending_accident') {
+      return res.status(400).json({ 
+        message: "Contract must be in 'completed_pending_accident' status to clear accident. Current status: " + contract.status
+      });
+    }
+
+    const { clearanceNotes, insuranceClaimId, resolutionType } = req.body;
+    
+    if (!clearanceNotes) {
+      return res.status(400).json({ message: "Clearance notes are required" });
+    }
+
+    // Update contract status back to completed
+    const updated = await storage.updateContract(req.params.id, {
+      status: 'completed',
+    });
+
+    // Log the accident clearance
+    await createAuditLog(
+      userId, 
+      'clear_accident', 
+      updated.id, 
+      req, 
+      `Cleared accident for contract #${updated.contractNumber}. Resolution: ${resolutionType || 'Not specified'}. Insurance claim: ${insuranceClaimId || 'N/A'}. Notes: ${clearanceNotes}`
+    );
+
+    res.json({
+      ...updated,
+      accidentClearance: {
+        notes: clearanceNotes,
+        insuranceClaimId,
+        resolutionType,
+        clearedAt: new Date().toISOString(),
+        clearedBy: userId,
+      }
+    });
+  } catch (error: any) {
+    console.error("Error clearing accident:", error);
+    res.status(400).json({ message: error.message || "Failed to clear accident" });
+  }
+});
+
+/**
  * POST /api/contracts/:id/close
  * Close contract (completed → closed)
  * Admin can override with closure remark for outstanding balance
@@ -852,10 +1008,20 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       }
     }
 
-    if (contract.status !== 'completed') {
+    if (contract.status !== 'completed' && contract.status !== 'completed_pending_accident') {
       return res.status(400).json({ 
-        message: "Contract must be in 'completed' status before closing" 
+        message: "Contract must be in 'completed' or 'completed_pending_accident' status before closing" 
       });
+    }
+
+    // If contract has pending accident, require accident clearance before closing
+    if (contract.status === 'completed_pending_accident') {
+      const { accidentClearanceNotes, insuranceClaimId } = req.body;
+      if (!accidentClearanceNotes) {
+        return res.status(400).json({ 
+          message: "Accident clearance notes required when closing a contract with pending accident" 
+        });
+      }
     }
 
     // PAYMENT VERIFICATION

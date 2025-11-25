@@ -2253,6 +2253,7 @@ export class DatabaseStorage implements IStorage {
         draft: sql<string>`SUM(CASE WHEN ${contracts.status} = 'draft' THEN 1 ELSE 0 END)`,
         active: sql<string>`SUM(CASE WHEN ${contracts.status} = 'active' THEN 1 ELSE 0 END)`,
         completed: sql<string>`SUM(CASE WHEN ${contracts.status} = 'completed' THEN 1 ELSE 0 END)`,
+        completedPendingAccident: sql<string>`SUM(CASE WHEN ${contracts.status} = 'completed_pending_accident' THEN 1 ELSE 0 END)`,
         closed: sql<string>`SUM(CASE WHEN ${contracts.status} = 'closed' THEN 1 ELSE 0 END)`,
       })
       .from(contracts)
@@ -2265,6 +2266,7 @@ export class DatabaseStorage implements IStorage {
       draft: parseInt(row.draft) || 0,
       active: parseInt(row.active) || 0,
       completed: parseInt(row.completed) || 0,
+      completedPendingAccident: parseInt(row.completedPendingAccident) || 0,
       closed: parseInt(row.closed) || 0,
     }));
   }
@@ -2288,10 +2290,11 @@ export class DatabaseStorage implements IStorage {
       return true;
     });
 
-    // Revenue contracts (only active, completed, and closed - these have earned revenue)
+    // Revenue contracts (only active, completed, completed_pending_accident, and closed - these have earned revenue)
     // CRITICAL FIX: Exclude 'confirmed' status - those haven't started yet
     const revenueContracts = filteredContracts.filter(c => 
-      c.status === 'active' || c.status === 'completed' || c.status === 'closed'
+      c.status === 'active' || c.status === 'completed' || 
+      c.status === 'completed_pending_accident' || c.status === 'closed'
     );
 
     // Total revenue (contract amount + extra charges + delivery charges)

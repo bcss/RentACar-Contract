@@ -10,6 +10,9 @@ import {
   boolean,
   pgEnum,
   numeric,
+  serial,
+  uniqueIndex,
+  date,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -1263,7 +1266,7 @@ export type DamageAssessment = typeof damageAssessments.$inferSelect;
 export const contracts = pgTable("contracts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractNumber: integer("contract_number").notNull().unique(),
-  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, active, completed, closed
+  status: varchar("status", { length: 35 }).notNull().default("draft"), // draft, active, completed, completed_pending_accident, closed
   
   // Foreign Keys to Master Data
   customerId: varchar("customer_id").notNull().references(() => customers.id),
@@ -3746,6 +3749,112 @@ export const insertChannelPreferenceSchema = createInsertSchema(notificationChan
 export type InsertChannelPreference = z.infer<typeof insertChannelPreferenceSchema>;
 export type ChannelPreference = typeof notificationChannelPreferences.$inferSelect;
 
+
+// ===========================
+// Vehicle Availability Cache
+// ===========================
+
+export const vehicleAvailabilityCache = pgTable("vehicle_availability_cache", {
+  id: serial("id").primaryKey(),
+  vehicleId: varchar("vehicle_id", { length: 50 }).notNull().references(() => vehicles.id),
+  branchId: varchar("branch_id", { length: 50 }).notNull().references(() => branches.id),
+  date: date("date").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("available"),
+  relatedEntityType: varchar("related_entity_type", { length: 30 }),
+  relatedEntityId: varchar("related_entity_id", { length: 50 }),
+  timeSlots: jsonb("time_slots").$type<{
+    morning?: { status: string; entityId?: string };
+    afternoon?: { status: string; entityId?: string };
+    evening?: { status: string; entityId?: string };
+  }>(),
+  notes: text("notes"),
+  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  uniqueIndex("idx_vehicle_availability_unique").on(table.vehicleId, table.date),
+  index("idx_vac_branch_date").on(table.branchId, table.date),
+  index("idx_vac_status_date").on(table.status, table.date),
+  index("idx_vac_vehicle_status").on(table.vehicleId, table.status),
+]);
+
+export const vehicleAvailabilityCacheRelations = relations(vehicleAvailabilityCache, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [vehicleAvailabilityCache.vehicleId],
+    references: [vehicles.id],
+    relationName: "vehicleAvailability",
+  }),
+  branch: one(branches, {
+    fields: [vehicleAvailabilityCache.branchId],
+    references: [branches.id],
+    relationName: "branchAvailability",
+  }),
+}));
+
+export const insertVehicleAvailabilityCacheSchema = createInsertSchema(vehicleAvailabilityCache).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastSyncedAt: true,
+});
+
+export type InsertVehicleAvailabilityCache = z.infer<typeof insertVehicleAvailabilityCacheSchema>;
+export type VehicleAvailabilityCache = typeof vehicleAvailabilityCache.$inferSelect;
+
+// ===========================
+// System Settings Table (Settings Matrix)
+// ===========================
+
+export const systemSettingsScopeEnum = pgEnum("system_settings_scope", ["GLOBAL", "BRANCH", "ORGANIZATION"]);
+
+export const systemSettings = pgTable("system_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  scopeType: varchar("scope_type", { length: 16 }).notNull().default("GLOBAL"),
+  scopeId: varchar("scope_id", { length: 50 }),
+  key: varchar("key", { length: 128 }).notNull(),
+  value: text("value"),
+  valueType: varchar("value_type", { length: 20 }).notNull().default("string"),
+  category: varchar("category", { length: 64 }).notNull().default("general"),
+  labelEn: varchar("label_en", { length: 255 }),
+  labelAr: varchar("label_ar", { length: 255 }),
+  descriptionEn: text("description_en"),
+  descriptionAr: text("description_ar"),
+  isRequired: boolean("is_required").notNull().default(false),
+  isReadOnly: boolean("is_read_only").notNull().default(false),
+  validationRules: jsonb("validation_rules").$type<{
+    min?: number;
+    max?: number;
+    pattern?: string;
+    options?: string[];
+  }>(),
+  defaultValue: text("default_value"),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+  updatedBy: varchar("updated_by", { length: 50 }).references(() => users.id),
+}, (table) => [
+  index("idx_system_settings_scope").on(table.scopeType, table.scopeId),
+  index("idx_system_settings_key").on(table.key),
+  index("idx_system_settings_category").on(table.category),
+  uniqueIndex("idx_system_settings_unique").on(table.scopeType, table.scopeId, table.key),
+]);
+
+export const systemSettingsRelations = relations(systemSettings, ({ one }) => ({
+  updatedByUser: one(users, {
+    fields: [systemSettings.updatedBy],
+    references: [users.id],
+    relationName: "settingsUpdatedBy",
+  }),
+}));
+
+export const insertSystemSettingsSchema = createInsertSchema(systemSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSystemSettings = z.infer<typeof insertSystemSettingsSchema>;
+export type SystemSettings = typeof systemSettings.$inferSelect;
 
 // ===========================
 // Predictive Report Response Types

@@ -59,19 +59,18 @@ router.post("/contracts/:id/deposit", isAuthenticated, requireEditor, async (req
     
     await createAuditLog(userId, 'payment', contract.id, req, `Recorded deposit payment of ${contract.securityDeposit || '0'} ${currency} for contract #${contract.contractNumber}`);
     
-    // Send payment received notification (non-blocking)
+    // Send security deposit received notification (non-blocking)
     const customer = await storage.getCustomer(contract.customerId);
     if (customer) {
-      triggerNotification('payment_received', {
+      triggerNotification('SECURITY_DEPOSIT_RECEIVED', {
         customerName: customer.nameEn || customer.nameAr || 'Customer',
         mobile: customer.phone,
         email: customer.email,
         language: customer.preferredLanguage || 'en',
       }, {
         contractNumber: contract.contractNumber.toString(),
-        paymentAmount: payment.amount,
-        paymentMethod: payment.paymentMethod,
-        currency: payment.currency,
+        depositAmount: contract.securityDeposit || '0',
+        receiptNumber: payment.id.toString(),
         companyName: settings.companyNameEn || 'KarāraOS',
       }).catch(err => console.error('[Payment] Deposit notification failed:', err));
     }
@@ -155,6 +154,7 @@ router.post("/contracts/:id/final-payment", isAuthenticated, requireEditor, asyn
 /**
  * POST /api/contracts/:id/refund
  * Record deposit refund (Legacy route)
+ * Note: Refunds are blocked for contracts with pending accident claims
  */
 router.post("/contracts/:id/refund", isAuthenticated, requireEditor, async (req: any, res) => {
   try {
@@ -163,6 +163,27 @@ router.post("/contracts/:id/refund", isAuthenticated, requireEditor, async (req:
     
     if (!contract) {
       return res.status(404).json({ message: "Contract not found" });
+    }
+    
+    // Block refunds for contracts with pending accident claims
+    if (contract.status === 'completed_pending_accident') {
+      return res.status(400).json({ 
+        message: "Deposit refund is blocked - contract has pending accident claims. Clear the accident claim before processing refund." 
+      });
+    }
+    
+    // Block refunds if not completed
+    if (contract.status !== 'completed') {
+      return res.status(400).json({ 
+        message: `Deposit refund can only be processed for completed contracts. Current status: ${contract.status}` 
+      });
+    }
+    
+    // Block if already refunded
+    if (contract.depositRefunded) {
+      return res.status(400).json({ 
+        message: "Deposit has already been refunded for this contract." 
+      });
     }
     
     const { method } = req.body;
@@ -182,9 +203,32 @@ router.post("/contracts/:id/refund", isAuthenticated, requireEditor, async (req:
       createdBy: userId,
     } as any);
     
+    // Update contract to mark deposit as refunded
+    await storage.updateContract(contract.id, {
+      depositRefunded: true,
+      depositRefundedDate: new Date(),
+    });
+    
     await createAuditLog(userId, 'payment', contract.id, req, `Refunded deposit of ${contract.securityDeposit || '0'} ${currency} for contract #${contract.contractNumber}`);
     
-    res.json(payment);
+    // Send deposit refund notification (non-blocking)
+    const customer = await storage.getCustomer(contract.customerId);
+    if (customer) {
+      triggerNotification('SECURITY_DEPOSIT_REFUNDED', {
+        customerName: customer.nameEn || customer.nameAr || 'Customer',
+        mobile: customer.phone,
+        email: customer.email,
+        language: customer.preferredLanguage || 'en',
+      }, {
+        contractNumber: contract.contractNumber.toString(),
+        depositAmount: contract.securityDeposit || '0',
+        deductions: '0',
+        refundAmount: contract.securityDeposit || '0',
+        companyName: settings.companyNameEn || 'KarāraOS',
+      }).catch(err => console.error('[Payment] Deposit refund notification failed:', err));
+    }
+    
+    res.json({ ...payment, depositRefunded: true, depositRefundedDate: new Date() });
   } catch (error: any) {
     console.error("Error recording refund:", error);
     res.status(400).json({ message: error.message || "Failed to record refund" });
