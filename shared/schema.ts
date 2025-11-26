@@ -1965,8 +1965,8 @@ export const vehicleInspections = pgTable("vehicle_inspections", {
   contractId: varchar("contract_id").notNull().references(() => contracts.id),
   vehicleId: varchar("vehicle_id").notNull().references(() => vehicles.id),
   
-  // Inspection Type
-  inspectionType: varchar("inspection_type", { length: 20 }).notNull(), // 'pre_delivery' or 'post_return'
+  // Inspection Type - Per Master Spec Part 2.10
+  inspectionType: varchar("inspection_type", { length: 20 }).notNull(), // checkout, return, transfer_in, transfer_out, maintenance
   
   // Inspector Information
   inspectorName: varchar("inspector_name").notNull(), // Auto-filled from logged-in user
