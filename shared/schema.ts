@@ -1351,6 +1351,12 @@ export const contracts = pgTable("contracts", {
   paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"), // pending, partial, paid, refunded
   outstandingBalance: numeric("outstanding_balance", { precision: 12, scale: 2 }), // Remaining amount to be paid
   
+  // Payment Summary - Per Master Spec Part 5.5.1
+  depositExpected: numeric("deposit_expected", { precision: 12, scale: 2 }), // Expected deposit amount
+  totalPaymentsIn: numeric("total_payments_in", { precision: 12, scale: 2 }).default("0"), // Total payments received
+  totalPaymentsOut: numeric("total_payments_out", { precision: 12, scale: 2 }).default("0"), // Total refunds/payouts
+  hasPendingIncident: boolean("has_pending_incident").default(false), // Flag for pending accidents/incidents
+  
   // Extra Charges (Phase 2) - Per Master Spec Part 5.5.1 DECIMAL(12,2) requirement
   extraKmCharge: numeric("extra_km_charge", { precision: 12, scale: 2 }), // Calculated overage charge
   extraKmDriven: integer("extra_km_driven"), // Km over the limit
