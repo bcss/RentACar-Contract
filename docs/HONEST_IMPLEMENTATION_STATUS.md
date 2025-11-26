@@ -2,43 +2,57 @@
 
 **Generated:** November 26, 2025
 **Verified via SQL:** November 26, 2025
+**Last Updated:** November 26, 2025 (4:15 AM) - 9 new lookup tables created
 **Purpose:** Transparent assessment of what's ACTUALLY implemented vs claimed
 
 ---
 
 ## VERIFIED INFRASTRUCTURE (SQL-Verified)
 
-### Database Tables: 68 VERIFIED (5 pending creation)
+### Database Tables: 76+ VERIFIED (9 new lookup tables added)
 
 **SQL Verification Command:**
 ```sql
 SELECT table_name FROM information_schema.tables WHERE table_schema='public';
 ```
 ```
-**68 Tables Verified in Database:**
+**76+ Tables Verified in Database:**
 ab_test_variants, access_logs, approval_logs, approval_requests, audit_logs,
-automated_reminders, branch_transfers, branches, campaign_recipients,
-claim_progress_updates, communication_logs, communication_providers, companies,
-company_settings, company_signatories, contract_accessories, contract_amendments,
+automated_reminders, **blacklist_entries** (NEW), branch_transfers, branches, 
+campaign_recipients, claim_progress_updates, communication_logs, communication_providers, 
+companies, company_settings, company_signatories, contract_accessories, contract_amendments,
 contract_charges, contract_counter, contract_edits, contract_status_history,
-contracts, customer_company_links, customer_risk_score_history, customer_risk_scores,
-customers, damage_assessments, document_approvals, document_registry,
+contracts, **cron_job_definitions** (NEW), customer_company_links, customer_risk_score_history, 
+customer_risk_scores, customers, damage_assessments, document_approvals, document_registry,
 driver_assignments, driver_attendance, driver_outsource_companies, driver_rate_cards,
 driver_schedule_blocks, driver_schedules, drivers, incidents, insurance_claims,
-notification_campaigns, notification_channel_preferences, notification_preferences,
+**maintenance_jobs** (NEW), notification_campaigns, notification_channel_preferences, 
+notification_preferences, **notification_purposes** (NEW), **notification_routes** (NEW),
 notification_templates, otp_logs, otp_verifications, payments, public_holidays,
 push_notification_tokens, renewal_requests, rental_rate_plans, reservations,
-sessions, sponsors, support_tickets, system_errors, system_settings, tariffs,
-template_analytics, toll_gates, toll_passes, toll_systems, traffic_fines,
-users, vehicle_accessories, vehicle_availability_cache, vehicle_inspections,
+**seasonal_tariffs** (NEW), **sequences** (NEW), sessions, sponsors, support_tickets, 
+system_errors, system_settings, tariffs, template_analytics, toll_gates, toll_passes, 
+toll_systems, traffic_fines, users, vehicle_accessories, vehicle_availability_cache, 
+**vehicle_classes** (NEW), **vehicle_groups** (NEW), vehicle_inspections, 
 vehicle_service_records, vehicles
 
-**5 Tables in Schema but NOT in Database (pending creation):**
-- digitalSignatures
-- documentFiles
-- paymentGateways
-- paymentTransactions
-- pricingRules
+**9 NEW LOOKUP TABLES (Created November 26, 2025):**
+- ✅ blacklist_entries - Proper entity blacklisting with status/reason/evidence
+- ✅ vehicle_classes - Economy/Compact/Mid-Size/Full-Size/Luxury/SUV/Van
+- ✅ vehicle_groups - Toyota Yaris Sedan/Nissan Sunny/Honda Civic etc.
+- ✅ seasonal_tariffs - Peak/off-peak pricing adjustments
+- ✅ notification_purposes - Purpose-driven notification configuration
+- ✅ notification_routes - Channel routing per purpose
+- ✅ cron_job_definitions - Database-driven scheduled jobs
+- ✅ sequences - Configurable number sequences
+- ✅ maintenance_jobs - Vehicle maintenance workflow
+
+**Tables in Schema but NOT in Database:**
+- digitalSignatures (pending)
+- documentFiles (pending)
+- paymentGateways (pending)
+- paymentTransactions (pending)
+- pricingRules (pending)
 ```
 
 ### Route Modules: 39 VERIFIED
@@ -111,21 +125,31 @@ Full UI for contracts, customers, vehicles, inspections, payments, reports, etc.
 
 ---
 
-## ALTERNATIVE IMPLEMENTATIONS (Functional but Different from Spec)
+## ALTERNATIVE IMPLEMENTATIONS → BEING REPLACED
 
-These items work but are implemented DIFFERENTLY than the Master Spec described:
+These items had alternative implementations, but proper lookup tables have now been CREATED.
+Integration work is needed to connect the new tables to the existing code.
 
-| Master Spec Says | Actual Implementation | Status |
-|------------------|----------------------|--------|
-| blacklist_entries table | blacklistStatus/blacklistReason fields on customers | ⚡ ALTERNATIVE |
-| vehicle_classes table | vehicleClassId text field on vehicles | ⚡ ALTERNATIVE |
-| vehicle_groups table | vehicleGroupId text field on vehicles | ⚡ ALTERNATIVE |
-| seasonal_tariffs table | ruleType='seasonal' in pricingRules | ⚡ ALTERNATIVE |
-| notification_purposes table | Enum values in code | ⚡ ALTERNATIVE |
-| notification_routes table | enhancedProviderSelector logic | ⚡ ALTERNATIVE |
-| cron_job_definitions table | Hardcoded in automationOrchestrator | ⚡ ALTERNATIVE |
-| sequences table | Database auto-increment | ⚡ ALTERNATIVE |
-| maintenance_jobs table | vehicleServiceRecords table | ⚡ ALTERNATIVE |
+| Master Spec Says | Old Implementation | New Table | Integration Status |
+|------------------|-------------------|-----------|-------------------|
+| blacklist_entries table | blacklistStatus/blacklistReason fields | ✅ CREATED | 🔄 Pending Integration |
+| vehicle_classes table | vehicleClassId text field | ✅ CREATED | 🔄 Pending Integration |
+| vehicle_groups table | vehicleGroupId text field | ✅ CREATED | 🔄 Pending Integration |
+| seasonal_tariffs table | ruleType='seasonal' inline | ✅ CREATED | 🔄 Pending Integration |
+| notification_purposes table | Enum values in code | ✅ CREATED | 🔄 Pending Integration |
+| notification_routes table | enhancedProviderSelector logic | ✅ CREATED | 🔄 Pending Integration |
+| cron_job_definitions table | Hardcoded in orchestrator | ✅ CREATED | 🔄 Pending Integration |
+| sequences table | contract_counter only | ✅ CREATED | 🔄 Pending Integration |
+| maintenance_jobs table | vehicle_service_records only | ✅ CREATED | 🔄 Pending Integration |
+
+### Integration Work Required
+1. **Vehicle Schema:** Update vehicles table to use FK to vehicle_classes/vehicle_groups
+2. **Notification System:** Route through notification_purposes and notification_routes
+3. **Cron Orchestrator:** Read job definitions from cron_job_definitions table
+4. **Blacklist System:** Migrate customer blacklistStatus to blacklist_entries table
+5. **Pricing:** Apply seasonal_tariffs in rate calculations
+6. **Sequences:** Use sequences table for contract/invoice number generation
+7. **Maintenance:** Replace service_records workflow with maintenance_jobs
 
 ---
 
