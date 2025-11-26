@@ -39,10 +39,21 @@ The architect tool performed a deep cross-check against the Master System Specif
 ### ❌ MISSING WORKFLOWS (Required by Master Spec Part 7)
 | Workflow | Spec Section | Description | Status |
 |----------|--------------|-------------|--------|
-| DepositService | 7.5 | Apply deposit to charges, calculate refund | ❌ NOT_IMPLEMENTED |
+| DepositService | 7.5 | Apply deposit to charges, calculate refund | ✅ IMPLEMENTED (Nov 26) |
 | Damage-to-Incident Automation | 2.4, 7.4 | Inspection comparison auto-creates incident | ❌ NOT_IMPLEMENTED |
 | COMPLETED_PENDING_ACCIDENT transition | 2.2 | State machine for accident path | ❌ NOT_IMPLEMENTED |
 | OTP IP/Device audit logging | 11.10 | Track OTP attempts with IP/device | ❌ NOT_IMPLEMENTED |
+
+### ✅ COMPLETED MIGRATIONS (November 26, 2025)
+| Migration | Spec Section | Description | Status |
+|-----------|--------------|-------------|--------|
+| driverRateCards → driverRatePlans | 4.10.2 | Code migration complete, data migration script ready | ✅ COMPLETE |
+| driverAssignments → contractDrivers | 4.10.3 | Code migration complete, data migration script ready | ✅ COMPLETE |
+| Cost breakdown in notes JSON | 4.10.3 | Surcharge/VAT stored in notes.costBreakdown | ✅ COMPLETE |
+
+**Migration Script:** `scripts/migrateLegacyDrivers.ts`
+- Run: `npx tsx scripts/migrateLegacyDrivers.ts --dry-run` (test mode)
+- Run: `npx tsx scripts/migrateLegacyDrivers.ts` (live migration)
 
 ### 📊 OVERALL SPEC COMPLIANCE
 - **Tables:** 76 implemented / 84 required = **~90%** (8 missing)
