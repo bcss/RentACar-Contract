@@ -1584,12 +1584,60 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Vehicle inspection operations
+  // Creates inspection and atomically updates contract lifecycle fields for checkout/return types
+  // Uses database transaction to ensure atomicity - Per Master Spec Part 3
   async createVehicleInspection(inspectionData: InsertVehicleInspection & { createdBy: string }): Promise<VehicleInspection> {
-    const [inspection] = await db
-      .insert(vehicleInspections)
-      .values([inspectionData])
-      .returning();
-    return inspection;
+    const result = await db.transaction(async (tx) => {
+      // Step 1: Insert the inspection record
+      const [inspection] = await tx
+        .insert(vehicleInspections)
+        .values([inspectionData])
+        .returning();
+      
+      // Step 2: Atomically update contract lifecycle fields based on inspection type
+      // Per Master Spec Part 3 - first-handover semantics
+      // Both insert and update must succeed for the transaction to commit
+      if (inspection.contractId && inspection.inspectionType) {
+        const inspectionTime = inspection.createdAt || new Date();
+        
+        if (inspection.inspectionType === 'checkout') {
+          // Update checkout lifecycle with RETURNING to verify success
+          const [updatedContract] = await tx
+            .update(contracts)
+            .set({
+              vehicleCheckoutAt: sql`COALESCE(${contracts.vehicleCheckoutAt}, ${inspectionTime})`,
+              lastCheckoutInspectionId: inspection.id,
+              updatedAt: new Date(),
+            })
+            .where(eq(contracts.id, inspection.contractId))
+            .returning({ id: contracts.id, vehicleCheckoutAt: contracts.vehicleCheckoutAt });
+          
+          if (!updatedContract) {
+            throw new Error(`Failed to update contract lifecycle for checkout inspection. Contract ${inspection.contractId} not found.`);
+          }
+        } else if (inspection.inspectionType === 'return') {
+          // Update return lifecycle with RETURNING to verify success
+          const [updatedContract] = await tx
+            .update(contracts)
+            .set({
+              vehicleReturnedAt: sql`COALESCE(${contracts.vehicleReturnedAt}, ${inspectionTime})`,
+              lastReturnInspectionId: inspection.id,
+              updatedAt: new Date(),
+            })
+            .where(eq(contracts.id, inspection.contractId))
+            .returning({ id: contracts.id, vehicleReturnedAt: contracts.vehicleReturnedAt });
+          
+          if (!updatedContract) {
+            throw new Error(`Failed to update contract lifecycle for return inspection. Contract ${inspection.contractId} not found.`);
+          }
+        }
+      }
+      
+      // Return inspection - transaction commits only if all operations succeed
+      return inspection;
+    });
+    
+    return result;
   }
 
   async getVehicleInspectionsByContract(contractId: string): Promise<VehicleInspection[]> {

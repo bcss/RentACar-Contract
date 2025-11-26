@@ -1431,18 +1431,17 @@ router.post("/:id/cancel", isAuthenticated, async (req: any, res) => {
       return res.status(404).json({ message: "Contract not found" });
     }
     
-    // Per Master Spec: Cancellation allowed for:
+    // Per Master Spec Part 3: Cancellation allowed for:
     // 1. DRAFT contracts - always cancellable
-    // 2. ACTIVE contracts - only before vehicle handover (no checkout inspection completed)
+    // 2. ACTIVE contracts - only before vehicle handover (vehicleCheckoutAt not set)
     if (contract.status === 'draft') {
       // Draft contracts can always be cancelled
     } else if (contract.status === 'active') {
       // Active contracts can only be cancelled before vehicle handover
-      // Check if a checkout inspection exists for this contract
-      const checkoutInspection = await storage.getContractCheckoutInspection(req.params.id);
-      if (checkoutInspection) {
+      // Check lifecycle field instead of querying inspections table - Per Master Spec Part 3
+      if (contract.vehicleCheckoutAt) {
         return res.status(400).json({ 
-          message: "Cannot cancel contract after vehicle handover. A checkout inspection has been completed for this contract." 
+          message: "Cannot cancel contract after vehicle handover. The vehicle checkout was completed and recorded." 
         });
       }
     } else {
