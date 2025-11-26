@@ -390,8 +390,8 @@ class AvailabilityEngine {
             inArray(contracts.status, ['reserved', 'active']),
             or(
               and(
-                lte(contracts.startDate, endDate),
-                gte(contracts.endDate, startDate)
+                lte(contracts.rentalStartDate, endDate),
+                gte(contracts.rentalEndDate, startDate)
               )
             )
           )
@@ -406,8 +406,8 @@ class AvailabilityEngine {
         let relatedEntityId: string | null = null;
 
         for (const contract of activeContracts) {
-          const contractStart = new Date(contract.startDate);
-          const contractEnd = new Date(contract.endDate);
+          const contractStart = new Date(contract.rentalStartDate);
+          const contractEnd = new Date(contract.rentalEndDate);
 
           if (date >= contractStart && date <= contractEnd) {
             status = contract.status === 'reserved' ? 'reserved' : 'rented';
@@ -487,8 +487,8 @@ class AvailabilityEngine {
         .where(
           and(
             inArray(contracts.status, ['active']),
-            lte(contracts.startDate, today),
-            gte(contracts.endDate, today)
+            lte(contracts.rentalStartDate, today),
+            gte(contracts.rentalEndDate, today)
           )
         );
 

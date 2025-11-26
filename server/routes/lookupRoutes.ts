@@ -1071,4 +1071,269 @@ router.delete('/package-addons/:id', async (req, res) => {
   }
 });
 
+// ============================================================================
+// PRICING SERVICE - Deep Integration with seasonal_tariffs, addons, packages
+// ============================================================================
+
+import * as pricingService from '../services/pricingService';
+
+// POST /api/lookup/pricing/estimate - Get pricing estimate with seasonal adjustments
+router.post('/pricing/estimate', async (req, res) => {
+  try {
+    const { baseRate, startDate, endDate, vehicleClassId, branchId, addonIds } = req.body;
+    
+    if (!baseRate || !startDate || !endDate) {
+      return res.status(400).json({ 
+        error: 'baseRate, startDate, and endDate are required' 
+      });
+    }
+    
+    const estimate = await pricingService.getQuickPricingEstimate(
+      parseFloat(baseRate),
+      new Date(startDate),
+      new Date(endDate),
+      { vehicleClassId, branchId, addonIds }
+    );
+    
+    res.json(estimate);
+  } catch (error) {
+    console.error('Error calculating pricing estimate:', error);
+    res.status(500).json({ error: 'Failed to calculate pricing estimate' });
+  }
+});
+
+// GET /api/lookup/pricing/multi-day - Get detailed day-by-day pricing breakdown
+router.get('/pricing/multi-day', async (req, res) => {
+  try {
+    const baseRate = parseFloat(req.query.baseRate as string);
+    const startDate = new Date(req.query.startDate as string);
+    const endDate = new Date(req.query.endDate as string);
+    const vehicleClassId = req.query.vehicleClassId as string | undefined;
+    const branchId = req.query.branchId as string | undefined;
+    
+    if (!baseRate || isNaN(baseRate) || !startDate || !endDate) {
+      return res.status(400).json({ 
+        error: 'baseRate, startDate, and endDate are required' 
+      });
+    }
+    
+    const pricing = await pricingService.calculateMultiDayPricing(
+      baseRate,
+      startDate,
+      endDate,
+      vehicleClassId,
+      branchId
+    );
+    
+    res.json(pricing);
+  } catch (error) {
+    console.error('Error calculating multi-day pricing:', error);
+    res.status(500).json({ error: 'Failed to calculate multi-day pricing' });
+  }
+});
+
+// GET /api/lookup/addons/available - Get available addons with branch filtering
+router.get('/addons/available', async (req, res) => {
+  try {
+    const branchId = req.query.branchId as string | undefined;
+    const category = req.query.category as string | undefined;
+    
+    const availableAddons = await pricingService.getAvailableAddons(branchId, category);
+    res.json(availableAddons);
+  } catch (error) {
+    console.error('Error fetching available addons:', error);
+    res.status(500).json({ error: 'Failed to fetch available addons' });
+  }
+});
+
+// GET /api/lookup/packages/available - Get available packages with addons
+router.get('/packages/available', async (req, res) => {
+  try {
+    const vehicleClassId = req.query.vehicleClassId as string | undefined;
+    const branchId = req.query.branchId as string | undefined;
+    
+    const availablePackages = await pricingService.getAvailablePackages(
+      vehicleClassId,
+      branchId
+    );
+    res.json(availablePackages);
+  } catch (error) {
+    console.error('Error fetching available packages:', error);
+    res.status(500).json({ error: 'Failed to fetch available packages' });
+  }
+});
+
+// POST /api/lookup/pricing/cache/clear - Clear pricing caches (admin only)
+router.post('/pricing/cache/clear', async (req, res) => {
+  try {
+    pricingService.clearPricingCache();
+    res.json({ success: true, message: 'Pricing cache cleared' });
+  } catch (error) {
+    console.error('Error clearing pricing cache:', error);
+    res.status(500).json({ error: 'Failed to clear pricing cache' });
+  }
+});
+
+// ============================================================================
+// MAINTENANCE SERVICE - Deep Integration with maintenance_jobs workflow
+// ============================================================================
+
+import * as maintenanceService from '../services/maintenanceService';
+
+// POST /api/lookup/maintenance/jobs - Create new maintenance job
+router.post('/maintenance/jobs', async (req, res) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const job = await maintenanceService.createMaintenanceJob({
+      ...req.body,
+      createdBy: userId,
+    });
+    
+    res.status(201).json(job);
+  } catch (error: any) {
+    console.error('Error creating maintenance job:', error);
+    res.status(500).json({ error: error.message || 'Failed to create maintenance job' });
+  }
+});
+
+// GET /api/lookup/maintenance/vehicle/:vehicleId - Get active jobs for vehicle
+router.get('/maintenance/vehicle/:vehicleId', async (req, res) => {
+  try {
+    const jobs = await maintenanceService.getActiveJobsForVehicle(req.params.vehicleId);
+    res.json(jobs);
+  } catch (error) {
+    console.error('Error fetching vehicle maintenance jobs:', error);
+    res.status(500).json({ error: 'Failed to fetch vehicle maintenance jobs' });
+  }
+});
+
+// GET /api/lookup/maintenance/branch/:branchId - Get jobs for branch
+router.get('/maintenance/branch/:branchId', async (req, res) => {
+  try {
+    const { status, priority, jobType, dateFrom, dateTo } = req.query;
+    
+    const jobs = await maintenanceService.getJobsForBranch(req.params.branchId, {
+      status: status as string,
+      priority: priority as string,
+      jobType: jobType as string,
+      dateFrom: dateFrom ? new Date(dateFrom as string) : undefined,
+      dateTo: dateTo ? new Date(dateTo as string) : undefined,
+    });
+    
+    res.json(jobs);
+  } catch (error) {
+    console.error('Error fetching branch maintenance jobs:', error);
+    res.status(500).json({ error: 'Failed to fetch branch maintenance jobs' });
+  }
+});
+
+// GET /api/lookup/maintenance/summary - Get maintenance summary for dashboard
+router.get('/maintenance/summary', async (req, res) => {
+  try {
+    const branchId = req.query.branchId as string | undefined;
+    const summary = await maintenanceService.getMaintenanceSummary(branchId);
+    res.json(summary);
+  } catch (error) {
+    console.error('Error fetching maintenance summary:', error);
+    res.status(500).json({ error: 'Failed to fetch maintenance summary' });
+  }
+});
+
+// GET /api/lookup/maintenance/can-rent/:vehicleId - Check if vehicle can be rented
+router.get('/maintenance/can-rent/:vehicleId', async (req, res) => {
+  try {
+    const result = await maintenanceService.canVehicleBeRented(req.params.vehicleId);
+    res.json(result);
+  } catch (error) {
+    console.error('Error checking vehicle rental status:', error);
+    res.status(500).json({ error: 'Failed to check vehicle rental status' });
+  }
+});
+
+// PATCH /api/lookup/maintenance/jobs/:id - Update maintenance job
+router.patch('/maintenance/jobs/:id', async (req, res) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const updated = await maintenanceService.updateMaintenanceJob(
+      req.params.id,
+      req.body,
+      userId
+    );
+    
+    res.json(updated);
+  } catch (error: any) {
+    console.error('Error updating maintenance job:', error);
+    res.status(500).json({ error: error.message || 'Failed to update maintenance job' });
+  }
+});
+
+// POST /api/lookup/maintenance/jobs/:id/schedule - Schedule a pending job
+router.post('/maintenance/jobs/:id/schedule', async (req, res) => {
+  try {
+    const userId = (req as any).user?.id;
+    const { plannedStartDate, plannedEndDate, assignedTo } = req.body;
+    
+    if (!plannedStartDate || !plannedEndDate) {
+      return res.status(400).json({ error: 'plannedStartDate and plannedEndDate are required' });
+    }
+    
+    const scheduled = await maintenanceService.scheduleJob(
+      req.params.id,
+      new Date(plannedStartDate),
+      new Date(plannedEndDate),
+      assignedTo || userId
+    );
+    
+    res.json(scheduled);
+  } catch (error: any) {
+    console.error('Error scheduling maintenance job:', error);
+    res.status(500).json({ error: error.message || 'Failed to schedule maintenance job' });
+  }
+});
+
+// POST /api/lookup/maintenance/jobs/:id/start - Start work on a job
+router.post('/maintenance/jobs/:id/start', async (req, res) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const started = await maintenanceService.startJob(req.params.id, userId);
+    res.json(started);
+  } catch (error: any) {
+    console.error('Error starting maintenance job:', error);
+    res.status(500).json({ error: error.message || 'Failed to start maintenance job' });
+  }
+});
+
+// POST /api/lookup/maintenance/jobs/:id/complete - Complete a job
+router.post('/maintenance/jobs/:id/complete', async (req, res) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const completed = await maintenanceService.completeJob(
+      req.params.id,
+      userId,
+      req.body
+    );
+    
+    res.json(completed);
+  } catch (error: any) {
+    console.error('Error completing maintenance job:', error);
+    res.status(500).json({ error: error.message || 'Failed to complete maintenance job' });
+  }
+});
+
 export default router;

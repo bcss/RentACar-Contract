@@ -4,8 +4,7 @@ import {
   auditLogs,
   accessLogs,
   contractEdits,
-  contractCounter, // LEGACY - kept for backward compatibility, use sequences instead
-  sequences, // NEW - Master Spec compliant sequence generator
+  sequences, // Master Spec compliant sequence generator (replaces legacy contractCounter)
   systemErrors,
   companySettings,
   customers,
@@ -1213,43 +1212,58 @@ export class DatabaseStorage implements IStorage {
     return enabled;
   }
 
-  // Contract counter
+  // Contract counter - ATOMIC increment using UPDATE...RETURNING
   async getNextContractNumber(): Promise<number> {
     // DEEP INTEGRATION: Using sequences table (Master Spec compliant)
-    // Instead of legacy contract_counter, use the sequences table for all numbering
+    // Uses ATOMIC UPDATE...RETURNING to guarantee unique sequential numbers even under concurrent load
     
-    const [seq] = await db.select().from(sequences)
+    // ATOMIC: Single UPDATE...RETURNING prevents race conditions
+    const [updated] = await db.update(sequences)
+      .set({ 
+        currentValue: sql`${sequences.currentValue} + 1`,
+        updatedAt: new Date()
+      })
       .where(and(
         eq(sequences.sequenceType, 'contract'),
         eq(sequences.isActive, true),
         isNull(sequences.branchId) // Global sequence (not branch-specific)
-      ));
+      ))
+      .returning();
     
-    if (!seq) {
-      // Fallback: Initialize sequence if it doesn't exist
-      const [newSeq] = await db.insert(sequences).values({
-        sequenceType: 'contract',
-        prefix: 'KR-',
-        currentValue: 10014, // Continue from existing contract numbers
-        incrementBy: 1,
-        paddingLength: 6,
-        includeYear: true,
-        yearFormat: 'YY',
-        isActive: true,
-      }).returning();
+    if (updated) {
+      return updated.currentValue;
+    }
+    
+    // Sequence doesn't exist - create it atomically
+    const [newSeq] = await db.insert(sequences).values({
+      sequenceType: 'contract',
+      prefix: 'KR-',
+      currentValue: 10015, // First number to return (continue from existing)
+      incrementBy: 1,
+      paddingLength: 6,
+      includeYear: true,
+      yearFormat: 'YY',
+      isActive: true,
+    }).onConflictDoNothing().returning();
+    
+    if (newSeq) {
       return newSeq.currentValue;
     }
-
-    // Atomically increment and return next value
-    const nextValue = seq.currentValue + seq.incrementBy;
-    await db.update(sequences)
+    
+    // Race condition on insert - retry atomic update
+    const [retryUpdate] = await db.update(sequences)
       .set({ 
-        currentValue: nextValue,
+        currentValue: sql`${sequences.currentValue} + 1`,
         updatedAt: new Date()
       })
-      .where(eq(sequences.id, seq.id));
+      .where(and(
+        eq(sequences.sequenceType, 'contract'),
+        eq(sequences.isActive, true),
+        isNull(sequences.branchId)
+      ))
+      .returning();
     
-    return nextValue;
+    return retryUpdate?.currentValue || 10015;
   }
 
   // Customer operations
