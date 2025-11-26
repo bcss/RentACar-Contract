@@ -425,74 +425,71 @@ async function executeCacheValidation(): Promise<void> {
 
 /**
  * RESERVATION_AUTO_EXPIRY - Reservation Auto-Expiry
+ * Per Master Spec §3.24 - Expires unclaimed reservations
  */
 async function executeReservationAutoExpiry(): Promise<void> {
   console.log('[Automation] Starting reservation auto-expiry check...');
+  
+  try {
+    // Import reservation service dynamically to avoid circular dependencies
+    const { reservationService } = await import('./reservationService');
+    
+    // Expire unclaimed reservations (24 hour grace period)
+    const result = await reservationService.expireUnclaimed(24);
+    
+    if (result.success) {
+      console.log(`[Automation] Reservation expiry check complete: ${result.expiredCount} reservations expired`);
+    } else {
+      console.error(`[Automation] Reservation expiry check failed: ${result.error}`);
+    }
+  } catch (error) {
+    console.error('[Automation] Reservation expiry job error:', error);
+  }
+
+  // Also clean up stale draft contracts (existing logic)
+  console.log('[Automation] Starting stale draft contract cleanup...');
   const allContracts = await storage.getAllContracts();
-  const reservations = allContracts.filter(c => c.status === 'draft');
+  const draftContracts = allContracts.filter(c => c.status === 'draft');
   
   const now = new Date();
   let expiredCount = 0;
   let errorCount = 0;
   
-  for (const reservation of reservations) {
+  for (const contract of draftContracts) {
     try {
-      const startDate = new Date(reservation.rentalStartDate);
+      const startDate = new Date(contract.rentalStartDate);
       const hoursSinceStart = (now.getTime() - startDate.getTime()) / (1000 * 60 * 60);
       
+      // Expire draft contracts that haven't been activated within 24 hours of start date
       if (hoursSinceStart > 24) {
-        await storage.updateContract(reservation.id, {
+        await storage.updateContract(contract.id, {
           status: 'cancelled',
-          closureRemark: 'Auto-expired: Reservation not activated within 24 hours of start date',
+          closureRemark: 'Auto-expired: Draft contract not activated within 24 hours of start date',
         });
         
-        if (reservation.vehicleId) {
+        if (contract.vehicleId) {
           try {
             await availabilityEngine.handleContractClosure(
-              reservation.vehicleId,
-              new Date(reservation.rentalStartDate),
-              new Date(reservation.rentalEndDate),
-              reservation.id
+              contract.vehicleId,
+              new Date(contract.rentalStartDate),
+              new Date(contract.rentalEndDate),
+              contract.id
             );
           } catch (cacheError) {
-            console.warn(`[Automation] Cache update failed for reservation ${reservation.contractNumber}:`, cacheError);
+            console.warn(`[Automation] Cache update failed for contract ${contract.contractNumber}:`, cacheError);
           }
-        }
-        
-        try {
-          const customer = await storage.getCustomerById(reservation.customerId);
-          if (customer) {
-            await notificationService.sendNotification({
-              templateCode: 'RESERVATION_EXPIRED',
-              channel: 'both',
-              recipientType: 'customer',
-              recipientId: customer.id,
-              variables: {
-                contractNumber: reservation.contractNumber.toString(),
-                customerName: customer.nameEn || '',
-                startDate: startDate.toLocaleDateString('en-AE'),
-              },
-              language: 'en',
-              triggerType: 'automated',
-              triggeredBy: 'system',
-              entityType: 'contract',
-              entityId: reservation.id,
-            });
-          }
-        } catch (notifError) {
-          console.warn(`[Automation] Notification failed for reservation ${reservation.contractNumber}:`, notifError);
         }
         
         expiredCount++;
-        console.log(`[Automation] Expired reservation ${reservation.contractNumber}`);
+        console.log(`[Automation] Expired stale draft contract ${contract.contractNumber}`);
       }
     } catch (expireError) {
       errorCount++;
-      console.error(`[Automation] Failed to expire reservation ${reservation.contractNumber}:`, expireError);
+      console.error(`[Automation] Failed to expire draft contract ${contract.contractNumber}:`, expireError);
     }
   }
   
-  console.log(`[Automation] Reservation expiry check complete: ${expiredCount} reservations expired, ${errorCount} errors`);
+  console.log(`[Automation] Stale draft cleanup complete: ${expiredCount} contracts expired, ${errorCount} errors`);
 }
 
 // =====================================================
