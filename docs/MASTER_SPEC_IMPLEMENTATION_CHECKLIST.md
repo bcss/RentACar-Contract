@@ -19,11 +19,11 @@
 ## 1.2 v1 Production Release Scope
 - 🔄 Full operational contract lifecycle (4-state workflow implemented, lifecycle tracking added)
 - 🔄 OTP-based digital signing (3-minute expiry, rate limiting) (schema ready)
-- 🔄 Payment confirmations (mandatory for every payment)
+- ✅ Payment confirmations (mandatory for every payment - triggerNotification, Nov 26, 2025)
 - 🔄 Real-time fleet availability across branches
 - ✅ Vehicle inspections (checkout + return) - with atomic lifecycle updates
-- 🔄 Damage detection + incident initiation
-- 🔄 Excess collection + deposit application
+- ✅ Damage detection + incident initiation (return inspection auto-creates incidents, Nov 26, 2025)
+- ✅ Excess collection + deposit application (closeContract with deposit calc, Nov 26, 2025)
 - ✅ Branch transfers & maintenance (schema + routes complete)
 - ✅ Operational reports & dashboards (18 report routes)
 - ✅ Notification framework with provider fallback (Twilio/SendGrid/Gmail)
@@ -126,7 +126,7 @@
 
 ### When Damage Found
 - ✅ Contract → COMPLETED_PENDING_ACCIDENT (status exists in schema)
-- 🔄 New incident record created automatically (incidents table exists, trigger needed)
+- ✅ New incident record created automatically (Nov 26, 2025 - atomic transaction in return inspection)
 - 🔄 Excess workflow triggered (schema ready, workflow needed)
 - ✅ Insurance claim created (if applicable) (insuranceClaims table exists)
 - ✅ Incident type classification (schema: incidentType - accident, theft, damage, breakdown)
@@ -151,8 +151,8 @@
 
 ### Distance Calculation
 - ✅ distance = odoIn - odoOut calculation (schema: odometerStart, odometerEnd)
-- 🔄 Tariff entitlements for free KM (schema ready, logic needed)
-- 🔄 Extra km fees applied (schema: extraKmCharge, logic needed)
+- ✅ Tariff entitlements for free KM (mileageLimit field on contracts, Nov 26, 2025)
+- ✅ Extra km fees applied (calculateExtraKmFee service function, Nov 26, 2025)
 
 ### Fuel Calculation
 - ✅ Price per litre from settings (companySettings exists)
@@ -179,21 +179,21 @@
 - ✅ Multiple payments allowed (payments table supports multiple per contract)
 - ✅ Partial payments allowed (schema supports)
 - ✅ Refunds supported (schema: refunds table exists)
-- 🔄 Payment must generate payment confirmation notification (template exists, trigger needed)
+- ✅ Payment must generate payment confirmation notification (triggerNotification in paymentRoutes, Nov 26, 2025)
 
 ### Deposit Workflow
 - ✅ Pre-auth mode supported (schema: depositPaid, depositPaidDate, depositPaidMethod)
 - ✅ Full-charge mode supported (schema: securityDeposit field)
-- 🔄 Applied to charges at closure (logic needed)
+- ✅ Applied to charges at closure (closeContract with deposit calculation, Nov 26, 2025)
 - ✅ Remaining refunded (schema: depositRefunded, depositRefundedDate)
 
-### Payment Confirmation Includes
-- ⬜ Amount
-- ⬜ Method
-- ⬜ Date
-- ⬜ Contract number
-- ⬜ Outstanding balance
-- ⬜ Mandatory for every payment
+### Payment Confirmation Includes (via notificationTrigger service)
+- ✅ Amount (template variable: amount)
+- ✅ Method (template variable: paymentMethod)
+- ✅ Date (template variable: paymentDate)
+- ✅ Contract number (template variable: contractNumber)
+- ✅ Outstanding balance (template variable: outstandingBalance)
+- ✅ Mandatory for every payment (triggerNotification called on all payment routes, Nov 26, 2025)
 
 ## 2.8 Sponsors & Liability
 
