@@ -1507,13 +1507,83 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   depositPaidDate: z.coerce.date().optional(),
   depositRefundedDate: z.coerce.date().optional(),
   finalPaymentDate: z.coerce.date().optional(),
-}).refine((data) => {
+}).superRefine((data, ctx) => {
   // Phase 1: Date validations
   // Rental end date must be after start date
-  return data.rentalEndDate >= data.rentalStartDate;
-}, {
-  message: "Rental end date must be on or after start date",
-  path: ["rentalEndDate"],
+  if (data.rentalEndDate < data.rentalStartDate) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Rental end date must be on or after start date",
+      path: ["rentalEndDate"],
+    });
+  }
+  
+  // Phase 2: Party-Type Validation - Per Master Spec Part 2.1
+  // Validates hirer/sponsor/company combinations based on hirerType
+  const hirerType = data.hirerType || "direct";
+  
+  switch (hirerType) {
+    case "direct":
+      // DIRECT_HIRER: Hirer required (customerId), Sponsor MUST BE EMPTY, Company MUST BE EMPTY
+      if (data.sponsorId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Direct hirer contracts cannot have a sponsor. Remove sponsorId or change hirerType to 'with_sponsor'.",
+          path: ["sponsorId"],
+        });
+      }
+      if (data.companySponsorId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Direct hirer contracts cannot have a company sponsor. Remove companySponsorId or change hirerType to 'from_company'.",
+          path: ["companySponsorId"],
+        });
+      }
+      break;
+      
+    case "with_sponsor":
+      // SPONSORED_INDIVIDUAL: Hirer required, Sponsor required, Company MUST BE EMPTY
+      if (!data.sponsorId && !data.sponsorName) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Sponsored individual contracts require a sponsor. Provide sponsorId or sponsor details.",
+          path: ["sponsorId"],
+        });
+      }
+      if (data.companySponsorId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Sponsored individual contracts cannot have a company sponsor. Remove companySponsorId or change hirerType to 'from_company'.",
+          path: ["companySponsorId"],
+        });
+      }
+      break;
+      
+    case "from_company":
+      // SPONSORED_COMPANY: Hirer required (driver info), Sponsor MUST BE EMPTY, Company required
+      if (!data.companySponsorId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company contracts require a company sponsor. Provide companySponsorId.",
+          path: ["companySponsorId"],
+        });
+      }
+      if (data.sponsorId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company contracts cannot have an individual sponsor. Remove sponsorId or change hirerType to 'with_sponsor'.",
+          path: ["sponsorId"],
+        });
+      }
+      break;
+      
+    default:
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Invalid hirerType: ${hirerType}. Must be 'direct', 'with_sponsor', or 'from_company'.`,
+        path: ["hirerType"],
+      });
+  }
 });
 
 export type InsertContract = z.infer<typeof insertContractSchema>;
@@ -1986,6 +2056,10 @@ export const vehicleInspections = pgTable("vehicle_inspections", {
   odometerReading: integer("odometer_reading").notNull(),
   fuelLevel: integer("fuel_level").notNull(), // 0-100%
   conditionNotes: text("condition_notes"), // Damage description
+  
+  // Damage Detection - Per Master Spec Part 2.4
+  newDamagesFound: boolean("new_damages_found").notNull().default(false), // True if new damages detected vs checkout
+  damageSeverity: varchar("damage_severity", { length: 20 }), // minor, moderate, major, total_loss
   
   // Photos - JSONB array of {angle: string, data: string (base64)}
   // Angles: 'front', 'back', 'left', 'right', 'top', 'dashboard'

@@ -1616,19 +1616,50 @@ export class DatabaseStorage implements IStorage {
             throw new Error(`Failed to update contract lifecycle for checkout inspection. Contract ${inspection.contractId} not found.`);
           }
         } else if (inspection.inspectionType === 'return') {
+          // Get the contract to check customer/vehicle details for incident creation
+          const [contract] = await tx
+            .select()
+            .from(contracts)
+            .where(eq(contracts.id, inspection.contractId))
+            .limit(1);
+          
+          if (!contract) {
+            throw new Error(`Failed to update contract lifecycle for return inspection. Contract ${inspection.contractId} not found.`);
+          }
+          
+          // Determine new status based on whether new damages were found
+          // Per Master Spec Part 2.4: When damage found, contract → COMPLETED_PENDING_ACCIDENT
+          const newStatus = inspection.newDamagesFound ? 'completed_pending_accident' : contract.status;
+          
           // Update return lifecycle with RETURNING to verify success
           const [updatedContract] = await tx
             .update(contracts)
             .set({
               vehicleReturnedAt: sql`COALESCE(${contracts.vehicleReturnedAt}, ${inspectionTime})`,
               lastReturnInspectionId: inspection.id,
+              status: newStatus,
               updatedAt: new Date(),
             })
             .where(eq(contracts.id, inspection.contractId))
-            .returning({ id: contracts.id, vehicleReturnedAt: contracts.vehicleReturnedAt });
+            .returning({ id: contracts.id, vehicleReturnedAt: contracts.vehicleReturnedAt, status: contracts.status });
           
           if (!updatedContract) {
             throw new Error(`Failed to update contract lifecycle for return inspection. Contract ${inspection.contractId} not found.`);
+          }
+          
+          // Per Master Spec Part 2.4: When damage found, create incident automatically
+          if (inspection.newDamagesFound) {
+            await tx.insert(incidents).values({
+              contractId: inspection.contractId,
+              vehicleId: inspection.vehicleId,
+              customerId: contract.customerId,
+              incidentType: 'damage',
+              severity: inspection.damageSeverity || 'minor',
+              incidentDate: inspectionTime,
+              description: inspection.conditionNotes || 'New damages detected during return inspection',
+              status: 'reported',
+              createdBy: inspection.createdBy,
+            });
           }
         }
       }
