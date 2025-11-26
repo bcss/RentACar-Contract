@@ -46,6 +46,7 @@ import importExportRoutes from "./importExportRoutes";
 import utilityRoutes from "./utilityRoutes";
 import otpRoutes from "./otpRoutes";
 import systemSettingsRoutes from "./systemSettingsRoutes";
+import lookupRoutes from "./lookupRoutes";
 
 /**
  * Register all modular routes with the Express app
@@ -128,6 +129,9 @@ export function registerModularRoutes(app: Express): void {
   // Utility & Import/Export
   app.use('/api', importExportRoutes); // Import routes at /api/import/*
   app.use('/api', utilityRoutes); // Utility routes (branding, QR, verification, performance)
+  
+  // Lookup Tables (Master Spec compliance)
+  app.use('/api/lookup', lookupRoutes); // Vehicle classes, groups, notification config, etc.
   
   // Feature routes
   app.use('/api', paymentRoutes); // Payment routes have mixed base paths
