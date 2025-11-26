@@ -18,7 +18,7 @@
 
 ## 1.2 v1 Production Release Scope
 - 🔄 Full operational contract lifecycle (4-state workflow implemented, lifecycle tracking added)
-- 🔄 OTP-based digital signing (3-minute expiry, rate limiting) (schema ready)
+- ✅ OTP-based digital signing (3-minute expiry, rate limiting) (otpService fully implemented)
 - ✅ Payment confirmations (mandatory for every payment - triggerNotification, Nov 26, 2025)
 - 🔄 Real-time fleet availability across branches
 - ✅ Vehicle inspections (checkout + return) - with atomic lifecycle updates
@@ -39,7 +39,7 @@
 - ✅ 4. Multi-Branch Intelligence - Branch boundaries with cross-branch rules
 - 🔄 5. Corporate Liability Clarity - Direct/Sponsored/Company enforcement
 - ✅ 6. Multi-Stage Inspections - Checkout before activate, return before complete (lifecycle fields added)
-- 🔄 7. OTP-Driven Authorization - Material steps require OTP (schema ready, implementation in progress)
+- ✅ 7. OTP-Driven Authorization - Material steps require OTP (otpService: 3-min expiry, rate limiting, multi-channel)
 - 🔄 8. Template Engine Reusability - One engine for all docs
 - ✅ 9. Notification First - SMS/Email confirmations for audit (30 templates, multi-provider)
 - ✅ 10. Enterprise Data Model - Future-proof tables (63+ tables, DECIMAL(12,2) financials)
@@ -269,36 +269,36 @@
 
 ## 2.13 Notifications Engine
 
-### Notification Purposes
-- ⬜ OTP
-- ⬜ Activation confirmation
-- ⬜ Completion confirmation
-- ⬜ Payment confirmation
-- ⬜ Incident creation
-- ⬜ Due reminders
-- ⬜ Overdue reminders
-- ⬜ Cron failure alerts
-- ⬜ Campaign messages
+### Notification Purposes (30 templates implemented via seedNotificationTemplates)
+- ✅ OTP (templates: otp_sms, otp_email)
+- ✅ Activation confirmation (templates: contract_activation, contract_activated)
+- ✅ Completion confirmation (templates: contract_completion)
+- ✅ Payment confirmation (templates: payment_received, SECURITY_DEPOSIT_RECEIVED)
+- ✅ Incident creation (templates: incident_notification)
+- ✅ Due reminders (templates: payment_due_reminder, contract_expiry_reminder)
+- ✅ Overdue reminders (templates: payment_overdue_reminder, contract_overdue_reminder)
+- ✅ Cron failure alerts (automationOrchestrator failure notification system)
+- ✅ Campaign messages (campaignSender service)
 
 ### Notification Channels
-- ⬜ SMS
-- ⬜ Email
-- ⬜ WhatsApp (future provision)
+- ✅ SMS (Twilio via twilioSmsProvider)
+- ✅ Email (SendGrid via sendgridEmailProvider, Gmail SMTP fallback)
+- 🔄 WhatsApp (future provision, schema ready)
 
 ### Provider Fallback
-- ⬜ SMS → Secondary SMS → Email logic
+- ✅ SMS → Secondary SMS → Email logic (enhancedProviderSelector service)
 
-## 2.14 Customer / Sponsor Profiles
+## 2.14 Customer / Sponsor Profiles (customers, sponsors tables)
 
 ### Profile Captures
-- ⬜ Full name
-- ⬜ ID numbers
-- ⬜ License details
-- ⬜ Expiry alerts
-- ⬜ EN/AR preference
-- ⬜ Notification preference
-- ⬜ Marketing opt-in
-- ⬜ DND window
+- ✅ Full name (nameEn, nameAr bilingual support)
+- ✅ ID numbers (nationalId, emiratesIdNumber, passportNumber)
+- ✅ License details (licenseNumber, licenseIssueDate, licenseExpiryDate)
+- ✅ Expiry alerts (Document Expiry Check cron job)
+- ✅ EN/AR preference (preferredLanguage field)
+- ✅ Notification preference (preferredChannel field: sms/email/both)
+- ✅ Marketing opt-in (marketingOptIn field)
+- ✅ DND window (dndStart, dndEnd fields)
 
 ## 2.15 Document Management
 
@@ -329,16 +329,16 @@
 - ⬜ Variable binding
 - ⬜ Version history
 
-## 2.17 Cron & Automation
+## 2.17 Cron & Automation (automationOrchestrator service)
 
 ### Cron Tasks
-- ⬜ Reservations expiry
-- ⬜ Overdue reminders
-- ⬜ Risk recalculation
-- ⬜ License/ID expiry reminders
-- ⬜ Cron failure watch
-- ⬜ Import job validation
-- ⬜ Availability refresh
+- ✅ Reservations expiry (11:00 AM daily - Reservation Auto-Expiry)
+- ✅ Overdue reminders (10:00 AM daily - Payment Due Reminders)
+- ✅ Risk recalculation (2:00 AM daily - Nightly Risk Score Calculation)
+- ✅ License/ID expiry reminders (8:00 AM daily - Document Expiry Check)
+- ✅ Cron failure watch (failure notification system with retry logic)
+- 🔄 Import job validation (schema ready)
+- ✅ Availability refresh (3:00 AM daily - Nightly Cache Validation)
 
 ## 2.18 Availability Engine
 
@@ -348,20 +348,20 @@
 - ⬜ Indexed queries
 - ⬜ Full multi-branch real-time view
 
-## 2.19 Dashboards & Reports
+## 2.19 Dashboards & Reports (18 report routes)
 
 ### Dashboards
-- ⬜ Fleet dashboard
-- ⬜ Contracts dashboard
-- ⬜ Financial KPIs
-- ⬜ Maintenance KPIs
+- ✅ Fleet dashboard (analyticsRoutes)
+- ✅ Contracts dashboard (reportRoutes)
+- ✅ Financial KPIs (reportRoutes)
+- ✅ Maintenance KPIs (reportRoutes)
 
-### Reports
-- ⬜ Revenue report
-- ⬜ Outstanding report
-- ⬜ Utilization report
-- ⬜ Aging report
-- ⬜ Incident summary report
+### Reports (with universal RFC 4180 CSV/PDF export)
+- ✅ Revenue report
+- ✅ Outstanding report
+- ✅ Utilization report
+- ✅ Aging report
+- ✅ Incident summary report
 
 ## 2.20 Import Engine
 
@@ -374,31 +374,31 @@
 - ⬜ Dry-run mode
 - ⬜ Full audit
 
-## 2.23 Security / RBAC
+## 2.23 Security / RBAC (users table, role-based middleware)
 
-### Roles
-- ⬜ Reception role
-- ⬜ Supervisor role
-- ⬜ Manager role
-- ⬜ Admin role
-- ⬜ Finance role
-- ⬜ HQ Administrator role
+### Roles (implemented via userRole field)
+- ✅ Reception role (viewer)
+- ✅ Supervisor role (editor)
+- ✅ Manager role (manager)
+- ✅ Admin role (admin)
+- ✅ Finance role (finance)
+- ✅ HQ Administrator role (admin with isImmutable flag)
 
 ### Scope
-- ⬜ Branch-limited access
-- ⬜ HQ global view
+- ✅ Branch-limited access (branchId on users, routeHelpers.getBranchFilter)
+- ✅ HQ global view (admin role with null branchId)
 
-## 2.24 Settings Module
+## 2.24 Settings Module (companySettings table, settingsRoutes)
 
 ### Settings Categories
-- ⬜ Tariff settings
-- ⬜ Deposit settings
-- ⬜ VAT %
-- ⬜ Contract numbering
-- ⬜ Template version selection
-- ⬜ Provider settings
-- ⬜ Notification toggles
-- ⬜ Cron toggles
+- ✅ Tariff settings (companySettings)
+- ✅ Deposit settings (companySettings)
+- ✅ VAT % (companySettings: vatRate)
+- ✅ Contract numbering (companySettings: contractNumberPrefix, autoNumbering)
+- 🔄 Template version selection (schema ready)
+- ✅ Provider settings (companySettings: twilioSid, sendgridApiKey, etc.)
+- ✅ Notification toggles (companySettings: smsEnabled, emailEnabled)
+- ✅ Cron toggles (automationOrchestrator configuration)
 
 ---
 
@@ -428,16 +428,16 @@
 - ⬜ Inspection type = CHECKOUT
 
 ## 3.3 Contract Activation (OTP Workflow)
-- ⬜ Click "Activate Contract"
-- ⬜ Verify checkout inspection present
-- ⬜ Verify deposit rule satisfied
-- ⬜ OTP sent based on party type
-- ⬜ User enters OTP
-- ⬜ OTP validated (3-minute expiry)
-- ⬜ OTP rate limiting (3 per 10 min per user)
-- ⬜ Contract status → ACTIVE
-- ⬜ Vehicle status → OUT
-- ⬜ SMS/Email confirmation of activation
+- 🔄 Click "Activate Contract" (UI needed)
+- ✅ Verify checkout inspection present (lastCheckoutInspectionId validation)
+- ✅ Verify deposit rule satisfied (depositPaid validation)
+- ✅ OTP sent based on party type (otpService.generateOTP)
+- ✅ User enters OTP (otpRoutes POST /validate)
+- ✅ OTP validated (3-minute expiry) (OTP_EXPIRY_MINUTES = 3)
+- ✅ OTP rate limiting (3 per 10 min per user) (checkRateLimit method)
+- ✅ Contract status → ACTIVE (storage.activateContract)
+- ✅ Vehicle status → OUT (vehicle status sync)
+- ✅ SMS/Email confirmation of activation (triggerNotification)
 
 ## 3.4 Vehicle Delivery Confirmation
 - ⬜ Configurable option
@@ -457,11 +457,11 @@
 - ⬜ Prompt operator for new damages
 - ⬜ Save inspection
 
-## 3.7 Damage Detection Workflow
-- ⬜ Checkout vs return images/remarks diff
-- ⬜ If new damage found: auto-create incident
-- ⬜ If new damage found: status → COMPLETED_PENDING_ACCIDENT
-- ⬜ If no damage: continue to settlement
+## 3.7 Damage Detection Workflow (Nov 26, 2025)
+- 🔄 Checkout vs return images/remarks diff (UI needed)
+- ✅ If new damage found: auto-create incident (createInspection atomic transaction)
+- ✅ If new damage found: status → COMPLETED_PENDING_ACCIDENT (inspection.newDamagesFound flag)
+- ✅ If no damage: continue to settlement (status remains COMPLETED)
 
 ## 3.8 Incident & Excess Workflow
 - ⬜ Incident record created
@@ -472,39 +472,39 @@
 - ⬜ Operator finalizes settlement when repair data arrives
 - ⬜ Contract cannot close until incident resolved
 
-## 3.9 Deposit Adjustment Workflow
-- ⬜ Compute total charges
-- ⬜ Compute deposit received
-- ⬜ Compute amount deductible from deposit
-- ⬜ Auto-apply deposit
-- ⬜ Calculate remaining deposit refund
-- ⬜ Create negative payment entry for refund
-- ⬜ Send refund confirmation
+## 3.9 Deposit Adjustment Workflow (Nov 26, 2025)
+- ✅ Compute total charges (calculateContractTotals service)
+- ✅ Compute deposit received (securityDeposit field)
+- ✅ Compute amount deductible from deposit (closeContract logic)
+- ✅ Auto-apply deposit (Outstanding = TotalDue - Deposit - Payments)
+- ✅ Calculate remaining deposit refund (refundAmount calculation)
+- ✅ Create negative payment entry for refund (refunds table)
+- ✅ Send refund confirmation (SECURITY_DEPOSIT_REFUNDED notification)
 
 ## 3.10 Balance Clearance Workflow
-- ⬜ Outstanding balance shown
-- ⬜ Operator records payment(s)
-- ⬜ Apply FIFO
-- ⬜ Update balance
-- ⬜ Send payment confirmation notifications
+- ✅ Outstanding balance shown (calculateContractTotals)
+- ✅ Operator records payment(s) (POST /api/payments)
+- ✅ Apply FIFO (payment order tracking)
+- ✅ Update balance (payment recalculation on each payment)
+- ✅ Send payment confirmation notifications (triggerNotification on payment routes)
 
-## 3.11 Contract Closure Workflow
-- ⬜ Precondition: No pending incidents
-- ⬜ Precondition: Balance = 0
-- ⬜ Precondition: Deposits adjusted
-- ⬜ Precondition: Return inspection complete
-- ⬜ Operator clicks "Close Contract"
-- ⬜ OTP (if configured)
-- ⬜ Status → CLOSED
-- ⬜ Contract becomes read-only
+## 3.11 Contract Closure Workflow (Nov 26, 2025)
+- 🔄 Precondition: No pending incidents (validation in progress)
+- ✅ Precondition: Balance = 0 (or admin override with remark)
+- ✅ Precondition: Deposits adjusted (closeContract deposit application)
+- ✅ Precondition: Return inspection complete (lastReturnInspectionId validation)
+- 🔄 Operator clicks "Close Contract" (UI needed)
+- 🔄 OTP (if configured) (otpService ready, integration in progress)
+- ✅ Status → CLOSED (storage.closeContract)
+- ✅ Contract becomes read-only (closed status prevents updates)
 
 ## 3.12 Contract Cancellation Workflow
-- ⬜ Allowed only in DRAFT or ACTIVE (before vehicle leaves)
-- ⬜ Operator clicks cancel
-- ⬜ Select reason
-- ⬜ Check vehicle status
-- ⬜ Deposit refunded if applicable
-- ⬜ Contract → CANCELLED
+- ✅ Allowed only in DRAFT or ACTIVE (before vehicle leaves) (vehicleCheckoutAt check)
+- 🔄 Operator clicks cancel (UI needed)
+- ✅ Select reason (cancellationReason field)
+- ✅ Check vehicle status (vehicleCheckoutAt lifecycle field)
+- ✅ Deposit refunded if applicable (refund logic)
+- ✅ Contract → CANCELLED (storage.cancelContract)
 
 ## 3.13 Extension Workflow
 - ⬜ Operator selects new end date/time
@@ -617,50 +617,50 @@
 - ⬜ Update availability materialized table
 
 ## 3.27 Payment Recording Workflow
-- ⬜ Operator selects payment method
-- ⬜ Inputs amount & reference
-- ⬜ Store payment
-- ⬜ Update contract balance
-- ⬜ Send payment confirmation
+- ✅ Operator selects payment method (paymentRoutes)
+- ✅ Inputs amount & reference (payment form fields)
+- ✅ Store payment (storage.createPayment)
+- ✅ Update contract balance (payment recalculation)
+- ✅ Send payment confirmation (triggerNotification)
 
-## 3.28 Payment Confirmation Flow (Mandatory)
-- ⬜ Triggered after: Payment created
-- ⬜ Triggered after: Refund created
-- ⬜ Triggered after: Deposit collected
-- ⬜ Triggered after: Excess paid
-- ⬜ Message includes: Amount, Payment type, Balance
-- ⬜ Sent via: Email (HTML)
-- ⬜ Sent via: SMS (concise)
-- ⬜ Logged in notifications table
+## 3.28 Payment Confirmation Flow (Mandatory) - Nov 26, 2025
+- ✅ Triggered after: Payment created (payment_received template)
+- ✅ Triggered after: Refund created (SECURITY_DEPOSIT_REFUNDED template)
+- ✅ Triggered after: Deposit collected (SECURITY_DEPOSIT_RECEIVED template)
+- 🔄 Triggered after: Excess paid (template ready)
+- ✅ Message includes: Amount, Payment type, Balance (template variables)
+- ✅ Sent via: Email (HTML) (sendgridEmailProvider)
+- ✅ Sent via: SMS (concise) (twilioSmsProvider)
+- ✅ Logged in notifications table (communicationLogs table)
 
 ## 3.29 Refund Workflow
-- ⬜ Operator triggers refund
-- ⬜ Refund stored as payment with negative amount
-- ⬜ Confirmation sent
-- ⬜ Contract balance updated
+- ✅ Operator triggers refund (paymentRoutes POST /refund)
+- ✅ Refund stored as payment with negative amount (refunds table)
+- ✅ Confirmation sent (SECURITY_DEPOSIT_REFUNDED notification)
+- ✅ Contract balance updated (recalculation)
 
 ## 3.30 Deposit Workflows
-- ⬜ Pre-auth mode (record only)
-- ⬜ Charge and track mode
-- ⬜ Release/refund mode
+- ✅ Pre-auth mode (record only) (depositPaid, depositPaidDate fields)
+- ✅ Charge and track mode (securityDeposit field)
+- ✅ Release/refund mode (depositRefunded, depositRefundedDate fields)
 
 ## 3.32 Notification Routing Workflow
-- ⬜ Internal module triggers notification
-- ⬜ NotificationService selects template
-- ⬜ Route via preferred channel
-- ⬜ Fallback if primary fails
-- ⬜ Record delivery status
+- ✅ Internal module triggers notification (triggerNotification service)
+- ✅ NotificationService selects template (getNotificationTemplates)
+- ✅ Route via preferred channel (preferredChannel from customer)
+- ✅ Fallback if primary fails (enhancedProviderSelector)
+- ✅ Record delivery status (communicationLogs table)
 
 ## 3.33 Provider Fallback Flow
-- ⬜ If SMS fails: Try secondary SMS
-- ⬜ If SMS fails again: Email
-- ⬜ Record fallback reason
+- ✅ If SMS fails: Try secondary SMS (providerSelector logic)
+- ✅ If SMS fails again: Email (enhancedProviderSelector cascade)
+- ✅ Record fallback reason (deliveryMetadata field)
 
 ## 3.34 Cron Failure Flow
-- ⬜ Retry on failure
-- ⬜ Mark failure count
-- ⬜ If thresholds reached: HTML alert to admins
-- ⬜ SMS fallback if email fails
+- ✅ Retry on failure (automationOrchestrator retry logic)
+- ✅ Mark failure count (error tracking)
+- ✅ If thresholds reached: HTML alert to admins (failure notification)
+- ✅ SMS fallback if email fails (multi-provider cascade)
 
 ## 3.35 Blacklist Enforcement Flow
 - ⬜ Hard block: Block contract creation/activation
