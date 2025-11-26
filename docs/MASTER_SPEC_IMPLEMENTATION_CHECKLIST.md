@@ -1,8 +1,25 @@
 # MASTER SYSTEM SPECIFICATION v1.0 — IMPLEMENTATION CHECKLIST
 
 **Created:** November 25, 2025
+**Last Verified:** November 26, 2025
 **Purpose:** Track implementation of every requirement from top to bottom
-**Status Legend:** ⬜ Not Started | 🔄 In Progress | ✅ Completed | ❌ Blocked
+**Status Legend:** ⬜ Not Started | 🔄 In Progress | ✅ Completed | ⚡ Alternative Implementation | ❌ Blocked
+
+## HONEST SUMMARY (SQL Verified - November 26, 2025)
+
+| Category | Status |
+|----------|--------|
+| Database Tables | 67 verified ✅ (5 pending schema push) |
+| Route Modules | 39 verified ✅ |
+| Service Files | 15 verified ✅ |
+| Frontend Pages | 70+ verified ✅ |
+| Core Workflows | 8/8 working ✅ |
+| Alternative Implementations | 9 items ⚡ |
+| Genuinely Missing | ~15 items ⬜ |
+
+**Missing per Master Spec:** vehicle_classes, vehicle_groups, packages, maintenance_jobs, blacklist_entries, seasonal_tariffs, notification_purposes, notification_routes, cron_job_definitions, sequences (lookup tables)
+
+**See:** `docs/HONEST_IMPLEMENTATION_STATUS.md` for detailed SQL-verified findings
 
 ---
 
@@ -775,28 +792,27 @@
 - ✅ Full name, email, phone
 - ✅ Document tracking
 
-### 4.2.4 blacklist_entries ✅ (via blacklistStatus field)
-- ✅ blacklistStatus on customers/companies
+### 4.2.4 blacklist_entries ⚡ ALTERNATIVE
+- ⚡ Uses blacklistStatus/blacklistReason fields on customers table (NOT separate table)
 - ✅ Status tracking (NONE, WATCH, SOFT, HARD)
 - ✅ Audit trail via contractEdits
+- ⬜ Dedicated blacklist_entries table NOT implemented
 
-## 4.3 Vehicle Master Data ✅ COMPLETE
+## 4.3 Vehicle Master Data ⚡ PARTIAL
 
-### 4.3.1 vehicle_classes ✅ (vehicleClasses table)
-- ✅ id SERIAL PK
-- ✅ code VARCHAR UNIQUE NOT NULL
-- ✅ name VARCHAR NOT NULL
-- ✅ description VARCHAR
+### 4.3.1 vehicle_classes ⚡ ALTERNATIVE
+- ⚡ Uses vehicleClassId TEXT field on vehicles (NOT a lookup table)
+- ⬜ Dedicated vehicle_classes table NOT implemented
+- ⬜ No CRUD UI for vehicle classes management
 
-### 4.3.2 vehicle_groups ✅ (vehicleCategories table)
-- ✅ id SERIAL PK
-- ✅ code VARCHAR UNIQUE NOT NULL
-- ✅ name VARCHAR NOT NULL
-- ✅ description VARCHAR
+### 4.3.2 vehicle_groups ⚡ ALTERNATIVE
+- ⚡ Uses vehicleGroupId TEXT field on vehicles (NOT a lookup table)
+- ⬜ Dedicated vehicle_groups table NOT implemented
+- ⬜ No CRUD UI for vehicle groups management
 
 ### 4.3.3 vehicles ✅
-- ✅ vehicleClassId FK
-- ✅ categoryId FK (vehicleCategories)
+- ⚡ vehicleClassId (TEXT field, not FK to lookup table)
+- ⚡ vehicleGroupId (TEXT field, not FK to lookup table)
 - ✅ plateNumber VARCHAR UNIQUE NOT NULL
 - ✅ vinNumber VARCHAR UNIQUE
 - ✅ tankCapacity DECIMAL
@@ -913,11 +929,11 @@
 - ✅ reference VARCHAR
 - ✅ status tracking
 
-### 4.8.2 sequences ✅ (via companySettings)
+### 4.8.2 sequences ⚡ ALTERNATIVE
+- ⚡ Uses contractCounter table + auto-increment (NOT separate sequences table)
 - ✅ Contract number sequencing
-- ✅ Invoice number sequencing
 - ✅ Prefix configuration
-- ✅ Auto-increment logic
+- ⬜ Dedicated sequences table NOT implemented
 
 ## 4.9 Tariffs & Pricing
 
@@ -943,28 +959,24 @@
 - ✅ downgrade_penalty_rate DECIMAL(12,2)
 - ✅ is_active BOOLEAN
 
-### 4.9.2 seasonal_tariffs ✅ (via tariff system)
-- ✅ Seasonal pricing via tariff updates
-- ✅ Date-based rate adjustments
-- ✅ Rate type flexibility
+### 4.9.2 seasonal_tariffs ⚡ ALTERNATIVE
+- ⚡ Uses pricingRules with ruleType='seasonal' (NOT separate table)
+- ⬜ Dedicated seasonal_tariffs table NOT implemented
+- ⬜ No dedicated seasonal pricing management UI
 
-### 4.9.3 addons ✅ (contractAddons table)
-- ✅ id VARCHAR PK
-- ✅ code VARCHAR
-- ✅ name, nameAr VARCHAR
-- ✅ chargeType ENUM (per_day, per_rental, flat)
-- ✅ rate DECIMAL
-- ✅ description VARCHAR
+### 4.9.3 addons ⚡ ALTERNATIVE
+- ⚡ Uses contract_charges with type='ADDON' (NOT separate addons table)
+- ⬜ Dedicated addons lookup table NOT implemented
+- ⬜ Limited addon management UI
 
-### 4.9.4 packages ✅ (via addon combinations)
-- ✅ Addon grouping support
-- ✅ Package pricing logic
-- ✅ Active state tracking
+### 4.9.4 packages ⬜ NOT IMPLEMENTED
+- ⬜ No packages table exists
+- ⬜ No package grouping system
+- ⬜ No package pricing logic
 
-### 4.9.5 package_addons ✅ (via contractAddonItems)
-- ✅ Contract-addon relationships
-- ✅ Quantity tracking
-- ✅ Price calculations
+### 4.9.5 package_addons ⬜ NOT IMPLEMENTED
+- ⬜ No package_addons table exists
+- ⬜ Addon quantities tracked in contract_charges only
 
 ## 4.10 Driver Services ✅ COMPLETE
 
@@ -985,15 +997,13 @@
 - ✅ status ENUM (requested, approved, in_transit, completed, cancelled)
 - ✅ Driver assignment
 
-### 4.11.2 maintenance_jobs ✅ (maintenanceJobs table)
-- ✅ id VARCHAR PK
+### 4.11.2 maintenance_jobs ⚡ ALTERNATIVE
+- ⚡ Uses vehicleServiceRecords table (NOT maintenanceJobs)
 - ✅ vehicleId FK
 - ✅ branchId FK
-- ✅ jobType VARCHAR
-- ✅ description TEXT
-- ✅ status ENUM
-- ✅ plannedStart, plannedEnd TIMESTAMP
-- ✅ actualStart, actualEnd TIMESTAMP
+- ✅ Service type tracking
+- ✅ Service records with dates
+- ⬜ Dedicated maintenance job workflow NOT implemented
 
 ## 4.12 Availability Engine ✅ COMPLETE
 
@@ -1012,14 +1022,16 @@
 - ✅ Provider configuration in companySettings
 - ✅ Multi-provider support (Twilio, SendGrid, Gmail)
 
-### 4.13.2 notification_purposes ✅ (notificationTemplates)
-- ✅ Template types for each purpose
+### 4.13.2 notification_purposes ⚡ ALTERNATIVE
+- ⚡ Uses enum values in notificationTemplates (NOT separate table)
 - ✅ 30+ bilingual templates
+- ⬜ Dedicated notification_purposes lookup table NOT implemented
 
-### 4.13.3 notification_routes ✅ (enhancedProviderSelector)
+### 4.13.3 notification_routes ⚡ ALTERNATIVE
+- ⚡ Uses enhancedProviderSelector logic (NOT configurable table)
 - ✅ Channel routing logic
 - ✅ Primary/secondary provider selection
-- ✅ Retry configuration
+- ⬜ Dedicated notification_routes table NOT implemented
 
 ### 4.13.4 otp_logs ✅ CREATED
 - ✅ id VARCHAR PK (UUID)
