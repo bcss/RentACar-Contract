@@ -76,29 +76,35 @@ export interface IncidentResult {
 
 class IncidentService {
   /**
-   * Generate incident number using sequences table (ATOMIC - thread-safe)
+   * Generate incident number using sequences table (ATOMIC + YEAR-SCOPED)
    * Per Master Spec §5.5.2 - Uses sequences for reliable ID generation
-   * Uses INSERT ON CONFLICT DO UPDATE (UPSERT) for guaranteed uniqueness
+   * Uses INSERT ON CONFLICT (sequence_type, scope_type, scope_id) for:
+   * - Thread-safe atomic increment
+   * - Annual reset (new row per year resets counter to 1)
    */
   private async generateIncidentNumber(): Promise<string> {
     const year = new Date().getFullYear();
-    const prefix = `INC-${year}-`;
     const scopeId = year.toString();
     
-    // ATOMIC UPSERT: Guarantees unique sequential numbers even under concurrency
-    // Uses (entity_type, scope_type, scope_id) as conflict key
+    // ATOMIC UPSERT with year-scoped conflict key per Master Spec §5.5.2
+    // Creates new row per year (resetting to 1) or increments existing
     const result = await db.execute(sql`
-      INSERT INTO sequences (entity_type, scope_type, scope_id, prefix, current_value, padding_length, include_year, is_active, created_at, updated_at)
+      INSERT INTO sequences (sequence_type, scope_type, scope_id, prefix, current_value, padding_length, include_year, is_active, created_at, updated_at)
       VALUES ('incident', 'YEAR', ${scopeId}, 'INC', 1, 6, true, true, NOW(), NOW())
-      ON CONFLICT (entity_type) 
+      ON CONFLICT (sequence_type, scope_type, scope_id) 
       DO UPDATE SET 
         current_value = sequences.current_value + 1,
         updated_at = NOW()
-      RETURNING current_value
+      RETURNING current_value, prefix, padding_length
     `);
     
-    const nextValue = (result.rows[0] as any).current_value;
-    return `${prefix}${nextValue.toString().padStart(6, '0')}`;
+    const row = result.rows[0] as any;
+    const nextValue = row.current_value;
+    const prefix = row.prefix || 'INC';
+    const padding = row.padding_length || 6;
+    
+    // Format: INC-YYYY-NNNNNN (year-scoped, resets annually)
+    return `${prefix}-${year}-${nextValue.toString().padStart(padding, '0')}`;
   }
 
   /**

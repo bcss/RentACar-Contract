@@ -60,12 +60,14 @@
 | sequences | ✅ | ✅ `/api/lookup/sequences` | ✅ 6 sequences | ✅ **storage.ts** (replaces contractCounter) |
 | maintenance_jobs | ✅ | ✅ `/api/lookup/maintenance-jobs` | - | ✅ **maintenanceService.ts** |
 
-### Deep Integration Services (NEW - November 26, 2025)
+### Deep Integration Services (November 26, 2025)
 | Service | Location | Purpose |
 |---------|----------|---------|
 | **pricingService.ts** | `server/services/` | Seasonal tariff multipliers, date-range filtering, pricing estimates |
 | **maintenanceService.ts** | `server/services/` | Maintenance job workflow, vehicle status sync, service record integration |
 | **enhancedProviderSelector.ts** | `server/services/` | Purpose-based routing, provider selection with caching, retry policies |
+| **depositService.ts** | `server/services/` | Deposit settlement §7.5: min enforcement, priority allocation (Excess→Damage→Rent), refund cap |
+| **incidentService.ts** | `server/services/` | Incident automation §7.4: year-scoped atomic numbering, damage-to-incident, closure gating |
 
 **API Endpoints:** All 9 lookup tables have full CRUD API routes at `/api/lookup/*`
 **New Endpoints:** `POST /api/lookup/pricing/estimate` (seasonal tariff calculation), `POST /api/lookup/maintenance-jobs/:id/complete`
