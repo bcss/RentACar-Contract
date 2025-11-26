@@ -51,14 +51,60 @@ export interface ResendResult {
 }
 
 const OTP_LENGTH = 6;
-const OTP_EXPIRY_MINUTES = 5;
+const OTP_EXPIRY_MINUTES = 3; // Per Master Spec Part 5.9 - 3 minutes, NOT 5
 const MAX_ATTEMPTS = 3;
 const RESEND_COOLDOWN_SECONDS = 60;
 const SALT_ROUNDS = 10;
 
+// Rate limiting per Master Spec Part 8 - 3 OTPs per 10 min per user
+const RATE_LIMIT_MAX_OTPS = 3;
+const RATE_LIMIT_WINDOW_MINUTES = 10;
+
 class OTPService {
+  // Rate limiting check - Per Master Spec Part 8
+  private async checkRateLimit(recipientId: string, recipientType: string): Promise<{ allowed: boolean; error?: string }> {
+    try {
+      const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+      
+      const recentOtps = await db
+        .select()
+        .from(otpVerifications)
+        .where(
+          and(
+            eq(otpVerifications.recipientId, recipientId),
+            eq(otpVerifications.recipientType, recipientType),
+            gt(otpVerifications.createdAt, windowStart)
+          )
+        );
+
+      if (recentOtps.length >= RATE_LIMIT_MAX_OTPS) {
+        const oldestOtp = recentOtps.sort((a, b) => 
+          new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
+        )[0];
+        const nextAllowedTime = new Date(new Date(oldestOtp.createdAt!).getTime() + RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+        const waitSeconds = Math.ceil((nextAllowedTime.getTime() - Date.now()) / 1000);
+        
+        return { 
+          allowed: false, 
+          error: `Rate limit exceeded. Maximum ${RATE_LIMIT_MAX_OTPS} OTPs per ${RATE_LIMIT_WINDOW_MINUTES} minutes. Please wait ${waitSeconds} seconds.`
+        };
+      }
+
+      return { allowed: true };
+    } catch (error) {
+      console.error('[OTPService] Rate limit check error:', error);
+      return { allowed: true }; // Fail open to avoid blocking legitimate requests
+    }
+  }
+
   async generateOTP(params: GenerateOTPParams): Promise<OTPResult> {
     try {
+      // Check rate limit first - Per Master Spec Part 8
+      const rateLimitCheck = await this.checkRateLimit(params.recipientId, params.recipientType);
+      if (!rateLimitCheck.allowed) {
+        return { success: false, error: rateLimitCheck.error };
+      }
+
       const recipient = await this.getRecipientContact(params.recipientType, params.recipientId);
       if (!recipient) {
         return { success: false, error: 'Recipient not found' };

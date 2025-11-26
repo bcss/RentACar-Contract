@@ -829,36 +829,39 @@
 - ⬜ version INT DEFAULT 1
 - ⬜ status ENUM with CANCELLED
 
-### 4.4.2 contract_status_history (NEW TABLE NEEDED)
-- ⬜ id BIGINT PK
-- ⬜ contract_id BIGINT FK
-- ⬜ from_status VARCHAR(32)
-- ⬜ to_status VARCHAR(32) NOT NULL
-- ⬜ changed_by BIGINT FK → users
-- ⬜ changed_at DATETIME
-- ⬜ reason TEXT
+### 4.4.2 contract_status_history ✅ CREATED
+- ✅ id VARCHAR PK (UUID)
+- ✅ contract_id VARCHAR FK
+- ✅ from_status VARCHAR(35)
+- ✅ to_status VARCHAR(35) NOT NULL
+- ✅ changed_by VARCHAR FK → users
+- ✅ changed_at TIMESTAMP
+- ✅ reason TEXT
 
-### 4.4.3 contract_amendments (NEW TABLE NEEDED)
-- ⬜ id BIGINT PK
-- ⬜ contract_id BIGINT FK
-- ⬜ type VARCHAR(64)
-- ⬜ old_value_json JSON
-- ⬜ new_value_json JSON
-- ⬜ penalty_amount DECIMAL(12,2)
-- ⬜ reason TEXT
-- ⬜ approved_by BIGINT FK
-- ⬜ created_by BIGINT FK
+### 4.4.3 contract_amendments ✅ CREATED
+- ✅ id VARCHAR PK (UUID)
+- ✅ contract_id VARCHAR FK
+- ✅ type VARCHAR(64)
+- ✅ old_value_json JSONB
+- ✅ new_value_json JSONB
+- ✅ penalty_amount DECIMAL(12,2)
+- ✅ reason TEXT
+- ✅ approved_by VARCHAR FK
+- ✅ created_by VARCHAR FK
+- ✅ requires_approval BOOLEAN
+- ✅ approved_at TIMESTAMP
 
-### 4.4.4 contract_charges (NEW TABLE NEEDED)
-- ⬜ id BIGINT PK
-- ⬜ contract_id BIGINT FK
-- ⬜ type VARCHAR(64)
-- ⬜ description VARCHAR(255)
-- ⬜ quantity DECIMAL(10,2)
-- ⬜ unit_price DECIMAL(12,4)
-- ⬜ amount DECIMAL(12,2) NOT NULL
-- ⬜ tax_category VARCHAR(64)
-- ⬜ is_manual BOOLEAN
+### 4.4.4 contract_charges ✅ CREATED
+- ✅ id VARCHAR PK (UUID)
+- ✅ contract_id VARCHAR FK
+- ✅ type VARCHAR(64)
+- ✅ description VARCHAR(255)
+- ✅ quantity DECIMAL(10,2)
+- ✅ unit_price DECIMAL(12,4)
+- ✅ amount DECIMAL(12,2) NOT NULL
+- ✅ tax_category VARCHAR(64)
+- ✅ tax_amount DECIMAL(12,2)
+- ✅ is_manual BOOLEAN
 
 ### 4.4.5 contract_disputes (NEW TABLE NEEDED)
 - ⬜ id BIGINT PK
@@ -872,18 +875,22 @@
 
 ## 4.5 Reservations
 
-### 4.5.1 reservations (NEW TABLE NEEDED)
-- ⬜ id BIGINT PK
-- ⬜ branch_id BIGINT FK
-- ⬜ contract_id BIGINT FK (if converted)
-- ⬜ hirer_id BIGINT FK
-- ⬜ vehicle_id BIGINT FK
-- ⬜ vehicle_group_id BIGINT FK
-- ⬜ start_datetime DATETIME
-- ⬜ end_datetime DATETIME
-- ⬜ status ENUM('PENDING','CONFIRMED','EXPIRED','CANCELLED','CONVERTED')
-- ⬜ deposit_expected DECIMAL(12,2)
-- ⬜ notes TEXT
+### 4.5.1 reservations ✅ CREATED
+- ✅ id VARCHAR PK (UUID)
+- ✅ reservation_number INTEGER UNIQUE
+- ✅ branch_id VARCHAR FK
+- ✅ contract_id VARCHAR FK (if converted)
+- ✅ hirer_id VARCHAR FK
+- ✅ vehicle_id VARCHAR FK
+- ✅ vehicle_group_id VARCHAR
+- ✅ tariff_id VARCHAR FK
+- ✅ start_datetime TIMESTAMP
+- ✅ end_datetime TIMESTAMP
+- ✅ status VARCHAR(32) DEFAULT 'pending'
+- ✅ deposit_expected DECIMAL(12,2)
+- ✅ deposit_received DECIMAL(12,2)
+- ✅ notes TEXT
+- ✅ cancellation_reason TEXT
 
 ## 4.6 Inspections
 
@@ -927,25 +934,27 @@
 
 ## 4.9 Tariffs & Pricing
 
-### 4.9.1 tariffs (NEW TABLE NEEDED)
-- ⬜ id BIGINT PK
-- ⬜ branch_id BIGINT FK
-- ⬜ vehicle_class_id BIGINT FK
-- ⬜ vehicle_group_id BIGINT FK
-- ⬜ name VARCHAR(255)
-- ⬜ rate_hourly DECIMAL(12,2)
-- ⬜ rate_daily DECIMAL(12,2)
-- ⬜ rate_weekly DECIMAL(12,2)
-- ⬜ rate_monthly DECIMAL(12,2)
-- ⬜ included_km_per_day DECIMAL(10,2)
-- ⬜ extra_km_rate DECIMAL(12,4)
-- ⬜ deposit_required BOOLEAN
-- ⬜ default_deposit DECIMAL(12,2)
-- ⬜ minimum_rental_hours INT
-- ⬜ minimum_rental_days INT
-- ⬜ return_grace_minutes INT DEFAULT 0
-- ⬜ downgrade_penalty_rate DECIMAL(12,2)
-- ⬜ is_active BOOLEAN
+### 4.9.1 tariffs ✅ CREATED
+- ✅ id VARCHAR PK (UUID)
+- ✅ branch_id VARCHAR FK
+- ✅ vehicle_class_id VARCHAR
+- ✅ vehicle_group_id VARCHAR
+- ✅ name VARCHAR(255)
+- ✅ name_ar VARCHAR(255)
+- ✅ code VARCHAR(64) UNIQUE
+- ✅ rate_hourly DECIMAL(12,2)
+- ✅ rate_daily DECIMAL(12,2)
+- ✅ rate_weekly DECIMAL(12,2)
+- ✅ rate_monthly DECIMAL(12,2)
+- ✅ included_km_per_day DECIMAL(10,2)
+- ✅ extra_km_rate DECIMAL(12,4)
+- ✅ deposit_required BOOLEAN
+- ✅ default_deposit DECIMAL(12,2)
+- ✅ minimum_rental_hours INT
+- ✅ minimum_rental_days INT
+- ✅ return_grace_minutes INT DEFAULT 0
+- ✅ downgrade_penalty_rate DECIMAL(12,2)
+- ✅ is_active BOOLEAN
 
 ### 4.9.2 seasonal_tariffs (NEW TABLE NEEDED)
 - ⬜ id BIGINT PK
@@ -1035,16 +1044,16 @@
 - ⬜ secondary_provider_id BIGINT FK
 - ⬜ max_retries INT DEFAULT 1
 
-### 4.13.4 otp_logs (RENAME/UPDATE TABLE)
-- ⬜ id BIGINT PK
-- ⬜ contract_id BIGINT FK
-- ⬜ purpose VARCHAR(64)
-- ⬜ channel VARCHAR(32)
-- ⬜ target VARCHAR(255)
-- ⬜ otp_hash VARCHAR(255)
-- ⬜ expires_at DATETIME (3-minute expiry)
-- ⬜ verified_at DATETIME
-- ⬜ attempts INT DEFAULT 0
+### 4.13.4 otp_logs ✅ CREATED
+- ✅ id VARCHAR PK (UUID)
+- ✅ contract_id VARCHAR FK
+- ✅ purpose VARCHAR(64)
+- ✅ channel VARCHAR(32)
+- ✅ target VARCHAR(255)
+- ✅ otp_hash VARCHAR(255)
+- ✅ expires_at TIMESTAMP (3-minute expiry)
+- ✅ verified_at TIMESTAMP
+- ✅ attempts INT DEFAULT 0
 
 ## 4.14 Cron & Import
 
@@ -1324,11 +1333,11 @@
 # PART 8 — OTP SYSTEM
 
 ## OTP Requirements
-- ⬜ 3-minute expiry (NOT 5 minutes)
-- ⬜ Rate limiting: 3 OTPs per 10 min per user
-- ⬜ Hash storage for OTP
-- ⬜ Attempt tracking
-- ⬜ otp_logs table with correct structure
+- ✅ 3-minute expiry (NOT 5 minutes) - FIXED Nov 26 in otpService.ts
+- ✅ Rate limiting: 3 OTPs per 10 min per user - IMPLEMENTED Nov 26
+- ✅ Hash storage for OTP - otp_hash column in otp_logs
+- ✅ Attempt tracking - attempts column in otp_logs
+- ✅ otp_logs table with correct structure - CREATED Nov 25
 
 ---
 
@@ -1347,15 +1356,15 @@
 # PART 10 — FINANCIAL DATA TYPES
 
 ## All Financial Fields Must Be DECIMAL(12,2)
-- ⬜ daily_rate DECIMAL(12,2) (not varchar)
-- ⬜ weekly_rate DECIMAL(12,2)
-- ⬜ monthly_rate DECIMAL(12,2)
+- ✅ daily_rate DECIMAL(12,2) (not varchar) - CONVERTED contracts.daily_rate, vehicles.daily_rate
+- ✅ weekly_rate DECIMAL(12,2) - CONVERTED vehicles.weekly_rate
+- ✅ monthly_rate DECIMAL(12,2) - CONVERTED vehicles.monthly_rate
 - ⬜ security_deposit DECIMAL(12,2)
-- ⬜ total_amount DECIMAL(12,2)
+- ✅ total_amount DECIMAL(12,2) - CONVERTED contracts.total_amount
 - ⬜ vat_amount DECIMAL(12,2)
-- ⬜ extra_km_rate DECIMAL(12,4)
-- ⬜ All payment amounts DECIMAL(12,2)
-- ⬜ All charge amounts DECIMAL(12,2)
+- ✅ extra_km_rate DECIMAL(12,4) - CONVERTED contracts.extra_km_rate
+- ✅ All payment amounts DECIMAL(12,2) - CONVERTED payments.amount
+- ✅ All charge amounts DECIMAL(12,2) - NEW contract_charges table uses DECIMAL
 
 ---
 
@@ -1363,18 +1372,32 @@
 
 ## Current Phase: Phase 1 - Critical Database Schema
 **Started:** November 25, 2025
+**Updated:** November 25, 2025
 
 ### Priority Order:
-1. ⬜ Fix all financial field data types (varchar → DECIMAL)
+1. ✅ Fix all financial field data types (varchar → DECIMAL) - DONE Nov 25
 2. ⬜ Add missing contract statuses (CANCELLED)
 3. ⬜ Add missing vehicle statuses
-4. ⬜ Create missing core tables
+4. ✅ Create missing core tables - DONE Nov 25 (6 tables created)
 5. ⬜ Add missing contract fields
 6. ⬜ Implement validation rules
 7. ⬜ Implement approval workflows
-8. ⬜ Fix OTP parameters
+8. ✅ Fix OTP parameters - DONE Nov 26 (3-min expiry + rate limiting)
 9. ⬜ Add database transactions
 10. ⬜ Implement services
+
+### Tables Created (Nov 25, 2025):
+- ✅ contract_charges (itemized charges per contract)
+- ✅ contract_amendments (track contract changes)
+- ✅ contract_status_history (lifecycle transitions)
+- ✅ otp_logs (OTP verification with 3-min expiry)
+- ✅ tariffs (pricing plans)
+- ✅ reservations (bookings before contracts)
+
+### Services Updated (Nov 26, 2025):
+- ✅ OTP Service - 3-minute expiry (per Master Spec Part 5.9)
+- ✅ OTP Service - Rate limiting 3 per 10 min (per Master Spec Part 8)
+- ✅ Storage Layer - Status history tracking on lifecycle transitions
 
 ---
 

@@ -51,6 +51,7 @@ import {
   templateAnalytics,
   abTestVariants,
   notificationChannelPreferences,
+  contractStatusHistory, // Per Master Spec Part 5.5.1 - Status tracking
   type User,
   type UpsertUser,
   type Contract,
@@ -939,8 +940,28 @@ export class DatabaseStorage implements IStorage {
 
   // Legacy finalizeContract method removed - use new state machine methods below
 
+  // Helper: Log status change to contract_status_history - Per Master Spec Part 5.5.1
+  private async logStatusChange(contractId: string, fromStatus: string | null, toStatus: string, userId: string, reason?: string): Promise<void> {
+    try {
+      await db.insert(contractStatusHistory).values({
+        contractId,
+        fromStatus,
+        toStatus,
+        changedBy: userId,
+        reason: reason || null,
+      });
+    } catch (error) {
+      console.error('[Storage] Failed to log status change:', error);
+      // Don't throw - status history is for audit, not critical path
+    }
+  }
+
   // Phase 2.1: State transition methods
   async activateContract(id: string, userId: string, timeOut?: string, expectedVersion?: number): Promise<Contract> {
+    // Get current status before update
+    const [current] = await db.select({ status: contracts.status }).from(contracts).where(eq(contracts.id, id));
+    const fromStatus = current?.status || 'draft';
+
     // Per Master Spec Part 6.5.2: Conditional update with version check
     const whereConditions = expectedVersion !== undefined
       ? and(eq(contracts.id, id), eq(contracts.version, expectedVersion))
@@ -962,6 +983,9 @@ export class DatabaseStorage implements IStorage {
     if (!activated && expectedVersion !== undefined) {
       throw new Error('Contract has been modified by another user. Please refresh and try again.');
     }
+
+    // Log status change - Per Master Spec Part 5.5.1
+    await this.logStatusChange(id, fromStatus, 'active', userId, 'Contract activated - vehicle handed over');
     
     return activated;
   }
@@ -976,6 +1000,10 @@ export class DatabaseStorage implements IStorage {
     totalExtraCharges?: string;
     outstandingBalance?: string;
   }, expectedVersion?: number): Promise<Contract> {
+    // Get current status before update
+    const [current] = await db.select({ status: contracts.status }).from(contracts).where(eq(contracts.id, id));
+    const fromStatus = current?.status || 'active';
+
     // Per Master Spec Part 6.5.2: Conditional update with version check
     const whereConditions = expectedVersion !== undefined
       ? and(eq(contracts.id, id), eq(contracts.version, expectedVersion))
@@ -997,11 +1025,18 @@ export class DatabaseStorage implements IStorage {
     if (!completed && expectedVersion !== undefined) {
       throw new Error('Contract has been modified by another user. Please refresh and try again.');
     }
+
+    // Log status change - Per Master Spec Part 5.5.1
+    await this.logStatusChange(id, fromStatus, 'completed', userId, 'Contract completed - vehicle returned');
     
     return completed;
   }
 
   async closeContract(id: string, userId: string, closureRemark?: string, expectedVersion?: number): Promise<Contract> {
+    // Get current status before update
+    const [current] = await db.select({ status: contracts.status }).from(contracts).where(eq(contracts.id, id));
+    const fromStatus = current?.status || 'completed';
+
     // Per Master Spec Part 6.5.2: Conditional update with version check
     const whereConditions = expectedVersion !== undefined
       ? and(eq(contracts.id, id), eq(contracts.version, expectedVersion))
@@ -1024,6 +1059,9 @@ export class DatabaseStorage implements IStorage {
     if (!closed && expectedVersion !== undefined) {
       throw new Error('Contract has been modified by another user. Please refresh and try again.');
     }
+
+    // Log status change - Per Master Spec Part 5.5.1
+    await this.logStatusChange(id, fromStatus, 'closed', userId, closureRemark || 'Contract closed - settlement complete');
     
     return closed;
   }
