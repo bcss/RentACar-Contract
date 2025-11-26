@@ -1421,6 +1421,46 @@ export const contracts = pgTable("contracts", {
   earlyClosureReason: text("early_closure_reason"), // Task 11: Optional reason for early completion
   editReason: text("edit_reason"), // Reason for edits made in Active/Completed stages
   
+  // ===========================
+  // MASTER SPEC COMPLIANCE FIELDS - Added per Gap Analysis November 26, 2025
+  // ===========================
+  
+  // String contract number per Master Spec §4.4.1 (VARCHAR(64) instead of INTEGER)
+  contractNumberStr: varchar("contract_number_str", { length: 64 }), // e.g., "KR-2025-000001"
+  
+  // Party type per Master Spec §4.4.1 - Spec-compliant naming
+  partyType: varchar("party_type", { length: 32 }), // 'DIRECT_HIRER', 'SPONSORED_INDIVIDUAL', 'SPONSORED_COMPANY'
+  
+  // Tariff FK per Master Spec §4.4.1
+  tariffId: varchar("tariff_id").references(() => tariffs.id),
+  
+  // Actual datetimes per Master Spec §4.4.1
+  startDatetimeActual: timestamp("start_datetime_actual"), // Activation time
+  endDatetimeActual: timestamp("end_datetime_actual"), // Return time
+  
+  // Branch FKs per Master Spec §4.4.1 (in addition to existing branchId)
+  originalBranchId: varchar("original_branch_id").references(() => branches.id), // Pickup branch
+  returnBranchId: varchar("return_branch_id").references(() => branches.id), // Return branch (may differ)
+  
+  // Deposit fields per Master Spec §4.4.1 - DECIMAL amounts, not BOOLEAN
+  depositRequired: boolean("deposit_required").default(false),
+  depositReceived: numeric("deposit_received", { precision: 12, scale: 2 }), // Actual amount received
+  depositRefundedSpec: numeric("deposit_refunded_spec", { precision: 12, scale: 2 }), // Master Spec: deposit_refunded as DECIMAL
+  
+  // Financial totals per Master Spec §4.4.1
+  totalCharges: numeric("total_charges", { precision: 12, scale: 2 }), // Total contract charges
+  outstandingAmount: numeric("outstanding_amount", { precision: 12, scale: 2 }), // Amount still owed
+  
+  // Dispute/Incident flags per Master Spec §4.4.1
+  hasActiveDispute: boolean("has_active_dispute").default(false),
+  
+  // OTP verification timestamps per Master Spec §4.4.1
+  otpActivationVerifiedAt: timestamp("otp_activation_verified_at"),
+  otpClosureVerifiedAt: timestamp("otp_closure_verified_at"),
+  
+  // Company contact FK per Master Spec §4.4.1
+  companyContactId: varchar("company_contact_id").references(() => companyContacts.id),
+  
   // Audit fields
   createdBy: varchar("created_by").notNull(),
   finalizedBy: varchar("finalized_by"),
@@ -1512,6 +1552,8 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   depositPaidDate: z.coerce.date().optional(),
   depositRefundedDate: z.coerce.date().optional(),
   finalPaymentDate: z.coerce.date().optional(),
+  // Master Spec §4.4.1 - Party Type validation
+  partyType: z.enum(['DIRECT_HIRER', 'SPONSORED_INDIVIDUAL', 'SPONSORED_COMPANY']).optional(),
 }).superRefine((data, ctx) => {
   // Phase 1: Date validations
   // Rental end date must be after start date
@@ -1616,6 +1658,16 @@ export const payments = pgTable("payments", {
   // Branch Assignment
   branchId: varchar("branch_id").references(() => branches.id),
   
+  // MASTER SPEC COMPLIANCE FIELDS - Per Master Spec §4.8.1
+  // Direction per Master Spec §4.8.1 - 'IN' for receipts, 'OUT' for refunds/payouts
+  direction: varchar("direction", { length: 8 }), // 'IN' or 'OUT'
+  
+  // Type per Master Spec §4.8.1 - Payment category
+  paymentType: varchar("payment_type", { length: 32 }), // 'RENT', 'DEPOSIT', 'REFUND', 'EXCESS', 'OTHER'
+  
+  // Status per Master Spec §4.8.1 - For future async gateway support
+  paymentStatus: varchar("payment_status", { length: 32 }).default('CONFIRMED'), // 'CONFIRMED', 'PENDING', 'FAILED', 'CANCELLED'
+  
   // Payment Details - Per Master Spec Part 5.5.1 DECIMAL(12,2) requirement
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(), // Payment amount with proper precision
   paymentMethod: varchar("payment_method", { length: 50 }).notNull(), // cash, card, bank_transfer, check, etc.
@@ -1652,6 +1704,11 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
 }));
 
+// Master Spec §4.8.1 Enum Values
+export const paymentDirectionEnum = z.enum(['IN', 'OUT']);
+export const paymentTypeEnum = z.enum(['RENT', 'DEPOSIT', 'REFUND', 'EXCESS', 'OTHER']);
+export const paymentStatusEnum = z.enum(['CONFIRMED', 'PENDING', 'FAILED', 'CANCELLED']);
+
 export const insertPaymentSchema = createInsertSchema(payments).omit({
   id: true,
   createdAt: true,
@@ -1660,6 +1717,10 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
 }).extend({
   paidAt: z.coerce.date(),
   amount: z.string().min(1, "Amount is required"),
+  // Master Spec §4.8.1 - Direction, Type, Status validation
+  direction: paymentDirectionEnum.optional(),
+  paymentType: paymentTypeEnum.optional(),
+  paymentStatus: paymentStatusEnum.default('CONFIRMED'),
 }).superRefine((data, ctx) => {
   // Task 12: Conditional validation based on payment method
   const method = data.paymentMethod?.toLowerCase();
@@ -5057,6 +5118,232 @@ export const insertRoleAssignmentSchema = createInsertSchema(roleAssignments).om
 });
 export type InsertRoleAssignment = z.infer<typeof insertRoleAssignmentSchema>;
 export type RoleAssignment = typeof roleAssignments.$inferSelect;
+
+// ===========================
+// MISSING MASTER SPEC TABLES (Part 4 Compliance)
+// Added per Master Spec Gap Analysis - November 26, 2025
+// ===========================
+
+// 22. contract_disputes - Per Master Spec §4.4.5 - Contract dispute tracking
+export const contractDisputes = pgTable("contract_disputes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").references(() => contracts.id).notNull(),
+  status: varchar("status", { length: 32 }).notNull().default('OPEN'), // 'OPEN', 'RESOLVED', 'CLOSED'
+  disputedAmount: numeric("disputed_amount", { precision: 12, scale: 2 }),
+  reason: text("reason"),
+  openedBy: varchar("opened_by").references(() => users.id),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  outcome: varchar("outcome", { length: 64 }), // 'UPHELD', 'REJECTED', 'PARTIAL', 'SETTLED'
+  evidenceFilePath: varchar("evidence_file_path", { length: 512 }), // Per Spec Appendix C.2
+  resolutionNotes: text("resolution_notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_contract_disputes_contract").on(table.contractId),
+  index("idx_contract_disputes_status").on(table.status),
+  index("idx_contract_disputes_opened_by").on(table.openedBy),
+]);
+
+export const insertContractDisputeSchema = createInsertSchema(contractDisputes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertContractDispute = z.infer<typeof insertContractDisputeSchema>;
+export type ContractDispute = typeof contractDisputes.$inferSelect;
+
+// 23. vehicle_inspection_photos - Per Master Spec §4.6.2 - Inspection photo storage
+export const vehicleInspectionPhotos = pgTable("vehicle_inspection_photos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  inspectionId: varchar("inspection_id").references(() => vehicleInspections.id).notNull(),
+  tag: varchar("tag", { length: 32 }), // 'FRONT', 'BACK', 'LEFT', 'RIGHT', 'TOP', 'INTERIOR', 'OTHER'
+  filePath: varchar("file_path", { length: 512 }).notNull(),
+  mimeType: varchar("mime_type", { length: 64 }),
+  fileSizeBytes: integer("file_size_bytes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_vehicle_inspection_photos_inspection").on(table.inspectionId),
+  index("idx_vehicle_inspection_photos_tag").on(table.tag),
+]);
+
+export const insertVehicleInspectionPhotoSchema = createInsertSchema(vehicleInspectionPhotos).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertVehicleInspectionPhoto = z.infer<typeof insertVehicleInspectionPhotoSchema>;
+export type VehicleInspectionPhoto = typeof vehicleInspectionPhotos.$inferSelect;
+
+// 24. company_contacts - Per Master Spec §4.2.3 - Company signatories/employees
+export const companyContacts = pgTable("company_contacts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").references(() => companies.id).notNull(),
+  fullName: varchar("full_name", { length: 255 }).notNull(),
+  fullNameAr: varchar("full_name_ar", { length: 255 }),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 64 }),
+  position: varchar("position", { length: 128 }),
+  isSignatory: boolean("is_signatory").notNull().default(false), // Can sign contracts
+  isDriver: boolean("is_driver").notNull().default(false), // Employee driver
+  idType: varchar("id_type", { length: 32 }),
+  idNumber: varchar("id_number", { length: 64 }),
+  idExpiryDate: date("id_expiry_date"),
+  licenseNumber: varchar("license_number", { length: 64 }),
+  licenseExpiryDate: date("license_expiry_date"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_company_contacts_company").on(table.companyId),
+  index("idx_company_contacts_signatory").on(table.isSignatory),
+  index("idx_company_contacts_driver").on(table.isDriver),
+  index("idx_company_contacts_active").on(table.isActive),
+]);
+
+export const insertCompanyContactSchema = createInsertSchema(companyContacts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCompanyContact = z.infer<typeof insertCompanyContactSchema>;
+export type CompanyContact = typeof companyContacts.$inferSelect;
+
+// 25. templates - Per Master Spec §4.16.1 - Contract/document templates (canvas-based)
+export const templates = pgTable("templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: varchar("type", { length: 64 }).notNull(), // 'CONTRACT', 'INVOICE', 'RECEIPT', 'STATEMENT'
+  branchId: varchar("branch_id").references(() => branches.id), // null = global template
+  name: varchar("name", { length: 255 }).notNull(),
+  nameAr: varchar("name_ar", { length: 255 }),
+  language: varchar("language", { length: 8 }).notNull(), // 'en', 'ar'
+  version: integer("version").notNull().default(1),
+  isPublished: boolean("is_published").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  canvasDefinition: jsonb("canvas_definition").notNull(), // Layout elements data
+  description: text("description"),
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_templates_type").on(table.type),
+  index("idx_templates_branch").on(table.branchId),
+  index("idx_templates_language").on(table.language),
+  index("idx_templates_published").on(table.isPublished),
+  index("idx_templates_active").on(table.isActive),
+]);
+
+export const insertTemplateSchema = createInsertSchema(templates).omit({
+  id: true,
+  version: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTemplate = z.infer<typeof insertTemplateSchema>;
+export type Template = typeof templates.$inferSelect;
+
+// 26. invoices - PROVISION ONLY per Master Spec §1.2 - Tax invoice generation
+export const invoices = pgTable("invoices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").references(() => contracts.id).notNull(),
+  invoiceNumber: varchar("invoice_number", { length: 64 }).notNull().unique(), // Generated via sequences
+  type: varchar("type", { length: 32 }).notNull().default('TAX_INVOICE'), // 'TAX_INVOICE', 'PROFORMA', 'CREDIT_NOTE'
+  status: varchar("status", { length: 32 }).notNull().default('DRAFT'), // 'DRAFT', 'ISSUED', 'PAID', 'CANCELLED', 'VOID'
+  issuedDate: date("issued_date"),
+  dueDate: date("due_date"),
+  subtotal: numeric("subtotal", { precision: 12, scale: 2 }).notNull(),
+  vatRate: numeric("vat_rate", { precision: 5, scale: 2 }).default('5'), // UAE VAT 5%
+  vatAmount: numeric("vat_amount", { precision: 12, scale: 2 }),
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).notNull(),
+  currencyCode: varchar("currency_code", { length: 3 }).notNull().default('AED'),
+  lineItems: jsonb("line_items").$type<{ description: string; quantity: number; unitPrice: number; amount: number }[]>(),
+  billingAddress: text("billing_address"),
+  notes: text("notes"),
+  pdfPath: varchar("pdf_path", { length: 512 }),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_invoices_contract").on(table.contractId),
+  index("idx_invoices_number").on(table.invoiceNumber),
+  index("idx_invoices_status").on(table.status),
+  index("idx_invoices_type").on(table.type),
+  index("idx_invoices_issued_date").on(table.issuedDate),
+]);
+
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type Invoice = typeof invoices.$inferSelect;
+
+// 27. receipts - PROVISION ONLY per Master Spec §1.2 - Payment receipt generation
+export const receipts = pgTable("receipts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  paymentId: varchar("payment_id").references(() => payments.id).notNull(),
+  contractId: varchar("contract_id").references(() => contracts.id).notNull(),
+  receiptNumber: varchar("receipt_number", { length: 64 }).notNull().unique(), // Generated via sequences
+  type: varchar("type", { length: 32 }).notNull().default('PAYMENT'), // 'PAYMENT', 'DEPOSIT', 'REFUND'
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currencyCode: varchar("currency_code", { length: 3 }).notNull().default('AED'),
+  issuedDate: date("issued_date").notNull(),
+  payerName: varchar("payer_name", { length: 255 }),
+  paymentMethod: varchar("payment_method", { length: 32 }),
+  reference: varchar("reference", { length: 128 }),
+  notes: text("notes"),
+  pdfPath: varchar("pdf_path", { length: 512 }),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_receipts_payment").on(table.paymentId),
+  index("idx_receipts_contract").on(table.contractId),
+  index("idx_receipts_number").on(table.receiptNumber),
+  index("idx_receipts_type").on(table.type),
+  index("idx_receipts_issued_date").on(table.issuedDate),
+]);
+
+export const insertReceiptSchema = createInsertSchema(receipts).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertReceipt = z.infer<typeof insertReceiptSchema>;
+export type Receipt = typeof receipts.$inferSelect;
+
+// 28. expense_recoveries - Track costs recovered from customers (fines, damages, etc.)
+export const expenseRecoveries = pgTable("expense_recoveries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").references(() => contracts.id).notNull(),
+  incidentId: varchar("incident_id").references(() => incidents.id),
+  type: varchar("type", { length: 32 }).notNull(), // 'TRAFFIC_FINE', 'TOLL', 'DAMAGE', 'FUEL', 'CLEANING', 'OTHER'
+  description: text("description"),
+  originalAmount: numeric("original_amount", { precision: 12, scale: 2 }).notNull(),
+  adminFee: numeric("admin_fee", { precision: 12, scale: 2 }).default('0'),
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).notNull(),
+  currencyCode: varchar("currency_code", { length: 3 }).notNull().default('AED'),
+  status: varchar("status", { length: 32 }).notNull().default('PENDING'), // 'PENDING', 'INVOICED', 'PAID', 'WAIVED', 'DISPUTED'
+  referenceNumber: varchar("reference_number", { length: 128 }), // Fine number, toll ref, etc.
+  dueDate: date("due_date"),
+  paymentId: varchar("payment_id").references(() => payments.id), // Link to payment when paid
+  notes: text("notes"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_expense_recoveries_contract").on(table.contractId),
+  index("idx_expense_recoveries_incident").on(table.incidentId),
+  index("idx_expense_recoveries_type").on(table.type),
+  index("idx_expense_recoveries_status").on(table.status),
+  index("idx_expense_recoveries_due_date").on(table.dueDate),
+]);
+
+export const insertExpenseRecoverySchema = createInsertSchema(expenseRecoveries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertExpenseRecovery = z.infer<typeof insertExpenseRecoverySchema>;
+export type ExpenseRecovery = typeof expenseRecoveries.$inferSelect;
 
 // ===========================
 // Predictive Report Response Types
