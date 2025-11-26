@@ -241,6 +241,7 @@ export interface IStorage {
   getVehicleInspections(filters?: { vehicleId?: string; contractId?: string; inspectionType?: string }): Promise<VehicleInspection[]>;
   getVehicleInspectionsByContract(contractId: string): Promise<VehicleInspection[]>;
   getVehicleInspection(id: string): Promise<VehicleInspection | undefined>;
+  getContractCheckoutInspection(contractId: string): Promise<VehicleInspection | undefined>; // For cancellation eligibility
   updateVehicleInspection(id: string, data: Partial<InsertVehicleInspection>): Promise<VehicleInspection>;
   
   // Audit log operations
@@ -1068,11 +1069,18 @@ export class DatabaseStorage implements IStorage {
 
   // Phase 2.3: Contract Cancellation - Per Master Spec Part 5.5.1
   // Cancellation allowed for DRAFT and ACTIVE (pre-handover) contracts
-  // Status validation is done in the route layer
+  // Primary status validation is done in the route layer, defensive check here
   async cancelContract(id: string, userId: string, cancellationReason: string, expectedVersion?: number): Promise<Contract> {
     // Get current status before update
     const [current] = await db.select({ status: contracts.status }).from(contracts).where(eq(contracts.id, id));
     const fromStatus = current?.status || 'draft';
+
+    // Defensive status check - only draft and active contracts can be cancelled
+    // This is a safety net - primary validation is in the route layer
+    const allowedStatuses = ['draft', 'active'];
+    if (!allowedStatuses.includes(fromStatus)) {
+      throw new Error(`Cannot cancel contract in '${fromStatus}' status. Only draft or active contracts can be cancelled.`);
+    }
 
     // Per Master Spec Part 6.5.2: Conditional update with version check
     const whereConditions = expectedVersion !== undefined
@@ -1612,6 +1620,20 @@ export class DatabaseStorage implements IStorage {
       .from(vehicleInspections)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(vehicleInspections.createdAt));
+  }
+
+  // Get checkout inspection for a contract - used for cancellation eligibility check
+  // Per Master Spec Part 3: Vehicle handover is confirmed by a completed CHECKOUT inspection
+  async getContractCheckoutInspection(contractId: string): Promise<VehicleInspection | undefined> {
+    const [inspection] = await db
+      .select()
+      .from(vehicleInspections)
+      .where(and(
+        eq(vehicleInspections.contractId, contractId),
+        eq(vehicleInspections.inspectionType, 'checkout')
+      ))
+      .limit(1);
+    return inspection;
   }
 
   async updateVehicleInspection(id: string, data: Partial<InsertVehicleInspection>): Promise<VehicleInspection> {

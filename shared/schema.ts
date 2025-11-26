@@ -1407,6 +1407,12 @@ export const contracts = pgTable("contracts", {
   cancelledAt: timestamp("cancelled_at"),
   cancellationReason: text("cancellation_reason"), // Required reason for cancellation
   
+  // Vehicle Handover Lifecycle Tracking - Per Master Spec Part 3
+  vehicleCheckoutAt: timestamp("vehicle_checkout_at"), // When vehicle was physically handed over
+  lastCheckoutInspectionId: varchar("last_checkout_inspection_id"), // Reference to checkout inspection
+  vehicleReturnedAt: timestamp("vehicle_returned_at"), // When vehicle was physically returned
+  lastReturnInspectionId: varchar("last_return_inspection_id"), // Reference to return inspection
+  
   earlyClosureReason: text("early_closure_reason"), // Task 11: Optional reason for early completion
   editReason: text("edit_reason"), // Reason for edits made in Active/Completed stages
   
@@ -1480,6 +1486,11 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   closedAt: true,
   cancelledBy: true,  // Cancellation tracking - auto-managed
   cancelledAt: true,  // Cancellation tracking - auto-managed
+  // Vehicle Handover Lifecycle - auto-managed by inspection creation
+  vehicleCheckoutAt: true,
+  lastCheckoutInspectionId: true,
+  vehicleReturnedAt: true,
+  lastReturnInspectionId: true,
   finalizedBy: true,
   finalizedAt: true,
   disabledBy: true,

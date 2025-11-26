@@ -1406,6 +1406,14 @@
 - ✅ Payment summary fields (depositExpected, totalPaymentsIn, totalPaymentsOut, hasPendingIncident)
 - ✅ Vehicle inspections type enum updated (checkout, return, transfer_in, transfer_out, maintenance)
 
+### Contract Cancellation Workflow (Nov 26, 2025):
+- ✅ Cancel route allows DRAFT contracts (always)
+- ✅ Cancel route allows ACTIVE contracts (before checkout inspection)
+- ✅ Vehicle handover check via getContractCheckoutInspection() method
+- ✅ Defensive status check in storage layer (only draft/active allowed)
+- ⬜ Enhancement: Add vehicleCheckoutAt/lastCheckoutInspectionId fields (future)
+- ⬜ Enhancement: Transactional enforcement for checkout + cancellation (future)
+
 ---
 
 **Document Version:** 1.0

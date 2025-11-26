@@ -1410,7 +1410,7 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
  * POST /api/contracts/:id/cancel
  * Cancel a contract - Per Master Spec Part 5.5.1
  * DRAFT contracts can always be cancelled.
- * ACTIVE contracts can be cancelled before vehicle handover (no timeOut set).
+ * ACTIVE contracts can be cancelled before vehicle handover (no checkout inspection completed).
  * Reason is required.
  */
 router.post("/:id/cancel", isAuthenticated, async (req: any, res) => {
@@ -1433,14 +1433,16 @@ router.post("/:id/cancel", isAuthenticated, async (req: any, res) => {
     
     // Per Master Spec: Cancellation allowed for:
     // 1. DRAFT contracts - always cancellable
-    // 2. ACTIVE contracts - only before vehicle handover (timeOut not set)
+    // 2. ACTIVE contracts - only before vehicle handover (no checkout inspection completed)
     if (contract.status === 'draft') {
       // Draft contracts can always be cancelled
     } else if (contract.status === 'active') {
       // Active contracts can only be cancelled before vehicle handover
-      if (contract.timeOut) {
+      // Check if a checkout inspection exists for this contract
+      const checkoutInspection = await storage.getContractCheckoutInspection(req.params.id);
+      if (checkoutInspection) {
         return res.status(400).json({ 
-          message: "Cannot cancel contract after vehicle handover. The vehicle has already been handed over to the customer." 
+          message: "Cannot cancel contract after vehicle handover. A checkout inspection has been completed for this contract." 
         });
       }
     } else {
