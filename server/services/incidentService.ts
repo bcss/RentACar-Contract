@@ -14,7 +14,7 @@
  */
 
 import { db } from "../db";
-import { incidents, contracts, vehicles, inspections, auditLogs } from "@shared/schema";
+import { incidents, contracts, vehicles, inspections, auditLogs, sequences } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 // Types per spec
@@ -76,18 +76,39 @@ export interface IncidentResult {
 
 class IncidentService {
   /**
+   * Generate incident number using sequences table (ATOMIC - thread-safe)
+   * Per Master Spec §5.5.2 - Uses sequences for reliable ID generation
+   * Uses INSERT ON CONFLICT DO UPDATE (UPSERT) for guaranteed uniqueness
+   */
+  private async generateIncidentNumber(): Promise<string> {
+    const year = new Date().getFullYear();
+    const prefix = `INC-${year}-`;
+    const scopeId = year.toString();
+    
+    // ATOMIC UPSERT: Guarantees unique sequential numbers even under concurrency
+    // Uses (entity_type, scope_type, scope_id) as conflict key
+    const result = await db.execute(sql`
+      INSERT INTO sequences (entity_type, scope_type, scope_id, prefix, current_value, padding_length, include_year, is_active, created_at, updated_at)
+      VALUES ('incident', 'YEAR', ${scopeId}, 'INC', 1, 6, true, true, NOW(), NOW())
+      ON CONFLICT (entity_type) 
+      DO UPDATE SET 
+        current_value = sequences.current_value + 1,
+        updated_at = NOW()
+      RETURNING current_value
+    `);
+    
+    const nextValue = (result.rows[0] as any).current_value;
+    return `${prefix}${nextValue.toString().padStart(6, '0')}`;
+  }
+
+  /**
    * Per Master Spec §7.4.2 - Create incident from return inspection damage detection
    * Auto-opens incident when damage is detected during return inspection
    */
   async createIncidentFromInspection(command: CreateIncidentFromInspectionCommand): Promise<IncidentResult> {
     try {
-      // Generate incident number (INC-YYYY-NNNNNN format)
-      const year = new Date().getFullYear();
-      const countResult = await db.execute(sql`
-        SELECT COUNT(*) as count FROM incidents WHERE EXTRACT(YEAR FROM created_at) = ${year}
-      `);
-      const count = parseInt((countResult.rows[0] as any)?.count || '0') + 1;
-      const incidentNumber = `INC-${year}-${count.toString().padStart(6, '0')}`;
+      // Generate incident number using sequences table (thread-safe)
+      const incidentNumber = await this.generateIncidentNumber();
 
       // Create incident
       const [newIncident] = await db.insert(incidents).values({
@@ -145,13 +166,8 @@ class IncidentService {
    */
   async createAbandonedVehicleIncident(command: CreateAbandonedIncidentCommand): Promise<IncidentResult> {
     try {
-      // Generate incident number
-      const year = new Date().getFullYear();
-      const countResult = await db.execute(sql`
-        SELECT COUNT(*) as count FROM incidents WHERE EXTRACT(YEAR FROM created_at) = ${year}
-      `);
-      const count = parseInt((countResult.rows[0] as any)?.count || '0') + 1;
-      const incidentNumber = `INC-${year}-${count.toString().padStart(6, '0')}`;
+      // Generate incident number using sequences table (thread-safe)
+      const incidentNumber = await this.generateIncidentNumber();
 
       // Get vehicle's current contract if any
       const vehicle = await db.query.vehicles.findFirst({
@@ -219,13 +235,8 @@ class IncidentService {
    */
   async createTheftIncident(command: CreateTheftIncidentCommand): Promise<IncidentResult> {
     try {
-      // Generate incident number
-      const year = new Date().getFullYear();
-      const countResult = await db.execute(sql`
-        SELECT COUNT(*) as count FROM incidents WHERE EXTRACT(YEAR FROM created_at) = ${year}
-      `);
-      const count = parseInt((countResult.rows[0] as any)?.count || '0') + 1;
-      const incidentNumber = `INC-${year}-${count.toString().padStart(6, '0')}`;
+      // Generate incident number using sequences table (thread-safe)
+      const incidentNumber = await this.generateIncidentNumber();
 
       const [newIncident] = await db.insert(incidents).values({
         vehicleId: command.vehicleId,
@@ -287,13 +298,8 @@ class IncidentService {
    */
   async createTransferIncident(command: CreateTransferIncidentCommand): Promise<IncidentResult> {
     try {
-      // Generate incident number
-      const year = new Date().getFullYear();
-      const countResult = await db.execute(sql`
-        SELECT COUNT(*) as count FROM incidents WHERE EXTRACT(YEAR FROM created_at) = ${year}
-      `);
-      const count = parseInt((countResult.rows[0] as any)?.count || '0') + 1;
-      const incidentNumber = `INC-${year}-${count.toString().padStart(6, '0')}`;
+      // Generate incident number using sequences table (thread-safe)
+      const incidentNumber = await this.generateIncidentNumber();
 
       const [newIncident] = await db.insert(incidents).values({
         vehicleId: command.vehicleId,

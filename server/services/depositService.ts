@@ -108,12 +108,15 @@ class DepositService {
       notes.push(`First-time customer: +10% adjustment`);
     }
 
-    // Calculate final required deposit
+    // Calculate final required deposit - enforcing minimum per spec
     const calculatedDeposit = (baseDeposit * vehicleClassMultiplier) + riskAdjustment;
-    const minimumRequired = Math.max(500, calculatedDeposit); // Minimum 500 AED per spec
-    const requiredDeposit = Math.round(calculatedDeposit * 100) / 100; // Round to 2 decimals
+    const minimumRequired = 500; // Absolute minimum 500 AED per spec
+    // CRITICAL: requiredDeposit MUST be at least minimumRequired per spec §7.5.2
+    const requiredDeposit = Math.round(Math.max(minimumRequired, calculatedDeposit) * 100) / 100;
 
-    notes.push(`Final required deposit: ${requiredDeposit} AED`);
+    notes.push(`Calculated deposit: ${calculatedDeposit} AED`);
+    notes.push(`Minimum required: ${minimumRequired} AED`);
+    notes.push(`Final required deposit (enforced minimum): ${requiredDeposit} AED`);
 
     return {
       contractId,
@@ -129,15 +132,15 @@ class DepositService {
   /**
    * Per Master Spec §7.5.2 - Apply deposit on contract closure
    * Priority order per spec D.3:
-   * 1. Excess charges
+   * 1. Excess charges (EXTRA_KM, FUEL, LATE_RETURN fees)
    * 2. Damage charges  
    * 3. Outstanding rent
-   * 4. Refund remaining
+   * 4. Refund remaining (CRITICAL: Cannot exceed received)
    */
   async applyDepositOnClosure(contractId: string): Promise<DepositAdjustmentResult> {
     const notes: string[] = [];
 
-    // Get contract
+    // Get contract with charges
     const contract = await db.query.contracts.findFirst({
       where: eq(contracts.id, contractId)
     });
@@ -182,8 +185,12 @@ class DepositService {
     notes.push(`Already refunded: ${totalDepositRefunded} AED`);
     notes.push(`Available for settlement: ${availableDeposit} AED`);
 
-    // Get outstanding charges
-    const outstandingAmount = parseFloat(contract.outstandingAmount ?? '0');
+    // Get outstanding charges by category from contract charges
+    const excessCharges = parseFloat(contract.extraKmCharge ?? '0') + 
+                          parseFloat(contract.fuelCharge ?? '0') + 
+                          parseFloat(contract.lateReturnFee ?? '0');
+    const damageCharges = parseFloat(contract.damageCharge ?? '0');
+    const rentBalance = parseFloat(contract.outstandingAmount ?? '0') - excessCharges - damageCharges;
     
     // Initialize allocation
     let amountAppliedToExcess = 0;
@@ -191,17 +198,31 @@ class DepositService {
     let amountAppliedToRent = 0;
     let remainingDeposit = availableDeposit;
 
-    // Apply to outstanding balance if any
-    if (outstandingAmount > 0 && remainingDeposit > 0) {
-      const amountToApply = Math.min(outstandingAmount, remainingDeposit);
-      amountAppliedToRent = amountToApply;
-      remainingDeposit -= amountToApply;
-      notes.push(`Applied ${amountToApply} AED to outstanding balance`);
+    // Priority 1: Apply to excess charges first (per spec D.3)
+    if (excessCharges > 0 && remainingDeposit > 0) {
+      amountAppliedToExcess = Math.min(excessCharges, remainingDeposit);
+      remainingDeposit -= amountAppliedToExcess;
+      notes.push(`Applied ${amountAppliedToExcess} AED to excess charges (KM/Fuel/Late fees)`);
     }
 
-    // Calculate refundable amount (per spec: cannot exceed received)
-    const amountRefundable = Math.max(0, remainingDeposit);
-    notes.push(`Refundable amount: ${amountRefundable} AED`);
+    // Priority 2: Apply to damage charges
+    if (damageCharges > 0 && remainingDeposit > 0) {
+      amountAppliedToDamage = Math.min(damageCharges, remainingDeposit);
+      remainingDeposit -= amountAppliedToDamage;
+      notes.push(`Applied ${amountAppliedToDamage} AED to damage charges`);
+    }
+
+    // Priority 3: Apply to outstanding rent
+    if (rentBalance > 0 && remainingDeposit > 0) {
+      amountAppliedToRent = Math.min(rentBalance, remainingDeposit);
+      remainingDeposit -= amountAppliedToRent;
+      notes.push(`Applied ${amountAppliedToRent} AED to outstanding rent`);
+    }
+
+    // Priority 4: Refund remaining (CRITICAL: Cannot exceed received - applied)
+    // This enforces spec rule: refund ≤ (received − applied)
+    const amountRefundable = Math.max(0, Math.min(remainingDeposit, totalDepositReceived - totalDepositRefunded - amountAppliedToExcess - amountAppliedToDamage - amountAppliedToRent));
+    notes.push(`Refundable amount: ${amountRefundable} AED (cap enforced: cannot exceed received - applied)`);
 
     // Determine refund method based on original payment method
     const originalDepositPayment = await db.query.payments.findFirst({
