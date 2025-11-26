@@ -1,11 +1,13 @@
 /**
- * Payment Management Routes
+ * Payment Management Routes - Master Spec Part 2.7 Compliant
  * 
- * Handles all payment-related operations including:
- * - Payment CRUD operations
- * - Legacy payment routes (deposit, final-payment, refund) for backward compatibility
+ * Handles all payment-related operations per Master Spec:
+ * - Deposit collection and tracking
+ * - Final payment calculation and recording
+ * - Deposit refund with business rule validation
+ * - Generic payment CRUD operations
  * - Payment validation and audit logging
- * - Payment notification triggers
+ * - Payment notification triggers (mandatory per spec)
  */
 
 import { Router } from "express";
@@ -22,14 +24,13 @@ import { triggerNotification } from "../services/notificationTrigger";
 const router = Router();
 
 /**
- * LEGACY PAYMENT ROUTES - Backward compatibility wrappers using new payments table
- * These routes maintain compatibility with existing frontend code
- * They create payment records in the payments table with appropriate types
+ * SPECIALIZED PAYMENT OPERATIONS
+ * Per Master Spec Part 2.7: Deposit workflow, payment recording, refund processing
  */
 
 /**
  * POST /api/contracts/:id/deposit
- * Record deposit payment (Legacy route)
+ * Record security deposit payment - Per Master Spec Part 2.7.3 Deposit Workflow
  */
 router.post("/contracts/:id/deposit", isAuthenticated, requireEditor, async (req: any, res) => {
   try {
@@ -84,7 +85,7 @@ router.post("/contracts/:id/deposit", isAuthenticated, requireEditor, async (req
 
 /**
  * POST /api/contracts/:id/final-payment
- * Record final payment (Legacy route)
+ * Record final payment - Per Master Spec Part 2.7 Settlement Complete
  */
 router.post("/contracts/:id/final-payment", isAuthenticated, requireEditor, async (req: any, res) => {
   try {
@@ -153,8 +154,8 @@ router.post("/contracts/:id/final-payment", isAuthenticated, requireEditor, asyn
 
 /**
  * POST /api/contracts/:id/refund
- * Record deposit refund (Legacy route)
- * Note: Refunds are blocked for contracts with pending accident claims
+ * Record deposit refund - Per Master Spec Part 2.7.3 Deposit returned/adjusted
+ * Business Rule: Refunds blocked for COMPLETED_PENDING_ACCIDENT status
  */
 router.post("/contracts/:id/refund", isAuthenticated, requireEditor, async (req: any, res) => {
   try {

@@ -322,6 +322,10 @@ export const vehicles = pgTable("vehicles", {
   licensingAuthority: varchar("licensing_authority"), // Licensing authority
   emirate: emiratesEnum("emirate"), // UAE Emirate for geographic distribution
   
+  // Master Spec Part 4.3: Vehicle Classification (FK to lookup tables)
+  vehicleClassId: varchar("vehicle_class_id"), // FK to vehicle_classes - will be added after table created
+  vehicleGroupId: varchar("vehicle_group_id"), // FK to vehicle_groups - will be added after table created
+  
   // Branch Assignment
   branchId: varchar("branch_id").references(() => branches.id),
   
@@ -2228,13 +2232,8 @@ export const insertContractEditSchema = createInsertSchema(contractEdits).omit({
 export type InsertContractEdit = z.infer<typeof insertContractEditSchema>;
 export type ContractEdit = typeof contractEdits.$inferSelect;
 
-// Contract counter table for sequential numbering
-export const contractCounter = pgTable("contract_counter", {
-  id: varchar("id").primaryKey().default("singleton"),
-  currentNumber: integer("current_number").notNull().default(15499), // Starts at 15499 so first contract is 15500
-});
-
-export type ContractCounter = typeof contractCounter.$inferSelect;
+// NOTE: contractCounter table REMOVED - sequences table is now the Master Spec compliant solution
+// See sequences table definition for contract/invoice/receipt numbering
 
 // System errors table for error logging
 export const systemErrors = pgTable("system_errors", {
