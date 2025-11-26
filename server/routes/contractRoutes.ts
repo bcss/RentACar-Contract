@@ -119,9 +119,9 @@ router.get("/unclosed-alerts", isAuthenticated, async (req: any, res) => {
         }, 0);
         
         // FIXED: Include driver charges in outstanding balance calculation
-        // Get driver assignments for this contract
-        const driverAssignments = await storage.getDriverAssignments({ contractId: contract.id });
-        const { totalDriverCharges } = calculateContractDriverCosts(driverAssignments);
+        // Per Master Spec §4.10.3 - Get contract drivers for this contract
+        const contractDriversList = await storage.getContractDrivers({ contractId: contract.id });
+        const { totalDriverCharges } = calculateContractDriverCosts(contractDriversList);
         
         // Use centralized financial calculator for consistency
         const financials = calculateContractTotals({
@@ -190,8 +190,9 @@ router.get("/:id", isAuthenticated, async (req: any, res) => {
     }, 0);
     
     // BRANCH & DRIVER SERVICE INTEGRATION: Include driver service costs in total (VAT-inclusive)
-    const driverAssignments = await storage.getDriverAssignments({ contractId: contract.id });
-    const { totalDriverCharges, totalDriverSurcharges, totalDriverVat } = calculateContractDriverCosts(driverAssignments);
+    // Per Master Spec §4.10.3 - Get contract drivers
+    const contractDriversList = await storage.getContractDrivers({ contractId: contract.id });
+    const { totalDriverCharges, totalDriverSurcharges, totalDriverVat } = calculateContractDriverCosts(contractDriversList);
     
     // Use centralized financial calculator for consistency
     const financials = calculateContractTotals({
@@ -905,9 +906,9 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
       }
     }, 0);
     
-    // Get driver assignments for this contract
-    const driverAssignments = await storage.getDriverAssignments({ contractId: contract.id });
-    const { totalDriverCharges } = calculateContractDriverCosts(driverAssignments);
+    // Per Master Spec §4.10.3 - Get contract drivers for this contract
+    const contractDriversList = await storage.getContractDrivers({ contractId: contract.id });
+    const { totalDriverCharges } = calculateContractDriverCosts(contractDriversList);
     
     // Determine deposit amount based on depositPaid flag
     let depositPaidAmount = 0;

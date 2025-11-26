@@ -12,9 +12,9 @@ import { isAuthenticated, requireManagerOrAdmin, requireAdmin } from "../auth/lo
 import {
   insertDriverOutsourceCompanySchema,
   insertDriverSchema,
-  insertDriverRateCardSchema,
+  insertDriverRatePlanSchema, // Per Master Spec §4.10.2
   insertDriverScheduleBlockSchema,
-  insertDriverAssignmentSchema,
+  insertContractDriverSchema, // Per Master Spec §4.10.3
   insertDriverScheduleSchema,
   insertDriverAttendanceSchema,
   type User,
@@ -225,25 +225,25 @@ router.post("/:id/enable", isAuthenticated, async (req: Request, res: Response, 
   }
 });
 
-// ==================== DRIVER RATE CARDS ====================
+// ==================== DRIVER RATE PLANS (Per Master Spec §4.10.2) ====================
 
-router.get("/:id/rate-cards", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/:id/rate-plans", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const rateCards = await storage.getDriverRateCards(req.params.id);
-    res.json(rateCards);
+    const ratePlans = await storage.getDriverRatePlans(req.params.id);
+    res.json(ratePlans);
   } catch (error) {
     next(error);
   }
 });
 
-router.post("/:id/rate-cards", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.post("/:id/rate-plans", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
     if (!user.canManageDrivers && user.role !== 'Admin') {
       return res.status(403).json({ message: "Insufficient permissions to manage driver rates" });
     }
     
-    const validationResult = insertDriverRateCardSchema.safeParse({
+    const validationResult = insertDriverRatePlanSchema.safeParse({
       ...req.body,
       driverId: req.params.id,
     });
@@ -251,33 +251,33 @@ router.post("/:id/rate-cards", isAuthenticated, async (req: Request, res: Respon
       return res.status(400).json({ message: fromZodError(validationResult.error).message });
     }
     
-    const rateCard = await storage.createDriverRateCard({
+    const ratePlan = await storage.createDriverRatePlan({
       ...validationResult.data,
       createdBy: user.id,
     });
     
-    await createAuditLog(user.id, 'driver_rate_card_created', undefined, req, `Created rate card for driver`);
-    res.status(201).json(rateCard);
+    await createAuditLog(user.id, 'driver_rate_plan_created', undefined, req, `Created rate plan for driver`);
+    res.status(201).json(ratePlan);
   } catch (error) {
     next(error);
   }
 });
 
-router.patch("/rate-cards/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.patch("/rate-plans/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
     if (!user.canManageDrivers && user.role !== 'Admin') {
       return res.status(403).json({ message: "Insufficient permissions to manage driver rates" });
     }
     
-    const validationResult = insertDriverRateCardSchema.partial().safeParse(req.body);
+    const validationResult = insertDriverRatePlanSchema.partial().safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ message: fromZodError(validationResult.error).message });
     }
     
-    const rateCard = await storage.updateDriverRateCard(req.params.id, validationResult.data);
-    await createAuditLog(user.id, 'driver_rate_card_updated', undefined, req, `Updated driver rate card`);
-    res.json(rateCard);
+    const ratePlan = await storage.updateDriverRatePlan(req.params.id, validationResult.data);
+    await createAuditLog(user.id, 'driver_rate_plan_updated', undefined, req, `Updated driver rate plan`);
+    res.json(ratePlan);
   } catch (error) {
     next(error);
   }
@@ -357,27 +357,27 @@ router.post("/:id/check-availability", isAuthenticated, async (req: Request, res
   }
 });
 
-// ==================== DRIVER ASSIGNMENTS ====================
+// ==================== CONTRACT DRIVERS (Per Master Spec §4.10.3) ====================
 
-router.get("/assignments", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/contract-drivers", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const filters = {
       contractId: req.query.contractId as string | undefined,
       driverId: req.query.driverId as string | undefined,
       status: req.query.status as string | undefined,
     };
-    const assignments = await storage.getDriverAssignments(filters);
+    const assignments = await storage.getContractDrivers(filters);
     res.json(assignments);
   } catch (error) {
     next(error);
   }
 });
 
-router.get("/assignments/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/contract-drivers/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const assignment = await storage.getDriverAssignmentById(req.params.id);
+    const assignment = await storage.getContractDriverById(req.params.id);
     if (!assignment) {
-      return res.status(404).json({ message: "Assignment not found" });
+      return res.status(404).json({ message: "Contract driver assignment not found" });
     }
     res.json(assignment);
   } catch (error) {
@@ -385,24 +385,21 @@ router.get("/assignments/:id", isAuthenticated, async (req: Request, res: Respon
   }
 });
 
-router.post("/assignments", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.post("/contract-drivers", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
     if (!user.canAssignDrivers && user.role !== 'Admin' && user.role !== 'Manager') {
       return res.status(403).json({ message: "Insufficient permissions to assign drivers" });
     }
     
-    const validationResult = insertDriverAssignmentSchema.safeParse(req.body);
+    const validationResult = insertContractDriverSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ message: fromZodError(validationResult.error).message });
     }
     
-    const assignment = await storage.createDriverAssignment({
-      ...validationResult.data,
-      assignedBy: user.id,
-    });
+    const assignment = await storage.createContractDriver(validationResult.data);
     
-    await createAuditLog(user.id, 'driver_assigned', undefined, req, `Assigned driver to contract`);
+    await createAuditLog(user.id, 'contract_driver_created', undefined, req, `Assigned driver to contract`);
     
     // Send driver assignment notification
     try {
@@ -416,14 +413,14 @@ router.post("/assignments", isAuthenticated, async (req: Request, res: Response,
           recipientId: driver.id,
           variables: {
             driverName: driver.nameEn || '',
-            assignmentDate: new Date(assignment.startDate).toLocaleDateString('en-AE'),
+            assignmentDate: assignment.assignmentStart ? new Date(assignment.assignmentStart).toLocaleDateString('en-AE') : 'N/A',
             contractNumber: contract?.contractNumber.toString() || 'N/A',
-            assignmentType: assignment.assignmentType || 'N/A',
+            assignmentType: 'driver_service',
           },
           language: 'en',
           triggerType: 'event_driven',
           triggeredBy: user.id,
-          entityType: 'driver_assignment',
+          entityType: 'contract_driver',
           entityId: assignment.id,
         });
       }
@@ -437,32 +434,32 @@ router.post("/assignments", isAuthenticated, async (req: Request, res: Response,
   }
 });
 
-router.patch("/assignments/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.patch("/contract-drivers/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
     if (!user.canAssignDrivers && user.role !== 'Admin' && user.role !== 'Manager') {
       return res.status(403).json({ message: "Insufficient permissions to update driver assignments" });
     }
     
-    const validationResult = insertDriverAssignmentSchema.partial().safeParse(req.body);
+    const validationResult = insertContractDriverSchema.partial().safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ message: fromZodError(validationResult.error).message });
     }
     
-    const assignment = await storage.updateDriverAssignment(req.params.id, validationResult.data);
-    await createAuditLog(user.id, 'driver_assignment_updated', undefined, req, `Updated driver assignment`);
+    const assignment = await storage.updateContractDriver(req.params.id, validationResult.data);
+    await createAuditLog(user.id, 'contract_driver_updated', undefined, req, `Updated contract driver assignment`);
     res.json(assignment);
   } catch (error) {
     next(error);
   }
 });
 
-router.post("/assignments/:id/complete", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.post("/contract-drivers/:id/complete", isAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as User;
     const { completionNotes } = req.body;
-    const assignment = await storage.completeDriverAssignment(req.params.id, completionNotes || '');
-    await createAuditLog(user.id, 'driver_assignment_completed', assignment.id, req, `Completed driver assignment`);
+    const assignment = await storage.completeContractDriver(req.params.id, completionNotes || '');
+    await createAuditLog(user.id, 'contract_driver_completed', assignment.id, req, `Completed contract driver assignment`);
     res.json(assignment);
   } catch (error) {
     next(error);

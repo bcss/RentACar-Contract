@@ -71,10 +71,11 @@ export async function calculateDriverAssignmentCost(
 
 /**
  * Calculates total driver service costs for a contract
- * Sums up all driver assignments (scheduled, active, completed)
+ * Per Master Spec §4.10.3 - Uses contractDrivers table
+ * Supports both legacy fields and new spec-compliant JSON notes format
  * Returns VAT-inclusive totals when driverServiceVatApplicable is true
  */
-export function calculateContractDriverCosts(driverAssignments: any[]): {
+export function calculateContractDriverCosts(contractDriversList: any[]): {
   totalDriverCharges: number;
   totalDriverSurcharges: number;
   totalDriverVat: number;
@@ -83,12 +84,36 @@ export function calculateContractDriverCosts(driverAssignments: any[]): {
   let totalDriverSurcharges = 0;
   let totalDriverVat = 0;
   
-  for (const assignment of driverAssignments) {
+  for (const assignment of contractDriversList) {
     // Only include scheduled, active, and completed assignments
     if (['scheduled', 'active', 'completed'].includes(assignment.status)) {
       const charge = parseFloat(assignment.totalCharge || '0');
-      const surcharges = parseFloat(assignment.totalSurcharges || '0');
-      const vat = parseFloat(assignment.vatAmount || '0');
+      
+      // Per Master Spec §4.10.3 - Try to read cost breakdown from notes JSON
+      // Format: { costBreakdown: { surcharges: number, vatAmount: number, ... } }
+      let surcharges = 0;
+      let vat = 0;
+      
+      if (assignment.notes) {
+        try {
+          const notesData = typeof assignment.notes === 'string' 
+            ? JSON.parse(assignment.notes) 
+            : assignment.notes;
+          
+          if (notesData?.costBreakdown) {
+            surcharges = parseFloat(notesData.costBreakdown.surcharges || '0');
+            vat = parseFloat(notesData.costBreakdown.vatAmount || '0');
+          }
+        } catch {
+          // Notes is not JSON, fall back to legacy fields or zero
+          surcharges = parseFloat(assignment.totalSurcharges || '0');
+          vat = parseFloat(assignment.vatAmount || '0');
+        }
+      } else {
+        // Legacy fallback for backward compatibility
+        surcharges = parseFloat(assignment.totalSurcharges || '0');
+        vat = parseFloat(assignment.vatAmount || '0');
+      }
       
       if (isFinite(charge)) totalDriverCharges += charge;
       if (isFinite(surcharges)) totalDriverSurcharges += surcharges;

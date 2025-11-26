@@ -169,30 +169,31 @@ export async function invalidatePublicHolidaysCache(year?: number) {
 }
 
 /**
- * Cache driver rate cards (used for cost calculations)
+ * Cache driver rate plans (used for cost calculations)
+ * Per Master Spec §4.10.2 - renamed from driverRateCards
  */
-export async function getCachedDriverRateCards() {
-  return await cacheGet('driver_rate_cards:all');
+export async function getCachedDriverRatePlans() {
+  return await cacheGet('driver_rate_plans:all');
 }
 
-export async function setCachedDriverRateCards(rateCards: any[]) {
+export async function setCachedDriverRatePlans(ratePlans: any[]) {
   // Cache for 15 minutes (rates may be updated during pricing changes)
-  await cacheSet('driver_rate_cards:all', rateCards, 900);
+  await cacheSet('driver_rate_plans:all', ratePlans, 900);
 }
 
-export async function invalidateDriverRateCardsCache() {
-  await cacheDel('driver_rate_cards:all');
+export async function invalidateDriverRatePlansCache() {
+  await cacheDel('driver_rate_plans:all');
 }
 
 /**
- * Cache specific driver rate card by ID
+ * Cache specific driver rate plan by ID
  */
-export async function getCachedDriverRateCard(cardId: string) {
-  return await cacheGet(`driver_rate_card:${cardId}`);
+export async function getCachedDriverRatePlan(planId: string) {
+  return await cacheGet(`driver_rate_plan:${planId}`);
 }
 
-export async function setCachedDriverRateCard(cardId: string, rateCard: any) {
-  await cacheSet(`driver_rate_card:${cardId}`, rateCard, 900);
+export async function setCachedDriverRatePlan(planId: string, ratePlan: any) {
+  await cacheSet(`driver_rate_plan:${planId}`, ratePlan, 900);
 }
 
 /**
@@ -222,8 +223,8 @@ export async function invalidateRelatedCaches(entity: string) {
     case 'holiday':
       await invalidatePublicHolidaysCache();
       break;
-    case 'driver_rate_card':
-      await invalidateDriverRateCardsCache();
+    case 'driver_rate_plan':
+      await invalidateDriverRatePlansCache();
       break;
     case 'company_settings':
     case 'vat':

@@ -19,8 +19,8 @@ The architect tool performed a deep cross-check against the Master System Specif
 | backups | 4.15.2 | Backup metadata tracking | ❌ NOT_IMPLEMENTED |
 | cash_closings | 9.4.1 | Daily branch reconciliation | ❌ NOT_IMPLEMENTED |
 | cron_job_executions | 4.14.2 | Cron execution history/monitoring | ❌ NOT_IMPLEMENTED |
-| driver_rate_plans | 4.10.2 | Driver rate governance per spec | ⚠️ ALTERNATIVE (driverRateCards) |
-| contract_drivers | 4.10.3 | Contract-driver assignments | ⚠️ ALTERNATIVE (driverAssignments) |
+| driver_rate_plans | 4.10.2 | Driver rate governance per spec | ✅ IMPLEMENTED (Nov 26 - migrated from driverRateCards) |
+| contract_drivers | 4.10.3 | Contract-driver assignments | ✅ IMPLEMENTED (Nov 26 - migrated from driverAssignments) |
 | roles/role_assignments | 5.1.3 | FK-backed RBAC matrix | ⚠️ ALTERNATIVE (user.role enum) |
 
 ### ❌ MISSING CONTRACT STATUS

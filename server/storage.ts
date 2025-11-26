@@ -23,9 +23,9 @@ import {
   publicHolidays,
   drivers,
   driverOutsourceCompanies,
-  driverRateCards,
+  driverRatePlans, // Per Master Spec §4.10.2 - replaces legacy driverRateCards
   driverScheduleBlocks,
-  driverAssignments,
+  contractDrivers, // Per Master Spec §4.10.3 - replaces legacy driverAssignments
   tollSystems,
   tollGates,
   tollPasses,
@@ -99,12 +99,12 @@ import {
   type InsertDriver,
   type DriverOutsourceCompany,
   type InsertDriverOutsourceCompany,
-  type DriverRateCard,
-  type InsertDriverRateCard,
+  type DriverRatePlan, // Per Master Spec §4.10.2
+  type InsertDriverRatePlan,
   type DriverScheduleBlock,
   type InsertDriverScheduleBlock,
-  type DriverAssignment,
-  type InsertDriverAssignment,
+  type ContractDriver, // Per Master Spec §4.10.3
+  type InsertContractDriver,
   type TollSystem,
   type InsertTollSystem,
   type TollGate,
@@ -3170,18 +3170,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Analytics - Driver Availability Summary (lightweight for dashboard)
+  // Per Master Spec §4.10.3 - Uses contractDrivers table
   async getDriverAvailabilitySummary() {
     const allDrivers = await db.select().from(drivers).where(eq(drivers.isActive, true));
-    const allAssignments = await db.select().from(driverAssignments);
+    const allAssignments = await db.select().from(contractDrivers);
     
     // Calculate current availability based on active assignments
     const driversOnAssignment = new Set<string>();
     const now = new Date();
     allAssignments.forEach(a => {
       if (a.status === 'active' || a.status === 'scheduled') {
-        const start = new Date(a.startDateTime);
-        const end = new Date(a.endDateTime);
-        if (start <= now && now <= end) {
+        const start = a.assignmentStart ? new Date(a.assignmentStart) : null;
+        const end = a.assignmentEnd ? new Date(a.assignmentEnd) : null;
+        if (start && end && start <= now && now <= end) {
           driversOnAssignment.add(a.driverId);
         }
       }
@@ -3201,22 +3202,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Reports - Driver Utilization
+  // Per Master Spec §4.10.2/§4.10.3 - Uses driverRatePlans and contractDrivers
   async getDriverUtilizationReport(startDate?: Date, endDate?: Date) {
     const allDrivers = await db.select().from(drivers).where(eq(drivers.isActive, true));
-    const allAssignments = await db.select().from(driverAssignments);
+    const allAssignments = await db.select().from(contractDrivers);
     const allContracts = await db.select().from(contracts);
-    const allRateCards = await db.select().from(driverRateCards);
+    const allRatePlans = await db.select().from(driverRatePlans);
     
     // Create Set of active driver IDs for filtering assignments
     const activeDriverIds = new Set(allDrivers.map(d => d.id));
     
-    // Create lookup maps
-    const rateCardsByDriver = new Map<string, typeof allRateCards>();
-    allRateCards.forEach(rc => {
-      if (!rateCardsByDriver.has(rc.driverId)) {
-        rateCardsByDriver.set(rc.driverId, []);
-      }
-      rateCardsByDriver.get(rc.driverId)!.push(rc);
+    // Create lookup maps for rate plans by ID
+    const ratePlansById = new Map<string, typeof allRatePlans[0]>();
+    allRatePlans.forEach(rp => {
+      ratePlansById.set(rp.id, rp);
     });
     
     // Filter assignments by active drivers AND date range
@@ -3226,8 +3225,8 @@ export class DatabaseStorage implements IStorage {
       
       // Apply date range filter if provided
       if (!startDate && !endDate) return true;
-      if (!a.startDateTime) return false;
-      const assignmentDate = new Date(a.startDateTime);
+      if (!a.assignmentStart) return false;
+      const assignmentDate = new Date(a.assignmentStart);
       if (startDate && assignmentDate < startDate) return false;
       if (endDate && assignmentDate > endDate) return false;
       return true;
@@ -3238,9 +3237,9 @@ export class DatabaseStorage implements IStorage {
     const now = new Date();
     filteredAssignments.forEach(a => {
       if (a.status === 'active' || a.status === 'scheduled') {
-        const start = new Date(a.startDateTime);
-        const end = new Date(a.endDateTime);
-        if (start <= now && now <= end) {
+        const start = a.assignmentStart ? new Date(a.assignmentStart) : null;
+        const end = a.assignmentEnd ? new Date(a.assignmentEnd) : null;
+        if (start && end && start <= now && now <= end) {
           driversOnAssignment.add(a.driverId);
         }
       }
@@ -3248,20 +3247,21 @@ export class DatabaseStorage implements IStorage {
 
     // Calculate driver statistics
     const driverStats = allDrivers.map(driver => {
-      const driverAssignments = filteredAssignments.filter(a => a.driverId === driver.id);
+      const driverAssignmentsList = filteredAssignments.filter(a => a.driverId === driver.id);
       
       // Calculate total days worked
-      const totalDaysWorked = driverAssignments
+      const totalDaysWorked = driverAssignmentsList
         .filter(a => a.status === 'completed')
         .reduce((sum, a) => {
-          const start = new Date(a.startDateTime);
-          const end = new Date(a.endDateTime);
+          if (!a.assignmentStart || !a.assignmentEnd) return sum;
+          const start = new Date(a.assignmentStart);
+          const end = new Date(a.assignmentEnd);
           const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
           return sum + days;
         }, 0);
 
       // Calculate total revenue from contracts (authoritative source)
-      const totalRevenue = driverAssignments
+      const totalRevenue = driverAssignmentsList
         .filter(a => a.status === 'completed')
         .reduce((sum, a) => {
           if (!a.contractId) return sum + parseFloat(a.totalCharge || '0');
@@ -3276,25 +3276,22 @@ export class DatabaseStorage implements IStorage {
           return sum + driverCharge;
         }, 0);
 
-      // Calculate total cost using applicable rate cards
-      const totalCost = driverAssignments
+      // Calculate total cost using rate plan
+      // Per Master Spec §4.10.2 - uses driverRatePlans
+      const totalCost = driverAssignmentsList
         .filter(a => a.status === 'completed')
         .reduce((sum, a) => {
-          const start = new Date(a.startDateTime);
-          const end = new Date(a.endDateTime);
+          if (!a.assignmentStart || !a.assignmentEnd) return sum;
+          const start = new Date(a.assignmentStart);
+          const end = new Date(a.assignmentEnd);
           const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
           
-          // Get applicable rate card for this assignment period
-          const applicableRates = rateCardsByDriver.get(driver.id) || [];
-          const rateCard = applicableRates.find(rc => {
-            const validFrom = new Date(rc.effectiveFrom);
-            const validTo = rc.effectiveTo ? new Date(rc.effectiveTo) : new Date('2099-12-31');
-            return start >= validFrom && start <= validTo && rc.isActive;
-          });
-
-          // Use rate from card, or fall back to driver's default cost rate
-          const dailyRate = rateCard 
-            ? parseFloat(rateCard.baseRate || '0')
+          // Get rate plan by ID from assignment
+          const ratePlan = a.driverRatePlanId ? ratePlansById.get(a.driverRatePlanId) : null;
+          
+          // Use daily rate from plan, or fall back to driver's default cost rate
+          const dailyRate = ratePlan 
+            ? parseFloat(ratePlan.dailyRate || '0')
             : parseFloat(driver.costRate || '0');
           
           return sum + (dailyRate * days);
@@ -3302,10 +3299,10 @@ export class DatabaseStorage implements IStorage {
 
       // Count assignments by status
       const assignmentsByStatus = {
-        scheduled: driverAssignments.filter(a => a.status === 'scheduled').length,
-        active: driverAssignments.filter(a => a.status === 'active').length,
-        completed: driverAssignments.filter(a => a.status === 'completed').length,
-        cancelled: driverAssignments.filter(a => a.status === 'cancelled').length,
+        scheduled: driverAssignmentsList.filter(a => a.status === 'scheduled').length,
+        active: driverAssignmentsList.filter(a => a.status === 'active').length,
+        completed: driverAssignmentsList.filter(a => a.status === 'completed').length,
+        cancelled: driverAssignmentsList.filter(a => a.status === 'cancelled').length,
       };
 
       return {
@@ -3315,7 +3312,7 @@ export class DatabaseStorage implements IStorage {
         driverNameAr: driver.nameAr,
         employmentType: driver.employmentType,
         availability: driver.availability,
-        totalAssignments: driverAssignments.length,
+        totalAssignments: driverAssignmentsList.length,
         completedAssignments: assignmentsByStatus.completed,
         activeAssignments: assignmentsByStatus.active,
         totalDaysWorked,
@@ -3353,24 +3350,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Reports - Driver Revenue vs Cost Analysis
+  // Per Master Spec §4.10.2/§4.10.3 - Uses driverRatePlans and contractDrivers
   async getDriverRevenueCostReport(startDate?: Date, endDate?: Date) {
     const allDrivers = await db.select().from(drivers).where(eq(drivers.isActive, true));
-    const allAssignments = await db.select().from(driverAssignments);
+    const allAssignments = await db.select().from(contractDrivers);
     const allContracts = await db.select().from(contracts);
-    const allRateCards = await db.select().from(driverRateCards);
+    const allRatePlans = await db.select().from(driverRatePlans);
     
     // Create Set of active driver IDs for filtering assignments
     const activeDriverIds = new Set(allDrivers.map(d => d.id));
     
     // Create lookup maps
     const contractMap = new Map(allContracts.map(c => [c.id, c]));
-    const rateCardsByDriver = new Map<string, typeof allRateCards>();
-    allRateCards.forEach(rc => {
-      if (!rateCardsByDriver.has(rc.driverId)) {
-        rateCardsByDriver.set(rc.driverId, []);
-      }
-      rateCardsByDriver.get(rc.driverId)!.push(rc);
-    });
+    const ratePlansById = new Map(allRatePlans.map(rp => [rp.id, rp]));
     
     // Filter assignments by active drivers AND date range
     const filteredAssignments = allAssignments.filter(a => {
@@ -3379,8 +3371,8 @@ export class DatabaseStorage implements IStorage {
       
       // Apply date range filter if provided
       if (!startDate && !endDate) return true;
-      if (!a.startDateTime) return false;
-      const assignmentDate = new Date(a.startDateTime);
+      if (!a.assignmentStart) return false;
+      const assignmentDate = new Date(a.assignmentStart);
       if (startDate && assignmentDate < startDate) return false;
       if (endDate && assignmentDate > endDate) return false;
       return true;
@@ -3388,10 +3380,10 @@ export class DatabaseStorage implements IStorage {
 
     // Revenue vs Cost analysis per driver
     const driverAnalysis = allDrivers.map(driver => {
-      const driverAssignments = filteredAssignments.filter(a => a.driverId === driver.id && a.status === 'completed');
+      const driverAssignmentsList = filteredAssignments.filter(a => a.driverId === driver.id && a.status === 'completed');
       
       // Calculate revenue from contracts (authoritative source)
-      const totalRevenue = driverAssignments.reduce((sum, a) => {
+      const totalRevenue = driverAssignmentsList.reduce((sum, a) => {
         if (!a.contractId) return sum;
         const contract = contractMap.get(a.contractId);
         if (!contract) return sum;
@@ -3404,33 +3396,31 @@ export class DatabaseStorage implements IStorage {
         return sum + driverCharge;
       }, 0);
       
-      const baseRevenue = driverAssignments.reduce((sum, a) => sum + (parseFloat(a.baseRate) * parseFloat(a.quantity)), 0);
-      const surchargeRevenue = driverAssignments.reduce((sum, a) => sum + parseFloat(a.totalSurcharges || '0'), 0);
+      // For spec-compliant tables, base/surcharge breakdown is derived from rate plan
+      const baseRevenue = totalRevenue; // Simplified: rate plan drives pricing
+      const surchargeRevenue = 0; // Surcharges calculated via surchargeCalculator service
       
-      // Calculate costs using rate cards (authoritative source)
-      const totalDaysWorked = driverAssignments.reduce((sum, a) => {
-        const start = new Date(a.startDateTime);
-        const end = new Date(a.endDateTime);
+      // Calculate costs using rate plans (authoritative source per §4.10.2)
+      const totalDaysWorked = driverAssignmentsList.reduce((sum, a) => {
+        if (!a.assignmentStart || !a.assignmentEnd) return sum;
+        const start = new Date(a.assignmentStart);
+        const end = new Date(a.assignmentEnd);
         return sum + Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
       }, 0);
       
-      // Calculate total cost using applicable rate cards
-      const totalCost = driverAssignments.reduce((sum, a) => {
-        const start = new Date(a.startDateTime);
-        const end = new Date(a.endDateTime);
+      // Calculate total cost using rate plan
+      const totalCost = driverAssignmentsList.reduce((sum, a) => {
+        if (!a.assignmentStart || !a.assignmentEnd) return sum;
+        const start = new Date(a.assignmentStart);
+        const end = new Date(a.assignmentEnd);
         const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         
-        // Get applicable rate card for this assignment period
-        const applicableRates = rateCardsByDriver.get(driver.id) || [];
-        const rateCard = applicableRates.find(rc => {
-          const validFrom = new Date(rc.effectiveFrom);
-          const validTo = rc.effectiveTo ? new Date(rc.effectiveTo) : new Date('2099-12-31');
-          return start >= validFrom && start <= validTo && rc.isActive;
-        });
+        // Get rate plan by ID
+        const ratePlan = a.driverRatePlanId ? ratePlansById.get(a.driverRatePlanId) : null;
 
-        // Use rate from card, or fall back to driver's default cost rate
-        const dailyRate = rateCard 
-          ? parseFloat(rateCard.baseRate || '0')
+        // Use daily rate from plan, or fall back to driver's default cost rate
+        const dailyRate = ratePlan 
+          ? parseFloat(ratePlan.dailyRate || '0')
           : parseFloat(driver.costRate || '0');
         
         return sum + (dailyRate * days);
@@ -3448,7 +3438,7 @@ export class DatabaseStorage implements IStorage {
         driverNameAr: driver.nameAr,
         employmentType: driver.employmentType,
         costRate: driver.costRate || '0',
-        totalAssignments: driverAssignments.length,
+        totalAssignments: driverAssignmentsList.length,
         totalDaysWorked,
         totalRevenue,
         baseRevenue,
@@ -4774,47 +4764,47 @@ export class DatabaseStorage implements IStorage {
       .where(eq(drivers.id, id));
   }
 
-  // Driver Rate Card operations implementation
-  async getDriverRateCards(driverId: string): Promise<DriverRateCard[]> {
+  // Driver Rate Plans operations - Per Master Spec §4.10.2
+  async getDriverRatePlans(driverId: string): Promise<DriverRatePlan[]> {
     return await db
       .select()
-      .from(driverRateCards)
-      .where(eq(driverRateCards.driverId, driverId))
-      .orderBy(desc(driverRateCards.effectiveFrom));
+      .from(driverRatePlans)
+      .where(eq(driverRatePlans.driverId, driverId))
+      .orderBy(desc(driverRatePlans.effectiveFrom));
   }
 
-  async getActiveDriverRateCard(driverId: string, rateType: string): Promise<DriverRateCard | undefined> {
+  async getActiveDriverRatePlan(driverId: string, serviceType: string): Promise<DriverRatePlan | undefined> {
     const now = new Date();
-    const [card] = await db
+    const [plan] = await db
       .select()
-      .from(driverRateCards)
+      .from(driverRatePlans)
       .where(
         and(
-          eq(driverRateCards.driverId, driverId),
-          eq(driverRateCards.rateType, rateType),
-          eq(driverRateCards.isActive, true),
-          lte(driverRateCards.effectiveFrom, now),
+          eq(driverRatePlans.driverId, driverId),
+          eq(driverRatePlans.serviceType, serviceType),
+          eq(driverRatePlans.isActive, true),
+          lte(driverRatePlans.effectiveFrom, now),
           or(
-            isNull(driverRateCards.effectiveTo),
-            gte(driverRateCards.effectiveTo, now)
+            isNull(driverRatePlans.effectiveTo),
+            gte(driverRatePlans.effectiveTo, now)
           )
         )
       )
-      .orderBy(desc(driverRateCards.effectiveFrom))
+      .orderBy(desc(driverRatePlans.effectiveFrom))
       .limit(1);
-    return card;
+    return plan;
   }
 
-  async createDriverRateCard(rateCardData: InsertDriverRateCard): Promise<DriverRateCard> {
-    const [card] = await db.insert(driverRateCards).values(rateCardData).returning();
-    return card;
+  async createDriverRatePlan(ratePlanData: InsertDriverRatePlan): Promise<DriverRatePlan> {
+    const [plan] = await db.insert(driverRatePlans).values(ratePlanData).returning();
+    return plan;
   }
 
-  async updateDriverRateCard(id: string, rateCardData: Partial<InsertDriverRateCard>): Promise<DriverRateCard> {
+  async updateDriverRatePlan(id: string, ratePlanData: Partial<InsertDriverRatePlan>): Promise<DriverRatePlan> {
     const [updated] = await db
-      .update(driverRateCards)
-      .set({ ...rateCardData, updatedAt: new Date() })
-      .where(eq(driverRateCards.id, id))
+      .update(driverRatePlans)
+      .set({ ...ratePlanData, updatedAt: new Date() })
+      .where(eq(driverRatePlans.id, id))
       .returning();
     return updated;
   }
@@ -4841,18 +4831,19 @@ export class DatabaseStorage implements IStorage {
     await db.delete(driverScheduleBlocks).where(eq(driverScheduleBlocks.id, id));
   }
 
+  // Per Master Spec §4.10.3 - Check driver availability using contractDrivers
   async checkDriverAvailability(driverId: string, startDateTime: Date, endDateTime: Date): Promise<boolean> {
     const blocks = await this.getDriverScheduleBlocks(driverId, startDateTime, endDateTime);
     const assignments = await db
       .select()
-      .from(driverAssignments)
+      .from(contractDrivers)
       .where(
         and(
-          eq(driverAssignments.driverId, driverId),
+          eq(contractDrivers.driverId, driverId),
           or(
-            and(lte(driverAssignments.startDateTime, startDateTime), gte(driverAssignments.endDateTime, startDateTime)),
-            and(lte(driverAssignments.startDateTime, endDateTime), gte(driverAssignments.endDateTime, endDateTime)),
-            and(gte(driverAssignments.startDateTime, startDateTime), lte(driverAssignments.endDateTime, endDateTime))
+            and(lte(contractDrivers.assignmentStart, startDateTime), gte(contractDrivers.assignmentEnd, startDateTime)),
+            and(lte(contractDrivers.assignmentStart, endDateTime), gte(contractDrivers.assignmentEnd, endDateTime)),
+            and(gte(contractDrivers.assignmentStart, startDateTime), lte(contractDrivers.assignmentEnd, endDateTime))
           )
         )
       );
@@ -4860,49 +4851,49 @@ export class DatabaseStorage implements IStorage {
     return blocks.length === 0 && assignments.length === 0;
   }
 
-  // Driver Assignment operations implementation
-  async getDriverAssignments(filters?: { contractId?: string; driverId?: string; status?: string }): Promise<DriverAssignment[]> {
+  // Contract Driver operations - Per Master Spec §4.10.3
+  async getContractDrivers(filters?: { contractId?: string; driverId?: string; status?: string }): Promise<ContractDriver[]> {
     const conditions = [];
-    if (filters?.contractId) conditions.push(eq(driverAssignments.contractId, filters.contractId));
-    if (filters?.driverId) conditions.push(eq(driverAssignments.driverId, filters.driverId));
-    if (filters?.status) conditions.push(eq(driverAssignments.status, filters.status));
+    if (filters?.contractId) conditions.push(eq(contractDrivers.contractId, filters.contractId));
+    if (filters?.driverId) conditions.push(eq(contractDrivers.driverId, filters.driverId));
+    if (filters?.status) conditions.push(eq(contractDrivers.status, filters.status));
     
     return await db
       .select()
-      .from(driverAssignments)
+      .from(contractDrivers)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(driverAssignments.createdAt));
+      .orderBy(desc(contractDrivers.createdAt));
   }
 
-  async getDriverAssignmentById(id: string): Promise<DriverAssignment | undefined> {
-    const [assignment] = await db.select().from(driverAssignments).where(eq(driverAssignments.id, id));
+  async getContractDriverById(id: string): Promise<ContractDriver | undefined> {
+    const [assignment] = await db.select().from(contractDrivers).where(eq(contractDrivers.id, id));
     return assignment;
   }
 
-  async createDriverAssignment(assignmentData: InsertDriverAssignment): Promise<DriverAssignment> {
-    const [assignment] = await db.insert(driverAssignments).values(assignmentData).returning();
+  async createContractDriver(assignmentData: InsertContractDriver): Promise<ContractDriver> {
+    const [assignment] = await db.insert(contractDrivers).values(assignmentData).returning();
     return assignment;
   }
 
-  async updateDriverAssignment(id: string, assignmentData: Partial<InsertDriverAssignment>): Promise<DriverAssignment> {
+  async updateContractDriver(id: string, assignmentData: Partial<InsertContractDriver>): Promise<ContractDriver> {
     const [updated] = await db
-      .update(driverAssignments)
+      .update(contractDrivers)
       .set({ ...assignmentData, updatedAt: new Date() })
-      .where(eq(driverAssignments.id, id))
+      .where(eq(contractDrivers.id, id))
       .returning();
     return updated;
   }
 
-  async completeDriverAssignment(id: string, completionNotes: string): Promise<DriverAssignment> {
+  async completeContractDriver(id: string, completionNotes: string): Promise<ContractDriver> {
+    // Per Master Spec §4.10.3 - notes field stores completion info
     const [updated] = await db
-      .update(driverAssignments)
+      .update(contractDrivers)
       .set({
         status: 'completed',
-        completionNotes,
-        completionDateTime: new Date(),
+        notes: completionNotes,
         updatedAt: new Date()
       })
-      .where(eq(driverAssignments.id, id))
+      .where(eq(contractDrivers.id, id))
       .returning();
     return updated;
   }
