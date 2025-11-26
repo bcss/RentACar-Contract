@@ -17,7 +17,8 @@ import { Router } from 'express';
 import { db } from '../db';
 import { 
   vehicleClasses, vehicleGroups, notificationPurposes, notificationRoutes,
-  cronJobDefinitions, sequences, blacklistEntries, seasonalTariffs, maintenanceJobs
+  cronJobDefinitions, sequences, blacklistEntries, seasonalTariffs, maintenanceJobs,
+  addons, packages, packageAddons
 } from '@shared/schema';
 import { eq, and, desc, asc, isNull, or, like, sql } from 'drizzle-orm';
 
@@ -793,6 +794,280 @@ router.post('/maintenance-jobs/:id/complete', async (req, res) => {
   } catch (error) {
     console.error('Error completing maintenance job:', error);
     res.status(500).json({ error: 'Failed to complete maintenance job' });
+  }
+});
+
+// ============================================================================
+// ADDONS - Rental add-on items (GPS, baby seat, insurance upgrades, etc.)
+// ============================================================================
+
+// GET /api/lookup/addons - List all addons
+router.get('/addons', async (req, res) => {
+  try {
+    const includeInactive = req.query.includeInactive === 'true';
+    const category = req.query.category as string;
+    const branchId = req.query.branchId as string;
+    
+    const conditions = [];
+    if (!includeInactive) {
+      conditions.push(eq(addons.isActive, true));
+    }
+    if (category) {
+      conditions.push(eq(addons.category, category));
+    }
+    if (branchId) {
+      conditions.push(or(eq(addons.branchId, branchId), isNull(addons.branchId))!);
+    }
+    
+    const items = await db.select().from(addons)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(asc(addons.sortOrder));
+    res.json(items);
+  } catch (error) {
+    console.error('Error fetching addons:', error);
+    res.status(500).json({ error: 'Failed to fetch addons' });
+  }
+});
+
+// GET /api/lookup/addons/:id
+router.get('/addons/:id', async (req, res) => {
+  try {
+    const [addon] = await db.select().from(addons)
+      .where(eq(addons.id, req.params.id));
+    if (!addon) {
+      return res.status(404).json({ error: 'Addon not found' });
+    }
+    res.json(addon);
+  } catch (error) {
+    console.error('Error fetching addon:', error);
+    res.status(500).json({ error: 'Failed to fetch addon' });
+  }
+});
+
+// POST /api/lookup/addons
+router.post('/addons', async (req, res) => {
+  try {
+    const [newAddon] = await db.insert(addons).values({
+      ...req.body,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    res.status(201).json(newAddon);
+  } catch (error) {
+    console.error('Error creating addon:', error);
+    res.status(500).json({ error: 'Failed to create addon' });
+  }
+});
+
+// PATCH /api/lookup/addons/:id
+router.patch('/addons/:id', async (req, res) => {
+  try {
+    const [updated] = await db.update(addons)
+      .set({ ...req.body, updatedAt: new Date() })
+      .where(eq(addons.id, req.params.id))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: 'Addon not found' });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error('Error updating addon:', error);
+    res.status(500).json({ error: 'Failed to update addon' });
+  }
+});
+
+// ============================================================================
+// PACKAGES - Rental packages that bundle addons
+// ============================================================================
+
+// GET /api/lookup/packages - List all packages
+router.get('/packages', async (req, res) => {
+  try {
+    const includeInactive = req.query.includeInactive === 'true';
+    const packageType = req.query.packageType as string;
+    const vehicleClassId = req.query.vehicleClassId as string;
+    
+    const conditions = [];
+    if (!includeInactive) {
+      conditions.push(eq(packages.isActive, true));
+    }
+    if (packageType) {
+      conditions.push(eq(packages.packageType, packageType));
+    }
+    if (vehicleClassId) {
+      conditions.push(or(eq(packages.vehicleClassId, vehicleClassId), isNull(packages.vehicleClassId))!);
+    }
+    
+    const items = await db.select().from(packages)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(asc(packages.sortOrder));
+    res.json(items);
+  } catch (error) {
+    console.error('Error fetching packages:', error);
+    res.status(500).json({ error: 'Failed to fetch packages' });
+  }
+});
+
+// GET /api/lookup/packages/:id - Get package with its addons
+router.get('/packages/:id', async (req, res) => {
+  try {
+    const [pkg] = await db.select().from(packages)
+      .where(eq(packages.id, req.params.id));
+    if (!pkg) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+    
+    // Get package addons with full addon details
+    const pkgAddons = await db.select({
+      packageAddon: packageAddons,
+      addon: addons
+    })
+    .from(packageAddons)
+    .innerJoin(addons, eq(packageAddons.addonId, addons.id))
+    .where(eq(packageAddons.packageId, req.params.id))
+    .orderBy(asc(packageAddons.sortOrder));
+    
+    res.json({
+      ...pkg,
+      includedAddons: pkgAddons.map(pa => ({
+        ...pa.addon,
+        quantity: pa.packageAddon.quantity,
+        isRequired: pa.packageAddon.isRequired,
+        overridePrice: pa.packageAddon.overridePrice
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching package:', error);
+    res.status(500).json({ error: 'Failed to fetch package' });
+  }
+});
+
+// POST /api/lookup/packages
+router.post('/packages', async (req, res) => {
+  try {
+    const { includedAddons, ...packageData } = req.body;
+    
+    const [newPackage] = await db.insert(packages).values({
+      ...packageData,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    
+    // Add package addons if provided
+    if (includedAddons && Array.isArray(includedAddons)) {
+      for (const addon of includedAddons) {
+        await db.insert(packageAddons).values({
+          packageId: newPackage.id,
+          addonId: addon.addonId,
+          quantity: addon.quantity || 1,
+          isRequired: addon.isRequired !== false,
+          overridePrice: addon.overridePrice,
+          sortOrder: addon.sortOrder || 0
+        });
+      }
+    }
+    
+    res.status(201).json(newPackage);
+  } catch (error) {
+    console.error('Error creating package:', error);
+    res.status(500).json({ error: 'Failed to create package' });
+  }
+});
+
+// PATCH /api/lookup/packages/:id
+router.patch('/packages/:id', async (req, res) => {
+  try {
+    const { includedAddons, ...packageData } = req.body;
+    
+    const [updated] = await db.update(packages)
+      .set({ ...packageData, updatedAt: new Date() })
+      .where(eq(packages.id, req.params.id))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+    
+    // Update package addons if provided
+    if (includedAddons && Array.isArray(includedAddons)) {
+      // Remove existing addons
+      await db.delete(packageAddons).where(eq(packageAddons.packageId, req.params.id));
+      
+      // Add new addons
+      for (const addon of includedAddons) {
+        await db.insert(packageAddons).values({
+          packageId: req.params.id,
+          addonId: addon.addonId,
+          quantity: addon.quantity || 1,
+          isRequired: addon.isRequired !== false,
+          overridePrice: addon.overridePrice,
+          sortOrder: addon.sortOrder || 0
+        });
+      }
+    }
+    
+    res.json(updated);
+  } catch (error) {
+    console.error('Error updating package:', error);
+    res.status(500).json({ error: 'Failed to update package' });
+  }
+});
+
+// ============================================================================
+// PACKAGE ADDONS - Junction table for packages and addons
+// ============================================================================
+
+// GET /api/lookup/package-addons - List addons for a package
+router.get('/package-addons', async (req, res) => {
+  try {
+    const packageId = req.query.packageId as string;
+    if (!packageId) {
+      return res.status(400).json({ error: 'packageId is required' });
+    }
+    
+    const items = await db.select({
+      packageAddon: packageAddons,
+      addon: addons
+    })
+    .from(packageAddons)
+    .innerJoin(addons, eq(packageAddons.addonId, addons.id))
+    .where(eq(packageAddons.packageId, packageId))
+    .orderBy(asc(packageAddons.sortOrder));
+    
+    res.json(items);
+  } catch (error) {
+    console.error('Error fetching package addons:', error);
+    res.status(500).json({ error: 'Failed to fetch package addons' });
+  }
+});
+
+// POST /api/lookup/package-addons - Add addon to package
+router.post('/package-addons', async (req, res) => {
+  try {
+    const [newItem] = await db.insert(packageAddons).values({
+      ...req.body,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    res.status(201).json(newItem);
+  } catch (error) {
+    console.error('Error adding addon to package:', error);
+    res.status(500).json({ error: 'Failed to add addon to package' });
+  }
+});
+
+// DELETE /api/lookup/package-addons/:id
+router.delete('/package-addons/:id', async (req, res) => {
+  try {
+    const [deleted] = await db.delete(packageAddons)
+      .where(eq(packageAddons.id, req.params.id))
+      .returning();
+    if (!deleted) {
+      return res.status(404).json({ error: 'Package addon not found' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error removing addon from package:', error);
+    res.status(500).json({ error: 'Failed to remove addon from package' });
   }
 });
 

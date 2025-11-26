@@ -4,7 +4,8 @@ import {
   auditLogs,
   accessLogs,
   contractEdits,
-  contractCounter,
+  contractCounter, // LEGACY - kept for backward compatibility, use sequences instead
+  sequences, // NEW - Master Spec compliant sequence generator
   systemErrors,
   companySettings,
   customers,
@@ -157,7 +158,7 @@ import {
   type InsertChannelPreference,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte } from "drizzle-orm";
+import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte, isNull } from "drizzle-orm";
 import { calculateExtraKmFee, calculateTotalExtraCharges } from "./services/contractFinancials";
 
 // Interface for storage operations
@@ -1214,25 +1215,41 @@ export class DatabaseStorage implements IStorage {
 
   // Contract counter
   async getNextContractNumber(): Promise<number> {
-    // Initialize counter if it doesn't exist
-    const [counter] = await db.select().from(contractCounter);
+    // DEEP INTEGRATION: Using sequences table (Master Spec compliant)
+    // Instead of legacy contract_counter, use the sequences table for all numbering
     
-    if (!counter) {
-      await db.insert(contractCounter).values({
-        id: 'singleton',
-        currentNumber: 15500,
-      });
-      return 15500;
+    const [seq] = await db.select().from(sequences)
+      .where(and(
+        eq(sequences.sequenceType, 'contract'),
+        eq(sequences.isActive, true),
+        isNull(sequences.branchId) // Global sequence (not branch-specific)
+      ));
+    
+    if (!seq) {
+      // Fallback: Initialize sequence if it doesn't exist
+      const [newSeq] = await db.insert(sequences).values({
+        sequenceType: 'contract',
+        prefix: 'KR-',
+        currentValue: 10014, // Continue from existing contract numbers
+        incrementBy: 1,
+        paddingLength: 6,
+        includeYear: true,
+        yearFormat: 'YY',
+        isActive: true,
+      }).returning();
+      return newSeq.currentValue;
     }
 
-    // Increment and return
-    const [updated] = await db
-      .update(contractCounter)
-      .set({ currentNumber: sql`${contractCounter.currentNumber} + 1` })
-      .where(eq(contractCounter.id, 'singleton'))
-      .returning();
+    // Atomically increment and return next value
+    const nextValue = seq.currentValue + seq.incrementBy;
+    await db.update(sequences)
+      .set({ 
+        currentValue: nextValue,
+        updatedAt: new Date()
+      })
+      .where(eq(sequences.id, seq.id));
     
-    return updated.currentNumber;
+    return nextValue;
   }
 
   // Customer operations

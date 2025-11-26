@@ -12,6 +12,7 @@ import {
   numeric,
   serial,
   uniqueIndex,
+  unique,
   date,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -4653,6 +4654,113 @@ export const insertMaintenanceJobSchema = createInsertSchema(maintenanceJobs).om
 });
 export type InsertMaintenanceJob = z.infer<typeof insertMaintenanceJobSchema>;
 export type MaintenanceJob = typeof maintenanceJobs.$inferSelect;
+
+// ===========================
+// 10. addons - Rental add-on items (GPS, baby seat, insurance upgrades, etc.)
+// ===========================
+export const addons = pgTable("addons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 30 }).notNull().unique(), // e.g., 'GPS', 'BABY_SEAT', 'CDW_UPGRADE'
+  nameEn: varchar("name_en", { length: 100 }).notNull(),
+  nameAr: varchar("name_ar", { length: 100 }),
+  descriptionEn: text("description_en"),
+  descriptionAr: text("description_ar"),
+  category: varchar("category", { length: 30 }).notNull(), // 'equipment', 'insurance', 'service', 'convenience'
+  pricingType: varchar("pricing_type", { length: 20 }).notNull().default('daily'), // 'daily', 'one_time', 'percentage'
+  dailyRate: numeric("daily_rate", { precision: 12, scale: 2 }),
+  oneTimeRate: numeric("one_time_rate", { precision: 12, scale: 2 }),
+  percentageRate: numeric("percentage_rate", { precision: 5, scale: 2 }), // % of rental cost
+  maxQuantity: integer("max_quantity").default(1), // How many can be added to a contract
+  isStackable: boolean("is_stackable").default(false), // Can multiple be added
+  requiresDeposit: boolean("requires_deposit").default(false),
+  depositAmount: numeric("deposit_amount", { precision: 12, scale: 2 }),
+  taxable: boolean("taxable").default(true),
+  branchId: varchar("branch_id").references(() => branches.id), // null = all branches
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_addons_code").on(table.code),
+  index("idx_addons_category").on(table.category),
+  index("idx_addons_active").on(table.isActive),
+  index("idx_addons_branch").on(table.branchId),
+]);
+
+export const insertAddonSchema = createInsertSchema(addons).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAddon = z.infer<typeof insertAddonSchema>;
+export type Addon = typeof addons.$inferSelect;
+
+// ===========================
+// 11. packages - Rental packages that bundle addons with special pricing
+// ===========================
+export const packages = pgTable("packages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 30 }).notNull().unique(), // e.g., 'FAMILY_PACK', 'BUSINESS_TRAVELER'
+  nameEn: varchar("name_en", { length: 100 }).notNull(),
+  nameAr: varchar("name_ar", { length: 100 }),
+  descriptionEn: text("description_en"),
+  descriptionAr: text("description_ar"),
+  vehicleClassId: varchar("vehicle_class_id").references(() => vehicleClasses.id), // null = all classes
+  packageType: varchar("package_type", { length: 30 }).notNull(), // 'value', 'premium', 'corporate', 'promotional'
+  pricingType: varchar("pricing_type", { length: 20 }).notNull().default('fixed'), // 'fixed', 'percentage_discount'
+  fixedPrice: numeric("fixed_price", { precision: 12, scale: 2 }), // Total package price
+  discountPercentage: numeric("discount_percentage", { precision: 5, scale: 2 }), // % off combined addon prices
+  minimumRentalDays: integer("minimum_rental_days").default(1),
+  maximumRentalDays: integer("maximum_rental_days"), // null = no limit
+  validFrom: date("valid_from"),
+  validUntil: date("valid_until"),
+  branchId: varchar("branch_id").references(() => branches.id), // null = all branches
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_packages_code").on(table.code),
+  index("idx_packages_type").on(table.packageType),
+  index("idx_packages_class").on(table.vehicleClassId),
+  index("idx_packages_active").on(table.isActive),
+  index("idx_packages_valid").on(table.validFrom, table.validUntil),
+]);
+
+export const insertPackageSchema = createInsertSchema(packages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPackage = z.infer<typeof insertPackageSchema>;
+export type Package = typeof packages.$inferSelect;
+
+// ===========================
+// 12. package_addons - Junction table linking packages to their included addons
+// ===========================
+export const packageAddons = pgTable("package_addons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  packageId: varchar("package_id").references(() => packages.id).notNull(),
+  addonId: varchar("addon_id").references(() => addons.id).notNull(),
+  quantity: integer("quantity").default(1),
+  isRequired: boolean("is_required").default(true), // Required vs optional addon in package
+  overridePrice: numeric("override_price", { precision: 12, scale: 2 }), // Override addon's default price
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_package_addons_package").on(table.packageId),
+  index("idx_package_addons_addon").on(table.addonId),
+  unique("uq_package_addon").on(table.packageId, table.addonId),
+]);
+
+export const insertPackageAddonSchema = createInsertSchema(packageAddons).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPackageAddon = z.infer<typeof insertPackageAddonSchema>;
+export type PackageAddon = typeof packageAddons.$inferSelect;
 
 // ===========================
 // Predictive Report Response Types
