@@ -4300,6 +4300,361 @@ export type InsertSystemSettings = z.infer<typeof insertSystemSettingsSchema>;
 export type SystemSettings = typeof systemSettings.$inferSelect;
 
 // ===========================
+// MASTER SPEC REQUIRED TABLES (9 items - Per User Requirements)
+// ===========================
+
+// 1. blacklist_entries - Separate blacklist tracking table
+export const blacklistEntries = pgTable("blacklist_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 20 }).notNull(), // 'customer', 'company', 'sponsor'
+  entityId: varchar("entity_id").notNull(), // FK to customers/companies/sponsors
+  blacklistStatus: varchar("blacklist_status", { length: 20 }).notNull().default('none'), // none, watch, soft_block, hard_block
+  reason: text("reason"),
+  reasonAr: text("reason_ar"),
+  evidenceDocuments: jsonb("evidence_documents").$type<string[]>().default([]),
+  blockedActions: jsonb("blocked_actions").$type<string[]>().default([]), // ['new_contract', 'extension', 'all']
+  effectiveFrom: timestamp("effective_from", { withTimezone: true }).defaultNow(),
+  effectiveUntil: timestamp("effective_until", { withTimezone: true }),
+  addedBy: varchar("added_by").references(() => users.id),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  notes: text("notes"),
+  branchId: varchar("branch_id").references(() => branches.id), // Branch scope or null for global
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_blacklist_entity").on(table.entityType, table.entityId),
+  index("idx_blacklist_status").on(table.blacklistStatus),
+  index("idx_blacklist_active").on(table.isActive),
+  index("idx_blacklist_branch").on(table.branchId),
+]);
+
+export const insertBlacklistEntrySchema = createInsertSchema(blacklistEntries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertBlacklistEntry = z.infer<typeof insertBlacklistEntrySchema>;
+export type BlacklistEntry = typeof blacklistEntries.$inferSelect;
+
+// 2. vehicle_classes - Lookup table for vehicle classes (Economy, Compact, SUV, Luxury, etc.)
+export const vehicleClasses = pgTable("vehicle_classes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 20 }).notNull().unique(), // 'ECO', 'COM', 'SUV', 'LUX', 'VAN'
+  name: varchar("name", { length: 100 }).notNull(),
+  nameAr: varchar("name_ar", { length: 100 }),
+  description: text("description"),
+  descriptionAr: text("description_ar"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  defaultDailyRate: numeric("default_daily_rate", { precision: 12, scale: 2 }),
+  defaultWeeklyRate: numeric("default_weekly_rate", { precision: 12, scale: 2 }),
+  defaultMonthlyRate: numeric("default_monthly_rate", { precision: 12, scale: 2 }),
+  defaultDeposit: numeric("default_deposit", { precision: 12, scale: 2 }),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_vehicle_classes_code").on(table.code),
+  index("idx_vehicle_classes_active").on(table.isActive),
+  index("idx_vehicle_classes_sort").on(table.sortOrder),
+]);
+
+export const insertVehicleClassSchema = createInsertSchema(vehicleClasses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVehicleClass = z.infer<typeof insertVehicleClassSchema>;
+export type VehicleClass = typeof vehicleClasses.$inferSelect;
+
+// 3. vehicle_groups - Lookup table for vehicle groups/categories
+export const vehicleGroups = pgTable("vehicle_groups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 20 }).notNull().unique(), // 'SEDAN', 'HATCH', 'CROSSOVER', 'PICKUP'
+  name: varchar("name", { length: 100 }).notNull(),
+  nameAr: varchar("name_ar", { length: 100 }),
+  description: text("description"),
+  descriptionAr: text("description_ar"),
+  vehicleClassId: varchar("vehicle_class_id").references(() => vehicleClasses.id), // Parent class
+  sortOrder: integer("sort_order").notNull().default(0),
+  seatCapacity: integer("seat_capacity"),
+  luggageCapacity: integer("luggage_capacity"), // Number of bags
+  fuelType: varchar("fuel_type", { length: 20 }), // 'petrol', 'diesel', 'electric', 'hybrid'
+  transmission: varchar("transmission", { length: 20 }), // 'automatic', 'manual'
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_vehicle_groups_code").on(table.code),
+  index("idx_vehicle_groups_class").on(table.vehicleClassId),
+  index("idx_vehicle_groups_active").on(table.isActive),
+  index("idx_vehicle_groups_sort").on(table.sortOrder),
+]);
+
+export const insertVehicleGroupSchema = createInsertSchema(vehicleGroups).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVehicleGroup = z.infer<typeof insertVehicleGroupSchema>;
+export type VehicleGroup = typeof vehicleGroups.$inferSelect;
+
+// 4. seasonal_tariffs - Seasonal pricing configuration
+export const seasonalTariffs = pgTable("seasonal_tariffs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 100 }).notNull(),
+  nameAr: varchar("name_ar", { length: 100 }),
+  seasonType: varchar("season_type", { length: 30 }).notNull(), // 'peak', 'off_peak', 'holiday', 'event', 'ramadan', 'eid'
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  adjustmentType: varchar("adjustment_type", { length: 20 }).notNull(), // 'percentage', 'fixed_amount'
+  adjustmentValue: numeric("adjustment_value", { precision: 12, scale: 2 }).notNull(), // +20 for 20% increase, -50 for AED 50 discount
+  applyTo: varchar("apply_to", { length: 20 }).notNull().default('all'), // 'all', 'daily', 'weekly', 'monthly'
+  vehicleClassId: varchar("vehicle_class_id").references(() => vehicleClasses.id), // null = all classes
+  vehicleGroupId: varchar("vehicle_group_id").references(() => vehicleGroups.id), // null = all groups
+  branchId: varchar("branch_id").references(() => branches.id), // null = all branches
+  priority: integer("priority").notNull().default(0), // Higher = takes precedence
+  isStackable: boolean("is_stackable").notNull().default(false), // Can combine with other seasonal tariffs
+  minimumRentalDays: integer("minimum_rental_days"),
+  maximumRentalDays: integer("maximum_rental_days"),
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_seasonal_tariffs_dates").on(table.startDate, table.endDate),
+  index("idx_seasonal_tariffs_type").on(table.seasonType),
+  index("idx_seasonal_tariffs_class").on(table.vehicleClassId),
+  index("idx_seasonal_tariffs_branch").on(table.branchId),
+  index("idx_seasonal_tariffs_active").on(table.isActive),
+  index("idx_seasonal_tariffs_priority").on(table.priority),
+]);
+
+export const insertSeasonalTariffSchema = createInsertSchema(seasonalTariffs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSeasonalTariff = z.infer<typeof insertSeasonalTariffSchema>;
+export type SeasonalTariff = typeof seasonalTariffs.$inferSelect;
+
+// 5. notification_purposes - Lookup table for notification types/purposes
+export const notificationPurposes = pgTable("notification_purposes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 50 }).notNull().unique(), // 'CONTRACT_ACTIVATION', 'PAYMENT_CONFIRMATION', 'OTP_VERIFICATION'
+  name: varchar("name", { length: 100 }).notNull(),
+  nameAr: varchar("name_ar", { length: 100 }),
+  description: text("description"),
+  category: varchar("category", { length: 30 }).notNull(), // 'contract', 'payment', 'otp', 'reminder', 'alert', 'marketing'
+  defaultChannels: jsonb("default_channels").$type<string[]>().default(['sms', 'email']), // ['sms', 'email', 'push', 'whatsapp']
+  isMandatory: boolean("is_mandatory").notNull().default(false), // Cannot be disabled
+  isTransactional: boolean("is_transactional").notNull().default(true), // vs marketing
+  requiresOtp: boolean("requires_otp").notNull().default(false),
+  cooldownMinutes: integer("cooldown_minutes"), // Minimum time between same notification to same recipient
+  maxRetries: integer("max_retries").notNull().default(3),
+  retryDelaySeconds: integer("retry_delay_seconds").notNull().default(60),
+  priority: varchar("priority", { length: 10 }).notNull().default('normal'), // 'critical', 'high', 'normal', 'low'
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_notification_purposes_code").on(table.code),
+  index("idx_notification_purposes_category").on(table.category),
+  index("idx_notification_purposes_active").on(table.isActive),
+]);
+
+export const insertNotificationPurposeSchema = createInsertSchema(notificationPurposes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertNotificationPurpose = z.infer<typeof insertNotificationPurposeSchema>;
+export type NotificationPurpose = typeof notificationPurposes.$inferSelect;
+
+// 6. notification_routes - Configurable notification routing rules
+export const notificationRoutes = pgTable("notification_routes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  purposeId: varchar("purpose_id").references(() => notificationPurposes.id).notNull(),
+  channel: varchar("channel", { length: 20 }).notNull(), // 'sms', 'email', 'push', 'whatsapp'
+  providerId: varchar("provider_id").references(() => communicationProviders.id),
+  priority: integer("priority").notNull().default(1), // 1 = primary, 2 = fallback, etc.
+  isEnabled: boolean("is_enabled").notNull().default(true),
+  conditions: jsonb("conditions").$type<Record<string, any>>(), // {"country": "AE", "time_range": "09:00-18:00"}
+  rateLimit: integer("rate_limit"), // Max messages per hour via this route
+  costPerMessage: numeric("cost_per_message", { precision: 10, scale: 4 }),
+  branchId: varchar("branch_id").references(() => branches.id), // null = all branches
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_notification_routes_purpose").on(table.purposeId),
+  index("idx_notification_routes_channel").on(table.channel),
+  index("idx_notification_routes_provider").on(table.providerId),
+  index("idx_notification_routes_branch").on(table.branchId),
+  index("idx_notification_routes_enabled").on(table.isEnabled),
+  index("idx_notification_routes_priority").on(table.priority),
+]);
+
+export const insertNotificationRouteSchema = createInsertSchema(notificationRoutes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertNotificationRoute = z.infer<typeof insertNotificationRouteSchema>;
+export type NotificationRoute = typeof notificationRoutes.$inferSelect;
+
+// 7. cron_job_definitions - Database-driven cron job configuration
+export const cronJobDefinitions = pgTable("cron_job_definitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  cronExpression: varchar("cron_expression", { length: 50 }).notNull(), // '0 2 * * *' for 2 AM daily
+  timezone: varchar("timezone", { length: 50 }).notNull().default('Asia/Dubai'),
+  handler: varchar("handler", { length: 100 }).notNull(), // 'riskScoreCalculation', 'documentExpiryCheck'
+  handlerConfig: jsonb("handler_config").$type<Record<string, any>>(), // Handler-specific configuration
+  isEnabled: boolean("is_enabled").notNull().default(true),
+  retryOnFailure: boolean("retry_on_failure").notNull().default(true),
+  maxRetries: integer("max_retries").notNull().default(3),
+  retryDelayMinutes: integer("retry_delay_minutes").notNull().default(5),
+  timeoutMinutes: integer("timeout_minutes").notNull().default(30),
+  alertOnFailure: boolean("alert_on_failure").notNull().default(true),
+  alertRecipients: jsonb("alert_recipients").$type<string[]>().default([]), // Email addresses
+  lastRunAt: timestamp("last_run_at", { withTimezone: true }),
+  lastRunStatus: varchar("last_run_status", { length: 20 }), // 'success', 'failed', 'timeout', 'skipped'
+  lastRunDurationMs: integer("last_run_duration_ms"),
+  lastErrorMessage: text("last_error_message"),
+  nextRunAt: timestamp("next_run_at", { withTimezone: true }),
+  runCount: integer("run_count").notNull().default(0),
+  failureCount: integer("failure_count").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_cron_jobs_name").on(table.name),
+  index("idx_cron_jobs_enabled").on(table.isEnabled),
+  index("idx_cron_jobs_next_run").on(table.nextRunAt),
+  index("idx_cron_jobs_status").on(table.lastRunStatus),
+]);
+
+export const insertCronJobDefinitionSchema = createInsertSchema(cronJobDefinitions).omit({
+  id: true,
+  lastRunAt: true,
+  lastRunStatus: true,
+  lastRunDurationMs: true,
+  lastErrorMessage: true,
+  nextRunAt: true,
+  runCount: true,
+  failureCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCronJobDefinition = z.infer<typeof insertCronJobDefinitionSchema>;
+export type CronJobDefinition = typeof cronJobDefinitions.$inferSelect;
+
+// 8. sequences - Dedicated sequence tracking table
+export const sequences = pgTable("sequences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sequenceType: varchar("sequence_type", { length: 50 }).notNull(), // 'contract', 'invoice', 'receipt', 'payment', 'incident'
+  prefix: varchar("prefix", { length: 20 }).notNull().default(''), // 'CNT-', 'INV-', 'RCP-'
+  suffix: varchar("suffix", { length: 20 }).notNull().default(''),
+  currentValue: integer("current_value").notNull().default(0),
+  incrementBy: integer("increment_by").notNull().default(1),
+  minValue: integer("min_value").notNull().default(1),
+  maxValue: integer("max_value").notNull().default(999999999),
+  paddingLength: integer("padding_length").notNull().default(6), // Zero padding: 000001
+  resetPeriod: varchar("reset_period", { length: 20 }), // 'yearly', 'monthly', 'daily', null for never
+  lastResetAt: timestamp("last_reset_at", { withTimezone: true }),
+  includeYear: boolean("include_year").notNull().default(false), // CNT-2025-000001
+  includeMonth: boolean("include_month").notNull().default(false),
+  yearFormat: varchar("year_format", { length: 10 }).notNull().default('YYYY'), // 'YYYY' or 'YY'
+  branchId: varchar("branch_id").references(() => branches.id), // null = global sequence
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_sequences_type").on(table.sequenceType),
+  index("idx_sequences_branch").on(table.branchId),
+  index("idx_sequences_active").on(table.isActive),
+  uniqueIndex("idx_sequences_type_branch").on(table.sequenceType, table.branchId),
+]);
+
+export const insertSequenceSchema = createInsertSchema(sequences).omit({
+  id: true,
+  currentValue: true,
+  lastResetAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSequence = z.infer<typeof insertSequenceSchema>;
+export type Sequence = typeof sequences.$inferSelect;
+
+// 9. maintenance_jobs - Dedicated maintenance job tracking (separate from service records)
+export const maintenanceJobs = pgTable("maintenance_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  vehicleId: varchar("vehicle_id").references(() => vehicles.id).notNull(),
+  branchId: varchar("branch_id").references(() => branches.id).notNull(),
+  jobNumber: varchar("job_number", { length: 50 }).unique(), // Auto-generated: MNT-2025-000001
+  jobType: varchar("job_type", { length: 30 }).notNull(), // 'scheduled', 'unscheduled', 'inspection', 'repair', 'body_work', 'accident_repair'
+  priority: varchar("priority", { length: 10 }).notNull().default('normal'), // 'critical', 'high', 'normal', 'low'
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // 'pending', 'scheduled', 'in_progress', 'on_hold', 'completed', 'cancelled'
+  title: varchar("title", { length: 200 }).notNull(),
+  titleAr: varchar("title_ar", { length: 200 }),
+  description: text("description"),
+  descriptionAr: text("description_ar"),
+  reportedIssues: jsonb("reported_issues").$type<string[]>().default([]),
+  diagnosedIssues: jsonb("diagnosed_issues").$type<string[]>().default([]),
+  partsRequired: jsonb("parts_required").$type<{ partName: string; quantity: number; cost: number; }[]>().default([]),
+  laborCost: numeric("labor_cost", { precision: 12, scale: 2 }),
+  partsCost: numeric("parts_cost", { precision: 12, scale: 2 }),
+  totalCost: numeric("total_cost", { precision: 12, scale: 2 }),
+  vendorId: varchar("vendor_id"), // External service provider
+  vendorName: varchar("vendor_name", { length: 200 }),
+  vendorInvoice: varchar("vendor_invoice", { length: 100 }),
+  odometerAtJob: integer("odometer_at_job"),
+  plannedStartDate: timestamp("planned_start_date", { withTimezone: true }),
+  plannedEndDate: timestamp("planned_end_date", { withTimezone: true }),
+  actualStartDate: timestamp("actual_start_date", { withTimezone: true }),
+  actualEndDate: timestamp("actual_end_date", { withTimezone: true }),
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  completedBy: varchar("completed_by").references(() => users.id),
+  completionNotes: text("completion_notes"),
+  qualityCheckPassed: boolean("quality_check_passed"),
+  qualityCheckBy: varchar("quality_check_by").references(() => users.id),
+  qualityCheckAt: timestamp("quality_check_at", { withTimezone: true }),
+  attachments: jsonb("attachments").$type<string[]>().default([]), // Photo/document URLs
+  linkedIncidentId: varchar("linked_incident_id").references(() => incidents.id),
+  linkedContractId: varchar("linked_contract_id").references(() => contracts.id),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_maintenance_jobs_vehicle").on(table.vehicleId),
+  index("idx_maintenance_jobs_branch").on(table.branchId),
+  index("idx_maintenance_jobs_status").on(table.status),
+  index("idx_maintenance_jobs_type").on(table.jobType),
+  index("idx_maintenance_jobs_priority").on(table.priority),
+  index("idx_maintenance_jobs_planned").on(table.plannedStartDate),
+  index("idx_maintenance_jobs_assigned").on(table.assignedTo),
+  index("idx_maintenance_jobs_incident").on(table.linkedIncidentId),
+]);
+
+export const insertMaintenanceJobSchema = createInsertSchema(maintenanceJobs).omit({
+  id: true,
+  jobNumber: true,
+  totalCost: true,
+  actualStartDate: true,
+  actualEndDate: true,
+  completedBy: true,
+  qualityCheckPassed: true,
+  qualityCheckBy: true,
+  qualityCheckAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMaintenanceJob = z.infer<typeof insertMaintenanceJobSchema>;
+export type MaintenanceJob = typeof maintenanceJobs.$inferSelect;
+
+// ===========================
 // Predictive Report Response Types
 // ===========================
 
