@@ -49,7 +49,24 @@ router.post("/", isAuthenticated, requireEditor, async (req: Request, res: Respo
       createdBy: user.id,
     } as any);
     
-    await createAuditLog(user.id, 'inspection_created', inspection.contractId ?? undefined, req, `Created vehicle inspection`);
+    // Update contract lifecycle fields based on inspection type - Per Master Spec Part 3
+    if (inspection.contractId && inspection.inspectionType) {
+      if (inspection.inspectionType === 'checkout') {
+        // Vehicle checkout inspection completed - mark handover timestamp and inspection reference
+        await storage.updateContract(inspection.contractId, {
+          vehicleCheckoutAt: new Date(),
+          lastCheckoutInspectionId: inspection.id,
+        } as any);
+      } else if (inspection.inspectionType === 'return') {
+        // Vehicle return inspection completed - mark return timestamp and inspection reference
+        await storage.updateContract(inspection.contractId, {
+          vehicleReturnedAt: new Date(),
+          lastReturnInspectionId: inspection.id,
+        } as any);
+      }
+    }
+    
+    await createAuditLog(user.id, 'inspection_created', inspection.contractId ?? undefined, req, `Created ${inspection.inspectionType} vehicle inspection`);
     res.status(201).json(inspection);
   } catch (error) {
     next(error);
