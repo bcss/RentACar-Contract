@@ -1220,7 +1220,8 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       }
     }
 
-    // PAYMENT VERIFICATION
+    // PAYMENT VERIFICATION - Per Master Spec Part 5.5.1
+    // Apply deposit to outstanding balance at closure
     const contractPayments = await storage.getPaymentsByContract(contract.id);
     
     const totalPaid = contractPayments.reduce((sum: number, payment: any) => {
@@ -1235,6 +1236,8 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
     
     const totalAmount = validateFinancialInput(contract.totalAmount, 'total amount');
     const totalExtraCharges = validateFinancialInput(contract.totalExtraCharges || '0', 'extra charges');
+    const totalDriverCharges = validateFinancialInput(contract.driverServiceTotal || '0', 'driver charges');
+    const securityDeposit = validateFinancialInput(contract.securityDeposit || '0', 'security deposit');
     
     if (!isFinite(totalAmount)) {
       return res.status(400).json({ 
@@ -1247,11 +1250,19 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       });
     }
     
-    const totalDue = totalAmount + totalExtraCharges;
+    // Per Master Spec Part 5.5.1: Total Due = Base + Extra + Driver charges
+    const totalDue = totalAmount + totalExtraCharges + totalDriverCharges;
     
     const totalPaidRounded = Math.round(totalPaid * 100) / 100;
     const totalDueRounded = Math.round(totalDue * 100) / 100;
-    const computedOutstanding = totalDueRounded - totalPaidRounded;
+    const depositRounded = Math.round(securityDeposit * 100) / 100;
+    
+    // Per Master Spec Part 5.5.1: Outstanding = TotalDue - Deposit - Payments
+    // Deposit is automatically applied to the outstanding balance at closure
+    const computedOutstanding = totalDueRounded - depositRounded - totalPaidRounded;
+    
+    // Calculate refund amount if deposit exceeds outstanding
+    const refundAmount = computedOutstanding < 0 ? Math.abs(computedOutstanding) : 0;
     
     if (isNaN(computedOutstanding)) {
       console.error(`NaN outstanding balance detected for contract ${contract.id}`);
@@ -1275,7 +1286,12 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       
       let closed;
       try {
-        closed = await storage.closeContract(req.params.id, userId, closureRemark, expectedVersion);
+        // Per Master Spec Part 5.5.1: Apply deposit at closure (even with admin override)
+        closed = await storage.closeContract(req.params.id, userId, closureRemark, expectedVersion, {
+          applied: depositRounded > 0,
+          refundAmount: 0, // No refund when there's outstanding balance
+          hasOutstandingBalance: true // Mark as having outstanding balance for admin override
+        });
       } catch (error: any) {
         if (error.message.includes('modified by another user')) {
           return res.status(409).json({ 
@@ -1306,7 +1322,7 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
         'close', 
         closed.id, 
         req, 
-        `Admin override: Closed contract #${closed.contractNumber} with outstanding balance of ${computedOutstanding.toFixed(2)} AED. Remark: ${closureRemark}`
+        `Admin override: Closed contract #${closed.contractNumber} with outstanding balance of ${computedOutstanding.toFixed(2)} AED (deposit of ${depositRounded.toFixed(2)} AED applied). Remark: ${closureRemark}`
       );
       
       // Send notification
@@ -1340,13 +1356,18 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
     // Standard payment verification
     if (hasOutstandingBalance) {
       return res.status(400).json({ 
-        message: `Cannot close contract with outstanding balance of ${computedOutstanding.toFixed(2)} AED. Total due: ${totalDueRounded.toFixed(2)} AED, Total paid: ${totalPaidRounded.toFixed(2)} AED. Please record remaining payment first.` 
+        message: `Cannot close contract with outstanding balance of ${computedOutstanding.toFixed(2)} AED. Total due: ${totalDueRounded.toFixed(2)} AED, Deposit: ${depositRounded.toFixed(2)} AED, Total paid: ${totalPaidRounded.toFixed(2)} AED. Please record remaining payment first.` 
       });
     }
 
     let closed;
     try {
-      closed = await storage.closeContract(req.params.id, userId, undefined, expectedVersion);
+      // Per Master Spec Part 5.5.1: Apply deposit at closure
+      closed = await storage.closeContract(req.params.id, userId, undefined, expectedVersion, {
+        applied: depositRounded > 0,
+        refundAmount: refundAmount, // Refund if deposit exceeds total charges
+        hasOutstandingBalance: false // No outstanding balance for standard closure
+      });
     } catch (error: any) {
       if (error.message.includes('modified by another user')) {
         return res.status(409).json({ 
@@ -1372,7 +1393,8 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       console.error('[Contract] Availability engine update failed on close:', cacheError);
     }
     
-    await createAuditLog(userId, 'close', closed.id, req, `Closed contract #${closed.contractNumber} - all payments settled and verified`);
+    const refundNote = refundAmount > 0 ? ` Deposit refund of ${refundAmount.toFixed(2)} AED issued.` : '';
+    await createAuditLog(userId, 'close', closed.id, req, `Closed contract #${closed.contractNumber} - all payments settled and verified.${refundNote}`);
     
     // Send notification
     try {

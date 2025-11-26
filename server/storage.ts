@@ -158,6 +158,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, or, like, sql, and, not, lt, gt, ne, ilike, getTableColumns, count, sum, gte, lte } from "drizzle-orm";
+import { calculateExtraKmFee, calculateTotalExtraCharges } from "./services/contractFinancials";
 
 // Interface for storage operations
 export interface IStorage {
@@ -1033,7 +1034,13 @@ export class DatabaseStorage implements IStorage {
     return completed;
   }
 
-  async closeContract(id: string, userId: string, closureRemark?: string, expectedVersion?: number): Promise<Contract> {
+  async closeContract(
+    id: string, 
+    userId: string, 
+    closureRemark?: string, 
+    expectedVersion?: number,
+    depositApplied?: { applied: boolean; refundAmount?: number; hasOutstandingBalance?: boolean }
+  ): Promise<Contract> {
     // Get current status before update
     const [current] = await db.select({ status: contracts.status }).from(contracts).where(eq(contracts.id, id));
     const fromStatus = current?.status || 'completed';
@@ -1043,17 +1050,28 @@ export class DatabaseStorage implements IStorage {
       ? and(eq(contracts.id, id), eq(contracts.version, expectedVersion))
       : eq(contracts.id, id);
     
+    // Build update data - Per Master Spec Part 5.5.1: Deposit application at closure
+    // Only mark as 'paid' if there's no outstanding balance
+    const hasRefund = depositApplied?.refundAmount !== undefined && depositApplied.refundAmount > 0;
+    const hasOutstanding = depositApplied?.hasOutstandingBalance === true;
+    
+    const updateData: any = {
+      status: 'closed',
+      closedBy: userId,
+      closedAt: new Date(),
+      closureRemark: closureRemark || null,
+      // Only set to 'paid' if no outstanding balance; otherwise set to 'partial' for admin override
+      paymentStatus: hasOutstanding ? 'partial' : 'paid',
+      // Set deposit refund flags when applicable
+      depositRefunded: hasRefund,
+      depositRefundedDate: hasRefund ? new Date() : null,
+      updatedAt: new Date(),
+      version: sql`${contracts.version} + 1`,
+    };
+    
     const [closed] = await db
       .update(contracts)
-      .set({
-        status: 'closed',
-        closedBy: userId,
-        closedAt: new Date(),
-        closureRemark: closureRemark || null,
-        paymentStatus: 'paid', // Mark as fully paid when closing
-        updatedAt: new Date(),
-        version: sql`${contracts.version} + 1`,
-      })
+      .set(updateData)
       .where(whereConditions)
       .returning();
     
@@ -1062,7 +1080,13 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Log status change - Per Master Spec Part 5.5.1
-    await this.logStatusChange(id, fromStatus, 'closed', userId, closureRemark || 'Contract closed - settlement complete');
+    let logMessage = closureRemark || 'Contract closed - settlement complete';
+    if (hasRefund) {
+      logMessage = `Contract closed - deposit refund of ${depositApplied!.refundAmount!.toFixed(2)} AED issued`;
+    } else if (hasOutstanding) {
+      logMessage = `Contract closed with admin override - outstanding balance remains`;
+    }
+    await this.logStatusChange(id, fromStatus, 'closed', userId, logMessage);
     
     return closed;
   }
@@ -1616,7 +1640,7 @@ export class DatabaseStorage implements IStorage {
             throw new Error(`Failed to update contract lifecycle for checkout inspection. Contract ${inspection.contractId} not found.`);
           }
         } else if (inspection.inspectionType === 'return') {
-          // Get the contract to check customer/vehicle details for incident creation
+          // Get the contract to check customer/vehicle details for incident creation and km calculation
           const [contract] = await tx
             .select()
             .from(contracts)
@@ -1627,16 +1651,49 @@ export class DatabaseStorage implements IStorage {
             throw new Error(`Failed to update contract lifecycle for return inspection. Contract ${inspection.contractId} not found.`);
           }
           
+          // Per Master Spec Part 5.5.1: Calculate extra km fee on return
+          // Guard against missing/zero data - only calculate if all required values present
+          let extraKmResult = { extraKmDriven: 0, extraKmCharge: 0 };
+          let updatedTotalExtraCharges = parseFloat(contract.totalExtraCharges || '0');
+          
+          // Only calculate extra km if we have valid odometer readings and rental data
+          const hasValidOdometer = inspection.odometerReading !== null && 
+            inspection.odometerReading >= 0 &&
+            contract.odometerStart !== null && 
+            inspection.odometerReading >= contract.odometerStart;
+          const hasValidRentalData = contract.totalDays > 0 && contract.mileageLimit !== null;
+          
+          if (hasValidOdometer && hasValidRentalData) {
+            extraKmResult = calculateExtraKmFee({
+              odometerStart: contract.odometerStart,
+              odometerEnd: inspection.odometerReading,
+              totalDays: contract.totalDays,
+              mileageLimit: contract.mileageLimit,
+              extraKmRate: contract.extraKmRate,
+            });
+            
+            // Merge with existing extra charges (don't overwrite)
+            // Add new extra km charge to existing total, but replace any prior extraKmCharge
+            const existingExtraKmCharge = parseFloat(contract.extraKmCharge || '0');
+            const existingOtherCharges = updatedTotalExtraCharges - existingExtraKmCharge;
+            updatedTotalExtraCharges = existingOtherCharges + extraKmResult.extraKmCharge;
+          }
+          
           // Determine new status based on whether new damages were found
           // Per Master Spec Part 2.4: When damage found, contract → COMPLETED_PENDING_ACCIDENT
           const newStatus = inspection.newDamagesFound ? 'completed_pending_accident' : contract.status;
           
           // Update return lifecycle with RETURNING to verify success
+          // Also store odometerEnd and calculated extra km charges
           const [updatedContract] = await tx
             .update(contracts)
             .set({
               vehicleReturnedAt: sql`COALESCE(${contracts.vehicleReturnedAt}, ${inspectionTime})`,
               lastReturnInspectionId: inspection.id,
+              odometerEnd: inspection.odometerReading,
+              extraKmDriven: extraKmResult.extraKmDriven,
+              extraKmCharge: extraKmResult.extraKmCharge.toString(),
+              totalExtraCharges: updatedTotalExtraCharges.toString(),
               status: newStatus,
               updatedAt: new Date(),
             })

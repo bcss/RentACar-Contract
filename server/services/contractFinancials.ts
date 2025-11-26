@@ -107,3 +107,123 @@ export function formatFinancialBreakdown(
     outstandingBalance: breakdown.outstandingBalance.toFixed(2),
   };
 }
+
+/**
+ * Extra Kilometer Fee Calculator - Per Master Spec Part 5.5.1
+ * 
+ * Calculates excess km charge when actual mileage exceeds tariff entitlement.
+ * 
+ * Formula: extraKmCharge = extraKmDriven × extraKmRate
+ * Where:
+ * - extraKmDriven = actualKm - (kmPerDay × totalDays)
+ * - actualKm = odometerEnd - odometerStart
+ * 
+ * @example
+ * calculateExtraKmFee({
+ *   odometerStart: 50000,
+ *   odometerEnd: 51500,
+ *   totalDays: 5,
+ *   mileageLimit: 200,  // 200 km per day
+ *   extraKmRate: "0.50" // 0.50 AED per extra km
+ * })
+ * // Returns: { extraKmDriven: 500, extraKmCharge: 250.00 }
+ * // Explanation: 1500 km driven - (5 days × 200 km/day = 1000 km) = 500 extra km × 0.50 = 250 AED
+ */
+export interface ExtraKmCalculationInputs {
+  odometerStart: number | null;
+  odometerEnd: number | null;
+  totalDays: number;
+  mileageLimit: number | null; // km per day allowance
+  extraKmRate: string | null; // rate per excess km
+}
+
+export interface ExtraKmCalculationResult {
+  totalKmDriven: number;
+  kmEntitlement: number;
+  extraKmDriven: number;
+  extraKmCharge: number;
+  hasExcess: boolean;
+}
+
+/**
+ * Calculate extra km fee based on odometer readings and tariff entitlement
+ */
+export function calculateExtraKmFee(
+  inputs: ExtraKmCalculationInputs
+): ExtraKmCalculationResult {
+  // If no odometer readings, return zero charges
+  if (inputs.odometerStart === null || inputs.odometerEnd === null) {
+    return {
+      totalKmDriven: 0,
+      kmEntitlement: 0,
+      extraKmDriven: 0,
+      extraKmCharge: 0,
+      hasExcess: false,
+    };
+  }
+  
+  // Calculate total km driven
+  const totalKmDriven = Math.max(0, inputs.odometerEnd - inputs.odometerStart);
+  
+  // Calculate km entitlement (mileageLimit per day × total days)
+  // If no mileage limit set, consider it unlimited (no extra charge)
+  const mileageLimit = inputs.mileageLimit || 0;
+  const kmEntitlement = mileageLimit * inputs.totalDays;
+  
+  // If no km entitlement set (unlimited), no extra charge
+  if (kmEntitlement === 0) {
+    return {
+      totalKmDriven,
+      kmEntitlement: 0,
+      extraKmDriven: 0,
+      extraKmCharge: 0,
+      hasExcess: false,
+    };
+  }
+  
+  // Calculate excess km
+  const extraKmDriven = Math.max(0, totalKmDriven - kmEntitlement);
+  
+  // Calculate charge if excess and rate provided
+  const extraKmRate = parseFloat(inputs.extraKmRate || '0') || 0;
+  const extraKmCharge = Math.round(extraKmDriven * extraKmRate * 100) / 100;
+  
+  return {
+    totalKmDriven,
+    kmEntitlement,
+    extraKmDriven,
+    extraKmCharge,
+    hasExcess: extraKmDriven > 0,
+  };
+}
+
+/**
+ * Aggregate all extra charges into totalExtraCharges
+ * Per Master Spec Part 5.5.1 - totalExtraCharges = sum of all extra charge components
+ */
+export interface ExtraChargesInputs {
+  extraKmCharge?: string | number | null;
+  fuelCharge?: string | number | null;
+  salikCharge?: string | number | null;
+  trafficFineCharge?: string | number | null;
+  damageCharge?: string | number | null;
+  otherCharges?: string | number | null;
+}
+
+export function calculateTotalExtraCharges(inputs: ExtraChargesInputs): number {
+  const parseValue = (val: string | number | null | undefined): number => {
+    if (val === null || val === undefined) return 0;
+    const parsed = typeof val === 'number' ? val : parseFloat(val);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+  
+  const total = 
+    parseValue(inputs.extraKmCharge) +
+    parseValue(inputs.fuelCharge) +
+    parseValue(inputs.salikCharge) +
+    parseValue(inputs.trafficFineCharge) +
+    parseValue(inputs.damageCharge) +
+    parseValue(inputs.otherCharges);
+  
+  return Math.round(total * 100) / 100;
+}
