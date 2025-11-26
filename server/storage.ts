@@ -1066,6 +1066,45 @@ export class DatabaseStorage implements IStorage {
     return closed;
   }
 
+  // Phase 2.3: Contract Cancellation - Per Master Spec Part 5.5.1
+  async cancelContract(id: string, userId: string, cancellationReason: string, expectedVersion?: number): Promise<Contract> {
+    // Get current status before update
+    const [current] = await db.select({ status: contracts.status }).from(contracts).where(eq(contracts.id, id));
+    const fromStatus = current?.status || 'draft';
+
+    // Validate: Only draft contracts can be cancelled
+    if (current?.status && current.status !== 'draft') {
+      throw new Error(`Cannot cancel contract in '${current.status}' status. Only draft contracts can be cancelled.`);
+    }
+
+    // Per Master Spec Part 6.5.2: Conditional update with version check
+    const whereConditions = expectedVersion !== undefined
+      ? and(eq(contracts.id, id), eq(contracts.version, expectedVersion))
+      : eq(contracts.id, id);
+    
+    const [cancelled] = await db
+      .update(contracts)
+      .set({
+        status: 'cancelled',
+        cancelledBy: userId,
+        cancelledAt: new Date(),
+        cancellationReason: cancellationReason,
+        updatedAt: new Date(),
+        version: sql`${contracts.version} + 1`,
+      })
+      .where(whereConditions)
+      .returning();
+    
+    if (!cancelled && expectedVersion !== undefined) {
+      throw new Error('Contract has been modified by another user. Please refresh and try again.');
+    }
+
+    // Log status change - Per Master Spec Part 5.5.1
+    await this.logStatusChange(id, fromStatus, 'cancelled', userId, cancellationReason);
+    
+    return cancelled;
+  }
+
   // Phase 2.4: Payment recording methods
   async recordDepositPayment(id: string, method: string): Promise<Contract> {
     const [updated] = await db

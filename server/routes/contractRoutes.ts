@@ -1407,6 +1407,85 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
 });
 
 /**
+ * POST /api/contracts/:id/cancel
+ * Cancel a draft contract - Per Master Spec Part 5.5.1
+ * Only draft contracts can be cancelled. Reason is required.
+ */
+router.post("/:id/cancel", isAuthenticated, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const { cancellationReason, expectedVersion } = req.body;
+    
+    // Validate cancellation reason is provided
+    if (!cancellationReason || cancellationReason.trim().length === 0) {
+      return res.status(400).json({ 
+        message: "Cancellation reason is required. Please provide a reason for cancelling this contract." 
+      });
+    }
+    
+    // Get contract to validate status
+    const contract = await storage.getContract(req.params.id);
+    if (!contract) {
+      return res.status(404).json({ message: "Contract not found" });
+    }
+    
+    // Only draft contracts can be cancelled
+    if (contract.status !== 'draft') {
+      return res.status(400).json({ 
+        message: `Cannot cancel contract in '${contract.status}' status. Only draft contracts can be cancelled.` 
+      });
+    }
+    
+    let cancelled;
+    try {
+      cancelled = await storage.cancelContract(req.params.id, userId, cancellationReason.trim(), expectedVersion);
+    } catch (error: any) {
+      if (error.message.includes('modified by another user')) {
+        return res.status(409).json({ 
+          message: error.message,
+          code: 'CONFLICT',
+          currentVersion: contract.version
+        });
+      }
+      throw error;
+    }
+    
+    await createAuditLog(userId, 'cancel', cancelled.id, req, `Cancelled contract #${cancelled.contractNumber} - Reason: ${cancellationReason}`);
+    
+    // Send cancellation notification
+    try {
+      const customer = await storage.getCustomerById(cancelled.customerId);
+      if (customer) {
+        await notificationService.sendNotification({
+          templateCode: 'CONTRACT_CANCELLED',
+          channel: 'email',
+          recipientType: 'customer',
+          recipientId: customer.id,
+          variables: {
+            contractNumber: cancelled.contractNumber.toString(),
+            customerName: customer.nameEn || '',
+            cancellationReason: cancellationReason,
+            cancellationDate: new Date().toLocaleDateString('en-AE'),
+          },
+          language: 'en',
+          triggerType: 'event_driven',
+          triggeredBy: userId,
+          entityType: 'contract',
+          entityId: cancelled.id,
+        });
+      }
+    } catch (notifError) {
+      console.error('[Notification] Failed to send contract cancellation notification:', notifError);
+    }
+    
+    res.json(cancelled);
+  } catch (error: any) {
+    console.error("Error cancelling contract:", error);
+    res.status(400).json({ message: error.message || "Failed to cancel contract" });
+  }
+});
+
+/**
  * POST /api/contracts/:id/disable
  * Disable contract (Admin only)
  */

@@ -1266,7 +1266,7 @@ export type DamageAssessment = typeof damageAssessments.$inferSelect;
 export const contracts = pgTable("contracts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractNumber: integer("contract_number").notNull().unique(),
-  status: varchar("status", { length: 35 }).notNull().default("draft"), // draft, active, completed, completed_pending_accident, closed
+  status: varchar("status", { length: 35 }).notNull().default("draft"), // draft, active, completed, completed_pending_accident, closed, cancelled
   
   // Foreign Keys to Master Data
   customerId: varchar("customer_id").notNull().references(() => customers.id),
@@ -1395,6 +1395,12 @@ export const contracts = pgTable("contracts", {
   closedBy: varchar("closed_by"),
   closedAt: timestamp("closed_at"),
   closureRemark: text("closure_remark"), // Admin override remark when closing with outstanding balance
+  
+  // Cancellation Tracking - Per Master Spec Part 5.5.1
+  cancelledBy: varchar("cancelled_by"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancellationReason: text("cancellation_reason"), // Required reason for cancellation
+  
   earlyClosureReason: text("early_closure_reason"), // Task 11: Optional reason for early completion
   editReason: text("edit_reason"), // Reason for edits made in Active/Completed stages
   
@@ -1466,6 +1472,8 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   completedAt: true,
   closedBy: true,
   closedAt: true,
+  cancelledBy: true,  // Cancellation tracking - auto-managed
+  cancelledAt: true,  // Cancellation tracking - auto-managed
   finalizedBy: true,
   finalizedAt: true,
   disabledBy: true,
