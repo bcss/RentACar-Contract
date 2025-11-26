@@ -17,20 +17,22 @@
 | Lookup Tables Created | 9/9 ✅ (integration pending) |
 | Alternative Implementations | 9 items → BEING REPLACED ⚡ |
 
-### New Lookup Tables Created (November 26, 2025)
-| Table | Status | Integration |
-|-------|--------|-------------|
-| blacklist_entries | ✅ Created | 🔄 Pending |
-| vehicle_classes | ✅ Created | 🔄 Pending |
-| vehicle_groups | ✅ Created | 🔄 Pending |
-| seasonal_tariffs | ✅ Created | 🔄 Pending |
-| notification_purposes | ✅ Created | 🔄 Pending |
-| notification_routes | ✅ Created | 🔄 Pending |
-| cron_job_definitions | ✅ Created | 🔄 Pending |
-| sequences | ✅ Created | 🔄 Pending |
-| maintenance_jobs | ✅ Created | 🔄 Pending |
+### New Lookup Tables (November 26, 2025) - TABLES & API READY
+| Table | Database | API Routes | Seed Data | Business Logic |
+|-------|----------|------------|-----------|----------------|
+| blacklist_entries | ✅ | ✅ `/api/lookup/blacklist` | - | 🔄 Uses legacy fields |
+| vehicle_classes | ✅ | ✅ `/api/lookup/vehicle-classes` | ✅ 8 classes | 🔄 Uses text field |
+| vehicle_groups | ✅ | ✅ `/api/lookup/vehicle-groups` | ✅ 22 groups | 🔄 Uses text field |
+| seasonal_tariffs | ✅ | ✅ `/api/lookup/seasonal-tariffs` | - | 🔄 Pending |
+| notification_purposes | ✅ | ✅ `/api/lookup/notification-purposes` | ✅ 16 purposes | 🔄 Uses enums |
+| notification_routes | ✅ | ✅ `/api/lookup/notification-routes` | - | 🔄 Hardcoded |
+| cron_job_definitions | ✅ | ✅ `/api/lookup/cron-jobs` | ✅ 8 jobs | 🔄 Hardcoded |
+| sequences | ✅ | ✅ `/api/lookup/sequences` | ✅ 6 sequences | 🔄 Uses legacy |
+| maintenance_jobs | ✅ | ✅ `/api/lookup/maintenance-jobs` | - | 🔄 Pending |
 
-**Next Steps:** Replace legacy text fields with FK references, create API routes, build admin UI
+**API Endpoints:** All 9 lookup tables have full CRUD API routes at `/api/lookup/*`
+**Sequence Generator:** Working - `GET /api/lookup/sequences/contract/next` → `KR-25010015` (continues from 10014)
+**Honest Status:** Tables & APIs are ready; deeper business logic integration is future enhancement
 
 **See:** `docs/HONEST_IMPLEMENTATION_STATUS.md` for detailed SQL-verified findings
 
