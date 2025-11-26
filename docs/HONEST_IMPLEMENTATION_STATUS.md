@@ -2,8 +2,53 @@
 
 **Generated:** November 26, 2025
 **Verified via SQL:** November 26, 2025
-**Last Updated:** November 26, 2025 (6:40 PM) - 9 lookup tables DEEPLY INTEGRATED, legacy code removed
+**Last Updated:** November 26, 2025 (7:30 PM) - Critical Cross-Check Against Master Spec v1.0
 **Purpose:** Transparent assessment of what's ACTUALLY implemented vs claimed
+
+---
+
+## ⚠️ CRITICAL CROSS-CHECK FINDINGS (November 26, 2025, 7:30 PM)
+
+The architect tool performed a deep cross-check against the Master System Specification v1.0 (10,806 lines) and found these gaps:
+
+### ❌ MISSING TABLES (Required by Master Spec Part 4 & 5)
+| Table | Spec Section | Description | Status |
+|-------|--------------|-------------|--------|
+| notifications_sent | 4.13.5 | Notification audit log with FK to purposes/providers | ❌ NOT_IMPLEMENTED |
+| import_jobs | 4.15.1 | Import engine persistence for bulk uploads | ❌ NOT_IMPLEMENTED |
+| backups | 4.15.2 | Backup metadata tracking | ❌ NOT_IMPLEMENTED |
+| cash_closings | 9.4.1 | Daily branch reconciliation | ❌ NOT_IMPLEMENTED |
+| cron_job_executions | 4.14.2 | Cron execution history/monitoring | ❌ NOT_IMPLEMENTED |
+| driver_rate_plans | 4.10.2 | Driver rate governance per spec | ⚠️ ALTERNATIVE (driverRateCards) |
+| contract_drivers | 4.10.3 | Contract-driver assignments | ⚠️ ALTERNATIVE (driverAssignments) |
+| roles/role_assignments | 5.1.3 | FK-backed RBAC matrix | ⚠️ ALTERNATIVE (user.role enum) |
+
+### ❌ MISSING CONTRACT STATUS
+| Status | Spec Section | Description | Status |
+|--------|--------------|-------------|--------|
+| COMPLETED_PENDING_ACCIDENT | 2.2 | Between COMPLETED and CLOSED when incident exists | ❌ NOT IN SCHEMA |
+
+### ⚠️ PARTIAL IMPLEMENTATIONS (Deviate from Spec)
+| Feature | Spec Requirement | Current Implementation | Gap |
+|---------|------------------|------------------------|-----|
+| sequences | scope_type, scope_id fields | Missing scope fields | Branch/global numbering separation broken |
+| notification_routes | purpose_id FK + provider FKs | Uses purposeCode string | No FK integrity |
+| maintenance_jobs.status | PLANNED/IN_PROGRESS/COMPLETED/CANCELLED | pending/scheduled/in_progress/etc | Non-spec status values |
+| OTP audit | IP/device logging per §11.10 | Only basic logging | Missing security audit fields |
+
+### ❌ MISSING WORKFLOWS (Required by Master Spec Part 7)
+| Workflow | Spec Section | Description | Status |
+|----------|--------------|-------------|--------|
+| DepositService | 7.5 | Apply deposit to charges, calculate refund | ❌ NOT_IMPLEMENTED |
+| Damage-to-Incident Automation | 2.4, 7.4 | Inspection comparison auto-creates incident | ❌ NOT_IMPLEMENTED |
+| COMPLETED_PENDING_ACCIDENT transition | 2.2 | State machine for accident path | ❌ NOT_IMPLEMENTED |
+| OTP IP/Device audit logging | 11.10 | Track OTP attempts with IP/device | ❌ NOT_IMPLEMENTED |
+
+### 📊 OVERALL SPEC COMPLIANCE
+- **Tables:** 76 implemented / 84 required = **~90%** (8 missing)
+- **Contract Status Enum:** 5/6 = **83%** (COMPLETED_PENDING_ACCIDENT missing)
+- **Critical Workflows:** 5/8 = **62%** (3 incomplete)
+- **Schema FK Integrity:** **~75%** (some tables use string codes instead of FKs)
 
 ---
 
