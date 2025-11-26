@@ -2028,6 +2028,52 @@ export const insertTariffSchema = createInsertSchema(tariffs).omit({
 export type InsertTariff = z.infer<typeof insertTariffSchema>;
 export type Tariff = typeof tariffs.$inferSelect;
 
+// ============================================================================
+// TARIFF RATE CARDS - Per Master Spec §4.9.2
+// Duration-based pricing tiers within a tariff
+// ============================================================================
+export const tariffRateCards = pgTable("tariff_rate_cards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tariffId: varchar("tariff_id").notNull().references(() => tariffs.id),
+  
+  // Rental type per Master Spec §4.9.2
+  rentalType: varchar("rental_type", { length: 32 }).notNull(), // 'HOURLY', 'DAILY', 'WEEKLY', 'MONTHLY'
+  
+  // Duration range (in days or hours depending on rental_type)
+  durationFrom: integer("duration_from").notNull(), // Minimum duration for this rate
+  durationTo: integer("duration_to").notNull(), // Maximum duration for this rate
+  
+  // Rate per Master Spec §4.9.2 - DECIMAL(12,2)
+  rate: numeric("rate", { precision: 12, scale: 2 }).notNull(),
+  extraKmRate: numeric("extra_km_rate", { precision: 12, scale: 4 }), // DECIMAL(12,4) for rate precision
+  
+  // Included kilometers
+  includedKm: integer("included_km"), // KM included in this rate card
+  
+  // Audit fields
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_tariff_rate_cards_tariff_id").on(table.tariffId),
+  index("idx_tariff_rate_cards_rental_type").on(table.rentalType),
+]);
+
+export const tariffRateCardsRelations = relations(tariffRateCards, ({ one }) => ({
+  tariff: one(tariffs, {
+    fields: [tariffRateCards.tariffId],
+    references: [tariffs.id],
+  }),
+}));
+
+export const insertTariffRateCardSchema = createInsertSchema(tariffRateCards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTariffRateCard = z.infer<typeof insertTariffRateCardSchema>;
+export type TariffRateCard = typeof tariffRateCards.$inferSelect;
+
 // Reservations table - Per Master Spec Part 4.5.1 - Booking before contract
 export const reservations = pgTable("reservations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
