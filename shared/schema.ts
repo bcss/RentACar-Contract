@@ -1848,12 +1848,13 @@ export type InsertContractStatusHistory = z.infer<typeof insertContractStatusHis
 export type ContractStatusHistory = typeof contractStatusHistory.$inferSelect;
 
 // OTP Logs table - Per Master Spec Part 5.9 - 3-minute expiry, rate limiting
+// Per Master Spec §4.13.6 and §11.10 - OTP logging with security audit fields
 export const otpLogs = pgTable("otp_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractId: varchar("contract_id").references(() => contracts.id),
   
   // OTP Details - Per Master Spec Part 5.9 and Part 8
-  purpose: varchar("purpose", { length: 64 }).notNull(), // 'ACTIVATION', 'CLOSURE', 'AMENDMENT', 'PAYMENT'
+  purpose: varchar("purpose", { length: 64 }).notNull(), // 'ACTIVATION', 'CLOSURE', 'DAMAGE_ACCEPTANCE', 'AMENDMENT', 'PAYMENT'
   channel: varchar("channel", { length: 32 }).notNull(), // 'SMS', 'EMAIL', 'WHATSAPP'
   target: varchar("target", { length: 255 }).notNull(), // Phone number or email
   otpHash: varchar("otp_hash", { length: 255 }).notNull(), // Hashed OTP for security
@@ -1863,6 +1864,11 @@ export const otpLogs = pgTable("otp_logs", {
   verifiedAt: timestamp("verified_at"),
   attempts: integer("attempts").notNull().default(0),
   
+  // Per Master Spec §11.10 - Security audit fields
+  ipAddress: varchar("ip_address", { length: 45 }), // IPv4 or IPv6
+  deviceId: varchar("device_id", { length: 255 }), // Mobile device ID
+  userAgent: varchar("user_agent", { length: 512 }), // Browser/device user agent
+  
   // Audit fields
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1870,6 +1876,8 @@ export const otpLogs = pgTable("otp_logs", {
   index("idx_otp_logs_contract_id").on(table.contractId),
   index("idx_otp_logs_target").on(table.target),
   index("idx_otp_logs_expires_at").on(table.expiresAt),
+  index("idx_otp_logs_ip").on(table.ipAddress),
+  index("idx_otp_logs_created").on(table.createdAt),
 ]);
 
 export const otpLogsRelations = relations(otpLogs, ({ one }) => ({
@@ -4473,24 +4481,30 @@ export const insertNotificationPurposeSchema = createInsertSchema(notificationPu
 export type InsertNotificationPurpose = z.infer<typeof insertNotificationPurposeSchema>;
 export type NotificationPurpose = typeof notificationPurposes.$inferSelect;
 
-// 6. notification_routes - Configurable notification routing rules
+// 6. notification_routes - Per Master Spec §4.13.3 - Configurable notification routing rules
 export const notificationRoutes = pgTable("notification_routes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   purposeId: varchar("purpose_id").references(() => notificationPurposes.id).notNull(),
-  channel: varchar("channel", { length: 20 }).notNull(), // 'sms', 'email', 'push', 'whatsapp'
-  providerId: varchar("provider_id").references(() => communicationProviders.id),
+  channel: varchar("channel", { length: 20 }).notNull(), // 'SMS', 'EMAIL', 'PUSH', 'WHATSAPP'
+  // Per Master Spec §4.13.3 - primary_provider_id and secondary_provider_id
+  primaryProviderId: varchar("primary_provider_id").references(() => communicationProviders.id).notNull(),
+  secondaryProviderId: varchar("secondary_provider_id").references(() => communicationProviders.id), // Optional fallback
+  maxRetries: integer("max_retries").notNull().default(1), // Per spec: Retries per provider
+  providerId: varchar("provider_id").references(() => communicationProviders.id), // Legacy - use primaryProviderId
   priority: integer("priority").notNull().default(1), // 1 = primary, 2 = fallback, etc.
   isEnabled: boolean("is_enabled").notNull().default(true),
   conditions: jsonb("conditions").$type<Record<string, any>>(), // {"country": "AE", "time_range": "09:00-18:00"}
   rateLimit: integer("rate_limit"), // Max messages per hour via this route
   costPerMessage: numeric("cost_per_message", { precision: 10, scale: 4 }),
-  branchId: varchar("branch_id").references(() => branches.id), // null = all branches
+  branchId: varchar("branch_id").references(() => branches.id), // Branch-specific override
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
 }, (table) => [
   index("idx_notification_routes_purpose").on(table.purposeId),
   index("idx_notification_routes_channel").on(table.channel),
   index("idx_notification_routes_provider").on(table.providerId),
+  index("idx_notification_routes_primary").on(table.primaryProviderId),
+  index("idx_notification_routes_secondary").on(table.secondaryProviderId),
   index("idx_notification_routes_branch").on(table.branchId),
   index("idx_notification_routes_enabled").on(table.isEnabled),
   index("idx_notification_routes_priority").on(table.priority),
@@ -4552,6 +4566,7 @@ export type InsertCronJobDefinition = z.infer<typeof insertCronJobDefinitionSche
 export type CronJobDefinition = typeof cronJobDefinitions.$inferSelect;
 
 // 8. sequences - Dedicated sequence tracking table
+// Per Master Spec §5.5.2 - Configurable sequences with scope
 export const sequences = pgTable("sequences", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sequenceType: varchar("sequence_type", { length: 50 }).notNull(), // 'contract', 'invoice', 'receipt', 'payment', 'incident'
@@ -4567,7 +4582,10 @@ export const sequences = pgTable("sequences", {
   includeYear: boolean("include_year").notNull().default(false), // CNT-2025-000001
   includeMonth: boolean("include_month").notNull().default(false),
   yearFormat: varchar("year_format", { length: 10 }).notNull().default('YYYY'), // 'YYYY' or 'YY'
-  branchId: varchar("branch_id").references(() => branches.id), // null = global sequence
+  // Per Master Spec §5.5.2 - scope_type and scope_id for branch/global separation
+  scopeType: varchar("scope_type", { length: 20 }).notNull().default('GLOBAL'), // 'GLOBAL', 'BRANCH', 'ORGANIZATION'
+  scopeId: varchar("scope_id"), // Branch ID when scopeType='BRANCH', null for GLOBAL
+  branchId: varchar("branch_id").references(() => branches.id), // Legacy - use scopeId instead
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
@@ -4575,7 +4593,8 @@ export const sequences = pgTable("sequences", {
   index("idx_sequences_type").on(table.sequenceType),
   index("idx_sequences_branch").on(table.branchId),
   index("idx_sequences_active").on(table.isActive),
-  uniqueIndex("idx_sequences_type_branch").on(table.sequenceType, table.branchId),
+  index("idx_sequences_scope").on(table.scopeType, table.scopeId),
+  uniqueIndex("idx_sequences_type_scope").on(table.sequenceType, table.scopeType, table.scopeId),
 ]);
 
 export const insertSequenceSchema = createInsertSchema(sequences).omit({
@@ -4588,15 +4607,17 @@ export const insertSequenceSchema = createInsertSchema(sequences).omit({
 export type InsertSequence = z.infer<typeof insertSequenceSchema>;
 export type Sequence = typeof sequences.$inferSelect;
 
-// 9. maintenance_jobs - Dedicated maintenance job tracking (separate from service records)
+// 9. maintenance_jobs - Per Master Spec §4.11.2 - Dedicated maintenance job tracking
 export const maintenanceJobs = pgTable("maintenance_jobs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   vehicleId: varchar("vehicle_id").references(() => vehicles.id).notNull(),
   branchId: varchar("branch_id").references(() => branches.id).notNull(),
   jobNumber: varchar("job_number", { length: 50 }).unique(), // Auto-generated: MNT-2025-000001
-  jobType: varchar("job_type", { length: 30 }).notNull(), // 'scheduled', 'unscheduled', 'inspection', 'repair', 'body_work', 'accident_repair'
-  priority: varchar("priority", { length: 10 }).notNull().default('normal'), // 'critical', 'high', 'normal', 'low'
-  status: varchar("status", { length: 20 }).notNull().default('pending'), // 'pending', 'scheduled', 'in_progress', 'on_hold', 'completed', 'cancelled'
+  // Per Master Spec §4.11.2 - job types: SERVICE, REPAIR, INSPECTION
+  jobType: varchar("job_type", { length: 30 }).notNull(), // 'SERVICE', 'REPAIR', 'INSPECTION'
+  priority: varchar("priority", { length: 10 }).notNull().default('NORMAL'), // 'CRITICAL', 'HIGH', 'NORMAL', 'LOW'
+  // Per Master Spec §4.11.2 - status: PLANNED, IN_PROGRESS, COMPLETED, CANCELLED
+  status: varchar("status", { length: 20 }).notNull().default('PLANNED'), // 'PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'
   title: varchar("title", { length: 200 }).notNull(),
   titleAr: varchar("title_ar", { length: 200 }),
   description: text("description"),
@@ -4760,6 +4781,282 @@ export const insertPackageAddonSchema = createInsertSchema(packageAddons).omit({
 });
 export type InsertPackageAddon = z.infer<typeof insertPackageAddonSchema>;
 export type PackageAddon = typeof packageAddons.$inferSelect;
+
+// ===========================
+// MASTER SPEC COMPLIANT TABLES (Part 4 & 5)
+// ===========================
+
+// 13. notifications_sent - Per Master Spec §4.13.5 - Notification audit log
+export const notificationsSent = pgTable("notifications_sent", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  purposeId: varchar("purpose_id").references(() => notificationPurposes.id).notNull(),
+  channel: varchar("channel", { length: 32 }).notNull(), // 'SMS', 'EMAIL', 'WHATSAPP'
+  toAddress: varchar("to_address", { length: 255 }).notNull(), // Phone or email
+  language: varchar("language", { length: 8 }), // 'en', 'ar'
+  subject: varchar("subject", { length: 255 }), // For email
+  body: text("body"), // Final rendered body
+  providerId: varchar("provider_id").references(() => communicationProviders.id),
+  status: varchar("status", { length: 32 }).notNull().default('SENT'), // 'SENT', 'FAILED', 'QUEUED', 'DELIVERED'
+  errorMessage: text("error_message"), // Provider error
+  fallbackUsed: boolean("fallback_used").default(false),
+  contractId: varchar("contract_id").references(() => contracts.id),
+  paymentId: varchar("payment_id").references(() => payments.id),
+  incidentId: varchar("incident_id").references(() => incidents.id),
+  cronJobId: varchar("cron_job_id").references(() => cronJobDefinitions.id),
+  triggeredBy: varchar("triggered_by").references(() => users.id), // If manual
+  deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_notifications_sent_purpose").on(table.purposeId),
+  index("idx_notifications_sent_status").on(table.status),
+  index("idx_notifications_sent_contract").on(table.contractId),
+  index("idx_notifications_sent_payment").on(table.paymentId),
+  index("idx_notifications_sent_created").on(table.createdAt),
+  index("idx_notifications_sent_channel").on(table.channel),
+]);
+
+export const insertNotificationsSentSchema = createInsertSchema(notificationsSent).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertNotificationsSent = z.infer<typeof insertNotificationsSentSchema>;
+export type NotificationsSent = typeof notificationsSent.$inferSelect;
+
+// 14. import_jobs - Per Master Spec §4.15.1 - Import engine persistence
+export const importJobs = pgTable("import_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 64 }).notNull(), // 'CUSTOMER', 'VEHICLE', 'CONTRACT', etc.
+  filename: varchar("filename", { length: 255 }).notNull(),
+  totalRecords: integer("total_records"),
+  successCount: integer("success_count"),
+  failureCount: integer("failure_count"),
+  status: varchar("status", { length: 32 }).notNull().default('PENDING'), // 'PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'PARTIAL'
+  errorReportPath: varchar("error_report_path", { length: 512 }),
+  initiatedBy: varchar("initiated_by").references(() => users.id).notNull(),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_import_jobs_entity").on(table.entityType),
+  index("idx_import_jobs_status").on(table.status),
+  index("idx_import_jobs_initiated").on(table.initiatedBy),
+  index("idx_import_jobs_created").on(table.createdAt),
+]);
+
+export const insertImportJobSchema = createInsertSchema(importJobs).omit({
+  id: true,
+  totalRecords: true,
+  successCount: true,
+  failureCount: true,
+  errorReportPath: true,
+  startedAt: true,
+  completedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertImportJob = z.infer<typeof insertImportJobSchema>;
+export type ImportJob = typeof importJobs.$inferSelect;
+
+// 15. backups - Per Master Spec §4.15.2 - Backup metadata tracking
+export const backups = pgTable("backups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  environment: varchar("environment", { length: 64 }).notNull(), // 'PROD', 'STAGE', 'DEV'
+  backupType: varchar("backup_type", { length: 32 }).notNull(), // 'FULL', 'DB_ONLY', 'FILES_ONLY'
+  storagePath: varchar("storage_path", { length: 512 }).notNull(),
+  checksum: varchar("checksum", { length: 128 }),
+  sizeBytes: integer("size_bytes"),
+  status: varchar("status", { length: 32 }).notNull().default('SUCCESS'), // 'SUCCESS', 'FAILED', 'IN_PROGRESS'
+  errorMessage: text("error_message"),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_backups_environment").on(table.environment),
+  index("idx_backups_type").on(table.backupType),
+  index("idx_backups_status").on(table.status),
+  index("idx_backups_started").on(table.startedAt),
+]);
+
+export const insertBackupSchema = createInsertSchema(backups).omit({
+  id: true,
+  completedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertBackup = z.infer<typeof insertBackupSchema>;
+export type Backup = typeof backups.$inferSelect;
+
+// 16. cash_closings - Per Master Spec §9.4.1 - Daily branch reconciliation
+export const cashClosings = pgTable("cash_closings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  branchId: varchar("branch_id").references(() => branches.id).notNull(),
+  clerkUserId: varchar("clerk_user_id").references(() => users.id).notNull(),
+  shiftStartAt: timestamp("shift_start_at", { withTimezone: true }),
+  shiftEndAt: timestamp("shift_end_at", { withTimezone: true }).notNull(),
+  systemCashTotal: numeric("system_cash_total", { precision: 12, scale: 2 }).notNull(),
+  systemCardTotal: numeric("system_card_total", { precision: 12, scale: 2 }).notNull(),
+  systemBankTotal: numeric("system_bank_total", { precision: 12, scale: 2 }).notNull(),
+  countedCashTotal: numeric("counted_cash_total", { precision: 12, scale: 2 }).notNull(),
+  differenceCash: numeric("difference_cash", { precision: 12, scale: 2 }).notNull(),
+  notes: text("notes"), // Discrepancy reasons etc.
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_cash_closings_branch").on(table.branchId),
+  index("idx_cash_closings_clerk").on(table.clerkUserId),
+  index("idx_cash_closings_shift_end").on(table.shiftEndAt),
+  index("idx_cash_closings_created").on(table.createdAt),
+]);
+
+export const insertCashClosingSchema = createInsertSchema(cashClosings).omit({
+  id: true,
+  approvedBy: true,
+  approvedAt: true,
+  createdAt: true,
+});
+export type InsertCashClosing = z.infer<typeof insertCashClosingSchema>;
+export type CashClosing = typeof cashClosings.$inferSelect;
+
+// 17. cron_job_executions - Per Master Spec §4.14.2 - Cron execution history
+export const cronJobExecutions = pgTable("cron_job_executions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cronJobId: varchar("cron_job_id").references(() => cronJobDefinitions.id).notNull(),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+  finishedAt: timestamp("finished_at", { withTimezone: true }),
+  status: varchar("status", { length: 32 }).notNull().default('SUCCESS'), // 'SUCCESS', 'FAILED', 'TIMEOUT', 'RETRIED'
+  attemptNumber: integer("attempt_number").notNull().default(1),
+  errorMessage: text("error_message"),
+  stackTrace: text("stack_trace"),
+  durationMs: integer("duration_ms"),
+  recordsProcessed: integer("records_processed"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_cron_executions_job").on(table.cronJobId),
+  index("idx_cron_executions_status").on(table.status),
+  index("idx_cron_executions_started").on(table.startedAt),
+]);
+
+export const insertCronJobExecutionSchema = createInsertSchema(cronJobExecutions).omit({
+  id: true,
+  finishedAt: true,
+  durationMs: true,
+  recordsProcessed: true,
+  createdAt: true,
+});
+export type InsertCronJobExecution = z.infer<typeof insertCronJobExecutionSchema>;
+export type CronJobExecution = typeof cronJobExecutions.$inferSelect;
+
+// 18. driver_rate_plans - Per Master Spec §4.10.2 - Driver rate governance
+export const driverRatePlans = pgTable("driver_rate_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  driverId: varchar("driver_id").references(() => drivers.id).notNull(),
+  rateType: varchar("rate_type", { length: 32 }).notNull(), // 'HOURLY', 'DAILY', 'WEEKLY', 'MONTHLY'
+  rateAmount: numeric("rate_amount", { precision: 12, scale: 2 }).notNull(), // Customer-facing rate
+  internalCostRate: numeric("internal_cost_rate", { precision: 12, scale: 2 }), // Internal cost
+  currencyCode: varchar("currency_code", { length: 3 }).notNull().default('AED'),
+  isChargeable: boolean("is_chargeable").notNull().default(true),
+  effectiveFrom: timestamp("effective_from", { withTimezone: true }),
+  effectiveTo: timestamp("effective_to", { withTimezone: true }),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_driver_rate_plans_driver").on(table.driverId),
+  index("idx_driver_rate_plans_type").on(table.rateType),
+  index("idx_driver_rate_plans_active").on(table.isActive),
+]);
+
+export const insertDriverRatePlanSchema = createInsertSchema(driverRatePlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertDriverRatePlan = z.infer<typeof insertDriverRatePlanSchema>;
+export type DriverRatePlan = typeof driverRatePlans.$inferSelect;
+
+// 19. contract_drivers - Per Master Spec §4.10.3 - Contract-driver assignments
+export const contractDrivers = pgTable("contract_drivers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractId: varchar("contract_id").references(() => contracts.id).notNull(),
+  driverId: varchar("driver_id").references(() => drivers.id).notNull(),
+  driverRatePlanId: varchar("driver_rate_plan_id").references(() => driverRatePlans.id).notNull(),
+  assignmentStart: timestamp("assignment_start", { withTimezone: true }).notNull(),
+  assignmentEnd: timestamp("assignment_end", { withTimezone: true }),
+  status: varchar("status", { length: 32 }).notNull().default('ASSIGNED'), // 'ASSIGNED', 'ACTIVE', 'COMPLETED', 'CANCELLED'
+  totalCharge: numeric("total_charge", { precision: 12, scale: 2 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_contract_drivers_contract").on(table.contractId),
+  index("idx_contract_drivers_driver").on(table.driverId),
+  index("idx_contract_drivers_rate_plan").on(table.driverRatePlanId),
+  index("idx_contract_drivers_status").on(table.status),
+]);
+
+export const insertContractDriverSchema = createInsertSchema(contractDrivers).omit({
+  id: true,
+  totalCharge: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertContractDriver = z.infer<typeof insertContractDriverSchema>;
+export type ContractDriver = typeof contractDrivers.$inferSelect;
+
+// 20. roles - Per Master Spec §5.1.3 - FK-backed RBAC
+export const roles = pgTable("roles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 64 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  nameAr: varchar("name_ar", { length: 255 }),
+  description: text("description"),
+  isSystemRole: boolean("is_system_role").notNull().default(false), // Cannot be deleted
+  permissions: jsonb("permissions").$type<string[]>().default([]), // List of permission codes
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_roles_code").on(table.code),
+]);
+
+export const insertRoleSchema = createInsertSchema(roles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertRole = z.infer<typeof insertRoleSchema>;
+export type Role = typeof roles.$inferSelect;
+
+// 21. role_assignments - Per Master Spec §5.1.3 - User-role linkage
+export const roleAssignments = pgTable("role_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  roleId: varchar("role_id").references(() => roles.id).notNull(),
+  branchId: varchar("branch_id").references(() => branches.id), // null = all branches
+  assignedBy: varchar("assigned_by").references(() => users.id),
+  assignedAt: timestamp("assigned_at", { withTimezone: true }).defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }), // Optional expiry
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_role_assignments_user").on(table.userId),
+  index("idx_role_assignments_role").on(table.roleId),
+  index("idx_role_assignments_branch").on(table.branchId),
+  index("idx_role_assignments_active").on(table.isActive),
+  unique("uq_user_role_branch").on(table.userId, table.roleId, table.branchId),
+]);
+
+export const insertRoleAssignmentSchema = createInsertSchema(roleAssignments).omit({
+  id: true,
+  assignedAt: true,
+  createdAt: true,
+});
+export type InsertRoleAssignment = z.infer<typeof insertRoleAssignmentSchema>;
+export type RoleAssignment = typeof roleAssignments.$inferSelect;
 
 // ===========================
 // Predictive Report Response Types
