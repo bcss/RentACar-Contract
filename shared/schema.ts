@@ -1445,7 +1445,7 @@ export const contracts = pgTable("contracts", {
   // Deposit fields per Master Spec §4.4.1 - DECIMAL amounts, not BOOLEAN
   depositRequired: boolean("deposit_required").default(false),
   depositReceived: numeric("deposit_received", { precision: 12, scale: 2 }), // Actual amount received
-  depositRefundedSpec: numeric("deposit_refunded_spec", { precision: 12, scale: 2 }), // Master Spec: deposit_refunded as DECIMAL
+  depositRefunded: numeric("deposit_refunded", { precision: 12, scale: 2 }), // Master Spec: exact naming per §4.4.1
   
   // Financial totals per Master Spec §4.4.1
   totalCharges: numeric("total_charges", { precision: 12, scale: 2 }), // Total contract charges
