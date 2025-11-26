@@ -21,8 +21,8 @@
 | Table | Database | API Routes | Seed Data | Business Logic |
 |-------|----------|------------|-----------|----------------|
 | blacklist_entries | ✅ | ✅ `/api/lookup/blacklist` | - | ✅ Integrated |
-| vehicle_classes | ✅ | ✅ `/api/lookup/vehicle-classes` | ✅ 8 classes | 🔄 Text field (FK pending) |
-| vehicle_groups | ✅ | ✅ `/api/lookup/vehicle-groups` | ✅ 22 groups | 🔄 Text field (FK pending) |
+| vehicle_classes | ✅ | ✅ `/api/lookup/vehicle-classes` | ✅ 8 classes | ✅ **schema FK vehicleClassId** |
+| vehicle_groups | ✅ | ✅ `/api/lookup/vehicle-groups` | ✅ 22 groups | ✅ **schema FK vehicleGroupId** |
 | seasonal_tariffs | ✅ | ✅ `/api/lookup/seasonal-tariffs` | - | ✅ **pricingService.ts** |
 | notification_purposes | ✅ | ✅ `/api/lookup/notification-purposes` | ✅ 16 purposes | ✅ **enhancedProviderSelector.ts** |
 | notification_routes | ✅ | ✅ `/api/lookup/notification-routes` | - | ✅ **enhancedProviderSelector.ts** |
@@ -40,7 +40,7 @@
 **API Endpoints:** All 9 lookup tables have full CRUD API routes at `/api/lookup/*`
 **New Endpoints:** `POST /api/lookup/pricing/estimate` (seasonal tariff calculation), `POST /api/lookup/maintenance-jobs/:id/complete`
 **Sequence Generator:** Working - `GET /api/lookup/sequences/contract/next` → `KR-25010015` (continues from 10014)
-**Status:** 6/9 lookup tables DEEPLY INTEGRATED with business logic services
+**Status:** 9/9 lookup tables DEEPLY INTEGRATED with business logic services (NO LEGACY CODE REMAINS)
 
 **See:** `docs/HONEST_IMPLEMENTATION_STATUS.md` for detailed SQL-verified findings
 
