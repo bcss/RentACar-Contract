@@ -1348,7 +1348,7 @@ export const contracts = pgTable("contracts", {
   depositPaid: boolean("deposit_paid").notNull().default(false),
   depositPaidDate: timestamp("deposit_paid_date"),
   depositPaidMethod: varchar("deposit_paid_method", { length: 50 }), // cash, card, bank_transfer
-  depositRefunded: boolean("deposit_refunded").notNull().default(false),
+  depositRefundedLegacy: boolean("deposit_refunded_legacy").notNull().default(false), // Legacy: use depositRefunded DECIMAL instead
   depositRefundedDate: timestamp("deposit_refunded_date"),
   finalPaymentReceived: boolean("final_payment_received").notNull().default(false),
   finalPaymentDate: timestamp("final_payment_date"),
@@ -4983,7 +4983,78 @@ export const insertCashClosingSchema = createInsertSchema(cashClosings).omit({
 export type InsertCashClosing = z.infer<typeof insertCashClosingSchema>;
 export type CashClosing = typeof cashClosings.$inferSelect;
 
-// 17. cron_job_executions - Per Master Spec §4.14.2 - Cron execution history
+// 17. summaries_daily_branch - Per Master Spec §9.6.2 & §12.5 - Branch daily reporting summaries
+export const summariesDailyBranch = pgTable("summaries_daily_branch", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  branchId: varchar("branch_id").references(() => branches.id).notNull(),
+  date: date("date").notNull(),
+  totalRevenueCash: numeric("total_revenue_cash", { precision: 12, scale: 2 }).notNull().default('0'),
+  totalRevenueCard: numeric("total_revenue_card", { precision: 12, scale: 2 }).notNull().default('0'),
+  totalRevenueBank: numeric("total_revenue_bank", { precision: 12, scale: 2 }).notNull().default('0'),
+  totalRevenue: numeric("total_revenue", { precision: 12, scale: 2 }).notNull().default('0'),
+  contractsStarted: integer("contracts_started").notNull().default(0),
+  contractsClosed: integer("contracts_closed").notNull().default(0),
+  activeContractsEndOfDay: integer("active_contracts_end_of_day").notNull().default(0),
+  reservationsCreated: integer("reservations_created").notNull().default(0),
+  reservationsConverted: integer("reservations_converted").notNull().default(0),
+  reservationsExpired: integer("reservations_expired").notNull().default(0),
+  paymentsInCount: integer("payments_in_count").notNull().default(0),
+  paymentsInTotal: numeric("payments_in_total", { precision: 12, scale: 2 }).notNull().default('0'),
+  paymentsOutCount: integer("payments_out_count").notNull().default(0),
+  paymentsOutTotal: numeric("payments_out_total", { precision: 12, scale: 2 }).notNull().default('0'),
+  outstandingBalance: numeric("outstanding_balance", { precision: 12, scale: 2 }).notNull().default('0'),
+  vehiclesAvailable: integer("vehicles_available").notNull().default(0),
+  vehiclesRented: integer("vehicles_rented").notNull().default(0),
+  vehiclesMaintenance: integer("vehicles_maintenance").notNull().default(0),
+  avgUtilisationPct: numeric("avg_utilisation_pct", { precision: 5, scale: 2 }),
+  newIncidents: integer("new_incidents").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_summaries_branch_date").on(table.branchId, table.date),
+  index("idx_summaries_branch_date_only").on(table.date),
+  uniqueIndex("idx_summaries_branch_unique").on(table.branchId, table.date),
+]);
+
+export const insertSummariesDailyBranchSchema = createInsertSchema(summariesDailyBranch).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSummariesDailyBranch = z.infer<typeof insertSummariesDailyBranchSchema>;
+export type SummariesDailyBranch = typeof summariesDailyBranch.$inferSelect;
+
+// 18. summaries_daily_vehicle - Per Master Spec §9.6.2 & §12.5 - Vehicle daily reporting summaries
+export const summariesDailyVehicle = pgTable("summaries_daily_vehicle", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  vehicleId: varchar("vehicle_id").references(() => vehicles.id).notNull(),
+  date: date("date").notNull(),
+  status: varchar("status", { length: 32 }).notNull(), // 'AVAILABLE', 'OUT', 'RESERVED', 'MAINTENANCE', 'TRANSFER', 'BLOCKED'
+  isOut: boolean("is_out").notNull().default(false),
+  utilisationContribution: integer("utilisation_contribution").notNull().default(0), // 0 or 1
+  contractId: varchar("contract_id").references(() => contracts.id),
+  reservationId: varchar("reservation_id").references(() => reservations.id),
+  maintenanceJobId: varchar("maintenance_job_id"),
+  branchId: varchar("branch_id").references(() => branches.id).notNull(),
+  revenueGenerated: numeric("revenue_generated", { precision: 12, scale: 2 }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_summaries_vehicle_date").on(table.vehicleId, table.date),
+  index("idx_summaries_vehicle_date_only").on(table.date),
+  index("idx_summaries_vehicle_branch").on(table.branchId, table.date),
+  uniqueIndex("idx_summaries_vehicle_unique").on(table.vehicleId, table.date),
+]);
+
+export const insertSummariesDailyVehicleSchema = createInsertSchema(summariesDailyVehicle).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSummariesDailyVehicle = z.infer<typeof insertSummariesDailyVehicleSchema>;
+export type SummariesDailyVehicle = typeof summariesDailyVehicle.$inferSelect;
+
+// 19. cron_job_executions - Per Master Spec §4.14.2 - Cron execution history
 export const cronJobExecutions = pgTable("cron_job_executions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   cronJobId: varchar("cron_job_id").references(() => cronJobDefinitions.id).notNull(),

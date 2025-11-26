@@ -47,6 +47,8 @@ import utilityRoutes from "./utilityRoutes";
 import otpRoutes from "./otpRoutes";
 import systemSettingsRoutes from "./systemSettingsRoutes";
 import lookupRoutes from "./lookupRoutes";
+import disputeRoutes from "./disputeRoutes";
+import cashClosingRoutes from "./cashClosingRoutes";
 
 /**
  * Register all modular routes with the Express app
@@ -132,6 +134,10 @@ export function registerModularRoutes(app: Express): void {
   
   // Lookup Tables (Master Spec compliance)
   app.use('/api/lookup', lookupRoutes); // Vehicle classes, groups, notification config, etc.
+  
+  // Contract Disputes & Cash Closings (Master Spec §4.4.5 & §9.4.1)
+  app.use('/api/disputes', disputeRoutes);
+  app.use('/api/cash-closings', cashClosingRoutes);
   
   // Feature routes
   app.use('/api', paymentRoutes); // Payment routes have mixed base paths

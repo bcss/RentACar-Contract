@@ -3,6 +3,7 @@ import { storage } from '../storage';
 import { RiskCalculator } from './riskCalculator';
 import { notificationService } from './notificationService';
 import { availabilityEngine } from './availabilityEngine';
+import { executeDailySummaryJob } from './dailySummaryJob';
 import { db } from '../db';
 import { users, cronJobDefinitions } from '../../shared/schema';
 import { and, or, eq } from 'drizzle-orm';
@@ -526,6 +527,9 @@ function registerAllJobImplementations() {
   
   // Database handler: sendReturnReminders
   registerJobImplementation('sendReturnReminders', executeContractExpiryReminder);
+  
+  // Database handler: generateDailySummary - Per Master Spec Part 9.6.2
+  registerJobImplementation('generateDailySummary', executeDailySummaryJob);
 }
 
 /**
@@ -534,6 +538,7 @@ function registerAllJobImplementations() {
  */
 const DEFAULT_SCHEDULES: Record<string, string> = {
   'calculateRiskScores': '0 2 * * *',        // 2 AM daily
+  'generateDailySummary': '0 1 * * *',       // 1 AM daily - Per Master Spec Part 9.6.2
   'cleanupStaleDrafts': '0 3 * * *',         // 3 AM daily
   'checkDocumentExpiry': '0 6 * * *',        // 6 AM daily
   'alertExpiringLicenses': '0 7 * * *',      // 7 AM daily
