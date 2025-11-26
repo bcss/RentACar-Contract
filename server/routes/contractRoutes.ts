@@ -1408,8 +1408,10 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
 
 /**
  * POST /api/contracts/:id/cancel
- * Cancel a draft contract - Per Master Spec Part 5.5.1
- * Only draft contracts can be cancelled. Reason is required.
+ * Cancel a contract - Per Master Spec Part 5.5.1
+ * DRAFT contracts can always be cancelled.
+ * ACTIVE contracts can be cancelled before vehicle handover (no timeOut set).
+ * Reason is required.
  */
 router.post("/:id/cancel", isAuthenticated, async (req: any, res) => {
   try {
@@ -1429,10 +1431,22 @@ router.post("/:id/cancel", isAuthenticated, async (req: any, res) => {
       return res.status(404).json({ message: "Contract not found" });
     }
     
-    // Only draft contracts can be cancelled
-    if (contract.status !== 'draft') {
+    // Per Master Spec: Cancellation allowed for:
+    // 1. DRAFT contracts - always cancellable
+    // 2. ACTIVE contracts - only before vehicle handover (timeOut not set)
+    if (contract.status === 'draft') {
+      // Draft contracts can always be cancelled
+    } else if (contract.status === 'active') {
+      // Active contracts can only be cancelled before vehicle handover
+      if (contract.timeOut) {
+        return res.status(400).json({ 
+          message: "Cannot cancel contract after vehicle handover. The vehicle has already been handed over to the customer." 
+        });
+      }
+    } else {
+      // Other statuses (completed, completed_pending_accident, closed, cancelled) cannot be cancelled
       return res.status(400).json({ 
-        message: `Cannot cancel contract in '${contract.status}' status. Only draft contracts can be cancelled.` 
+        message: `Cannot cancel contract in '${contract.status}' status. Only draft or active (pre-handover) contracts can be cancelled.` 
       });
     }
     

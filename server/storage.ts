@@ -1067,15 +1067,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Phase 2.3: Contract Cancellation - Per Master Spec Part 5.5.1
+  // Cancellation allowed for DRAFT and ACTIVE (pre-handover) contracts
+  // Status validation is done in the route layer
   async cancelContract(id: string, userId: string, cancellationReason: string, expectedVersion?: number): Promise<Contract> {
     // Get current status before update
     const [current] = await db.select({ status: contracts.status }).from(contracts).where(eq(contracts.id, id));
     const fromStatus = current?.status || 'draft';
-
-    // Validate: Only draft contracts can be cancelled
-    if (current?.status && current.status !== 'draft') {
-      throw new Error(`Cannot cancel contract in '${current.status}' status. Only draft contracts can be cancelled.`);
-    }
 
     // Per Master Spec Part 6.5.2: Conditional update with version check
     const whereConditions = expectedVersion !== undefined

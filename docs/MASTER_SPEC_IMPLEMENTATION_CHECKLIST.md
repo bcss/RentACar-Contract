@@ -1376,10 +1376,10 @@
 
 ### Priority Order:
 1. ✅ Fix all financial field data types (varchar → DECIMAL) - DONE Nov 25
-2. ⬜ Add missing contract statuses (CANCELLED)
-3. ⬜ Add missing vehicle statuses
+2. ✅ Add missing contract statuses (CANCELLED) - DONE Nov 26
+3. ✅ Add missing vehicle statuses - VERIFIED Nov 26 (already complete)
 4. ✅ Create missing core tables - DONE Nov 25 (6 tables created)
-5. ⬜ Add missing contract fields
+5. ✅ Add missing contract fields - DONE Nov 26
 6. ⬜ Implement validation rules
 7. ⬜ Implement approval workflows
 8. ✅ Fix OTP parameters - DONE Nov 26 (3-min expiry + rate limiting)
@@ -1398,6 +1398,13 @@
 - ✅ OTP Service - 3-minute expiry (per Master Spec Part 5.9)
 - ✅ OTP Service - Rate limiting 3 per 10 min (per Master Spec Part 8)
 - ✅ Storage Layer - Status history tracking on lifecycle transitions
+- ✅ Storage Layer - Contract cancellation method with version control
+- ✅ Contract Routes - Cancel contract endpoint (/api/contracts/:id/cancel)
+
+### Schema Updates (Nov 26, 2025):
+- ✅ Contract cancellation fields (cancelledBy, cancelledAt, cancellationReason)
+- ✅ Payment summary fields (depositExpected, totalPaymentsIn, totalPaymentsOut, hasPendingIncident)
+- ✅ Vehicle inspections type enum updated (checkout, return, transfer_in, transfer_out, maintenance)
 
 ---
 
