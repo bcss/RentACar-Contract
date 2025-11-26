@@ -49,6 +49,8 @@ import systemSettingsRoutes from "./systemSettingsRoutes";
 import lookupRoutes from "./lookupRoutes";
 import disputeRoutes from "./disputeRoutes";
 import cashClosingRoutes from "./cashClosingRoutes";
+import contractLifecycleRoutes from "./contractLifecycleRoutes";
+import billingRoutes from "./billingRoutes";
 
 /**
  * Register all modular routes with the Express app
@@ -138,6 +140,10 @@ export function registerModularRoutes(app: Express): void {
   // Contract Disputes & Cash Closings (Master Spec §4.4.5 & §9.4.1)
   app.use('/api/disputes', disputeRoutes);
   app.use('/api/cash-closings', cashClosingRoutes);
+  
+  // Contract Lifecycle & Billing (Master Spec Part 3 & §7.5.2)
+  app.use('/api/contracts/lifecycle', contractLifecycleRoutes);
+  app.use('/api/billing', billingRoutes);
   
   // Feature routes
   app.use('/api', paymentRoutes); // Payment routes have mixed base paths
