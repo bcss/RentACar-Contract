@@ -195,7 +195,7 @@ const resources = {
       "financialReports.noData": "No financial data available for the selected period",
       "financialReports.noPayments": "No payments recorded for this period",
       "financialReports.noOutstanding": "No outstanding payments",
-      "financialReports.exportPlaceholder": "Export (Coming Soon)",
+      "financialReports.exportPlaceholder": "Export",
       "financialReports.cash": "Cash",
       "financialReports.card": "Card",
       "financialReports.bankTransfer": "Bank Transfer",
@@ -882,7 +882,7 @@ const resources = {
       "operationalReports.extraChargesReport": "Extra Charges Report",
       "operationalReports.dateRange": "Date Range",
       "operationalReports.clearFilters": "Clear Filters",
-      "operationalReports.exportPlaceholder": "Export (Coming Soon)",
+      "operationalReports.exportPlaceholder": "Export",
       "operationalReports.noData": "No operational data available for the selected period",
       
       // Vehicle Utilization Tab
@@ -2471,7 +2471,7 @@ const resources = {
       "financialReports.noData": "لا توجد بيانات مالية متاحة للفترة المحددة",
       "financialReports.noPayments": "لا توجد مدفوعات مسجلة لهذه الفترة",
       "financialReports.noOutstanding": "لا توجد مدفوعات مستحقة",
-      "financialReports.exportPlaceholder": "تصدير (قريباً)",
+      "financialReports.exportPlaceholder": "تصدير",
       "financialReports.cash": "نقداً",
       "financialReports.card": "بطاقة",
       "financialReports.bankTransfer": "تحويل بنكي",
@@ -3158,7 +3158,7 @@ const resources = {
       "operationalReports.extraChargesReport": "تقرير الرسوم الإضافية",
       "operationalReports.dateRange": "نطاق التاريخ",
       "operationalReports.clearFilters": "مسح المرشحات",
-      "operationalReports.exportPlaceholder": "تصدير (قريباً)",
+      "operationalReports.exportPlaceholder": "تصدير",
       "operationalReports.noData": "لا توجد بيانات تشغيلية متاحة للفترة المحددة",
       
       // Vehicle Utilization Tab

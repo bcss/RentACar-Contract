@@ -90,17 +90,14 @@ export function DriverAssignmentModal({
   // Create driver assignment mutation
   const createAssignmentMutation = useMutation({
     mutationFn: async (data: DriverAssignmentFormData) => {
-      return await apiRequest('/api/driver-assignments', {
-        method: 'POST',
-        body: JSON.stringify({
-          contractId: contract.id,
-          driverId: data.driverId,
-          startDateTime: data.startDateTime.toISOString(),
-          endDateTime: data.endDateTime.toISOString(),
-          assignmentNotes: data.assignmentNotes,
-          status: 'scheduled',
-          createdBy: '', // Will be set by backend
-        }),
+      return await apiRequest('POST', '/api/driver-assignments', {
+        contractId: contract.id,
+        driverId: data.driverId,
+        startDateTime: data.startDateTime.toISOString(),
+        endDateTime: data.endDateTime.toISOString(),
+        assignmentNotes: data.assignmentNotes,
+        status: 'scheduled',
+        createdBy: '', // Will be set by backend
       });
     },
     onSuccess: () => {
@@ -260,7 +257,7 @@ export function DriverAssignmentModal({
                       <span>{selectedDriver.mobile}</span>
                     </div>
                   )}
-                  {selectedDriver.companyId && (
+                  {selectedDriver.outsourceCompanyId && (
                     <div>
                       <span className="text-muted-foreground">Company:</span>{' '}
                       <span>Outsourced</span>
@@ -420,7 +417,7 @@ export function DriverAssignmentModal({
                 type="submit"
                 disabled={
                   createAssignmentMutation.isPending ||
-                  (availabilityStatus && !availabilityStatus.isAvailable)
+                  (availabilityStatus !== null && !availabilityStatus.isAvailable)
                 }
                 data-testid="button-assign-driver"
               >

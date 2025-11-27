@@ -48,6 +48,7 @@ import { ZoomIn } from 'lucide-react';
 import { PDFPreviewModal } from '@/components/PDFPreviewModal';
 import { generateContractPDF } from '@/utils/contractPDF';
 import { Icon } from '@/components/Icon';
+import { DriverAssignmentModal } from '@/components/DriverAssignmentModal';
 
 export default function ContractView() {
   const { t, i18n } = useTranslation();
@@ -68,6 +69,7 @@ export default function ContractView() {
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [showEditReasonDialog, setShowEditReasonDialog] = useState(false);
+  const [showDriverAssignmentModal, setShowDriverAssignmentModal] = useState(false);
 
   // Activation workflow - capture actual vehicle handover time
   const [timeOut, setTimeOut] = useState(() => {
@@ -240,7 +242,7 @@ export default function ContractView() {
 
   // Payment mutations
   const createPaymentMutation = useMutation({
-    mutationFn: async (data: { amount: string; paymentMethod: string; currency: string; notes?: string; paidAt: Date }) => {
+    mutationFn: async (data: { amount: string; paymentMethod: string; currency: string; notes?: string; paidAt: Date; chequeNumber?: string; last4Digits?: string; referenceNumber?: string }) => {
       return await apiRequest('POST', `/api/contracts/${params.id}/payments`, data);
     },
     onSuccess: () => {
@@ -741,7 +743,7 @@ export default function ContractView() {
     if (isAdmin && hasOutstandingBalance) {
       setShowClosureRemarkDialog(true);
     } else {
-      closeMutation.mutate();
+      closeMutation.mutate(undefined);
     }
   };
 
@@ -2052,12 +2054,7 @@ export default function ContractView() {
               Driver Service
             </div>
             {contract.status !== 'closed' && (
-              <Button onClick={() => {
-                toast({
-                  title: "Coming Soon",
-                  description: "Driver assignment management will be available in the next update",
-                });
-              }} size="sm" data-testid="button-manage-driver-assignments">
+              <Button onClick={() => setShowDriverAssignmentModal(true)} size="sm" data-testid="button-manage-driver-assignments">
                 <Icon name="add" className=" text-sm" />
                 <span>Assign Driver</span>
               </Button>
@@ -2071,11 +2068,21 @@ export default function ContractView() {
               No driver assignments for this contract
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Driver service functionality will be fully available in the next update
+              Click "Assign Driver" to schedule a driver for this contract
             </p>
           </div>
         </CardContent>
       </Card>
+
+      {/* Driver Assignment Modal */}
+      <DriverAssignmentModal
+        open={showDriverAssignmentModal}
+        onOpenChange={setShowDriverAssignmentModal}
+        contract={contract}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id] });
+        }}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Customer Information */}
@@ -2636,16 +2643,16 @@ export default function ContractView() {
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-mono font-semibold">{claim.claimNumber}</span>
                         <Badge className={
-                          claim.status === 'pending' ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
-                          claim.status === 'under_review' ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400' :
-                          claim.status === 'approved' ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
-                          claim.status === 'rejected' ? 'bg-red-500/10 text-red-700 dark:text-red-400' :
+                          claim.claimStatus === 'pending' ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
+                          claim.claimStatus === 'under_review' ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400' :
+                          claim.claimStatus === 'approved' ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
+                          claim.claimStatus === 'rejected' ? 'bg-red-500/10 text-red-700 dark:text-red-400' :
                           'bg-gray-500/10 text-gray-700 dark:text-gray-400'
                         }>
-                          {claim.status === 'pending' ? 'Pending' :
-                           claim.status === 'under_review' ? 'Under Review' :
-                           claim.status === 'approved' ? 'Approved' :
-                           claim.status === 'rejected' ? 'Rejected' :
+                          {claim.claimStatus === 'pending' ? 'Pending' :
+                           claim.claimStatus === 'under_review' ? 'Under Review' :
+                           claim.claimStatus === 'approved' ? 'Approved' :
+                           claim.claimStatus === 'rejected' ? 'Rejected' :
                            'Settled'}
                         </Badge>
                       </div>
