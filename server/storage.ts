@@ -401,12 +401,6 @@ export interface IStorage {
   disableDriver(id: string, disabledBy: string): Promise<void>;
   enableDriver(id: string): Promise<void>;
   
-  // Driver Rate Card operations
-  getDriverRateCards(driverId: string): Promise<DriverRateCard[]>;
-  getActiveDriverRateCard(driverId: string, rateType: string): Promise<DriverRateCard | undefined>;
-  createDriverRateCard(rateCard: InsertDriverRateCard): Promise<DriverRateCard>;
-  updateDriverRateCard(id: string, rateCard: Partial<InsertDriverRateCard>): Promise<DriverRateCard>;
-  
   // Driver Schedule Block operations
   getDriverScheduleBlocks(driverId: string, startDate?: Date, endDate?: Date): Promise<DriverScheduleBlock[]>;
   createDriverScheduleBlock(block: InsertDriverScheduleBlock): Promise<DriverScheduleBlock>;

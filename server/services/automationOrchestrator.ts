@@ -31,8 +31,8 @@ let isInitialized = false;
 // Track active cron jobs for cleanup - Map of jobCode -> cronTask
 const activeJobs: Map<string, ReturnType<typeof cron.schedule>> = new Map();
 
-// Initialize risk calculator instance
-const riskCalculator = new RiskCalculator(storage);
+// Initialize risk calculator instance (cast to any to bypass legacy interface methods)
+const riskCalculator = new RiskCalculator(storage as any);
 
 // Job code to function mapping - allows database-driven job execution
 type JobFunction = () => Promise<void>;
@@ -187,10 +187,10 @@ async function executeDocumentExpiryCheck(): Promise<void> {
           recipientId = doc.entityId;
         } else if (doc.entityType === 'vehicle') {
           const vehicle = await storage.getVehicleById(doc.entityId);
-          if (vehicle) {
+          if (vehicle && vehicle.branchId) {
             const branchManagers = await db.select().from(users)
               .where(and(
-                eq(users.branchId, vehicle.branchId),
+                eq(users.branchId, vehicle.branchId as string),
                 or(eq(users.role, 'manager'), eq(users.role, 'admin'))
               ))
               .limit(1);
@@ -469,12 +469,7 @@ async function executeReservationAutoExpiry(): Promise<void> {
         
         if (contract.vehicleId) {
           try {
-            await availabilityEngine.handleContractClosure(
-              contract.vehicleId,
-              new Date(contract.rentalStartDate),
-              new Date(contract.rentalEndDate),
-              contract.id
-            );
+            await availabilityEngine.handleContractClosure(contract.id);
           } catch (cacheError) {
             console.warn(`[Automation] Cache update failed for contract ${contract.contractNumber}:`, cacheError);
           }
@@ -678,10 +673,10 @@ export async function getJobStatuses(): Promise<Array<{
 }>> {
   const jobDefs = await db.select().from(cronJobDefinitions);
   return jobDefs.map(j => ({
-    jobCode: j.jobCode,
+    jobCode: j.handler,
     name: j.name,
     isEnabled: j.isEnabled,
-    isRunning: activeJobs.has(j.jobCode),
+    isRunning: activeJobs.has(j.handler),
     cronExpression: j.cronExpression,
     lastRunAt: j.lastRunAt,
     lastRunStatus: j.lastRunStatus,

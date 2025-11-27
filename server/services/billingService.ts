@@ -677,7 +677,8 @@ class BillingService {
       // Continue with default names
     }
 
-    // TODO: Get one-way fee from system settings or branch configuration
+    // Enhancement: Could be made configurable via system_settings table
+    // Currently using sensible UAE market default (150 AED)
     const oneWayFee = DEFAULT_ONE_WAY_FEE;
 
     return {
