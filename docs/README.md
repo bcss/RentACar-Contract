@@ -1,64 +1,67 @@
-# KarāraOS Documentation Index
+# KarāraOS Documentation
 
-**✅ UPDATE:** All 5 feature gaps resolved! See [FEATURE_STATUS_UPDATE.md](FEATURE_STATUS_UPDATE.md)  
-**Last Updated:** November 21, 2025 (P1 Critical Fixes Applied)
+**Last Updated:** November 27, 2025  
+**Master Spec Compliance:** 100% (Parts 1-16 + A-F verified)
 
-## 📚 Documentation Structure
+## Documentation Structure
 
-This folder contains all technical and user documentation for the KarāraOS (Rental Car Contract Management System). Documents are organized by purpose for easy navigation.
-
----
-
-## 🚀 Quick Start
-
-- **✅ Feature Status:** [FEATURE_STATUS_UPDATE.md](FEATURE_STATUS_UPDATE.md) - All gaps resolved
-- **New Users:** Start with [User Guide](USER_GUIDE.md)
-- **Administrators:** Read [Admin Guide](ADMIN_GUIDE.md)
-- **Developers:** See [Architecture](ARCHITECTURE.md) and [Technical Documentation](TECHNICAL_DOCUMENTATION.md)
-- **Deployment:** Follow [Production Deployment](PRODUCTION_DEPLOYMENT.md) + [Document Storage Migration](DOCUMENT_STORAGE_MIGRATION_GUIDE.md)
+This folder contains all technical and user documentation for KarāraOS (UAE Rental Car Contract Management Platform). Documents are organized by purpose for easy navigation.
 
 ---
 
-## 📖 Core Documentation
+## Quick Start
+
+- **Overview:** Start with [replit.md](../replit.md) for system overview
+- **Specification:** [Master System Specification](KARĀRAOS%20–%20MASTER%20SYSTEM%20SPECIFICATION%20v1.0.md)
+- **Features:** [Master Feature List](MASTER_FEATURE_LIST.md)
+- **New Users:** [User Guide](USER_GUIDE.md)
+- **Administrators:** [Admin Guide](ADMIN_GUIDE.md)
+- **Developers:** [Architecture](ARCHITECTURE.md) and [Technical Documentation](TECHNICAL_DOCUMENTATION.md)
+- **Deployment:** [Production Deployment](PRODUCTION_DEPLOYMENT.md)
+
+---
+
+## Documentation Index
+
+For complete documentation catalog, see **[DOCUMENT_INDEX.md](DOCUMENT_INDEX.md)**
+
+### Core Documents
+
+| Document | Purpose |
+|----------|---------|
+| [KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md](KARĀRAOS%20–%20MASTER%20SYSTEM%20SPECIFICATION%20v1.0.md) | Master specification (10,806 lines) |
+| [MASTER_FEATURE_LIST.md](MASTER_FEATURE_LIST.md) | Comprehensive feature inventory |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture and design |
+| [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md) | Technical specifications |
 
 ### User Guides
-- **[USER_GUIDE.md](USER_GUIDE.md)** - Complete user manual for all roles
-- **[ADMIN_GUIDE.md](ADMIN_GUIDE.md)** - Administrator configuration and management
-- **[DASHBOARD_GUIDE.md](DASHBOARD_GUIDE.md)** - Dashboard features and analytics
-- **[ROLE_PERMISSIONS.md](ROLE_PERMISSIONS.md)** - Role-based access control matrix
 
-### Technical Documentation
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and design patterns
-- **[TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md)** - Consolidated technical specs
-- **[CONTRACT_FLOW.md](CONTRACT_FLOW.md)** - Contract lifecycle and workflows
-- **[TABBED_DIALOGS_GUIDE.md](TABBED_DIALOGS_GUIDE.md)** - UI component patterns
+| Document | Purpose |
+|----------|---------|
+| [USER_GUIDE.md](USER_GUIDE.md) | Complete user manual |
+| [ADMIN_GUIDE.md](ADMIN_GUIDE.md) | Administrator configuration |
+| [DASHBOARD_GUIDE.md](DASHBOARD_GUIDE.md) | Dashboard features |
+| [OPERATIONAL_RUNBOOK.md](OPERATIONAL_RUNBOOK.md) | Operations guide |
 
-### Feature Documentation
-- **[FEATURE_STATUS_UPDATE.md](FEATURE_STATUS_UPDATE.md)** - 🆕 Latest feature gap resolutions
-- **[MASTER_FEATURE_LIST.md](MASTER_FEATURE_LIST.md)** - Comprehensive feature inventory
-- **[IMPORT_DATA.md](IMPORT_DATA.md)** - Bulk data import functionality
+### Compliance & Quality
 
-### Deployment & Operations
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Consolidated deployment guide (Docker, VPS, Replit)
-- **[PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md)** - Production deployment checklist
-- **[OPERATIONAL_RUNBOOK.md](OPERATIONAL_RUNBOOK.md)** - Operations and troubleshooting
-- **[MAINTENANCE_GUIDE.md](MAINTENANCE_GUIDE.md)** - System maintenance procedures
+| Document | Purpose |
+|----------|---------|
+| [MASTER_SPEC_COMPLIANCE_COMPARISON.md](MASTER_SPEC_COMPLIANCE_COMPARISON.md) | 100% compliance verification |
+| [MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md](MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md) | Implementation tracking |
+| [PROJECT_AUDIT_NOV22_2025.md](PROJECT_AUDIT_NOV22_2025.md) | Latest system audit |
 
-### Quality Assurance
-- **[COMPREHENSIVE_AUDIT_REPORT_NOV2025.md](COMPREHENSIVE_AUDIT_REPORT_NOV2025.md)** - 🆕 Complete Nov 2025 audit
-- **[COMPREHENSIVE_SYSTEM_AUDIT.md](COMPREHENSIVE_SYSTEM_AUDIT.md)** - 60-page system audit
-- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Testing procedures
-- **[CI_LOCAL_CHECKLIST.md](CI_LOCAL_CHECKLIST.md)** - Pre-release testing checklist
-- **[RTL_LTR_TESTING_CHECKLIST.md](RTL_LTR_TESTING_CHECKLIST.md)** - Bilingual testing
-- **[PRODUCTION_READINESS_REPORT.md](PRODUCTION_READINESS_REPORT.md)** - Pre-production validation
+### Testing & Deployment
 
-### Strategic Planning
-- **[FEATURE_ROADMAP.md](FEATURE_ROADMAP.md)** - Future development roadmap and gap analysis
-- **[VERIFIED_GAP_ANALYSIS.md](VERIFIED_GAP_ANALYSIS.md)** - Market requirements analysis
+| Document | Purpose |
+|----------|---------|
+| [TESTING_GUIDE.md](TESTING_GUIDE.md) | Testing procedures |
+| [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md) | Deployment guide |
+| [CI_LOCAL_CHECKLIST.md](CI_LOCAL_CHECKLIST.md) | Pre-release checklist |
 
 ---
 
-## 🏗️ System Components
+## System Overview
 
 ### Core Modules
 1. **Contract Management** - 4-state lifecycle (Draft → Active → Completed → Closed)
@@ -73,79 +76,17 @@ This folder contains all technical and user documentation for the KarāraOS (Ren
 - **Frontend:** React, TypeScript, Wouter, TanStack Query, Radix UI, Tailwind CSS
 - **Backend:** Node.js, Express.js, Drizzle ORM, Passport.js
 - **Database:** PostgreSQL (Neon serverless)
-- **Internationalization:** i18next (English/Arabic with RTL/LTR)
-- **Design System:** Material Design 3 with dual theme (light/dark)
+- **Build:** Vite
+- **i18n:** i18next (English/Arabic with RTL/LTR)
 
 ---
 
-## 🔍 Find What You Need
+## Archived Documents
 
-### By Role
-
-**🧑‍💼 Business Users**
-- [User Guide](USER_GUIDE.md) - Daily operations
-- [Dashboard Guide](DASHBOARD_GUIDE.md) - Analytics and reporting
-- [Features](FEATURES.md) - What the system can do
-
-**⚙️ System Administrators**
-- [Admin Guide](ADMIN_GUIDE.md) - System configuration
-- [Role Permissions](ROLE_PERMISSIONS.md) - Access control setup
-- [Operational Runbook](OPERATIONAL_RUNBOOK.md) - Troubleshooting
-- [Maintenance Guide](MAINTENANCE_GUIDE.md) - Regular maintenance
-
-**👨‍💻 Developers**
-- [Architecture](ARCHITECTURE.md) - System design
-- [Technical Documentation](TECHNICAL_DOCUMENTATION.md) - Implementation details
-- [Testing Guide](TESTING_AND_QA.md) - Testing procedures
-
-**🚀 DevOps/Deployment**
-- [Deployment Guide](DEPLOYMENT.md) - All deployment options
-- [Production Deployment](PRODUCTION_DEPLOYMENT.md) - Production checklist
-- [Operational Runbook](OPERATIONAL_RUNBOOK.md) - Operations guide
-
-**📊 Management/Executives**
-- [System Brochure](SYSTEM_BROCHURE.md) - Executive overview
-- [Feature Roadmap](FEATURE_ROADMAP.md) - Strategic planning
-- [Audit Reports](AUDIT_REPORTS.md) - Security and compliance
+Superseded and outdated documents are stored in `docs/archive/`. These are kept for historical reference but are no longer authoritative.
 
 ---
 
-## 📝 Document Maintenance
+## Terminology
 
-### Archived Documents
-Older proposals and historical documents moved to `archive/` folder:
-- Enhancement proposals
-- Bug reports
-- Analysis documents
-- Deprecated guides
-
-### Contributing
-When updating documentation:
-1. Keep this README.md index current
-2. Use consistent formatting (Markdown)
-3. Include bilingual content where applicable
-4. Update "Last Updated" dates
-5. Link related documents
-
----
-
-## 🆘 Support
-
-**For Technical Issues:**
-- Check [Operational Runbook](OPERATIONAL_RUNBOOK.md)
-- Review [Maintenance Guide](MAINTENANCE_GUIDE.md)
-- Consult [Audit Reports](AUDIT_REPORTS.md) for known issues
-
-**For Feature Requests:**
-- Review [Feature Roadmap](FEATURE_ROADMAP.md)
-- Submit via internal ticketing system
-
-**For User Questions:**
-- Refer to [User Guide](USER_GUIDE.md)
-- Contact system administrator
-
----
-
-**System Version:** 2.0  
-**Documentation Status:** Current  
-**Language Support:** English, العربية (Arabic)
+The system is officially named **KarāraOS** (previously referred to as "RCCMS" in older documentation). All active documents use the current terminology.
