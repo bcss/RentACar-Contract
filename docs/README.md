@@ -50,6 +50,7 @@ For complete documentation catalog, see **[DOCUMENT_INDEX.md](DOCUMENT_INDEX.md)
 | [MASTER_SPEC_COMPLIANCE_COMPARISON.md](MASTER_SPEC_COMPLIANCE_COMPARISON.md) | 100% compliance verification |
 | [MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md](MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md) | Implementation tracking |
 | [PROJECT_AUDIT_NOV22_2025.md](PROJECT_AUDIT_NOV22_2025.md) | Latest system audit |
+| [NON_COMPLIANT_DEPENDENCIES.md](NON_COMPLIANT_DEPENDENCIES.md) | Legacy code review |
 
 ### Testing & Deployment
 

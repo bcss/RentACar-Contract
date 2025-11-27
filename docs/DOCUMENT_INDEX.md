@@ -101,6 +101,7 @@
 |----------|---------|----------|
 | **PROJECT_AUDIT_NOV22_2025.md** | Comprehensive system audit (current) | Primary |
 | **SECURITY_CHANGELOG.md** | Security change log | Reference |
+| **NON_COMPLIANT_DEPENDENCIES.md** | Legacy code review and compliance status | Reference |
 
 ### Planning & Roadmap
 
