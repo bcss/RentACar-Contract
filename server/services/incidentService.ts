@@ -14,7 +14,7 @@
  */
 
 import { db } from "../db";
-import { incidents, contracts, vehicles, inspections, auditLogs, sequences } from "@shared/schema";
+import { incidents, contracts, vehicles, vehicleInspections, auditLogs, sequences } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 // Types per spec
@@ -116,20 +116,18 @@ class IncidentService {
       // Generate incident number using sequences table (thread-safe)
       const incidentNumber = await this.generateIncidentNumber();
 
-      // Create incident
+      // Create incident - aligned with incidents table schema
       const [newIncident] = await db.insert(incidents).values({
         vehicleId: command.vehicleId,
         contractId: command.contractId,
-        inspectionId: command.inspectionId,
-        incidentNumber,
-        incidentType: 'DAMAGE',
-        status: 'OPEN',
-        dateReported: new Date(),
-        description: command.damageDescription,
-        descriptionAr: command.damageDescriptionAr,
-        damageType: command.damageType,
+        incidentType: 'damage', // Maps to schema's 'accident, theft, damage, breakdown'
+        severity: 'minor', // Default severity
+        status: 'reported', // Maps to schema's 'reported, under_investigation, claim_filed, resolved, closed'
+        incidentDate: new Date(),
+        description: `${command.damageType}: ${command.damageDescription}${command.damageDescriptionAr ? ` | ${command.damageDescriptionAr}` : ''}`,
         estimatedCost: command.estimatedCost?.toString(),
-        photos: command.damagePhotos,
+        photoUrls: command.damagePhotos,
+        notes: `Inspection ID: ${command.inspectionId}, Damage type: ${command.damageType}`,
         createdBy: command.createdBy,
       }).returning();
 
@@ -155,7 +153,7 @@ class IncidentService {
       return {
         success: true,
         incidentId: newIncident.id,
-        incidentNumber,
+        incidentNumber, // Returned for tracking but stored in notes
         message: `Damage incident ${incidentNumber} created from inspection`
       };
     } catch (error) {
@@ -180,18 +178,25 @@ class IncidentService {
         where: eq(vehicles.id, command.vehicleId)
       });
 
+      // contractId is required per schema - use current or fail if no contract
+      const contractId = vehicle?.currentContractId;
+      if (!contractId) {
+        return {
+          success: false,
+          message: 'Cannot create abandoned incident: Vehicle has no active contract'
+        };
+      }
+
       const [newIncident] = await db.insert(incidents).values({
         vehicleId: command.vehicleId,
-        contractId: vehicle?.currentContractId,
-        incidentNumber,
-        incidentType: 'ABANDONED',
-        status: 'OPEN',
-        dateReported: new Date(),
+        contractId,
+        incidentType: 'breakdown', // Use 'breakdown' as closest match for ABANDONED
+        severity: 'major',
+        status: 'reported',
         incidentDate: command.abandonedDate,
         description: command.notes ?? 'Abandoned vehicle incident',
         location: command.lastKnownLocation,
-        latitude: command.lastKnownLatitude?.toString(),
-        longitude: command.lastKnownLongitude?.toString(),
+        notes: `Incident #: ${incidentNumber}, Last known location: ${command.lastKnownLocation || 'Unknown'}, Lat/Lng: ${command.lastKnownLatitude || 'N/A'}/${command.lastKnownLongitude || 'N/A'}`,
         createdBy: command.createdBy,
       }).returning();
 
@@ -244,17 +249,25 @@ class IncidentService {
       // Generate incident number using sequences table (thread-safe)
       const incidentNumber = await this.generateIncidentNumber();
 
+      // contractId is required per schema
+      if (!command.contractId) {
+        return {
+          success: false,
+          message: 'Cannot create theft incident: Contract ID is required'
+        };
+      }
+
       const [newIncident] = await db.insert(incidents).values({
         vehicleId: command.vehicleId,
         contractId: command.contractId,
-        incidentNumber,
-        incidentType: 'THEFT',
-        status: 'OPEN',
-        dateReported: new Date(),
+        incidentType: 'theft',
+        severity: 'total_loss',
+        status: 'reported',
         incidentDate: command.theftDate,
         description: command.notes ?? 'Vehicle theft incident',
         location: command.theftLocation,
         policeReportNumber: command.policeReportNumber,
+        notes: `Incident #: ${incidentNumber}`,
         createdBy: command.createdBy,
       }).returning();
 
@@ -301,23 +314,37 @@ class IncidentService {
 
   /**
    * Per Master Spec §7.4.2 - Create transfer damage incident
+   * Note: Transfer incidents require a dummy/system contract or must be linked to an existing contract
    */
   async createTransferIncident(command: CreateTransferIncidentCommand): Promise<IncidentResult> {
     try {
       // Generate incident number using sequences table (thread-safe)
       const incidentNumber = await this.generateIncidentNumber();
 
+      // Get vehicle's current contract - required per schema
+      const vehicle = await db.query.vehicles.findFirst({
+        where: eq(vehicles.id, command.vehicleId)
+      });
+
+      const contractId = vehicle?.currentContractId;
+      if (!contractId) {
+        return {
+          success: false,
+          message: 'Cannot create transfer incident: Vehicle has no active contract'
+        };
+      }
+
       const [newIncident] = await db.insert(incidents).values({
         vehicleId: command.vehicleId,
-        incidentNumber,
-        incidentType: 'TRANSFER_DAMAGE',
-        status: 'OPEN',
-        dateReported: new Date(),
+        contractId,
+        incidentType: 'damage', // Transfer damage
+        severity: 'minor',
+        status: 'reported',
+        incidentDate: new Date(),
         description: command.damageDescription,
         estimatedCost: command.estimatedCost?.toString(),
-        photos: command.damagePhotos,
-        fromBranchId: command.fromBranchId,
-        toBranchId: command.toBranchId,
+        photoUrls: command.damagePhotos,
+        notes: `Incident #: ${incidentNumber}, Transfer from branch ${command.fromBranchId} to ${command.toBranchId}`,
         createdBy: command.createdBy,
       }).returning();
 
@@ -363,14 +390,21 @@ class IncidentService {
 
       const oldStatus = currentIncident.status;
 
-      // Update incident
+      // Map status to schema values: 'reported', 'under_investigation', 'claim_filed', 'resolved', 'closed'
+      const statusMap: Record<string, string> = {
+        'OPEN': 'reported',
+        'UNDER_INVESTIGATION': 'under_investigation',
+        'RESOLVED': 'resolved',
+        'CLOSED': 'closed',
+        'ESCALATED': 'under_investigation', // Map escalated to under_investigation
+      };
+
+      // Update incident - use schema-compliant fields
       await db.update(incidents)
         .set({
-          status: command.status,
-          resolutionNotes: command.resolutionNotes,
-          resolvedCost: command.resolutionCost?.toString(),
-          resolvedAt: command.status === 'RESOLVED' || command.status === 'CLOSED' ? new Date() : undefined,
-          resolvedBy: command.status === 'RESOLVED' || command.status === 'CLOSED' ? command.updatedBy : undefined,
+          status: statusMap[command.status] || command.status.toLowerCase(),
+          notes: command.resolutionNotes ? `Resolution: ${command.resolutionNotes}` : undefined,
+          actualCost: command.resolutionCost?.toString(),
           updatedAt: new Date(),
         })
         .where(eq(incidents.id, incidentId));
@@ -409,7 +443,6 @@ class IncidentService {
       return {
         success: true,
         incidentId,
-        incidentNumber: currentIncident.incidentNumber,
         message: `Incident status updated from ${oldStatus} to ${command.status}`
       };
     } catch (error) {
@@ -432,8 +465,8 @@ class IncidentService {
   ): Promise<IncidentResult | null> {
     try {
       // Get return inspection
-      const returnInspection = await db.query.inspections.findFirst({
-        where: eq(inspections.id, inspectionId)
+      const returnInspection = await db.query.vehicleInspections.findFirst({
+        where: eq(vehicleInspections.id, inspectionId)
       });
 
       if (!returnInspection) {
@@ -441,46 +474,30 @@ class IncidentService {
       }
 
       // Get checkout inspection for comparison
-      const checkoutInspection = await db.query.inspections.findFirst({
-        where: eq(inspections.id, checkoutInspectionId)
+      const checkoutInspection = await db.query.vehicleInspections.findFirst({
+        where: eq(vehicleInspections.id, checkoutInspectionId)
       });
 
       if (!checkoutInspection) {
         throw new Error(`Checkout inspection not found: ${checkoutInspectionId}`);
       }
 
-      // Compare damage arrays to detect new damage
-      const checkoutDamage = new Set((checkoutInspection.damageAreas as string[]) || []);
-      const returnDamage = (returnInspection.damageAreas as string[]) || [];
-      
-      const newDamage = returnDamage.filter(d => !checkoutDamage.has(d));
-
-      // If no new damage detected, return null
-      if (newDamage.length === 0 && !returnInspection.remarksEnd) {
-        return null;
-      }
-
-      // Check for damage notes in remarks
-      const hasDamageRemarks = returnInspection.remarksEnd?.toLowerCase().includes('damage') ||
-                               returnInspection.remarksEnd?.toLowerCase().includes('scratch') ||
-                               returnInspection.remarksEnd?.toLowerCase().includes('dent');
-
-      if (newDamage.length === 0 && !hasDamageRemarks) {
+      // Check if new damages were found during return
+      if (!returnInspection.newDamagesFound) {
         return null;
       }
 
       // Create incident for detected damage
-      const damageDescription = newDamage.length > 0 
-        ? `New damage detected during return inspection: ${newDamage.join(', ')}`
-        : `Damage noted in inspection remarks: ${returnInspection.remarksEnd}`;
+      const damageDescription = returnInspection.conditionNotes 
+        ? `Damage detected during return inspection: ${returnInspection.conditionNotes}`
+        : 'New damage detected during return inspection';
 
       const result = await this.createIncidentFromInspection({
-        contractId: returnInspection.contractId!,
-        vehicleId: returnInspection.vehicleId!,
+        contractId: returnInspection.contractId,
+        vehicleId: returnInspection.vehicleId,
         inspectionId,
         damageType: 'OTHER',
         damageDescription,
-        damagePhotos: returnInspection.photosEnd as string[],
         createdBy,
       });
 
@@ -531,12 +548,14 @@ class IncidentService {
   }) {
     try {
       await db.insert(auditLogs).values({
-        entityType: params.entityType,
-        entityId: params.entityId,
         action: params.action,
         userId: params.userId,
-        oldValues: params.oldValues,
-        newValues: params.newValues,
+        details: JSON.stringify({
+          entityType: params.entityType,
+          entityId: params.entityId,
+          oldValues: params.oldValues,
+          newValues: params.newValues,
+        }),
       });
     } catch (error) {
       console.error('Failed to log audit:', error);
