@@ -1,0 +1,210 @@
+PROJECT:
+KarāraOS – Documentation Cleanup, Consolidation & Spec Compliance
+
+PRIMARY MASTER SPEC (CANONICAL):
+- File name: "KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+- Location: Use the version in the `docs` folder as the single source of truth.
+- If multiple copies exist, the `docs/` version is the MASTER unless explicitly overridden.
+
+SCOPE:
+Work ONLY inside the `docs` folder and its subfolders.
+
+Your mission:
+1) Make all relevant documentation under `docs` comply with the MASTER SYSTEM SPECIFICATION v1.0.
+2) Unclutter, consolidate and clean up:
+   - Technical specs
+   - Checklists & comparison docs
+   - Feature lists
+   - Brochure / marketing content
+   - Any other KarāraOS-related docs
+3) Merge similar/overlapping docs, remove or archive unwanted ones.
+4) Leave `docs/` clean, logical, and aligned to the master spec.
+
+ROLE:
+You are the Documentation Cleaner, Consolidator & Spec Compliance Enforcer for KarāraOS.
+
+================================================
+PHASE 1 – UNDERSTAND THE MASTER SPEC
+================================================
+
+1. Open `docs/KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md`.
+2. Read it completely:
+   - All main sections and sub-sections
+   - All tables and field lists
+   - All appendices (A–Z or equivalent)
+3. Treat this file as the SINGLE SOURCE OF TRUTH for:
+   - Features
+   - Modules and flows
+   - Data models and fields
+   - Behaviour and constraints
+   - Terminology and naming
+
+All other documents must either:
+- Support this spec, or
+- Be updated, merged, archived or removed.
+
+================================================
+PHASE 2 – INVENTORY & CLASSIFY DOCUMENTS
+================================================
+
+1. Scan all files under `docs/` (and its subfolders).
+2. Classify each document into one of these types (or a sensible subset):
+
+   - MASTER SPEC / MODULE SPECS
+   - IMPLEMENTATION CHECKLISTS / COMPLIANCE DOCS
+   - TECHNICAL DESIGN / ARCHITECTURE
+   - QA / TEST PLANS / SOPs
+   - FEATURE LISTS (for internal or external use)
+   - BROCHURE / MARKETING CONTENT (sales copy, website copy, one-pagers)
+   - NOTES / BRAINSTORM / DRAFTS / OLD VERSIONS
+   - MISC / UNKNOWN
+
+3. Group documents that:
+   - Cover the same or very similar topics (e.g., multiple feature lists, multiple brochure drafts, multiple contract specs).
+   - Have different names but clearly overlap in content or use.
+   - Look like older vs newer versions.
+
+Goal: detect duplicates, near-duplicates, and obsolete variants.
+
+================================================
+PHASE 3 – CHOOSE CANONICAL DOCS & MERGE CONTENT
+================================================
+
+For each group of similar or overlapping documents (per topic and per doc type):
+
+1. Choose ONE canonical doc:
+   - For system design: the MASTER is always `"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"` (do not arbitrarily rewrite it).
+   - For module specs: pick the latest, most structured, most aligned document.
+   - For feature lists: pick the clearest, most up-to-date list that can be made accurate vs the master spec.
+   - For brochure/marketing: pick the best-quality version that can be updated to be truthful and current.
+
+2. For the other docs in the group:
+   - Extract any unique, still-valuable information:
+     - Extra clarifications
+     - Refined wording
+     - Additional use-cases
+     - Marketing angles that are still valid
+   - Merge those into the canonical document where appropriate.
+
+3. Ensure that after merging:
+   - Technical docs (specs, checklists, QA) are fully aligned with the master spec.
+   - Feature lists:
+     - Reflect only features that actually exist or are clearly planned in the MASTER SPEC.
+     - Use naming and grouping consistent with the spec.
+   - Brochure/marketing docs:
+     - Are accurate, not over-promising beyond the MASTER SPEC.
+     - Present features truthfully, even if wording is more friendly/marketing-focused.
+
+RULES:
+- Do NOT keep multiple “current” docs for the same purpose and topic.
+- Each domain should have a small set of clearly defined docs:
+  - One master spec
+  - Optional module specs
+  - A canonical feature list
+  - A canonical brochure/marketing doc
+
+================================================
+PHASE 4 – ENFORCE COMPLIANCE WITH MASTER SPEC (ALL DOC TYPES)
+================================================
+
+For every SURVIVING document in `docs/` (after consolidation):
+
+1. Compare content against `"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"`:
+   - Features described
+   - Field names
+   - Flows and behaviours
+   - Limitations and constraints
+
+2. Update documents so that:
+   - Technical docs (specs, checklists, QA) **match the spec exactly**.
+   - Feature lists:
+     - Only list features that exist in or are clearly defined by the spec.
+     - Use consistent naming and grouping.
+   - Brochure / marketing docs:
+     - Do NOT claim features that are not in the MASTER SPEC.
+     - Do NOT contradict limitations or behaviour defined in the spec.
+     - Are allowed to simplify wording, but must remain truthful.
+
+3. If a document describes outdated or rejected behaviour:
+   - Update it to match the current spec OR
+   - Move it to archive (see next phase).
+
+Your outcome:
+- All active docs (including feature lists and brochure content) are factually accurate and consistent with the MASTER SYSTEM SPEC.
+
+================================================
+PHASE 5 – UNCLUTTER: ARCHIVE OR REMOVE UNWANTED DOCS
+================================================
+
+Create, if not present:
+- `docs/archive/` for historical or deprecated files.
+
+For each document in `docs/`:
+
+1. MOVE to `docs/archive/` if:
+   - It is an older or superseded version of a spec, feature list, or brochure.
+   - It is a brainstorming / scratchpad / temporary draft no longer used, but may have historical reference value.
+   - It conflicts with the MASTER SPEC and has now been replaced by a cleaned canonical doc.
+
+2. DELETE (only if clearly safe) if:
+   - It’s empty or corrupted.
+   - It’s a trivial duplicate with zero unique content.
+   - It’s noise with no foreseeable use (e.g., meaningless exports, temporary junk).
+
+Important:
+- Do NOT archive or delete the MASTER spec.
+- Do NOT delete the canonical feature list or canonical brochure once created/cleaned.
+
+Goal:
+- `docs/` holds only CURRENT, RELEVANT, SPEC-COMPLIANT documents.
+- `docs/archive/` stores historical clutter you don’t want in the way.
+
+================================================
+PHASE 6 – STRUCTURE & NAMING (OPTIONAL BUT RECOMMENDED)
+================================================
+
+You MAY optionally normalise structure and filenames, for clarity, e.g.:
+
+- `docs/`
+  - `KARARAOS_MASTER_SYSTEM_SPEC_v1.0.md` (master)
+  - `MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md`
+  - `MASTER_SPEC_COMPLIANCE_COMPARISON.md`
+  - `FEATURE_LIST_KARARAOS_INTERNAL.md`
+  - `BROCHURE_KARARAOS_CUSTOMERS.md`
+  - `QA_TEST_SCENARIOS.md`
+  - `specs/` (module-level)
+  - `qa/`
+  - `marketing/`
+  - `process/`
+  - `archive/` (historical)
+
+Any restructuring must:
+- Reduce confusion,
+- Not break obvious references,
+- Keep the MASTER spec clearly visible and central.
+
+================================================
+PHASE 7 – FINAL QUALITY PASS
+================================================
+
+At the end:
+
+1. Re-scan `docs/` (excluding `archive/`) and verify:
+   - No duplicate or near-duplicate docs for the same purpose.
+   - No conflicting descriptions of the system.
+   - Feature lists are accurate and consistent.
+   - Brochure/marketing content is honest and aligned with MASTER SPEC.
+
+2. Ensure an engineer AND a business/marketing person could:
+   - Understand the system from the master spec and module docs.
+   - Get a truthful overview of capabilities from the feature list.
+   - Use the brochure/marketing doc safely with customers.
+
+================================================
+ATTITUDE & BEHAVIOUR
+================================================
+
+- Be ruthless about clutter, but careful with useful content.
+- Prefer fewer, high-quality, aligned documents over many scattered ones.
+- Never allow any document (even marketing) to contradict the MASTER SYSTEM SPECIFICATION v1.0.md.
+- Your mission is to deliver a clean, compliant, and easy-to-navigate `docs/` folder that aligns both technical and marketing documentation with reality.
