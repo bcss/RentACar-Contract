@@ -71,12 +71,21 @@ export interface LifecycleResult {
 }
 
 // Command DTOs per Master Spec
+// Master Spec §4.4.1 - PartyType enum values (STRICT COMPLIANCE)
+export const PartyType = {
+  DIRECT_HIRER: 'DIRECT_HIRER',
+  SPONSORED_INDIVIDUAL: 'SPONSORED_INDIVIDUAL',
+  SPONSORED_COMPANY: 'SPONSORED_COMPANY',
+} as const;
+
+export type PartyTypeValue = typeof PartyType[keyof typeof PartyType];
+
 export interface CreateContractCommand {
   branchId: string;
   customerId: string;
   vehicleId: string;
   tariffId?: string;
-  partyType: 'DIRECT' | 'SPONSORED_INDIVIDUAL' | 'SPONSORED_COMPANY';
+  partyType: PartyTypeValue; // Master Spec §4.4.1 compliant values
   sponsorId?: string;
   companyId?: string;
   companyContactId?: string;
@@ -1374,7 +1383,9 @@ class ContractLifecycleService {
       }
 
       // Per §3.17 - Corporate contracts may require OTP verification
-      if (contract.hirerType === 'from_company' && command.otp) {
+      // Use partyType (spec-compliant) with fallback to legacy hirerType for backward compatibility
+      const isCompanyContract = contract.partyType === PartyType.SPONSORED_COMPANY || contract.hirerType === 'from_company';
+      if (isCompanyContract && command.otp) {
         // Verify company OTP if provided
         const otpResult = await otpService.verifyOtp({
           verificationId: command.contractId,

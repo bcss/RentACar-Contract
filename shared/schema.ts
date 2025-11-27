@@ -215,6 +215,12 @@ export const customers = pgTable("customers", {
   // Master Spec §11 - Blacklist Status (canonical field per Architect guidance)
   blacklistStatus: varchar("blacklist_status", { length: 20 }), // 'CLEAR', 'WATCH', 'SOFT_BLOCK', 'HARD_BLOCK'
   
+  // Master Spec §4.2.1 - Communication Preferences (STRICT COMPLIANCE Nov 27, 2025)
+  preferredLanguage: varchar("preferred_language", { length: 8 }).default("en"), // 'en' or 'ar'
+  marketingOptIn: boolean("marketing_opt_in").notNull().default(false), // Marketing consent
+  dndStartTime: varchar("dnd_start_time", { length: 8 }), // Do-not-disturb start (HH:MM format)
+  dndEndTime: varchar("dnd_end_time", { length: 8 }), // DND end (HH:MM format)
+  
   // Branch Assignment
   branchId: varchar("branch_id").references(() => branches.id),
   
@@ -232,6 +238,7 @@ export const customers = pgTable("customers", {
   index("idx_customers_national_id").on(table.nationalId),
   index("idx_customers_phone").on(table.phone),
   index("idx_customers_blacklist").on(table.blacklistStatus),
+  index("idx_customers_marketing_opt_in").on(table.marketingOptIn), // Master Spec §4.2.1 - for campaign targeting
 ]);
 
 export const customersRelations = relations(customers, ({ one }) => ({
@@ -267,6 +274,11 @@ export const insertCustomerSchema = createInsertSchema(customers).omit({
   licenseDateOfBirth: z.coerce.date().optional(),
   licenseDateOfIssue: z.coerce.date().optional(),
   licenseDateOfExpiry: z.coerce.date().optional(),
+  // Master Spec §4.2.1 - Communication Preferences
+  preferredLanguage: z.enum(['en', 'ar']).optional(),
+  marketingOptIn: z.boolean().optional(),
+  dndStartTime: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)").optional().nullable(),
+  dndEndTime: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)").optional().nullable(),
 });
 
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
@@ -1446,6 +1458,9 @@ export const contracts = pgTable("contracts", {
   
   // Party type per Master Spec §4.4.1 - Spec-compliant naming
   partyType: varchar("party_type", { length: 32 }), // 'DIRECT_HIRER', 'SPONSORED_INDIVIDUAL', 'SPONSORED_COMPANY'
+  
+  // Currency per Master Spec §4.4.1 - CHAR(3) default 'AED'
+  currencyCode: varchar("currency_code", { length: 3 }).default('AED'),
   
   // Tariff FK per Master Spec §4.4.1
   tariffId: varchar("tariff_id").references(() => tariffs.id),
