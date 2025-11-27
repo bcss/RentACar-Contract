@@ -671,8 +671,8 @@ class BillingService {
         pickupBranch ? db.query.branches.findFirst({ where: eq(branches.id, pickupBranch) }) : null,
         returnBranch ? db.query.branches.findFirst({ where: eq(branches.id, returnBranch) }) : null,
       ]);
-      if (pickup) pickupName = pickup.nameEn || 'Pickup';
-      if (returnB) returnName = returnB.nameEn || 'Return';
+      if (pickup?.nameEn && typeof pickup.nameEn === 'string') pickupName = pickup.nameEn;
+      if (returnB?.nameEn && typeof returnB.nameEn === 'string') returnName = returnB.nameEn;
     } catch {
       // Continue with default names
     }
@@ -816,18 +816,19 @@ class BillingService {
       return { amount: 0, quantity: 0, unitPrice: 0, description: '', descriptionAr: '' };
     }
 
-    const serviceType = contract.driverServiceType || 'daily';
-    const serviceTypeLabel = {
+    const serviceType = (contract.driverServiceType || 'daily') as 'daily' | 'hourly' | 'flat';
+    const labels: Record<'daily' | 'hourly' | 'flat', string> = {
       'daily': 'day(s)',
       'hourly': 'hour(s)',
       'flat': 'trip(s)',
-    }[serviceType] || 'unit(s)';
-
-    const serviceTypeLabelAr = {
+    };
+    const labelsAr: Record<'daily' | 'hourly' | 'flat', string> = {
       'daily': 'يوم',
       'hourly': 'ساعة',
       'flat': 'رحلة',
-    }[serviceType] || 'وحدة';
+    };
+    const serviceTypeLabel = labels[serviceType] || 'unit(s)';
+    const serviceTypeLabelAr = labelsAr[serviceType] || 'وحدة';
 
     return {
       amount: total,
