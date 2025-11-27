@@ -1,13 +1,7 @@
-import { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link as WouterLink, useLocation } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
-
-// Create a ref-forwarding Link component for compatibility with Radix UI Slot
-const Link = forwardRef<HTMLAnchorElement, React.ComponentProps<typeof WouterLink>>((props, ref) => {
-  return <WouterLink {...props} ref={ref as any} />;
-});
-Link.displayName = 'Link';
 import { useQuery } from '@tanstack/react-query';
 import { CompanySettings } from '@shared/schema';
 import {

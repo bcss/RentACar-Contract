@@ -14,6 +14,7 @@ import {
   uniqueIndex,
   unique,
   date,
+  AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -66,7 +67,7 @@ export const sessions = pgTable(
 );
 
 // User storage table - Internal authentication with username/password
-export const users: ReturnType<typeof pgTable> = pgTable("users", {
+export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: varchar("username").unique().notNull(),
   passwordHash: varchar("password_hash").notNull(),
@@ -103,8 +104,8 @@ export const users: ReturnType<typeof pgTable> = pgTable("users", {
   canAssignDrivers: boolean("can_assign_drivers").notNull().default(false), // Assign drivers to contracts
   canViewDriverCosts: boolean("can_view_driver_costs").notNull().default(false), // View driver cost rates
   
-  // Branch Assignment
-  branchId: varchar("branch_id").references(() => branches.id),
+  // Branch Assignment (using AnyPgColumn for circular reference resolution)
+  branchId: varchar("branch_id").references((): AnyPgColumn => branches.id),
   
   lastPasswordChange: timestamp("last_password_change").defaultNow(),
   lastLoginAt: timestamp("last_login_at"), // Track last successful login for dashboard display
@@ -531,7 +532,7 @@ export type Company = typeof companies.$inferSelect;
 // ========================================
 
 // Branches table - Multi-location branch management
-export const branches: ReturnType<typeof pgTable> = pgTable("branches", {
+export const branches = pgTable("branches", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   
   // Branch Identification

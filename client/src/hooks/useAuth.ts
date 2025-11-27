@@ -47,7 +47,19 @@ export function useAuth(): UseAuthReturn {
     isStaff: user?.role === 'staff',
     isViewer: user?.role === 'viewer',
     // Permission toggles - default to false if not set
-    canAccessReports: user?.canAccessReports ?? false,
+    // canAccessReports is computed from granular permissions or elevated access
+    canAccessReports: hasElevatedAccess || Boolean(
+      user?.canAccessFinancialReports || 
+      user?.canAccessOperationalReports || 
+      user?.canAccessCustomerReports || 
+      user?.canAccessInsuranceReports || 
+      user?.canAccessAuditReports || 
+      user?.canAccessUserActivityReports || 
+      user?.canAccessRevenueTrends || 
+      user?.canAccessFleetPerformance || 
+      user?.canAccessContractAnalytics || 
+      user?.canAccessCollectionPerformance
+    ),
     canCloseContracts: user?.canCloseContracts ?? false,
     canViewAllContracts: user?.canViewAllContracts ?? false,
     // Granular report permissions - Admin/Manager have full access, others check their flags
