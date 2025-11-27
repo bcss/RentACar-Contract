@@ -1,4 +1,4 @@
-# RCCMS Technical Documentation
+# KarāraOS Technical Documentation
 
 **Last Updated:** November 18, 2025  
 **Version:** 5.0 - Complete Bilingual Implementation  
@@ -24,7 +24,7 @@
 
 ### High-Level Overview
 
-RCCMS follows a modern full-stack architecture with clear separation of concerns:
+KarāraOS follows a modern full-stack architecture with clear separation of concerns:
 
 ```
 ┌─────────────────┐
@@ -786,7 +786,7 @@ if (isPublicHoliday && emirate in holidayList) {
 
 ### Overview
 
-RCCMS features a production-ready multi-provider communications infrastructure supporting SMS and Email notifications with intelligent routing, fallback handling, and comprehensive delivery tracking.
+KarāraOS features a production-ready multi-provider communications infrastructure supporting SMS and Email notifications with intelligent routing, fallback handling, and comprehensive delivery tracking.
 
 ### Architecture
 

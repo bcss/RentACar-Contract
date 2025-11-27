@@ -7,7 +7,7 @@
 
 ## Overview
 
-RCCMS includes **built-in performance monitoring** that tracks:
+KarāraOS includes **built-in performance monitoring** that tracks:
 - ✅ Request duration (response times)
 - ✅ Memory usage per request
 - ✅ Slow request detection (> 1 second)
@@ -153,7 +153,7 @@ New Relic provides full-stack observability with AI-powered insights.
    'use strict';
    
    exports.config = {
-     app_name: ['RCCMS'],
+     app_name: ['KarāraOS'],
      license_key: process.env.NEW_RELIC_LICENSE_KEY,
      logging: {
        level: 'info'
@@ -188,7 +188,7 @@ New Relic provides full-stack observability with AI-powered insights.
 6. **Set environment variable:**
    ```bash
    NEW_RELIC_LICENSE_KEY=your-license-key
-   NEW_RELIC_APP_NAME=RCCMS
+   NEW_RELIC_APP_NAME=KarāraOS
    NEW_RELIC_LOG_LEVEL=info
    ```
 

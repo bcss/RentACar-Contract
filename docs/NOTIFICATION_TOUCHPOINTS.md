@@ -1,4 +1,4 @@
-# RCCMS Notification Touchpoints
+# KarāraOS Notification Touchpoints
 
 **Last Updated:** November 18, 2025  
 **Status:** Production Ready - 15 Touchpoints Wired + 6 Existing = 21 Total
@@ -7,7 +7,7 @@
 
 ## Overview
 
-RCCMS features a comprehensive notification ecosystem with 21 automated touchpoints across all business workflows. Each touchpoint uses intelligent channel routing (Email for regular updates, SMS for critical alerts), bilingual templates, and proper RBAC enforcement.
+KarāraOS features a comprehensive notification ecosystem with 21 automated touchpoints across all business workflows. Each touchpoint uses intelligent channel routing (Email for regular updates, SMS for critical alerts), bilingual templates, and proper RBAC enforcement.
 
 ---
 

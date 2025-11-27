@@ -1,4 +1,4 @@
-# RCCMS Local CI Checklist
+# KarāraOS Local CI Checklist
 
 **Version:** 1.1  
 **Purpose:** Pre-release validation checklist for local development  

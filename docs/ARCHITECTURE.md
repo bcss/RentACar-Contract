@@ -3,7 +3,7 @@
 ## 1. APPLICATION OVERVIEW & CORE FEATURES
 
 ### **What KarāraOS Is**
-KarāraOS (formerly RCCMS - Rental Car Contract Management System) is a production-ready, bilingual (English/Arabic), **desktop-only** enterprise application for managing the complete rental car lifecycle. It supports RTA (Roads & Transport Authority) compliance fields for UAE operations and implements a streamlined 4-state contract workflow with comprehensive audit trails, role-based access control, and extensive reporting capabilities.
+KarāraOS (formerly KarāraOS - Rental Car Contract Management System) is a production-ready, bilingual (English/Arabic), **desktop-only** enterprise application for managing the complete rental car lifecycle. It supports RTA (Roads & Transport Authority) compliance fields for UAE operations and implements a streamlined 4-state contract workflow with comprehensive audit trails, role-based access control, and extensive reporting capabilities.
 
 **Desktop-Only Application (as of Nov 21, 2025):**
 - Minimum width: 1024px (tablets in landscape + desktops)
@@ -126,7 +126,7 @@ KarāraOS (formerly RCCMS - Rental Car Contract Management System) is a producti
 ## 3. BACKEND API (Modular Architecture - 34 Route Modules, 300 Routes)
 
 ### **Modular Route Architecture (November 2025 - 100% COMPLETE)**
-RCCMS has completed a comprehensive modularization transformation from a monolithic routes.ts (9,666 lines) into 34 specialized route modules with exactly 300 operational routes:
+KarāraOS has completed a comprehensive modularization transformation from a monolithic routes.ts (9,666 lines) into 34 specialized route modules with exactly 300 operational routes:
 
 **Core Entity Modules (11 modules, 97 routes):**
 - `authRoutes.ts` (4 routes) - Authentication & CSRF tokens

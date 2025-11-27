@@ -25,7 +25,7 @@
 ## Introduction
 
 ### Welcome
-Welcome to KarāraOS (formerly RCCMS) - Rental Car Contract Management System. This guide will help you navigate daily operations, create contracts, manage customers and vehicles, and process payments efficiently.
+Welcome to KarāraOS (formerly KarāraOS) - Rental Car Contract Management System. This guide will help you navigate daily operations, create contracts, manage customers and vehicles, and process payments efficiently.
 
 ---
 
@@ -185,7 +185,7 @@ The system has been updated with critical bug fixes to ensure 100% data accuracy
 - Audit logs are fully bilingual and easier to understand
 - All reports load faster and more reliably
 
-These improvements were discovered through comprehensive system review and strengthen RCCMS's data integrity and compliance capabilities.
+These improvements were discovered through comprehensive system review and strengthen KarāraOS's data integrity and compliance capabilities.
 
 ### Performance Enhancements (December 2025)
 
@@ -308,10 +308,10 @@ The system features a professional Microsoft 365 Admin-style sidebar with icon-o
 
 ### Introduction
 
-As a user of RCCMS, it's important to understand your rights and responsibilities when using the system. The system provides two comprehensive legal documents:
+As a user of KarāraOS, it's important to understand your rights and responsibilities when using the system. The system provides two comprehensive legal documents:
 
 - **Privacy Policy**: Explains how we collect, use, and protect your personal information
-- **Terms of Service**: Outlines the rules, responsibilities, and legal agreements for using RCCMS
+- **Terms of Service**: Outlines the rules, responsibilities, and legal agreements for using KarāraOS
 
 **Why Read These Documents?**
 - 📋 Understand what data we collect and how we use it
@@ -330,7 +330,7 @@ You can access the Privacy Policy and Terms of Service pages through **multiple 
 
 #### Method 1: Footer Links (All Pages)
 
-Every page in RCCMS has a footer with quick links:
+Every page in KarāraOS has a footer with quick links:
 
 1. Scroll to the bottom of any page
 2. Look for the footer section
@@ -378,7 +378,7 @@ The Support page also provides links to legal information:
 
 ### Understanding the Privacy Policy
 
-The Privacy Policy is your guide to understanding how RCCMS protects your personal information.
+The Privacy Policy is your guide to understanding how KarāraOS protects your personal information.
 
 #### What the Privacy Policy Covers
 
@@ -507,14 +507,14 @@ Many sections use **accordion panels** to organize detailed information:
 
 ### Understanding the Terms of Service
 
-The Terms of Service outlines the rules, responsibilities, and legal agreements governing your use of RCCMS.
+The Terms of Service outlines the rules, responsibilities, and legal agreements governing your use of KarāraOS.
 
 #### What the Terms of Service Covers
 
 **14 Essential Sections:**
 
 1. **Acceptance of Terms**: Agreement to use the system
-2. **License & Usage**: Your rights to use RCCMS
+2. **License & Usage**: Your rights to use KarāraOS
 3. **User Accounts**: Account security and management
 4. **User Responsibilities**: Your obligations as a user
 5. **Data Accuracy**: Responsibility for data quality
@@ -853,7 +853,7 @@ From the Privacy Policy or Terms of Service page:
 **Example Questions:**
 - "Privacy Policy Section 6 - How do I request a data export?"
 - "Terms Section 7 - Is using a shared computer a prohibited activity?"
-- "Privacy Policy Section 11 - Does RCCMS comply with Saudi data laws?"
+- "Privacy Policy Section 11 - Does KarāraOS comply with Saudi data laws?"
 
 **Response Time:**
 - ⏱️ General questions: 24-48 hours
@@ -868,7 +868,7 @@ If your question isn't answered satisfactorily:
 
 ---
 
-**Remember**: Reading and understanding these legal documents is not just a formality—it's an essential part of using RCCMS responsibly and protecting both your rights and the privacy of your customers.
+**Remember**: Reading and understanding these legal documents is not just a formality—it's an essential part of using KarāraOS responsibly and protecting both your rights and the privacy of your customers.
 
 ---
 
@@ -1849,7 +1849,7 @@ For technical issues, refer to the **Maintenance Guide**.
 ### Overview
 
 **WHY TWO-STAGE INSPECTION:**
-RCCMS implements a mandatory two-stage vehicle inspection system for legal protection and dispute prevention. This workflow ensures complete photo documentation at both handover (pre-delivery) and return (post-return), creating an unbreakable chain of visual evidence.
+KarāraOS implements a mandatory two-stage vehicle inspection system for legal protection and dispute prevention. This workflow ensures complete photo documentation at both handover (pre-delivery) and return (post-return), creating an unbreakable chain of visual evidence.
 
 **RATIONALE FOR MANDATORY WORKFLOW:**
 - **Legal Protection:** Prevents AED 94,000/year in false damage claims
@@ -2279,7 +2279,7 @@ Review payment history before attempting contract closure to ensure full payment
 
 ### Overview
 
-RCCMS automatically sends you important updates via SMS and Email throughout the contract lifecycle. Stay informed about contract status, payments, document expiries, and approvals.
+KarāraOS automatically sends you important updates via SMS and Email throughout the contract lifecycle. Stay informed about contract status, payments, document expiries, and approvals.
 
 ### Notification Types
 

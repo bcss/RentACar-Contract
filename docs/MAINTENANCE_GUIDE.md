@@ -1,5 +1,5 @@
 # Maintenance Guide
-## RCCMS - Rental Car Contract Management System
+## KarāraOS - Rental Car Contract Management System
 
 **Version 1.0** | **For System Administrators & Technical Staff**
 
@@ -23,7 +23,7 @@
 ## Introduction
 
 ### Purpose
-This guide provides technical information for maintaining, troubleshooting, and optimizing the RCCMS Rental Car Contract Management System in production environments.
+This guide provides technical information for maintaining, troubleshooting, and optimizing the KarāraOS Rental Car Contract Management System in production environments.
 
 ### Target Audience
 - System Administrators
@@ -480,7 +480,7 @@ AND acknowledged_at < NOW() - INTERVAL '90 days';
 ### Vehicle Inspection Photo Storage
 
 **Overview:**
-RCCMS implements a two-stage vehicle inspection workflow (pre-delivery and post-return) with mandatory photo documentation. Photos are stored as base64-encoded JSONB data in PostgreSQL.
+KarāraOS implements a two-stage vehicle inspection workflow (pre-delivery and post-return) with mandatory photo documentation. Photos are stored as base64-encoded JSONB data in PostgreSQL.
 
 **Storage Architecture:**
 
@@ -1489,7 +1489,7 @@ npm --version
 
 ### Overview
 
-The RCCMS system includes comprehensive legal documentation accessible to all users through dedicated pages for Privacy Policy and Terms of Service. These documents are critical for regulatory compliance, user transparency, and legal protection. This section provides maintenance procedures for keeping these documents current, accurate, and compliant with evolving regulations and system features.
+The KarāraOS system includes comprehensive legal documentation accessible to all users through dedicated pages for Privacy Policy and Terms of Service. These documents are critical for regulatory compliance, user transparency, and legal protection. This section provides maintenance procedures for keeping these documents current, accurate, and compliant with evolving regulations and system features.
 
 **File Locations:**
 - Privacy Policy: `client/src/pages/PrivacyPolicyPage.tsx`
@@ -1508,7 +1508,7 @@ The Privacy Policy page contains 13 major sections including Introduction, Infor
 The Terms of Service page includes 14 comprehensive sections covering Acceptance of Terms, System License and Usage Rights (with sub-accordions for License Grant, Usage Restrictions, and Scope of Use), User Accounts, User Responsibilities, Data Accuracy, System Availability, Prohibited Activities, Intellectual Property, Limitation of Liability, Legal Compliance, Termination, Dispute Resolution, Modifications, and Contact information. Each section uses AccordionItem components with descriptive AccordionTrigger elements for easy navigation.
 
 **Technical Implementation:**
-Both pages implement a sticky table of contents (TOC) on desktop layouts, scroll-spy functionality to highlight the active section, smooth scrolling to sections on TOC click, and responsive design that adapts for mobile devices. The pages use Material Design 3 icons from lucide-react, follow the application's bilingual design patterns (though currently English-only for legal precision), and maintain consistent styling with the rest of the RCCMS interface.
+Both pages implement a sticky table of contents (TOC) on desktop layouts, scroll-spy functionality to highlight the active section, smooth scrolling to sections on TOC click, and responsive design that adapts for mobile devices. The pages use Material Design 3 icons from lucide-react, follow the application's bilingual design patterns (though currently English-only for legal precision), and maintain consistent styling with the rest of the KarāraOS interface.
 
 ### Annual Review Schedule
 
@@ -1604,7 +1604,7 @@ const sections = [
       <AccordionItem value="ai-predictions" data-testid="accordion-ai-predictions">
         <AccordionTrigger>Predictive Analytics</AccordionTrigger>
         <AccordionContent className="space-y-3 text-sm">
-          <p>RCCMS uses machine learning algorithms to...</p>
+          <p>KarāraOS uses machine learning algorithms to...</p>
           {/* Additional content */}
         </AccordionContent>
       </AccordionItem>
@@ -1778,7 +1778,7 @@ Maintain an emergency contact list for legal documentation issues including prim
 
 ### Localization and International Compliance
 
-As RCCMS expands to serve customers in multiple jurisdictions, legal documentation may require localization beyond simple translation. Different countries have varying privacy laws, contractual requirements, and consumer protection standards that may necessitate jurisdiction-specific policy variations.
+As KarāraOS expands to serve customers in multiple jurisdictions, legal documentation may require localization beyond simple translation. Different countries have varying privacy laws, contractual requirements, and consumer protection standards that may necessitate jurisdiction-specific policy variations.
 
 **Jurisdiction-Specific Requirements:**
 
@@ -2476,7 +2476,7 @@ pg_dump --jobs=4 --format=directory ...
 
 ### Overview for Technical Staff
 
-The System Administrator Suite adds enterprise-grade disaster recovery, business continuity, and data migration capabilities to RCCMS. This section provides technical context for maintenance staff to understand the planned architecture.
+The System Administrator Suite adds enterprise-grade disaster recovery, business continuity, and data migration capabilities to KarāraOS. This section provides technical context for maintenance staff to understand the planned architecture.
 
 ---
 

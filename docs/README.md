@@ -1,11 +1,11 @@
-# RCCMS Documentation Index
+# KarāraOS Documentation Index
 
 **✅ UPDATE:** All 5 feature gaps resolved! See [FEATURE_STATUS_UPDATE.md](FEATURE_STATUS_UPDATE.md)  
 **Last Updated:** November 21, 2025 (P1 Critical Fixes Applied)
 
 ## 📚 Documentation Structure
 
-This folder contains all technical and user documentation for the RCCMS (Rental Car Contract Management System). Documents are organized by purpose for easy navigation.
+This folder contains all technical and user documentation for the KarāraOS (Rental Car Contract Management System). Documents are organized by purpose for easy navigation.
 
 ---
 

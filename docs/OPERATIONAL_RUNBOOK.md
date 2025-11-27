@@ -1,4 +1,4 @@
-# RCCMS Permission Toggle Management - Operational Runbook
+# KarāraOS Permission Toggle Management - Operational Runbook
 
 **Version:** 1.0  
 **Last Updated:** November 3, 2025  
@@ -24,7 +24,7 @@
 
 ### What Are Permission Toggles?
 
-Permission toggles are granular access controls that allow administrators to grant additional capabilities to users beyond their base role permissions. RCCMS implements three toggles:
+Permission toggles are granular access controls that allow administrators to grant additional capabilities to users beyond their base role permissions. KarāraOS implements three toggles:
 
 - **canAccessReports**: Access to reports and analytics
 - **canCloseContracts**: Ability to close completed contracts

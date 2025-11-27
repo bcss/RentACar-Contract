@@ -1,4 +1,4 @@
-# RCCMS Production Deployment Guide
+# KarāraOS Production Deployment Guide
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -15,7 +15,7 @@
 
 ## Overview
 
-This guide provides comprehensive instructions for deploying RCCMS (Rental Car Contract Management System) to a production environment. The application is designed to run on Linux servers behind a reverse proxy (Nginx, Apache, or cloud load balancer).
+This guide provides comprehensive instructions for deploying KarāraOS (Rental Car Contract Management System) to a production environment. The application is designed to run on Linux servers behind a reverse proxy (Nginx, Apache, or cloud load balancer).
 
 **Architecture:**
 - **Frontend**: React + TypeScript (served as static files in production)
@@ -996,7 +996,7 @@ TWILIO_PHONE_NUMBER=+971xxxxxxxxx
 # SendGrid Email (Primary)
 SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 SENDGRID_FROM_EMAIL=noreply@yourdomain.com
-SENDGRID_FROM_NAME="RCCMS Notifications"
+SENDGRID_FROM_NAME="KarāraOS Notifications"
 
 # Gmail SMTP (Fallback Email)
 GMAIL_USER=your-email@gmail.com
@@ -1062,7 +1062,7 @@ INSERT INTO communication_providers (
   api_key, from_email, from_name
 ) VALUES (
   'SendGrid', 'sendgrid', 'email', true, 10,
-  'SG.xxxxxxxx', 'noreply@domain.com', 'RCCMS Notifications'
+  'SG.xxxxxxxx', 'noreply@domain.com', 'KarāraOS Notifications'
 );
 
 -- Gmail Fallback (Optional)
@@ -1073,7 +1073,7 @@ INSERT INTO communication_providers (
 ) VALUES (
   'Gmail SMTP', 'gmail', 'email', true, 5,
   'smtp.gmail.com', 587, 'user@gmail.com', 'app_password',
-  'user@gmail.com', 'RCCMS Notifications'
+  'user@gmail.com', 'KarāraOS Notifications'
 );
 ```
 

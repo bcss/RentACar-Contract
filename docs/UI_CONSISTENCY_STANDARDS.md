@@ -1,11 +1,11 @@
-# RCCMS UI Consistency Standards
+# KarāraOS UI Consistency Standards
 
 **Document Version:** 1.0  
 **Last Updated:** November 20, 2025  
 **Status:** Production Guidelines
 
 ## Overview
-This document establishes UI/UX consistency standards for RCCMS to ensure a cohesive, professional, and maintainable user experience across all 66 pages and 23+ specialized modules.
+This document establishes UI/UX consistency standards for KarāraOS to ensure a cohesive, professional, and maintainable user experience across all 66 pages and 23+ specialized modules.
 
 ---
 
@@ -810,7 +810,7 @@ const MAX_FILE_SIZE = 5242880;
 
 ## Conclusion
 
-These UI consistency standards ensure RCCMS maintains a professional, accessible, and cohesive user experience. By following these guidelines, developers can:
+These UI consistency standards ensure KarāraOS maintains a professional, accessible, and cohesive user experience. By following these guidelines, developers can:
 
 1. **Reduce Decision Fatigue** - Pre-defined patterns for common scenarios
 2. **Accelerate Development** - Copy-paste patterns from this document

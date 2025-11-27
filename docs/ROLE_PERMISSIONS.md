@@ -1,8 +1,8 @@
-# RCCMS Role-Based Permissions System
+# KarāraOS Role-Based Permissions System
 
 ## Overview
 
-RCCMS implements a flexible role-based access control (RBAC) system with granular permission toggles. This system balances simplicity with flexibility by providing 4 core roles, enhanced with 3 targeted permission toggles that allow administrators to grant additional capabilities to users as needed.
+KarāraOS implements a flexible role-based access control (RBAC) system with granular permission toggles. This system balances simplicity with flexibility by providing 4 core roles, enhanced with 3 targeted permission toggles that allow administrators to grant additional capabilities to users as needed.
 
 ## Core Roles
 
@@ -483,7 +483,7 @@ canViewAllContracts BOOLEAN DEFAULT false
 
 ## Summary
 
-The RCCMS permission system provides:
+The KarāraOS permission system provides:
 - **4 Core Roles** - Clear hierarchy from Admin to Viewer
 - **3 Permission Toggles** - Flexible access control for specific capabilities
 - **Enhanced Staff Role** - Full operational workflow capability

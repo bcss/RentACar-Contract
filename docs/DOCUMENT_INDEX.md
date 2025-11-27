@@ -1,4 +1,4 @@
-# RCCMS Documentation Index & Consolidation Map
+# KarāraOS Documentation Index & Consolidation Map
 
 **✅ UPDATE:** All 5 feature gaps resolved - See `FEATURE_STATUS_UPDATE.md`  
 **Document Version:** 1.4  
@@ -414,7 +414,7 @@ All documentation should include this header section:
 ```markdown
 **Document Version:** X.X  
 **Last Updated:** Month Day, Year  
-**Application Version:** RCCMS 1.0 (Production Ready)  
+**Application Version:** KarāraOS 1.0 (Production Ready)  
 
 ## Authoritative Documentation
 

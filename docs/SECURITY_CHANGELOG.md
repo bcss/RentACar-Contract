@@ -1,4 +1,4 @@
-# RCCMS Security Changelog
+# KarāraOS Security Changelog
 
 **Document Version:** 1.0  
 **Purpose:** Track all security changes, improvements, and fixes  
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This document tracks all security-related changes made to RCCMS, including vulnerability fixes, security enhancements, and compliance improvements. All changes are documented with:
+This document tracks all security-related changes made to KarāraOS, including vulnerability fixes, security enhancements, and compliance improvements. All changes are documented with:
 - Date of change
 - Type (Fix/Enhancement/Compliance)
 - Severity (Critical/High/Medium/Low)
@@ -232,7 +232,7 @@ _This section will be updated if any security incidents occur. All incidents wil
 
 **Review Schedule:** Quarterly (every 3 months)  
 **Next Review:** February 20, 2026  
-**Maintained By:** RCCMS Security Team  
+**Maintained By:** KarāraOS Security Team  
 **Document Owner:** Security Architect
 
 ---

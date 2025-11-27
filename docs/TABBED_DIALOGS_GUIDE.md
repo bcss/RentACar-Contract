@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides a comprehensive approach to converting large forms and modals to tabbed dialogs throughout the RCCMS application. Tabbed dialogs improve user experience by organizing extensive form fields into logical, manageable sections.
+This guide provides a comprehensive approach to converting large forms and modals to tabbed dialogs throughout the KarāraOS application. Tabbed dialogs improve user experience by organizing extensive form fields into logical, manageable sections.
 
 ## When to Use Tabbed Dialogs
 

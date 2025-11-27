@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Import Data feature allows superadmin users to bulk import master data and contracts from external systems into RCCMS. This feature supports importing Customers, Vehicles, Sponsors, Companies, and Contracts through standardized file formats with comprehensive validation and user-friendly error reporting.
+The Import Data feature allows superadmin users to bulk import master data and contracts from external systems into KarāraOS. This feature supports importing Customers, Vehicles, Sponsors, Companies, and Contracts through standardized file formats with comprehensive validation and user-friendly error reporting.
 
 **Access:** Settings → Import Data (superadmin only)
 
@@ -265,7 +265,7 @@ nameEn,nameAr,registrationNumber,tradeLicenseNo,contactPerson,mobile,email,addre
 
 ### 5. Contracts (Simplified Import)
 
-**Important:** Imported contracts are created in **DRAFT** status only. All financial calculations, activations, and completions must be done through the normal contract workflow in RCCMS.
+**Important:** Imported contracts are created in **DRAFT** status only. All financial calculations, activations, and completions must be done through the normal contract workflow in KarāraOS.
 
 **Required Fields:**
 - `customerPassportId` (string) - References existing customer by passport ID

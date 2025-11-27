@@ -1,4 +1,4 @@
-# RCCMS Comprehensive Testing Guide
+# KarāraOS Comprehensive Testing Guide
 **Rental Car Contract Management System - Exhaustive Testing Scenarios**
 
 **Document Version:** 2.0 (Updated with Two-Stage Inspection Testing)  
@@ -48,7 +48,7 @@ For any discrepancies, replit.md and MASTER_FEATURE_LIST.md take precedence.
 - **User Trust:** Permission bypass bugs expose sensitive financial data
 - **Operational Continuity:** Workflow bugs block daily rental operations
 
-**This comprehensive testing guide contains 22+ detailed test scenarios covering EVERY aspect of RCCMS.**
+**This comprehensive testing guide contains 22+ detailed test scenarios covering EVERY aspect of KarāraOS.**
 
 For full testing guide content, please see the complete TESTING_GUIDE.md file in the repository.
 
@@ -542,7 +542,7 @@ After validating all new features, verify existing functionality:
 
 ### Overview
 
-RCCMS implements a flexible permission toggle system with 3 granular controls that enhance the 4 core roles. This section provides comprehensive test scenarios for verifying permission toggle functionality.
+KarāraOS implements a flexible permission toggle system with 3 granular controls that enhance the 4 core roles. This section provides comprehensive test scenarios for verifying permission toggle functionality.
 
 **Permission Toggles:**
 - `canAccessReports`: Access to reports and analytics
@@ -994,7 +994,7 @@ RCCMS implements a flexible permission toggle system with 3 granular controls th
 
 ### Overview
 
-RCCMS includes dedicated Privacy Policy and Terms of Service pages that provide comprehensive legal information to users. These pages feature interactive accordions, sticky table of contents navigation, scroll tracking, and responsive design. This section provides exhaustive testing procedures for all legal page functionality.
+KarāraOS includes dedicated Privacy Policy and Terms of Service pages that provide comprehensive legal information to users. These pages feature interactive accordions, sticky table of contents navigation, scroll tracking, and responsive design. This section provides exhaustive testing procedures for all legal page functionality.
 
 **Critical Legal Pages:**
 - **Privacy Policy**: `/privacy` - 13 sections covering data collection, usage, security, rights
@@ -1172,7 +1172,7 @@ RCCMS includes dedicated Privacy Policy and Terms of Service pages that provide 
 #### TC-LEGAL-006: Privacy Policy Back Navigation
 
 **Test Steps**:
-1. Login to RCCMS
+1. Login to KarāraOS
 2. Navigate to Privacy Policy via footer link or direct URL
 3. Click back button (data-testid="button-back")
 
@@ -1517,7 +1517,7 @@ RCCMS includes dedicated Privacy Policy and Terms of Service pages that provide 
 **Expected Results**:
 
 **Required Sections Present**:
-- ✅ Introduction with system name (RCCMS)
+- ✅ Introduction with system name (KarāraOS)
 - ✅ Data collection types documented
 - ✅ Data usage purposes explained
 - ✅ Security measures described (bcrypt, HTTPS, RBAC)
@@ -1578,7 +1578,7 @@ RCCMS includes dedicated Privacy Policy and Terms of Service pages that provide 
 #### TC-LEGAL-022: Footer Link Navigation
 
 **Test Steps**:
-1. Login to RCCMS
+1. Login to KarāraOS
 2. Navigate to any page (Dashboard, Customers, Vehicles, etc.)
 3. Scroll to footer
 4. Click "Privacy Policy" link
@@ -1598,7 +1598,7 @@ RCCMS includes dedicated Privacy Policy and Terms of Service pages that provide 
 #### TC-LEGAL-023: Direct URL Access
 
 **Test Steps**:
-1. Logout of RCCMS (or use incognito)
+1. Logout of KarāraOS (or use incognito)
 2. Navigate directly to `/privacy`
 3. Navigate directly to `/terms`
 

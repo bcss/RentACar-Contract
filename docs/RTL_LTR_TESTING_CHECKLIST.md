@@ -1,4 +1,4 @@
-# RTL/LTR Testing Checklist - RCCMS
+# RTL/LTR Testing Checklist - KarāraOS
 
 **Created:** November 20, 2025  
 **Purpose:** Comprehensive bilingual testing across all 66 pages  

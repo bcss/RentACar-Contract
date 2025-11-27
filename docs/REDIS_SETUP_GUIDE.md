@@ -7,7 +7,7 @@
 
 ## Overview
 
-RCCMS includes a production-ready Redis caching layer (`server/utils/cache.ts`) that:
+KarāraOS includes a production-ready Redis caching layer (`server/utils/cache.ts`) that:
 - ✅ Reduces database load by caching frequently-accessed data
 - ✅ Improves response times for read-heavy operations
 - ✅ Gracefully degrades when Redis is unavailable (app continues without caching)
@@ -286,7 +286,7 @@ After setting `REDIS_URL`, check the logs when starting the application:
 ### Upstash Pricing (as of 2025):
 - **Free tier:** 10,000 commands/day
 - **Pay-as-you-go:** $0.2 per 100K commands
-- **Estimated cost:** $5-20/month for typical RCCMS usage
+- **Estimated cost:** $5-20/month for typical KarāraOS usage
 
 ### Self-hosted Redis:
 - **Infrastructure cost:** Server costs (varies)

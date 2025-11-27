@@ -1,15 +1,15 @@
-# RCCMS Environment Variables Catalog
+# KarāraOS Environment Variables Catalog
 
 **Document Version:** 1.0  
 **Last Updated:** November 20, 2025  
-**Purpose:** Complete catalog of all environment variables used in RCCMS  
+**Purpose:** Complete catalog of all environment variables used in KarāraOS  
 **Status:** ✅ COMPREHENSIVE - ALL VARIABLES DOCUMENTED
 
 ---
 
 ## Executive Summary
 
-This document catalogs all environment variables required for RCCMS deployment, development, and operation. Environment variables are used for configuration, secrets management, and deployment-specific settings.
+This document catalogs all environment variables required for KarāraOS deployment, development, and operation. Environment variables are used for configuration, secrets management, and deployment-specific settings.
 
 ### Variable Summary
 
@@ -444,7 +444,7 @@ SUPER_ADMIN_USERNAME=systemadmin
 
 **Note:** The following variables are available in the Replit environment but are **NOT referenced by the application code**. The application uses `DATABASE_URL` directly.
 
-These variables are automatically extracted from `DATABASE_URL` by the Replit platform and may be useful for external tools (e.g., psql CLI), but RCCMS does not read them:
+These variables are automatically extracted from `DATABASE_URL` by the Replit platform and may be useful for external tools (e.g., psql CLI), but KarāraOS does not read them:
 
 - **PGDATABASE** - Database name (from DATABASE_URL)
 - **PGHOST** - Server hostname (from DATABASE_URL)
@@ -752,7 +752,7 @@ DATADOG_API_KEY=...
 
 **Document Status:** ✅ CURRENT AND ACCURATE  
 **Next Review:** February 20, 2026 (Quarterly Review)  
-**Maintained By:** RCCMS DevOps Team  
+**Maintained By:** KarāraOS DevOps Team  
 **Last Verified:** November 20, 2025
 
 ---

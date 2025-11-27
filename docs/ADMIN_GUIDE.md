@@ -1,5 +1,5 @@
 # Administrator Guide
-## RCCMS - Rental Car Contract Management System
+## KarāraOS - Rental Car Contract Management System
 
 **Version 1.0** | **For System Administrators**
 
@@ -24,7 +24,7 @@
 ## Introduction
 
 ### Purpose
-This guide provides comprehensive instructions for system administrators managing the RCCMS Rental Car Contract Management System. It covers all administrative functions, security settings, user management, and system monitoring.
+This guide provides comprehensive instructions for system administrators managing the KarāraOS Rental Car Contract Management System. It covers all administrative functions, security settings, user management, and system monitoring.
 
 ### Administrator Role
 As an administrator, you have full access to:
@@ -138,7 +138,7 @@ The Dashboard has been enhanced with complete bilingual support for all user-fac
 
 ### Overview
 
-RCCMS includes comprehensive Privacy Policy and Terms of Service pages designed to meet international legal requirements, support bilingual users, and provide transparent information about data handling and system usage policies.
+KarāraOS includes comprehensive Privacy Policy and Terms of Service pages designed to meet international legal requirements, support bilingual users, and provide transparent information about data handling and system usage policies.
 
 **Purpose:**
 - **Legal Compliance**: Meet GDPR, CCPA, and regional privacy regulations
@@ -337,7 +337,7 @@ The Terms of Service page contains **14 comprehensive sections** governing syste
 - Automated scraping/harvesting
 
 **8. Intellectual Property**
-- Ownership of RCCMS software
+- Ownership of KarāraOS software
 - Ownership of your business data
 - Usage restrictions on system code
 - Trademark and branding rights
@@ -649,7 +649,7 @@ The legal pages are designed to support compliance with major data protection re
 
 **Microsoft 365-Style Sidebar Controls**
 
-The RCCMS features a professional Microsoft 365 Admin-style sidebar interface optimized for administrators:
+The KarāraOS features a professional Microsoft 365 Admin-style sidebar interface optimized for administrators:
 
 **Icon-Only Control Cluster (Sidebar Header)**
 - **☰ Hamburger Menu**: Toggle between expanded (~256px) and collapsed (~48px) modes
@@ -685,7 +685,7 @@ User management is accessed via **Settings → System Users** in the sidebar.
 
 ### User Roles & Permission Toggles
 
-RCCMS implements a flexible role-based access control (RBAC) system with **4 core roles** enhanced by **3 granular permission toggles**. This design balances organizational simplicity with operational flexibility.
+KarāraOS implements a flexible role-based access control (RBAC) system with **4 core roles** enhanced by **3 granular permission toggles**. This design balances organizational simplicity with operational flexibility.
 
 **🔑 Permission Toggles Overview:**
 
@@ -1230,7 +1230,7 @@ Available → (Confirm/Activate) → Rented → (Complete/Close) → Available
 
 ### Two-Stage Inspection System
 
-RCCMS implements a mandatory two-stage vehicle inspection workflow to protect both the rental company and customers from disputes:
+KarāraOS implements a mandatory two-stage vehicle inspection workflow to protect both the rental company and customers from disputes:
 
 **Stage 1: Pre-Delivery Inspection**
 - **When**: Required before contract activation
@@ -1426,7 +1426,7 @@ All inspection operations are fully logged:
 
 ### Dual Audit System Architecture
 
-**Important:** RCCMS provides TWO distinct audit views for different purposes:
+**Important:** KarāraOS provides TWO distinct audit views for different purposes:
 
 #### 1. System Audit Logs (Logs & Errors → Audit Logs)
 
@@ -2203,7 +2203,7 @@ The inspection system is a LEGAL PROTECTION feature. Incomplete inspections = lo
 
 ### Overview
 
-The System Administrator Suite is an enterprise-grade disaster recovery and data migration framework designed to transform RCCMS into a military-spec business continuity platform. This suite provides advanced capabilities for emergency access, data reset, automated backups, legacy system migration, and compliance-ready audit logging.
+The System Administrator Suite is an enterprise-grade disaster recovery and data migration framework designed to transform KarāraOS into a military-spec business continuity platform. This suite provides advanced capabilities for emergency access, data reset, automated backups, legacy system migration, and compliance-ready audit logging.
 
 **Why This Matters:**
 - **Risk Mitigation:** Protect against ransomware, accidental deletion, account lockouts
@@ -2346,7 +2346,7 @@ The System Administrator Suite is an enterprise-grade disaster recovery and data
 **Import Workflow:**
 1. Admin downloads CSV template
 2. Fills template with legacy system data (Excel export → CSV)
-3. Uploads CSV file to RCCMS
+3. Uploads CSV file to KarāraOS
 4. System validates all rows (shows errors if any)
 5. Admin reviews dry-run preview
 6. Admin confirms import
