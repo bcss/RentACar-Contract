@@ -252,8 +252,18 @@ class BlacklistService {
       }
 
       const [newEntry] = await db.insert(blacklistEntries).values({
-        ...entry,
+        entityType: entry.entityType,
+        entityId: entry.entityId,
+        blacklistStatus: entry.blacklistStatus,
+        reason: entry.reason,
+        reasonAr: entry.reasonAr,
+        evidenceDocuments: entry.evidenceDocuments as string[],
+        blockedActions: entry.blockedActions as string[],
+        effectiveFrom: entry.effectiveFrom,
+        effectiveUntil: entry.effectiveUntil,
         addedBy: addedByUserId,
+        notes: entry.notes,
+        branchId: entry.branchId,
         isActive: true,
       }).returning();
 
@@ -296,7 +306,16 @@ class BlacklistService {
 
       const [updatedEntry] = await db.update(blacklistEntries)
         .set({
-          ...updates,
+          blacklistStatus: updates.blacklistStatus ?? existing.blacklistStatus,
+          reason: updates.reason ?? existing.reason,
+          reasonAr: updates.reasonAr ?? existing.reasonAr,
+          evidenceDocuments: updates.evidenceDocuments as string[] ?? existing.evidenceDocuments,
+          blockedActions: updates.blockedActions as string[] ?? existing.blockedActions,
+          effectiveFrom: updates.effectiveFrom ?? existing.effectiveFrom,
+          effectiveUntil: updates.effectiveUntil ?? existing.effectiveUntil,
+          notes: updates.notes ?? existing.notes,
+          branchId: updates.branchId ?? existing.branchId,
+          isActive: updates.isActive ?? existing.isActive,
           updatedAt: new Date(),
         })
         .where(eq(blacklistEntries.id, entryId))
