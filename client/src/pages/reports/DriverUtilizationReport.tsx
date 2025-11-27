@@ -7,6 +7,17 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { Download, Users, Clock, TrendingUp, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 
+const safeFormatDate = (dateValue: string | Date | null | undefined, formatStr: string, fallback: string = "—") => {
+  if (!dateValue) return fallback;
+  try {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return fallback;
+    return format(date, formatStr);
+  } catch {
+    return fallback;
+  }
+};
+
 export default function DriverUtilizationReport() {
   const { data: schedules, isLoading } = useQuery<any[]>({
     queryKey: ['/api/driver-schedules'],
@@ -52,8 +63,10 @@ export default function DriverUtilizationReport() {
 
   // Monthly hours trend
   const monthlyData = schedules
+    ?.filter(schedule => schedule.shiftDate)
     ?.reduce((acc: any[], schedule) => {
-      const month = format(new Date(schedule.shiftDate), 'MMM yyyy');
+      const month = safeFormatDate(schedule.shiftDate, 'MMM yyyy', 'Unknown');
+      if (month === 'Unknown') return acc;
       const existing = acc.find(d => d.month === month);
       const hours = schedule.actualHours || 0;
       const overtime = schedule.overtimeHours || 0;
@@ -76,7 +89,7 @@ export default function DriverUtilizationReport() {
     const csv = [
       ['Date', 'Driver ID', 'Shift Type', 'Actual Hours', 'Overtime Hours', 'Status'].join(','),
       ...schedules.map(s => [
-        format(new Date(s.shiftDate), 'yyyy-MM-dd'),
+        safeFormatDate(s.shiftDate, 'yyyy-MM-dd', ''),
         s.driverId || '',
         s.shiftType || '',
         s.actualHours || 0,
@@ -89,7 +102,7 @@ export default function DriverUtilizationReport() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `driver-utilization-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.download = `driver-utilization-${safeFormatDate(new Date(), 'yyyy-MM-dd', 'export')}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

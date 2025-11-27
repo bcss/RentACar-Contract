@@ -237,10 +237,21 @@ export default function DriverScheduling() {
     return branches.find(b => b.id === branchId)?.nameEn || "N/A";
   };
 
+  const safeFormatDate = (dateValue: string | Date | null | undefined, formatStr: string) => {
+    if (!dateValue) return "—";
+    try {
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return "—";
+      return format(date, formatStr);
+    } catch {
+      return "—";
+    }
+  };
+
   const getScheduleText = (scheduleId: string) => {
     const schedule = schedules.find(s => s.id === scheduleId);
     if (!schedule) return "N/A";
-    return `${format(new Date(schedule.scheduleDate), "PP")} - ${getDriverName(schedule.driverId)}`;
+    return `${safeFormatDate(schedule.scheduleDate, "PP")} - ${getDriverName(schedule.driverId)}`;
   };
 
   const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" => {
@@ -331,9 +342,9 @@ export default function DriverScheduling() {
                       <TableRow key={schedule.id} data-testid={`table-row-schedule-${schedule.id}`}>
                         <TableCell className="font-medium">{getDriverName(schedule.driverId)}</TableCell>
                         <TableCell>{getBranchName(schedule.branchId || "")}</TableCell>
-                        <TableCell>{format(new Date(schedule.scheduleDate), "PP")}</TableCell>
-                        <TableCell>{format(new Date(schedule.shiftStart), "p")}</TableCell>
-                        <TableCell>{format(new Date(schedule.shiftEnd), "p")}</TableCell>
+                        <TableCell>{safeFormatDate(schedule.scheduleDate, "PP")}</TableCell>
+                        <TableCell>{safeFormatDate(schedule.shiftStart, "p")}</TableCell>
+                        <TableCell>{safeFormatDate(schedule.shiftEnd, "p")}</TableCell>
                         <TableCell>{schedule.breakDuration || 0}</TableCell>
                         <TableCell>
                           <Badge variant={getStatusBadgeVariant(schedule.status)}>
@@ -431,9 +442,9 @@ export default function DriverScheduling() {
                       <TableRow key={record.id} data-testid={`table-row-attendance-${record.id}`}>
                         <TableCell className="font-medium">{getDriverName(record.driverId)}</TableCell>
                         <TableCell>{getScheduleText(record.scheduleId || "")}</TableCell>
-                        <TableCell>{format(new Date(record.checkIn), "PPp")}</TableCell>
+                        <TableCell>{safeFormatDate(record.checkIn, "PPp")}</TableCell>
                         <TableCell>
-                          {record.checkOut ? format(new Date(record.checkOut), "PPp") : "—"}
+                          {safeFormatDate(record.checkOut, "PPp")}
                         </TableCell>
                         <TableCell>{record.hoursWorked || "—"}</TableCell>
                         <TableCell>{record.overtimeHours || "0"}</TableCell>

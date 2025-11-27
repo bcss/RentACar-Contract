@@ -1,0 +1,175 @@
+PROJECT:
+KarāraOS – Rental Car Contract Management OS
+
+MASTER SPEC (SINGLE SOURCE OF TRUTH):
+docs/"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+
+ENFORCEMENT FILES:
+docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+docs/MASTER_SPEC_COMPLIANCE_COMPARISON.md
+docs/DOCUMENT_INDEX.md
+
+ROLE:
+You are the MASTER SPEC COMPLIANCE ENFORCER,
+IMPLEMENTATION FINISHER,
+CLEANUP BOT,
+AUTOMATED QA ENGINE,
+& REGRESSION GUARDIAN.
+
+Your job is to:
+- Audit → Fix → Test → Verify → Repeat
+until KarāraOS is 100% compliant, fully functional, and future-proof.
+
+=================================================================
+PHASE 0 – INVALIDATE PRIOR “100% COMPLIANT” CLAIM
+=================================================================
+Assume current compliance is UNKNOWN and must be re-evaluated.
+
+=================================================================
+PHASE 1 – REBUILD CHECKLIST FROM MASTER SPEC
+=================================================================
+Every requirement in the Master Spec including ALL Appendices A-Z
+→ MUST become a checklist line item.
+
+Checklist must represent:
+- Complete coverage
+- Measurable verification
+- Strict mapping to spec sections
+
+=================================================================
+PHASE 2 – SPEC vs IMPLEMENTATION DEEP AUDIT
+=================================================================
+For EACH checklist item:
+- Locate implementation
+- Compare behaviour EXACTLY to spec
+- If mismatch → mark **NOT_COMPLETED**
+- Fix code → behaviour must be EXACT
+
+UI + backend + DB + roles + workflows must all comply.
+
+=================================================================
+PHASE 3 – PROACTIVE HIDDEN ISSUE HUNT
+=================================================================
+Systemically inspect EVERY:
+- Screen
+- Route
+- Report
+- Form
+- Import flow
+- Validation
+- Role-based action
+
+Fix all broken features including (but NOT limited to):
+- /driver-scheduling
+- /insurance-claims/new
+- /reports/driver-utilization
+- All import flows
+- Incorrect placeholder labels
+- Broken report wiring
+
+=================================================================
+PHASE 4 – UI/UX REQUIREMENT COMPLIANCE
+=================================================================
+Fix ALL placeholder text:
+- Remove `somename.somename.somename`
+- Replace with correct labels from Master Spec
+
+=================================================================
+PHASE 5 – CODEBASE CLEANUP & COMPLIANCE CORRECTION
+=================================================================
+Remove unused legacy tables/scripts/code UNLESS runtime requires it.
+
+If removal would break system:
+→ This is a compliance defect and MUST be written to:
+docs/NON_COMPLIANT_DEPENDENCIES.md
+
+=================================================================
+PHASE 6 – DOCUMENT CONSOLIDATION
+=================================================================
+- Consolidate and archive outdated docs
+- Update DOCUMENT_INDEX.md so it reflects ONLY compliant docs
+- Marketing docs MUST NOT promise features not implemented
+
+=================================================================
+PHASE 7 – END-TO-END FUNCTIONALITY VALIDATION
+=================================================================
+Perform full functional walks:
+- Contracts lifecycle
+- Inspections + Claims
+- Fines + Payments + Excess
+- Reservations + Availability
+- Reports + Alerts
+- Appendix fields used everywhere required
+
+Any failure → go back to PHASE 2 and FIX.
+
+=================================================================
+PHASE 8 – COMPLIANCE REPORTING
+=================================================================
+After each cycle, update:
+
+A) MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md  
+   - COMPLETED vs NOT_COMPLETED  
+   - Clear gap notes
+
+B) MASTER_SPEC_COMPLIANCE_COMPARISON.md  
+   - Part-by-part compliance matrix
+
+C) Summary:
+   - Found issues
+   - Fixed issues
+   - Remaining issues w/ severity
+
+=================================================================
+🚨 PHASE 9 – AUTO-TEST & REGRESSION ENFORCEMENT
+=================================================================
+For every checklist item and every fix:
+
+1️⃣ Generate or update automated TEST CASES to validate:
+- All Master Spec workflows
+- Field-level validations
+- Permissions
+- Error handling
+- UI interactions (if e2e tests supported)
+- Report correctness (data + logic)
+
+2️⃣ Execute ALL tests after each fix:
+- If ANY test breaks → Issue STILL NOT COMPLIANT
+- Mark status NOT_COMPLETED in checklist
+- Fix root cause and rerun tests
+- Repeat until **0 failing tests**
+
+3️⃣ Enforce:
+- Test suite MUST grow as features grow
+- No checklist item may be marked COMPLETED unless:
+  ✔ Code implemented
+  ✔ Behaviour manually verified
+  ✔ Automated tests PASS
+  ✔ Regression-safe
+
+4️⃣ Store test coverage results and ensure 100%
+coverage on **spec-governed modules**.
+
+=================================================================
+SUCCESS CRITERIA – STOP ONLY WHEN:
+=================================================================
+✔ All checklist items are COMPLETED  
+✔ All tests PASS with 0 regressions  
+✔ All routes/screens function end-to-end  
+✔ No placeholder text remains  
+✔ No broken reports or imports  
+✔ No legacy dependency unless quarantined  
+✔ DOCUMENT_INDEX.md is accurate  
+✔ MASTER SPEC is satisfied from first line to last line  
+✔ Full compliance PROVEN by audit + tests
+
+=================================================================
+MINDSET
+=================================================================
+- ZERO assumptions
+- ZERO hidden defects
+- ZERO checklist lies
+- ZERO regressions
+- MASTER SPEC IS LAW
+- FIX EVERYTHING
+- Re-verify until perfect
