@@ -113,18 +113,24 @@
 
 ## Archived Documents
 
-All superseded, outdated, or consolidated documents have been moved to `docs/archive/`:
+All superseded, outdated, or consolidated documents are organized in `docs/archive/` by category:
 
-### November 2025 Superseded (docs/archive/nov2025_superseded/)
-- Gap analysis documents (superseded by 100% compliance)
-- Old audit reports using "RCCMS" terminology
-- Status reports superseded by Master Spec compliance verification
-- Supabase migration guide (system uses Neon/Drizzle)
+### Archive Structure
 
-### Previously Archived
-- Session documents (docs/archive/nov2025_session_docs/)
-- Consolidation documents (docs/archive/nov2025_consolidation/)
-- Legacy system documents
+| Folder | Contents | File Count |
+|--------|----------|------------|
+| `nov2025_superseded/` | Superseded specs, gap analyses, old audit reports (RCCMS terminology), deployment guides, feature status reports | 40 |
+| `nov2025_consolidation/` | Consolidation work products, module analyses, status reports | 12 |
+| `nov2025_session_docs/` | Development session documents, action plans | 4 |
+
+**Total Archived:** 56 documents
+
+### Why Documents Were Archived
+- Used old "RCCMS" terminology (now "KarāraOS")
+- Gap analysis documents (superseded by 100% Master Spec compliance)
+- Duplicate/redundant content consolidated into primary documents
+- Infrastructure guides for discontinued platforms (Supabase, Docker direct)
+- Intermediate status reports replaced by definitive compliance verification
 
 ---
 
