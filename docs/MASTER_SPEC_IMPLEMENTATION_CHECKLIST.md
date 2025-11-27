@@ -101,6 +101,21 @@
 | OTP Service | §11.10 | ✅ Audit fields (ip_address, device_id, user_agent) captured |
 | Deposit Service | §7.5 | ✅ Min enforcement (500 AED), priority allocation (Excess→Damage→Rent), refund cap |
 
+#### Legacy Driver Artifacts Removed (November 27, 2025)
+| Artifact | Type | Action | Status |
+|----------|------|--------|--------|
+| driverRateCards | Legacy schema table | REMOVED from shared/schema.ts | ✅ RESOLVED |
+| driverAssignments | Legacy schema table | REMOVED from shared/schema.ts | ✅ RESOLVED |
+| migrateLegacyDrivers.ts | Migration script | DELETED from scripts/ | ✅ RESOLVED |
+| driver_rate_cards | Database table | Empty (0 records) - no action needed | ✅ RESOLVED |
+| driver_assignments | Database table | Empty (0 records) - no action needed | ✅ RESOLVED |
+
+**Spec-Compliant Replacements (Active):**
+- `driverRatePlans` (§4.10.2) - ACTIVE in schema and storage
+- `contractDrivers` (§4.10.3) - ACTIVE in schema and storage
+
+**Compliance Status:** Schema now contains ONLY spec-compliant driver tables. No legacy artifacts remain in active codebase.
+
 ### ✅ PART 4 DATA MODEL COMPLIANCE - VERIFIED (November 26, 2025)
 All critical tables, fields, and constraints verified against Master Spec Part 4.
 
