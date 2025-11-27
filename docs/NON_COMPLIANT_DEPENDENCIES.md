@@ -75,12 +75,22 @@ The following migration files contain references to legacy tables but are **reta
 - For fresh deployments, a cleanup migration should be added to drop legacy tables
 - The files do NOT affect runtime behavior - only database provisioning
 
-**Recommended Action for Fresh Deployments:**
-Create a new migration script to drop legacy tables after initial provisioning:
-```sql
-DROP TABLE IF EXISTS driver_rate_cards CASCADE;
-DROP TABLE IF EXISTS driver_assignments CASCADE;
+**Cleanup Migration Available:**
+A forward-only migration script has been created for fresh deployments:
+
+| File | Purpose | Execution |
+|------|---------|-----------|
+| `migrations/drop_legacy_driver_tables.sql` | Drops legacy tables and associated constraints/indexes | Run after initial provisioning |
+
+**To execute cleanup migration:**
+```bash
+psql $DATABASE_URL < migrations/drop_legacy_driver_tables.sql
 ```
+
+This migration:
+- Drops `driver_rate_cards` and `driver_assignments` tables
+- Removes associated indexes and foreign key constraints
+- Aligns database with Master Spec compliant schema
 
 ---
 

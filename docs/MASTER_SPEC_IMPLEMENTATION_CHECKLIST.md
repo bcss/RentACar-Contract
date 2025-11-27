@@ -114,7 +114,10 @@
 - `driverRatePlans` (§4.10.2) - ACTIVE in schema and storage
 - `contractDrivers` (§4.10.3) - ACTIVE in schema and storage
 
-**Compliance Status:** Schema now contains ONLY spec-compliant driver tables. No legacy artifacts remain in active codebase.
+**Cleanup Migration Created:**
+- `migrations/drop_legacy_driver_tables.sql` - Drops legacy tables for fresh deployments
+
+**Compliance Status:** Schema now contains ONLY spec-compliant driver tables. Legacy table cleanup migration available for fresh database provisioning.
 
 ### ✅ PART 4 DATA MODEL COMPLIANCE - VERIFIED (November 26, 2025)
 All critical tables, fields, and constraints verified against Master Spec Part 4.
