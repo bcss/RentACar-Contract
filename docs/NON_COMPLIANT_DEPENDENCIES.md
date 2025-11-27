@@ -51,13 +51,36 @@ After thorough codebase analysis and cleanup against the Master System Specifica
 
 ---
 
-## Database Tables Note
+## Database & Migration Status
 
-The following database tables may still exist in PostgreSQL but are **empty and unused**:
+### Database Tables (Empty/Unused)
+The following database tables still exist in PostgreSQL but are **empty and unused**:
 - `driver_rate_cards` (0 records)
 - `driver_assignments` (0 records)
 
 These can be safely dropped via database admin tools if desired. They are not referenced by any ORM schema or application code.
+
+### Historical Migration Files (Retained)
+The following migration files contain references to legacy tables but are **retained as historical records**:
+
+| File | Contains | Status |
+|------|----------|--------|
+| `migrations/delta_branch_driver_schema.sql` | CREATE TABLE for legacy tables | HISTORICAL - already executed |
+| `migrations/add_foreign_key_constraints.sql` | FK constraints for legacy tables | HISTORICAL - already executed |
+| `migrations/meta/0000_snapshot.json` | Drizzle schema snapshot | Contains legacy table state |
+
+**Rationale for Retention:**
+- These files document what migrations have been executed against the database
+- Removing them could break Drizzle's migration state tracking
+- For fresh deployments, a cleanup migration should be added to drop legacy tables
+- The files do NOT affect runtime behavior - only database provisioning
+
+**Recommended Action for Fresh Deployments:**
+Create a new migration script to drop legacy tables after initial provisioning:
+```sql
+DROP TABLE IF EXISTS driver_rate_cards CASCADE;
+DROP TABLE IF EXISTS driver_assignments CASCADE;
+```
 
 ---
 
