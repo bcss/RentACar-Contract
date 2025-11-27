@@ -355,7 +355,7 @@ class AvailabilityEngine {
       const results: BranchAvailability[] = [];
       
       for (const branch of allBranches) {
-        const availability = await this.getBranchAvailability(branch.id, date);
+        const availability = await this.getBranchAvailability(branch.id as string, date);
         results.push(availability);
       }
 
@@ -477,6 +477,7 @@ class AvailabilityEngine {
     try {
       const today = format(new Date(), 'yyyy-MM-dd');
 
+      // Use SQL date casting to avoid timezone issues with date-only comparisons
       const vehiclesWithContracts = await db
         .select({
           vehicleId: contracts.vehicleId,
@@ -487,8 +488,8 @@ class AvailabilityEngine {
         .where(
           and(
             inArray(contracts.status, ['active']),
-            lte(contracts.rentalStartDate, today),
-            gte(contracts.rentalEndDate, today)
+            sql`DATE(${contracts.rentalStartDate}) <= DATE(${today})`,
+            sql`DATE(${contracts.rentalEndDate}) >= DATE(${today})`
           )
         );
 

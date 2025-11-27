@@ -116,18 +116,43 @@ class IncidentService {
       // Generate incident number using sequences table (thread-safe)
       const incidentNumber = await this.generateIncidentNumber();
 
+      // Derive severity from damage type per Master Spec §7.4.3
+      // Keys match CreateIncidentFromInspectionCommand damageType enum values
+      const severityMap: Record<string, 'minor' | 'moderate' | 'major' | 'total_loss'> = {
+        // Inspection damage type enum values
+        'SCRATCHES': 'minor',
+        'DENTS': 'moderate',
+        'WINDSHIELD': 'moderate',
+        'TYRE': 'minor',
+        'MECHANICAL': 'major',
+        'INTERIOR': 'minor',
+        'OTHER': 'minor',
+        // Additional legacy/alternate mappings for safety
+        'DENT': 'moderate',
+        'TIRE': 'minor',
+        'TIRE_DAMAGE': 'minor',
+        'BROKEN_WINDOW': 'moderate',
+        'INTERIOR_DAMAGE': 'minor',
+        'STRUCTURAL': 'major',
+        'ACCIDENT': 'major',
+        'COLLISION': 'major',
+        'TOTAL_LOSS': 'total_loss',
+        'THEFT': 'total_loss',
+      };
+      const severity = severityMap[command.damageType.toUpperCase()] || 'minor';
+
       // Create incident - aligned with incidents table schema
       const [newIncident] = await db.insert(incidents).values({
         vehicleId: command.vehicleId,
         contractId: command.contractId,
         incidentType: 'damage', // Maps to schema's 'accident, theft, damage, breakdown'
-        severity: 'minor', // Default severity
+        severity, // Derived from damage classification per Master Spec §7.4.3
         status: 'reported', // Maps to schema's 'reported, under_investigation, claim_filed, resolved, closed'
         incidentDate: new Date(),
         description: `${command.damageType}: ${command.damageDescription}${command.damageDescriptionAr ? ` | ${command.damageDescriptionAr}` : ''}`,
         estimatedCost: command.estimatedCost?.toString(),
         photoUrls: command.damagePhotos,
-        notes: `Inspection ID: ${command.inspectionId}, Damage type: ${command.damageType}`,
+        notes: `Incident #: ${incidentNumber}, Inspection ID: ${command.inspectionId}, Damage type: ${command.damageType}`,
         createdBy: command.createdBy,
       }).returning();
 
@@ -141,19 +166,27 @@ class IncidentService {
           .where(eq(contracts.id, command.contractId));
       }
 
-      // Log audit
+      // Log audit with full incident details per Master Spec §3.22
       await this.logAudit({
         entityType: 'INCIDENT',
         entityId: newIncident.id,
         action: 'CREATE',
         userId: command.createdBy,
-        newValues: { incidentNumber, status: 'OPEN', type: 'DAMAGE' },
+        newValues: { 
+          incidentNumber, 
+          status: 'reported', 
+          type: 'damage',
+          severity,
+          inspectionId: command.inspectionId,
+          damageType: command.damageType,
+          photoCount: command.damagePhotos?.length ?? 0,
+        },
       });
 
       return {
         success: true,
         incidentId: newIncident.id,
-        incidentNumber, // Returned for tracking but stored in notes
+        incidentNumber,
         message: `Damage incident ${incidentNumber} created from inspection`
       };
     } catch (error) {
