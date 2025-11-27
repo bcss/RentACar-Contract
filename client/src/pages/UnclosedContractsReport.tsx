@@ -42,7 +42,8 @@ export default function UnclosedContractsReport() {
     enabled: isAdmin || isManager,
   });
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | undefined | null) => {
+    if (amount === undefined || amount === null) return `0.00 ${currency}`;
     return `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
   };
 

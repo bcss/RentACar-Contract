@@ -196,7 +196,8 @@ export default function OperationalReports() {
     enabled: isAdmin || isManager,
   });
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | undefined | null) => {
+    if (amount === undefined || amount === null) return `0.00 ${currency}`;
     return `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
   };
 
@@ -719,7 +720,7 @@ export default function OperationalReports() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {report.extraCharges.contracts.length === 0 ? (
+                  {(!report.extraCharges?.contracts || report.extraCharges.contracts.length === 0) ? (
                     <p className="text-muted-foreground text-center py-12">
                       {t('operationalReports.noExtraCharges')}
                     </p>
