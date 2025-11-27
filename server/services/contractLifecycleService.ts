@@ -279,7 +279,8 @@ class ContractLifecycleService {
         startDatetime: command.startDatetime,
         endDatetime: command.endDatetime,
         status: ContractStatus.DRAFT,
-        depositRequired: depositExpected,
+        depositRequired: depositExpected > 0, // Boolean per schema
+        depositExpected: String(depositExpected), // Numeric field
         depositReceived: '0',
         depositRefunded: '0',
         totalCharges: '0',
@@ -287,6 +288,8 @@ class ContractLifecycleService {
         version: 1,
         notes: command.notes,
         createdBy: command.createdBy,
+        dailyRate: '0',
+        totalAmount: '0',
       }).returning();
 
       // Emit ContractCreated event
@@ -357,7 +360,7 @@ class ContractLifecycleService {
         'customer',
         contract.customerId,
         'activation',
-        contract.branchId
+        contract.branchId ?? undefined
       );
 
       if (blacklistCheck.isBlocked) {
@@ -425,11 +428,10 @@ class ContractLifecycleService {
       }
 
       // Per §3.3 - Validate OTP
-      const otpResult = await otpService.verifyOTP(
-        command.contractId,
-        command.otp,
-        'ACTIVATION'
-      );
+      const otpResult = await otpService.verifyOTP({
+        verificationId: command.contractId,
+        otpCode: command.otp,
+      });
 
       if (!otpResult.success) {
         return { success: false, error: otpResult.error || 'OTP verification failed' };
@@ -667,11 +669,10 @@ class ContractLifecycleService {
         return { success: false, error: 'Closure OTP is required per Master Spec §3.11' };
       }
       
-      const otpResult = await otpService.verifyOTP(
-        command.contractId,
-        command.otp,
-        'CLOSURE'
-      );
+      const otpResult = await otpService.verifyOTP({
+        verificationId: command.contractId,
+        otpCode: command.otp,
+      });
 
       if (!otpResult.success) {
         return { success: false, error: otpResult.error || 'Closure OTP verification failed' };
@@ -727,11 +728,10 @@ class ContractLifecycleService {
       });
 
       // Trigger closure notification
-      await triggerNotification('CONTRACT_CLOSED', {
-        contractId: contract.id,
-        customerId: contract.customerId,
-        contractNumber: contract.contractNumber,
-      });
+      await triggerNotification('CONTRACT_CLOSED', 
+        { customerId: contract.customerId, phone: contract.hirerMobile, email: contract.hirerAddress },
+        { contractId: contract.id, contractNumber: contract.contractNumber }
+      );
 
       return {
         success: true,
@@ -840,12 +840,10 @@ class ContractLifecycleService {
       });
 
       // Trigger cancellation notification
-      await triggerNotification('CONTRACT_CANCELLED', {
-        contractId: contract.id,
-        customerId: contract.customerId,
-        contractNumber: contract.contractNumber,
-        reason: command.reason,
-      });
+      await triggerNotification('CONTRACT_CANCELLED', 
+        { customerId: contract.customerId, phone: contract.hirerMobile, email: contract.hirerAddress },
+        { contractId: contract.id, contractNumber: contract.contractNumber, reason: command.reason }
+      );
 
       return {
         success: true,
@@ -954,13 +952,10 @@ class ContractLifecycleService {
       });
 
       // Trigger extension notification
-      await triggerNotification('CONTRACT_EXTENDED', {
-        contractId: contract.id,
-        customerId: contract.customerId,
-        contractNumber: contract.contractNumber,
-        oldEndDate,
-        newEndDate: newEndDate.toISOString(),
-      });
+      await triggerNotification('CONTRACT_EXTENDED', 
+        { customerId: contract.customerId, phone: contract.hirerMobile, email: contract.hirerAddress },
+        { contractId: contract.id, contractNumber: contract.contractNumber, oldEndDate, newEndDate: newEndDate.toISOString() }
+      );
 
       return {
         success: true,
@@ -1381,14 +1376,12 @@ class ContractLifecycleService {
       // Per §3.17 - Corporate contracts may require OTP verification
       if (contract.hirerType === 'from_company' && command.otp) {
         // Verify company OTP if provided
-        const otpValid = await otpService.verifyOtp({
-          target: contract.hirerMobile || '',
-          code: command.otp,
-          contractId: command.contractId,
-          purpose: 'DRIVER_CHANGE',
+        const otpResult = await otpService.verifyOtp({
+          verificationId: command.contractId,
+          otpCode: command.otp,
         });
 
-        if (!otpValid) {
+        if (!otpResult.success) {
           return { success: false, error: 'Invalid OTP for driver change verification' };
         }
       }
