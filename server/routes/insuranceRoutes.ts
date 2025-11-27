@@ -43,14 +43,14 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: Ne
 // POST /api/insurance-claims - Create new claim
 router.post("/", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = req.user as User;
+    const user = req.user as User & { id: string };
     const data = insertInsuranceClaimSchema.parse(req.body);
     const claim = await storage.createInsuranceClaim({
       ...data,
       createdBy: user.id,
     } as any);
     
-    await createAuditLog(user.id, 'insurance_claim_created', claim.contractId, req, `Created insurance claim: ${claim.claimNumber}`);
+    await createAuditLog(user.id, 'insurance_claim_created', claim.contractId as string, req, `Created insurance claim: ${claim.claimNumber}`);
     res.status(201).json(claim);
   } catch (error) {
     next(error);
@@ -60,14 +60,14 @@ router.post("/", isAuthenticated, requireEditor, async (req: Request, res: Respo
 // PATCH /api/insurance-claims/:id - Update claim
 router.patch("/:id", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = req.user as User;
+    const user = req.user as User & { id: string };
     const validationResult = insertInsuranceClaimSchema.partial().safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ message: fromZodError(validationResult.error).message });
     }
     
     const claim = await storage.updateInsuranceClaim(req.params.id, validationResult.data);
-    await createAuditLog(user.id, 'insurance_claim_updated', claim.contractId, req, `Updated insurance claim: ${claim.claimNumber}`);
+    await createAuditLog(user.id, 'insurance_claim_updated', claim.contractId as string, req, `Updated insurance claim: ${claim.claimNumber}`);
     res.json(claim);
   } catch (error) {
     next(error);
@@ -77,11 +77,11 @@ router.patch("/:id", isAuthenticated, requireEditor, async (req: Request, res: R
 // DELETE /api/insurance-claims/:id - Delete claim
 router.delete("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = req.user as User;
+    const user = req.user as User & { id: string };
     const claim = await storage.getInsuranceClaimById(req.params.id);
     if (claim) {
-      await storage.deleteInsuranceClaim(req.params.id);
-      await createAuditLog(user.id, 'insurance_claim_deleted', claim.contractId, req, `Deleted insurance claim`);
+      await storage.deleteInsuranceClaim(req.params.id, user.id);
+      await createAuditLog(user.id, 'insurance_claim_deleted', claim.contractId as string, req, `Deleted insurance claim`);
     }
     res.status(204).send();
   } catch (error) {
@@ -102,7 +102,7 @@ router.get("/claims/:claimId/progress", isAuthenticated, async (req: Request, re
 // POST /api/claims/:claimId/progress - Add claim progress update
 router.post("/claims/:claimId/progress", isAuthenticated, requireEditor, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = req.user as User;
+    const user = req.user as User & { id: string };
     const data = insertClaimProgressUpdateSchema.parse({
       ...req.body,
       claimId: req.params.claimId,
@@ -112,7 +112,7 @@ router.post("/claims/:claimId/progress", isAuthenticated, requireEditor, async (
       createdBy: user.id,
     } as any);
     
-    await createAuditLog(user.id, 'claim_progress_updated', undefined, req, `Added progress update to claim`);
+    await createAuditLog(user.id, 'claim_progress_updated', req.params.claimId, req, `Added progress update to claim`);
     res.status(201).json(update);
   } catch (error) {
     next(error);
