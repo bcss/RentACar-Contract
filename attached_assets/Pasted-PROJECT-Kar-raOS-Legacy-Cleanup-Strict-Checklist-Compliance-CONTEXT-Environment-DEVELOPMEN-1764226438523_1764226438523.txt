@@ -1,0 +1,164 @@
+PROJECT:
+KarāraOS – Legacy Cleanup & Strict Checklist Compliance
+
+CONTEXT:
+- Environment: DEVELOPMENT (NOT a production system).
+- Master Spec: docs/"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+- Implementation Checklist: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+- Compliance Report (example content already seen):
+  - Legacy tables: driverRateCards, driverAssignments in shared/schema.ts
+  - Migration script: scripts/migrateLegacyDrivers.ts
+  - Database: legacy tables currently contain 0 records.
+
+IMPORTANT BUSINESS DECISION:
+The user has decided:
+- Backward compatibility with legacy driver tables is NOT required at this stage.
+- This is a development system; no real production data is being used.
+- There must be **no leftover legacy tables or scripts** that are outside the Master Spec and Master Checklist.
+- If something is not needed AND not in the Master Spec, it must be removed or fully isolated.
+
+ROLE:
+You are the Legacy Eradicator & Checklist Compliance Enforcer.
+
+Your mission:
+1) Treat legacy driver tables and related scripts as NON-COMPLIANT unless strictly needed by the MASTER SPEC.
+2) Clean up these legacy artifacts while keeping the project functional.
+3) Update MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md to reflect that these items are resolved and fully compliant.
+4) If something cannot be removed without breaking the project, explicitly record it as a compliance problem.
+
+================================================
+PHASE 1 – RE-EVALUATE LEGACY DRIVER ARTIFACTS
+================================================
+
+TARGETS (BASED ON PRIOR REPORT):
+- shared/schema.ts:
+  - Legacy tables:
+    - driverRateCards
+    - driverAssignments
+- scripts/migrateLegacyDrivers.ts
+
+STEPS:
+1. Open shared/schema.ts and locate:
+   - driverRateCards table definition
+   - driverAssignments table definition
+2. Verify:
+   - These tables are NOT referenced anywhere in current production code paths.
+   - Current storage/ORM layer uses only spec-compliant tables:
+     - driverRatePlans (Master Spec §4.10.2)
+     - contractDrivers (Master Spec §4.10.3)
+3. Open scripts/migrateLegacyDrivers.ts:
+   - Confirm it is ONLY used for migrating from legacy driver tables to spec-compliant tables.
+   - Confirm it is not wired into any runtime startup or critical path.
+
+================================================
+PHASE 2 – ALIGN WITH MASTER SPEC & CHECKLIST
+================================================
+
+1. Cross-check the Master Spec and MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md:
+   - Confirm that driverRateCards and driverAssignments are NOT part of the official spec.
+   - Confirm that driverRatePlans and contractDrivers ARE the spec-compliant entities.
+
+2. Decide based on user policy:
+   - Since environment is development and legacy tables have 0 records:
+     - There is no functional reason to keep legacy tables or migration scripts in the active codebase.
+     - Legacy structures must be removed or quarantined so they do NOT appear as active schema.
+
+================================================
+PHASE 3 – CLEANUP ACTIONS
+================================================
+
+A. Legacy Tables in shared/schema.ts
+
+1. If NOT referenced by any current code path:
+   - REMOVE the legacy table definitions for:
+     - driverRateCards
+     - driverAssignments
+   - Ensure:
+     - No remaining imports, types, or references expect these tables.
+     - Schema compiles/validates without them.
+
+2. If there IS some hidden dependency:
+   - Isolate that dependency and plan to refactor it to use spec-compliant tables.
+   - Temporarily keep the definitions but:
+     - Move them to a clearly marked LEGACY section that is not used by runtime.
+     - Prepare a follow-up task to eliminate this dependency entirely.
+
+B. Migration Script scripts/migrateLegacyDrivers.ts
+
+1. If legacy tables are being removed:
+   - This script has no current purpose.
+   - MOVE it to a legacy/migration-tools area OR DELETE it, depending on repository policy.
+   - It must not be part of the standard runtime or deployment.
+
+2. If you keep it for documentation:
+   - Comment clearly that:
+     - It is a historical migration tool.
+     - It is not part of the active, spec-compliant runtime.
+   - Ensure it is not executed automatically anywhere.
+
+================================================
+PHASE 4 – VERIFY PROJECT IS NOT BROKEN
+================================================
+
+After removing or isolating legacy artifacts:
+
+1. Ensure the project:
+   - Builds/compiles without errors.
+   - Runs without runtime failures.
+   - Still provides all the features listed as COMPLETED in MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+
+2. If the project fails because legacy tables or scripts were removed:
+   - That means the project is actually dependent on non-compliant elements.
+   - In that case:
+     - REVERT only enough to keep it running.
+     - Mark this as an explicit NON-COMPLIANCE ISSUE (do NOT hide it).
+
+================================================
+PHASE 5 – UPDATE MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+================================================
+
+1. Open docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+2. Add or update entries related to:
+
+   - Legacy driver tables (driverRateCards, driverAssignments)
+   - Legacy driver migration script (migrateLegacyDrivers.ts)
+   - Spec-compliant driverRatePlans & contractDrivers
+
+3. Set statuses:
+
+   - For legacy tables & migration script:
+     - If removed or fully quarantined away from runtime:
+       - Mark as: RESOLVED – LEGACY ARTIFACTS REMOVED/ISOLATED (NO LONGER IN ACTIVE SCHEMA/RUNTIME)
+   - For spec-compliant entities:
+       - Ensure their items remain COMPLETED if they are correctly implemented.
+
+4. Make sure the checklist clearly shows:
+   - There are NO remaining active, non-spec-compliant runtime dependencies.
+   - Any legacy utilities left are clearly marked as non-runtime tools.
+
+================================================
+PHASE 6 – LIST ANY REMAINING NON-COMPLIANT DEPENDENCIES
+================================================
+
+If you discover that removing legacy artifacts causes breakage:
+
+1. Create or update a list (e.g. in docs/NON_COMPLIANT_DEPENDENCIES.md) including:
+
+   - File/module name
+   - What breaks if removed
+   - How it conflicts with MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+   - What needs to be refactored to achieve full compliance
+
+Only use this list if you genuinely cannot remove legacy dependencies without breaking the app.
+
+================================================
+ATTITUDE & BEHAVIOUR
+================================================
+
+- Do NOT keep unused legacy schema “just in case” when:
+  - There are 0 records,
+  - This is a dev system,
+  - And the Master Spec does not require it.
+- Prefer a clean, spec-aligned schema and runtime over hypothetical future migrations.
+- Be strict: if it’s not in the Master Spec and not required for the dev system to function, remove or quarantine it.
+- Always keep MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md updated with the true state of compliance.
