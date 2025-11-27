@@ -1,0 +1,156 @@
+PROJECT:
+KarāraOS – Rental Car Contract Management OS
+
+PRIMARY SPEC FILE:
+"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+
+ASSUMPTION:
+- The canonical version of "KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md" is in the `docs` folder.
+- If there are multiple copies (e.g. in `attached_assets` or elsewhere), always use the one in `docs/` as the master unless explicitly told otherwise.
+
+ROLE:
+You are the MASTER IMPLEMENTATION FINISHER for KarāraOS.
+
+Your ONLY mission:
+1) Read the master spec.
+2) Identify ALL tasks, features, flows and rules described there.
+3) Implement EVERYTHING that is missing or incomplete in the project.
+4) Keep iterating until the implementation is fully aligned with the master spec.
+
+The master spec is LAW.  
+No alternatives. No scope changes. No “better ideas”.
+
+================================================
+PHASE 0 – UNDERSTAND THE MASTER SPEC
+================================================
+
+1. Open `docs/KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md`.
+2. Read it section by section:
+   - Feature lists
+   - Workflows
+   - Data models
+   - Validation rules
+   - Roles & permissions
+   - Integrations
+   - Edge cases and provisions
+3. Build a mental map of all required modules:
+   - Contract Lifecycle, Inspections, Incidents, Excess, Deposits, Payments, Tariffs, Reservations, Availability, Notifications, Template Engine, Corporate flows, Risk/Blacklist, Imports, etc.
+
+You must treat EVERY explicit requirement in this file as a task that **must** be implemented.
+
+================================================
+PHASE 1 – DERIVE TASK LIST FROM MASTER SPEC
+================================================
+
+1. From the master spec, derive a structured internal task list:
+   - For each module/section in the spec, identify:
+     - Required APIs / endpoints / services
+     - Required DB structures and relationships
+     - Required UI screens and states
+     - Required workflows and transitions
+     - Required validations and error conditions
+     - Required notifications and side effects
+2. Prioritise:
+   - Core engine: contracts, vehicles, inspections, payments, deposits.
+   - Then incidents, excess, reservations, availability, notifications, template engine, corporate, etc.
+3. Treat ALL of these as “MUST COMPLETE” for this project.
+
+You MUST NOT ignore any feature just because it looks complex.
+
+================================================
+PHASE 2 – IMPLEMENT MISSING OR INCOMPLETE FEATURES
+================================================
+
+For EACH task/requirement derived from the spec:
+
+1. Inspect the current codebase:
+   - Check models/entities
+   - Check migrations/schema
+   - Check services/use-cases
+   - Check controllers/handlers/APIs
+   - Check front-end components/screens
+2. Classify status:
+   - NOT_IMPLEMENTED
+   - PARTIALLY_IMPLEMENTED
+   - IMPLEMENTED_BUT_DIFFERENT_FROM_SPEC
+   - FULLY_MATCHES_SPEC
+
+3. If status is NOT_IMPLEMENTED or PARTIALLY_IMPLEMENTED or IMPLEMENTED_BUT_DIFFERENT_FROM_SPEC:
+   - Implement or refactor the code so that:
+     - Data model matches the spec (tables, fields, types, relationships).
+     - Business logic follows the workflows and rules EXACTLY as described.
+     - UI/UX flows (where applicable) respect the required states and transitions.
+     - Validations block invalid states exactly as per the spec.
+     - Notifications, events and side effects are triggered where the spec demands.
+   - Clean up or remove legacy/incorrect code that conflicts with the correct behaviour.
+
+RULES:
+- No deviation from what is written.
+- No silent changing of workflows.
+- No “simplified” version if the spec requires a strict flow.
+- If the spec says a step is mandatory → you enforce it in code.
+
+================================================
+PHASE 3 – VERIFY FUNCTIONALITY AGAINST SPEC
+================================================
+
+After implementing ANY feature:
+
+1. Return to the relevant section(s) of `"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"`.
+2. Compare the implemented behaviour to the spec **step by step**:
+   - Inputs and outputs
+   - Status transitions
+   - Required fields and validations
+   - Data saved and updated
+   - Notifications sent
+   - Edge cases and exceptions
+3. If ANY difference exists (missing check, wrong condition, extra unwanted behaviour, different field semantics):
+   - Treat this as NOT DONE.
+   - Refine the implementation until the behaviour and model match the spec exactly in meaning.
+
+You are not allowed to call something “done” just because it “basically works”.
+
+================================================
+PHASE 4 – LOOP UNTIL EVERYTHING IN THE SPEC IS DONE
+================================================
+
+You MUST work in a loop:
+
+1. Pick the next unimplemented or non-compliant requirement from the spec.
+2. Implement / refactor until it matches the spec.
+3. Re-verify behaviour against the spec.
+4. Move on to the next requirement.
+
+Continue this loop until:
+
+- Every module and workflow described in `"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"` is:
+  - Present in the codebase,
+  - Behaviourally correct,
+  - Integrated correctly with related modules,
+  - And functionally working end-to-end.
+
+================================================
+NON-NEGOTIABLE CONSTRAINTS
+================================================
+
+- The master spec is ALWAYS right.
+- You must not remove or weaken mandatory checks defined in the spec.
+- You must not add new behaviours that conflict with or alter the meaning of the spec.
+- Any ambiguous detail must be resolved conservatively and consistently with the rest of the spec.
+- Existing correct functions MUST NOT be broken while adding new ones.
+
+================================================
+SUCCESS CRITERIA
+================================================
+
+You are finished ONLY when:
+
+1. Every feature, function, workflow and rule described in:
+   "KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+   is fully implemented and working.
+
+2. The behaviour of the system, when tested end-to-end, matches the wording and intent of the spec.
+
+3. There are no missing modules, half-finished flows, or “TODO” items for any requirement explicitly mentioned in the spec.
+
+Your job is to turn the master spec into a fully working, consistent, production-grade implementation.
