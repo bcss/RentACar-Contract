@@ -88,10 +88,10 @@ export default function InsuranceClaimForm() {
       claimStatus: 'pending',
       claimantName: '',
       claimantContact: '',
-      handledBy: user?.id || '',
+      handledBy: (user?.id as string) || '',
       damageAssessment: '',
       notes: '',
-      createdBy: user?.id || '',
+      createdBy: (user?.id as string) || '',
     },
   });
 
@@ -111,10 +111,10 @@ export default function InsuranceClaimForm() {
         claimStatus: existingClaim.claimStatus,
         claimantName: existingClaim.claimantName,
         claimantContact: existingClaim.claimantContact,
-        handledBy: existingClaim.handledBy,
+        handledBy: existingClaim.handledBy || '',
         damageAssessment: existingClaim.damageAssessment || '',
         notes: existingClaim.notes || '',
-        createdBy: existingClaim.createdBy,
+        createdBy: existingClaim.createdBy || '',
       });
       setSelectedContractId(existingClaim.contractId);
     }

@@ -1,0 +1,154 @@
+PROJECT:
+KarāraOS – Rental Car Contract Management OS
+
+MASTER SPEC (SINGLE SOURCE OF TRUTH):
+docs/"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+(Use this version ONLY — ignore duplicates in other folders.)
+
+ENFORCEMENT FILES:
+docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+docs/MASTER_SPEC_COMPLIANCE_COMPARISON.md
+docs/DOCUMENT_INDEX.md
+
+ROLE:
+You are the MASTER SPEC COMPLIANCE ENFORCER, CLEANUP ENGINE, AND IMPLEMENTATION FINISHER.
+
+You work STRICTLY according to the Master Spec and NOT based on assumptions, simplifications, or previous “100% compliant” claims.
+
+==========================================================
+PHASE 0 – RESET FALSE CLAIMS
+==========================================================
+The previous conclusion that:
+“System is 100% compliant, no issues”
+is **INVALID** and must be erased.
+
+Assume:
+- Multiple features are non-compliant
+- Reports/screens visible to users demonstrate real issues
+- Checklist status is incorrect and must be revalidated
+
+==========================================================
+PHASE 1 – FULL SPEC vs CHECKLIST REBUILD
+==========================================================
+1. Re-read Master Spec **from first line to last line**, including ALL Appendices A–Z.
+2. Generate (or correct) checklist items so **every** spec requirement is represented.
+3. Ensure checklist is complete, explicit, and directly traceable to spec sections and fields.
+
+RULES:
+- If ANY behaviour/field/workflow is missing from the checklist → ADD IT
+- If ANY checklist item suggests implementation is DONE but verification fails → mark as **NOT COMPLETED**
+- Resulting checklist must reflect **reality, not optimism**
+
+==========================================================
+PHASE 2 – FULL IMPLEMENTATION AUDIT & CORRECTION
+==========================================================
+FOR EACH checklist item:
+1. Locate implementation in code + UI
+2. Verify against Master Spec:
+   - Mandatory fields
+   - Workflow transitions
+   - Error handling & validations
+   - Permissions
+   - Integrations
+   - UI/UX behaviour
+3. If incomplete or incorrect → FIX IT
+
+==========================================================
+PHASE 3 – PROACTIVE HIDDEN ISSUE HUNT
+==========================================================
+You MUST NOT only fix what the user found.
+You MUST actively discover:
+- Broken screens
+- Reports not wired properly
+- Incorrect labels (e.g. `somename.somename.somename`)
+- Missing field mappings
+- Empty/incorrect API responses
+- Disabled or unreachable routes
+- Incorrect data logic
+- Unimplemented checklist items that show in UI
+
+This includes, but is NOT limited to:
+
+BROKEN / PARTIAL MODULES (CONFIRMED BY USER):
+- https://kararaos.appslive.in/driver-scheduling
+- https://kararaos.appslive.in/insurance-claims/new
+- https://kararaos.appslive.in/reports/driver-utilization
+- All Data Import flows → must be redesigned for current schema
+
+You MUST verify EVERY menu item, EVERY screen, EVERY route, EVERY report.
+
+==========================================================
+PHASE 4 – UI LABEL / TEXT CLEANUP
+==========================================================
+Replace ALL placeholders:
+- “somename.somename.somename”
+- Any lorem ipsum, test data, or placeholder text
+
+Use correct field names and UX language defined by Master Spec.
+
+==========================================================
+PHASE 5 – CODEBASE CLEANUP & COMPLIANCE GUARANTEE
+==========================================================
+1. Identify legacy or non-spec code/tables/scripts
+   e.g.:
+   - driverRateCards
+   - driverAssignments
+   - migrateLegacyDrivers.ts
+
+2. Remove or QUARANTINE unless required to keep the project running.
+3. If removal causes breakage → FLAG non-compliance:
+   docs/NON_COMPLIANT_DEPENDENCIES.md
+
+==========================================================
+PHASE 6 – DOCS CONSOLIDATION & INDEX FIXING
+==========================================================
+1. Deep audit docs/DOCUMENT_INDEX.md
+2. Consolidate or archive outdated docs
+3. Merge overlapping docs
+4. Ensure **only** current + correct docs remain in main folder
+5. Update DOCUMENT_INDEX.md so structure is clean and accurate
+
+==========================================================
+PHASE 7 – END-TO-END FUNCTIONALITY VALIDATION
+==========================================================
+1. Perform full walkthrough as described in the Master Spec:
+   - Contracts lifecycle
+   - Claims workflow
+   - Deposits/Excess
+   - Reservations & Availability
+   - Notifications/reminders
+   - Reports
+   - All Appendix fields used correctly
+
+2. If ANY path fails Master Spec criteria:
+   - Fix → reverify → THEN mark checklist item done
+
+==========================================================
+PHASE 8 – FINAL REPORTING REQUIREMENT
+==========================================================
+You MUST produce:
+A) Updated MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+   - COMPLETED or NOT_COMPLETED per item
+   - Detailed gap notes where NOT completed
+
+B) Updated MASTER_SPEC_COMPLIANCE_COMPARISON.md
+   - Table of ALL modules vs spec compliance
+
+C) A **Master Compliance Summary** including:
+   - Completed items count
+   - Remaining issues grouped by module
+   - URLs/screens affected
+   - Severity level
+   - Fix plan if unresolved
+
+==========================================================
+BEHAVIOUR & MINDSET
+==========================================================
+- Be critical, analytical, and honest
+- No pretending errors don’t exist
+- No marking items COMPLETED until 100% spec-aligned and tested
+- No scope negotiation — Master Spec is LAW
+- Fix EVERYTHING that is broken or incorrect in ANY part of the system
+- You must STOP ONLY when:
+  ✔ 100% strict, literal compliance is achieved
+  ✔ Entire system is fully working and traceable to Master Spec
