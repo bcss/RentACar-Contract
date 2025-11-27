@@ -119,11 +119,11 @@ All superseded, outdated, or consolidated documents are organized in `docs/archi
 
 | Folder | Contents | File Count |
 |--------|----------|------------|
-| `nov2025_superseded/` | Superseded specs, gap analyses, old audit reports (RCCMS terminology), deployment guides, feature status reports | 40 |
+| `nov2025_superseded/` | Superseded specs, gap analyses, old audit reports (RCCMS terminology), deployment guides, feature status reports | 37 |
 | `nov2025_consolidation/` | Consolidation work products, module analyses, status reports | 12 |
 | `nov2025_session_docs/` | Development session documents, action plans | 4 |
 
-**Total Archived:** 56 documents
+**Total Archived:** 53 documents
 
 ### Why Documents Were Archived
 - Used old "RCCMS" terminology (now "KarāraOS")
