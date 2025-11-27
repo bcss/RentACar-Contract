@@ -21,7 +21,7 @@ import {
   type InsertBlacklistEntry
 } from "@shared/schema";
 import { eq, and, or, isNull, gte, lte, inArray } from "drizzle-orm";
-import { createAuditLog } from "../utils/auditLogger";
+import { storage } from "../storage";
 
 // Blacklist status levels per Master Spec
 export enum BlacklistStatus {
@@ -123,9 +123,10 @@ class BlacklistService {
           primaryReasonAr = entry.reasonAr || undefined;
         }
 
-        // Merge blocked actions
+        // Merge blocked actions (use Array.from for compatibility)
         if (entry.blockedActions) {
-          blockedActions = [...new Set([...blockedActions, ...(entry.blockedActions as string[])])];
+          const combined = [...blockedActions, ...(entry.blockedActions as string[])];
+          blockedActions = Array.from(new Set(combined));
         }
       }
 
@@ -256,19 +257,18 @@ class BlacklistService {
         isActive: true,
       }).returning();
 
-      // Create audit log
-      await createAuditLog(
-        'blacklist_entries',
-        newEntry.id,
-        'BLACKLIST_ADDED',
-        addedByUserId,
-        {
+      // Create audit log per Master Spec dual audit trail
+      await storage.createAuditLog({
+        userId: addedByUserId,
+        action: 'BLACKLIST_ADDED',
+        details: JSON.stringify({
+          entryId: newEntry.id,
           entityType: entry.entityType,
           entityId: entry.entityId,
           status: entry.blacklistStatus,
           reason: entry.reason,
-        }
-      );
+        })
+      });
 
       return { success: true, entry: newEntry };
     } catch (error: any) {
@@ -302,18 +302,17 @@ class BlacklistService {
         .where(eq(blacklistEntries.id, entryId))
         .returning();
 
-      // Create audit log
-      await createAuditLog(
-        'blacklist_entries',
-        entryId,
-        'BLACKLIST_UPDATED',
-        updatedByUserId,
-        {
+      // Create audit log per Master Spec dual audit trail
+      await storage.createAuditLog({
+        userId: updatedByUserId,
+        action: 'BLACKLIST_UPDATED',
+        details: JSON.stringify({
+          entryId,
           oldStatus: existing.blacklistStatus,
           newStatus: updates.blacklistStatus || existing.blacklistStatus,
           changes: updates,
-        }
-      );
+        })
+      });
 
       return { success: true, entry: updatedEntry };
     } catch (error: any) {
@@ -349,19 +348,18 @@ class BlacklistService {
         })
         .where(eq(blacklistEntries.id, entryId));
 
-      // Create audit log
-      await createAuditLog(
-        'blacklist_entries',
-        entryId,
-        'BLACKLIST_REMOVED',
-        removedByUserId,
-        {
+      // Create audit log per Master Spec dual audit trail
+      await storage.createAuditLog({
+        userId: removedByUserId,
+        action: 'BLACKLIST_REMOVED',
+        details: JSON.stringify({
+          entryId,
           entityType: existing.entityType,
           entityId: existing.entityId,
           previousStatus: existing.blacklistStatus,
           removalReason: reason,
-        }
-      );
+        })
+      });
 
       return { success: true };
     } catch (error: any) {
@@ -397,19 +395,18 @@ class BlacklistService {
       // Generate override token (valid for 24 hours)
       const overrideToken = `OVERRIDE-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-      // Create audit log for override request
-      await createAuditLog(
-        'blacklist_entries',
-        entryId,
-        'BLACKLIST_OVERRIDE_GRANTED',
-        managerId,
-        {
-          contractId,
+      // Create audit log for override request per Master Spec dual audit trail
+      await storage.createAuditLog({
+        userId: managerId,
+        action: 'BLACKLIST_OVERRIDE_GRANTED',
+        contractId,
+        details: JSON.stringify({
+          entryId,
           reason,
           overrideToken,
           validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        }
-      );
+        })
+      });
 
       return { success: true, overrideToken };
     } catch (error: any) {
