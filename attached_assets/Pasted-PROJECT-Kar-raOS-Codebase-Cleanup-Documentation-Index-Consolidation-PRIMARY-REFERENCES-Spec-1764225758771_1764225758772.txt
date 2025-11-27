@@ -1,0 +1,195 @@
+PROJECT:
+KarāraOS – Codebase Cleanup & Documentation Index Consolidation
+
+PRIMARY REFERENCES:
+- Spec Compliance Checklist: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+- Documentation Index: docs/DOCUMENT_INDEX.md
+- Master Spec (for context): docs/KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md
+
+ROLE:
+You are the Code & Docs Cleanup Enforcer.
+
+Your mission:
+1) Identify and remove old/unwanted code and files that do NOT comply with MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md,
+   but ONLY if doing so does NOT break the project.
+2) If removing such code/files would break the project, then:
+   - Treat this as a NON-COMPLIANCE issue with MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+   - Record it clearly in a list.
+3) Deeply, thoroughly, analytically, and critically review DOCUMENT_INDEX.md and:
+   - Consolidate documents further where possible.
+   - Update DOCUMENT_INDEX.md so it accurately reflects the cleaned, consolidated doc set.
+
+================================================
+PART 1 – UNDERSTAND COMPLIANCE BASIS
+================================================
+
+1. Open and read:
+   - docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+   - docs/KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md (for meaning/context where needed).
+
+2. Understand:
+   - Which modules, features, and components are considered “in-scope” and required.
+   - What the current checklist expects to be implemented and maintained.
+   - Which areas of the codebase are part of the compliant, current implementation.
+
+You will treat the checklist as the reference for **what SHOULD exist** in the live codebase.
+
+================================================
+PART 2 – IDENTIFY OLD / UNWANTED / NON-COMPLIANT CODE & FILES
+================================================
+
+1. Scan the project codebase (excluding obviously external dependencies like vendor/ or node_modules/):
+
+   - Source code directories (e.g., src/, app/, modules/, etc.)
+   - Legacy or experimental folders (e.g., old/, backup/, tmp/, playground/, etc.)
+   - Any code or config files that:
+     - Are not referenced by the current implementation,
+     - Represent older versions of modules,
+     - Implement features or flows that contradict or duplicate the checklist-defined implementation.
+
+2. For each candidate file or code section:
+
+   - Check if it is referenced by the current, checklist-compliant implementation:
+     - Imports, calls, routes, config references, environment variables, etc.
+   - Check if it implements behaviour that is:
+     - Not part of MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md,
+     - Or clearly superseded by newer code.
+
+3. Tag each candidate as one of:
+   - SAFE_TO_REMOVE – definitely unused, legacy, or conflicting old implementation.
+   - POTENTIALLY_USED – looks old but still might be referenced.
+   - CLEARLY_CONFLICTING – implements behaviour that contradicts the checklist but is still wired into execution.
+
+================================================
+PART 3 – REMOVE SAFE CODE & FILES WITHOUT BREAKING THE PROJECT
+================================================
+
+For each item tagged SAFE_TO_REMOVE:
+
+1. Simulate or reason about removal:
+   - Ensure no imports, routes, or runtime paths depend on it.
+   - Ensure configs don’t require it.
+2. Remove the code/file:
+   - Delete the file or the obsolete sections.
+   - Clean up any leftover references (imports, registrations, etc.).
+3. After removal, ensure the project still:
+   - Builds/compiles (if applicable).
+   - Runs without fatal errors at startup.
+   - Maintains the required features (as per the checklist) intact.
+
+RULE:
+- Do NOT leave dangling references or broken imports.
+
+================================================
+PART 4 – DETECT NON-COMPLIANCE WHEN REMOVAL WOULD BREAK THE PROJECT
+================================================
+
+For items tagged POTENTIALLY_USED or CLEARLY_CONFLICTING:
+
+1. Analyse whether this code/file is:
+   - Still actively used to keep the system running.
+   - Implementing behaviour that is not aligned with MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md but the system currently depends on it.
+
+2. If removing or refactoring this code/file would:
+   - Break core flows,
+   - Cause runtime failures,
+   - Or make required features stop working,
+
+   THEN:
+
+   - Do NOT just remove it blindly.
+   - Instead, treat this as a NON-COMPLIANCE situation:
+     - The project is currently dependent on code that is not aligned with the checklist.
+
+3. Build a list of such issues with:
+   - File / module name
+   - Nature of the dependency (what breaks if removed)
+   - How it contradicts or falls outside MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+
+You MUST produce this list clearly (e.g., as a section in a report or as an update to a compliance doc).
+
+================================================
+PART 5 – OUTPUT A NON-COMPLIANCE LIST
+================================================
+
+Create or update a section (or document, if appropriate) such as:
+
+- docs/NON_COMPLIANT_DEPENDENCIES.md
+  or
+- A clear section inside MASTER_SPEC_COMPLIANCE_COMPARISON.md
+
+For each problematic code/file:
+
+- Name of file/module
+- Short description of what it does
+- Why it doesn’t comply with MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+- What breaks if it is removed
+- Suggested direction (e.g., “Replace with compliant implementation of X”, “Refactor into new module Y”, etc.)
+
+================================================
+PART 6 – DOCUMENT_INDEX.md – DEEP ANALYSIS & CONSOLIDATION
+================================================
+
+Now work on documentation structure:
+
+1. Open docs/DOCUMENT_INDEX.md.
+2. Deeply, thoroughly, analytically, and critically review:
+   - The structure of the index,
+   - The list of documents,
+   - How they are grouped and described.
+
+3. Cross-check:
+   - Does every indexed document actually still exist?
+   - Are there documents that have been archived, renamed, merged, or removed during earlier cleanups?
+   - Are there multiple documents covering the same content or purpose?
+
+4. Where further consolidation is possible:
+   - Merge overlapping documents (e.g., multiple specs, multiple feature lists, multiple brochures) into the canonical ones you have already defined.
+   - Update or remove references in DOCUMENT_INDEX.md accordingly.
+
+5. Ensure DOCUMENT_INDEX.md ends up:
+   - Clean,
+   - Up-to-date,
+   - Pointing only to relevant, non-duplicate documents,
+   - Reflecting the current, consolidated structure of docs/.
+
+================================================
+PART 7 – UPDATE DOCUMENT_INDEX.md
+================================================
+
+After consolidation:
+
+1. Rewrite or update DOCUMENT_INDEX.md so that it:
+
+   - Lists the key documents clearly (master spec, module specs, checklists, QA docs, feature lists, brochure, etc.).
+   - Uses accurate filenames and paths.
+   - Removes references to deleted/archived docs.
+   - Optionally distinguishes:
+     - Core specs
+     - Supporting technical docs
+     - Checklists/compliance docs
+     - Marketing/brochure docs
+     - Archive (if you show it at all)
+
+2. Make sure the index is logical and easy to navigate for:
+   - Engineers (to find specs and checklists)
+   - QA (to find test docs)
+   - Business/marketing (to find feature lists and brochures)
+
+================================================
+ATTITUDE & BEHAVIOUR
+================================================
+
+- Be critical, thorough, analytical and honest.
+- Do NOT keep dead or clearly obsolete code “just in case”.
+- Do NOT pretend the system is compliant if it relies on non-compliant legacy code to function.
+- Always ensure:
+  - Code cleanup does NOT silently break the project.
+  - Any blocking dependency on non-compliant code is **explicitly listed** as a non-compliance issue.
+- For docs, prefer:
+  - Fewer, well-organised, accurate documents
+  - Over many scattered, outdated, and conflicting files.
+
+Your mission:
+- A cleaner, safer codebase aligned with MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+- A more accurate, consolidated DOCUMENT_INDEX.md that actually reflects the real, current documentation.
