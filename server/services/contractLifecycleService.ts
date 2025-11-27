@@ -272,11 +272,10 @@ class ContractLifecycleService {
       }
 
       // Generate contract number from sequence
-      const contractNumber = await this.generateContractNumber(command.branchId);
+      const generatedContractNumber = await this.generateContractNumber(command.branchId);
 
-      // Create contract in DRAFT state
-      const [contract] = await db.insert(contracts).values({
-        contractNumber,
+      // Create contract in DRAFT state - use raw SQL insert for contractNumber to bypass type omission
+      const insertValues = {
         branchId: command.branchId,
         customerId: command.customerId,
         vehicleId: command.vehicleId,
@@ -299,7 +298,10 @@ class ContractLifecycleService {
         createdBy: command.createdBy,
         dailyRate: '0',
         totalAmount: '0',
-      }).returning();
+      } as any;
+      insertValues.contractNumber = generatedContractNumber;
+      
+      const [contract] = await db.insert(contracts).values(insertValues).returning();
 
       // Emit ContractCreated event
       events.push({
@@ -738,8 +740,8 @@ class ContractLifecycleService {
 
       // Trigger closure notification
       await triggerNotification('CONTRACT_CLOSED', 
-        { customerId: contract.customerId, phone: contract.hirerMobile, email: contract.hirerAddress },
-        { contractId: contract.id, contractNumber: contract.contractNumber }
+        { customerId: contract.customerId, customerName: contract.hirerNameEn || 'Customer', mobile: contract.hirerMobile, email: null, language: 'en' as const },
+        { contractId: contract.id, contractNumber: String(contract.contractNumber) }
       );
 
       return {
@@ -850,8 +852,8 @@ class ContractLifecycleService {
 
       // Trigger cancellation notification
       await triggerNotification('CONTRACT_CANCELLED', 
-        { customerId: contract.customerId, phone: contract.hirerMobile, email: contract.hirerAddress },
-        { contractId: contract.id, contractNumber: contract.contractNumber, reason: command.reason }
+        { customerId: contract.customerId, customerName: contract.hirerNameEn || 'Customer', mobile: contract.hirerMobile, email: null, language: 'en' as const },
+        { contractId: contract.id, contractNumber: String(contract.contractNumber), reason: command.reason }
       );
 
       return {
@@ -962,8 +964,8 @@ class ContractLifecycleService {
 
       // Trigger extension notification
       await triggerNotification('CONTRACT_EXTENDED', 
-        { customerId: contract.customerId, phone: contract.hirerMobile, email: contract.hirerAddress },
-        { contractId: contract.id, contractNumber: contract.contractNumber, oldEndDate, newEndDate: newEndDate.toISOString() }
+        { customerId: contract.customerId, customerName: contract.hirerNameEn || 'Customer', mobile: contract.hirerMobile, email: null, language: 'en' as const },
+        { contractId: contract.id, contractNumber: String(contract.contractNumber), oldEndDate, newEndDate: newEndDate.toISOString() }
       );
 
       return {
@@ -1582,13 +1584,10 @@ class ContractLifecycleService {
    */
   private async triggerActivationNotification(contract: any): Promise<void> {
     try {
-      await triggerNotification('CONTRACT_ACTIVE', {
-        contractId: contract.id,
-        customerId: contract.customerId,
-        contractNumber: contract.contractNumber,
-        startDate: contract.startDatetime,
-        endDate: contract.endDatetime,
-      });
+      await triggerNotification('CONTRACT_ACTIVE', 
+        { customerId: contract.customerId, customerName: contract.hirerNameEn || 'Customer', mobile: contract.hirerMobile, email: contract.email || null, language: 'en' as const },
+        { contractId: contract.id, contractNumber: String(contract.contractNumber), startDate: contract.startDatetime, endDate: contract.endDatetime }
+      );
     } catch (error) {
       console.error('[ContractLifecycleService] Failed to trigger activation notification:', error);
     }
