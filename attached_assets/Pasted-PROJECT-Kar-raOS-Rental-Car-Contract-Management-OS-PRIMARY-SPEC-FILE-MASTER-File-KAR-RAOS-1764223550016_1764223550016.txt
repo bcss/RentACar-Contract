@@ -1,0 +1,119 @@
+PROJECT:
+KarāraOS – Rental Car Contract Management OS
+
+PRIMARY SPEC FILE (MASTER):
+- File: "KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+- Location: Prefer the version in the `docs` folder as canonical.
+
+TRACKING FILES:
+- IMPLEMENTATION CHECKLIST: "MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md" (in `docs/`)
+- COMPLIANCE COMPARISON: "MASTER_SPEC_COMPLIANCE_COMPARISON.md" (in `docs/`)
+
+ROLE:
+You are the Master Spec TOC Compliance Auditor & Updater for KarāraOS.
+
+YOUR JOB (HIGH LEVEL):
+1) From the Master Spec, use the TABLE OF CONTENTS Part 1 to Part 16 and TABLE OF CONTENTS Part A to Part E as your master list of sections.
+2) For each Part (1–16 and A–E), determine if it is fully implemented in the codebase or not.
+3) Update MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md to reflect the real implementation status.
+4) Update MASTER_SPEC_COMPLIANCE_COMPARISON.md to show a clear comparison between the spec and the implementation, Part by Part.
+5) Give a direct answer: for each Part, is it completely implemented or not?
+
+================================================
+PHASE 1 – READ TABLE OF CONTENTS (TOC)
+================================================
+
+1. Open `docs/KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md`.
+2. Locate and read the TABLE OF CONTENTS sections:
+   - Part 1 to Part 16
+   - Part A to Part E (appendix/annex parts)
+3. Build an internal list of all these TOC parts, including:
+   - Part identifier (e.g., "Part 1", "Part 2", ..., "Part 16", "Part A", ..., "Part E")
+   - Part title/section name
+   - A short description of what each Part covers, based on the spec.
+
+This TOC (Parts 1–16 and A–E) is your master checklist of high-level sections.
+
+================================================
+PHASE 2 – CHECK IMPLEMENTATION STATUS FOR EACH PART
+================================================
+
+For each TOC entry (Part 1–16, Part A–E):
+
+1. Read the corresponding section content in the Master Spec to understand:
+   - Features and flows
+   - Data models and fields
+   - Validations and rules
+   - Roles/permissions
+   - Integrations and side effects
+
+2. Inspect the codebase to determine if this Part is:
+   - FULLY_IMPLEMENTED (all required behaviour, fields, workflows, rules are present and correct)
+   - PARTIALLY_IMPLEMENTED (some pieces exist, but not complete or not compliant)
+   - NOT_IMPLEMENTED (no meaningful implementation exists)
+   - IMPLEMENTED_DIFFERENT (exists but diverges from the spec in important ways)
+
+3. Decide, for each Part:
+   - Is this Part **completely implemented as per spec**? Answer YES or NO.
+   - If NO, briefly identify the key missing or incorrect areas.
+
+You must be critical and honest. “Almost done” = NO.
+
+================================================
+PHASE 3 – UPDATE MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+================================================
+
+1. Open `docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md`.
+
+2. For each Part (1–16, A–E):
+   - Ensure there is a checklist entry for that Part.
+     - If missing, ADD a new entry.
+   - Update the status based on your analysis:
+     - COMPLETED – only if FULLY_IMPLEMENTED and matches the spec.
+     - NOT COMPLETED – if PARTIALLY_IMPLEMENTED, NOT_IMPLEMENTED, or IMPLEMENTED_DIFFERENT.
+   - Include:
+     - Part ID (e.g., Part 3, Part B)
+     - Part title
+     - Status (COMPLETED / NOT COMPLETED)
+     - Short notes about gaps if NOT COMPLETED.
+
+3. Keep the checklist structured and consistent (e.g., a table or bullet list with clear status).
+
+RULES:
+- Never mark COMPLETED if any requirement in that Part is missing or wrong.
+- Checklist must reflect reality, not optimism.
+
+================================================
+PHASE 4 – UPDATE MASTER_SPEC_COMPLIANCE_COMPARISON.md
+================================================
+
+1. Open `docs/MASTER_SPEC_COMPLIANCE_COMPARISON.md`.
+
+2. Build or update a comparison table for all TOC Parts 1–16 and A–E, with at least:
+
+   - Column 1: Part ID (1–16, A–E)
+   - Column 2: Part Title
+   - Column 3: Spec Summary (what the Master Spec demands in this Part)
+   - Column 4: Implementation Status (FULLY_IMPLEMENTED / PARTIALLY_IMPLEMENTED / NOT_IMPLEMENTED / IMPLEMENTED_DIFFERENT)
+   - Column 5: Compliance (COMPLIANT / NOT COMPLIANT)
+   - Column 6: Notes (key gaps or deviations, if any)
+
+3. For each Part:
+   - If implementation fully matches the spec → Compliance = COMPLIANT.
+   - Otherwise → Compliance = NOT COMPLIANT and briefly explain why.
+
+4. Make sure MASTER_SPEC_COMPLIANCE_COMPARISON.md gives a clean bird’s-eye view of:
+   - Which Parts of the spec are fully done.
+   - Which Parts still need work.
+   - What exactly is missing or different.
+
+================================================
+PHASE 5 – DIRECT ANSWER TO THE QUESTION
+================================================
+
+After the analysis and document updates, explicitly answer:
+
+- For each Part 1–16 and Part A–E:
+  - “Part X – [Title]: COMPLETELY IMPLEMENTED = YES/NO”
+
+You MUST produce a clear list in your final response
