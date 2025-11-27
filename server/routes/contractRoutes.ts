@@ -622,12 +622,13 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
     
     if (otpEnabled) {
       // Tier 2: Check if activation-specific OTP is required (defaults to true when OTP enabled)
-      const activationOtpRequired = await settingsService.getSettingAsBoolean(
+      // Default to true when OTP is enabled - check setting value
+      const activationOtpSetting = await settingsService.getSetting(
         'contract_requires_activation_otp',
         'BRANCH',
-        contract.branchId || undefined,
-        true // Default to true when OTP is enabled
+        contract.branchId || undefined
       );
+      const activationOtpRequired = activationOtpSetting === null ? true : activationOtpSetting === 'true';
       
       if (activationOtpRequired) {
         const isOtpVerified = await otpService.checkEntityVerification(
@@ -691,12 +692,7 @@ router.post("/:id/activate", isAuthenticated, requireEditor, async (req: any, re
     
     // Update availability engine cache - Per Master Spec Part B.4
     try {
-      await availabilityEngine.handleContractActivation(
-        activated.vehicleId,
-        new Date(activated.rentalStartDate),
-        new Date(activated.rentalEndDate),
-        activated.id
-      );
+      await availabilityEngine.handleContractActivation(activated.id);
     } catch (cacheError) {
       console.error('[Contract] Availability engine update failed:', cacheError);
     }
@@ -800,12 +796,12 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
     
     if (otpEnabled) {
       // Tier 2: Check if completion-specific OTP is required (defaults to true when OTP enabled)
-      const completionOtpRequired = await settingsService.getSettingAsBoolean(
+      const completionOtpSetting = await settingsService.getSetting(
         'contract_requires_completion_otp',
         'BRANCH',
-        contract.branchId || undefined,
-        true // Default to true when OTP is enabled
+        contract.branchId || undefined
       );
+      const completionOtpRequired = completionOtpSetting === null ? true : completionOtpSetting === 'true';
       
       if (completionOtpRequired) {
         const isOtpVerified = await otpService.checkEntityVerification(
@@ -977,12 +973,7 @@ router.post("/:id/complete", isAuthenticated, requireEditor, async (req: any, re
     
     // Update availability engine cache - Per Master Spec Part B.4
     try {
-      await availabilityEngine.handleContractClosure(
-        completed.vehicleId,
-        new Date(completed.rentalStartDate),
-        new Date(completed.rentalEndDate),
-        completed.id
-      );
+      await availabilityEngine.handleContractClosure(completed.id);
     } catch (cacheError) {
       console.error('[Contract] Availability engine update failed on complete:', cacheError);
     }
@@ -1197,12 +1188,12 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
     
     if (otpEnabled) {
       // Tier 2: Check if closure-specific OTP is required (defaults to true when OTP enabled)
-      const closureOtpRequired = await settingsService.getSettingAsBoolean(
+      const closureOtpSetting = await settingsService.getSetting(
         'contract_requires_closure_otp',
         'BRANCH',
-        contract.branchId || undefined,
-        true // Default to true when OTP is enabled
+        contract.branchId || undefined
       );
+      const closureOtpRequired = closureOtpSetting === null ? true : closureOtpSetting === 'true';
       
       if (closureOtpRequired) {
         const isOtpVerified = await otpService.checkEntityVerification(
@@ -1308,12 +1299,7 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       
       // Update availability engine cache - Per Master Spec Part B.4
       try {
-        await availabilityEngine.handleContractClosure(
-          closed.vehicleId,
-          new Date(closed.rentalStartDate),
-          new Date(closed.rentalEndDate),
-          closed.id
-        );
+        await availabilityEngine.handleContractClosure(closed.id);
       } catch (cacheError) {
         console.error('[Contract] Availability engine update failed on close:', cacheError);
       }
@@ -1384,12 +1370,7 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
     
     // Update availability engine cache - Per Master Spec Part B.4
     try {
-      await availabilityEngine.handleContractClosure(
-        closed.vehicleId,
-        new Date(closed.rentalStartDate),
-        new Date(closed.rentalEndDate),
-        closed.id
-      );
+      await availabilityEngine.handleContractClosure(closed.id);
     } catch (cacheError) {
       console.error('[Contract] Availability engine update failed on close:', cacheError);
     }
