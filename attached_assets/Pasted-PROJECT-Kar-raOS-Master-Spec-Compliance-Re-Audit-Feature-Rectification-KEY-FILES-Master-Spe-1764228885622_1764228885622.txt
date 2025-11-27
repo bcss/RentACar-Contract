@@ -1,0 +1,229 @@
+PROJECT:
+KarāraOS – Master Spec Compliance Re-Audit & Feature Rectification
+
+KEY FILES:
+- Master Spec: docs/"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+- Implementation Checklist: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+- Compliance Comparison (if present): docs/MASTER_SPEC_COMPLIANCE_COMPARISON.md
+
+CONTEXT:
+You previously concluded that:
+> “The KarāraOS codebase is compliant with the Master System Specification v1.0. Legacy schema definitions are retained intentionally… No active code path uses these legacy tables… 100% compliant with all Parts 1-16 and Addenda A-F.”
+
+This conclusion is WRONG.
+
+The following real-world issues prove that the system is NOT fully compliant with the spec or the checklist:
+
+BROKEN / PARTIALLY WORKING AREAS (EXAMPLES):
+1. Driver Scheduling:
+   - URL: https://kararaos.appslive.in/driver-scheduling
+   - Behaviour: Some features not working as expected per spec/checklist.
+
+2. Insurance Claims – New:
+   - URL: https://kararaos.appslive.in/insurance-claims/new
+   - Behaviour: Some features not working as per Master Spec & checklist.
+
+3. Driver Utilization Report:
+   - URL: https://kararaos.appslive.in/reports/driver-utilization
+   - Behaviour: Some reports are not wired properly / not working as intended.
+
+4. Data Import from Other Software:
+   - Data import logic must be re-evaluated based on **current** fields and structures.
+   - Needs to be redeveloped with relevant data only – aligned with the latest schema and spec.
+
+5. Placeholder / Garbage Labels:
+   - Labels and fields like `somename.somename.somename` are shown across the project.
+   - This is NOT acceptable in a spec-compliant implementation.
+
+6. General:
+   - Some reports are not wired properly.
+   - Some features are not working.
+
+ROLE:
+You are the Spec Compliance Auditor & Fixer.  
+Your job is to:
+- Admit that “everything is working and 100% compliant” is false.
+- Re-audit the implementation strictly against MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+- Find what is ACTUALLY working vs NOT working.
+- Fix the broken/incorrect parts so that they truly comply with the Master Spec.
+- Update MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md and COMPLIANCE docs honestly.
+
+================================================
+PHASE 1 – REJECT THE OLD “100% COMPLIANT” ASSUMPTION
+================================================
+
+1. Treat any previous statement of:
+   - “100% compliant”
+   - “No action required”
+   as INVALID.
+
+2. Assume the following until proven otherwise:
+   - There ARE non-compliant implementations.
+   - Some checklist items marked COMPLETED are actually NOT COMPLETED.
+   - Reports and screens mentioned above are examples of visible non-compliance.
+
+Your job is to CORRECT this and bring reality back into the checklist and codebase.
+
+================================================
+PHASE 2 – RE-AUDIT AGAINST MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+================================================
+
+1. Open docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+2. For each feature/module listed, especially those related to:
+
+   - Driver Scheduling
+   - Driver Rostering / Utilization
+   - Insurance Claims (creation, editing, lifecycle, workflows)
+   - Reporting (including driver utilization)
+   - Data Import / Migration
+   - UI/UX polish (field labels, no placeholder garbage like `somename.somename.somename`)
+
+   do a deep, thorough, critical review of:
+
+   - What the checklist says should exist.
+   - What the Master Spec says (open docs/"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md").
+   - What is actually implemented in the code.
+
+3. For each checklist item:
+   - If the actual behaviour or implementation is broken, incomplete, or different from the spec:
+     - Mark it as NOT COMPLETED.
+     - Add a short note describing the gap.
+
+This step is an honest reality check.
+
+================================================
+PHASE 3 – FOCUS FIX AREAS (URLs & FEATURES GIVEN)
+================================================
+
+For each area below, map it to the relevant checklist entries and spec sections, then fix.
+
+A) DRIVER SCHEDULING
+   URL: /driver-scheduling
+
+   1. Identify which Master Spec sections and checklist items correspond to:
+      - Driver scheduling
+      - Driver rostering
+      - Shift assignment
+      - Driver availability
+   2. Review the code (front-end + back-end) for this route.
+   3. Fix:
+      - Any broken UI actions.
+      - Any backend APIs that don’t behave as per spec.
+      - Any missing validations or constraints.
+   4. Ensure:
+      - The screen is fully functional and compliant with the Master Spec.
+      - Data flows, state transitions, and filters work as described.
+
+B) INSURANCE CLAIMS – NEW
+   URL: /insurance-claims/new
+
+   1. Map this screen to the claims/incident sections of the Master Spec and checklist.
+   2. Verify:
+      - All fields required by the spec are present and correctly labelled.
+      - Workflow behaviour (creation, linking to contracts, incidents, documents) matches the spec.
+   3. Fix any:
+      - Broken form submissions.
+      - Incorrect field bindings.
+      - Missing or wrong validations.
+   4. Ensure a claim can be created, saved, and processed exactly as per the spec.
+
+C) DRIVER UTILIZATION REPORT
+   URL: /reports/driver-utilization
+
+   1. Identify the spec section and checklist entries about:
+      - Driver utilization reporting.
+   2. Check:
+      - Is the report wired to the correct data sources?
+      - Are filters, date ranges, and aggregations working?
+      - Are metrics calculated as per the spec?
+   3. Fix:
+      - Any broken wiring (wrong endpoints, wrong queries).
+      - Any miscalculated KPIs.
+      - Any UI reporting glitches.
+
+D) IMPORT DATA FROM OTHER SOFTWARE
+
+   1. Locate all import/migration logic (e.g., import scripts, endpoints, UI flows).
+   2. Re-evaluate these against the **current** schema and Master Spec:
+      - Only import fields that exist in the current data model.
+      - Map external fields to internal fields correctly.
+      - Drop or ignore irrelevant/outdated fields.
+   3. Redevelop the import functionality:
+      - Align with Master Spec and checklist.
+      - Ensure robust validation and error reporting.
+   4. Document the new import behaviour if needed.
+
+E) PLACEHOLDER LABELS (somename.somename.somename)
+
+   1. Search across the project for labels/fields like:
+      - `somename.somename.somename`
+      - Any similar placeholder / dummy / testing text.
+   2. For each occurrence:
+      - Replace with correct, user-facing labels defined in the Master Spec.
+      - Ensure localisation / i18n is handled correctly where relevant.
+   3. Verify:
+      - No user-facing screen contains such placeholder text anymore.
+
+F) REPORTS NOT WIRED PROPERLY / FEATURES NOT WORKING
+
+   1. Systematically:
+      - Identify all report routes and components.
+      - Cross-check each against the Master Spec and the checklist.
+   2. For each report:
+      - Ensure correct API calls, queries, and data bindings.
+      - Fix broken or missing links, filters, and actions.
+   3. For any non-working feature discovered in this process:
+      - Map it to its checklist item.
+      - Fix it to match the Master Spec.
+      - Then mark checklist status accordingly.
+
+================================================
+PHASE 4 – RE-VALIDATE & UPDATE CHECKLIST
+================================================
+
+1. After fixing each area:
+   - Re-verify behaviour against:
+     - Master Spec
+     - MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+2. Only when a feature:
+   - Works end-to-end,
+   - Matches the spec in behaviour, fields, and flows,
+   - Has correct labels (no placeholders),
+   mark the relevant checklist items as COMPLETED.
+
+3. Ensure the checklist:
+   - No longer reflects a fake “100% compliant” state.
+   - Accurately distinguishes:
+     - COMPLETED (truly compliant)
+     - NOT COMPLETED (broken/incomplete)
+
+================================================
+PHASE 5 – HONEST STATUS & REPORT
+================================================
+
+At the end of this process, you MUST be able to answer honestly:
+
+- For each of these:
+  - Driver Scheduling
+  - Insurance Claims (New)
+  - Driver Utilization Report
+  - Data Import from Other Software
+  - Reports and other features
+
+  → Is it now:
+     - FULLY COMPLIANT & WORKING
+     - PARTIALLY WORKING
+     - BROKEN
+
+If anything remains not fully compliant:
+- Leave the checklist as NOT COMPLETED.
+- Document what still needs to be done.
+
+================================================
+ATTITUDE & BEHAVIOUR
+================================================
+
+- Stop claiming “100% compliant” if visible features are broken.
+- Be critical, thorough, and honest.
+- FIX reality, don’t paper over it.
+- MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md must reflect ground truth, not optimistic assumptions.

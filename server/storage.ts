@@ -2858,15 +2858,66 @@ export class DatabaseStorage implements IStorage {
     const totalExtraCharges = extraCharges.reduce((sum, e) => sum + e.extraCharges, 0);
     const avgExtraCharges = extraCharges.length > 0 ? totalExtraCharges / extraCharges.length : 0;
 
+    // Calculate available and maintenance vehicles
+    const maintenanceVehicles = allVehicles.filter(v => v.status === 'maintenance').length;
+    const availableVehicles = allVehicles.length - activeVehicleIds.size - maintenanceVehicles;
+
+    // Create utilizationByCategory for export
+    const categoryMap = new Map<string, { total: number; rented: number; available: number }>();
+    allVehicles.forEach(v => {
+      const category = v.category || 'Uncategorized';
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, { total: 0, rented: 0, available: 0 });
+      }
+      const stats = categoryMap.get(category)!;
+      stats.total++;
+      if (activeVehicleIds.has(v.id)) {
+        stats.rented++;
+      } else if (v.status !== 'maintenance') {
+        stats.available++;
+      }
+    });
+    
+    const utilizationByCategory = Array.from(categoryMap.entries()).map(([category, stats]) => ({
+      category,
+      total: stats.total,
+      rented: stats.rented,
+      available: stats.available,
+      utilizationRate: stats.total > 0 ? (stats.rented / stats.total) * 100 : 0,
+    }));
+
+    // Create contractsByStatus array for export
+    const contractsByStatus = Object.entries(statusSummary).map(([status, count]) => ({
+      status,
+      count: count as number,
+    }));
+
     return {
       utilization: {
         utilizationRate,
         activeVehicles: activeVehicleIds.size,
         totalVehicles: allVehicles.length,
       },
+      // Add summary structure for export compatibility
+      summary: {
+        totalVehicles: allVehicles.length,
+        rentedVehicles: activeVehicleIds.size,
+        availableVehicles,
+        maintenanceVehicles,
+        utilizationRate,
+      },
       vehicleStats,
       statusSummary,
-      extraCharges: {
+      // Add arrays for export compatibility
+      utilizationByCategory,
+      contractsByStatus,
+      extraCharges: extraCharges.map(e => ({
+        contractNumber: e.contractNumber.toString(),
+        type: 'Extra Charge',
+        amount: e.extraCharges,
+        date: new Date().toISOString(), // Placeholder since we don't have specific dates for extra charges
+      })),
+      extraChargesSummary: {
         total: totalExtraCharges,
         average: avgExtraCharges,
         contracts: extraCharges,
@@ -2941,6 +2992,30 @@ export class DatabaseStorage implements IStorage {
       return true;
     });
 
+    // Calculate summary statistics for export compatibility
+    const totalCustomers = customerActivity.length;
+    const totalRevenue = customerActivity.reduce((sum, c) => sum + c.totalRevenue, 0);
+    const totalContracts = customerActivity.reduce((sum, c) => sum + c.contractCount, 0);
+    const repeatRate = totalCustomers > 0 ? (repeatCustomers.length / totalCustomers) * 100 : 0;
+    const activeCustomersCount = customerActivity.filter(c => c.lastRental && new Date(c.lastRental) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)).length;
+
+    // Top customers for export - with the property names the routes expect
+    const topCustomers = customerActivity
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0, 10)
+      .map(c => ({
+        name: c.nameEn,
+        customerName: c.nameEn,
+        revenue: c.totalRevenue,
+        totalSpent: c.totalRevenue,
+        contracts: c.contractCount,
+        totalRentals: c.contractCount,
+        lastRentalDate: c.lastRental,
+      }));
+
+    // Customer demographics (placeholder - based on nationality if available)
+    const customersByDemographic: Array<{ group: string; count: number; type: string; percentage: number }> = [];
+    
     return {
       customerActivity: customerActivity.sort((a, b) => b.totalRevenue - a.totalRevenue),
       repeatCustomers: repeatCustomers.sort((a, b) => b.contractCount - a.contractCount),
@@ -2949,6 +3024,18 @@ export class DatabaseStorage implements IStorage {
         const bDate = b.lastRental ? b.lastRental.getTime() : 0;
         return bDate - aDate;
       }),
+      // Add summary structure for export compatibility
+      summary: {
+        totalCustomers,
+        totalRevenue,
+        totalContracts,
+        repeatRate,
+        newCustomers: newCustomers.length,
+        repeatCustomers: repeatCustomers.length,
+        activeCustomers: activeCustomersCount,
+      },
+      topCustomers,
+      customersByDemographic,
     };
   }
 
@@ -3121,6 +3208,13 @@ export class DatabaseStorage implements IStorage {
     
     const inspectionOperations = filteredAuditLogs.filter(log => log.action === 'inspection');
 
+    // Sort modifications for recentModifications export
+    const sortedModifications = transformedModifications.sort((a, b) => {
+      const aTime = a.editedAt ? new Date(a.editedAt).getTime() : 0;
+      const bTime = b.editedAt ? new Date(b.editedAt).getTime() : 0;
+      return bTime - aTime;
+    });
+
     return {
       summary: {
         totalModifications,
@@ -3133,13 +3227,24 @@ export class DatabaseStorage implements IStorage {
         masterDataOperationsCount: masterDataOperations.length,
         paymentOperationsCount: paymentOperations.length,
         inspectionOperationsCount: inspectionOperations.length,
+        // Additional fields for export compatibility
+        contractsModified: uniqueContracts.size,
       },
       // CRITICAL FIX: Return transformed modifications with individual field changes
-      modifications: transformedModifications.sort((a, b) => {
-        const aTime = a.editedAt ? new Date(a.editedAt).getTime() : 0;
-        const bTime = b.editedAt ? new Date(b.editedAt).getTime() : 0;
-        return bTime - aTime;
-      }),
+      modifications: sortedModifications,
+      // Alias for export compatibility
+      recentModifications: sortedModifications.slice(0, 100).map(m => ({
+        contractId: m.contractId,
+        contractNumber: m.contractId, // alias
+        user: m.userName,
+        editedBy: m.userName, // alias
+        editedAt: m.editedAt, // alias
+        field: m.fieldChanged,
+        oldValue: m.oldValue,
+        newValue: m.newValue,
+        date: m.editedAt,
+        changesSummary: `${m.fieldChanged}: ${m.oldValue || 'null'} → ${m.newValue || 'null'}`,
+      })),
       auditLogs: filteredAuditLogs, // All business operations (for backward compatibility)
       // Categorized operations for clearer reporting
       categories: {

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -271,7 +272,7 @@ export default function InsuranceClaimForm() {
                         <DateSelector
                           value={field.value}
                           onChange={field.onChange}
-                          dataTestId="input-claim-date"
+                          data-testid="input-claim-date"
                         />
                       </FormControl>
                       <FormMessage />
@@ -289,7 +290,7 @@ export default function InsuranceClaimForm() {
                         <DateSelector
                           value={field.value}
                           onChange={field.onChange}
-                          dataTestId="input-incident-date"
+                          data-testid="input-incident-date"
                         />
                       </FormControl>
                       <FormMessage />

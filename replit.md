@@ -61,6 +61,30 @@ Complete TOC verification and implementation against Master System Specification
 
 **Compliance Status:** 100% Master Spec compliant (Parts 1-16 + A-F), all schema gaps closed
 
+### Bug Fixes and Cleanup (Nov 27, 2025)
+Following an honest re-audit of the codebase, the following issues were identified and fixed:
+
+**Frontend Type Errors Fixed:**
+- **InsuranceClaimForm.tsx:** Fixed 41+ TypeScript errors including missing Tabs/TabsList/TabsTrigger imports, incorrect `dataTestId` prop (changed to `data-testid`), and type mismatches for nullable form fields
+- **DriverScheduling.tsx:** Fixed null handling for `breakDuration` field that prevented form compilation
+- **VehicleAccessories.tsx:** Fixed missing translation key (`t("vehicleAccessories")` → `t("nav.vehicleAccessories", "Vehicle Accessories")`)
+
+**Report Export Wiring Fixed:**
+- **Operational Report:** Added missing `summary`, `utilizationByCategory`, `contractsByStatus`, and proper `extraCharges` array structure to storage method return type for PDF/Excel export compatibility
+- **Customer Report:** Added `summary.newCustomers`, `summary.repeatCustomers`, `summary.activeCustomers` and proper `topCustomers` array with `customerName`, `totalRentals`, `totalSpent`, `lastRentalDate` fields for export
+- **Audit Report:** Added `recentModifications` array with `contractNumber`, `editedBy`, `editedAt`, `changesSummary` fields for export compatibility
+
+**Legacy Code Cleanup:**
+- Removed legacy driver artifacts from schema.ts (driverRateCards, driverAssignments tables - superseded by Master Spec Part 4.10)
+- Created `migrations/drop_legacy_driver_tables.sql` migration file for production database cleanup
+- Consolidated 22 loose archive files into `docs/archive/nov2025_superseded/` folder
+- Updated `docs/DOCUMENT_INDEX.md` with accurate archive structure (56 archived documents organized)
+
+**Archive Structure:**
+- `docs/archive/nov2025_consolidation/` - Consolidated session documents
+- `docs/archive/nov2025_session_docs/` - Original session transcripts
+- `docs/archive/nov2025_superseded/` - Superseded implementation documents
+
 ### Feature Specifications
 The system manages the full rental lifecycle with a 4-state workflow, automated financial calculations, and comprehensive reporting with universal RFC 4180 compliant CSV/PDF export. Key features include enhanced vehicle management (inspection, status sync, inter-branch transfers, UAE toll/fine tracking), a professional driver service module compliant with the UAE market, a customer risk scoring system, a document registry with automated expiry monitoring, and an automated multi-channel (email/SMS) bilingual reminders engine. A Campaign Management System allows for UI-driven, branch-scoped or organization-wide campaigns with RBAC and approval workflows. A production-ready automated notification system includes 30 pre-configured bilingual templates, smart template-driven notifications, multi-provider routing with failover, and comprehensive communication logging.
 

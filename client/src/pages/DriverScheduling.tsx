@@ -555,8 +555,11 @@ export default function DriverScheduling() {
                       <FormControl>
                         <Input
                           type="number"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          value={field.value ?? 60}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 60)}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
                           data-testid="input-breakDuration"
                         />
                       </FormControl>
