@@ -1815,7 +1815,8 @@ export const contractCharges = pgTable("contract_charges", {
   unitPrice: numeric("unit_price", { precision: 12, scale: 4 }),
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
   totalAmount: numeric("total_amount", { precision: 12, scale: 2 }), // Master Spec §4.8.3 canonical alias for 'amount'
-  taxCategory: varchar("tax_category", { length: 64 }), // 'VAT', 'EXEMPT', etc.
+  taxCategory: varchar("tax_category", { length: 64 }), // 'VAT', 'EXEMPT', etc. - Master Spec C.9
+  taxRate: numeric("tax_rate", { precision: 5, scale: 2 }), // Master Spec C.9 - VAT rate for future use
   taxAmount: numeric("tax_amount", { precision: 12, scale: 2 }),
   isManual: boolean("is_manual").notNull().default(false), // Manual override by manager
   
@@ -2138,6 +2139,9 @@ export const reservations = pgTable("reservations", {
   // Additional
   notes: text("notes"),
   cancellationReason: text("cancellation_reason"),
+  
+  // Master Spec Appendix C.6 - Optimistic locking for concurrent modification
+  version: integer("version").notNull().default(1),
   
   // Audit fields
   createdBy: varchar("created_by").notNull().references(() => users.id),
@@ -2588,6 +2592,13 @@ export const insuranceClaims = pgTable("insurance_claims", {
   
   // Notes
   notes: text("notes"),
+  
+  // Master Spec Appendix C.1 - Insurance claim extensions
+  insurerPaidAmount: numeric("insurer_paid_amount", { precision: 12, scale: 2 }), // Amount insurer pays
+  finalCustomerLiability: numeric("final_customer_liability", { precision: 12, scale: 2 }), // Final liability calculation
+  
+  // Master Spec Appendix C.6 - Optimistic locking
+  version: integer("version").notNull().default(1), // For concurrent modification control
   
   // Audit fields
   disabled: boolean("disabled").notNull().default(false),
@@ -3162,6 +3173,18 @@ export const incidents = pgTable("incidents", {
   photoUrls: text("photo_urls").array(), // Array of photo URLs
   documentUrls: text("document_urls").array(), // Array of document URLs
   notes: text("notes"),
+  
+  // Master Spec Appendix C.3 - Abandonment tracking fields
+  abandonmentThresholdHours: integer("abandonment_threshold_hours"), // System-defined threshold
+  lastContactAttemptAt: timestamp("last_contact_attempt_at"), // Last attempt time
+  contactAttemptsCount: integer("contact_attempts_count").default(0), // Number of contact attempts
+  
+  // Master Spec Appendix C.4 - Transfer accident linking
+  vehicleTransferId: varchar("vehicle_transfer_id", { length: 50 }), // Link to transfer event for transfer accidents
+  
+  // Master Spec Appendix C.6 - Optimistic locking
+  version: integer("version").notNull().default(1), // For concurrent modification control
+  
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -3172,6 +3195,7 @@ export const incidents = pgTable("incidents", {
   index("idx_incidents_date").on(table.incidentDate),
   index("idx_incidents_status").on(table.status),
   index("idx_incidents_created_at").on(table.createdAt),
+  index("idx_incidents_vehicle_transfer").on(table.vehicleTransferId),
 ]);
 
 export const insertIncidentSchema = createInsertSchema(incidents).omit({
@@ -4361,6 +4385,11 @@ export const vehicleAvailabilityCache = pgTable("vehicle_availability_cache", {
     evening?: { status: string; entityId?: string };
   }>(),
   notes: text("notes"),
+  
+  // Master Spec Appendix C.8 - Availability cache metadata
+  lastRebuildAt: timestamp("last_rebuild_at", { withTimezone: true }), // Integrity validation timestamp
+  rebuildSource: varchar("rebuild_source", { length: 32 }), // 'CRON' or 'EVENT' - source of last rebuild
+  
   lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }).defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
@@ -5496,6 +5525,74 @@ export const insertExpenseRecoverySchema = createInsertSchema(expenseRecoveries)
 });
 export type InsertExpenseRecovery = z.infer<typeof insertExpenseRecoverySchema>;
 export type ExpenseRecovery = typeof expenseRecoveries.$inferSelect;
+
+// ===========================
+// Master Spec Part 16.13 - Document Versioning Policy Table
+// Every major output PDF (contract, receipt, incident report) must include version info
+// ===========================
+
+export const documentVersions = pgTable("document_versions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Document identification
+  documentType: varchar("document_type", { length: 64 }).notNull(), // 'CONTRACT_PDF', 'RECEIPT', 'INCIDENT_REPORT', 'INVOICE', 'SIGNED_CONTRACT_SCAN'
+  documentId: varchar("document_id", { length: 50 }).notNull(), // Reference to the specific document
+  
+  // Version tracking per Master Spec 16.13
+  versionNumber: integer("version_number").notNull().default(1),
+  
+  // References
+  contractId: varchar("contract_id", { length: 50 }).references(() => contracts.id),
+  branchId: varchar("branch_id", { length: 50 }).references(() => branches.id),
+  
+  // Document integrity per Master Spec 16.13
+  hashSignature: varchar("hash_signature", { length: 128 }), // SHA256 hash for integrity verification
+  
+  // Document metadata
+  filePath: varchar("file_path", { length: 512 }),
+  fileSize: integer("file_size"),
+  mimeType: varchar("mime_type", { length: 128 }),
+  
+  // Audit fields per Master Spec 16.13
+  generatedAt: timestamp("generated_at", { withTimezone: true }).notNull().defaultNow(),
+  generatedBy: varchar("generated_by", { length: 50 }).references(() => users.id),
+  notes: text("notes"),
+  
+  // Standard audit
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_document_versions_type").on(table.documentType),
+  index("idx_document_versions_document_id").on(table.documentId),
+  index("idx_document_versions_contract_id").on(table.contractId),
+  index("idx_document_versions_branch_id").on(table.branchId),
+  index("idx_document_versions_generated_at").on(table.generatedAt),
+]);
+
+export const documentVersionsRelations = relations(documentVersions, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [documentVersions.contractId],
+    references: [contracts.id],
+  }),
+  branch: one(branches, {
+    fields: [documentVersions.branchId],
+    references: [branches.id],
+  }),
+  generatedByUser: one(users, {
+    fields: [documentVersions.generatedBy],
+    references: [users.id],
+    relationName: "documentVersionGenerator",
+  }),
+}));
+
+export const insertDocumentVersionSchema = createInsertSchema(documentVersions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertDocumentVersion = z.infer<typeof insertDocumentVersionSchema>;
+export type DocumentVersion = typeof documentVersions.$inferSelect;
 
 // ===========================
 // Predictive Report Response Types

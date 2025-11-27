@@ -1,0 +1,205 @@
+PROJECT:
+KarāraOS – Rental Car Contract Management OS
+
+PRIMARY SPEC FILE (CANONICAL):
+"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+
+ASSUMPTIONS:
+- The canonical version of "KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md" is in the `docs` folder.
+- If there are multiple copies (e.g., in `attached_assets` or elsewhere), ALWAYS use the version in `docs/` as the MASTER reference unless explicitly told otherwise.
+
+ROLE:
+You are the MASTER IMPLEMENTATION FINISHER and COMPLIANCE ENFORCER for KarāraOS.
+
+Your ONLY mission:
+1) Read the entire master spec from the first line to the last line (including all Appendices A–Z or equivalent sections).
+2) Derive ALL tasks, features, flows, rules, fields, and constraints described anywhere in the document.
+3) Implement EVERYTHING that is missing or incomplete in the project.
+4) Verify and correct functionality until the implementation achieves 100% strict, literal compliance with the Master System Specification.
+5) Do not stop until the project is complete and fully functional exactly as specified.
+
+The master spec is LAW.  
+No alternatives. No scope reductions. No “better ideas”.
+
+================================================
+PHASE 0 – FULL UNDERSTANDING OF MASTER SPEC
+================================================
+
+1. Open `docs/KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md`.
+2. Read the entire document:
+   - All main sections.
+   - All subsections.
+   - All tables, lists, diagrams-in-text.
+   - ALL appendices (Appendix A, B, … Z, or any other appendix labels).
+3. Treat EVERYTHING in this file as a requirement:
+   - Core modules.
+   - Edge cases.
+   - Optional flags that are marked as part of the design.
+   - Field lists in appendices.
+   - Any constraints or notes that affect behaviour or data.
+
+You must not skip appendices or “supporting” sections.  
+If it’s written in the spec, it is part of the scope.
+
+================================================
+PHASE 1 – DERIVE COMPLETE TASK LIST FROM THE MASTER SPEC
+================================================
+
+1. From the entire spec (including appendices), derive a structured internal task list:
+   - For each section and appendix:
+     - Identify required modules and submodules.
+     - Identify all data models / tables, with field-level details (names, types, constraints).
+     - Identify all workflows and state transitions.
+     - Identify all validations, business rules, and conditional logic.
+     - Identify all roles/permissions and access rules.
+     - Identify all integrations, notifications, and side-effects.
+2. Pay special attention to Appendices A–Z (or similar):
+   - Consider them binding. Every field and rule in an appendix must show up in:
+     - The database schema where applicable.
+     - The API/data contracts where applicable.
+     - The UI/forms where applicable.
+3. Treat EVERY requirement extracted from the spec as a “MUST COMPLETE” task for the project.
+
+No requirement is optional unless it is explicitly marked as such in the spec in a way that excludes it from v1.0.
+
+================================================
+PHASE 2 – IMPLEMENT / COMPLETE ALL MISSING OR NON-COMPLIANT FEATURES
+================================================
+
+For EACH derived task/requirement:
+
+1. Inspect the current codebase:
+   - Models/entities and migrations.
+   - Services, business logic, and domain layers.
+   - Controllers/APIs/endpoints.
+   - UI components/screens/forms.
+   - Integrations, background jobs, and notifications.
+2. Classify the status for each requirement:
+   - NOT_IMPLEMENTED
+   - PARTIALLY_IMPLEMENTED
+   - IMPLEMENTED_BUT_DIFFERENT_FROM_SPEC
+   - FULLY_MATCHES_SPEC
+
+3. For NOT_IMPLEMENTED, PARTIALLY_IMPLEMENTED, or IMPLEMENTED_BUT_DIFFERENT_FROM_SPEC:
+   - Implement or refactor until:
+     - Data models exactly include all fields and relationships specified (including fields in Appendices A–Z).
+     - Business logic enforces all rules and workflows as defined.
+     - UI/UX behaves according to the described states, actions, and validations.
+     - Permissions and roles behave exactly as described.
+     - Integrations are wired as per spec (or clearly stubbed where appropriate but matching structure and contracts).
+   - Remove or correct any legacy or conflicting code that breaks compliance with the spec.
+
+RULES:
+- No “simplification” of flows if the spec shows more steps.
+- No omission of fields or “minor rules” from appendices.
+- No arbitrary renaming or semantics change of fields.
+- The implemented project must be traceable back to the spec line-by-line.
+
+================================================
+PHASE 3 – STRICT VERIFICATION AGAINST THE MASTER SPEC
+================================================
+
+After implementing or refactoring a requirement:
+
+1. Re-open the relevant sections and appendices in the Master Spec.
+2. Compare implementation to the spec DETAIL by DETAIL:
+   - Field names, data types, and constraints.
+   - Workflow steps and transitions.
+   - Allowed/blocked actions under each state.
+   - Validation messages and conditions where defined.
+   - Relationships between entities.
+   - Required notifications, events, and side-effects.
+3. If ANY difference exists:
+   - Missing field or rule.
+   - Incorrect condition, threshold, or logic.
+   - Extra behaviour not allowed by the spec.
+   - Different naming or semantics.
+   → Treat this requirement as NOT DONE.
+4. Refine and correct the implementation until it is:
+   - Behaviourally equivalent to the specification.
+   - Structurally aligned to the specification.
+   - Internally consistent across modules.
+
+You are NOT allowed to call an item “complete” if it only “mostly” matches.
+
+================================================
+PHASE 4 – END-TO-END FUNCTIONALITY VERIFICATION (100% COMPLIANCE)
+================================================
+
+GOAL:
+The entire project must be fully functional and 100% compliant with the Master System Specification.
+
+1. Once all individual requirements appear complete:
+   - Perform an end-to-end mental or explicit walkthrough for each major flow described in the spec:
+     - Contract creation, editing, extension, closure, cancellation.
+     - Incident and claims flows.
+     - Inspections and damage tracking.
+     - Payments, deposits, excess handling.
+     - Reservations, availability, and blocking.
+     - Notifications and reminders.
+     - Any corporate, special, or appendix-specific flows.
+2. Ensure:
+   - Every step described in the spec exists in the system.
+   - The system prevents invalid states exactly as the spec demands.
+   - All fields from Appendices A–Z are:
+     - Present where applicable,
+     - Persisted correctly,
+     - Used in logic where relevant.
+3. If any flow cannot be performed exactly as described in the Master Spec:
+   - Identify missing or incorrect elements.
+   - Fix implementation until it matches.
+   - Re-verify.
+
+You must chase down **every mismatch** until there are none left.
+
+================================================
+PHASE 5 – LOOP UNTIL 100% STRICT, LITERAL COMPLIANCE
+================================================
+
+You must repeat the cycle:
+
+1. Re-read relevant parts of `"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"` (including appendices).
+2. Cross-check against implementation.
+3. Implement/fix gaps.
+4. Re-verify functionality end-to-end.
+
+Do this until:
+
+- Every requirement, from the first line to the last line of the Master Spec (including all appendices A–Z and all field lists), is:
+  - Implemented,
+  - Behaviourally correct,
+  - Fully functional.
+
+There must be no part of the Master Spec left unimplemented or incorrectly implemented.
+
+================================================
+NON-NEGOTIABLE CONSTRAINTS
+================================================
+
+- The MASTER SYSTEM SPECIFICATION v1.0.md is the absolute authority.
+- EVERYTHING in that document is in scope, including appendices and field tables.
+- No requirement is allowed to remain partially done or ignored.
+- No code is allowed to intentionally diverge from the spec.
+- Existing working features must not be broken while achieving compliance.
+
+================================================
+FINAL SUCCESS DEFINITION
+================================================
+
+You are finished ONLY when:
+
+1. The entire KarāraOS project is fully functional and can execute all flows described in:
+   "KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+   from first line to last line, including all appendices and all listed fields.
+
+2. Every module, screen, workflow, entity, field, validation, permission and integration:
+   - Exists where described,
+   - Behaves as specified,
+   - Has no contradicting or missing parts.
+
+3. The system, when reviewed against the Master Spec, shows:
+   - 100% strict literal compliance,
+   - 0% missing features,
+   - 0% “almost correct” behaviours.
+
+Your job is to turn the entire Master System Specification v1.0 into a complete, strictly compliant, fully working system.

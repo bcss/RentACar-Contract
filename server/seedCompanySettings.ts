@@ -1,4 +1,7 @@
 import { storage } from "./storage";
+import { db } from "./db";
+import { systemSettings } from "@shared/schema";
+import { sql } from "drizzle-orm";
 
 const TERMS_SECTION_1_EN = `In Case of accident will occur to the vehicle and the mistake from the hirer the hirer has to pay basic lump sum of Dhs. __________ in addition to the daily rent till the vehicle complete repairing
 
@@ -114,6 +117,78 @@ export async function seedCompanySettings() {
     console.log("Company settings seeded successfully");
   } catch (error) {
     console.error("Error seeding company settings:", error);
+    throw error;
+  }
+}
+
+/**
+ * Master Spec Appendix C.7 - Required System Settings
+ * Ensures these critical operational settings exist in all environments
+ */
+export async function seedMasterSpecSystemSettings() {
+  const requiredSettings = [
+    {
+      scopeType: "GLOBAL",
+      key: "PAYMENT_GRACE_DAYS",
+      value: "3",
+      valueType: "integer",
+      category: "financial",
+      labelEn: "Payment Grace Days",
+      labelAr: "أيام السماح للدفع",
+      descriptionEn: "Number of days grace period before payment is considered overdue",
+      descriptionAr: "عدد أيام السماح قبل اعتبار الدفعة متأخرة",
+      isRequired: true,
+      displayOrder: 1,
+    },
+    {
+      scopeType: "GLOBAL",
+      key: "OVERDUE_ABANDON_THRESHOLD_HOURS",
+      value: "72",
+      valueType: "integer",
+      category: "operations",
+      labelEn: "Overdue Abandon Threshold Hours",
+      labelAr: "عتبة ساعات التخلي عن المتأخرين",
+      descriptionEn: "Number of hours overdue before contract is considered abandoned",
+      descriptionAr: "عدد الساعات المتأخرة قبل اعتبار العقد متروكاً",
+      isRequired: true,
+      displayOrder: 2,
+    },
+    {
+      scopeType: "GLOBAL",
+      key: "ALLOW_ONE_WAY_RETURNS",
+      value: "true",
+      valueType: "boolean",
+      category: "operations",
+      labelEn: "Allow One-Way Returns",
+      labelAr: "السماح بالإرجاع في اتجاه واحد",
+      descriptionEn: "Whether to allow returning vehicles at different branches than pickup",
+      descriptionAr: "ما إذا كان يسمح بإرجاع المركبات في فروع مختلفة عن الاستلام",
+      isRequired: true,
+      displayOrder: 3,
+    },
+  ];
+
+  try {
+    for (const setting of requiredSettings) {
+      // Check if setting already exists
+      const existing = await db
+        .select()
+        .from(systemSettings)
+        .where(sql`${systemSettings.scopeType} = ${setting.scopeType} AND ${systemSettings.key} = ${setting.key}`)
+        .limit(1);
+
+      if (existing.length === 0) {
+        // Insert the setting
+        await db.insert(systemSettings).values({
+          id: sql`gen_random_uuid()::text`,
+          ...setting,
+        });
+        console.log(`[Master Spec C.7] Seeded system setting: ${setting.key}`);
+      }
+    }
+    console.log("[Master Spec C.7] System settings verification complete");
+  } catch (error) {
+    console.error("[Master Spec C.7] Error seeding system settings:", error);
     throw error;
   }
 }

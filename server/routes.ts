@@ -7,7 +7,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { seedSuperAdmin } from "./auth/seedSuperAdmin";
-import { seedCompanySettings } from "./seedCompanySettings";
+import { seedCompanySettings, seedMasterSpecSystemSettings } from "./seedCompanySettings";
 import { seedNotificationTemplates } from "./seedNotificationTemplates";
 import { setupAuth } from "./auth/localAuth";
 import { apiLimiter } from "./rateLimiters";
@@ -31,6 +31,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Seed company settings on startup
   await seedCompanySettings();
+  
+  // Master Spec C.7 - Seed required system settings
+  await seedMasterSpecSystemSettings();
   
   // Seed notification templates on startup
   await seedNotificationTemplates();
