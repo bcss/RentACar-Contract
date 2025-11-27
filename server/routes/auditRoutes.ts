@@ -22,7 +22,25 @@ router.get("/", isAuthenticated, requireManagerOrAdmin, async (req: Request, res
       endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
     };
     
-    const logs = await storage.getAuditLogs(filters);
+    let logs = await storage.getAllAuditLogs();
+    
+    // Apply filters
+    if (filters.userId) {
+      logs = logs.filter(log => log.userId === filters.userId);
+    }
+    if (filters.action) {
+      logs = logs.filter(log => log.action === filters.action);
+    }
+    if (filters.contractId) {
+      logs = logs.filter(log => log.contractId === filters.contractId);
+    }
+    if (filters.startDate) {
+      logs = logs.filter(log => log.createdAt && new Date(log.createdAt) >= filters.startDate!);
+    }
+    if (filters.endDate) {
+      logs = logs.filter(log => log.createdAt && new Date(log.createdAt) <= filters.endDate!);
+    }
+    
     res.json(logs);
   } catch (error) {
     next(error);
@@ -32,7 +50,8 @@ router.get("/", isAuthenticated, requireManagerOrAdmin, async (req: Request, res
 // GET /api/audit-logs/:id - Get audit log by ID
 router.get("/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const log = await storage.getAuditLogById(req.params.id);
+    const logs = await storage.getAllAuditLogs();
+    const log = logs.find(l => l.id === req.params.id);
     if (!log) {
       return res.status(404).json({ message: "Audit log not found" });
     }
@@ -71,7 +90,8 @@ router.get("/access/list", isAuthenticated, requireManagerOrAdmin, async (req: R
 // GET /api/access-logs/:id - Get access log by ID
 router.get("/access/:id", isAuthenticated, requireManagerOrAdmin, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const log = await storage.getAccessLogById(req.params.id);
+    const result = await storage.getAccessLogs();
+    const log = result.logs.find((l: any) => l.id === req.params.id);
     if (!log) {
       return res.status(404).json({ message: "Access log not found" });
     }
