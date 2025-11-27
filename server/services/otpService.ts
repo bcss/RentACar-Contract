@@ -609,6 +609,14 @@ This code is valid for ${OTP_EXPIRY_MINUTES} minutes. Do not share this code wit
       return { success: false, status: 'failed' };
     }
   }
+  // Alias methods for backward compatibility with contractLifecycleService
+  async verifyOTP(params: ValidateOTPParams): Promise<ValidationResult> {
+    return this.validateOTP(params);
+  }
+
+  async verifyOtp(params: ValidateOTPParams): Promise<ValidationResult> {
+    return this.validateOTP(params);
+  }
 }
 
 export const otpService = new OTPService();

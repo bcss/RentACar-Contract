@@ -361,18 +361,21 @@ class BillingService {
         });
       }
 
-      // Insert all calculated charges
+      // Insert all calculated charges - per Master Spec §4.8.3 using both canonical (chargeType/totalAmount) and required (type/amount) fields
       if (calculatedCharges.length > 0) {
         await db.insert(contractCharges).values(
           calculatedCharges.map(c => ({
             contractId,
-            chargeType: c.chargeType,
+            type: c.chargeType, // Required schema field
+            chargeType: c.chargeType, // Canonical alias
             description: c.description,
             descriptionAr: c.descriptionAr,
             quantity: c.quantity,
             unitPrice: c.unitPrice,
-            totalAmount: c.totalAmount,
+            amount: c.totalAmount, // Required schema field
+            totalAmount: c.totalAmount, // Canonical alias
             isManual: false,
+            createdBy: 'system', // System-generated charges
           }))
         );
       }
@@ -911,31 +914,31 @@ class BillingService {
 
       const totalAmount = command.quantity * command.unitPrice;
 
-      // Insert manual charge
+      // Insert manual charge - per Master Spec §4.8.3 using both canonical and required fields
       await db.insert(contractCharges).values({
         contractId: command.contractId,
-        chargeType: command.chargeType,
+        type: command.chargeType, // Required schema field
+        chargeType: command.chargeType, // Canonical alias
         description: command.description,
         descriptionAr: command.descriptionAr,
         quantity: command.quantity.toString(),
         unitPrice: command.unitPrice.toFixed(2),
-        totalAmount: totalAmount.toFixed(2),
+        amount: totalAmount.toFixed(2), // Required schema field
+        totalAmount: totalAmount.toFixed(2), // Canonical alias
         isManual: true,
-        notes: command.notes,
         createdBy: command.createdBy,
       });
 
       // Create audit log
       await db.insert(auditLogs).values({
-        tableName: 'contract_charges',
-        recordId: command.contractId,
+        contractId: command.contractId,
         action: 'MANUAL_CHARGE_ADDED',
         userId: command.createdBy,
-        changes: {
+        details: JSON.stringify({
           chargeType: command.chargeType,
           description: command.description,
           amount: totalAmount,
-        },
+        }),
       });
 
       // Recalculate totals
@@ -965,15 +968,14 @@ class BillingService {
 
       // Create audit log before deletion
       await db.insert(auditLogs).values({
-        tableName: 'contract_charges',
-        recordId: chargeId,
+        contractId: charge.contractId,
         action: 'MANUAL_CHARGE_REMOVED',
         userId,
-        changes: {
+        details: JSON.stringify({
           chargeType: charge.chargeType,
           description: charge.description,
           amount: charge.totalAmount,
-        },
+        }),
       });
 
       // Delete the charge
@@ -1133,31 +1135,34 @@ class BillingService {
         penaltyAmount += downgradePenaltyRate;
       }
 
-      // Insert downgrade penalty charge
+      // Insert downgrade penalty charge - per Master Spec §4.8.3
       if (penaltyAmount > 0) {
         await db.insert(contractCharges).values({
           contractId,
-          chargeType: ChargeType.DOWNGRADE_PENALTY,
+          type: ChargeType.DOWNGRADE_PENALTY, // Required schema field
+          chargeType: ChargeType.DOWNGRADE_PENALTY, // Canonical alias
           description: `Downgrade penalty: ${originalRentalType} → ${newRentalType}`,
           descriptionAr: `غرامة التخفيض: ${originalRentalType === 'monthly' ? 'شهري' : 'أسبوعي'} ← يومي`,
           quantity: actualDays.toString(),
           unitPrice: (penaltyAmount / actualDays).toFixed(2),
-          totalAmount: penaltyAmount.toFixed(2),
+          amount: penaltyAmount.toFixed(2), // Required schema field
+          totalAmount: penaltyAmount.toFixed(2), // Canonical alias
           isManual: false,
+          createdBy: 'system',
         });
 
         // Create audit log
         await db.insert(auditLogs).values({
-          tableName: 'contract_charges',
-          recordId: contractId,
+          contractId,
           action: 'DOWNGRADE_PENALTY_APPLIED',
-          changes: {
+          userId: 'system',
+          details: JSON.stringify({
             originalRentalType,
             newRentalType,
             actualDays,
             penaltyAmount,
             rateDifference,
-          },
+          }),
         });
       }
 

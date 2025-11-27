@@ -532,12 +532,13 @@ class AvailabilityEngine {
         throw new Error('Contract not found');
       }
 
-      const startDate = new Date(contract.startDate);
-      const endDate = new Date(contract.endDate);
+      // Use canonical startDatetime/endDatetime if available, fallback to rentalStartDate/rentalEndDate
+      const startDate = new Date(contract.startDatetime || contract.rentalStartDate);
+      const endDate = new Date(contract.endDatetime || contract.rentalEndDate);
 
       await this.updateVehicleAvailability(
-        contract.vehicleId,
-        contract.branchId,
+        contract.vehicleId!,
+        contract.branchId || '',
         startDate,
         endDate,
         'rented',
@@ -564,7 +565,7 @@ class AvailabilityEngine {
       }
 
       const today = startOfDay(new Date());
-      const originalEndDate = new Date(contract.endDate);
+      const originalEndDate = new Date(contract.endDatetime || contract.rentalEndDate);
       const endDate = originalEndDate > today ? originalEndDate : today;
 
       await this.clearVehicleAvailability(

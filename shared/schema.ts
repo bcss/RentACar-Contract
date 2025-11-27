@@ -212,6 +212,9 @@ export const customers = pgTable("customers", {
   preferredDriverService: boolean("preferred_driver_service").notNull().default(false),
   preferredDriverServiceType: varchar("preferred_driver_service_type", { length: 20 }).default("none"), // 'daily', 'hourly', 'flat', 'none'
   
+  // Master Spec §11 - Blacklist Status (canonical field per Architect guidance)
+  blacklistStatus: varchar("blacklist_status", { length: 20 }), // 'CLEAR', 'WATCH', 'SOFT_BLOCK', 'HARD_BLOCK'
+  
   // Branch Assignment
   branchId: varchar("branch_id").references(() => branches.id),
   
@@ -228,6 +231,7 @@ export const customers = pgTable("customers", {
   index("idx_customers_created_at").on(table.createdAt),
   index("idx_customers_national_id").on(table.nationalId),
   index("idx_customers_phone").on(table.phone),
+  index("idx_customers_blacklist").on(table.blacklistStatus),
 ]);
 
 export const customersRelations = relations(customers, ({ one }) => ({
@@ -286,6 +290,13 @@ export const vehicles = pgTable("vehicles", {
   
   // Tracking
   odometer: integer("odometer"), // Current mileage
+  currentOdometerReading: integer("current_odometer_reading"), // Master Spec §4.6 canonical name
+  
+  // Master Spec §4.6 - Current Contract Link
+  currentContractId: varchar("current_contract_id"), // FK to contracts (set when vehicle is OUT)
+  
+  // Master Spec §4.6.2 - Last Inspection Date
+  lastInspectionDate: timestamp("last_inspection_date"), // Tracks when vehicle was last inspected
   
   // Phase 1: UAE Compliance - GPS & Tracking (nullable)
   gpsDeviceId: varchar("gps_device_id"),
@@ -1322,6 +1333,11 @@ export const contracts = pgTable("contracts", {
   rentalType: varchar("rental_type", { length: 20 }).notNull().default("daily"), // daily, weekly, monthly
   rentalStartDate: timestamp("rental_start_date").notNull(),
   rentalEndDate: timestamp("rental_end_date").notNull(),
+  
+  // Master Spec §4.4.1 Canonical Planned DateTime Fields
+  startDatetime: timestamp("start_datetime"), // Planned start (canonical per Architect)
+  endDatetime: timestamp("end_datetime"), // Planned end (canonical per Architect)
+  
   timeIn: varchar("time_in"), // Time In (e.g., "09:00")
   timeOut: varchar("time_out"), // Time Out (e.g., "17:00")
   rentalStartTime: varchar("rental_start_time"), // e.g., "09:00" (legacy)
@@ -1777,10 +1793,13 @@ export const contractCharges = pgTable("contract_charges", {
   
   // Charge Details - Per Master Spec Part 5.5.1
   type: varchar("type", { length: 64 }).notNull(), // 'RENT', 'EXTRA_KM', 'FUEL', 'PENALTY', 'ADDON', 'DAMAGE', 'SALIK', 'FINE', 'ONE_WAY', 'DRIVER', 'OTHER'
+  chargeType: varchar("charge_type", { length: 64 }), // Master Spec §4.8.3 canonical alias for 'type'
   description: varchar("description", { length: 255 }),
+  descriptionAr: varchar("description_ar", { length: 255 }), // Master Spec §4.8.3 bilingual support
   quantity: numeric("quantity", { precision: 10, scale: 2 }),
   unitPrice: numeric("unit_price", { precision: 12, scale: 4 }),
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }), // Master Spec §4.8.3 canonical alias for 'amount'
   taxCategory: varchar("tax_category", { length: 64 }), // 'VAT', 'EXEMPT', etc.
   taxAmount: numeric("tax_amount", { precision: 12, scale: 2 }),
   isManual: boolean("is_manual").notNull().default(false), // Manual override by manager
@@ -1792,6 +1811,7 @@ export const contractCharges = pgTable("contract_charges", {
 }, (table) => [
   index("idx_contract_charges_contract_id").on(table.contractId),
   index("idx_contract_charges_type").on(table.type),
+  index("idx_contract_charges_charge_type").on(table.chargeType),
 ]);
 
 export const contractChargesRelations = relations(contractCharges, ({ one }) => ({

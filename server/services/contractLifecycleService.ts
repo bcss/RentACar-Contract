@@ -561,7 +561,7 @@ class ContractLifecycleService {
           status: newStatus,
           completedAt: now,
           endDatetimeActual: now,
-          vehicleReturnAt: now,
+          vehicleReturnedAt: now,
           hasPendingIncident: pendingIncidents.length > 0,
           version: sql`${contracts.version} + 1`,
           updatedAt: now,
@@ -1280,7 +1280,7 @@ class ContractLifecycleService {
         },
         newValueJson: {
           vehicleId: command.newVehicleId,
-          odometerStart: newVehicle.currentOdometer,
+          odometerStart: newVehicle.currentOdometerReading || newVehicle.odometer,
         },
         reason: command.reason,
         createdBy: command.swappedBy,
@@ -1308,7 +1308,7 @@ class ContractLifecycleService {
       const [updatedContract] = await db.update(contracts)
         .set({
           vehicleId: command.newVehicleId,
-          odometerStart: newVehicle.currentOdometer,
+          odometerStart: newVehicle.currentOdometerReading || newVehicle.odometer,
           version: sql`${contracts.version} + 1`,
           updatedAt: now,
         })
@@ -1563,11 +1563,10 @@ class ContractLifecycleService {
   ): Promise<void> {
     try {
       await db.insert(auditLogs).values({
-        tableName: 'contracts',
-        recordId: contractId,
+        contractId,
         action,
         userId,
-        changes: details,
+        details: JSON.stringify(details),
       });
     } catch (error) {
       console.error('[ContractLifecycleService] Failed to create audit log:', error);

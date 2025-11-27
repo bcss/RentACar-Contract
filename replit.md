@@ -23,6 +23,15 @@ The frontend is built with React, TypeScript, Wouter, TanStack Query, React Hook
 - **Lookup Tables (12 total):** blacklist_entries, vehicle_classes, vehicle_groups, seasonal_tariffs, notification_purposes, notification_routes, cron_job_definitions, sequences, maintenance_jobs, addons, packages, package_addons - all with full CRUD APIs at /api/lookup/*
 - **Daily Summary Tables (Part 12.5):** summaries_daily_branch (per-branch daily metrics: contract counts, revenue totals, utilization %) and summaries_daily_vehicle (per-vehicle daily tracking: status, revenue, utilization contribution) with unique indexes for idempotent upserts.
 
+### Schema-Service Canonical Field Alignment (Nov 2025)
+Per Master Spec Parts 4.4-4.8, canonical fields were added to ensure consistent usage across services:
+- **Customers:** Added `blacklistStatus` (CLEAR/FLAGGED/BLOCKED)
+- **Vehicles:** Added `currentContractId`, `currentOdometerReading`, `lastInspectionDate`
+- **Contracts:** Added `startDatetime`, `endDatetime` (canonical planned dates alongside `rentalStartDate`/`rentalEndDate`)
+- **Contract Charges:** Added `chargeType`, `totalAmount`, `descriptionAr` as canonical aliases for `type`, `amount`, and bilingual support
+- **OTP Service:** Added `verifyOTP` and `verifyOtp` method aliases for backward compatibility with lifecycle services
+- **Audit Logs:** Services now use correct schema fields (`contractId`, `action`, `userId`, `details`) instead of legacy fields
+
 ### Feature Specifications
 The system manages the full rental lifecycle with a 4-state workflow, automated financial calculations, and comprehensive reporting with universal RFC 4180 compliant CSV/PDF export. Key features include enhanced vehicle management (inspection, status sync, inter-branch transfers, UAE toll/fine tracking), a professional driver service module compliant with the UAE market, a customer risk scoring system, a document registry with automated expiry monitoring, and an automated multi-channel (email/SMS) bilingual reminders engine. A Campaign Management System allows for UI-driven, branch-scoped or organization-wide campaigns with RBAC and approval workflows. A production-ready automated notification system includes 30 pre-configured bilingual templates, smart template-driven notifications, multi-provider routing with failover, and comprehensive communication logging.
 

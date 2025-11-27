@@ -486,15 +486,15 @@ class PaymentService {
     paymentId: string,
     action: string,
     userId: string,
-    details: Record<string, any>
+    details: Record<string, any>,
+    contractId?: string
   ): Promise<void> {
     try {
       await db.insert(auditLogs).values({
-        tableName: 'payments',
-        recordId: paymentId,
+        contractId: contractId || null,
         action,
         userId,
-        changes: details,
+        details: JSON.stringify({ ...details, paymentId }),
       });
     } catch (error) {
       console.error('[PaymentService] Failed to create audit log:', error);
