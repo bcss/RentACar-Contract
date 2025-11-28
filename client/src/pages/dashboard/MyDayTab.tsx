@@ -70,12 +70,12 @@ export function MyDayTab() {
 
   return (
     <div className="space-y-4">
-      {/* Quick Actions - Modern MD3 Assist Chips with Tonal Containers */}
-      <Card className="shadow-lg border-transparent ring-1 ring-[hsl(var(--primary)/0.2)]" data-testid="card-quick-actions">
-        <CardHeader className="p-4">
-          <CardTitle className="text-sm font-medium uppercase tracking-[0.08em]">{t('dashboard.quickActions')}</CardTitle>
+      {/* Quick Actions */}
+      <Card className="rounded-xl" data-testid="card-quick-actions">
+        <CardHeader>
+          <CardTitle className="text-base font-medium">{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
+        <CardContent>
           <div className="flex gap-3 flex-wrap">
             {/* Primary Action - Filled Style */}
             <Link href="/contracts/create">
@@ -157,8 +157,8 @@ export function MyDayTab() {
         </CardContent>
       </Card>
 
-      {/* Hero KPI Rail - Compact MD3 Design */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* Stats Grid - Reference Design */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         <DashboardMetricCard
           title={t('dashboard.myContracts')}
           value={myContracts.length}

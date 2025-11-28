@@ -82,13 +82,13 @@ export default function Dashboard() {
   const lastLoginText = getLastLoginText();
 
   return (
-    <div className="p-4 lg:p-6 space-y-4">
+    <div className="p-6 lg:p-8">
       {/* System Errors Banner */}
       {isAdmin && unacknowledgedErrors.length > 0 && !isErrorBannerDismissed && (
-        <Alert variant="destructive" className="relative rounded-lg py-2" data-testid="alert-system-errors">
+        <Alert variant="destructive" className="relative rounded-xl mb-6" data-testid="alert-system-errors">
           <MaterialSymbol name="error" size="sm" />
-          <AlertTitle className="text-sm">{t('greeting.systemErrors')}</AlertTitle>
-          <AlertDescription className="flex items-center justify-between text-xs">
+          <AlertTitle>{t('greeting.systemErrors')}</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
             <span>
               {t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}{' '}
               <button 
@@ -102,40 +102,27 @@ export default function Dashboard() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-1 right-1 h-5 w-5 hover:bg-destructive/20"
+              className="absolute top-2 right-2 hover:bg-destructive/20"
               onClick={() => setIsErrorBannerDismissed(true)}
               data-testid="button-dismiss-error-banner"
             >
-              <MaterialSymbol name="close" size="xs" />
+              <MaterialSymbol name="close" size="sm" />
             </Button>
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Welcome Header - Compact Design */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl lg:text-3xl font-bold leading-tight tracking-tight" data-testid="text-dashboard-title">
+      {/* Page Header - Reference Design */}
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-4xl font-black leading-tight tracking-[-0.033em]" data-testid="text-dashboard-title">
             {t('dashboard.title')}
           </h1>
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-muted-foreground" data-testid="text-greeting">
-              {greetingText}, <span className="font-medium text-foreground">{firstName}</span>
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="font-normal text-[10px] py-0 h-5 rounded-full" data-testid="badge-user-role">
-              <MaterialSymbol name="person" size="xs" className="mr-0.5" />
-              {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
-            </Badge>
-            <span className="text-border">•</span>
-            <span className="flex items-center gap-1" data-testid="text-last-login">
-              <MaterialSymbol name="schedule" size="xs" />
-              {t('greeting.lastLogin')}: {lastLoginText}
-            </span>
-          </div>
+          <p className="text-base text-muted-foreground" data-testid="text-greeting">
+            {greetingText}, <span className="font-medium text-foreground">{firstName}</span>
+          </p>
         </div>
-        <Button asChild size="sm" className="gap-1.5 h-9" data-testid="button-new-contract">
+        <Button asChild className="h-10 px-4 text-sm font-bold gap-2" data-testid="button-new-contract">
           <Link href="/contracts/new">
             <MaterialSymbol name="add" size="sm" />
             <span>{t('contracts.newContract')}</span>
@@ -179,17 +166,17 @@ export default function Dashboard() {
             </TabsList>
           </div>
 
-        <TabsContent value="my-day" className="mt-4" data-testid="content-my-day">
+        <TabsContent value="my-day" className="mt-8" data-testid="content-my-day">
           <MyDayTab />
         </TabsContent>
 
         {canViewManagement && (
           <>
-            <TabsContent value="company-today" className="mt-4" data-testid="content-company-today">
+            <TabsContent value="company-today" className="mt-8" data-testid="content-company-today">
               <CompanyTodayTab />
             </TabsContent>
 
-            <TabsContent value="executive-overview" className="mt-4" data-testid="content-executive-overview">
+            <TabsContent value="executive-overview" className="mt-8" data-testid="content-executive-overview">
               <ExecutiveOverviewTab />
             </TabsContent>
           </>

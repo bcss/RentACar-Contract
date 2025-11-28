@@ -50,33 +50,24 @@ export function DashboardMetricCard({
 
   return (
     <Card 
-      className={`${styles.card} hover-elevate transition-all duration-200 ${className}`}
+      className={`flex flex-col gap-2 rounded-xl p-6 border ${className}`}
       data-testid={testId}
     >
-      <CardHeader className="flex flex-row items-center justify-between gap-2 p-4 pb-2">
-        <div className="flex-1">
-          <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {title}
-          </CardTitle>
+      <p className="text-base font-medium leading-normal">
+        {title}
+      </p>
+      <p className="tracking-tight text-3xl font-bold leading-tight tabular-nums" data-testid={valueTestId}>
+        {value}
+      </p>
+      {subtitle && (
+        <div className="text-base font-medium leading-normal">
+          {typeof subtitle === 'string' ? (
+            <span className="text-muted-foreground">{subtitle}</span>
+          ) : (
+            subtitle
+          )}
         </div>
-        <div className={`h-8 w-8 rounded-full ${styles.iconBg} flex items-center justify-center flex-shrink-0`}>
-          <Icon className={`h-4 w-4 ${styles.iconColor}`} />
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 pt-0">
-        <div className="text-2xl font-bold tabular-nums tracking-tight" data-testid={valueTestId}>
-          {value}
-        </div>
-        {subtitle && (
-          <div className="mt-1.5">
-            {typeof subtitle === 'string' ? (
-              <span className="text-xs text-muted-foreground">{subtitle}</span>
-            ) : (
-              subtitle
-            )}
-          </div>
-        )}
-      </CardContent>
+      )}
     </Card>
   );
 }

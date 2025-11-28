@@ -737,10 +737,33 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
   return (
     <Sidebar side={side} collapsible="icon" data-testid="sidebar-main">
-      <SidebarHeader className="p-3 border-b">
-        {/* Microsoft 365-style control cluster - Responsive to sidebar state */}
-        <div className={`flex ${sidebarState === 'collapsed' ? 'flex-col' : 'flex-row'} items-center gap-2 mb-3`}>
-          {/* Sidebar Toggle - Icon only */}
+      <SidebarHeader className="p-4 border-b">
+        {/* Company branding - Reference Design */}
+        <div className="flex items-center gap-3 px-2">
+          {/* Logo placeholder */}
+          <div className="bg-primary rounded-full size-10 flex items-center justify-center flex-shrink-0">
+            <MaterialSymbol name="directions_car" size="sm" className="text-white" />
+          </div>
+          {sidebarState === 'expanded' && (
+            <div className="flex flex-col min-w-0">
+              <h1 className="text-base font-bold leading-normal truncate">
+                {settings 
+                  ? i18n.language === 'ar' 
+                    ? settings.companyNameAr || settings.companyNameEn || 'KarāraOS'
+                    : settings.companyNameEn || settings.companyNameAr || 'KarāraOS'
+                  : 'KarāraOS'
+                }
+              </h1>
+              <p className="text-sm font-normal text-muted-foreground leading-normal truncate">
+                {t('landing.title')}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Control cluster - below branding */}
+        <div className={`flex ${sidebarState === 'collapsed' ? 'flex-col' : 'flex-row'} items-center gap-2 mt-4`}>
+          {/* Sidebar Toggle */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -759,7 +782,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             </TooltipContent>
           </Tooltip>
 
-          {/* Theme Toggle - Icon only */}
+          {/* Theme Toggle */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -778,7 +801,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             </TooltipContent>
           </Tooltip>
 
-          {/* Language Toggle - Icon only */}
+          {/* Language Toggle */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -797,23 +820,6 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             </TooltipContent>
           </Tooltip>
         </div>
-
-        {/* Company branding - below controls */}
-        {sidebarState === 'expanded' && (
-          <div className="overflow-hidden min-w-0">
-            <h2 className="text-sm font-semibold truncate leading-tight">
-              {settings 
-                ? i18n.language === 'ar' 
-                  ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
-                  : settings.companyNameEn || settings.companyNameAr || t('landing.title')
-                : t('landing.title')
-              }
-            </h2>
-            <p className="text-[11px] text-muted-foreground truncate leading-tight">
-              {t('landing.title')}
-            </p>
-          </div>
-        )}
       </SidebarHeader>
       
       <SidebarContent>
