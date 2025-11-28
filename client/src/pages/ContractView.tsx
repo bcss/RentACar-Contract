@@ -1722,7 +1722,7 @@ export default function ContractView() {
                 <p className="text-sm text-muted-foreground">Deposit Payment</p>
                 <p className="font-medium" data-testid="text-deposit-status">
                   {contract.depositPaid ? (
-                    <span className="text-green-600 flex items-center gap-1">
+                    <span className="text-[hsl(var(--positive))] flex items-center gap-1">
                       <Icon name="check_circle" className=" text-sm" />
                       Paid
                       {contract.depositPaidDate && ` on ${format(new Date(contract.depositPaidDate), 'PP')}`}
@@ -1740,7 +1740,7 @@ export default function ContractView() {
                 <p className="text-sm text-muted-foreground">Final Payment</p>
                 <p className="font-medium" data-testid="text-final-payment-status">
                   {contract.finalPaymentReceived ? (
-                    <span className="text-green-600 flex items-center gap-1">
+                    <span className="text-[hsl(var(--positive))] flex items-center gap-1">
                       <Icon name="check_circle" className=" text-sm" />
                       Received
                       {contract.finalPaymentDate && ` on ${format(new Date(contract.finalPaymentDate), 'PP')}`}
@@ -1929,7 +1929,7 @@ export default function ContractView() {
                 {contract.depositPaid && contract.securityDeposit && (
                   <div className="flex justify-between">
                     <span>Security Deposit (Paid):</span>
-                    <span className="font-mono text-green-600">- {contract.securityDeposit} {currency}</span>
+                    <span className="font-mono text-[hsl(var(--positive))]">- {contract.securityDeposit} {currency}</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold border-t pt-1 mt-1">
@@ -1977,8 +1977,8 @@ export default function ContractView() {
                     <Badge
                       className={
                         claim.claimStatus === 'pending' ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
-                        claim.claimStatus === 'approved' ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
-                        claim.claimStatus === 'rejected' ? 'bg-red-500/10 text-red-700 dark:text-red-400' :
+                        claim.claimStatus === 'approved' ? 'bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))]' :
+                        claim.claimStatus === 'rejected' ? 'bg-[hsl(var(--negative)/0.1)] text-[hsl(var(--negative))]' :
                         'bg-gray-500/10 text-gray-700 dark:text-gray-400'
                       }
                     >
@@ -2543,7 +2543,7 @@ export default function ContractView() {
                 {contract.depositPaid && contract.securityDeposit && (
                   <div className="flex justify-between items-center border-t pt-2">
                     <p className="text-sm text-muted-foreground">Advance Paid (Security Deposit)</p>
-                    <p className="font-medium font-mono text-green-600" data-testid="text-advance-paid">
+                    <p className="font-medium font-mono text-[hsl(var(--positive))]" data-testid="text-advance-paid">
                       - {contract.securityDeposit} {currency}
                     </p>
                   </div>
@@ -2552,7 +2552,7 @@ export default function ContractView() {
                 {payments.length > 0 && (
                   <div className="flex justify-between items-center border-t pt-2">
                     <p className="text-sm text-muted-foreground">Additional Payments</p>
-                    <p className="font-medium font-mono text-green-600" data-testid="text-additional-payments">
+                    <p className="font-medium font-mono text-[hsl(var(--positive))]" data-testid="text-additional-payments">
                       - {payments.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0).toFixed(2)} {currency}
                     </p>
                   </div>
@@ -2645,8 +2645,8 @@ export default function ContractView() {
                         <Badge className={
                           claim.claimStatus === 'pending' ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
                           claim.claimStatus === 'under_review' ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400' :
-                          claim.claimStatus === 'approved' ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
-                          claim.claimStatus === 'rejected' ? 'bg-red-500/10 text-red-700 dark:text-red-400' :
+                          claim.claimStatus === 'approved' ? 'bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))]' :
+                          claim.claimStatus === 'rejected' ? 'bg-[hsl(var(--negative)/0.1)] text-[hsl(var(--negative))]' :
                           'bg-gray-500/10 text-gray-700 dark:text-gray-400'
                         }>
                           {claim.claimStatus === 'pending' ? 'Pending' :

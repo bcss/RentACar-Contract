@@ -117,10 +117,14 @@ This document tracks all UI/UX improvements made during the KarāraOS redesign b
 - [x] Core components now use semantic CSS variable pattern from design system
 - [x] E2E tested: Dashboard tabs, stats cards, Contracts list all working
 
-### Phase 4: Transactional Screens
-- [ ] Contract forms
-- [ ] Payment modals
-- [ ] Inspection modals
+### Phase 4: Transactional Screens (COMPLETED)
+- [x] OTPVerificationModal - Updated success states to use `text-[hsl(var(--positive))]`
+- [x] DriverAssignmentModal - Updated availability success indicator to semantic color
+- [x] FileUploadZone - Updated success checkmark to semantic color
+- [x] ContractView - Updated payment status indicators (Deposit Paid, Final Payment) to semantic colors
+- [x] ContractView - Updated financial summary deductions to semantic colors
+- [x] ContractView - Updated insurance claim badges (approved/rejected) to semantic positive/negative colors
+- [x] E2E tested: Contract view, payment status, financial indicators all working
 
 ### Phase 5: Secondary Screens
 - [ ] Reports

@@ -386,8 +386,8 @@ export function OTPVerificationModal({
 
           {step === "verified" && (
             <div className="flex flex-col items-center justify-center py-8" data-testid="status-otp-verified">
-              <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
-              <p className="text-lg font-medium text-green-600" data-testid="text-verification-success">
+              <CheckCircle2 className="h-12 w-12 text-[hsl(var(--positive))] mb-4" />
+              <p className="text-lg font-medium text-[hsl(var(--positive))]" data-testid="text-verification-success">
                 {isRTL ? "تم التحقق بنجاح" : "Verification Successful"}
               </p>
             </div>

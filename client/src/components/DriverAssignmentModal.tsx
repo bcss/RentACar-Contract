@@ -348,7 +348,7 @@ export function DriverAssignmentModal({
               <Alert variant={availabilityStatus.isAvailable ? "default" : "destructive"}>
                 <div className="flex items-start gap-2">
                   {availabilityStatus.isAvailable ? (
-                    <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 mt-0.5 text-[hsl(var(--positive))]" />
                   ) : (
                     <AlertTriangle className="h-4 w-4 mt-0.5" />
                   )}
