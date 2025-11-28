@@ -1,0 +1,226 @@
+PROJECT:
+KarāraOS – UI Reference Alignment & Hard Enforcement
+
+FACTS:
+- Functional truth: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+- Visual/UX reference: ui_design_28_nov_2025 (NEW UI samples)
+- Current situation: The implemented UI does NOT follow the reference templates.
+
+ROLE:
+You are the **UI HARD ENFORCER**.
+
+Your mission:
+1) Treat the existing UI as NON-ALIGNED with design.
+2) Compare every relevant screen against the reference UI samples in ui_design_28_nov_2025.
+3) Refactor the UI until it follows the reference templates **faithfully**.
+4) At the same time, ensure all fields / behaviour strictly follow docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+
+================================================================
+PHASE 0 – GROUND RULES
+================================================================
+
+1) docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+   → Only source of truth for:
+      - What screens exist
+      - What fields exist
+      - What behaviour and workflows must do
+
+2) ui_design_28_nov_2025
+   → Only source of truth for:
+      - Layout
+      - Component choices
+      - Visual hierarchy
+      - Spacing, grouping, general UX patterns
+
+3) Existing UI implementation:
+   → TRUST NOTHING VISUALLY.
+   → You may reuse logic and data bindings, but NOT layout/styling decisions.
+
+================================================================
+PHASE 1 – IDENTIFY SCREEN ↔ DESIGN MAPPINGS
+================================================================
+
+1) From docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md:
+   - Build a list of all screens and major flows:
+     - e.g., Contracts list/detail, New Contract, Driver Scheduling,
+       Insurance Claims New, Reports (Driver Utilization, etc.), Imports, Settings, etc.
+
+2) From ui_design_28_nov_2025:
+   - Inspect all reference UI screens.
+   - Map each design sample to the corresponding functional screen(s) from the checklist.
+   - Build an internal map:
+
+   SCREEN_DESIGN_MAP = [
+     { screenId, checklistIds[], designReferenceFile, notes }
+   ]
+
+3) If a checklist screen has NO design reference:
+   - Keep existing layout but refactor to be stylistically consistent with the new UI framework.
+   - Mark as “NO DIRECT TEMPLATE” internally.
+
+================================================================
+PHASE 2 – AUDIT CURRENT UI VS REFERENCE DESIGN
+================================================================
+
+For each entry in SCREEN_DESIGN_MAP:
+
+1) Open:
+   - The current code implementation for that screen/page/component.
+   - The reference UI design from ui_design_28_nov_2025.
+
+2) Compare in detail:
+   - Layout (grid/sections/sidebars/header/footer)
+   - Component types (cards, tables, inputs, buttons, tabs, etc.)
+   - Placement of filters, action buttons, and key info
+   - Overall structure (e.g., sidebar + top bar + content area)
+   - Presence of support/help button where required (bottom-left)
+
+3) Identify all mismatches, e.g.:
+   - Current UI uses a random layout instead of the template.
+   - Filters placed incorrectly.
+   - Buttons in wrong order or location.
+   - Missing panels or sections from the reference design.
+   - Old styles/components used instead of the new patterns.
+
+4) Treat every mismatch as a **UI NON-COMPLIANCE** that MUST be fixed.
+
+================================================================
+PHASE 3 – REFACTOR UI TO FOLLOW REFERENCE TEMPLATE
+================================================================
+
+For each screen:
+
+1) Restructure the UI code (React/Next/shadcn/Tailwind or whatever stack is used) so that:
+   - The visual structure matches ui_design_28_nov_2025 as closely as possible.
+   - The layout, component hierarchy, and general look-and-feel are aligned.
+
+2) While refactoring:
+   - KEEP existing data bindings, validation hooks, and business logic.
+   - DO NOT drop required fields defined in the checklist.
+   - DO NOT add new fields that are not in the checklist.
+   - DO NOT change workflow logic, routes, or backend behaviours.
+
+3) Ensure:
+   - All checklist-required fields are still present and visible.
+   - The screen is cleaner and follows the new design.
+
+4) Apply shared design patterns:
+   - Unified top bar / side navigation if present in reference
+   - Consistent card/table styles
+   - Consistent buttons and spacing
+   - Support/help button at bottom-left near user info (if part of new standard)
+
+================================================================
+PHASE 4 – STRICT CHECKLIST REVALIDATION
+================================================================
+
+After updating a given screen:
+
+1) Re-open docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+2) For each checklist item tied to this screen:
+   - Verify:
+     - Every required field is present.
+     - Correct controls used (dropdown vs text, multi-select, etc.) where specified.
+     - All actions (save, cancel, approve, reject, etc.) are available and working.
+3) If ANY checklist requirement is not visible or not working:
+   - The screen is NOT DONE.
+   - Fix and re-verify.
+
+RULE:
+The reference design NEVER overrides what the checklist demands.
+
+================================================================
+PHASE 5 – GLOBAL UI ALIGNMENT STATUS DOC
+================================================================
+
+Create or update:
+
+docs/UI_ALIGNMENT_STATUS.md
+
+For each functional screen:
+
+- Screen ID / Name
+- Linked checklist IDs
+- Reference design file(s)
+- UI Alignment Status:
+  - NOT_STARTED
+  - IN_PROGRESS
+  - ALIGNED
+- Notes:
+  - Key fixes made
+  - Any constraints or remaining gaps
+
+This document is for human review and tracking.
+
+================================================================
+PHASE 6 – SMOKE TEST ALL UPDATED SCREENS
+================================================================
+
+After applying template-based refactors:
+
+1) Run existing unit + integration + e2e tests for each affected module.
+2) Add/update UI-level tests where needed, validating:
+   - Screen loads correctly
+   - No runtime errors
+   - Required fields exist on screen
+   - Actions perform correctly
+   - No placeholders like `somename.somename.somename`
+
+3) If any test fails:
+   - Fix code.
+   - Ensure both:
+     - UI stays aligned with reference
+     - Behaviour stays aligned with checklist
+
+================================================================
+PHASE 7 – HANDLE SCREENS WITHOUT DIRECT DESIGN TEMPLATES
+================================================================
+
+For screens that:
+- Are in the checklist
+- Have NO explicit design in ui_design_28_nov_2025
+
+Do:
+
+1) Apply the **global design language** inferred from templates:
+   - Same typography
+   - Same card/table styles
+   - Consistent spacing and layout patterns
+2) Clean up clutter and align with the rest of the redesigned UI.
+3) Do NOT invent new behaviours or fields.
+4) Mark in docs/UI_ALIGNMENT_STATUS.md as:
+   - “ALIGNED (NO DIRECT TEMPLATE – STYLE MATCH ONLY)”
+
+================================================================
+PHASE 8 – EXIT CRITERIA
+================================================================
+
+You may consider UI alignment done ONLY when:
+
+1) For every screen in SCREEN_DESIGN_MAP:
+   - Actual UI structure matches the corresponding reference template.
+   - All checklist-required fields and actions are present and working.
+
+2) For every checklist item:
+   - Its associated screen is:
+     - Visually aligned with reference, and
+     - Functionally aligned with the checklist.
+
+3) docs/UI_ALIGNMENT_STATUS.md:
+   - Shows all screens as ALIGNED (or explicitly noted as style-only aligned where templates don’t exist).
+
+================================================================
+ATTITUDE & BEHAVIOUR
+================================================================
+
+- Assume the current UI is visually wrong until corrected.
+- Do NOT defend existing layouts; refactor them.
+- Always choose:
+  - Behaviour = from docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+  - Layout = from ui_design_28_nov_2025 (or inferred global pattern)
+- If in doubt:
+  - Favour the checklist for function
+  - Favour the template for structure
+- The goal is a system where:
+  - UX matches the new templates,
+  - But behaviour remains 100% spec-compliant.
