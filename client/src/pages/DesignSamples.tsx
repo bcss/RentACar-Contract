@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, FileText, Car, Users, Bell, CheckCircle, AlertCircle, XCircle, Clock } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTranslation } from "react-i18next";
@@ -63,9 +63,9 @@ export default function DesignSamples() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="hover-elevate" data-testid="card-metric-revenue">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{t("designSamples.totalRevenue")}</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <MaterialSymbol name="payments" size="sm" className="text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold" data-testid="text-revenue-value">AED 245,680</div>
@@ -76,9 +76,9 @@ export default function DesignSamples() {
               </Card>
 
               <Card className="hover-elevate" data-testid="card-metric-contracts">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{t("designSamples.activeContracts")}</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <MaterialSymbol name="description" size="sm" className="text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold" data-testid="text-contracts-value">142</div>
@@ -89,9 +89,9 @@ export default function DesignSamples() {
               </Card>
 
               <Card className="hover-elevate" data-testid="card-metric-utilization">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{t("designSamples.fleetUtilization")}</CardTitle>
-                  <Car className="h-4 w-4 text-muted-foreground" />
+                  <MaterialSymbol name="directions_car" size="sm" className="text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold" data-testid="text-utilization-value">87%</div>
@@ -103,9 +103,9 @@ export default function DesignSamples() {
               </Card>
 
               <Card className="hover-elevate" data-testid="card-metric-satisfaction">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{t("designSamples.customerSatisfaction")}</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <MaterialSymbol name="group" size="sm" className="text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold" data-testid="text-satisfaction-value">4.8/5</div>
@@ -262,7 +262,7 @@ export default function DesignSamples() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="border-l-4 border-l-green-500 hover-elevate" data-testid="card-notification-payment">
                 <CardHeader className="flex flex-row items-start gap-4">
-                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                  <MaterialSymbol name="check_circle" size="md" className="text-green-500 mt-0.5" />
                   <div className="flex-1">
                     <CardTitle className="text-base" data-testid="heading-payment-received">
                       {t("designSamples.paymentReceived")}
@@ -276,7 +276,7 @@ export default function DesignSamples() {
 
               <Card className="border-l-4 border-l-yellow-500 hover-elevate" data-testid="card-notification-maintenance">
                 <CardHeader className="flex flex-row items-start gap-4">
-                  <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+                  <MaterialSymbol name="warning" size="md" className="text-yellow-500 mt-0.5" />
                   <div className="flex-1">
                     <CardTitle className="text-base" data-testid="heading-maintenance-due">
                       {t("designSamples.maintenanceDue")}
@@ -290,7 +290,7 @@ export default function DesignSamples() {
 
               <Card className="border-l-4 border-l-red-500 hover-elevate" data-testid="card-notification-overdue">
                 <CardHeader className="flex flex-row items-start gap-4">
-                  <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                  <MaterialSymbol name="cancel" size="md" className="text-red-500 mt-0.5" />
                   <div className="flex-1">
                     <CardTitle className="text-base" data-testid="heading-payment-overdue">
                       {t("designSamples.paymentOverdue")}
@@ -304,7 +304,7 @@ export default function DesignSamples() {
 
               <Card className="border-l-4 border-l-blue-500 hover-elevate" data-testid="card-notification-booking">
                 <CardHeader className="flex flex-row items-start gap-4">
-                  <Bell className="h-5 w-5 text-blue-500 mt-0.5" />
+                  <MaterialSymbol name="notifications" size="md" className="text-blue-500 mt-0.5" />
                   <div className="flex-1">
                     <CardTitle className="text-base" data-testid="heading-new-booking">
                       {t("designSamples.newBookingRequest")}
@@ -466,7 +466,7 @@ export default function DesignSamples() {
                 {t("designSamples.pending")}
               </Badge>
               <Badge variant="default" data-testid="badge-completed">
-                <CheckCircle className="w-3 h-3 mr-1" />
+                <MaterialSymbol name="check_circle" size="sm" className="mr-1" />
                 {t("designSamples.completed")}
               </Badge>
               <Badge variant="destructive" data-testid="badge-cancelled">

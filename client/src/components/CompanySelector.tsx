@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { cn } from "@/lib/utils";
 import { queryClient } from "@/lib/queryClient";
 import type { Company } from "@shared/schema";
@@ -87,7 +87,7 @@ export function CompanySelector({
           data-testid={testId}
         >
           {displayText}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <MaterialSymbol name="unfold_more" size="sm" className="ml-2 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
@@ -115,9 +115,11 @@ export function CompanySelector({
                     }}
                     data-testid={`item-company-${company.id}`}
                   >
-                    <Check
+                    <MaterialSymbol
+                      name="check"
+                      size="sm"
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2",
                         value === company.id ? "opacity-100" : "opacity-0"
                       )}
                     />
@@ -142,14 +144,14 @@ export function CompanySelector({
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full"
+                className="w-full gap-2"
                 onClick={() => {
                   onCreateNew();
                   setOpen(false);
                 }}
                 data-testid="button-create-company"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <MaterialSymbol name="add" size="sm" />
                 {t('companies.addCompany')}
               </Button>
             </div>

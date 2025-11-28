@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { Info, Globe, Shield, Users } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { useTranslation } from "react-i18next";
 
 interface SystemHealth {
@@ -21,7 +21,7 @@ export default function AboutPage() {
       <Card data-testid="card-about">
         <CardHeader data-testid="header-about">
           <div className="flex items-center gap-2" data-testid="title-container">
-            <Info className="h-5 w-5 text-primary" data-testid="icon-info" />
+            <MaterialSymbol name="info" size="md" className="text-primary" data-testid="icon-info" />
             <CardTitle data-testid="text-title">{t('about.title', 'About KarāraOS')}</CardTitle>
           </div>
           <CardDescription data-testid="text-subtitle">
@@ -55,7 +55,7 @@ export default function AboutPage() {
 
           <div data-testid="section-key-features">
             <h3 className="font-semibold mb-2 flex items-center gap-2" data-testid="heading-features">
-              <Globe className="h-4 w-4" data-testid="icon-globe" />
+              <MaterialSymbol name="language" size="sm" data-testid="icon-globe" />
               {t('about.keyFeatures', 'Key Features')}
             </h3>
             <ul className="space-y-1 text-sm text-muted-foreground list-disc list-inside" data-testid="list-features">
@@ -72,7 +72,7 @@ export default function AboutPage() {
 
           <div data-testid="section-security">
             <h3 className="font-semibold mb-2 flex items-center gap-2" data-testid="heading-security">
-              <Shield className="h-4 w-4" data-testid="icon-shield" />
+              <MaterialSymbol name="shield" size="sm" data-testid="icon-shield" />
               {t('about.securityCompliance', 'Security & Compliance')}
             </h3>
             <ul className="space-y-1 text-sm text-muted-foreground list-disc list-inside" data-testid="list-security">
@@ -86,7 +86,7 @@ export default function AboutPage() {
 
           <div data-testid="section-user-roles">
             <h3 className="font-semibold mb-2 flex items-center gap-2" data-testid="heading-roles">
-              <Users className="h-4 w-4" data-testid="icon-users" />
+              <MaterialSymbol name="group" size="sm" data-testid="icon-users" />
               {t('about.userRoles', 'User Roles')}
             </h3>
             <div className="grid grid-cols-2 gap-2 text-sm" data-testid="grid-roles">

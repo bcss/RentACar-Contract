@@ -16,37 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import {
-  Car,
-  Users,
-  FileText,
-  TrendingUp,
-  Calendar,
-  DollarSign,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Settings,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Edit,
-  Trash2,
-  Eye,
-  Plus,
-  X,
-  Mail,
-  Phone,
-  MapPin,
-  CreditCard,
-  BarChart3,
-  PieChart,
-  Activity,
-  Bell,
-  Star,
-  Flag
-} from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { BarChart, Bar, LineChart, Line, PieChart as RechartsPieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const sampleData = {
@@ -113,7 +83,7 @@ export default function DesignSamplesShowcase() {
             </p>
           </div>
           <Button variant="outline" size="icon" data-testid="button-settings">
-            <Settings className="h-4 w-4" />
+            <MaterialSymbol name="settings" size="sm" />
           </Button>
         </div>
         <Separator />
@@ -134,35 +104,35 @@ export default function DesignSamplesShowcase() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Stat Cards */}
             <Card data-testid="card-stat-total-revenue">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <MaterialSymbol name="payments" size="sm" className="text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold" data-testid="text-revenue-amount">AED 328,600</div>
                 <p className="text-xs text-muted-foreground" data-testid="text-revenue-change">
-                  <TrendingUp className="inline h-3 w-3 text-green-500" /> +12.5% from last month
+                  <MaterialSymbol name="trending_up" size="sm" className="inline text-green-500" /> +12.5% from last month
                 </p>
               </CardContent>
             </Card>
 
             <Card data-testid="card-stat-active-contracts">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Contracts</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
+                <MaterialSymbol name="description" size="sm" className="text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold" data-testid="text-contracts-count">142</div>
                 <p className="text-xs text-muted-foreground" data-testid="text-contracts-change">
-                  <TrendingUp className="inline h-3 w-3 text-green-500" /> +8 new today
+                  <MaterialSymbol name="trending_up" size="sm" className="inline text-green-500" /> +8 new today
                 </p>
               </CardContent>
             </Card>
 
             <Card data-testid="card-stat-fleet-utilization">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Fleet Utilization</CardTitle>
-                <Car className="h-4 w-4 text-muted-foreground" />
+                <MaterialSymbol name="directions_car" size="sm" className="text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold" data-testid="text-utilization-percentage">87%</div>
@@ -171,9 +141,9 @@ export default function DesignSamplesShowcase() {
             </Card>
 
             <Card data-testid="card-stat-total-customers">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <MaterialSymbol name="group" size="sm" className="text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold" data-testid="text-customers-count">1,249</div>
@@ -240,7 +210,7 @@ export default function DesignSamplesShowcase() {
             <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20" data-testid="card-alert-warning">
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                  <MaterialSymbol name="warning" size="md" className="text-amber-600" />
                   <CardTitle className="text-amber-900 dark:text-amber-100">Pending Approvals</CardTitle>
                 </div>
               </CardHeader>
@@ -257,7 +227,7 @@ export default function DesignSamplesShowcase() {
             <Card className="border-green-200 bg-green-50 dark:bg-green-950/20" data-testid="card-alert-success">
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <MaterialSymbol name="check_circle" size="md" className="text-green-600" />
                   <CardTitle className="text-green-900 dark:text-green-100">System Status</CardTitle>
                 </div>
               </CardHeader>
@@ -283,12 +253,12 @@ export default function DesignSamplesShowcase() {
                   <CardDescription>Manage all rental agreements</CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" data-testid="button-filter">
-                    <Filter className="h-4 w-4 mr-2" />
+                  <Button variant="outline" size="sm" className="gap-2" data-testid="button-filter">
+                    <MaterialSymbol name="filter_list" size="sm" />
                     Filter
                   </Button>
-                  <Button size="sm" data-testid="button-add-contract">
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Button size="sm" className="gap-2" data-testid="button-add-contract">
+                    <MaterialSymbol name="add" size="sm" />
                     New Contract
                   </Button>
                 </div>
@@ -297,7 +267,7 @@ export default function DesignSamplesShowcase() {
             <CardContent>
               <div className="mb-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <MaterialSymbol name="search" size="sm" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search contracts..."
                     className="pl-9"
@@ -332,13 +302,13 @@ export default function DesignSamplesShowcase() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button variant="ghost" size="icon" data-testid={`button-view-${contract.id}`}>
-                              <Eye className="h-4 w-4" />
+                              <MaterialSymbol name="visibility" size="sm" />
                             </Button>
                             <Button variant="ghost" size="icon" data-testid={`button-edit-${contract.id}`}>
-                              <Edit className="h-4 w-4" />
+                              <MaterialSymbol name="edit" size="sm" />
                             </Button>
                             <Button variant="ghost" size="icon" data-testid={`button-delete-${contract.id}`}>
-                              <Trash2 className="h-4 w-4" />
+                              <MaterialSymbol name="delete" size="sm" />
                             </Button>
                           </div>
                         </TableCell>
@@ -369,7 +339,7 @@ export default function DesignSamplesShowcase() {
                   <div key={vehicle.id} className="flex items-center justify-between p-4 border rounded-lg hover-elevate" data-testid={`item-vehicle-${vehicle.id}`}>
                     <div className="flex items-center gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                        <Car className="h-6 w-6 text-primary" />
+                        <MaterialSymbol name="directions_car" size="lg" className="text-primary" />
                       </div>
                       <div>
                         <p className="font-medium">{vehicle.brand} {vehicle.model} {vehicle.year}</p>
@@ -512,8 +482,8 @@ export default function DesignSamplesShowcase() {
               </ResponsiveContainer>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" size="sm" data-testid="button-export-chart">
-                <Download className="h-4 w-4 mr-2" />
+              <Button variant="outline" size="sm" className="gap-2" data-testid="button-export-chart">
+                <MaterialSymbol name="download" size="sm" />
                 Export Chart
               </Button>
             </CardFooter>
@@ -527,7 +497,7 @@ export default function DesignSamplesShowcase() {
               <CardContent>
                 <div className="text-3xl font-bold">AED 2,314</div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  <Activity className="inline h-3 w-3" /> Based on 142 contracts
+                  <MaterialSymbol name="monitoring" size="sm" className="inline" /> Based on 142 contracts
                 </p>
               </CardContent>
             </Card>
@@ -539,7 +509,7 @@ export default function DesignSamplesShowcase() {
               <CardContent>
                 <div className="text-3xl font-bold">7.2 days</div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  <Calendar className="inline h-3 w-3" /> Typical rental period
+                  <MaterialSymbol name="event" size="sm" className="inline" /> Typical rental period
                 </p>
               </CardContent>
             </Card>
@@ -551,7 +521,7 @@ export default function DesignSamplesShowcase() {
               <CardContent>
                 <div className="text-3xl font-bold flex items-center gap-2">
                   4.8
-                  <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+                  <MaterialSymbol name="star" size="lg" className="text-yellow-400" filled />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   Based on 523 reviews
@@ -580,10 +550,10 @@ export default function DesignSamplesShowcase() {
                         item.type === 'assign' ? 'bg-purple-100 dark:bg-purple-950' :
                         'bg-amber-100 dark:bg-amber-950'
                       }`}>
-                        {item.type === 'create' && <Plus className="h-5 w-5 text-blue-600" />}
-                        {item.type === 'payment' && <DollarSign className="h-5 w-5 text-green-600" />}
-                        {item.type === 'assign' && <Car className="h-5 w-5 text-purple-600" />}
-                        {item.type === 'status' && <CheckCircle className="h-5 w-5 text-amber-600" />}
+                        {item.type === 'create' && <MaterialSymbol name="add" size="md" className="text-blue-600" />}
+                        {item.type === 'payment' && <MaterialSymbol name="payments" size="md" className="text-green-600" />}
+                        {item.type === 'assign' && <MaterialSymbol name="directions_car" size="md" className="text-purple-600" />}
+                        {item.type === 'status' && <MaterialSymbol name="check_circle" size="md" className="text-amber-600" />}
                       </div>
                       {index < sampleData.timeline.length - 1 && (
                         <div className="h-full w-px bg-border my-2" />
@@ -613,12 +583,12 @@ export default function DesignSamplesShowcase() {
                     <p className="text-sm text-muted-foreground">Manager</p>
                   </div>
                   <div className="flex gap-2 w-full">
-                    <Button variant="outline" size="sm" className="flex-1" data-testid="button-email-user-1">
-                      <Mail className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="flex-1 gap-2" data-testid="button-email-user-1">
+                      <MaterialSymbol name="mail" size="sm" />
                       Email
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1" data-testid="button-call-user-1">
-                      <Phone className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="flex-1 gap-2" data-testid="button-call-user-1">
+                      <MaterialSymbol name="phone" size="sm" />
                       Call
                     </Button>
                   </div>
@@ -637,12 +607,12 @@ export default function DesignSamplesShowcase() {
                     <p className="text-sm text-muted-foreground">Sales Staff</p>
                   </div>
                   <div className="flex gap-2 w-full">
-                    <Button variant="outline" size="sm" className="flex-1" data-testid="button-email-user-2">
-                      <Mail className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="flex-1 gap-2" data-testid="button-email-user-2">
+                      <MaterialSymbol name="mail" size="sm" />
                       Email
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1" data-testid="button-call-user-2">
-                      <Phone className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="flex-1 gap-2" data-testid="button-call-user-2">
+                      <MaterialSymbol name="phone" size="sm" />
                       Call
                     </Button>
                   </div>
@@ -661,12 +631,12 @@ export default function DesignSamplesShowcase() {
                     <p className="text-sm text-muted-foreground">Fleet Manager</p>
                   </div>
                   <div className="flex gap-2 w-full">
-                    <Button variant="outline" size="sm" className="flex-1" data-testid="button-email-user-3">
-                      <Mail className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="flex-1 gap-2" data-testid="button-email-user-3">
+                      <MaterialSymbol name="mail" size="sm" />
                       Email
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1" data-testid="button-call-user-3">
-                      <Phone className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="flex-1 gap-2" data-testid="button-call-user-3">
+                      <MaterialSymbol name="phone" size="sm" />
                       Call
                     </Button>
                   </div>
@@ -685,8 +655,8 @@ export default function DesignSamplesShowcase() {
               <CardContent className="space-y-4">
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full" data-testid="button-open-form-dialog">
-                      <Plus className="h-4 w-4 mr-2" />
+                    <Button variant="outline" className="w-full gap-2" data-testid="button-open-form-dialog">
+                      <MaterialSymbol name="add" size="sm" />
                       Open Form Dialog
                     </Button>
                   </DialogTrigger>
@@ -714,8 +684,8 @@ export default function DesignSamplesShowcase() {
 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="w-full" data-testid="button-open-alert">
-                      <Trash2 className="h-4 w-4 mr-2" />
+                    <Button variant="destructive" className="w-full gap-2" data-testid="button-open-alert">
+                      <MaterialSymbol name="delete" size="sm" />
                       Delete Confirmation
                     </Button>
                   </AlertDialogTrigger>
@@ -800,7 +770,7 @@ export default function DesignSamplesShowcase() {
                     <Button data-testid="button-size-default">Default</Button>
                     <Button size="lg" data-testid="button-size-large">Large</Button>
                     <Button size="icon" data-testid="button-size-icon">
-                      <Settings className="h-4 w-4" />
+                      <MaterialSymbol name="settings" size="sm" />
                     </Button>
                   </div>
                 </div>
@@ -808,16 +778,16 @@ export default function DesignSamplesShowcase() {
                 <div className="space-y-2">
                   <p className="text-sm font-medium">With Icons:</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button data-testid="button-icon-download">
-                      <Download className="h-4 w-4 mr-2" />
+                    <Button className="gap-2" data-testid="button-icon-download">
+                      <MaterialSymbol name="download" size="sm" />
                       Download
                     </Button>
-                    <Button variant="outline" data-testid="button-icon-upload">
-                      <Upload className="h-4 w-4 mr-2" />
+                    <Button variant="outline" className="gap-2" data-testid="button-icon-upload">
+                      <MaterialSymbol name="upload" size="sm" />
                       Upload
                     </Button>
-                    <Button variant="secondary" data-testid="button-icon-filter">
-                      <Filter className="h-4 w-4 mr-2" />
+                    <Button variant="secondary" className="gap-2" data-testid="button-icon-filter">
+                      <MaterialSymbol name="filter_list" size="sm" />
                       Filter
                     </Button>
                   </div>

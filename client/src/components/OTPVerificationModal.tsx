@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, RefreshCw, Shield, CheckCircle2, XCircle, Phone, Mail } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { useTranslation } from "react-i18next";
 
 interface OTPVerificationModalProps {
@@ -265,9 +265,9 @@ export function OTPVerificationModal({
   };
 
   const getChannelIcon = () => {
-    if (deliveryChannel === "email") return <Mail className="h-4 w-4" />;
-    if (deliveryChannel === "both") return <><Phone className="h-4 w-4" /><Mail className="h-4 w-4" /></>;
-    return <Phone className="h-4 w-4" />;
+    if (deliveryChannel === "email") return <MaterialSymbol name="mail" size="sm" />;
+    if (deliveryChannel === "both") return <><MaterialSymbol name="phone" size="sm" /><MaterialSymbol name="mail" size="sm" /></>;
+    return <MaterialSymbol name="phone" size="sm" />;
   };
 
   const canSubmit = otpCode.length === 6 && timeRemaining > 0 && remainingAttempts > 0;
@@ -278,7 +278,7 @@ export function OTPVerificationModal({
       <DialogContent className="sm:max-w-[400px]" data-testid="modal-otp-verification" dir={isRTL ? "rtl" : "ltr"}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2" data-testid="title-otp-verification">
-            <Shield className="h-5 w-5" />
+            <MaterialSymbol name="shield" size="md" />
             {isRTL ? "التحقق بالرمز" : "OTP Verification"}
           </DialogTitle>
           <DialogDescription data-testid="description-otp-purpose">
@@ -294,7 +294,7 @@ export function OTPVerificationModal({
         <div className="py-4">
           {step === "generating" && (
             <div className="flex flex-col items-center justify-center py-8" data-testid="status-otp-generating">
-              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+              <MaterialSymbol name="progress_activity" size="lg" className="animate-spin text-primary mb-4" />
               <p className="text-muted-foreground">
                 {isRTL ? "جاري إنشاء رمز التحقق..." : "Generating verification code..."}
               </p>
@@ -353,15 +353,15 @@ export function OTPVerificationModal({
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 rounded-none"
+                  className="flex-1 rounded-none gap-2"
                   onClick={() => resendMutation.mutate()}
                   disabled={!canResend}
                   data-testid="button-resend-otp"
                 >
                   {resendMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <MaterialSymbol name="progress_activity" size="sm" className="animate-spin" />
                   ) : (
-                    <RefreshCw className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+                    <MaterialSymbol name="refresh" size="sm" />
                   )}
                   {resendCooldown > 0 
                     ? `${isRTL ? "إعادة الإرسال" : "Resend"} (${resendCooldown}s)` 
@@ -375,7 +375,7 @@ export function OTPVerificationModal({
                   data-testid="button-verify-otp"
                 >
                   {validateMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <MaterialSymbol name="progress_activity" size="sm" className="animate-spin" />
                   ) : (
                     isRTL ? "تحقق" : "Verify"
                   )}
@@ -386,7 +386,7 @@ export function OTPVerificationModal({
 
           {step === "verified" && (
             <div className="flex flex-col items-center justify-center py-8" data-testid="status-otp-verified">
-              <CheckCircle2 className="h-12 w-12 text-[hsl(var(--positive))] mb-4" />
+              <MaterialSymbol name="check_circle" size="xl" className="text-[hsl(var(--positive))] mb-4" />
               <p className="text-lg font-medium text-[hsl(var(--positive))]" data-testid="text-verification-success">
                 {isRTL ? "تم التحقق بنجاح" : "Verification Successful"}
               </p>
@@ -395,7 +395,7 @@ export function OTPVerificationModal({
 
           {step === "failed" && (
             <div className="flex flex-col items-center justify-center py-8" data-testid="status-otp-failed">
-              <XCircle className="h-12 w-12 text-destructive mb-4" />
+              <MaterialSymbol name="cancel" size="xl" className="text-destructive mb-4" />
               <p className="text-lg font-medium text-destructive mb-4" data-testid="text-verification-failed">
                 {isRTL ? "فشل التحقق" : "Verification Failed"}
               </p>

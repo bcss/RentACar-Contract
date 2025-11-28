@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { useTranslation } from "react-i18next";
 
 interface ActionButtonsProps {
@@ -55,7 +55,7 @@ export function ActionButtons({
         disabled={isLoading || submitDisabled}
         data-testid="button-submit"
       >
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isLoading && <MaterialSymbol name="progress_activity" size="sm" className="mr-2 animate-spin" />}
         {submitLabel || t('common.submit')}
       </Button>
     </div>

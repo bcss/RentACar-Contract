@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMessage, getErrorTitle } from "@/lib/errorUtils";
-import { AlertCircle, CheckCircle2, Info, XCircle } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
@@ -27,12 +27,12 @@ interface ErrorDisplayProps {
 /**
  * Visual icons for each variant
  */
-const variantIcons = {
-  destructive: XCircle,
-  success: CheckCircle2,
-  warning: AlertCircle,
-  info: Info,
-};
+const variantIconNames = {
+  destructive: "cancel",
+  success: "check_circle",
+  warning: "warning",
+  info: "info",
+} as const;
 
 /**
  * ErrorDisplay Component
@@ -58,7 +58,7 @@ export function ErrorDisplay({
 
   // Inline mode - compact error message
   if (mode === "inline") {
-    const Icon = variantIcons[variant];
+    const iconName = variantIconNames[variant];
     return (
       <div
         className={cn(
@@ -71,14 +71,14 @@ export function ErrorDisplay({
         )}
         data-testid="error-inline"
       >
-        <Icon className="h-4 w-4 shrink-0" />
+        <MaterialSymbol name={iconName} size="sm" className="shrink-0" />
         <span>{resolvedDescription || resolvedTitle}</span>
       </div>
     );
   }
 
   // Banner mode - full alert component
-  const Icon = variantIcons[variant];
+  const iconName = variantIconNames[variant];
   return (
     <Alert
       variant={variant === "destructive" ? "destructive" : "default"}
@@ -91,7 +91,7 @@ export function ErrorDisplay({
       )}
       data-testid="error-banner"
     >
-      <Icon className="h-4 w-4" />
+      <MaterialSymbol name={iconName} size="sm" />
       <AlertTitle>{resolvedTitle}</AlertTitle>
       {resolvedDescription && (
         <AlertDescription>{resolvedDescription}</AlertDescription>
@@ -103,7 +103,7 @@ export function ErrorDisplay({
           aria-label="Dismiss"
           data-testid="button-dismiss-error"
         >
-          <XCircle className="h-4 w-4" />
+          <MaterialSymbol name="cancel" size="sm" />
         </button>
       )}
     </Alert>
