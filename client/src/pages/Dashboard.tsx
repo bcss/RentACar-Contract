@@ -82,13 +82,13 @@ export default function Dashboard() {
   const lastLoginText = getLastLoginText();
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-fluid-4 md:p-fluid-6 lg:p-fluid-8">
       {/* System Errors Banner */}
       {isAdmin && unacknowledgedErrors.length > 0 && !isErrorBannerDismissed && (
-        <Alert variant="destructive" className="relative rounded-xl mb-6" data-testid="alert-system-errors">
+        <Alert variant="destructive" className="relative rounded-xl mb-fluid-4" data-testid="alert-system-errors">
           <MaterialSymbol name="error" size="sm" />
-          <AlertTitle>{t('greeting.systemErrors')}</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
+          <AlertTitle className="text-fluid-sm">{t('greeting.systemErrors')}</AlertTitle>
+          <AlertDescription className="flex items-center justify-between text-fluid-xs">
             <span>
               {t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}{' '}
               <button 
@@ -112,17 +112,17 @@ export default function Dashboard() {
         </Alert>
       )}
 
-      {/* Page Header - Reference Design */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-black leading-tight tracking-[-0.033em]" data-testid="text-dashboard-title">
+      {/* Page Header - Responsive Design */}
+      <div className="flex flex-wrap justify-between items-center gap-fluid-4">
+        <div className="flex flex-col gap-fluid-2">
+          <h1 className="text-fluid-4xl font-black leading-tight tracking-[-0.033em]" data-testid="text-dashboard-title">
             {t('dashboard.title')}
           </h1>
-          <p className="text-base text-muted-foreground" data-testid="text-greeting">
+          <p className="text-fluid-base text-muted-foreground" data-testid="text-greeting">
             {greetingText}, <span className="font-medium text-foreground">{firstName}</span>
           </p>
         </div>
-        <Button asChild className="h-10 px-4 text-sm font-bold gap-2" data-testid="button-new-contract">
+        <Button asChild className="h-9 md:h-10 px-3 md:px-4 text-fluid-sm font-bold gap-2" data-testid="button-new-contract">
           <Link href="/contracts/new">
             <MaterialSymbol name="add" size="sm" />
             <span>{t('contracts.newContract')}</span>
@@ -131,16 +131,16 @@ export default function Dashboard() {
       </div>
 
       {/* Tabbed Dashboard */}
-      <div className="mt-6">
+      <div className="mt-fluid-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <div className="border-b border-border">
-            <TabsList className="bg-transparent h-auto p-0 gap-8">
+            <TabsList className="bg-transparent h-auto p-0 gap-4 md:gap-6 lg:gap-8">
               <TabsTrigger 
                 value="my-day" 
                 data-testid="tab-my-day"
-                className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-3 pt-4 text-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
+                className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-2 md:pb-3 pt-3 md:pt-4 text-fluid-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
               >
-                <MaterialSymbol name="today" size="sm" className="mr-2" />
+                <MaterialSymbol name="today" size="sm" className="mr-1 md:mr-2" />
                 {t('dashboard.myDay')}
               </TabsTrigger>
               {canViewManagement && (
@@ -148,17 +148,17 @@ export default function Dashboard() {
                   <TabsTrigger 
                     value="company-today" 
                     data-testid="tab-company-today"
-                    className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-3 pt-4 text-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
+                    className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-2 md:pb-3 pt-3 md:pt-4 text-fluid-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
                   >
-                    <MaterialSymbol name="domain" size="sm" className="mr-2" />
+                    <MaterialSymbol name="domain" size="sm" className="mr-1 md:mr-2" />
                     {t('dashboard.companyToday')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="executive-overview" 
                     data-testid="tab-executive-overview"
-                    className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-3 pt-4 text-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
+                    className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-2 md:pb-3 pt-3 md:pt-4 text-fluid-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
                   >
-                    <MaterialSymbol name="analytics" size="sm" className="mr-2" />
+                    <MaterialSymbol name="analytics" size="sm" className="mr-1 md:mr-2" />
                     {t('dashboard.executiveOverview')}
                   </TabsTrigger>
                 </>
@@ -166,17 +166,17 @@ export default function Dashboard() {
             </TabsList>
           </div>
 
-        <TabsContent value="my-day" className="mt-8" data-testid="content-my-day">
+        <TabsContent value="my-day" className="mt-fluid-6" data-testid="content-my-day">
           <MyDayTab />
         </TabsContent>
 
         {canViewManagement && (
           <>
-            <TabsContent value="company-today" className="mt-8" data-testid="content-company-today">
+            <TabsContent value="company-today" className="mt-fluid-6" data-testid="content-company-today">
               <CompanyTodayTab />
             </TabsContent>
 
-            <TabsContent value="executive-overview" className="mt-8" data-testid="content-executive-overview">
+            <TabsContent value="executive-overview" className="mt-fluid-6" data-testid="content-executive-overview">
               <ExecutiveOverviewTab />
             </TabsContent>
           </>
