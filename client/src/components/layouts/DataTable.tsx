@@ -1,15 +1,17 @@
 /**
  * File: client/src/components/layouts/DataTable.tsx
  * @area UI Design System
- * @checklist UI Alignment Phase 2
+ * @checklist UI Alignment Phase 2 - Reference Design Match
  * @purpose Reusable data table component matching reference design
  * 
  * @behaviour
  *  - Styled table headers (uppercase, smaller text)
- *  - Row hover states
- *  - Status badges with rounded-full styling
+ *  - Row hover states with proper dark mode support
+ *  - Status badges with rounded-full styling and dot indicators
  *  - Action buttons column
  *  - Pagination footer
+ * 
+ * @reference ui_design_28_nov_2025/customer_list_screen
  */
 
 import { ReactNode } from 'react';
@@ -69,14 +71,14 @@ export function DataTable<T>({
   return (
     <div className={`w-full ${className}`}>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left" data-testid="data-table">
-          <thead className="text-xs uppercase bg-muted/50 dark:bg-muted/30 text-muted-foreground">
+        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" data-testid="data-table">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#1c2127] dark:text-gray-400">
             <tr>
               {columns.map((col) => (
                 <th 
                   key={col.key}
                   scope="col"
-                  className={`px-5 py-3.5 font-medium tracking-wide ${
+                  className={`px-6 py-4 font-semibold ${
                     col.align === 'right' ? 'text-right' : 
                     col.align === 'center' ? 'text-center' : 'text-left'
                   } ${col.className || ''}`}
@@ -91,7 +93,7 @@ export function DataTable<T>({
               <tr>
                 <td 
                   colSpan={columns.length} 
-                  className="px-5 py-12 text-center text-muted-foreground"
+                  className="px-6 py-12 text-center text-muted-foreground"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <MaterialSymbol name="progress_activity" className="animate-spin" />
@@ -103,7 +105,7 @@ export function DataTable<T>({
               <tr>
                 <td 
                   colSpan={columns.length} 
-                  className="px-5 py-12 text-center text-muted-foreground"
+                  className="px-6 py-12 text-center text-muted-foreground"
                 >
                   {emptyMessage || t('common.noData')}
                 </td>
@@ -114,8 +116,9 @@ export function DataTable<T>({
                   key={keyExtractor(item, index)}
                   onClick={() => onRowClick?.(item)}
                   className={`
-                    border-b border-border/50 
-                    hover:bg-muted/30 dark:hover:bg-muted/20 
+                    bg-white dark:bg-card 
+                    border-b border-gray-200 dark:border-gray-700 
+                    hover:bg-gray-50 dark:hover:bg-[#1c2127] 
                     transition-colors
                     ${onRowClick ? 'cursor-pointer' : ''}
                   `}
@@ -124,7 +127,7 @@ export function DataTable<T>({
                   {columns.map((col) => (
                     <td 
                       key={col.key}
-                      className={`px-5 py-4 ${
+                      className={`px-6 py-4 ${
                         col.align === 'right' ? 'text-right' : 
                         col.align === 'center' ? 'text-center' : 'text-left'
                       } ${col.className || ''}`}
