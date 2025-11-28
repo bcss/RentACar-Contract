@@ -69,14 +69,14 @@ export function MyDayTab() {
   }
 
   return (
-    <div className="space-y-fluid-4">
+    <div className="space-y-4">
       {/* Quick Actions */}
       <Card className="rounded-xl" data-testid="card-quick-actions">
-        <CardHeader className="p-fluid-4 md:p-fluid-5 lg:p-fluid-6">
-          <CardTitle className="text-fluid-base font-medium">{t('dashboard.quickActions')}</CardTitle>
+        <CardHeader>
+          <CardTitle className="text-base font-medium">{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
-        <CardContent className="p-fluid-4 md:p-fluid-5 lg:p-fluid-6 pt-0">
-          <div className="flex gap-fluid-2 md:gap-fluid-3 flex-wrap">
+        <CardContent>
+          <div className="flex gap-3 flex-wrap">
             {/* Primary Action - Filled Style */}
             <Link href="/contracts/create">
               <Button 
@@ -157,8 +157,8 @@ export function MyDayTab() {
         </CardContent>
       </Card>
 
-      {/* Stats Grid - Responsive Design */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-fluid-4 md:gap-fluid-5 lg:gap-fluid-6 mt-fluid-6">
+      {/* Stats Grid - Reference Design Match */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         <DashboardMetricCard
           title={t('dashboard.myContracts')}
           value={myContracts.length}
@@ -203,61 +203,61 @@ export function MyDayTab() {
         />
       </div>
 
-      {/* My Contracts Status Breakdown - Responsive Grid */}
+      {/* My Contracts Status Breakdown - Reference Design Match */}
       <Card className="shadow-lg" data-testid="card-my-contracts-breakdown">
-        <CardHeader className="p-fluid-4 md:p-fluid-5 lg:p-fluid-6">
-          <CardTitle className="text-fluid-lg md:text-fluid-xl font-semibold tracking-tight">{t('dashboard.myContractsBreakdown')}</CardTitle>
+        <CardHeader className="p-6">
+          <CardTitle className="text-xl font-semibold tracking-tight">{t('dashboard.myContractsBreakdown')}</CardTitle>
         </CardHeader>
-        <CardContent className="p-fluid-4 md:p-fluid-5 lg:p-fluid-6 pt-0">
-          <div className="grid gap-fluid-3 md:gap-fluid-4 grid-cols-2 md:grid-cols-4">
+        <CardContent className="p-6 pt-0">
+          <div className="grid gap-4 md:grid-cols-4">
             <Link href="/contracts?status=draft">
-              <div className="group relative p-fluid-3 md:p-fluid-4 lg:p-fluid-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-draft-contracts">
+              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-draft-contracts">
                 <div className="absolute top-0 left-0 w-1 h-full bg-muted-foreground group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-fluid-2 md:gap-fluid-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-fluid-xs md:text-fluid-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.draft')}</p>
-                    <Badge variant="secondary" className="text-[10px] md:text-xs hidden sm:inline-flex">{t('contract.status.draft')}</Badge>
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.draft')}</p>
+                    <Badge variant="secondary" className="text-xs">{t('contract.status.draft')}</Badge>
                   </div>
-                  <p className="text-fluid-2xl md:text-fluid-3xl font-semibold tabular-nums">{myDraftContracts.length}</p>
+                  <p className="text-3xl font-semibold tabular-nums">{myDraftContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=active">
-              <div className="group relative p-fluid-3 md:p-fluid-4 lg:p-fluid-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-active-contracts">
+              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-active-contracts">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-fluid-2 md:gap-fluid-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-fluid-xs md:text-fluid-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.active')}</p>
-                    <Badge variant="default" className="text-[10px] md:text-xs hidden sm:inline-flex">{t('contract.status.active')}</Badge>
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.active')}</p>
+                    <Badge variant="default" className="text-xs">{t('contract.status.active')}</Badge>
                   </div>
-                  <p className="text-fluid-2xl md:text-fluid-3xl font-semibold tabular-nums text-primary">{myActiveContracts.length}</p>
+                  <p className="text-3xl font-semibold tabular-nums text-primary">{myActiveContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=completed">
-              <div className="group relative p-fluid-3 md:p-fluid-4 lg:p-fluid-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-completed-contracts">
+              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-completed-contracts">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[hsl(var(--positive))] group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-fluid-2 md:gap-fluid-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-fluid-xs md:text-fluid-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.completed')}</p>
-                    <Badge className="text-[10px] md:text-xs hidden sm:inline-flex bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))] border-[hsl(var(--positive)/0.2)]">{t('contract.status.completed')}</Badge>
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.completed')}</p>
+                    <Badge className="text-xs bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))] border-[hsl(var(--positive)/0.2)]">{t('contract.status.completed')}</Badge>
                   </div>
-                  <p className="text-fluid-2xl md:text-fluid-3xl font-semibold tabular-nums">{myCompletedContracts.length}</p>
+                  <p className="text-3xl font-semibold tabular-nums">{myCompletedContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=closed">
-              <div className="group relative p-fluid-3 md:p-fluid-4 lg:p-fluid-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-closed-contracts">
+              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-closed-contracts">
                 <div className="absolute top-0 left-0 w-1 h-full bg-muted group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-fluid-2 md:gap-fluid-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-fluid-xs md:text-fluid-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.closed')}</p>
-                    <Badge variant="outline" className="text-[10px] md:text-xs hidden sm:inline-flex">{t('contract.status.closed')}</Badge>
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.closed')}</p>
+                    <Badge variant="outline" className="text-xs">{t('contract.status.closed')}</Badge>
                   </div>
-                  <p className="text-fluid-2xl md:text-fluid-3xl font-semibold tabular-nums">{myClosedContracts.length}</p>
+                  <p className="text-3xl font-semibold tabular-nums">{myClosedContracts.length}</p>
                 </div>
               </div>
             </Link>

@@ -50,17 +50,17 @@ export function DashboardMetricCard({
 
   return (
     <Card 
-      className={`flex flex-col gap-fluid-2 rounded-xl p-fluid-4 md:p-fluid-5 lg:p-fluid-6 border ${className}`}
+      className={`flex flex-col gap-2 rounded-xl p-6 border ${className}`}
       data-testid={testId}
     >
-      <p className="text-fluid-sm md:text-fluid-base font-medium leading-normal">
+      <p className="text-base font-medium leading-normal">
         {title}
       </p>
-      <p className="tracking-tight text-fluid-2xl md:text-fluid-3xl font-bold leading-tight tabular-nums" data-testid={valueTestId}>
+      <p className="tracking-tight text-3xl font-bold leading-tight tabular-nums" data-testid={valueTestId}>
         {value}
       </p>
       {subtitle && (
-        <div className="text-fluid-sm md:text-fluid-base font-medium leading-normal">
+        <div className="text-base font-medium leading-normal">
           {typeof subtitle === 'string' ? (
             <span className="text-muted-foreground">{subtitle}</span>
           ) : (

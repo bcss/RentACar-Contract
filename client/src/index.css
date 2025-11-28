@@ -31,9 +31,14 @@
   }
 }
 
-/* Base font normalization for consistent rem scaling */
+/* Viewport-aware root font scaling for responsive proportional sizing
+   - All Tailwind rem-based classes (text-4xl, p-6, etc.) scale with viewport
+   - At 1366px: ~15px base (slightly compact)
+   - At 1600px: ~16px base (matches reference design)
+   - At 1920px: ~17.5px base (slightly larger)
+   This maintains exact reference design ratios while providing responsive scaling */
 html {
-  font-size: 16px;
+  font-size: clamp(15px, 0.75vw + 10px, 17.5px);
 }
 
 /* LIGHT MODE - KarāraOS Reference Design (Nov 2025) */
@@ -295,7 +300,7 @@ html {
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground text-sm;
+    @apply font-sans antialiased bg-background text-foreground;
   }
 }
 
