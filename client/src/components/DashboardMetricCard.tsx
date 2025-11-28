@@ -53,24 +53,24 @@ export function DashboardMetricCard({
       className={`${styles.card} hover-elevate transition-all duration-200 ${className}`}
       data-testid={testId}
     >
-      <CardHeader className="flex flex-row items-center justify-between gap-2 p-3 pb-1.5">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 p-4 pb-2">
         <div className="flex-1">
-          <CardTitle className="text-[10px] font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {title}
           </CardTitle>
         </div>
-        <div className={`h-7 w-7 rounded-full ${styles.iconBg} flex items-center justify-center flex-shrink-0`}>
+        <div className={`h-8 w-8 rounded-full ${styles.iconBg} flex items-center justify-center flex-shrink-0`}>
           <Icon className={`h-4 w-4 ${styles.iconColor}`} />
         </div>
       </CardHeader>
-      <CardContent className="p-3 pt-0">
-        <div className="text-base font-semibold tabular-nums tracking-tight" data-testid={valueTestId}>
+      <CardContent className="p-4 pt-0">
+        <div className="text-2xl font-bold tabular-nums tracking-tight" data-testid={valueTestId}>
           {value}
         </div>
         {subtitle && (
-          <div className="mt-1">
+          <div className="mt-1.5">
             {typeof subtitle === 'string' ? (
-              <span className="text-[10px] text-muted-foreground leading-4">{subtitle}</span>
+              <span className="text-xs text-muted-foreground">{subtitle}</span>
             ) : (
               subtitle
             )}

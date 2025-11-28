@@ -800,8 +800,8 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
 
         {/* Company branding - below controls */}
         {sidebarState === 'expanded' && (
-          <div className="overflow-hidden">
-            <h2 className="text-base font-semibold truncate">
+          <div className="overflow-hidden min-w-0">
+            <h2 className="text-sm font-semibold truncate leading-tight">
               {settings 
                 ? i18n.language === 'ar' 
                   ? settings.companyNameAr || settings.companyNameEn || t('landing.title')
@@ -809,7 +809,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 : t('landing.title')
               }
             </h2>
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-[11px] text-muted-foreground truncate leading-tight">
               {t('landing.title')}
             </p>
           </div>

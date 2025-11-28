@@ -82,13 +82,13 @@ export default function Dashboard() {
   const lastLoginText = getLastLoginText();
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 lg:p-6 space-y-4">
       {/* System Errors Banner */}
       {isAdmin && unacknowledgedErrors.length > 0 && !isErrorBannerDismissed && (
-        <Alert variant="destructive" className="relative rounded-xl" data-testid="alert-system-errors">
+        <Alert variant="destructive" className="relative rounded-lg py-2" data-testid="alert-system-errors">
           <MaterialSymbol name="error" size="sm" />
-          <AlertTitle>{t('greeting.systemErrors')}</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
+          <AlertTitle className="text-sm">{t('greeting.systemErrors')}</AlertTitle>
+          <AlertDescription className="flex items-center justify-between text-xs">
             <span>
               {t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}{' '}
               <button 
@@ -102,30 +102,30 @@ export default function Dashboard() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 h-6 w-6 hover:bg-destructive/20"
+              className="absolute top-1 right-1 h-5 w-5 hover:bg-destructive/20"
               onClick={() => setIsErrorBannerDismissed(true)}
               data-testid="button-dismiss-error-banner"
             >
-              <MaterialSymbol name="close" size="sm" />
+              <MaterialSymbol name="close" size="xs" />
             </Button>
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Welcome Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl lg:text-4xl font-black leading-tight tracking-tight" data-testid="text-dashboard-title">
+      {/* Welcome Header - Compact Design */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl lg:text-3xl font-bold leading-tight tracking-tight" data-testid="text-dashboard-title">
             {t('dashboard.title')}
           </h1>
           <div className="flex items-center gap-2">
-            <p className="text-base text-muted-foreground" data-testid="text-greeting">
-              {greetingText}, <span className="font-semibold text-foreground">{firstName}</span>
+            <p className="text-sm text-muted-foreground" data-testid="text-greeting">
+              {greetingText}, <span className="font-medium text-foreground">{firstName}</span>
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="font-normal text-xs rounded-full" data-testid="badge-user-role">
-              <MaterialSymbol name="person" size="xs" className="mr-1" />
+            <Badge variant="outline" className="font-normal text-[10px] py-0 h-5 rounded-full" data-testid="badge-user-role">
+              <MaterialSymbol name="person" size="xs" className="mr-0.5" />
               {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
             </Badge>
             <span className="text-border">•</span>
@@ -135,7 +135,7 @@ export default function Dashboard() {
             </span>
           </div>
         </div>
-        <Button asChild className="gap-2" data-testid="button-new-contract">
+        <Button asChild size="sm" className="gap-1.5 h-9" data-testid="button-new-contract">
           <Link href="/contracts/new">
             <MaterialSymbol name="add" size="sm" />
             <span>{t('contracts.newContract')}</span>
@@ -144,7 +144,7 @@ export default function Dashboard() {
       </div>
 
       {/* Tabbed Dashboard */}
-      <div className="mt-8">
+      <div className="mt-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <div className="border-b border-border">
             <TabsList className="bg-transparent h-auto p-0 gap-8">
