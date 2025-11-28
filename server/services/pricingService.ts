@@ -1,15 +1,28 @@
 /**
- * Pricing Service - Deep Integration with seasonal_tariffs Lookup Table
+ * File: server/services/pricingService.ts
+ * @area Tariffs & Pricing Engine
+ * @checklist §2.12, §4.9.2
+ * @purpose Seasonal pricing and tariff calculation per Master Spec §2.12
  * 
- * Per Master Spec Part 4.9.2 - Seasonal pricing adjustments are managed
- * through the seasonal_tariffs lookup table, not pricingRules.
+ * @behaviour
+ *  - Deep integration with seasonal_tariffs lookup table (not pricingRules)
+ *  - Multi-day rentals with overlapping season handling
+ *  - Priority-based tariff selection when multiple apply
+ *  - Branch and vehicle class filtering
+ *  - Audit trail for applied tariffs
  * 
- * This service provides:
- * - Automatic seasonal tariff detection and application
- * - Multi-day rentals with overlapping seasons
- * - Priority-based tariff selection
- * - Branch and vehicle class filtering
- * - Audit trail for applied tariffs
+ * @services
+ *  - getApplicableTariffs(startDate, endDate, vehicleClassId?, branchId?): Gets seasonal tariffs
+ *  - calculateSeasonalPricing(baseRate, date, vehicleClassId?, branchId?): Single-day pricing
+ *  - calculateMultiDayPricing(baseRate, startDate, endDate, ...): Range pricing with breakdown
+ *  - getActiveAddons(branchId?, vehicleClassId?): Available add-on items
+ *  - getActivePackages(branchId?, vehicleClassId?): Available packages
+ * 
+ * @notes
+ *  - 5-minute cache TTL for frequently accessed tariffs
+ *  - Supports percentage, flat, and override adjustment types
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.12, §4.9.2)
  */
 
 import { db } from '../db';

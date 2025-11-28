@@ -1,13 +1,31 @@
 /**
- * Payment Management Routes - Master Spec Part 2.7 Compliant
+ * File: server/routes/paymentRoutes.ts
+ * @area Payments
+ * @checklist §2.7, §3.9, §3.10, §3.27-3.31
+ * @purpose Payment recording and refund processing per Master Spec §2.7
  * 
- * Handles all payment-related operations per Master Spec:
- * - Deposit collection and tracking
- * - Final payment calculation and recording
- * - Deposit refund with business rule validation
- * - Generic payment CRUD operations
- * - Payment validation and audit logging
- * - Payment notification triggers (mandatory per spec)
+ * @behaviour
+ *  - Direction tracking: IN (receipts) vs OUT (refunds) per §4.8.1
+ *  - Payment types: RENT, DEPOSIT, REFUND, EXCESS, OTHER
+ *  - Mandatory notification on every payment (§3.28)
+ *  - Deposit refund cannot exceed received amount (§3.9)
+ *  - Outstanding amount recalculated after each payment
+ * 
+ * @routes
+ *  - POST /api/payments/contracts/:id/deposit - Record deposit (§3.30)
+ *  - POST /api/payments/contracts/:id/final-payment - Record rent payment (§3.27)
+ *  - POST /api/payments/contracts/:id/refund - Process refund (§3.29)
+ *  - GET /api/payments - List all payments with filters
+ *  - GET /api/payments/:id - Single payment details
+ *  - POST /api/payments - Generic payment creation
+ *  - DELETE /api/payments/:id - Void payment (admin only)
+ * 
+ * @notifications (per §3.28)
+ *  - SECURITY_DEPOSIT_RECEIVED
+ *  - PAYMENT_RECEIVED
+ *  - SECURITY_DEPOSIT_REFUNDED
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.7, §3.27-3.31)
  */
 
 import { Router } from "express";

@@ -1,3 +1,29 @@
+/**
+ * File: server/services/otpService.ts
+ * @area OTP Authorization
+ * @checklist §3.3, §3.11, §5.9, §11.10
+ * @purpose Implements OTP-based digital signing workflow per Master Spec §5.9
+ * 
+ * @behaviour
+ *  - OTP expires in 3 minutes (OTP_EXPIRY_MINUTES = 3, NOT 5 per §5.9)
+ *  - Rate limited: 3 OTPs per 10 minutes per user (§8.1)
+ *  - Max 3 validation attempts before lockout (MAX_ATTEMPTS = 3)
+ *  - Multi-channel delivery: SMS primary, Email fallback
+ *  - All OTP attempts logged with IP, device_id, user_agent (§11.10 audit)
+ * 
+ * @services
+ *  - generateOTP(params): OTPResult - Creates new OTP with secure hash
+ *  - validateOTP(params): ValidationResult - Validates OTP entry
+ *  - resendOTP(verificationId): ResendResult - Resends with cooldown
+ *  - verifyOTP/verifyOtp: Alias methods for backward compatibility
+ * 
+ * @notes
+ *  - Used for: Contract activation (§3.3), Contract closure (§3.11), Amendment approval
+ *  - Party type determines OTP recipient: DIRECT→Hirer, SPONSORED→Sponsor, COMPANY→Signatory
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§5.9, §11.10)
+ */
+
 import { db } from '../db';
 import { otpVerifications, customers, drivers, users } from '@shared/schema';
 import { eq, and, gt, desc } from 'drizzle-orm';

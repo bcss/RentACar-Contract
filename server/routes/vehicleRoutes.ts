@@ -1,11 +1,29 @@
 /**
- * Vehicle Management Routes
+ * File: server/routes/vehicleRoutes.ts
+ * @area Vehicle Operations
+ * @checklist §2.10, §3.18-3.23, §4.5
+ * @purpose Vehicle CRUD and status management per Master Spec §2.10
  * 
- * Handles all vehicle-related operations including:
- * - Vehicle CRUD operations
- * - Search and filtering
- * - Availability checking
- * - Enable/disable operations
+ * @behaviour
+ *  - 8 vehicle statuses: AVAILABLE, RESERVED, OUT, UNDER_MAINTENANCE, UNDER_REPAIR, IN_TRANSFER, RETIRED, LOST_STOLEN (§3.18)
+ *  - Status transitions validated per state machine (§3.18)
+ *  - Canonical fields: currentContractId, currentOdometerReading, lastInspectionDate
+ *  - Branch-scoped operations (vehicleClassId, vehicleGroupId per §4.5)
+ * 
+ * @routes
+ *  - GET /api/vehicles - List with disabled filter
+ *  - GET /api/vehicles/search - Search by query string
+ *  - GET /api/vehicles/:id - Single vehicle with relations
+ *  - POST /api/vehicles - Create vehicle
+ *  - PATCH /api/vehicles/:id - Update vehicle
+ *  - DELETE /api/vehicles/:id - Disable vehicle (no hard delete)
+ *  - POST /api/vehicles/:id/transfer - Initiate branch transfer (§3.20)
+ *  - POST /api/vehicles/:id/maintenance - Create maintenance job (§3.19)
+ * 
+ * @notes
+ *  - Availability synced via availabilityEngine on status changes
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.10, §3.18-3.23)
  */
 
 import { Router } from "express";

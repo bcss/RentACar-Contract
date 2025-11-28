@@ -1,12 +1,29 @@
 /**
- * Blacklist Service - Per Master Spec §3.35-3.36
+ * File: server/services/blacklistService.ts
+ * @area Risk, Blacklist & Watchlist
+ * @checklist §3.35, §3.36, §3.37, Part 11
+ * @purpose Customer/Company/Sponsor blacklist enforcement per Master Spec Part 11
  * 
- * Manages customer/company/sponsor blacklist status with:
- * - Hard block: Prevents all contract operations
- * - Soft block: Requires manager approval/override
- * - Watch status: Warning only, no blocking
+ * @behaviour
+ *  - Three blocking levels: HARD_BLOCK, SOFT_BLOCK, WATCH
+ *  - HARD_BLOCK: Prevents all contract operations (§3.35)
+ *  - SOFT_BLOCK: Requires manager approval/override (§3.36)
+ *  - WATCH: Warning only, no operational blocking (§3.37)
+ *  - Branch-specific or global blacklist scope
+ *  - Effective date range support (effectiveFrom, effectiveUntil)
  * 
- * Integrates with contract creation and activation workflows.
+ * @services
+ *  - checkBlacklist(entityType, entityId, action, branchId?): Returns blocking status
+ *  - addToBlacklist(command): Creates blacklist entry with audit
+ *  - removeFromBlacklist(entryId): Deactivates entry
+ *  - requestOverride(entryId, managerId, reason): Manager override workflow
+ * 
+ * @integration
+ *  - Contract creation: Checked before saving draft (§3.1)
+ *  - Contract activation: Checked before OTP generation (§3.3)
+ *  - Customer schema: blacklistStatus field (CLEAR/FLAGGED/BLOCKED)
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§3.35-3.37, Part 11)
  */
 
 import { db } from "../db";

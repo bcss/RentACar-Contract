@@ -1,3 +1,33 @@
+/**
+ * File: server/services/automationOrchestrator.ts
+ * @area Cron & Automation
+ * @checklist §2.17, §12.4, Part 12.5
+ * @purpose Database-driven cron job orchestrator per Master Spec §2.17
+ * 
+ * @behaviour
+ *  - All jobs read from cron_job_definitions table (not hardcoded)
+ *  - Runtime enable/disable without server restart
+ *  - Execution tracking: lastRunAt, lastRunStatus, runCount, failureCount
+ *  - Failure notifications to admin users
+ * 
+ * @jobs (9 production jobs per spec):
+ *  - RISK_SCORE_CALC: 2:00 AM daily - Recalculates customer risk scores (§3.35)
+ *  - CACHE_VALIDATION: 3:00 AM daily - Validates availability cache (§3.26)
+ *  - DOCUMENT_EXPIRY_CHECK: 8:00 AM daily - Document/license expiry alerts (§2.14)
+ *  - CONTRACT_EXPIRY_REMINDER: 9:00 AM daily - Contract renewal reminders (§2.13)
+ *  - PAYMENT_DUE_REMINDER: 10:00 AM daily - Payment due notifications (§3.27)
+ *  - RESERVATION_AUTO_EXPIRY: 11:00 AM daily - Expires stale reservations (§3.25)
+ *  - DAILY_SUMMARY_JOB: 1:00 AM daily - Branch/vehicle metrics (Part 12.5)
+ *  - OVERDUE_CONTRACT_CHECK: 8:00 AM daily - Overdue return detection (§3.22)
+ *  - ABANDONED_VEHICLE_CHECK: 3:00 AM daily - Abandoned threshold detection (§3.22)
+ * 
+ * @notes
+ *  - Hot-reload: Jobs can be reconfigured without server restart
+ *  - Status updates persist to database for monitoring
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.17, Part 12.5)
+ */
+
 import cron from 'node-cron';
 import { storage } from '../storage';
 import { RiskCalculator } from './riskCalculator';
@@ -7,24 +37,6 @@ import { executeDailySummaryJob } from './dailySummaryJob';
 import { db } from '../db';
 import { users, cronJobDefinitions } from '../../shared/schema';
 import { and, or, eq } from 'drizzle-orm';
-
-/**
- * Automation Orchestrator for KarāraOS
- * 
- * DEEP INTEGRATION: Reads job configurations from cron_job_definitions table
- * instead of hardcoded values. This allows runtime configuration of:
- * - Cron schedules
- * - Enable/disable jobs
- * - Execution tracking
- * 
- * Per Master Spec, jobs are managed via database:
- * - Nightly risk score calculations (RISK_SCORE_CALC)
- * - Nightly availability cache validation (CACHE_VALIDATION)
- * - Document expiry checks (DOCUMENT_EXPIRY_CHECK)
- * - Contract expiry reminders (CONTRACT_EXPIRY_REMINDER)
- * - Payment due reminders (PAYMENT_DUE_REMINDER)
- * - Reservation auto-expiry (RESERVATION_AUTO_EXPIRY)
- */
 
 let isInitialized = false;
 

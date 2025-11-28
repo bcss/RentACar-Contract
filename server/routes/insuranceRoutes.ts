@@ -1,6 +1,28 @@
 /**
- * Insurance Routes Module
- * Insurance claims and claim progress tracking
+ * File: server/routes/insuranceRoutes.ts
+ * @area Insurance Claims & Excess
+ * @checklist §2.4, §2.5, §3.8, Appendix C.1
+ * @purpose Insurance claim CRUD and progress tracking per Master Spec §2.5
+ * 
+ * @behaviour
+ *  - Claim creation linked to contract/vehicle/incident
+ *  - Progress updates tracked in claim_progress_updates table
+ *  - Status workflow: pending → under_review → approved/rejected → settled
+ *  - Appendix C.1 fields: insurerPaidAmount, finalCustomerLiability
+ * 
+ * @routes
+ *  - GET /api/insurance-claims - List claims with filters
+ *  - GET /api/insurance-claims/:id - Single claim with progress history
+ *  - POST /api/insurance-claims - Create claim (§3.8)
+ *  - PATCH /api/insurance-claims/:id - Update claim
+ *  - DELETE /api/insurance-claims/:id - Disable claim (manager only)
+ *  - POST /api/insurance-claims/:id/progress - Add progress update
+ * 
+ * @notes
+ *  - Excess amount loaded from insurance/tariff configuration
+ *  - Contract cannot close until all claims resolved (§3.8)
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.4, §2.5, §3.8, C.1)
  */
 
 import { Router, type Request, type Response, type NextFunction } from "express";

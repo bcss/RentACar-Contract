@@ -1,3 +1,32 @@
+/**
+ * File: server/routes/customerRoutes.ts
+ * @area Customer / Sponsor Profiles
+ * @checklist §2.14, §4.2.1, Appendix C
+ * @purpose Customer CRUD and profile management per Master Spec §2.14
+ * 
+ * @behaviour
+ *  - Bilingual names: nameEn, nameAr
+ *  - ID documents: nationalId, emiratesIdNumber, passportNumber
+ *  - License tracking: licenseNumber, licenseIssueDate, licenseExpiryDate (§2.14)
+ *  - Communication prefs: preferredLanguage (en/ar), preferredChannel (sms/email/both)
+ *  - Marketing opt-in and DND window support (§4.2.1)
+ *  - Blacklist status field: CLEAR/FLAGGED/BLOCKED (Appendix C)
+ * 
+ * @routes
+ *  - GET /api/customers - List with disabled filter
+ *  - GET /api/customers/search - Search by query string
+ *  - GET /api/customers/:id - Single customer
+ *  - POST /api/customers - Create customer
+ *  - PATCH /api/customers/:id - Update customer
+ *  - DELETE /api/customers/:id - Disable customer (no hard delete)
+ * 
+ * @notes
+ *  - Document expiry monitored by DOCUMENT_EXPIRY_CHECK cron job (§2.17)
+ *  - Risk scores tracked in customer_risk_scores table (§3.35)
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.14, §4.2.1)
+ */
+
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { storage } from "../storage";

@@ -1,14 +1,32 @@
 /**
- * Contract Management Routes
+ * File: server/routes/contractRoutes.ts
+ * @area Contracts
+ * @checklist §2.1, §2.2, §3.1-3.16, Part 3
+ * @purpose Contract CRUD and lifecycle operations per Master Spec Part 3
  * 
- * Handles all contract-related operations including:
- * - Contract CRUD operations
- * - State machine transitions (draft → active → completed → closed)
- * - Edit history and audit logging
- * - Financial calculations and validation
- * - Insurance claims integration
- * - Driver cost integration
- * - Notification triggers
+ * @behaviour
+ *  - 4-state workflow: DRAFT → ACTIVE → COMPLETED → CLOSED (§2.2)
+ *  - Party type validation: DIRECT_HIRER, SPONSORED_INDIVIDUAL, SPONSORED_COMPANY (§2.1)
+ *  - Edit history tracked in contract_edits table (dual audit trail)
+ *  - Financial calculations via contractFinancials service
+ *  - Notification triggers for all material state changes
+ * 
+ * @routes
+ *  - GET /api/contracts - List with role-based filtering (staff sees own only)
+ *  - GET /api/contracts/:id - Single contract with relations
+ *  - POST /api/contracts - Create draft contract (§3.1)
+ *  - PATCH /api/contracts/:id - Update contract (requires edit reason)
+ *  - POST /api/contracts/:id/activate - Activate with OTP (§3.3)
+ *  - POST /api/contracts/:id/complete - Complete after return inspection (§3.5)
+ *  - POST /api/contracts/:id/close - Close with settlement (§3.11)
+ *  - DELETE /api/contracts/:id - Disable (no hard delete per §1.3)
+ * 
+ * @notes
+ *  - Vehicle status sync on activation (→ OUT) and completion (→ AVAILABLE)
+ *  - Insurance claims integration for damage workflows (§2.4)
+ *  - Driver cost calculation for sponsored contracts
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.1-2.2, Part 3 Workflows)
  */
 
 import { Router } from "express";

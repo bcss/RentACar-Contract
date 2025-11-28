@@ -1,6 +1,29 @@
 /**
- * Inspection & Service Routes Module
- * Vehicle inspections and service records
+ * File: server/routes/inspectionRoutes.ts
+ * @area Inspections
+ * @checklist §2.3, §3.2, §3.6, §3.7
+ * @purpose Vehicle inspection CRUD per Master Spec §2.3
+ * 
+ * @behaviour
+ *  - CHECKOUT inspections: Required before contract activation (§3.2)
+ *  - RETURN inspections: Required before contract completion (§3.6)
+ *  - Damage detection on return: newDamagesFound triggers incident (§3.7)
+ *  - Photos OR remarks mandatory per inspection
+ *  - Atomic lifecycle field updates (vehicleCheckoutAt, vehicleReturnedAt)
+ * 
+ * @routes
+ *  - GET /api/inspections - List with filters (vehicleId, contractId, type)
+ *  - GET /api/inspections/:id - Single inspection
+ *  - POST /api/inspections - Create inspection (triggers lifecycle update)
+ *  - PATCH /api/inspections/:id - Update inspection
+ *  - GET /api/inspections/service-records - Service record listing
+ *  - POST /api/inspections/service-records - Create service record
+ * 
+ * @notes
+ *  - First-handover semantics: COALESCE for timestamps
+ *  - Return damage auto-creates incident via incidentService (§3.7)
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.3, §3.2, §3.6, §3.7)
  */
 
 import { Router, type Request, type Response, type NextFunction } from "express";

@@ -1,6 +1,29 @@
 /**
- * Notification Routes Module
- * Notification templates, reminders, and communications
+ * File: server/routes/notificationRoutes.ts
+ * @area Notifications Engine
+ * @checklist §2.13, Part 8, §3.28, §3.32-3.34
+ * @purpose Notification templates, reminders, and communications per Master Spec Part 8
+ * 
+ * @behaviour
+ *  - 30 pre-seeded bilingual templates (EN/AR)
+ *  - Multi-channel: SMS (Twilio), Email (SendGrid), WhatsApp (future)
+ *  - Provider fallback: SMS → Secondary SMS → Email
+ *  - Mandatory confirmations: OTP, payment, activation, completion (§3.28)
+ * 
+ * @routes
+ *  - GET /api/notifications/templates - List templates with filters
+ *  - POST /api/notifications/templates - Create template (manager+)
+ *  - PATCH /api/notifications/templates/:id - Update template
+ *  - DELETE /api/notifications/templates/:id - Disable template
+ *  - GET /api/notifications/reminders - List automated reminders
+ *  - POST /api/notifications/reminders - Create reminder rule
+ *  - POST /api/notifications/send - Manual notification send
+ * 
+ * @notes
+ *  - Templates support variable binding: {{customerName}}, {{contractNumber}}
+ *  - Campaign messages via campaignRoutes (§2.13)
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.13, Part 8)
  */
 
 import { Router, type Request, type Response, type NextFunction } from "express";

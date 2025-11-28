@@ -1,3 +1,35 @@
+/**
+ * File: server/services/availabilityEngine.ts
+ * @area Availability Engine
+ * @checklist §2.18, §3.26, Appendix C.8
+ * @purpose High-performance vehicle availability tracking per Master Spec §2.18
+ * 
+ * @behaviour
+ *  - Materialized availability via vehicle_availability_cache table
+ *  - Event-driven updates on: reservation, cancellation, activation, completion, transfer, maintenance
+ *  - Indexed queries for real-time multi-branch fleet visibility
+ *  - Cache metadata: lastRebuildAt, rebuildSource per Appendix C.8
+ * 
+ * @services
+ *  - updateVehicleAvailability(vehicleId, dates, status): Updates cache entries
+ *  - clearVehicleAvailability(vehicleId, dates): Resets to 'available'
+ *  - getVehicleAvailability(vehicleId, dateRange): Queries availability
+ *  - getBranchAvailability(branchId): Aggregate branch metrics
+ *  - rebuildCacheForVehicle(vehicleId): Full cache rebuild
+ * 
+ * @triggers (per §3.26)
+ *  - Reservation created/cancelled
+ *  - Contract activated/completed/closed/cancelled
+ *  - Vehicle transferred between branches
+ *  - Maintenance job started/completed
+ * 
+ * @notes
+ *  - Uses UPSERT for conflict resolution (vehicleId + date)
+ *  - Cache TTL managed by CACHE_VALIDATION cron job
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.18, §3.26, Appendix C.8)
+ */
+
 import { db } from '../db';
 import { vehicleAvailabilityCache, vehicles, contracts, branches } from '@shared/schema';
 import { eq, and, gte, lte, inArray, sql, or, not, isNull } from 'drizzle-orm';

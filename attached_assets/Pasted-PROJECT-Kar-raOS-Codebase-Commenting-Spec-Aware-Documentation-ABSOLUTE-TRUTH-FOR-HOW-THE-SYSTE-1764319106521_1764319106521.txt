@@ -1,0 +1,122 @@
+PROJECT:
+KarāraOS – Codebase Commenting & Spec-Aware Documentation
+
+ABSOLUTE TRUTH FOR HOW THE SYSTEM WORKS:
+docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+
+CONTEXT:
+- The project’s behaviour, flows, fields, and features are defined ONLY in docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+- The current codebase implements that behaviour (or attempts to).
+- We now want the ENTIRE codebase to be thoroughly, consistently commented so that:
+  - Any developer can understand what each part does,
+  - How it maps to the checklist,
+  - Where any known deviations or gaps exist.
+
+ROLE:
+You are the SPEC-AWARE CODE COMMENTING ENGINE.
+
+Your mission:
+1) Read docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md and treat it as the **functional map** of the system.
+2) Traverse the entire codebase (backend, frontend, scripts, jobs, etc.).
+3) Add or improve comments so that every significant piece of code:
+   - Is clearly explained,
+   - Is mapped to one or more checklist items,
+   - Clearly calls out any known or suspected spec deviations.
+
+You MUST NOT:
+- Change behaviour,
+- Add new features,
+- “Fix” code beyond trivial comment-related refactors (e.g., renaming a variable only if it is clearly misleading).
+
+This pass is about **documentation in code**, not logic changes.
+
+==================================================================
+PHASE 1 – LOAD CHECKLIST & BUILD INTERNAL MAP
+==================================================================
+
+1. Open docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+2. For each row/entry, extract:
+   - `ID` (e.g., CL-01, DS-01, RPT-01, IMP-01)
+   - `Area` (Contracts, Driver Scheduling, Insurance Claims, Reports, Imports, etc.)
+   - `Spec Section` (if present)
+   - `Behaviour summary`
+   - `Screen(s)` if referenced
+   - `Status` (COMPLETED / NOT_COMPLETED etc.)
+
+3. Build an internal mapping:
+   - `ChecklistByArea[Area] = [ChecklistItems...]`
+   - `ChecklistById[ID] = ChecklistItem`
+
+You will use these IDs and Areas in comments.
+
+==================================================================
+PHASE 2 – DEFINE COMMENTING STYLE & CONVENTIONS
+==================================================================
+
+Use a consistent commenting style depending on language:
+
+- For TypeScript/JavaScript:
+  - File/module header: `/** ... */`
+  - Function/method: `/** ... */` or `// ...`
+  - Inline/block: `// ...`
+
+- For other languages: use idiomatic comment markers (`#`, `//`, `/* */`, etc.)
+
+Each significant function/method/class or module should have:
+
+1. A **high-level comment** including:
+   - `@area` → Checklist area (e.g., `@area Contracts`, `@area Driver Scheduling`)
+   - `@checklist` → ID(s) from MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+   - `@purpose` → What this code does in business terms
+   - `@behaviour` → Short summary of critical behaviour rules
+   - `@notes` → Optional: edge cases, technical notes
+
+2. For complex logic blocks, add **inline comments** that:
+   - Explain “why” this logic exists in terms of the checklist
+   - Highlight important validations or constraints
+
+3. For any suspected or confirmed spec deviation, mark with:
+   - `@deviation` → Short description
+   - `@status` → KNOWN / TO_VERIFY / TODO
+   - `@impact` → What might be affected
+
+==================================================================
+PHASE 3 – INVENTORY & TRAVERSE THE CODEBASE
+==================================================================
+
+1. Identify main code areas:
+   - Backend: e.g. `src/`, `app/`, `server/`, `modules/`, etc.
+   - Frontend: e.g. `src/pages/`, `src/components/`, `app/**`, etc.
+   - Background jobs: `jobs/`, `workers/`, `cron/`, etc.
+   - Scripts: `scripts/`, `tools/`, `cli/`, etc.
+
+2. EXCLUDE:
+   - Third-party code: `node_modules/`, `vendor/`, generated artifacts, etc.
+   - Pure config or environment files unless they contain important logic (still okay to comment top-level purpose if needed).
+
+3. For each file:
+   - Determine which AREA(S) and checklist ID(s) it belongs to.
+   - If multiple, list multiple IDs.
+
+==================================================================
+PHASE 4 – COMMENT FILE HEADERS
+==================================================================
+
+For EVERY relevant source file, add or update a header comment:
+
+Example (TypeScript):
+
+```ts
+/**
+ * File: src/modules/contracts/createContract.ts
+ * @area Contracts
+ * @checklist CL-01, CL-02
+ * @purpose Implements contract creation workflow as defined in MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+ * @behaviour
+ *  - Validates required fields before persisting a new contract.
+ *  - Applies business rules for dates, vehicle assignment, and pricing.
+ *  - Triggers initial status and any required notifications as per spec.
+ *
+ * NOTE:
+ *  - See docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (IDs: CL-01, CL-02) for the detailed functional definition.
+ */
