@@ -32,13 +32,18 @@
 }
 
 /* Viewport-aware root font scaling for responsive proportional sizing
-   - All Tailwind rem-based classes (text-4xl, p-6, etc.) scale with viewport
-   - At 1366px: ~15px base (slightly compact)
-   - At 1600px: ~16px base (matches reference design)
-   - At 1920px: ~17.5px base (slightly larger)
-   This maintains exact reference design ratios while providing responsive scaling */
+   Reference baseline: 16px at 1600px viewport
+   Formula: clamp(min, preferred, max) where preferred = 0.46875vw + 8.5px
+   
+   Computed values by viewport width:
+   - At 1366px: ~14.9px (compact for smaller laptop screens)
+   - At 1600px: ~16px (matches reference design baseline)
+   - At 1920px: ~17.5px (maximum, larger for big screens)
+   
+   This maintains exact reference design ratios while providing responsive scaling.
+   See docs/RESPONSIVE_SCALING_REFERENCE.md for full documentation. */
 html {
-  font-size: clamp(15px, 0.75vw + 10px, 17.5px);
+  font-size: clamp(14.8px, 0.46875vw + 8.5px, 17.5px);
 }
 
 /* LIGHT MODE - KarāraOS Reference Design (Nov 2025) */
