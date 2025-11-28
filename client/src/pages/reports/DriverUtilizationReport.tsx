@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Download, Users, Clock, TrendingUp, DollarSign } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { format } from "date-fns";
 
 const safeFormatDate = (dateValue: string | Date | null | undefined, formatStr: string, fallback: string = "—") => {
@@ -116,8 +116,8 @@ export default function DriverUtilizationReport() {
           <h1 className="text-3xl font-bold mb-2">Driver Utilization & Overtime Report</h1>
           <p className="text-muted-foreground">Workforce productivity and labor cost analysis</p>
         </div>
-        <Button onClick={handleExport} variant="outline">
-          <Download className="w-4 h-4 mr-2" />
+        <Button onClick={handleExport} variant="outline" className="gap-2">
+          <MaterialSymbol name="download" size="sm" />
           Export CSV
         </Button>
       </div>
@@ -125,9 +125,9 @@ export default function DriverUtilizationReport() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Drivers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <MaterialSymbol name="group" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{uniqueDrivers}</div>
@@ -136,9 +136,9 @@ export default function DriverUtilizationReport() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Hours</CardTitle>
-            <Clock className="h-4 w-4 text-blue-600" />
+            <MaterialSymbol name="schedule" size="sm" className="text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{totalHours.toFixed(1)}</div>
@@ -147,9 +147,9 @@ export default function DriverUtilizationReport() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Overtime Hours</CardTitle>
-            <TrendingUp className="h-4 w-4 text-orange-600" />
+            <MaterialSymbol name="trending_up" size="sm" className="text-orange-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{overtimeHours.toFixed(1)}</div>
@@ -158,9 +158,9 @@ export default function DriverUtilizationReport() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Utilization Rate</CardTitle>
-            <DollarSign className="h-4 w-4 text-[hsl(var(--positive))]" />
+            <MaterialSymbol name="payments" size="sm" className="text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-[hsl(var(--positive))]">

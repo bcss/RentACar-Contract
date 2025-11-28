@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CommunicationLog } from "@shared/schema";
-import { Mail, Phone, Search, Download, Filter, CheckCircle2, XCircle, Clock, Send } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { useState } from "react";
 import { format } from "date-fns";
 
@@ -64,13 +64,13 @@ export default function CommunicationLogs() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'delivered':
-        return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="w-3 h-3 mr-1" /> {t('communications.logStatusDelivered')}</Badge>;
+        return <Badge variant="default" className="bg-green-600 gap-1"><MaterialSymbol name="check_circle" size="xs" /> {t('communications.logStatusDelivered')}</Badge>;
       case 'sent':
-        return <Badge variant="default" className="bg-blue-600"><Send className="w-3 h-3 mr-1" /> {t('communications.logStatusSent')}</Badge>;
+        return <Badge variant="default" className="bg-blue-600 gap-1"><MaterialSymbol name="send" size="xs" /> {t('communications.logStatusSent')}</Badge>;
       case 'failed':
-        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" /> {t('communications.logStatusFailed')}</Badge>;
+        return <Badge variant="destructive" className="gap-1"><MaterialSymbol name="cancel" size="xs" /> {t('communications.logStatusFailed')}</Badge>;
       case 'pending':
-        return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" /> {t('communications.logStatusPending')}</Badge>;
+        return <Badge variant="secondary" className="gap-1"><MaterialSymbol name="schedule" size="xs" /> {t('communications.logStatusPending')}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -78,8 +78,8 @@ export default function CommunicationLogs() {
 
   const getChannelIcon = (channel: string) => {
     return channel === 'email' 
-      ? <Mail className="w-4 h-4 text-blue-600" />
-      : <Phone className="w-4 h-4 text-[hsl(var(--positive))]" />;
+      ? <MaterialSymbol name="mail" size="sm" className="text-blue-600" />
+      : <MaterialSymbol name="phone" size="sm" className="text-[hsl(var(--positive))]" />;
   };
 
   return (
@@ -103,9 +103,10 @@ export default function CommunicationLogs() {
                 variant="outline"
                 onClick={handleExport}
                 disabled={!filteredLogs || filteredLogs.length === 0}
+                className="gap-2"
                 data-testid="button-export-logs"
               >
-                <Download className="w-4 h-4 mr-2" />
+                <MaterialSymbol name="download" size="sm" />
                 {t('common.exportCSV')}
               </Button>
             </div>
@@ -116,7 +117,7 @@ export default function CommunicationLogs() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <MaterialSymbol name="search" size="sm" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder={t('communications.searchPlaceholder')}
                   value={searchTerm}
@@ -128,8 +129,8 @@ export default function CommunicationLogs() {
             </div>
             <div>
               <Select value={channelFilter} onValueChange={setChannelFilter}>
-                <SelectTrigger data-testid="select-channel-filter">
-                  <Filter className="w-4 h-4 mr-2" />
+                <SelectTrigger data-testid="select-channel-filter" className="gap-2">
+                  <MaterialSymbol name="filter_alt" size="sm" />
                   <SelectValue placeholder={t('communications.logChannel')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -141,8 +142,8 @@ export default function CommunicationLogs() {
             </div>
             <div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger data-testid="select-status-filter">
-                  <Filter className="w-4 h-4 mr-2" />
+                <SelectTrigger data-testid="select-status-filter" className="gap-2">
+                  <MaterialSymbol name="filter_alt" size="sm" />
                   <SelectValue placeholder={t('communications.logStatus')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -221,9 +222,9 @@ export default function CommunicationLogs() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>{t('communications.noLogs')}</p>
+            <div className="p-12 text-center">
+              <MaterialSymbol name="mail" size="2xl" className="text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">{t('communications.noLogs')}</p>
               {(searchTerm || channelFilter !== "all" || statusFilter !== "all") && (
                 <Button 
                   variant="ghost" 

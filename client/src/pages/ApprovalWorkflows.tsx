@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Edit, CheckCircle, XCircle, History, FileText } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -203,8 +203,8 @@ export default function ApprovalWorkflows() {
           </h1>
           <p className="text-muted-foreground mt-1">Multi-level approval request management</p>
         </div>
-        <Button onClick={handleCreate} data-testid="button-create-approval">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button onClick={handleCreate} className="gap-2" data-testid="button-create-approval">
+          <MaterialSymbol name="add_circle" size="sm" />
           New Request
         </Button>
       </div>
@@ -213,7 +213,7 @@ export default function ApprovalWorkflows() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
-            <FileText className="w-4 h-4 text-muted-foreground" />
+            <MaterialSymbol name="description" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalRequests}</div>
@@ -222,7 +222,7 @@ export default function ApprovalWorkflows() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <FileText className="w-4 h-4 text-muted-foreground" />
+            <MaterialSymbol name="schedule" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingRequests}</div>
@@ -231,7 +231,7 @@ export default function ApprovalWorkflows() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Approved</CardTitle>
-            <CheckCircle className="w-4 h-4 text-muted-foreground" />
+            <MaterialSymbol name="check_circle" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{approvedRequests}</div>
@@ -240,7 +240,7 @@ export default function ApprovalWorkflows() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-            <XCircle className="w-4 h-4 text-muted-foreground" />
+            <MaterialSymbol name="cancel" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{rejectedRequests}</div>
@@ -251,17 +251,22 @@ export default function ApprovalWorkflows() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
+            <MaterialSymbol name="approval" size="md" className="text-primary" />
             Approval Requests
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            <div className="flex justify-center py-12">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MaterialSymbol name="progress_activity" className="animate-spin" />
+                Loading...
+              </div>
+            </div>
           ) : requests.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No approval requests found</p>
+            <div className="p-12 text-center">
+              <MaterialSymbol name="approval" size="2xl" className="text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">No approval requests found</p>
             </div>
           ) : (
             <Table>
@@ -294,12 +299,13 @@ export default function ApprovalWorkflows() {
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="ghost"
                           onClick={() => handleEdit(request)}
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                           data-testid={`button-edit-approval-${request.id}`}
                         >
-                          <Edit className="w-4 h-4" />
+                          <MaterialSymbol name="edit" size="sm" />
                         </Button>
                         {request.status === "pending" && (
                           <>
@@ -307,29 +313,32 @@ export default function ApprovalWorkflows() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleApprove(request.id)}
+                              className="gap-1"
                               data-testid={`button-approve-${request.id}`}
                             >
-                              <CheckCircle className="w-4 h-4 mr-1" />
+                              <MaterialSymbol name="check_circle" size="sm" />
                               Approve
                             </Button>
                             <Button
                               size="sm"
                               variant="destructive"
                               onClick={() => handleReject(request)}
+                              className="gap-1"
                               data-testid={`button-reject-${request.id}`}
                             >
-                              <XCircle className="w-4 h-4 mr-1" />
+                              <MaterialSymbol name="cancel" size="sm" />
                               Reject
                             </Button>
                           </>
                         )}
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="ghost"
                           onClick={() => handleViewHistory(request)}
+                          className="h-8 w-8"
                           data-testid={`button-history-${request.id}`}
                         >
-                          <History className="w-4 h-4" />
+                          <MaterialSymbol name="history" size="sm" />
                         </Button>
                       </div>
                     </TableCell>

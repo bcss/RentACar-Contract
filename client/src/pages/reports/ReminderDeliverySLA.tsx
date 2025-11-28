@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Download, Send, CheckCircle, XCircle, Clock } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { format } from "date-fns";
 
 export default function ReminderDeliverySLA() {
@@ -101,8 +101,8 @@ export default function ReminderDeliverySLA() {
           <h1 className="text-3xl font-bold mb-2">Reminder Delivery SLA Report</h1>
           <p className="text-muted-foreground">SMS and Email notification delivery performance</p>
         </div>
-        <Button onClick={handleExport} variant="outline">
-          <Download className="w-4 h-4 mr-2" />
+        <Button onClick={handleExport} variant="outline" className="gap-2">
+          <MaterialSymbol name="download" size="sm" />
           Export CSV
         </Button>
       </div>
@@ -110,9 +110,9 @@ export default function ReminderDeliverySLA() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Messages</CardTitle>
-            <Send className="h-4 w-4 text-muted-foreground" />
+            <MaterialSymbol name="send" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalMessages}</div>
@@ -121,9 +121,9 @@ export default function ReminderDeliverySLA() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Delivery Rate</CardTitle>
-            <CheckCircle className="h-4 w-4 text-[hsl(var(--positive))]" />
+            <MaterialSymbol name="check_circle" size="sm" className="text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-[hsl(var(--positive))]">{deliveryRate}%</div>
@@ -132,9 +132,9 @@ export default function ReminderDeliverySLA() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Failure Rate</CardTitle>
-            <XCircle className="h-4 w-4 text-[hsl(var(--negative))]" />
+            <MaterialSymbol name="cancel" size="sm" className="text-[hsl(var(--negative))]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-[hsl(var(--negative))]">{failureRate}%</div>
@@ -143,9 +143,9 @@ export default function ReminderDeliverySLA() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <MaterialSymbol name="schedule" size="sm" className="text-yellow-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>

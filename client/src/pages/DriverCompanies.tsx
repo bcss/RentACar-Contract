@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Building2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useErrorDisplay } from "@/components/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,8 @@ import { insertDriverOutsourceCompanySchema, type DriverOutsourceCompany, type I
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
+import { ListPageLayout, FilterPanel, FilterGroup } from "@/components/layouts";
 
 export default function DriverCompanies() {
   const { t } = useTranslation();
@@ -104,89 +106,141 @@ export default function DriverCompanies() {
     }
   };
 
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            {t("driverCompanies")}
-          </h1>
-          <p className="text-muted-foreground mt-1">Manage outsource driver service companies</p>
-        </div>
-        <Button onClick={handleCreate} data-testid="button-create-company">
-          <Plus className="w-4 h-4 mr-2" />
-          {t("addCompany")}
-        </Button>
-      </div>
+  const [searchTerm, setSearchTerm] = useState("");
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            Service Providers
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
-          ) : companies.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No companies found</p>
+  const filteredCompanies = companies.filter((company) => {
+    const matchesSearch = 
+      company.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (company.nameAr && company.nameAr.includes(searchTerm)) ||
+      (company.contactPerson && company.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesSearch;
+  });
+
+  return (
+    <div data-testid="page-driver-companies">
+      <ListPageLayout
+        title={t("driverCompanies")}
+        subtitle={`${filteredCompanies.length} ${t("companies")}`}
+        actionButton={
+          <Button onClick={handleCreate} className="gap-2" data-testid="button-create-company">
+            <MaterialSymbol name="add_circle" size="sm" />
+            {t("addCompany")}
+          </Button>
+        }
+        filterPanel={
+          <FilterPanel title={t("common.filters")} showButtons={false}>
+            <FilterGroup label={t("common.search")}>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <MaterialSymbol name="search" size="sm" />
+                </span>
+                <Input
+                  placeholder={t("common.search")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-10 rounded-lg"
+                  data-testid="input-search"
+                />
+              </div>
+            </FilterGroup>
+          </FilterPanel>
+        }
+      >
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MaterialSymbol name="progress_activity" className="animate-spin" />
+              {t("common.loading")}
             </div>
-          ) : (
+          </div>
+        ) : filteredCompanies.length === 0 ? (
+          <div className="p-12 text-center">
+            <MaterialSymbol name="business" size="2xl" className="text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground">{t("common.noResults")}</p>
+          </div>
+        ) : (
+          <div className="rounded-xl border bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>{t("companyName")}</TableHead>
-                  <TableHead>{t("contactPerson")}</TableHead>
-                  <TableHead>{t("contact")}</TableHead>
-                  <TableHead>{t("status")}</TableHead>
-                  <TableHead className="text-right">{t("actions")}</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">{t("companyName")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("contactPerson")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("contact")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("status")}</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right">{t("actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {companies.map((company) => (
-                  <TableRow key={company.id} data-testid={`row-company-${company.id}`}>
+                {filteredCompanies.map((company) => (
+                  <TableRow 
+                    key={company.id} 
+                    className="hover:bg-muted/30 transition-colors"
+                    data-testid={`row-company-${company.id}`}
+                  >
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{company.nameEn}</div>
-                        {company.nameAr && (
-                          <div className="text-sm text-muted-foreground">{company.nameAr}</div>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <MaterialSymbol name="business" size="sm" className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-medium">{company.nameEn}</div>
+                          {company.nameAr && (
+                            <div className="text-sm text-muted-foreground">{company.nameAr}</div>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell>{company.contactPerson}</TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        <div>{company.mobile}</div>
-                        <div className="text-muted-foreground">{company.email}</div>
+                      <div className="flex items-center gap-1">
+                        <MaterialSymbol name="person" size="xs" className="text-muted-foreground" />
+                        {company.contactPerson || "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm space-y-1">
+                        <div className="flex items-center gap-1">
+                          <MaterialSymbol name="phone" size="xs" className="text-muted-foreground" />
+                          {company.mobile || "-"}
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <MaterialSymbol name="mail" size="xs" />
+                          {company.email || "-"}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       {company.isActive ? (
-                        <Badge variant="default">Active</Badge>
+                        <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400 rounded-full">
+                          <MaterialSymbol name="check_circle" size="xs" className="mr-1" />
+                          Active
+                        </Badge>
                       ) : (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="secondary" className="rounded-full">
+                          <MaterialSymbol name="pause_circle" size="xs" className="mr-1" />
+                          Inactive
+                        </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(company)}
-                        data-testid={`button-edit-company-${company.id}`}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(company)}
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                          data-testid={`button-edit-company-${company.id}`}
+                        >
+                          <MaterialSymbol name="edit" size="sm" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </ListPageLayout>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Mail, MessageSquare, Edit, Power, AlertCircle } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -115,8 +115,8 @@ export default function CommunicationProviders() {
           <h1 className="text-3xl font-bold">{t('communications.providers')}</h1>
           <p className="text-muted-foreground mt-1">{t('communications.providersDescription')}</p>
         </div>
-        <Button onClick={handleCreate} data-testid="button-create-provider">
-          <Plus className="h-4 w-4" />
+        <Button onClick={handleCreate} className="gap-2" data-testid="button-create-provider">
+          <MaterialSymbol name="add" size="sm" />
           {t('communications.addProvider')}
         </Button>
       </div>
@@ -125,17 +125,17 @@ export default function CommunicationProviders() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
+              <MaterialSymbol name="sms" size="md" className="text-primary" />
               {t('communications.smsProviders')} ({smsProviders.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {smsProviders.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>{t('communications.noSmsProviders')}</p>
-                  <p className="text-sm">{t('communications.addSmsProviderHint')}</p>
+                <div className="p-12 text-center">
+                  <MaterialSymbol name="info" size="2xl" className="text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">{t('communications.noSmsProviders')}</p>
+                  <p className="text-sm text-muted-foreground">{t('communications.addSmsProviderHint')}</p>
                 </div>
               ) : (
                 smsProviders.map((provider) => (
@@ -161,9 +161,10 @@ export default function CommunicationProviders() {
                       size="icon"
                       variant="ghost"
                       onClick={() => handleEdit(provider)}
+                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                       data-testid={`button-edit-provider-${provider.id}`}
                     >
-                      <Edit className="h-4 w-4" />
+                      <MaterialSymbol name="edit" size="sm" />
                     </Button>
                   </div>
                 ))
@@ -175,17 +176,17 @@ export default function CommunicationProviders() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
+              <MaterialSymbol name="mail" size="md" className="text-primary" />
               {t('communications.emailProviders')} ({emailProviders.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {emailProviders.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>{t('communications.noEmailProviders')}</p>
-                  <p className="text-sm">{t('communications.addEmailProviderHint')}</p>
+                <div className="p-12 text-center">
+                  <MaterialSymbol name="info" size="2xl" className="text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">{t('communications.noEmailProviders')}</p>
+                  <p className="text-sm text-muted-foreground">{t('communications.addEmailProviderHint')}</p>
                 </div>
               ) : (
                 emailProviders.map((provider) => (
@@ -211,9 +212,10 @@ export default function CommunicationProviders() {
                       size="icon"
                       variant="ghost"
                       onClick={() => handleEdit(provider)}
+                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                       data-testid={`button-edit-provider-${provider.id}`}
                     >
-                      <Edit className="h-4 w-4" />
+                      <MaterialSymbol name="edit" size="sm" />
                     </Button>
                   </div>
                 ))
@@ -332,7 +334,7 @@ export default function CommunicationProviders() {
 
               <div className="p-4 border rounded-lg bg-muted/50 space-y-3">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <MaterialSymbol name="info" size="md" className="text-muted-foreground mt-0.5" />
                   <div>
                     <p className="text-sm font-medium">{t('communications.credentialsRequired')}</p>
                     <p className="text-sm text-muted-foreground mt-1">

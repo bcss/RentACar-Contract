@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Edit, Ticket, MapPin, Receipt } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -318,16 +318,16 @@ export default function TollManagement() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="systems" data-testid="tab-toll-systems">
-            <Ticket className="w-4 h-4 mr-2" />
+          <TabsTrigger value="systems" data-testid="tab-toll-systems" className="gap-2">
+            <MaterialSymbol name="toll" size="sm" />
             Toll Systems
           </TabsTrigger>
-          <TabsTrigger value="gates" data-testid="tab-toll-gates">
-            <MapPin className="w-4 h-4 mr-2" />
+          <TabsTrigger value="gates" data-testid="tab-toll-gates" className="gap-2">
+            <MaterialSymbol name="location_on" size="sm" />
             Toll Gates
           </TabsTrigger>
-          <TabsTrigger value="passes" data-testid="tab-toll-passes">
-            <Receipt className="w-4 h-4 mr-2" />
+          <TabsTrigger value="passes" data-testid="tab-toll-passes" className="gap-2">
+            <MaterialSymbol name="receipt" size="sm" />
             Toll Passes
           </TabsTrigger>
         </TabsList>
@@ -335,8 +335,8 @@ export default function TollManagement() {
         {/* Toll Systems Tab */}
         <TabsContent value="systems" className="space-y-4">
           <div className="flex justify-end">
-            <Button onClick={handleCreateSystem} data-testid="button-create-toll-system">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={handleCreateSystem} className="gap-2" data-testid="button-create-toll-system">
+              <MaterialSymbol name="add_circle" size="sm" />
               Add Toll System
             </Button>
           </div>
@@ -344,17 +344,22 @@ export default function TollManagement() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Ticket className="w-5 h-5" />
+                <MaterialSymbol name="toll" size="md" className="text-primary" />
                 Toll Systems
               </CardTitle>
             </CardHeader>
             <CardContent>
               {systemsLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                <div className="flex justify-center py-12">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MaterialSymbol name="progress_activity" className="animate-spin" />
+                    Loading...
+                  </div>
+                </div>
               ) : tollSystems.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Ticket className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No toll systems found</p>
+                <div className="p-12 text-center">
+                  <MaterialSymbol name="toll" size="2xl" className="text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">No toll systems found</p>
                 </div>
               ) : (
                 <Table>
@@ -392,12 +397,13 @@ export default function TollManagement() {
                         </TableCell>
                         <TableCell>
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="ghost"
                             onClick={() => handleEditSystem(system)}
+                            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                             data-testid={`button-edit-toll-system-${system.id}`}
                           >
-                            <Edit className="w-4 h-4" />
+                            <MaterialSymbol name="edit" size="sm" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -412,8 +418,8 @@ export default function TollManagement() {
         {/* Toll Gates Tab */}
         <TabsContent value="gates" className="space-y-4">
           <div className="flex justify-end">
-            <Button onClick={handleCreateGate} data-testid="button-create-toll-gate">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={handleCreateGate} className="gap-2" data-testid="button-create-toll-gate">
+              <MaterialSymbol name="add_circle" size="sm" />
               Add Toll Gate
             </Button>
           </div>
@@ -421,17 +427,22 @@ export default function TollManagement() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
+                <MaterialSymbol name="location_on" size="md" className="text-primary" />
                 Toll Gates
               </CardTitle>
             </CardHeader>
             <CardContent>
               {gatesLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                <div className="flex justify-center py-12">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MaterialSymbol name="progress_activity" className="animate-spin" />
+                    Loading...
+                  </div>
+                </div>
               ) : tollGates.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <MapPin className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No toll gates found</p>
+                <div className="p-12 text-center">
+                  <MaterialSymbol name="location_on" size="2xl" className="text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">No toll gates found</p>
                 </div>
               ) : (
                 <Table>
@@ -471,12 +482,13 @@ export default function TollManagement() {
                           </TableCell>
                           <TableCell>
                             <Button
-                              size="sm"
+                              size="icon"
                               variant="ghost"
                               onClick={() => handleEditGate(gate)}
+                              className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                               data-testid={`button-edit-toll-gate-${gate.id}`}
                             >
-                              <Edit className="w-4 h-4" />
+                              <MaterialSymbol name="edit" size="sm" />
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -492,8 +504,8 @@ export default function TollManagement() {
         {/* Toll Passes Tab */}
         <TabsContent value="passes" className="space-y-4">
           <div className="flex justify-end">
-            <Button onClick={handleCreatePass} data-testid="button-create-toll-pass">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={handleCreatePass} className="gap-2" data-testid="button-create-toll-pass">
+              <MaterialSymbol name="add_circle" size="sm" />
               Add Toll Pass
             </Button>
           </div>
@@ -501,17 +513,22 @@ export default function TollManagement() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Receipt className="w-5 h-5" />
+                <MaterialSymbol name="receipt" size="md" className="text-primary" />
                 Toll Passes
               </CardTitle>
             </CardHeader>
             <CardContent>
               {passesLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                <div className="flex justify-center py-12">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MaterialSymbol name="progress_activity" className="animate-spin" />
+                    Loading...
+                  </div>
+                </div>
               ) : tollPasses.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Receipt className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No toll passes found</p>
+                <div className="p-12 text-center">
+                  <MaterialSymbol name="receipt" size="2xl" className="text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">No toll passes found</p>
                 </div>
               ) : (
                 <Table>
@@ -552,12 +569,13 @@ export default function TollManagement() {
                           <TableCell>{pass.paidBy || "—"}</TableCell>
                           <TableCell>
                             <Button
-                              size="sm"
+                              size="icon"
                               variant="ghost"
                               onClick={() => handleEditPass(pass)}
+                              className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                               data-testid={`button-edit-toll-pass-${pass.id}`}
                             >
-                              <Edit className="w-4 h-4" />
+                              <MaterialSymbol name="edit" size="sm" />
                             </Button>
                           </TableCell>
                         </TableRow>

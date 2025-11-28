@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Building2, Edit, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +16,8 @@ import { insertBranchSchema, type Branch, type InsertBranch } from "@shared/sche
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
+import { ListPageLayout, FilterPanel, FilterGroup } from "@/components/layouts";
 
 const EMIRATES = [
   { value: "dubai", label: "Dubai" },
@@ -121,98 +122,166 @@ export default function Branches() {
     }
   };
 
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            {t("branches")}
-          </h1>
-          <p className="text-muted-foreground mt-1">Manage company branches and locations</p>
-        </div>
-        <Button onClick={handleCreate} data-testid="button-create-branch">
-          <Plus className="w-4 h-4 mr-2" />
-          {t("addBranch")}
-        </Button>
-      </div>
+  const [searchTerm, setSearchTerm] = useState("");
+  const [emirateFilter, setEmirateFilter] = useState<string>("all");
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            Branch Locations
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
-          ) : branches.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No branches found</p>
+  const filteredBranches = branches.filter((branch) => {
+    const matchesSearch = 
+      branch.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (branch.nameAr && branch.nameAr.includes(searchTerm)) ||
+      branch.branchCode.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesEmirate = emirateFilter === "all" || branch.emirate === emirateFilter;
+    return matchesSearch && matchesEmirate;
+  });
+
+  return (
+    <div data-testid="page-branches">
+      <ListPageLayout
+        title={t("branches")}
+        subtitle={`${filteredBranches.length} ${t("branches")}`}
+        actionButton={
+          <Button onClick={handleCreate} className="gap-2" data-testid="button-create-branch">
+            <MaterialSymbol name="add_circle" size="sm" />
+            {t("addBranch")}
+          </Button>
+        }
+        filterPanel={
+          <FilterPanel title={t("common.filters")} showButtons={false}>
+            <FilterGroup label={t("common.search")}>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <MaterialSymbol name="search" size="sm" />
+                </span>
+                <Input
+                  placeholder={t("common.search")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-10 rounded-lg"
+                  data-testid="input-search"
+                />
+              </div>
+            </FilterGroup>
+            
+            <FilterGroup label={t("emirate")}>
+              <Select value={emirateFilter} onValueChange={setEmirateFilter}>
+                <SelectTrigger className="h-10 rounded-lg" data-testid="select-emirate">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("common.all")}</SelectItem>
+                  {EMIRATES.map((emirate) => (
+                    <SelectItem key={emirate.value} value={emirate.value}>
+                      {emirate.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FilterGroup>
+          </FilterPanel>
+        }
+      >
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MaterialSymbol name="progress_activity" className="animate-spin" />
+              {t("common.loading")}
             </div>
-          ) : (
+          </div>
+        ) : filteredBranches.length === 0 ? (
+          <div className="p-12 text-center">
+            <MaterialSymbol name="business" size="2xl" className="text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground">{t("common.noResults")}</p>
+          </div>
+        ) : (
+          <div className="rounded-xl border bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>{t("code")}</TableHead>
-                  <TableHead>{t("branchName")}</TableHead>
-                  <TableHead>{t("emirate")}</TableHead>
-                  <TableHead>{t("contact")}</TableHead>
-                  <TableHead>{t("status")}</TableHead>
-                  <TableHead className="text-right">{t("actions")}</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">{t("code")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("branchName")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("emirate")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("contact")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("status")}</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right">{t("actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {branches.map((branch) => (
-                  <TableRow key={branch.id} data-testid={`row-branch-${branch.id}`}>
+                {filteredBranches.map((branch) => (
+                  <TableRow 
+                    key={branch.id} 
+                    className="hover:bg-muted/30 transition-colors"
+                    data-testid={`row-branch-${branch.id}`}
+                  >
                     <TableCell>
-                      <Badge variant="outline">{branch.branchCode}</Badge>
+                      <Badge variant="outline" className="rounded-full">
+                        <MaterialSymbol name="tag" size="xs" className="mr-1" />
+                        {branch.branchCode}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{branch.nameEn}</div>
-                        {branch.nameAr && (
-                          <div className="text-sm text-muted-foreground">{branch.nameAr}</div>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <MaterialSymbol name="business" size="sm" className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-medium">{branch.nameEn}</div>
+                          {branch.nameAr && (
+                            <div className="text-sm text-muted-foreground">{branch.nameAr}</div>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
+                        <MaterialSymbol name="location_on" size="xs" className="text-muted-foreground" />
                         {EMIRATES.find((e) => e.value === branch.emirate)?.label || branch.emirate}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        <div>{branch.phone}</div>
-                        <div className="text-muted-foreground">{branch.email}</div>
+                      <div className="text-sm space-y-1">
+                        <div className="flex items-center gap-1">
+                          <MaterialSymbol name="phone" size="xs" className="text-muted-foreground" />
+                          {branch.phone || "-"}
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <MaterialSymbol name="mail" size="xs" />
+                          {branch.email || "-"}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       {branch.isActive ? (
-                        <Badge variant="default">Active</Badge>
+                        <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400 rounded-full">
+                          <MaterialSymbol name="check_circle" size="xs" className="mr-1" />
+                          Active
+                        </Badge>
                       ) : (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="secondary" className="rounded-full">
+                          <MaterialSymbol name="pause_circle" size="xs" className="mr-1" />
+                          Inactive
+                        </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(branch)}
-                        data-testid={`button-edit-branch-${branch.id}`}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(branch)}
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                          data-testid={`button-edit-branch-${branch.id}`}
+                        >
+                          <MaterialSymbol name="edit" size="sm" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </ListPageLayout>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

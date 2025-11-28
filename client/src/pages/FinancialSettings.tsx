@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
 import { insertCompanySettingsSchema, type CompanySettings } from "@shared/schema";
 import { z } from "zod";
-import { Lock } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import {
   Form,
   FormControl,
@@ -232,7 +232,7 @@ export default function FinancialSettings() {
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
-        <Lock className="w-16 h-16 text-muted-foreground" />
+        <MaterialSymbol name="lock" size="2xl" className="text-muted-foreground" />
         <p className="text-muted-foreground text-lg">{t('msg.noPermission')}</p>
       </div>
     );

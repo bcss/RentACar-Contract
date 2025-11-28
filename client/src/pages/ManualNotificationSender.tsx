@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { NotificationTemplate, Customer } from "@shared/schema";
-import { Send, Mail, Phone, AlertCircle, CheckCircle2 } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 
 const manualNotificationSchema = z.object({
   channel: z.enum(["sms", "email"]),
@@ -142,13 +142,13 @@ export default function ManualNotificationSender() {
                           <SelectContent>
                             <SelectItem value="sms">
                               <div className="flex items-center gap-2">
-                                <Phone className="w-4 h-4" />
+                                <MaterialSymbol name="phone" size="sm" />
                                 SMS
                               </div>
                             </SelectItem>
                             <SelectItem value="email">
                               <div className="flex items-center gap-2">
-                                <Mail className="w-4 h-4" />
+                                <MaterialSymbol name="mail" size="sm" />
                                 Email
                               </div>
                             </SelectItem>
@@ -254,9 +254,10 @@ export default function ManualNotificationSender() {
                     <Button
                       type="submit"
                       disabled={sendMutation.isPending}
+                      className="gap-2"
                       data-testid="button-send-notification"
                     >
-                      <Send className="w-4 h-4 mr-2" />
+                      <MaterialSymbol name="send" size="sm" />
                       {sendMutation.isPending ? 'Sending...' : 'Send Notification'}
                     </Button>
                     <Button
@@ -314,9 +315,9 @@ export default function ManualNotificationSender() {
                   </div>
                 ))}
                 {(!templates || templates.length === 0) && (
-                  <div className="text-center py-8 text-muted-foreground text-sm">
-                    <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    No templates available
+                  <div className="p-8 text-center text-muted-foreground text-sm">
+                    <MaterialSymbol name="info" size="xl" className="text-muted-foreground/50 mb-2" />
+                    <p>No templates available</p>
                   </div>
                 )}
               </div>
@@ -328,7 +329,7 @@ export default function ManualNotificationSender() {
             <Card className="mt-4 border-[hsl(var(--positive)/0.2)] bg-[hsl(var(--positive)/0.05)]">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 text-[hsl(var(--positive))]">
-                  <CheckCircle2 className="w-5 h-5" />
+                  <MaterialSymbol name="check_circle" size="md" />
                   <p className="font-medium">Message queued successfully!</p>
                 </div>
               </CardContent>

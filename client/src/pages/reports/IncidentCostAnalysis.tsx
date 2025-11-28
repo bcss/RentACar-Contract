@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Download, AlertTriangle, DollarSign, Shield, FileText } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { format } from "date-fns";
 
 export default function IncidentCostAnalysis() {
@@ -88,8 +88,8 @@ export default function IncidentCostAnalysis() {
           <h1 className="text-3xl font-bold mb-2">Incident Cost & Liability Analysis</h1>
           <p className="text-muted-foreground">Accident tracking, insurance claims, and financial impact</p>
         </div>
-        <Button onClick={handleExport} variant="outline">
-          <Download className="w-4 h-4 mr-2" />
+        <Button onClick={handleExport} variant="outline" className="gap-2">
+          <MaterialSymbol name="download" size="sm" />
           Export CSV
         </Button>
       </div>
@@ -97,9 +97,9 @@ export default function IncidentCostAnalysis() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Incidents</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <MaterialSymbol name="warning" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalIncidents}</div>
@@ -108,9 +108,9 @@ export default function IncidentCostAnalysis() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Estimated Costs</CardTitle>
-            <DollarSign className="h-4 w-4 text-[hsl(var(--negative))]" />
+            <MaterialSymbol name="payments" size="sm" className="text-[hsl(var(--negative))]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-[hsl(var(--negative))]">AED {totalEstimatedCost.toFixed(2)}</div>
@@ -119,9 +119,9 @@ export default function IncidentCostAnalysis() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Claims</CardTitle>
-            <FileText className="h-4 w-4 text-yellow-600" />
+            <MaterialSymbol name="description" size="sm" className="text-yellow-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{activeClaimsCount}</div>
@@ -130,9 +130,9 @@ export default function IncidentCostAnalysis() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Settled Claims</CardTitle>
-            <Shield className="h-4 w-4 text-[hsl(var(--positive))]" />
+            <MaterialSymbol name="shield" size="sm" className="text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-[hsl(var(--positive))]">{settledClaimsCount}</div>

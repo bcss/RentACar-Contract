@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Download, AlertCircle, DollarSign, Calendar, CheckCircle } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { format, differenceInDays } from "date-fns";
 
 export default function TrafficFineAgingReport() {
@@ -94,8 +94,8 @@ export default function TrafficFineAgingReport() {
           <h1 className="text-3xl font-bold mb-2">Traffic Fine Aging & Recovery</h1>
           <p className="text-muted-foreground">Outstanding fines analysis and payment tracking</p>
         </div>
-        <Button onClick={handleExport} variant="outline">
-          <Download className="w-4 h-4 mr-2" />
+        <Button onClick={handleExport} variant="outline" className="gap-2">
+          <MaterialSymbol name="download" size="sm" />
           Export CSV
         </Button>
       </div>
@@ -103,9 +103,9 @@ export default function TrafficFineAgingReport() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Fines</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            <MaterialSymbol name="warning" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalFines}</div>
@@ -114,9 +114,9 @@ export default function TrafficFineAgingReport() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Unpaid Amount</CardTitle>
-            <DollarSign className="h-4 w-4 text-[hsl(var(--negative))]" />
+            <MaterialSymbol name="payments" size="sm" className="text-[hsl(var(--negative))]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-[hsl(var(--negative))]">AED {totalUnpaidAmount.toFixed(2)}</div>
@@ -125,9 +125,9 @@ export default function TrafficFineAgingReport() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Black Points</CardTitle>
-            <Calendar className="h-4 w-4 text-orange-600" />
+            <MaterialSymbol name="event" size="sm" className="text-orange-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{totalBlackPoints}</div>
@@ -136,9 +136,9 @@ export default function TrafficFineAgingReport() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Recovery Rate</CardTitle>
-            <CheckCircle className="h-4 w-4 text-[hsl(var(--positive))]" />
+            <MaterialSymbol name="check_circle" size="sm" className="text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-[hsl(var(--positive))]">

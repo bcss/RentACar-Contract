@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Edit, Bell, Send, Mail, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -23,6 +22,8 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
+import { ListPageLayout, FilterPanel, FilterGroup } from "@/components/layouts";
 
 export default function AutomatedReminders() {
   const { t } = useTranslation();
@@ -229,8 +230,8 @@ export default function AutomatedReminders() {
           </h1>
           <p className="text-muted-foreground mt-1">Manage automated notifications and reminders</p>
         </div>
-        <Button onClick={handleCreate} data-testid="button-create-reminder">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button onClick={handleCreate} className="gap-2" data-testid="button-create-reminder">
+          <MaterialSymbol name="add_circle" size="sm" />
           Add Reminder
         </Button>
       </div>
@@ -239,7 +240,7 @@ export default function AutomatedReminders() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Reminders</CardTitle>
-            <Bell className="w-4 h-4 text-muted-foreground" />
+            <MaterialSymbol name="notifications" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalReminders}</div>
@@ -248,7 +249,7 @@ export default function AutomatedReminders() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sent</CardTitle>
-            <Send className="w-4 h-4 text-muted-foreground" />
+            <MaterialSymbol name="send" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{sentReminders}</div>
@@ -257,7 +258,7 @@ export default function AutomatedReminders() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Bell className="w-4 h-4 text-muted-foreground" />
+            <MaterialSymbol name="schedule" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingReminders}</div>
@@ -266,7 +267,7 @@ export default function AutomatedReminders() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Failed Rate</CardTitle>
-            <Bell className="w-4 h-4 text-muted-foreground" />
+            <MaterialSymbol name="error" size="sm" className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{failedRate}%</div>
@@ -277,17 +278,22 @@ export default function AutomatedReminders() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Bell className="w-5 h-5" />
+            <MaterialSymbol name="notifications" size="md" className="text-primary" />
             Reminders
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            <div className="flex justify-center py-12">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MaterialSymbol name="progress_activity" className="animate-spin" />
+                {t("common.loading")}
+              </div>
+            </div>
           ) : reminders.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Bell className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No reminders found</p>
+            <div className="p-12 text-center">
+              <MaterialSymbol name="notifications" size="2xl" className="text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">No reminders found</p>
             </div>
           ) : (
             <Table>
@@ -313,8 +319,8 @@ export default function AutomatedReminders() {
                     <TableCell>{format(new Date(reminder.reminderDate), "PPp")}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        {reminder.channel === "email" && <Mail className="w-4 h-4" />}
-                        {reminder.channel === "sms" && <MessageSquare className="w-4 h-4" />}
+                        {reminder.channel === "email" && <MaterialSymbol name="mail" size="sm" />}
+                        {reminder.channel === "sms" && <MaterialSymbol name="sms" size="sm" />}
                         <span>{reminder.channel}</span>
                       </div>
                     </TableCell>
@@ -322,12 +328,13 @@ export default function AutomatedReminders() {
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="ghost"
                           onClick={() => handleEdit(reminder)}
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                           data-testid={`button-edit-reminder-${reminder.id}`}
                         >
-                          <Edit className="w-4 h-4" />
+                          <MaterialSymbol name="edit" size="sm" />
                         </Button>
                         {!reminder.isSent && reminder.isActive && (
                           <Button

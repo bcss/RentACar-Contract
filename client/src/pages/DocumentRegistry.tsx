@@ -1,7 +1,7 @@
 import { useState, useRef, DragEvent } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Edit, FileText, CheckCircle, Upload, X } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -334,8 +334,8 @@ export default function DocumentRegistry() {
           </h1>
           <p className="text-muted-foreground mt-1">Centralized document management with expiry tracking</p>
         </div>
-        <Button onClick={handleCreate} data-testid="button-create-document">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button onClick={handleCreate} className="gap-2" data-testid="button-create-document">
+          <MaterialSymbol name="add" size="sm" />
           Add Document
         </Button>
       </div>
@@ -343,17 +343,22 @@ export default function DocumentRegistry() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
+            <MaterialSymbol name="description" size="md" className="text-primary" />
             Document Registry
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            <div className="flex justify-center py-12">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MaterialSymbol name="progress_activity" className="animate-spin" />
+                Loading...
+              </div>
+            </div>
           ) : documents.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No documents found</p>
+            <div className="p-12 text-center">
+              <MaterialSymbol name="description" size="2xl" className="text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">No documents found</p>
             </div>
           ) : (
             <Table>
@@ -394,8 +399,8 @@ export default function DocumentRegistry() {
                       </TableCell>
                       <TableCell>
                         {document.isVerified ? (
-                          <Badge variant="default">
-                            <CheckCircle className="w-3 h-3 mr-1" />
+                          <Badge variant="default" className="gap-1">
+                            <MaterialSymbol name="check_circle" size="xs" />
                             Verified
                           </Badge>
                         ) : (
@@ -405,21 +410,23 @@ export default function DocumentRegistry() {
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="ghost"
                             onClick={() => handleEdit(document)}
+                            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                             data-testid={`button-edit-document-${document.id}`}
                           >
-                            <Edit className="w-4 h-4" />
+                            <MaterialSymbol name="edit" size="sm" />
                           </Button>
                           {!document.isVerified && (
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => handleVerify(document.id)}
+                              className="gap-1"
                               data-testid={`button-verify-document-${document.id}`}
                             >
-                              <CheckCircle className="w-4 h-4 mr-1" />
+                              <MaterialSymbol name="check_circle" size="sm" />
                               Verify
                             </Button>
                           )}
@@ -568,7 +575,7 @@ export default function DocumentRegistry() {
                   <div className="mt-2">
                     {uploadedFile ? (
                       <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/50">
-                        <FileText className="h-4 w-4" />
+                        <MaterialSymbol name="description" size="sm" />
                         <span className="flex-1 text-sm">{uploadedFile.name}</span>
                         <Button
                           type="button"
@@ -577,7 +584,7 @@ export default function DocumentRegistry() {
                           onClick={handleRemoveFile}
                           data-testid="button-remove-file"
                         >
-                          <X className="h-4 w-4" />
+                          <MaterialSymbol name="close" size="sm" />
                         </Button>
                       </div>
                     ) : (
@@ -603,7 +610,7 @@ export default function DocumentRegistry() {
                           data-testid="input-file"
                         />
                         <div className="flex flex-col items-center gap-2">
-                          <Upload className={`h-10 w-10 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <MaterialSymbol name="upload_file" size="2xl" className={isDragging ? 'text-primary' : 'text-muted-foreground'} />
                           <div>
                             <p className="font-medium">
                               {isUploading ? 'Uploading...' : isDragging ? 'Drop file here' : 'Drag & drop file here'}

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Package, Edit, DollarSign } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -290,8 +290,8 @@ export default function VehicleAccessories() {
         {/* Tab 1: Accessory Catalog */}
         <TabsContent value="catalog" className="space-y-6">
           <div className="flex justify-end">
-            <Button onClick={handleCreateAccessory} data-testid="button-create-accessory">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={handleCreateAccessory} className="gap-2" data-testid="button-create-accessory">
+              <MaterialSymbol name="add_circle" size="sm" />
               Add Accessory
             </Button>
           </div>
@@ -355,17 +355,22 @@ export default function VehicleAccessories() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
+                <MaterialSymbol name="inventory_2" size="md" className="text-primary" />
                 Accessory Catalog
               </CardTitle>
             </CardHeader>
             <CardContent>
               {accessoriesLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                <div className="flex justify-center py-12">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MaterialSymbol name="progress_activity" className="animate-spin" />
+                    Loading...
+                  </div>
+                </div>
               ) : filteredAccessories.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No accessories found</p>
+                <div className="p-12 text-center">
+                  <MaterialSymbol name="inventory_2" size="2xl" className="text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">No accessories found</p>
                 </div>
               ) : (
                 <Table>
@@ -417,9 +422,10 @@ export default function VehicleAccessories() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleEditAccessory(accessory)}
+                            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                             data-testid={`button-edit-accessory-${accessory.id}`}
                           >
-                            <Edit className="w-4 h-4" />
+                            <MaterialSymbol name="edit" size="sm" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -437,7 +443,7 @@ export default function VehicleAccessories() {
             <Card className="flex-1 mr-4">
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Accessory Revenue</CardTitle>
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
+                <MaterialSymbol name="payments" size="sm" className="text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold" data-testid="text-total-revenue">
@@ -445,8 +451,8 @@ export default function VehicleAccessories() {
                 </div>
               </CardContent>
             </Card>
-            <Button onClick={handleCreateContractAccessory} data-testid="button-create-contract-accessory">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={handleCreateContractAccessory} className="gap-2" data-testid="button-create-contract-accessory">
+              <MaterialSymbol name="add_circle" size="sm" />
               Assign Accessory
             </Button>
           </div>
@@ -499,17 +505,22 @@ export default function VehicleAccessories() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
+                <MaterialSymbol name="link" size="md" className="text-primary" />
                 Contract Accessories
               </CardTitle>
             </CardHeader>
             <CardContent>
               {contractAccessoriesLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                <div className="flex justify-center py-12">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MaterialSymbol name="progress_activity" className="animate-spin" />
+                    Loading...
+                  </div>
+                </div>
               ) : filteredContractAccessories.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No contract accessories found</p>
+                <div className="p-12 text-center">
+                  <MaterialSymbol name="link" size="2xl" className="text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">No contract accessories found</p>
                 </div>
               ) : (
                 <Table>
@@ -545,9 +556,10 @@ export default function VehicleAccessories() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleEditContractAccessory(ca)}
+                              className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                               data-testid={`button-edit-contract-accessory-${ca.id}`}
                             >
-                              <Edit className="w-4 h-4" />
+                              <MaterialSymbol name="edit" size="sm" />
                             </Button>
                           </TableCell>
                         </TableRow>

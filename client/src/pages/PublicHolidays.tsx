@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, Calendar, Edit, Trash2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,6 +24,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
+import { ListPageLayout, FilterPanel, FilterGroup } from "@/components/layouts";
 
 export default function PublicHolidays() {
   const { t } = useTranslation();
@@ -133,103 +134,149 @@ export default function PublicHolidays() {
     }
   };
 
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            {t("publicHolidays")}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {t("manageUaePublicHolidays")}
-          </p>
-        </div>
-        <Button onClick={handleCreate} data-testid="button-create-holiday">
-          <Plus className="w-4 h-4 mr-2" />
-          {t("addHoliday")}
-        </Button>
-      </div>
+  const [searchTerm, setSearchTerm] = useState("");
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            {t("holidayCalendar")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-              {t("loading")}
+  const filteredHolidays = holidays.filter((holiday) => {
+    const matchesSearch = 
+      holiday.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (holiday.nameAr && holiday.nameAr.includes(searchTerm));
+    return matchesSearch;
+  });
+
+  return (
+    <div data-testid="page-public-holidays">
+      <ListPageLayout
+        title={t("publicHolidays")}
+        subtitle={`${filteredHolidays.length} ${t("holidays")}`}
+        actionButton={
+          <Button onClick={handleCreate} className="gap-2" data-testid="button-create-holiday">
+            <MaterialSymbol name="add_circle" size="sm" />
+            {t("addHoliday")}
+          </Button>
+        }
+        filterPanel={
+          <FilterPanel title={t("common.filters")} showButtons={false}>
+            <FilterGroup label={t("common.search")}>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <MaterialSymbol name="search" size="sm" />
+                </span>
+                <Input
+                  placeholder={t("common.search")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-10 rounded-lg"
+                  data-testid="input-search"
+                />
+              </div>
+            </FilterGroup>
+          </FilterPanel>
+        }
+      >
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MaterialSymbol name="progress_activity" className="animate-spin" />
+              {t("common.loading")}
             </div>
-          ) : holidays.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>{t("noHolidaysFound")}</p>
-            </div>
-          ) : (
+          </div>
+        ) : filteredHolidays.length === 0 ? (
+          <div className="p-12 text-center">
+            <MaterialSymbol name="calendar_month" size="2xl" className="text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground">{t("noHolidaysFound")}</p>
+          </div>
+        ) : (
+          <div className="rounded-xl border bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>{t("date")}</TableHead>
-                  <TableHead>{t("holidayName")}</TableHead>
-                  <TableHead>{t("type")}</TableHead>
-                  <TableHead>{t("surchargeRate")}</TableHead>
-                  <TableHead>{t("status")}</TableHead>
-                  <TableHead className="text-right">{t("actions")}</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">{t("date")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("holidayName")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("type")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("surchargeRate")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("status")}</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right">{t("actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {holidays.map((holiday) => (
-                  <TableRow key={holiday.id} data-testid={`row-holiday-${holiday.id}`}>
+                {filteredHolidays.map((holiday) => (
+                  <TableRow 
+                    key={holiday.id} 
+                    className="hover:bg-muted/30 transition-colors"
+                    data-testid={`row-holiday-${holiday.id}`}
+                  >
                     <TableCell>
-                      {format(new Date(holiday.holidayDate), "MMM dd, yyyy")}
+                      <Badge variant="outline" className="rounded-full">
+                        <MaterialSymbol name="event" size="xs" className="mr-1" />
+                        {format(new Date(holiday.holidayDate), "MMM dd, yyyy")}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{holiday.nameEn}</div>
-                        {holiday.nameAr && (
-                          <div className="text-sm text-muted-foreground">{holiday.nameAr}</div>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <MaterialSymbol name="celebration" size="sm" className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-medium">{holiday.nameEn}</div>
+                          {holiday.nameAr && (
+                            <div className="text-sm text-muted-foreground">{holiday.nameAr}</div>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       {holiday.isRecurring ? (
-                        <Badge variant="secondary">
+                        <Badge variant="secondary" className="rounded-full">
+                          <MaterialSymbol name="event_repeat" size="xs" className="mr-1" />
                           {t("recurring")} ({holiday.recurrenceType || "gregorian"})
                         </Badge>
                       ) : (
-                        <Badge variant="outline">{t("oneTime")}</Badge>
+                        <Badge variant="outline" className="rounded-full">
+                          <MaterialSymbol name="event" size="xs" className="mr-1" />
+                          {t("oneTime")}
+                        </Badge>
                       )}
                     </TableCell>
                     <TableCell>
-                      {holiday.surchargeRate ? `${holiday.surchargeRate}x` : "-"}
+                      {holiday.surchargeRate ? (
+                        <span className="flex items-center gap-1">
+                          <MaterialSymbol name="percent" size="xs" className="text-muted-foreground" />
+                          {holiday.surchargeRate}x
+                        </span>
+                      ) : "-"}
                     </TableCell>
                     <TableCell>
                       {holiday.isActive ? (
-                        <Badge variant="default">{t("active")}</Badge>
+                        <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400 rounded-full">
+                          <MaterialSymbol name="check_circle" size="xs" className="mr-1" />
+                          {t("active")}
+                        </Badge>
                       ) : (
-                        <Badge variant="secondary">{t("inactive")}</Badge>
+                        <Badge variant="secondary" className="rounded-full">
+                          <MaterialSymbol name="pause_circle" size="xs" className="mr-1" />
+                          {t("inactive")}
+                        </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEdit(holiday)}
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                           data-testid={`button-edit-holiday-${holiday.id}`}
                         >
-                          <Edit className="w-4 h-4" />
+                          <MaterialSymbol name="edit" size="sm" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDelete(holiday.id)}
+                          className="h-8 w-8 hover:bg-red-500/10 hover:text-red-500"
                           data-testid={`button-delete-holiday-${holiday.id}`}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <MaterialSymbol name="delete" size="sm" />
                         </Button>
                       </div>
                     </TableCell>
@@ -237,9 +284,9 @@ export default function PublicHolidays() {
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </ListPageLayout>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

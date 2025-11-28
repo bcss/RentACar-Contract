@@ -44,7 +44,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { Icon } from '@/components/Icon';
+import { MaterialSymbol } from '@/components/MaterialSymbol';
+import { ListPageLayout, FilterPanel, FilterGroup } from '@/components/layouts';
 
 export default function Users() {
   const { t } = useTranslation();
@@ -344,8 +345,8 @@ export default function Users() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">{t('users.title')}</CardTitle>
-          <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="button-add-user">
-            <Icon name="add" className=" mr-2" />
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2" data-testid="button-add-user">
+            <MaterialSymbol name="add_circle" size="sm" />
             {t('users.addUser')}
           </Button>
         </CardHeader>
@@ -378,13 +379,13 @@ export default function Users() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>{t('users.username')}</TableHead>
-                  <TableHead>{t('users.name')}</TableHead>
-                  <TableHead>{t('users.email')}</TableHead>
-                  <TableHead>{t('users.role')}</TableHead>
-                  <TableHead>{t('common.status')}</TableHead>
-                  <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">{t('users.username')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('users.name')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('users.email')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('users.role')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('common.status')}</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right">{t('contracts.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -404,11 +405,13 @@ export default function Users() {
                     <TableCell>{t(`role.${user.role}`)}</TableCell>
                     <TableCell>
                       {isDisabledUser(user) ? (
-                        <Badge variant="secondary" data-testid={`badge-disabled-${user.id}`}>
+                        <Badge variant="secondary" className="rounded-full" data-testid={`badge-disabled-${user.id}`}>
+                          <MaterialSymbol name="cancel" size="xs" className="mr-1" />
                           {t('common.disabled')}
                         </Badge>
                       ) : (
-                        <Badge variant="default" data-testid={`badge-active-${user.id}`}>
+                        <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400 rounded-full" data-testid={`badge-active-${user.id}`}>
+                          <MaterialSymbol name="check_circle" size="xs" className="mr-1" />
                           {t('common.active')}
                         </Badge>
                       )}
@@ -418,30 +421,33 @@ export default function Users() {
                         <>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => openEditDialog(user)}
+                            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                             data-testid={`button-edit-user-${user.id}`}
                           >
-                            <Icon name="edit" className=" text-base" />
+                            <MaterialSymbol name="edit" size="sm" />
                           </Button>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => openDisableDialog(user)}
                             disabled={user.isImmutable}
+                            className="h-8 w-8 hover:bg-red-500/10 hover:text-red-500"
                             data-testid={`button-disable-user-${user.id}`}
                           >
-                            <Icon name="block" className=" text-base" />
+                            <MaterialSymbol name="block" size="sm" />
                           </Button>
                         </>
                       ) : (
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => openEnableDialog(user)}
+                          className="h-8 w-8 hover:bg-green-500/10 hover:text-green-500"
                           data-testid={`button-enable-user-${user.id}`}
                         >
-                          <Icon name="check_circle" className=" text-base" />
+                          <MaterialSymbol name="check_circle" size="sm" />
                         </Button>
                       )}
                     </TableCell>

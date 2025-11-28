@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, TrendingUp, AlertTriangle, Clock } from "lucide-react";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
 import { useTranslation } from "react-i18next";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
@@ -30,7 +30,7 @@ export default function PerformanceMonitoring() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <Activity className="mx-auto h-12 w-12 animate-pulse text-primary" />
+          <MaterialSymbol name="progress_activity" size="2xl" className="mx-auto animate-spin text-primary" />
           <p className="mt-4 text-muted-foreground">{t('common.loading', 'Loading...')}</p>
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function PerformanceMonitoring() {
               <CardTitle className="text-sm font-medium">
                 {t('performance.totalRequests', 'Total Requests')}
               </CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
+              <MaterialSymbol name="monitoring" size="sm" className="text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold" data-testid="text-total-requests">
@@ -87,7 +87,7 @@ export default function PerformanceMonitoring() {
               <CardTitle className="text-sm font-medium">
                 {t('performance.avgDuration', 'Avg Duration')}
               </CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <MaterialSymbol name="schedule" size="sm" className="text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold" data-testid="text-avg-duration">
@@ -112,7 +112,7 @@ export default function PerformanceMonitoring() {
               <CardTitle className="text-sm font-medium">
                 {t('performance.errorRate', 'Error Rate')}
               </CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              <MaterialSymbol name="warning" size="sm" className="text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold" data-testid="text-error-rate">
@@ -135,7 +135,7 @@ export default function PerformanceMonitoring() {
               <CardTitle className="text-sm font-medium">
                 {t('performance.slowestRequest', 'Slowest Request')}
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <MaterialSymbol name="trending_up" size="sm" className="text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold" data-testid="text-slowest-duration">
