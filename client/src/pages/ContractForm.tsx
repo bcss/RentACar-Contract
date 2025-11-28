@@ -1,3 +1,26 @@
+/**
+ * File: client/src/pages/ContractForm.tsx
+ * @area Contract Creation
+ * @checklist §2.1, §3.1, §4.1, §4.9
+ * @purpose Contract draft creation form per Master Spec §3.1
+ * 
+ * @behaviour
+ *  - Party type selection: DIRECT_HIRER, SPONSORED_INDIVIDUAL, SPONSORED_COMPANY (§2.1)
+ *  - Type-ahead search for customer, vehicle, sponsor selection
+ *  - Inline entity creation: New Customer, New Vehicle dialogs
+ *  - Rental pricing: Daily, Weekly, Monthly rates from tariff or manual entry (§4.9)
+ *  - Insurance excess validation from vehicle class
+ *  - Blacklist check on customer selection (§3.35)
+ * 
+ * @validation
+ *  - rentalStartDate: Cannot be in past
+ *  - rentalEndDate: Must be after start date
+ *  - customerId, vehicleId: Required
+ *  - Pricing fields: At least daily rate required
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.1, §3.1, §4.9)
+ */
+
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';

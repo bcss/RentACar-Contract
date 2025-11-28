@@ -1,3 +1,27 @@
+/**
+ * File: server/utils/auditLogger.ts
+ * @area Audit Logging
+ * @checklist §11.1, §11.2, §11.10
+ * @purpose Dual audit trail implementation per Master Spec §11
+ * 
+ * @behaviour
+ *  - Geolocation enrichment: IP → country, city, region
+ *  - Session tracking: sessionId for login correlation
+ *  - User agent capture: Browser/device info
+ *  - Non-blocking: Errors logged but don't fail requests
+ * 
+ * @services
+ *  - createAuditLog(userId, action, contractId, req, details): Main audit trail
+ *  - createAccessLog(userId, action, success, req, details): Login/access tracking
+ * 
+ * @notes
+ *  - Uses auditLogs table for operational actions
+ *  - Uses accessLogs table for authentication attempts
+ *  - contractEdits table handles contract-specific changes (separate layer)
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§11.1, §11.2, §11.10)
+ */
+
 import type { Request } from "express";
 import { storage } from "../storage";
 import { getGeolocation } from "../services/geolocation";

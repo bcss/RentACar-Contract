@@ -1,3 +1,19 @@
+/**
+ * File: client/src/pages/Contracts.tsx
+ * @area Contract Listing
+ * @checklist §2.2, §3.1-3.16
+ * @purpose Contract list view with filtering per Master Spec Part 3
+ * 
+ * @behaviour
+ *  - Status filter: ALL, DRAFT, ACTIVE, COMPLETED, CLOSED (§2.2)
+ *  - Role-based visibility: Staff sees own contracts only
+ *  - Quick actions: View, Edit, Disable (no hard delete)
+ *  - Status badges: Color-coded per contract state
+ *  - Overdue/Pending refunds filters from dashboard
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.2, Part 3)
+ */
+
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';

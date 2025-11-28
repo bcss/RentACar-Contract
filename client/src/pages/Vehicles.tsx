@@ -1,3 +1,19 @@
+/**
+ * File: client/src/pages/Vehicles.tsx
+ * @area Vehicle Management
+ * @checklist §2.10, §3.18-3.23, §4.5
+ * @purpose Vehicle listing and CRUD per Master Spec §2.10
+ * 
+ * @behaviour
+ *  - 8 status states: AVAILABLE, RESERVED, OUT, etc. (§3.18)
+ *  - Branch assignment and class/group categorization (§4.5)
+ *  - Pricing: dailyRate, weeklyRate, monthlyRate
+ *  - Quick actions: Edit, Disable, View history
+ *  - Maintenance and transfer tracking
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.10, §3.18-3.23)
+ */
+
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';

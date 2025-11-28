@@ -1,3 +1,19 @@
+/**
+ * File: client/src/pages/Settings.tsx
+ * @area Company Settings
+ * @checklist §2.16, Part 16
+ * @purpose Company configuration and preferences per Master Spec §2.16
+ * 
+ * @behaviour
+ *  - Bilingual company info: nameEn/Ar, addressEn/Ar
+ *  - Financial settings: VAT percentage, currency, late fees
+ *  - Terms & Conditions: 3 sections bilingual
+ *  - Communication settings: Email, SMS provider config
+ *  - Admin-only access
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.16, Part 16)
+ */
+
 import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";

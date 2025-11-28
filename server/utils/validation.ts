@@ -1,5 +1,21 @@
 /**
- * Validation utilities for contract management
+ * File: server/utils/validation.ts
+ * @area Input Validation
+ * @checklist §8.1, §8.2
+ * @purpose Input validation and sanitization per Master Spec §8.1-8.2
+ * 
+ * @services
+ *  - validateSearchQuery(query): Sanitizes search input, max 200 chars
+ *  - validateEditReason(reason): Requires 10+ meaningful words, varied content
+ *  - validatePaginationParams(limit, offset): Normalizes pagination
+ *  - validateFinancialInput(value): Ensures valid currency amounts
+ *  - sanitizePII(data): Masks sensitive data for logging
+ * 
+ * @notes
+ *  - Used across all API routes for consistent validation
+ *  - PII sanitization for GDPR/compliance logging
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§8.1, §8.2)
  */
 
 /**

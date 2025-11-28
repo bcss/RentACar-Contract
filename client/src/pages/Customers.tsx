@@ -1,3 +1,20 @@
+/**
+ * File: client/src/pages/Customers.tsx
+ * @area Customer Management
+ * @checklist §2.14, §4.2.1
+ * @purpose Customer listing and CRUD per Master Spec §2.14
+ * 
+ * @behaviour
+ *  - Bilingual display: nameEn/nameAr (RTL support)
+ *  - Document fields: Emirates ID, Passport, License (§2.14)
+ *  - Communication prefs: preferredLanguage, marketingOptIn, DND window (§4.2.1)
+ *  - Quick create: Inline customer creation dialog
+ *  - Search: Type-ahead filtering by name/ID
+ *  - Disable/Enable: Soft-delete pattern (no hard delete)
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (§2.14, §4.2.1)
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
