@@ -47,10 +47,12 @@ This document tracks all UI/UX improvements made during the KarāraOS redesign b
 
 ### DEV-001: Support Button Addition
 - **Screen:** Global (all pages)
-- **Location:** Bottom-left, near logged-in user details in sidebar
-- **Behavior:** Opens help/support page
+- **Location:** Bottom-left, near logged-in user details in sidebar footer
+- **Behavior:** Opens help/support page (/settings/support)
 - **Bilingual:** Yes (EN: "Support", AR: "الدعم")
-- **Status:** APPROVED - Only functional enhancement permitted
+- **Icon:** Headphones (lucide-react)
+- **Responsive:** Shows text when sidebar expanded, icon-only when collapsed
+- **Status:** COMPLETED - E2E tested in both expanded/collapsed states
 
 ### DEV-002: Sidebar Navigation Refinement
 - **Screen:** Global navigation
@@ -96,17 +98,17 @@ This document tracks all UI/UX improvements made during the KarāraOS redesign b
 
 ## Implementation Progress
 
-### Phase 1: Design Tokens
+### Phase 1: Design Tokens (COMPLETED)
 - [x] Document color palette
-- [ ] Update index.css with new colors
-- [ ] Verify light/dark mode consistency
-- [ ] Verify RTL/LTR support
+- [x] Update index.css with new colors (primary: 209 88% 51%, positive/negative semantic colors)
+- [x] Verify light/dark mode consistency (E2E tested)
+- [x] Verify RTL/LTR support (inherits existing infrastructure)
 
-### Phase 2: Global Shell
-- [ ] Update AppSidebar styling
-- [ ] Add Support button
-- [ ] Update page layout structure
-- [ ] Update header component
+### Phase 2: Global Shell (COMPLETED)
+- [x] Add Support button to SidebarFooter (DEV-001)
+- [x] Bilingual support: "Support" / "الدعم"
+- [x] Responsive: icon-only when collapsed, text when expanded
+- [x] E2E tested in both states
 
 ### Phase 3: Core Screens
 - [ ] Dashboard

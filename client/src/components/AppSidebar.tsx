@@ -100,6 +100,7 @@ import {
   Target,
   LineChart,
   Activity,
+  Headphones,
 } from 'lucide-react';
 
 interface AppSidebarProps {
@@ -1237,7 +1238,36 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 space-y-2">
+        {/* Support Button - Quick access to help */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link href="/settings/support">
+              {sidebarState === 'expanded' ? (
+                <button 
+                  className="flex items-center gap-3 w-full hover-elevate p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-support"
+                >
+                  <Headphones className="h-5 w-5" />
+                  <span className="text-sm font-medium">{t('nav.support')}</span>
+                </button>
+              ) : (
+                <button 
+                  className="flex items-center justify-center w-full hover-elevate p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-support"
+                >
+                  <Headphones className="h-5 w-5" />
+                </button>
+              )}
+            </Link>
+          </TooltipTrigger>
+          {sidebarState === 'collapsed' && (
+            <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
+              <p>{t('nav.support')}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+
         {/* User menu - Responsive to sidebar state */}
         <DropdownMenu>
           <Tooltip>

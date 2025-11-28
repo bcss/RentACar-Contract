@@ -64,6 +64,7 @@ const resources = {
       "nav.contractFormSample": "Contract Form (New Design)",
       "nav.providerComparison": "Provider Layouts Comparison",
       "nav.fieldStyleShowcase": "Field Style Demo",
+      "nav.support": "Support",
       
       // Design System Showcase
       "designShowcase.title": "Design System Showcase",
@@ -2340,6 +2341,7 @@ const resources = {
       "nav.contractFormSample": "نموذج العقد (التصميم الجديد)",
       "nav.providerComparison": "مقارنة تخطيطات الموفر",
       "nav.fieldStyleShowcase": "عرض توضيحي لأنماط الحقول",
+      "nav.support": "الدعم",
       
       // Design System Showcase
       "designShowcase.title": "عرض نظام التصميم",
