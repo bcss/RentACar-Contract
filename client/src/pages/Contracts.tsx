@@ -56,6 +56,8 @@ import {
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import { Icon } from '@/components/Icon';
+import { ListPageLayout, FilterPanel, FilterGroup } from '@/components/layouts';
+import { MaterialSymbol } from '@/components/MaterialSymbol';
 
 export default function Contracts() {
   const { t } = useTranslation();
@@ -226,7 +228,7 @@ export default function Contracts() {
     if (showPendingRefundsOnly) {
       matchesPendingRefunds = contract.status === 'closed' && 
                               contract.depositPaid === true && 
-                              contract.depositRefunded !== true;
+                              !contract.depositRefunded;
     }
     
     return matchesSearch && matchesStatus && matchesDateRange && matchesOverdue && matchesPendingRefunds;
@@ -269,42 +271,38 @@ export default function Contracts() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-contracts-title">{t('contracts.title')}</h1>
-          <p className="text-muted-foreground">{filteredContracts.length} {t('contracts.title')}</p>
-        </div>
-        <Button asChild data-testid="button-new-contract">
-          <Link href="/contracts/new">
-            <Icon name="add" className="" />
-            <span>{t('contracts.newContract')}</span>
-          </Link>
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Icon name="filter_list" className="" />
-            {t('common.filter')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-            <div className="space-y-2">
-              <label className="text-sm font-medium block">{t('common.search')}</label>
-              <Input
-                placeholder={t('contracts.searchPlaceholder')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                data-testid="input-search"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium block">{t('contracts.status')}</label>
+    <div data-testid="page-contracts">
+      <ListPageLayout
+        title={t('contracts.title')}
+        subtitle={`${filteredContracts.length} ${t('contracts.title')}`}
+        actionButton={
+          <Button asChild data-testid="button-new-contract" className="gap-2">
+            <Link href="/contracts/new">
+              <MaterialSymbol name="add_circle" size="sm" />
+              <span>{t('contracts.newContract')}</span>
+            </Link>
+          </Button>
+        }
+        filterPanel={
+          <FilterPanel title={t('common.filters')} showButtons={false}>
+            <FilterGroup label={t('common.search')}>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <MaterialSymbol name="search" size="sm" />
+                </span>
+                <Input
+                  placeholder={t('contracts.searchPlaceholder')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-10 rounded-lg"
+                  data-testid="input-search"
+                />
+              </div>
+            </FilterGroup>
+            
+            <FilterGroup label={t('contracts.status')}>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger data-testid="select-status-filter">
+                <SelectTrigger data-testid="select-status-filter" className="h-10 rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -316,70 +314,115 @@ export default function Contracts() {
                   <SelectItem value="disabled">{t('common.disabled')}</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium block">{t('common.dateFrom')}</label>
-              <DatePicker
-                date={fromDate}
-                onDateChange={setFromDate}
-                placeholder={t('common.dateFrom')}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium block">{t('common.dateTo')}</label>
-              <DatePicker
-                date={toDate}
-                onDateChange={setToDate}
-                placeholder={t('common.dateTo')}
-              />
+            </FilterGroup>
+
+            <FilterGroup label={t('common.dateRange')}>
+              <div className="space-y-2">
+                <DatePicker
+                  date={fromDate}
+                  onDateChange={setFromDate}
+                  placeholder={t('common.dateFrom')}
+                />
+                <DatePicker
+                  date={toDate}
+                  onDateChange={setToDate}
+                  placeholder={t('common.dateTo')}
+                />
+                {(fromDate || toDate) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearDateFilters}
+                    className="w-full justify-start text-muted-foreground hover:text-foreground"
+                    data-testid="button-clear-dates"
+                  >
+                    <MaterialSymbol name="close" size="sm" className="mr-1" />
+                    {t('contracts.clearDateFilter')}
+                  </Button>
+                )}
+              </div>
+            </FilterGroup>
+
+            {(showOverdueOnly || showPendingRefundsOnly) && (
+              <FilterGroup label={t('common.activeFilters')}>
+                <div className="space-y-2">
+                  {showOverdueOnly && (
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 text-destructive text-sm">
+                      <MaterialSymbol name="warning" size="sm" />
+                      <span className="font-medium">{t('contracts.overdueOnly')}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 ml-auto hover:bg-destructive/20"
+                        onClick={() => setShowOverdueOnly(false)}
+                      >
+                        <MaterialSymbol name="close" size="xs" />
+                      </Button>
+                    </div>
+                  )}
+                  {showPendingRefundsOnly && (
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm">
+                      <MaterialSymbol name="pending_actions" size="sm" />
+                      <span className="font-medium">{t('contracts.pendingRefunds')}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 ml-auto hover:bg-amber-500/20"
+                        onClick={() => setShowPendingRefundsOnly(false)}
+                      >
+                        <MaterialSymbol name="close" size="xs" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </FilterGroup>
+            )}
+          </FilterPanel>
+        }
+      >
+        {contractsLoading || disabledContractsLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MaterialSymbol name="progress_activity" className="animate-spin" />
+              {t('common.loading')}
             </div>
           </div>
-          {(fromDate || toDate) && (
-            <div className="flex justify-end">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearDateFilters}
-                data-testid="button-clear-dates"
-              >
-                <Icon name="clear" className=" text-sm mr-1" />
-                {t('contracts.clearDateFilter')}
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          {contractsLoading || disabledContractsLoading ? (
-            <div className="text-center py-8">{t('common.loading')}</div>
-          ) : filteredContracts.length === 0 ? (
-            <div className="p-12 text-center">
-              <Icon name="description" className=" text-6xl text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">{t('common.noResults')}</p>
-            </div>
-          ) : (
+        ) : filteredContracts.length === 0 ? (
+          <div className="p-12 text-center">
+            <MaterialSymbol name="description" size="2xl" className="text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground">{t('common.noResults')}</p>
+          </div>
+        ) : (
+          <div className="rounded-xl border bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>{t('contracts.contractNumber')}</TableHead>
-                  <TableHead>{t('contracts.customerName')}</TableHead>
-                  <TableHead>{t('contracts.status')}</TableHead>
-                  <TableHead>{t('contracts.rentalStartDate')}</TableHead>
-                  <TableHead>{t('contracts.rentalEndDate')}</TableHead>
-                  <TableHead>{t('contracts.createdBy')}</TableHead>
-                  <TableHead>{t('contracts.createdDate')}</TableHead>
-                  <TableHead className="text-right">{t('contracts.actions')}</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">{t('contracts.contractNumber')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('contracts.customerName')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('contracts.status')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('contracts.rentalStartDate')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('contracts.rentalEndDate')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('contracts.createdBy')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('contracts.createdDate')}</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right">{t('contracts.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredContracts.map((contract) => {
                   const isDisabled = statusFilter === 'disabled';
                   return (
-                    <TableRow key={contract.id} className="hover-elevate" data-testid={`row-contract-${contract.id}`}>
-                      <TableCell className="font-mono font-medium" data-testid={`text-contract-number-${contract.id}`}>
-                        #{contract.contractNumber}
+                    <TableRow 
+                      key={contract.id} 
+                      className="hover:bg-muted/30 transition-colors" 
+                      data-testid={`row-contract-${contract.id}`}
+                    >
+                      <TableCell className="font-medium" data-testid={`text-contract-number-${contract.id}`}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <MaterialSymbol name="description" size="sm" className="text-primary" />
+                          </div>
+                          <span className="font-mono">#{contract.contractNumber}</span>
+                        </div>
                       </TableCell>
                       <TableCell data-testid={`text-customer-name-${contract.id}`}>
                         {getBilingualValue(contract.customerNameEn, contract.customerNameAr)}
@@ -401,8 +444,8 @@ export default function Contracts() {
                       <TableCell className="text-muted-foreground">
                         {contract.createdAt && format(new Date(contract.createdAt), 'PP')}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-1">
                           {!isDisabled && (
                             <>
                               <Button
@@ -410,9 +453,10 @@ export default function Contracts() {
                                 size="icon"
                                 asChild
                                 data-testid={`button-view-${contract.id}`}
+                                className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                               >
                                 <Link href={`/contracts/${contract.id}`}>
-                                  <Icon name="visibility" className="" />
+                                  <MaterialSymbol name="visibility" size="sm" />
                                 </Link>
                               </Button>
                               {contract.status === 'draft' && !isViewer && (
@@ -424,8 +468,9 @@ export default function Contracts() {
                                     setIsEditReasonDialogOpen(true);
                                   }}
                                   data-testid={`button-edit-${contract.id}`}
+                                  className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                                 >
-                                  <Icon name="edit" className="" />
+                                  <MaterialSymbol name="edit" size="sm" />
                                 </Button>
                               )}
                               <Button
@@ -433,9 +478,10 @@ export default function Contracts() {
                                 size="icon"
                                 asChild
                                 data-testid={`button-print-${contract.id}`}
+                                className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                               >
                                 <Link href={`/contracts/${contract.id}`}>
-                                  <Icon name="print" className="" />
+                                  <MaterialSymbol name="print" size="sm" />
                                 </Link>
                               </Button>
                               {isAdmin && (
@@ -444,8 +490,9 @@ export default function Contracts() {
                                   size="icon"
                                   onClick={() => openDisableDialog(contract)}
                                   data-testid={`button-disable-contract-${contract.id}`}
+                                  className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
                                 >
-                                  <Icon name="block" className="" />
+                                  <MaterialSymbol name="block" size="sm" />
                                 </Button>
                               )}
                             </>
@@ -456,8 +503,9 @@ export default function Contracts() {
                               size="icon"
                               onClick={() => openEnableDialog(contract)}
                               data-testid={`button-enable-contract-${contract.id}`}
+                              className="h-8 w-8 hover:bg-green-500/10 hover:text-green-600"
                             >
-                              <Icon name="check_circle" className="" />
+                              <MaterialSymbol name="check_circle" size="sm" />
                             </Button>
                           )}
                         </div>
@@ -467,9 +515,9 @@ export default function Contracts() {
                 })}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </ListPageLayout>
 
       <AlertDialog open={isDisableDialogOpen} onOpenChange={setIsDisableDialogOpen}>
         <AlertDialogContent data-testid="dialog-disable-contract">

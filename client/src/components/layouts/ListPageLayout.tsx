@@ -16,6 +16,7 @@ import { ReactNode } from 'react';
 interface ListPageLayoutProps {
   title: string;
   titleAr?: string;
+  subtitle?: string;
   actionButton?: ReactNode;
   filterPanel?: ReactNode;
   children: ReactNode;
@@ -26,6 +27,7 @@ interface ListPageLayoutProps {
 export function ListPageLayout({
   title,
   titleAr,
+  subtitle,
   actionButton,
   filterPanel,
   children,
@@ -46,17 +48,22 @@ export function ListPageLayout({
         <div className="flex-1 min-w-0">
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <h1 
-                className="text-2xl lg:text-3xl font-bold leading-tight tracking-tight text-foreground min-w-0"
-                data-testid="text-page-title"
-              >
-                {title}
-                {titleAr && (
-                  <span className="text-muted-foreground text-lg font-normal ltr:ml-2 rtl:mr-2">
-                    {titleAr}
-                  </span>
+              <div className="min-w-0">
+                <h1 
+                  className="text-2xl lg:text-3xl font-bold leading-tight tracking-tight text-foreground"
+                  data-testid="text-page-title"
+                >
+                  {title}
+                  {titleAr && (
+                    <span className="text-muted-foreground text-lg font-normal ltr:ml-2 rtl:mr-2">
+                      {titleAr}
+                    </span>
+                  )}
+                </h1>
+                {subtitle && (
+                  <p className="text-muted-foreground text-sm mt-1">{subtitle}</p>
                 )}
-              </h1>
+              </div>
               {actionButton && (
                 <div className="flex-shrink-0">
                   {actionButton}

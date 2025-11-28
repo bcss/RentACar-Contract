@@ -60,10 +60,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useErrorDisplay } from '@/components/design-system';
+import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Search, Edit, Ban, CheckCircle } from 'lucide-react';
+import { ListPageLayout, FilterPanel, FilterGroup, FilterSearch } from '@/components/layouts';
+import { MaterialSymbol } from '@/components/MaterialSymbol';
 import type { Vehicle } from '@shared/schema';
 import { insertVehicleSchema } from '@shared/schema';
 import {
@@ -567,11 +570,13 @@ export default function Vehicles() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { showError, showSuccess } = useErrorDisplay();
+  const { toast } = useToast();
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const statusFilterFromUrl = searchParams.get('status'); // e.g., 'rented', 'available'
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'active' | 'disabled'>('active');
   const [statusFilter, setStatusFilter] = useState<string | null>(statusFilterFromUrl);
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -802,163 +807,249 @@ export default function Vehicles() {
 
   const isAdmin = user?.role === 'admin';
 
+  const getStatusBadgeStyle = (status: string) => {
+    switch (status) {
+      case 'available':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'rented':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'maintenance':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'reserved':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
+      case 'out_of_service':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'available':
+        return 'check_circle';
+      case 'rented':
+        return 'directions_car';
+      case 'maintenance':
+        return 'build';
+      case 'reserved':
+        return 'schedule';
+      case 'out_of_service':
+        return 'cancel';
+      default:
+        return 'help';
+    }
+  };
+
   const VehicleTable = ({ vehicles, showActions }: { vehicles: Vehicle[]; showActions: 'disable' | 'enable' }) => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t('vehicles.registration')}</TableHead>
-          <TableHead>{t('vehicles.make')} / {t('vehicles.model')}</TableHead>
-          <TableHead>{t('vehicles.year')}</TableHead>
-          <TableHead>{t('vehicles.color')}</TableHead>
-          <TableHead>{t('vehicles.status')}</TableHead>
-          <TableHead>{t('vehicles.dailyRate')}</TableHead>
-          <TableHead>{t('common.actions')}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {vehicles.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={7} className="text-center text-muted-foreground">
-              {t('vehicles.noVehicles')}
-            </TableCell>
+    <div className="rounded-xl border bg-card overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableHead className="font-semibold text-foreground">{t('vehicles.registration')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('vehicles.make')} / {t('vehicles.model')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('vehicles.year')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('vehicles.color')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('vehicles.status')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('vehicles.dailyRate')}</TableHead>
+            <TableHead className="font-semibold text-foreground text-right">{t('common.actions')}</TableHead>
           </TableRow>
-        ) : (
-          vehicles.map((vehicle) => (
-            <TableRow key={vehicle.id} data-testid={`row-vehicle-${vehicle.id}`}>
-              <TableCell className="font-medium">{vehicle.registration}</TableCell>
-              <TableCell>
-                <div>{vehicle.make} {vehicle.model}</div>
-                <div className="text-sm text-muted-foreground">
-                  {vehicle.fuelType}{vehicle.tankCapacity ? ` (${vehicle.tankCapacity}L)` : ''}
-                </div>
-              </TableCell>
-              <TableCell>{vehicle.year}</TableCell>
-              <TableCell>{vehicle.color || '-'}</TableCell>
-              <TableCell>
-                <span className={`text-sm px-2 py-1 rounded ${
-                  vehicle.status === 'available' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                  vehicle.status === 'rented' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                  vehicle.status === 'maintenance' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                  'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                }`}>
-                  {vehicle.status}
-                </span>
-              </TableCell>
-              <TableCell>{vehicle.dailyRate}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  {!isViewer && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(vehicle)}
-                      data-testid={`button-edit-vehicle-${vehicle.id}`}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {isAdmin && showActions === 'disable' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDisableClick(vehicle)}
-                      data-testid={`button-disable-vehicle-${vehicle.id}`}
-                    >
-                      <Ban className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {isAdmin && showActions === 'enable' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEnableClick(vehicle)}
-                      data-testid={`button-enable-vehicle-${vehicle.id}`}
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                    </Button>
-                  )}
+        </TableHeader>
+        <TableBody>
+          {vehicles.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                <div className="flex flex-col items-center gap-2">
+                  <MaterialSymbol name="directions_car_filled" size="xl" className="text-muted-foreground/50" />
+                  <span>{t('vehicles.noVehicles')}</span>
                 </div>
               </TableCell>
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
+          ) : (
+            vehicles.map((vehicle) => (
+              <TableRow 
+                key={vehicle.id} 
+                data-testid={`row-vehicle-${vehicle.id}`}
+                className="hover:bg-muted/30 transition-colors"
+              >
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <MaterialSymbol name="directions_car" size="sm" className="text-primary" />
+                    </div>
+                    <span>{vehicle.registration}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="font-medium">{vehicle.make} {vehicle.model}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {vehicle.fuelType}{vehicle.tankCapacity ? ` (${vehicle.tankCapacity}L)` : ''}
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{vehicle.year}</TableCell>
+                <TableCell className="text-muted-foreground">{vehicle.color || '-'}</TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${getStatusBadgeStyle(vehicle.status || 'available')}`}>
+                    <MaterialSymbol name={getStatusIcon(vehicle.status || 'available')} size="xs" />
+                    {vehicle.status}
+                  </span>
+                </TableCell>
+                <TableCell className="font-medium">{vehicle.dailyRate}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1 justify-end">
+                    {!isViewer && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(vehicle)}
+                        data-testid={`button-edit-vehicle-${vehicle.id}`}
+                        className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                      >
+                        <MaterialSymbol name="edit" size="sm" />
+                      </Button>
+                    )}
+                    {isAdmin && showActions === 'disable' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDisableClick(vehicle)}
+                        data-testid={`button-disable-vehicle-${vehicle.id}`}
+                        className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <MaterialSymbol name="block" size="sm" />
+                      </Button>
+                    )}
+                    {isAdmin && showActions === 'enable' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEnableClick(vehicle)}
+                        data-testid={`button-enable-vehicle-${vehicle.id}`}
+                        className="h-8 w-8 hover:bg-green-500/10 hover:text-green-600"
+                      >
+                        <MaterialSymbol name="check_circle" size="sm" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 
   return (
-    <div className="container mx-auto p-6" data-testid="page-vehicles">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>{t('vehicles.title')}</CardTitle>
-            {!isViewer && (
-              <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-                <DialogTrigger asChild>
-                  <Button data-testid="button-create-vehicle">
-                    <Plus className="h-4 w-4 mr-2" />
+    <div data-testid="page-vehicles">
+      <ListPageLayout
+        title={t('vehicles.title')}
+        actionButton={
+          !isViewer && (
+            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+              <DialogTrigger asChild>
+                <Button data-testid="button-create-vehicle" className="gap-2">
+                  <MaterialSymbol name="add_circle" size="sm" />
+                  {t('vehicles.addVehicle')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{t('vehicles.newVehicle')}</DialogTitle>
+                  <DialogDescription>
                     {t('vehicles.addVehicle')}
+                  </DialogDescription>
+                </DialogHeader>
+                <VehicleForm form={form} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
+              </DialogContent>
+            </Dialog>
+          )
+        }
+        filterPanel={
+          <FilterPanel title={t('common.filters')} showButtons={false}>
+            <FilterGroup label={t('vehicles.searchPlaceholder')}>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <MaterialSymbol name="search" size="sm" />
+                </span>
+                <Input
+                  placeholder={t('vehicles.searchPlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-10 rounded-lg"
+                  data-testid="input-search-vehicles"
+                />
+              </div>
+            </FilterGroup>
+            
+            <FilterGroup label={t('common.status')}>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-3 rounded-lg border border-input p-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/10 transition-colors">
+                  <input
+                    type="radio"
+                    name="vehicle-status"
+                    checked={activeTab === 'active'}
+                    onChange={() => setActiveTab('active')}
+                    className="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                  />
+                  <span className="text-sm font-medium">{t('vehicles.activeVehicles')} ({activeVehicles.length})</span>
+                </label>
+                <label className="flex items-center gap-3 rounded-lg border border-input p-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/10 transition-colors">
+                  <input
+                    type="radio"
+                    name="vehicle-status"
+                    checked={activeTab === 'disabled'}
+                    onChange={() => setActiveTab('disabled')}
+                    className="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                  />
+                  <span className="text-sm font-medium">{t('vehicles.disabledVehicles')} ({disabledVehicles.length})</span>
+                </label>
+              </div>
+            </FilterGroup>
+
+            {statusFilter && (
+              <FilterGroup label={t('vehicles.statusFilter')}>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10 text-primary text-sm">
+                  <MaterialSymbol name={getStatusIcon(statusFilter)} size="sm" />
+                  <span className="font-medium capitalize">{statusFilter}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 ml-auto hover:bg-primary/20"
+                    onClick={() => setStatusFilter(null)}
+                  >
+                    <MaterialSymbol name="close" size="xs" />
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>{t('vehicles.newVehicle')}</DialogTitle>
-                    <DialogDescription>
-                      {t('vehicles.addVehicle')}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <VehicleForm form={form} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
-                </DialogContent>
-              </Dialog>
+                </div>
+              </FilterGroup>
             )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t('vehicles.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                data-testid="input-search-vehicles"
-              />
+          </FilterPanel>
+        }
+      >
+        {activeTab === 'active' ? (
+          activeLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MaterialSymbol name="progress_activity" className="animate-spin" />
+                {t('common.loading')}
+              </div>
             </div>
-          </div>
-
-          <Tabs defaultValue="active">
-            <TabsList className="mb-4">
-              <TabsTrigger value="active" data-testid="tab-active-vehicles">
-                {t('vehicles.activeVehicles')} ({activeVehicles.length})
-              </TabsTrigger>
-              <TabsTrigger value="disabled" data-testid="tab-disabled-vehicles">
-                {t('vehicles.disabledVehicles')} ({disabledVehicles.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="active">
-              {activeLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : (
-                <VehicleTable vehicles={filteredActiveVehicles} showActions="disable" />
-              )}
-            </TabsContent>
-
-            <TabsContent value="disabled">
-              {disabledLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : (
-                <VehicleTable vehicles={filteredDisabledVehicles} showActions="enable" />
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+          ) : (
+            <VehicleTable vehicles={filteredActiveVehicles} showActions="disable" />
+          )
+        ) : (
+          disabledLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MaterialSymbol name="progress_activity" className="animate-spin" />
+                {t('common.loading')}
+              </div>
+            </div>
+          ) : (
+            <VehicleTable vehicles={filteredDisabledVehicles} showActions="enable" />
+          )
+        )}
+      </ListPageLayout>
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

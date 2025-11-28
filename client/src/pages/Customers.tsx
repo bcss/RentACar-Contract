@@ -67,6 +67,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Search, Edit, Ban, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ListPageLayout, FilterPanel, FilterGroup, FilterSearch } from '@/components/layouts';
+import { MaterialSymbol } from '@/components/MaterialSymbol';
 import type { Customer } from '@shared/schema';
 import { insertCustomerSchema } from '@shared/schema';
 import {
@@ -604,6 +606,7 @@ export default function Customers() {
   const { isAuthenticated, isLoading, user, isViewer } = useAuth();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'active' | 'disabled'>('active');
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -894,148 +897,185 @@ export default function Customers() {
   const isAdmin = user?.role === 'admin';
 
   const CustomerTable = ({ customers, showActions }: { customers: Customer[]; showActions: 'disable' | 'enable' }) => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t('customers.name')}</TableHead>
-          <TableHead>{t('customers.nationalId')}</TableHead>
-          <TableHead>{t('customers.phone')}</TableHead>
-          <TableHead>{t('customers.email')}</TableHead>
-          <TableHead>{t('customers.licenseNumber')}</TableHead>
-          <TableHead>{t('common.actions')}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {customers.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={6} className="text-center text-muted-foreground">
-              {t('customers.noCustomers')}
-            </TableCell>
+    <div className="rounded-xl border bg-card overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableHead className="font-semibold text-foreground">{t('customers.name')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('customers.nationalId')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('customers.phone')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('customers.email')}</TableHead>
+            <TableHead className="font-semibold text-foreground">{t('customers.licenseNumber')}</TableHead>
+            <TableHead className="font-semibold text-foreground text-right">{t('common.actions')}</TableHead>
           </TableRow>
-        ) : (
-          customers.map((customer) => (
-            <TableRow key={customer.id} data-testid={`row-customer-${customer.id}`}>
-              <TableCell className="font-medium">
-                {getBilingualValue(customer.nameEn, customer.nameAr)}
-              </TableCell>
-              <TableCell>{customer.nationalId}</TableCell>
-              <TableCell>{customer.phone}</TableCell>
-              <TableCell>{customer.email || '-'}</TableCell>
-              <TableCell>{customer.licenseNumber || '-'}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  {!isViewer && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(customer)}
-                      data-testid={`button-edit-customer-${customer.id}`}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {isAdmin && showActions === 'disable' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDisableClick(customer)}
-                      data-testid={`button-disable-customer-${customer.id}`}
-                    >
-                      <Ban className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {isAdmin && showActions === 'enable' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEnableClick(customer)}
-                      data-testid={`button-enable-customer-${customer.id}`}
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                    </Button>
-                  )}
+        </TableHeader>
+        <TableBody>
+          {customers.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                <div className="flex flex-col items-center gap-2">
+                  <MaterialSymbol name="person_off" size="xl" className="text-muted-foreground/50" />
+                  <span>{t('customers.noCustomers')}</span>
                 </div>
               </TableCell>
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
+          ) : (
+            customers.map((customer) => (
+              <TableRow 
+                key={customer.id} 
+                data-testid={`row-customer-${customer.id}`}
+                className="hover:bg-muted/30 transition-colors"
+              >
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <MaterialSymbol name="person" size="sm" className="text-primary" />
+                    </div>
+                    <span>{getBilingualValue(customer.nameEn, customer.nameAr)}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{customer.nationalId}</TableCell>
+                <TableCell className="text-muted-foreground">{customer.phone}</TableCell>
+                <TableCell className="text-muted-foreground">{customer.email || '-'}</TableCell>
+                <TableCell className="text-muted-foreground">{customer.licenseNumber || '-'}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1 justify-end">
+                    {!isViewer && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(customer)}
+                        data-testid={`button-edit-customer-${customer.id}`}
+                        className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                      >
+                        <MaterialSymbol name="edit" size="sm" />
+                      </Button>
+                    )}
+                    {isAdmin && showActions === 'disable' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDisableClick(customer)}
+                        data-testid={`button-disable-customer-${customer.id}`}
+                        className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <MaterialSymbol name="block" size="sm" />
+                      </Button>
+                    )}
+                    {isAdmin && showActions === 'enable' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEnableClick(customer)}
+                        data-testid={`button-enable-customer-${customer.id}`}
+                        className="h-8 w-8 hover:bg-green-500/10 hover:text-green-600"
+                      >
+                        <MaterialSymbol name="check_circle" size="sm" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 
   return (
-    <div className="container mx-auto p-6" data-testid="page-customers">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>{t('customers.title')}</CardTitle>
-            {!isViewer && (
-              <Dialog open={createOpen} onOpenChange={handleCreateDialogChange}>
-                <DialogTrigger asChild>
-                  <Button data-testid="button-create-customer">
-                    <Plus className="h-4 w-4 mr-2" />
+    <div data-testid="page-customers">
+      <ListPageLayout
+        title={t('customers.title')}
+        actionButton={
+          !isViewer && (
+            <Dialog open={createOpen} onOpenChange={handleCreateDialogChange}>
+              <DialogTrigger asChild>
+                <Button data-testid="button-create-customer" className="gap-2">
+                  <MaterialSymbol name="person_add" size="sm" />
+                  {t('customers.addCustomer')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+                <DialogHeader className="px-6 pt-6 pb-4">
+                  <DialogTitle>{t('customers.newCustomer')}</DialogTitle>
+                  <DialogDescription>
                     {t('customers.addCustomer')}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-                  <DialogHeader className="px-6 pt-6 pb-4">
-                    <DialogTitle>{t('customers.newCustomer')}</DialogTitle>
-                    <DialogDescription>
-                      {t('customers.addCustomer')}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <CustomerForm form={form} phoneWarning={phoneWarning} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t('customers.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                data-testid="input-search-customers"
-              />
+                  </DialogDescription>
+                </DialogHeader>
+                <CustomerForm form={form} phoneWarning={phoneWarning} t={t} onSubmit={handleCreate} isPending={createMutation.isPending} />
+              </DialogContent>
+            </Dialog>
+          )
+        }
+        filterPanel={
+          <FilterPanel title={t('common.filters')} showButtons={false}>
+            <FilterGroup label={t('customers.searchPlaceholder')}>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <MaterialSymbol name="search" size="sm" />
+                </span>
+                <Input
+                  placeholder={t('customers.searchPlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-10 rounded-lg"
+                  data-testid="input-search-customers"
+                />
+              </div>
+            </FilterGroup>
+            
+            <FilterGroup label={t('common.status')}>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-3 rounded-lg border border-input p-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/10 transition-colors">
+                  <input
+                    type="radio"
+                    name="customer-status"
+                    checked={activeTab === 'active'}
+                    onChange={() => setActiveTab('active')}
+                    className="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                  />
+                  <span className="text-sm font-medium">{t('customers.activeCustomers')} ({activeCustomers.length})</span>
+                </label>
+                <label className="flex items-center gap-3 rounded-lg border border-input p-3 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/10 transition-colors">
+                  <input
+                    type="radio"
+                    name="customer-status"
+                    checked={activeTab === 'disabled'}
+                    onChange={() => setActiveTab('disabled')}
+                    className="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                  />
+                  <span className="text-sm font-medium">{t('customers.disabledCustomers')} ({disabledCustomers.length})</span>
+                </label>
+              </div>
+            </FilterGroup>
+          </FilterPanel>
+        }
+      >
+        {activeTab === 'active' ? (
+          activeLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MaterialSymbol name="progress_activity" className="animate-spin" />
+                {t('common.loading')}
+              </div>
             </div>
-          </div>
-
-          <Tabs defaultValue="active">
-            <TabsList className="mb-4">
-              <TabsTrigger value="active" data-testid="tab-active-customers">
-                {t('customers.activeCustomers')} ({activeCustomers.length})
-              </TabsTrigger>
-              <TabsTrigger value="disabled" data-testid="tab-disabled-customers">
-                {t('customers.disabledCustomers')} ({disabledCustomers.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="active">
-              {activeLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : (
-                <CustomerTable customers={filteredActiveCustomers} showActions="disable" />
-              )}
-            </TabsContent>
-
-            <TabsContent value="disabled">
-              {disabledLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : (
-                <CustomerTable customers={filteredDisabledCustomers} showActions="enable" />
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+          ) : (
+            <CustomerTable customers={filteredActiveCustomers} showActions="disable" />
+          )
+        ) : (
+          disabledLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MaterialSymbol name="progress_activity" className="animate-spin" />
+                {t('common.loading')}
+              </div>
+            </div>
+          ) : (
+            <CustomerTable customers={filteredDisabledCustomers} showActions="enable" />
+          )
+        )}
+      </ListPageLayout>
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={handleEditDialogChange}>
