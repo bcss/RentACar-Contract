@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'wouter';
 import { SystemError } from '@shared/schema';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getTimeBasedGreeting, getTimeAgo } from '@/utils/timeGreeting';
 import { MaterialSymbol } from '@/components/MaterialSymbol';
@@ -22,7 +21,6 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, isAdmin, isManager, user } = useAuth();
   const [, setLocation] = useLocation();
-  const [isErrorBannerDismissed, setIsErrorBannerDismissed] = useState(false);
   const [activeTab, setActiveTab] = useState('my-day');
 
   const handleTabChange = (value: string) => {
@@ -83,35 +81,6 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 lg:p-8">
-      {/* System Errors Banner */}
-      {isAdmin && unacknowledgedErrors.length > 0 && !isErrorBannerDismissed && (
-        <Alert variant="destructive" className="relative rounded-xl mb-4" data-testid="alert-system-errors">
-          <MaterialSymbol name="error" size="sm" />
-          <AlertTitle className="text-sm">{t('greeting.systemErrors')}</AlertTitle>
-          <AlertDescription className="flex items-center justify-between text-xs">
-            <span>
-              {t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}{' '}
-              <button 
-                className="underline hover:no-underline"
-                onClick={() => setLocation('/system-errors')}
-                data-testid="link-view-errors"
-              >
-                {t('systemErrors.clickToView')}
-              </button>
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 hover:bg-destructive/20"
-              onClick={() => setIsErrorBannerDismissed(true)}
-              data-testid="button-dismiss-error-banner"
-            >
-              <MaterialSymbol name="close" size="sm" />
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
       {/* Page Header - Reference Design Match */}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div className="flex flex-col gap-2">
@@ -122,12 +91,34 @@ export default function Dashboard() {
             {greetingText}, <span className="font-medium text-foreground">{firstName}</span>
           </p>
         </div>
-        <Button asChild className="h-10 px-4 text-sm font-bold gap-2" data-testid="button-new-contract">
-          <Link href="/contracts/new">
-            <MaterialSymbol name="add" size="sm" />
-            <span>{t('contracts.newContract')}</span>
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* System Errors Icon Button - Compact notification like mail count */}
+          {isAdmin && unacknowledgedErrors.length > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative toggle-elevate"
+              onClick={() => setLocation('/system-errors')}
+              title={t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}
+              data-testid="button-system-errors"
+            >
+              <MaterialSymbol name="error" size="sm" className="text-destructive" />
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
+                data-testid="badge-error-count"
+              >
+                {unacknowledgedErrors.length > 99 ? '99+' : unacknowledgedErrors.length}
+              </Badge>
+            </Button>
+          )}
+          <Button asChild className="h-10 px-4 text-sm font-bold gap-2" data-testid="button-new-contract">
+            <Link href="/contracts/new">
+              <MaterialSymbol name="add" size="sm" />
+              <span>{t('contracts.newContract')}</span>
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Tabbed Dashboard - Reference Design Match */}

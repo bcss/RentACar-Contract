@@ -5,7 +5,7 @@ import { useCurrency } from '@/hooks/useCurrency';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
-import { Contract } from '@shared/schema';
+import { ContractWithDetails } from '@shared/schema';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Icon } from '@/components/Icon';
@@ -18,7 +18,7 @@ export function MyDayTab() {
   const { user } = useAuth();
   const { currency } = useCurrency();
 
-  const { data: contracts = [], isLoading: contractsLoading } = useQuery<Contract[]>({
+  const { data: contracts = [], isLoading: contractsLoading } = useQuery<ContractWithDetails[]>({
     queryKey: ['/api/contracts'],
   });
 
@@ -39,7 +39,7 @@ export function MyDayTab() {
   // This month's contracts and revenue
   const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const myContractsThisMonth = myContracts.filter(c => new Date(c.createdAt) >= firstDayOfMonth);
+  const myContractsThisMonth = myContracts.filter(c => c.createdAt && new Date(c.createdAt) >= firstDayOfMonth);
   const myRevenueThisMonth = myContractsThisMonth.reduce((sum, contract) => {
     return sum + parseFloat(contract.totalAmount || '0');
   }, 0);
