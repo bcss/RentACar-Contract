@@ -61,19 +61,21 @@
 
   --card-border: 216 12% 91%;
 
-  --sidebar: 216 20% 8%;
+  /* Light mode sidebar: white surface with light gray border */
+  --sidebar: 0 0% 100%;
 
-  --sidebar-foreground: 210 20% 92%;
+  --sidebar-foreground: 220 13% 12%;
 
-  --sidebar-border: 216 20% 15%;
+  --sidebar-border: 216 12% 91%;
 
   --sidebar-primary: 209 88% 51%;
 
   --sidebar-primary-foreground: 0 0% 100%;
 
-  --sidebar-accent: 216 20% 15%;
+  /* Light mode accent: subtle blue tint */
+  --sidebar-accent: 209 88% 96%;
 
-  --sidebar-accent-foreground: 210 20% 92%;
+  --sidebar-accent-foreground: 209 88% 40%;
 
   --sidebar-ring: 209 88% 51%;
 
