@@ -10,8 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getTimeBasedGreeting, getTimeAgo } from '@/utils/timeGreeting';
-import { AlertCircle, X } from 'lucide-react';
-import { Icon } from '@/components/Icon';
+import { MaterialSymbol } from '@/components/MaterialSymbol';
 
 // Import tab components
 import { MyDayTab } from './dashboard/MyDayTab';
@@ -86,8 +85,8 @@ export default function Dashboard() {
     <div className="p-4 space-y-4">
       {/* System Errors Banner */}
       {isAdmin && unacknowledgedErrors.length > 0 && !isErrorBannerDismissed && (
-        <Alert variant="destructive" className="relative" data-testid="alert-system-errors">
-          <AlertCircle className="h-4 w-4" />
+        <Alert variant="destructive" className="relative rounded-xl" data-testid="alert-system-errors">
+          <MaterialSymbol name="error" size="sm" />
           <AlertTitle>{t('greeting.systemErrors')}</AlertTitle>
           <AlertDescription className="flex items-center justify-between">
             <span>
@@ -103,60 +102,82 @@ export default function Dashboard() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 h-6 w-6"
+              className="absolute top-2 right-2 h-6 w-6 hover:bg-destructive/20"
               onClick={() => setIsErrorBannerDismissed(true)}
               data-testid="button-dismiss-error-banner"
             >
-              <X className="h-4 w-4" />
+              <MaterialSymbol name="close" size="sm" />
             </Button>
           </AlertDescription>
         </Alert>
       )}
 
       {/* Welcome Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold" data-testid="text-dashboard-title">{t('dashboard.title')}</h1>
-          <div className="flex items-center gap-2 mt-1">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl lg:text-4xl font-black leading-tight tracking-tight" data-testid="text-dashboard-title">
+            {t('dashboard.title')}
+          </h1>
+          <div className="flex items-center gap-2">
             <p className="text-base text-muted-foreground" data-testid="text-greeting">
               {greetingText}, <span className="font-semibold text-foreground">{firstName}</span>
             </p>
           </div>
-          <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-            <Badge variant="outline" className="font-normal text-xs" data-testid="badge-user-role">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Badge variant="outline" className="font-normal text-xs rounded-full" data-testid="badge-user-role">
+              <MaterialSymbol name="person" size="xs" className="mr-1" />
               {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
             </Badge>
-            <span>•</span>
-            <span data-testid="text-last-login">{t('greeting.lastLogin')}: {lastLoginText}</span>
+            <span className="text-border">•</span>
+            <span className="flex items-center gap-1" data-testid="text-last-login">
+              <MaterialSymbol name="schedule" size="xs" />
+              {t('greeting.lastLogin')}: {lastLoginText}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button asChild size="sm" data-testid="button-new-contract">
-            <Link href="/contracts/new">
-              <Icon name="add" className="" />
-              <span>{t('contracts.newContract')}</span>
-            </Link>
-          </Button>
-        </div>
+        <Button asChild className="gap-2" data-testid="button-new-contract">
+          <Link href="/contracts/new">
+            <MaterialSymbol name="add" size="sm" />
+            <span>{t('contracts.newContract')}</span>
+          </Link>
+        </Button>
       </div>
 
       {/* Tabbed Dashboard */}
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full max-w-4xl" style={{ gridTemplateColumns: canViewManagement ? '1fr 1fr 1fr' : '1fr' }}>
-          <TabsTrigger value="my-day" data-testid="tab-my-day">
-            {t('dashboard.myDay')}
-          </TabsTrigger>
-          {canViewManagement && (
-            <>
-              <TabsTrigger value="company-today" data-testid="tab-company-today">
-                {t('dashboard.companyToday')}
+      <div className="mt-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <div className="border-b border-border">
+            <TabsList className="bg-transparent h-auto p-0 gap-8">
+              <TabsTrigger 
+                value="my-day" 
+                data-testid="tab-my-day"
+                className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-3 pt-4 text-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
+              >
+                <MaterialSymbol name="today" size="sm" className="mr-2" />
+                {t('dashboard.myDay')}
               </TabsTrigger>
-              <TabsTrigger value="executive-overview" data-testid="tab-executive-overview">
-                {t('dashboard.executiveOverview')}
-              </TabsTrigger>
-            </>
-          )}
-        </TabsList>
+              {canViewManagement && (
+                <>
+                  <TabsTrigger 
+                    value="company-today" 
+                    data-testid="tab-company-today"
+                    className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-3 pt-4 text-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
+                  >
+                    <MaterialSymbol name="domain" size="sm" className="mr-2" />
+                    {t('dashboard.companyToday')}
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="executive-overview" 
+                    data-testid="tab-executive-overview"
+                    className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-3 pt-4 text-sm font-bold leading-normal tracking-wide data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:text-primary transition-colors"
+                  >
+                    <MaterialSymbol name="analytics" size="sm" className="mr-2" />
+                    {t('dashboard.executiveOverview')}
+                  </TabsTrigger>
+                </>
+              )}
+            </TabsList>
+          </div>
 
         <TabsContent value="my-day" className="mt-4" data-testid="content-my-day">
           <MyDayTab />
@@ -173,7 +194,8 @@ export default function Dashboard() {
             </TabsContent>
           </>
         )}
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Plus, UserCircle, Edit, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +16,8 @@ import { insertDriverSchema, type Driver, type InsertDriver } from "@shared/sche
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { MaterialSymbol } from "@/components/MaterialSymbol";
+import { ListPageLayout, FilterPanel, FilterGroup } from "@/components/layouts";
 
 export default function Drivers() {
   const { t } = useTranslation();
@@ -115,97 +116,169 @@ export default function Drivers() {
     }
   };
 
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            {t("drivers")}
-          </h1>
-          <p className="text-muted-foreground mt-1">Manage professional drivers and assignments</p>
-        </div>
-        <Button onClick={handleCreate} data-testid="button-create-driver">
-          <Plus className="w-4 h-4 mr-2" />
-          {t("addDriver")}
-        </Button>
-      </div>
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserCircle className="w-5 h-5" />
-            Driver Directory
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
-          ) : drivers.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <UserCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No drivers found</p>
+  const filteredDrivers = drivers.filter((driver) => {
+    const matchesSearch = 
+      driver.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (driver.nameAr && driver.nameAr.includes(searchTerm)) ||
+      driver.licenseNumber.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = 
+      statusFilter === "all" || 
+      (statusFilter === "active" && driver.isActive) ||
+      (statusFilter === "inactive" && !driver.isActive);
+    return matchesSearch && matchesStatus;
+  });
+
+  return (
+    <div data-testid="page-drivers">
+      <ListPageLayout
+        title={t("drivers")}
+        subtitle={`${filteredDrivers.length} ${t("drivers")}`}
+        actionButton={
+          <Button onClick={handleCreate} className="gap-2" data-testid="button-create-driver">
+            <MaterialSymbol name="add_circle" size="sm" />
+            {t("addDriver")}
+          </Button>
+        }
+        filterPanel={
+          <FilterPanel title={t("common.filters")} showButtons={false}>
+            <FilterGroup label={t("common.search")}>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <MaterialSymbol name="search" size="sm" />
+                </span>
+                <Input
+                  placeholder={t("searchDrivers")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-10 rounded-lg"
+                  data-testid="input-search"
+                />
+              </div>
+            </FilterGroup>
+            
+            <FilterGroup label={t("status")}>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-10 rounded-lg" data-testid="select-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("common.all")}</SelectItem>
+                  <SelectItem value="active">{t("active")}</SelectItem>
+                  <SelectItem value="inactive">{t("inactive")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </FilterGroup>
+          </FilterPanel>
+        }
+      >
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MaterialSymbol name="progress_activity" className="animate-spin" />
+              {t("common.loading")}
             </div>
-          ) : (
+          </div>
+        ) : filteredDrivers.length === 0 ? (
+          <div className="p-12 text-center">
+            <MaterialSymbol name="person" size="2xl" className="text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground">{t("common.noResults")}</p>
+          </div>
+        ) : (
+          <div className="rounded-xl border bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>{t("driverName")}</TableHead>
-                  <TableHead>{t("licenseNumber")}</TableHead>
-                  <TableHead>{t("employmentType")}</TableHead>
-                  <TableHead>{t("contact")}</TableHead>
-                  <TableHead>{t("status")}</TableHead>
-                  <TableHead className="text-right">{t("actions")}</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">{t("driverName")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("licenseNumber")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("employmentType")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("contact")}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t("status")}</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right">{t("actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {drivers.map((driver) => (
-                  <TableRow key={driver.id} data-testid={`row-driver-${driver.id}`}>
+                {filteredDrivers.map((driver) => (
+                  <TableRow 
+                    key={driver.id} 
+                    className="hover:bg-muted/30 transition-colors"
+                    data-testid={`row-driver-${driver.id}`}
+                  >
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{driver.nameEn}</div>
-                        {driver.nameAr && (
-                          <div className="text-sm text-muted-foreground">{driver.nameAr}</div>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <MaterialSymbol name="person" size="sm" className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-medium">{driver.nameEn}</div>
+                          {driver.nameAr && (
+                            <div className="text-sm text-muted-foreground">{driver.nameAr}</div>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{driver.licenseNumber}</Badge>
+                      <Badge variant="outline" className="rounded-full">
+                        <MaterialSymbol name="id_card" size="xs" className="mr-1" />
+                        {driver.licenseNumber}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={driver.employmentType === 'in_house' ? 'default' : 'secondary'}>
+                      <Badge 
+                        variant={driver.employmentType === 'in_house' ? 'default' : 'secondary'}
+                        className="rounded-full"
+                      >
+                        <MaterialSymbol name={driver.employmentType === 'in_house' ? 'home' : 'business'} size="xs" className="mr-1" />
                         {driver.employmentType === 'in_house' ? t("directEmployee") : t("outsourced")}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        <div>{driver.mobile}</div>
-                        <div className="text-muted-foreground">{driver.email}</div>
+                      <div className="text-sm space-y-1">
+                        <div className="flex items-center gap-1">
+                          <MaterialSymbol name="phone" size="xs" className="text-muted-foreground" />
+                          {driver.mobile || "-"}
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <MaterialSymbol name="mail" size="xs" />
+                          {driver.email || "-"}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       {driver.isActive ? (
-                        <Badge variant="default">Active</Badge>
+                        <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400 rounded-full">
+                          <MaterialSymbol name="check_circle" size="xs" className="mr-1" />
+                          Active
+                        </Badge>
                       ) : (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="secondary" className="rounded-full">
+                          <MaterialSymbol name="pause_circle" size="xs" className="mr-1" />
+                          Inactive
+                        </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(driver)}
-                        data-testid={`button-edit-driver-${driver.id}`}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(driver)}
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                          data-testid={`button-edit-driver-${driver.id}`}
+                        >
+                          <MaterialSymbol name="edit" size="sm" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </ListPageLayout>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
