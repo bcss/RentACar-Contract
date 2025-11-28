@@ -31,7 +31,15 @@
   }
 }
 
-/* LIGHT MODE - KarāraOS Design System (Nov 2025) */
+/* Base font normalization for consistent rem scaling */
+html {
+  font-size: 16px;
+}
+
+/* LIGHT MODE - KarāraOS Reference Design (Nov 2025) */
+/* Exact colors from ui_design_28_nov_2025 reference templates:
+   Primary: #137fec, Background: #f6f7f8, Surface: #ffffff
+   Border: #e5e7eb, Text Secondary: #6b7280 */
 :root {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
@@ -43,61 +51,70 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  /* Semantic status colors */
-  --positive: 142 91% 45%;
+  /* Semantic status colors - Reference: positive #0bda5b, negative #fa6238 */
+  --positive: 145 92% 45%;
   --positive-foreground: 0 0% 100%;
   --negative: 11 95% 60%;
   --negative-foreground: 0 0% 100%;
 
+  /* Background: #f6f7f8 */
   --background: 210 10% 97%;
 
-  --foreground: 220 13% 12%;
+  /* Text primary: #111827 */
+  --foreground: 221 39% 11%;
 
-  --border: 216 12% 84%;
+  /* Border: #e5e7eb */
+  --border: 220 13% 91%;
 
+  /* Surface: #ffffff */
   --card: 0 0% 100%;
 
-  --card-foreground: 220 13% 12%;
+  --card-foreground: 221 39% 11%;
 
-  --card-border: 216 12% 91%;
+  --card-border: 220 13% 91%;
 
   /* Light mode sidebar: white surface with light gray border */
   --sidebar: 0 0% 100%;
 
-  --sidebar-foreground: 220 13% 12%;
+  --sidebar-foreground: 221 39% 11%;
 
-  --sidebar-border: 216 12% 91%;
+  --sidebar-border: 220 13% 91%;
 
-  --sidebar-primary: 209 88% 51%;
+  /* Primary: #137fec */
+  --sidebar-primary: 210 85% 50%;
 
   --sidebar-primary-foreground: 0 0% 100%;
 
   /* Light mode accent: subtle blue tint */
-  --sidebar-accent: 209 88% 96%;
+  --sidebar-accent: 210 85% 96%;
 
-  --sidebar-accent-foreground: 209 88% 40%;
+  --sidebar-accent-foreground: 210 85% 40%;
 
-  --sidebar-ring: 209 88% 51%;
+  --sidebar-ring: 210 85% 50%;
 
   --popover: 0 0% 100%;
 
-  --popover-foreground: 220 13% 12%;
+  --popover-foreground: 221 39% 11%;
 
-  --popover-border: 216 12% 91%;
+  --popover-border: 220 13% 91%;
 
-  --primary: 209 88% 51%;
+  /* Primary: #137fec */
+  --primary: 210 85% 50%;
 
   --primary-foreground: 0 0% 100%;
 
+  /* Secondary text: #6b7280 */
   --secondary: 220 9% 46%;
 
   --secondary-foreground: 0 0% 100%;
 
   --muted: 210 10% 96%;
 
+  /* Muted foreground: #6b7280 */
   --muted-foreground: 220 9% 46%;
 
-  --accent: 45 100% 51%;
+  /* Accent amber: #FFCC00 */
+  --accent: 48 100% 50%;
 
   --accent-foreground: 0 0% 13%;
 
@@ -105,12 +122,12 @@
 
   --destructive-foreground: 0 0% 100%;
 
-  --input: 216 12% 84%;
-  --ring: 209 88% 51%;
-  --chart-1: 209 88% 51%;
-  --chart-2: 142 71% 45%;
+  --input: 220 13% 91%;
+  --ring: 210 85% 50%;
+  --chart-1: 210 85% 50%;
+  --chart-2: 145 92% 45%;
   --chart-3: 207 90% 54%;
-  --chart-4: 38 92% 50%;
+  --chart-4: 48 100% 50%;
   --chart-5: 220 9% 46%;
 
   --font-sans: Inter, sans-serif;
@@ -161,8 +178,8 @@
 }
 
 /* DARK MODE - KarāraOS Reference Design (Nov 2025) */
-/* Colors from ui_design_28_nov_2025 reference:
-   Primary: #137fec, Background: #101922, Surface: #111418
+/* Exact colors from ui_design_28_nov_2025 reference templates:
+   Primary: #137fec, Background: #101922, Surface: #1a2530
    Border: #3b4754, Text Secondary: #9dabb9 */
 .dark {
   --button-outline: rgba(255,255,255, .10);
@@ -174,7 +191,7 @@
   --elevate-2: rgba(255,255,255, .09);
 
   /* Semantic status colors - Reference: positive #0bda5b, negative #fa6238 */
-  --positive: 142 91% 45%;
+  --positive: 145 92% 45%;
   --positive-foreground: 0 0% 100%;
   --negative: 11 95% 60%;
   --negative-foreground: 0 0% 100%;
@@ -182,60 +199,62 @@
   /* Background: #101922 */
   --background: 213 38% 10%;
 
-  --foreground: 0 0% 98%;
+  --foreground: 0 0% 100%;
 
   /* Border: #3b4754 */
-  --border: 210 19% 28%;
+  --border: 210 18% 28%;
 
-  /* Card/Surface: #111418 */
-  --card: 216 20% 8%;
+  /* Card/Surface: #1a2530 (reference surface-dark) */
+  --card: 210 29% 15%;
 
-  --card-foreground: 0 0% 98%;
+  --card-foreground: 0 0% 100%;
 
-  --card-border: 210 19% 22%;
+  --card-border: 210 18% 28%;
 
-  /* Sidebar: #111418 (same as card surface) */
-  --sidebar: 216 20% 8%;
+  /* Sidebar: #1a2530 (matches reference surface-dark) */
+  --sidebar: 210 29% 15%;
 
-  --sidebar-foreground: 0 0% 98%;
+  --sidebar-foreground: 0 0% 100%;
 
-  --sidebar-border: 210 19% 22%;
+  --sidebar-border: 210 18% 28%;
 
   /* Primary: #137fec */
-  --sidebar-primary: 209 88% 51%;
+  --sidebar-primary: 210 85% 50%;
 
   --sidebar-primary-foreground: 0 0% 100%;
 
-  --sidebar-accent: 209 40% 20%;
+  /* Active/Selected item background: subtle primary tint */
+  --sidebar-accent: 210 50% 22%;
 
-  --sidebar-accent-foreground: 209 88% 75%;
+  --sidebar-accent-foreground: 210 85% 75%;
 
-  --sidebar-ring: 209 88% 51%;
+  --sidebar-ring: 210 85% 50%;
 
-  /* Popover: #111418 */
-  --popover: 216 20% 8%;
+  /* Popover: #1a2530 */
+  --popover: 210 29% 15%;
 
-  --popover-foreground: 0 0% 98%;
+  --popover-foreground: 0 0% 100%;
 
-  --popover-border: 210 19% 22%;
+  --popover-border: 210 18% 28%;
 
   /* Primary: #137fec */
-  --primary: 209 88% 51%;
+  --primary: 210 85% 50%;
 
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary/Muted text: #9dabb9 */
-  --secondary: 210 15% 67%;
+  /* Secondary text: #9dabb9 */
+  --secondary: 210 14% 67%;
 
-  --secondary-foreground: 0 0% 98%;
+  --secondary-foreground: 0 0% 100%;
 
-  /* Muted background for inputs: #1c2127 */
-  --muted: 213 18% 13%;
+  /* Muted background: slightly elevated from background */
+  --muted: 210 25% 13%;
 
   /* Muted foreground: #9dabb9 */
-  --muted-foreground: 210 15% 67%;
+  --muted-foreground: 210 14% 67%;
 
-  --accent: 45 100% 60%;
+  /* Accent amber: #FFCC00 */
+  --accent: 48 100% 50%;
 
   --accent-foreground: 220 13% 13%;
 
@@ -243,14 +262,14 @@
 
   --destructive-foreground: 0 0% 100%;
 
-  /* Input background: #1c2127, border: #3b4754 */
-  --input: 210 19% 28%;
-  --ring: 209 88% 51%;
-  --chart-1: 209 88% 51%;
-  --chart-2: 142 91% 45%;
+  /* Input border: #3b4754 */
+  --input: 210 18% 28%;
+  --ring: 210 85% 50%;
+  --chart-1: 210 85% 50%;
+  --chart-2: 145 92% 45%;
   --chart-3: 207 90% 60%;
-  --chart-4: 38 92% 55%;
-  --chart-5: 210 15% 67%;
+  --chart-4: 48 100% 50%;
+  --chart-5: 210 14% 67%;
 
   --shadow-2xs: 0px 2px 0px 0px hsl(220 13% 8% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(220 13% 8% / 0.00);
@@ -276,7 +295,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-background text-foreground text-sm;
   }
 }
 
