@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KarāraOS - Contracts Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light font-display">
+<div class="flex h-screen">
+<aside class="flex flex-col w-64 bg-white border-r border-gray-200">
+<div class="flex flex-col justify-between flex-1 p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAYyBQ3gO1QPNVgRmTNJphKM13TJugwMa5rotOsiB9KotPdD09YtShrpea1uj5XaDtJM9WLXuS_ZpGm-Dgkt_anF4UyY79xfPvIBR22o8wUCigZJ9n2Xotbttca9uiK6cMWbymi3l2uLlUOth6Arqqx-pxeaE3XreGtAEZsHpJHUWZi0qWedR2DkUrQ3mXw5Qb9CpQYAyF3GtxkgOChB8TFheQLa2Si3Fu1Ggw2uEW-Pn3UbOJnaPs310KDMDBZTuOw204_Ve_M7CA");'></div>
+<div class="flex flex-col">
+<h1 class="text-gray-800 text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-gray-600 text-sm font-normal leading-normal">Rental Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white bg-primary rounded-lg" href="#">
+<span class="material-symbols-outlined filled-icon">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg" href="#">
+<span class="material-symbols-outlined">monetization_on</span>
+<p class="text-sm font-medium leading-normal">Finance</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</div>
+</aside>
+<main class="flex flex-1 overflow-hidden">
+<div class="flex flex-1">
+<div class="w-80 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col">
+<div class="p-4 border-b border-gray-200">
+<h3 class="text-gray-800 text-lg font-bold leading-tight">Filters</h3>
+</div>
+<div class="flex-1 overflow-y-auto p-4">
+<details class="flex flex-col border-t border-t-gray-200 py-2 group" open="">
+<summary class="flex cursor-pointer items-center justify-between gap-6 py-2">
+<p class="text-gray-800 text-sm font-medium leading-normal">Status</p>
+<span class="material-symbols-outlined text-gray-800 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="pl-2">
+<label class="flex items-center gap-x-3 py-2 flex-row"><input checked="" class="h-4 w-4 rounded border-gray-300 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/><p class="text-gray-800 text-sm font-normal leading-normal">ACTIVE</p></label>
+<label class="flex items-center gap-x-3 py-2 flex-row"><input class="h-4 w-4 rounded border-gray-300 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/><p class="text-gray-800 text-sm font-normal leading-normal">DRAFT</p></label>
+<label class="flex items-center gap-x-3 py-2 flex-row"><input class="h-4 w-4 rounded border-gray-300 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/><p class="text-gray-800 text-sm font-normal leading-normal">COMPLETED</p></label>
+<label class="flex items-center gap-x-3 py-2 flex-row"><input class="h-4 w-4 rounded border-gray-300 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/><p class="text-gray-800 text-sm font-normal leading-normal">CANCELLED</p></label>
+</div>
+</details>
+<details class="flex flex-col border-t border-t-gray-200 py-2 group">
+<summary class="flex cursor-pointer items-center justify-between gap-6 py-2">
+<p class="text-gray-800 text-sm font-medium leading-normal">Branch</p>
+<span class="material-symbols-outlined text-gray-800 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="pt-2">
+<input class="w-full bg-gray-50 border border-gray-300 text-gray-800 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5" placeholder="Search branch..." type="text"/>
+</div>
+</details>
+<details class="flex flex-col border-t border-t-gray-200 py-2 group" open="">
+<summary class="flex cursor-pointer items-center justify-between gap-6 py-2">
+<p class="text-gray-800 text-sm font-medium leading-normal">Date Range</p>
+<span class="material-symbols-outlined text-gray-800 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="flex items-center justify-center pt-2">
+<div class="flex min-w-full flex-col gap-0.5">
+<div class="flex items-center p-1 justify-between"><button><span class="material-symbols-outlined text-gray-800 flex size-8 items-center justify-center">chevron_left</span></button><p class="text-gray-800 text-sm font-bold leading-tight flex-1 text-center">October 2023</p><button><span class="material-symbols-outlined text-gray-800 flex size-8 items-center justify-center">chevron_right</span></button></div>
+<div class="grid grid-cols-7 text-xs"><p class="text-gray-600 font-bold flex h-8 w-full items-center justify-center">S</p><p class="text-gray-600 font-bold flex h-8 w-full items-center justify-center">M</p><p class="text-gray-600 font-bold flex h-8 w-full items-center justify-center">T</p><p class="text-gray-600 font-bold flex h-8 w-full items-center justify-center">W</p><p class="text-gray-600 font-bold flex h-8 w-full items-center justify-center">T</p><p class="text-gray-600 font-bold flex h-8 w-full items-center justify-center">F</p><p class="text-gray-600 font-bold flex h-8 w-full items-center justify-center">S</p>
+<button class="h-8 w-full text-gray-800 col-start-1 text-sm"><div class="flex size-full items-center justify-center rounded-full">1</div></button>
+<button class="h-8 w-full text-gray-800 text-sm"><div class="flex size-full items-center justify-center rounded-full">2</div></button>
+<button class="h-8 w-full text-gray-800 text-sm"><div class="flex size-full items-center justify-center rounded-full">3</div></button>
+<button class="h-8 w-full text-gray-800 text-sm"><div class="flex size-full items-center justify-center rounded-full">4</div></button>
+<button class="h-8 w-full text-white bg-primary/20 rounded-l-full"><div class="flex size-full items-center justify-center rounded-full bg-primary">5</div></button>
+<button class="h-8 w-full text-gray-800 bg-primary/20 text-sm"><div class="flex size-full items-center justify-center rounded-full">6</div></button>
+<button class="h-8 w-full text-gray-800 bg-primary/20 text-sm"><div class="flex size-full items-center justify-center rounded-full">7</div></button>
+<button class="h-8 w-full text-gray-800 bg-primary/20 text-sm"><div class="flex size-full items-center justify-center rounded-full">8</div></button>
+<button class="h-8 w-full text-white bg-primary/20 rounded-r-full"><div class="flex size-full items-center justify-center rounded-full bg-primary">9</div></button>
+<button class="h-8 w-full text-gray-800 text-sm"><div class="flex size-full items-center justify-center rounded-full">10</div></button>
+<button class="h-8 w-full text-gray-800 text-sm"><div class="flex size-full items-center justify-center rounded-full">11</div></button>
+</div>
+</div>
+</div>
+</details>
+<details class="flex flex-col border-t border-t-gray-200 py-2 group">
+<summary class="flex cursor-pointer items-center justify-between gap-6 py-2">
+<p class="text-gray-800 text-sm font-medium leading-normal">Contracting Type</p>
+<span class="material-symbols-outlined text-gray-800 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="pl-2 pt-2 space-y-3">
+<label class="flex items-center gap-x-3"><input class="h-4 w-4 text-primary focus:ring-primary border-gray-300" name="contract-type" type="radio"/><span class="text-gray-800 text-sm">Individual</span></label>
+<label class="flex items-center gap-x-3"><input class="h-4 w-4 text-primary focus:ring-primary border-gray-300" name="contract-type" type="radio"/><span class="text-gray-800 text-sm">Corporate</span></label>
+</div>
+</details>
+<details class="flex flex-col border-t border-t-gray-200 py-2 group">
+<summary class="flex cursor-pointer items-center justify-between gap-6 py-2">
+<p class="text-gray-800 text-sm font-medium leading-normal">Risk Flags</p>
+<span class="material-symbols-outlined text-gray-800 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="pl-2 pt-2 space-y-3">
+<label class="flex items-center gap-x-3"><input class="h-4 w-4 rounded text-primary focus:ring-primary border-gray-300" type="checkbox"/><span class="text-gray-800 text-sm">Blacklist</span></label>
+<label class="flex items-center gap-x-3"><input class="h-4 w-4 rounded text-primary focus:ring-primary border-gray-300" type="checkbox"/><span class="text-gray-800 text-sm">Legal Hold</span></label>
+</div>
+</details>
+</div>
+<div class="p-4 border-t border-gray-200 flex items-center gap-2">
+<button class="w-full bg-primary text-white text-sm font-medium py-2 px-4 rounded-lg">Apply Filters</button>
+<button class="w-full bg-gray-200 text-gray-800 text-sm font-medium py-2 px-4 rounded-lg">Clear All</button>
+</div>
+</div>
+<div class="flex-1 flex flex-col overflow-hidden bg-white">
+<div class="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+<h2 class="text-2xl font-bold text-gray-800">Contracts</h2>
+<button class="flex items-center gap-2 bg-primary text-white font-medium px-4 py-2 rounded-lg">
+<span class="material-symbols-outlined">add_circle</span>
+                            Create New Contract
+                        </button>
+</div>
+<div class="flex-1 overflow-x-auto">
+<table class="w-full text-sm text-left text-gray-600">
+<thead class="text-xs text-gray-800 uppercase bg-gray-50 sticky top-0">
+<tr>
+<th class="px-6 py-3" scope="col">Contract No</th>
+<th class="px-6 py-3" scope="col">Status</th>
+<th class="px-6 py-3" scope="col">Hirer</th>
+<th class="px-6 py-3" scope="col">Sponsor/Company</th>
+<th class="px-6 py-3" scope="col">Vehicle</th>
+<th class="px-6 py-3" scope="col">Branch</th>
+<th class="px-6 py-3" scope="col">Start/End</th>
+<th class="px-6 py-3 text-right" scope="col">Balance</th>
+<th class="px-6 py-3" scope="col">Flags</th>
+<th class="px-6 py-3 text-center" scope="col">Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
+<td class="px-6 py-4 font-medium text-gray-800 whitespace-nowrap">CON-23-01034</td>
+<td class="px-6 py-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">ACTIVE</span></td>
+<td class="px-6 py-4 text-gray-800">John Doe</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4 text-gray-800">Toyota Camry</td>
+<td class="px-6 py-4">Main Branch</td>
+<td class="px-6 py-4">01/10/23 - 15/10/23</td>
+<td class="px-6 py-4 text-right text-gray-800">$0.00</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4 text-center"><button class="text-gray-800"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
+<td class="px-6 py-4 font-medium text-gray-800 whitespace-nowrap">CON-23-01033</td>
+<td class="px-6 py-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">COMPLETED</span></td>
+<td class="px-6 py-4 text-gray-800">Jane Smith</td>
+<td class="px-6 py-4">Innovate Corp.</td>
+<td class="px-6 py-4 text-gray-800">Honda CR-V</td>
+<td class="px-6 py-4">Airport Branch</td>
+<td class="px-6 py-4">25/09/23 - 30/09/23</td>
+<td class="px-6 py-4 text-right text-gray-800">$0.00</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4 text-center"><button class="text-gray-800"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
+<td class="px-6 py-4 font-medium text-gray-800 whitespace-nowrap">CON-23-01032</td>
+<td class="px-6 py-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">PENDING</span></td>
+<td class="px-6 py-4 text-gray-800">Alex Johnson</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4 text-gray-800">Ford Mustang</td>
+<td class="px-6 py-4">Downtown Branch</td>
+<td class="px-6 py-4">10/10/23 - 12/10/23</td>
+<td class="px-6 py-4 text-right text-red-500">-$250.00</td>
+<td class="px-6 py-4 flex gap-2"><span class="material-symbols-outlined text-red-500" title="Blacklisted">flag</span><span class="material-symbols-outlined text-orange-500" title="Legal Hold">gavel</span></td>
+<td class="px-6 py-4 text-center"><button class="text-gray-800"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
+<td class="px-6 py-4 font-medium text-gray-800 whitespace-nowrap">CON-23-01031</td>
+<td class="px-6 py-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">DRAFT</span></td>
+<td class="px-6 py-4 text-gray-800">Emily Davis</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4 text-gray-800">Chevrolet Bolt</td>
+<td class="px-6 py-4">Main Branch</td>
+<td class="px-6 py-4">15/10/23 - 20/10/23</td>
+<td class="px-6 py-4 text-right text-gray-800">$0.00</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4 text-center"><button class="text-gray-800"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="bg-white hover:bg-gray-50">
+<td class="px-6 py-4 font-medium text-gray-800 whitespace-nowrap">CON-23-01030</td>
+<td class="px-6 py-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">CANCELLED</span></td>
+<td class="px-6 py-4 text-gray-800">Michael Brown</td>
+<td class="px-6 py-4">Tech Solutions Ltd.</td>
+<td class="px-6 py-4 text-gray-800">Nissan Leaf</td>
+<td class="px-6 py-4">Airport Branch</td>
+<td class="px-6 py-4">02/10/23 - 04/10/23</td>
+<td class="px-6 py-4 text-right text-gray-800">$0.00</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4 text-center"><button class="text-gray-800"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between p-4 border-t border-gray-200 flex-shrink-0">
+<span class="text-sm text-gray-600">Showing <span class="font-semibold text-gray-800">1-5</span> of <span class="font-semibold text-gray-800">100</span></span>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled=""><span class="material-symbols-outlined">first_page</span></button>
+<button class="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled=""><span class="material-symbols-outlined">chevron_left</span></button>
+<button class="p-2 rounded-lg hover:bg-gray-100"><span class="material-symbols-outlined">chevron_right</span></button>
+<button class="p-2 rounded-lg hover:bg-gray-100"><span class="material-symbols-outlined">last_page</span></button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

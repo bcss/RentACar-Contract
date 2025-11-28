@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Driver Change / Handover Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#137fec",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .form-input {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+  </style>
+</head>
+<body class="font-display">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center bg-background-light dark:bg-background-dark p-4 sm:p-6" style="background-image: radial-gradient(circle at top right, rgba(19, 127, 236, 0.15), transparent 40%), radial-gradient(circle at bottom left, rgba(19, 127, 236, 0.15), transparent 40%);">
+<!-- Modal -->
+<div class="w-full max-w-3xl rounded-xl bg-[#111418] border border-[#3b4754] shadow-2xl">
+<div class="layout-content-container flex flex-col flex-1">
+<!-- PageHeading -->
+<div class="flex flex-wrap items-start justify-between gap-3 p-6 border-b border-[#3b4754]">
+<div class="flex min-w-72 flex-col gap-2">
+<p class="text-white text-xl font-bold leading-tight">Driver Change / Handover</p>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Securely update the assigned driver for this corporate contract.</p>
+</div>
+<button class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-[#1c2127]">
+<span class="material-symbols-outlined text-[#9dabb9]">close</span>
+</button>
+</div>
+<div class="p-6 space-y-8">
+<!-- Current Driver Section -->
+<div>
+<h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-2 pt-0">Current Driver Details</h3>
+<div class="grid grid-cols-1 md:grid-cols-[25%_1fr] gap-x-6 border border-[#3b4754] rounded-lg">
+<div class="col-span-2 grid grid-cols-subgrid py-4 px-4 items-center">
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Driver Name</p>
+<p class="text-white text-sm font-normal leading-normal">John Appleseed</p>
+</div>
+<div class="col-span-2 grid grid-cols-subgrid border-t border-t-[#3b4754] py-4 px-4 items-center">
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Contact Number</p>
+<p class="text-white text-sm font-normal leading-normal">+1 (555) 123-4567</p>
+</div>
+</div>
+</div>
+<!-- New Driver Information Section -->
+<div>
+<h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-2">New Driver Information</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col col-span-2">
+<label class="flex flex-col">
+<p class="text-white text-sm font-medium leading-normal pb-2">New Driver</p>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9dabb9]">search</span>
+<select class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#3b4754] bg-[#1c2127] focus:border-primary h-12 bg-no-repeat bg-[center_right_1rem] bg-[length:1.25rem] placeholder:text-[#9dabb9] pl-11 pr-10 text-base font-normal leading-normal" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWlSXVclqxzMdVrpCpkQ7_vqud-M663w9UJxT5mxokmu8bbqyq5ZIDxzRzY34gYaoD7WcaCpc-U7W4S6JCFWDNSMYfyrCTsVIGswHuJsOA8ToTSkKs82F3EgPfmQJFQ7Su1_mZQpj-cDoN94IJUkZ19HESoiKYbNYH1_r0R4U4kPmJOcY3cnpEpiIUhJJxDcqpnETxUGfjRNiqFzM7Ql7FQW5Vt6e1Ag2IqvXw9y8X9Tm2H5DamYCDlPwALV1rXqqcCVWWUyA8fDo');">
+<option value="one">Search and select an employee</option>
+<option value="two">Jane Doe</option>
+<option value="three">Peter Jones</option>
+</select>
+</div>
+</label>
+</div>
+<label class="flex flex-col">
+<p class="text-white text-sm font-medium leading-normal pb-2">Driver's License Number</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#3b4754] bg-[#1c2127] focus:border-primary h-12 placeholder:text-[#9dabb9] px-4 text-base font-normal leading-normal" placeholder="Enter license number" type="text"/>
+</label>
+<label class="flex flex-col">
+<p class="text-white text-sm font-medium leading-normal pb-2">License Expiry Date</p>
+<div class="relative">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#3b4754] bg-[#1c2127] focus:border-primary h-12 placeholder:text-[#9dabb9] px-4 text-base font-normal leading-normal" type="date"/>
+</div>
+</label>
+<div class="col-span-2">
+<p class="text-white text-sm font-medium leading-normal pb-2">Upload Driver's License</p>
+<div class="flex items-center justify-center w-full">
+<label class="flex flex-col items-center justify-center w-full h-32 border-2 border-[#3b4754] border-dashed rounded-lg cursor-pointer bg-[#1c2127] hover:bg-[#2c3239]" for="dropzone-file">
+<div class="flex flex-col items-center justify-center pt-5 pb-6">
+<span class="material-symbols-outlined text-[#9dabb9]">cloud_upload</span>
+<p class="mb-2 text-sm text-[#9dabb9]"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+<p class="text-xs text-[#6a7583]">PNG, JPG or PDF (MAX. 5MB)</p>
+</div>
+<input class="hidden" id="dropzone-file" type="file"/>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Authorization Section -->
+<div>
+<h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-2">Authorization</h3>
+<div class="space-y-4">
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 rounded-lg bg-[#1c2127] border border-[#3b4754]">
+<div class="flex-1">
+<p class="text-white text-sm font-medium">OTP Verification</p>
+<p class="text-[#9dabb9] text-sm">An OTP will be sent to the authorized corporate contact to approve this change.</p>
+</div>
+<button class="flex-shrink-0 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#111418] focus:ring-primary">
+                  Send OTP
+                </button>
+</div>
+<div>
+<p class="text-white text-sm font-medium leading-normal pb-2">Enter OTP</p>
+<div class="flex items-center gap-2">
+<input class="w-12 h-12 text-center text-xl font-semibold text-white bg-[#1c2127] border border-[#3b4754] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" maxlength="1" type="text"/>
+<input class="w-12 h-12 text-center text-xl font-semibold text-white bg-[#1c2127] border border-[#3b4754] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" maxlength="1" type="text"/>
+<input class="w-12 h-12 text-center text-xl font-semibold text-white bg-[#1c2127] border border-[#3b4754] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" maxlength="1" type="text"/>
+<input class="w-12 h-12 text-center text-xl font-semibold text-white bg-[#1c2127] border border-[#3b4754] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" maxlength="1" type="text"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col sm:flex-row-reverse gap-3 p-6 border-t border-[#3b4754]">
+<button class="w-full sm:w-auto inline-flex justify-center rounded-lg px-6 py-3 text-sm font-medium text-white bg-primary hover:bg-primary/90 disabled:bg-primary/40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#111418] focus:ring-primary" disabled="">
+            Confirm Handover
+          </button>
+<button class="w-full sm:w-auto inline-flex justify-center rounded-lg px-6 py-3 text-sm font-medium text-white bg-transparent border border-[#3b4754] hover:bg-[#1c2127] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#111418] focus:ring-[#3b4754]">
+            Cancel
+          </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

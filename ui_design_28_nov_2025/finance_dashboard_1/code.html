@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KarāraOS - Finance Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="w-64 flex-shrink-0 bg-[#111418] p-4 flex flex-col justify-between">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3 p-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Rohan Sharma's profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD1mj7tGmnPRdh-isZNYHzS040qO1Xys0GxisVakEEX8McFDjsGhxzUzFhtMIMTGLBsIgJAH881LJNq-niNSFu1Gpqoil84E6WFFmf489OF3MhTpHq5NwR_FZsPOGWswJWdGbEp_IPEc1ncGz7WrYshWyOMDJxOypwvBTeMKpd9JK2cFXJeKwMLags3G62DmXCCCOg3iQaMjFMWW1LhDmXDyUPVGQ8o2raJ6JdGGhVbopHjNI8Y-6DBYcWDViTJArgrpUR2HWWvM2A");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">Rohan Sharma</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">HQ Administrator</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<p class="text-sm font-medium leading-normal">Finance</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+<div class="max-w-7xl mx-auto">
+<!-- PageHeading & Chips -->
+<header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+<h1 class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight">Finance Dashboard</h1>
+<div class="flex gap-3">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-white dark:bg-[#1C2A38] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-[#3b4754] px-3">
+<p class="text-sm font-medium">Date Range: Last 30 Days</p>
+<span class="material-symbols-outlined text-base">expand_more</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-white dark:bg-[#1C2A38] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-[#3b4754] px-3">
+<p class="text-sm font-medium">Branch: All Branches</p>
+<span class="material-symbols-outlined text-base">expand_more</span>
+</button>
+</div>
+</header>
+<!-- Stats -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754]">
+<p class="text-gray-600 dark:text-gray-400 text-base font-medium">Total Revenue</p>
+<p class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold">₹8,45,670.00</p>
+<p class="text-green-500 dark:text-green-400 text-base font-medium flex items-center gap-1"><span class="material-symbols-outlined text-lg">arrow_upward</span>5.2%</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754]">
+<p class="text-gray-600 dark:text-gray-400 text-base font-medium">Total Outstanding AR</p>
+<p class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold">₹1,12,340.50</p>
+<p class="text-green-500 dark:text-green-400 text-base font-medium flex items-center gap-1"><span class="material-symbols-outlined text-lg">arrow_upward</span>1.8%</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754]">
+<p class="text-gray-600 dark:text-gray-400 text-base font-medium">Total Deposits Held</p>
+<p class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold">₹2,50,000.00</p>
+<p class="text-red-500 dark:text-red-400 text-base font-medium flex items-center gap-1"><span class="material-symbols-outlined text-lg">arrow_downward</span>0.5%</p>
+</div>
+</section>
+<!-- Charts & Data Tables -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+<!-- Left Column -->
+<div class="lg:col-span-3 flex flex-col gap-6">
+<!-- Revenue Summary -->
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[#3b4754] p-6 bg-white dark:bg-[#111418]">
+<div class="flex justify-between items-center">
+<h3 class="text-gray-900 dark:text-white text-lg font-semibold">Revenue Summary</h3>
+<button class="text-sm font-medium text-primary hover:underline">View Report</button>
+</div>
+<div class="grid min-h-[250px] grid-flow-col gap-6 grid-rows-[1fr_auto] items-end justify-items-center px-3 pt-4">
+<div class="bg-primary/20 dark:bg-primary/30 w-full rounded-t-md" style="height: 80%;"><span class="sr-only">Mumbai Revenue</span></div>
+<div class="bg-primary/20 dark:bg-primary/30 w-full rounded-t-md" style="height: 40%;"><span class="sr-only">Delhi Revenue</span></div>
+<div class="bg-primary dark:bg-primary w-full rounded-t-md" style="height: 100%;"><span class="sr-only">Bangalore Revenue</span></div>
+<div class="bg-primary/20 dark:bg-primary/30 w-full rounded-t-md" style="height: 60%;"><span class="sr-only">Chennai Revenue</span></div>
+<div class="bg-primary/20 dark:bg-primary/30 w-full rounded-t-md" style="height: 50%;"><span class="sr-only">Kolkata Revenue</span></div>
+<p class="text-gray-500 dark:text-gray-400 text-xs font-medium">Mumbai</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs font-medium">Delhi</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs font-medium">Bangalore</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs font-medium">Chennai</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs font-medium">Kolkata</p>
+</div>
+</div>
+<!-- Incident Financials -->
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[#3b4754] p-6 bg-white dark:bg-[#111418]">
+<div class="flex justify-between items-center">
+<h3 class="text-gray-900 dark:text-white text-lg font-semibold">Incident-Related Finances</h3>
+<button class="text-sm font-medium text-primary hover:underline">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead class="text-xs text-gray-500 dark:text-gray-400 uppercase border-b border-gray-200 dark:border-gray-700">
+<tr>
+<th class="px-4 py-3" scope="col">Incident ID</th>
+<th class="px-4 py-3" scope="col">Customer</th>
+<th class="px-4 py-3" scope="col">Amount</th>
+<th class="px-4 py-3" scope="col">Status</th>
+</tr>
+</thead>
+<tbody class="text-gray-700 dark:text-gray-300">
+<tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<td class="px-4 py-3 font-medium">#INC-0824</td>
+<td class="px-4 py-3">Priya Patel</td>
+<td class="px-4 py-3">₹12,500</td>
+<td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Pending Collection</span></td>
+</tr>
+<tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<td class="px-4 py-3 font-medium">#INC-0821</td>
+<td class="px-4 py-3">Amit Singh</td>
+<td class="px-4 py-3">₹45,000</td>
+<td class="px-4 py-3"><span class="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Claim Submitted</span></td>
+</tr>
+<tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<td class="px-4 py-3 font-medium">#INC-0815</td>
+<td class="px-4 py-3">Sunita Rao</td>
+<td class="px-4 py-3">₹8,000</td>
+<td class="px-4 py-3"><span class="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Closed</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- Accounts Receivable -->
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[#3b4754] p-6 bg-white dark:bg-[#111418]">
+<h3 class="text-gray-900 dark:text-white text-lg font-semibold">Accounts Receivable</h3>
+<div class="flex items-center justify-center h-48 relative">
+<!-- Donut Chart Placeholder -->
+<svg class="w-48 h-48 transform -rotate-90" viewbox="0 0 120 120">
+<circle class="stroke-current text-green-500/20 dark:text-green-400/20" cx="60" cy="60" fill="none" r="54" stroke-width="12"></circle>
+<circle class="stroke-current text-green-500 dark:text-green-400" cx="60" cy="60" fill="none" r="54" stroke-dasharray="204" stroke-dashoffset="340" stroke-width="12"></circle>
+<circle class="stroke-current text-yellow-500 dark:text-yellow-400" cx="60" cy="60" fill="none" r="54" stroke-dasharray="68" stroke-dashoffset="272" stroke-width="12"></circle>
+<circle class="stroke-current text-orange-500 dark:text-orange-400" cx="60" cy="60" fill="none" r="54" stroke-dasharray="34" stroke-dashoffset="238" stroke-width="12"></circle>
+<circle class="stroke-current text-red-500 dark:text-red-400" cx="60" cy="60" fill="none" r="54" stroke-dasharray="34" stroke-dashoffset="204" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<span class="text-xs text-gray-500 dark:text-gray-400">Total Due</span>
+<span class="text-xl font-bold text-gray-900 dark:text-white">₹1.12L</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+<div class="flex items-center gap-2"><div class="size-3 rounded-full bg-green-500 dark:bg-green-400"></div><span class="text-gray-700 dark:text-gray-300">Current</span></div>
+<div class="flex items-center gap-2"><div class="size-3 rounded-full bg-yellow-500 dark:bg-yellow-400"></div><span class="text-gray-700 dark:text-gray-300">1-30 Days</span></div>
+<div class="flex items-center gap-2"><div class="size-3 rounded-full bg-orange-500 dark:bg-orange-400"></div><span class="text-gray-700 dark:text-gray-300">31-60 Days</span></div>
+<div class="flex items-center gap-2"><div class="size-3 rounded-full bg-red-500 dark:bg-red-400"></div><span class="text-gray-700 dark:text-gray-300">60+ Days</span></div>
+</div>
+<hr class="border-gray-200 dark:border-gray-700"/>
+<h4 class="font-semibold text-gray-800 dark:text-gray-200">Top Overdue Contracts</h4>
+<ul class="space-y-3 text-sm">
+<li class="flex justify-between items-center">
+<div>
+<p class="font-medium text-gray-800 dark:text-gray-200">Arjun Verma</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">#C-4561</p>
+</div>
+<div class="text-right">
+<p class="font-medium text-red-600 dark:text-red-400">₹15,200</p>
+<p class="text-red-600 dark:text-red-400 text-xs">82 days</p>
+</div>
+</li>
+<li class="flex justify-between items-center">
+<div>
+<p class="font-medium text-gray-800 dark:text-gray-200">Vikram Desai</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">#C-4558</p>
+</div>
+<div class="text-right">
+<p class="font-medium text-orange-600 dark:text-orange-400">₹9,800</p>
+<p class="text-orange-600 dark:text-orange-400 text-xs">45 days</p>
+</div>
+</li>
+</ul>
+</div>
+<!-- Customer Deposits -->
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[#3b4754] p-6 bg-white dark:bg-[#111418]">
+<h3 class="text-gray-900 dark:text-white text-lg font-semibold">Customer Deposits</h3>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between mb-1">
+<p class="text-sm font-medium text-gray-600 dark:text-gray-300">Deposits Held</p>
+<p class="text-sm font-medium text-gray-800 dark:text-white">₹2,50,000</p>
+</div>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+<div class="bg-primary h-2.5 rounded-full" style="width: 70%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<p class="text-sm font-medium text-gray-600 dark:text-gray-300">Deposits Released (30d)</p>
+<p class="text-sm font-medium text-gray-800 dark:text-white">₹1,07,142</p>
+</div>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+<div class="bg-teal-500 dark:bg-teal-400 h-2.5 rounded-full" style="width: 30%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

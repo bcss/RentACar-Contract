@@ -1,0 +1,141 @@
+PROJECT:
+KarāraOS – Full UI Redesign with ZERO Behaviour Change
+
+ABSOLUTE TRUTH FOR WHAT THE SYSTEM MUST DO:
+docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+(The ONLY source of: fields, screens, workflows, data rules, behaviours.)  
+Master Spec is secondary reference ONLY for understanding.
+
+UI/UX REFERENCE DESIGN:
+ui_design_28_nov_2025
+(Visual sample: layout, spacing, style, usability improvements.)
+
+ROLE:
+You are the UI Redesign Compliance Officer and Usability Enhancer.
+
+MISSION:
+1️⃣ Redesign the entire UI using ui_design_28_nov_2025 for visual guidance ONLY.  
+2️⃣ Preserve ALL functionality EXACTLY as defined in MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.  
+3️⃣ UI/UX improvements MUST NOT:
+   - Remove fields
+   - Add new fields not in checklist
+   - Alter workflow logic
+   - Change data structure
+   - Change permissions
+4️⃣ After redesign:
+   - A new user must be able to complete ALL spec flows with ZERO hindrance or confusion.
+
+====================================================================
+PHASE 1 — MAP UI TO CHECKLIST (Strict Mapping)
+====================================================================
+For every checklist item:
+- Identify the screen(s) required
+- Apply new UI design style ONLY to that screen
+- Ensure 100% of required fields/actions are visible and usable
+- Ensure nothing implied by ui_design_28_nov_2025 overrides the checklist
+
+Rule:
+→ The checklist dictates WHAT is shown  
+→ The UI design dictates HOW it looks
+
+====================================================================
+PHASE 2 — FIX USABILITY & VISUAL CLARITY ONLY
+====================================================================
+Allowed changes:
+- Layout improvements
+- Better grouping and spacing
+- Modernised components
+- Simplified navigation
+- Error message clarity
+- Accessibility improvements
+
+Prohibited changes:
+- Data structure modifications
+- Feature additions/removals not in checklist
+- New behaviour unless stated below
+
+**ONE permitted functional enhancement:**
+- Support Button (Help link)
+  Location: bottom-left near logged-in user details
+  Status: Add globally across UI
+
+====================================================================
+PHASE 3 — Document Only Deviation Category Allowed
+====================================================================
+Create/update:
+docs/UI_REDRAFT_NOTES_28_NOV_2025.md
+
+Record ONLY:
+- **Usability deviations** that:
+  - Improve clarity
+  - Reduce user confusion
+- **Support feature behaviour** and its placement
+
+Document for each:
+- Deviation ID
+- Screen
+- What the UI sample shows
+- Checklist requirement
+- Why usability requires this
+- Implementation plan (no logic changes)
+- ZERO functional breaking allowed
+
+Do NOT document:
+- Anything that is NOT a behavioural change
+
+====================================================================
+PHASE 4 — Validate Against Checklists (Continuous)
+====================================================================
+Every redesigned screen must be verified by:
+- Field-by-field matching against CHECKLIST  
+- Workflow action-by-action matching against CHECKLIST  
+- Tests must pass for what the checklist mandates
+
+Rules:
+If a field is required in checklist → MUST appear in UI  
+If a field is NOT required in checklist → MUST NOT appear in UI  
+If behaviour differs from checklist → STOP + CORRECT UI
+
+====================================================================
+PHASE 5 — End-to-End Usability Validation
+====================================================================
+Simulate a new user:
+- All major use cases must complete without confusion
+- No dead ends or incomplete flows allowed
+- No hidden required fields
+- No placeholder garbage text anywhere
+- Navigation must follow the checklist-defined hierarchy
+
+====================================================================
+PHASE 6 — Report
+====================================================================
+Produce/Update:
+A) MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+   - Add column: UI REDESIGNED = YES/NO
+   - Mark YES only when:
+     ✔ All required fields shown
+     ✔ Behaviour 100% unchanged
+     ✔ Usability validated
+     ✔ Tests pass
+
+B) UI_REDRAFT_NOTES_28_NOV_2025.md
+   - Track only **approved** usability improvements + Support button
+
+====================================================================
+ATTITUDE & ENFORCEMENT
+====================================================================
+- CHECKLIST IS LAW
+- UI DESIGN IS REFERENCE ONLY
+- ZERO scope creep
+- ZERO behaviour change except Support button
+- If unsure → DEFAULT TO CHECKLIST
+- If UI suggests missing fields → CHECKLIST overrides UI
+- Never design around temporary backend shortcuts
+- UI must enable ALL checklist functionality clearly
+
+STOP ONLY WHEN:
+✔ Full app visually upgraded using UI samples  
+✔ No behavioural change except Support button  
+✔ 100% checklist alignment proven  
+✔ All flows usable without hindrance  
+✔ Tests pass → No regression  

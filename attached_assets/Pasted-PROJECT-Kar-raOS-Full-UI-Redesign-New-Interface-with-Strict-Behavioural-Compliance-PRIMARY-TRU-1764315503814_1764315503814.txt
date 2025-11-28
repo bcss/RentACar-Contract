@@ -1,0 +1,198 @@
+PROJECT:
+KarāraOS – Full UI Redesign (New Interface) with Strict Behavioural Compliance
+
+PRIMARY TRUTHS:
+1) Functional / Behavioural Truth:
+   docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+   → This is the ONLY authoritative source for WHAT the system must do.
+
+2) UI Design Source:
+   ui_design_28_nov_2025
+   (New interface design samples – wireframes/mockups/layouts).
+   → This defines HOW the UI should look and flow, subject to #1.
+
+ASSUMPTIONS:
+- The underlying system logic is now compliant with MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+- We are doing a **UI redesign**, NOT a scope redesign.
+- Any behavioural change must go through a documented deviation process.
+
+ROLE:
+You are the **UI Redesign & Spec Compliance Enforcer**.
+
+Your mission:
+1) Redesign the entire KarāraOS UI according to `ui_design_28_nov_2025`.
+2) Ensure 0% deviation in behaviour from MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md unless explicitly documented as a deviation.
+3) For ANY deviation in the UI samples from MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md:
+   - Detect it,
+   - Document it in a new doc under `docs/`,
+   - Analyse impact,
+   - Propose mitigation.
+
+=================================================================
+PHASE 1 – LOAD INPUTS & SET GROUND RULES
+=================================================================
+
+INPUTS:
+- Functional baseline: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+- System spec (for understanding): docs/"KARĀRAOS – MASTER SYSTEM SPECIFICATION v1.0.md"
+- UI design assets: ui_design_28_nov_2025 (all screens, components, flows inside it)
+- Existing UI codebase (React/Next/shadcn/tailwind or equivalent).
+
+GROUND RULES:
+1) MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md defines REQUIRED behaviour.
+2) ui_design_28_nov_2025 defines DESIRED visual design & UX.
+3) Where they conflict:
+   - Behaviour MUST follow the checklist.
+   - The conflict MUST be documented, not silently ignored.
+
+=================================================================
+PHASE 2 – MAP UI SCREENS TO CHECKLIST FEATURES
+=================================================================
+
+1) From MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md:
+   - Extract all functional areas/screens:
+     Examples (not exhaustive):
+       - Contract list / detail / create / edit
+       - Driver scheduling
+       - Insurance claims new/edit/list
+       - Reports (including driver utilization)
+       - Import screens
+       - Master data, settings, roles, etc.
+   - Build a list: `FEATURE_SCREEN_MAP` = [Checklist Item ↔ UI Screen(s)]
+
+2) From ui_design_28_nov_2025:
+   - Identify all screen types, components, and layouts.
+   - Map each sample screen to one or more checklist features.
+
+3) Ensure:
+   - Every checklist item has at least one mapped UI design.
+   - If a feature in the checklist has **no** design in ui_design_28_nov_2025:
+     - Mark it as a missing design gap to be addressed (and note in a doc).
+
+=================================================================
+PHASE 3 – REDESIGN THE UI (CODE) BASED ON THE NEW DESIGNS
+=================================================================
+
+For each screen in `FEATURE_SCREEN_MAP`:
+
+1) Take the existing implementation:
+   - Components, pages, routes.
+   - Form structures, tables, filters, dialogs.
+2) Apply the new UI layout and visual design:
+   - Use the structure, layout, spacing, typography, and components from ui_design_28_nov_2025.
+   - Implement consistently (e.g., shadcn + tailwind or current design system).
+3) Preserve and rewire:
+   - All existing business logic hooks.
+   - All field bindings (values, validation, error messages).
+   - All actions (create, update, delete, transitions).
+4) Ensure:
+   - No functional regression.
+   - New UI does not drop required fields or flows from MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+
+=================================================================
+PHASE 4 – DETECT & DOCUMENT ALL DEVIATIONS FROM MASTER SPEC
+=================================================================
+
+Create a new document:
+
+- File: docs/UI_SPEC_DEVIATIONS_28_NOV_2025.md
+
+For **each** conflict or deviation where ui_design_28_nov_2025 differs from MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md:
+
+Document a structured entry:
+
+- `Screen / Area:` (e.g., Driver Scheduling, Insurance Claims New, Report X)
+- `Checklist Reference:` (ID from MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md)
+- `UI Design Behaviour / Element:`
+  - What the UI design proposes (field, flow, step, removal, extra chart, etc.)
+- `Spec Behaviour / Requirement:`
+  - What the checklist/spec actually requires.
+- `Deviation Type:` 
+  - Missing field / Extra field
+  - Changed flow / Additional step
+  - Different validation / Different permissions
+  - Different aggregation / Different report measure
+- `Is this deviation needed?` (YES/NO/MAYBE)
+  - Why it might be beneficial (usability, clarity, performance, business need).
+- `How can it be implemented?`
+  - Changes required to models, APIs, workflows, permissions, or data.
+- `What will this break or impact?`
+  - Impact on:
+    - Existing flows
+    - Data integrity
+    - Reports
+    - Integrations
+    - Tests
+- `How to mitigate and keep system stable?`
+  - Migration steps
+  - Backward compatibility considerations
+  - Additional validations or feature flags
+- `Recommendation:`
+  - Implement as new spec change
+  - Reject the deviation
+  - Park for future version (v1.x / v2)
+- `Status:` 
+  - ACCEPTED_FOR_FUTURE / REJECTED / UNDER_REVIEW / IMPLEMENTED
+
+RULE:
+- No deviation is allowed silently.
+- All must be explicitly listed in UI_SPEC_DEVIATIONS_28_NOV_2025.md.
+
+=================================================================
+PHASE 5 – REFINE IMPORT & REPORT SCREENS WITH NEW UI
+=================================================================
+
+1) Import Screens:
+   - Redesign import UI based on ui_design_28_nov_2025, but:
+     - Re-evaluate fields against **current schema** (as per checklist).
+     - Only expose/import fields that exist and are relevant now.
+   - Document any new fields or import flows that UI design suggests as deviations.
+
+2) Reporting Screens:
+   - Ensure reports (e.g., driver utilization) are:
+     - Visually updated as per new designs.
+     - Correctly wired to back-end data.
+     - Showing columns and metrics as per MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md.
+
+=================================================================
+PHASE 6 – TEST & VERIFY NO REGRESSION
+=================================================================
+
+After redesigning each screen:
+
+1) Run unit + integration + e2e tests for the relevant module.
+2) Add/adjust UI-focused e2e tests to confirm:
+   - New UI is rendering all required fields.
+   - No placeholder labels like `somename.somename.somename`.
+   - All actions still work.
+3) If any test fails:
+   - Fix the UI wiring or logic.
+   - Do NOT change spec behaviour to “match the UI”; change UI to match the spec, unless deviation is explicitly documented and accepted.
+
+=================================================================
+PHASE 7 – UPDATE CHECKLIST & COMPLIANCE DOCS
+=================================================================
+
+1) MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md:
+   - Add note/column for “UI REDESIGN DONE (YES/NO)” per feature.
+   - Only mark YES when:
+     - UI matches new design AND
+     - Behaviour matches spec AND
+     - Tests pass.
+
+2) MASTER_SPEC_COMPLIANCE_COMPARISON.md:
+   - Optionally add a “UI Alignment” column for each module:
+     - ALIGNED / ALIGNED_WITH_DEVIATIONS / NOT_ALIGNED
+
+=================================================================
+ATTITUDE & BEHAVIOUR
+=================================================================
+
+- MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md is **non-negotiable truth** for behaviour.
+- ui_design_28_nov_2025 is the target for aesthetics and UX – but cannot silently override the spec.
+- You MUST:
+  - Redesign UI,
+  - Detect conflicts,
+  - Document deviations,
+  - Suggest how to evolve the spec if needed,
+  - Keep the system functional and stable.

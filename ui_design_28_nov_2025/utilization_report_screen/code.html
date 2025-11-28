@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Utilization Report Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#137fec",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex flex-col w-64 bg-[#111418] shrink-0">
+<div class="flex flex-col justify-between p-4 h-full">
+<div class="flex flex-col gap-4">
+<div class="flex gap-3 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDb3C0pa-zoqayGZ3J76WjzWGJhevSdmvEEpLbv4KXxwyMCrqXAjrhL2ix-pz1YdSO4_td8sUNvVperD1VXRdVWwunE4JbNRpWFu72eIR7bYhMmmRXYEo5yIkHI1sZb7EiZnFa5QkPH312NzqnpxyuYIbvwXE4byleyWIJyhUUSDgSaL6Vnk_55Cj88PTB8cBOuyVBKTT65gImv6hUcf0FA89Jnuw-XQBlSWpEM3KhjJIAU3stkAcoVBNaKRP2wpPQLYY_bA0PNLGc");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:bg-[#283039] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:bg-[#283039] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">event_repeat</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:bg-[#283039] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:bg-[#283039] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#283039] text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+<p class="text-sm font-medium leading-normal">Reports</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:bg-[#283039] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:bg-[#283039] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col">
+<div class="flex-1 p-6 lg:p-8">
+<div class="max-w-7xl mx-auto flex gap-8">
+<!-- Left Filter Panel -->
+<div class="w-80 shrink-0">
+<div class="flex flex-col gap-6 sticky top-8">
+<h2 class="text-xl font-bold text-gray-900 dark:text-white">Filters</h2>
+<div class="flex flex-col gap-3">
+<details class="flex flex-col rounded-lg bg-white dark:bg-[#283039] group" open="">
+<summary class="flex cursor-pointer items-center justify-between gap-6 p-4">
+<p class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Date Range</p>
+<span class="material-symbols-outlined text-gray-500 dark:text-white/70 group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="p-4 pt-0 border-t border-gray-200 dark:border-white/10">
+<div class="flex flex-wrap items-center justify-center">
+<div class="flex w-full flex-col gap-0.5">
+<div class="flex items-center py-1 justify-between">
+<button class="text-gray-900 dark:text-white flex size-10 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-base">chevron_left</span>
+</button>
+<p class="text-gray-900 dark:text-white text-sm font-bold leading-tight">October 2023</p>
+<div></div>
+</div>
+<div class="grid grid-cols-7 text-center">
+<p class="text-gray-600 dark:text-white/50 text-xs font-bold leading-normal h-10 flex items-center justify-center">S</p>
+<p class="text-gray-600 dark:text-white/50 text-xs font-bold leading-normal h-10 flex items-center justify-center">M</p>
+<p class="text-gray-600 dark:text-white/50 text-xs font-bold leading-normal h-10 flex items-center justify-center">T</p>
+<p class="text-gray-600 dark:text-white/50 text-xs font-bold leading-normal h-10 flex items-center justify-center">W</p>
+<p class="text-gray-600 dark:text-white/50 text-xs font-bold leading-normal h-10 flex items-center justify-center">T</p>
+<p class="text-gray-600 dark:text-white/50 text-xs font-bold leading-normal h-10 flex items-center justify-center">F</p>
+<p class="text-gray-600 dark:text-white/50 text-xs font-bold leading-normal h-10 flex items-center justify-center">S</p>
+<!-- Dates -->
+<div class="col-start-1 h-10"></div>
+<div class="h-10 text-sm text-gray-500 dark:text-white/50">1</div>
+<div class="h-10 text-sm text-gray-500 dark:text-white/50">2</div>
+<div class="h-10 text-sm text-gray-500 dark:text-white/50">3</div>
+<div class="h-10 text-sm text-gray-500 dark:text-white/50">4</div>
+<button class="h-10 w-full text-white text-sm font-medium leading-normal relative">
+<div class="absolute inset-0 bg-primary/30 rounded-l-full"></div>
+<div class="flex size-full items-center justify-center rounded-full bg-primary relative">5</div>
+</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">6</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">7</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">8</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">9</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">10</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">11</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">12</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">13</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">14</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">15</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">16</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">17</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">18</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">19</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">20</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">21</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">22</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">23</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">24</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">25</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">26</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">27</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">28</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">29</button>
+<button class="h-10 w-full bg-primary/30 text-gray-900 dark:text-white text-sm font-medium leading-normal">30</button>
+<button class="h-10 w-full text-white text-sm font-medium leading-normal relative">
+<div class="absolute inset-0 bg-primary/30 rounded-r-full"></div>
+<div class="flex size-full items-center justify-center rounded-full bg-primary relative">31</div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</details>
+<details class="flex flex-col rounded-lg bg-white dark:bg-[#283039] group">
+<summary class="flex cursor-pointer items-center justify-between gap-6 p-4">
+<p class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Branch</p>
+<span class="material-symbols-outlined text-gray-500 dark:text-white/70 group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="p-4 pt-0 border-t border-gray-200 dark:border-white/10">
+<p class="text-gray-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">Multi-select component for branches would be here.</p>
+</div>
+</details>
+<details class="flex flex-col rounded-lg bg-white dark:bg-[#283039] group">
+<summary class="flex cursor-pointer items-center justify-between gap-6 p-4">
+<p class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Vehicle</p>
+<span class="material-symbols-outlined text-gray-500 dark:text-white/70 group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="p-4 pt-0 border-t border-gray-200 dark:border-white/10">
+<p class="text-gray-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">Multi-select component for vehicle groups would be here.</p>
+</div>
+</details>
+</div>
+<div class="flex flex-col gap-2 mt-2">
+<button class="w-full bg-primary text-white font-medium text-sm py-2.5 px-4 rounded-lg hover:bg-primary/90 transition-colors">Apply Filters</button>
+<button class="w-full bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white font-medium text-sm py-2.5 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-white/20 transition-colors">Reset</button>
+</div>
+</div>
+</div>
+<!-- Right Main Content -->
+<div class="flex-1 min-w-0">
+<div class="flex flex-col gap-6">
+<!-- Header -->
+<div>
+<div class="flex flex-wrap gap-2 text-sm text-gray-500 dark:text-[#9dabb9] font-medium">
+<a class="hover:text-primary" href="#">Reports</a>
+<span>/</span>
+<a class="hover:text-primary" href="#">Fleet</a>
+<span>/</span>
+<span class="text-gray-900 dark:text-white">Utilization</span>
+</div>
+<h1 class="text-gray-900 dark:text-white text-3xl font-black leading-tight tracking-[-0.03em] mt-2">Utilization Report</h1>
+</div>
+<!-- KPI Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-white dark:bg-[#283039] p-5 rounded-xl">
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">Overall Utilization</p>
+<p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">82.5%</p>
+</div>
+<div class="bg-white dark:bg-[#283039] p-5 rounded-xl">
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Days on Rent</p>
+<p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">1,980</p>
+</div>
+<div class="bg-white dark:bg-[#283039] p-5 rounded-xl">
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Fleet Days</p>
+<p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">2,400</p>
+</div>
+</div>
+<!-- Data Table Section -->
+<div class="bg-white dark:bg-[#283039] rounded-xl overflow-hidden">
+<div class="p-4 flex justify-between items-center border-b border-gray-200 dark:border-white/10">
+<h3 class="font-bold text-gray-900 dark:text-white">Utilization by Branch &amp; Group</h3>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/10 px-3 py-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
+<span class="material-symbols-outlined text-base">ios_share</span>
+<span>Export CSV</span>
+</button>
+<button class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/10 px-3 py-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
+<span class="material-symbols-outlined text-base">picture_as_pdf</span>
+<span>Export PDF</span>
+</button>
+</div>
+</div>
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-sm text-left">
+<thead class="bg-gray-50 dark:bg-white/5 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+<tr>
+<th class="px-6 py-3 font-medium" scope="col">Branch Name</th>
+<th class="px-6 py-3 font-medium" scope="col">Vehicle Group</th>
+<th class="px-6 py-3 font-medium text-right" scope="col">Vehicles</th>
+<th class="px-6 py-3 font-medium text-right" scope="col">Days on Rent</th>
+<th class="px-6 py-3 font-medium text-right" scope="col">Available Days</th>
+<th class="px-6 py-3 font-medium min-w-48" scope="col">Utilization %</th>
+<th class="px-6 py-3" scope="col"><span class="sr-only">Actions</span></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-white/10 text-gray-900 dark:text-white">
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5">
+<td class="px-6 py-4 font-medium whitespace-nowrap">Downtown Central</td>
+<td class="px-6 py-4 text-gray-600 dark:text-gray-300">Compact Sedans</td>
+<td class="px-6 py-4 text-right">25</td>
+<td class="px-6 py-4 text-right">620</td>
+<td class="px-6 py-4 text-right">750</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-green-500 h-2 rounded-full" style="width: 83%"></div>
+</div>
+<span class="font-medium">82.7%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline font-medium">Details</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5">
+<td class="px-6 py-4 font-medium whitespace-nowrap">Downtown Central</td>
+<td class="px-6 py-4 text-gray-600 dark:text-gray-300">SUVs</td>
+<td class="px-6 py-4 text-right">15</td>
+<td class="px-6 py-4 text-right">390</td>
+<td class="px-6 py-4 text-right">450</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-green-500 h-2 rounded-full" style="width: 87%"></div>
+</div>
+<span class="font-medium">86.7%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline font-medium">Details</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5">
+<td class="px-6 py-4 font-medium whitespace-nowrap">Airport West</td>
+<td class="px-6 py-4 text-gray-600 dark:text-gray-300">Compact Sedans</td>
+<td class="px-6 py-4 text-right">20</td>
+<td class="px-6 py-4 text-right">450</td>
+<td class="px-6 py-4 text-right">600</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-yellow-500 h-2 rounded-full" style="width: 75%"></div>
+</div>
+<span class="font-medium">75.0%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline font-medium">Details</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5">
+<td class="px-6 py-4 font-medium whitespace-nowrap">Airport West</td>
+<td class="px-6 py-4 text-gray-600 dark:text-gray-300">Luxury</td>
+<td class="px-6 py-4 text-right">5</td>
+<td class="px-6 py-4 text-right">80</td>
+<td class="px-6 py-4 text-right">150</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-red-500 h-2 rounded-full" style="width: 53%"></div>
+</div>
+<span class="font-medium">53.3%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline font-medium">Details</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5">
+<td class="px-6 py-4 font-medium whitespace-nowrap">North Suburbs</td>
+<td class="px-6 py-4 text-gray-600 dark:text-gray-300">Vans &amp; Trucks</td>
+<td class="px-6 py-4 text-right">15</td>
+<td class="px-6 py-4 text-right">440</td>
+<td class="px-6 py-4 text-right">450</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-green-500 h-2 rounded-full" style="width: 98%"></div>
+</div>
+<span class="font-medium">97.8%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline font-medium">Details</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-4 flex justify-between items-center text-sm border-t border-gray-200 dark:border-white/10">
+<span class="font-medium text-gray-700 dark:text-gray-300">Showing 1 to 5 of 12 results</span>
+<div class="flex items-center gap-1">
+<button class="flex items-center justify-center size-8 rounded hover:bg-gray-100 dark:hover:bg-white/10 transition-colors" disabled="">
+<span class="material-symbols-outlined text-base text-gray-400 dark:text-gray-600">chevron_left</span>
+</button>
+<button class="flex items-center justify-center size-8 rounded bg-primary text-white font-bold">1</button>
+<button class="flex items-center justify-center size-8 rounded hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-700 dark:text-gray-300">2</button>
+<button class="flex items-center justify-center size-8 rounded hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-700 dark:text-gray-300">3</button>
+<button class="flex items-center justify-center size-8 rounded hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-700 dark:text-gray-300">
+<span class="material-symbols-outlined text-base">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer class="text-center p-4 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-white/10">
+        © 2024 KarāraOS. All Rights Reserved.
+      </footer>
+</main>
+</div>
+</body></html>

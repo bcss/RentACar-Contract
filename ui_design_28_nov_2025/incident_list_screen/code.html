@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Incident List Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+      }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex h-screen flex-col justify-between bg-white dark:bg-[#111418] p-4 w-64 sticky top-0">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDP9JcQl209mMLu8hqZNXHuKCLHevK-yQE04qAik1wYtyyx-1ramOKT41F45KGOieTOr5Eb-nHUi5fhCK8MrpZ5DUao6Fh2cZO3NSky1XGvf7GAQlOHbALJAsyfT-0flTrCpNbEPy7dxRc7a0ZipC6wozdJwXCSqm8UGH-zNXlCZsoHcaTUy4yeN-2UUK1yAvr3L8s6MBg4OxRBsUb5bc7CSNcXNs3LPzqob7XdrRlCoM3nQh49WjJExQNwYEWV1RG_1SvqTdnhr4Q");'></div>
+<div class="flex flex-col">
+<h1 class="text-gray-900 dark:text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-gray-500 dark:text-[#9dabb9] text-sm font-normal leading-normal">Vehicle Rental Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined">article</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary dark:bg-primary/30 dark:text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">error</span>
+<p class="text-sm font-medium leading-normal">Incidents</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined">payments</span>
+<p class="text-sm font-medium leading-normal">Finances</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Help &amp; Support</span>
+</button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-8">
+<div class="w-full max-w-7xl mx-auto">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+<h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Incidents</h1>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined">add</span>
+<span class="truncate">New Incident</span>
+</button>
+</div>
+<!-- Table -->
+<div class="w-full bg-white dark:bg-[#111418] rounded-lg border border-gray-200 dark:border-[#3b4754] overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-sm">
+<thead>
+<tr class="bg-gray-50 dark:bg-[#1c2127]">
+<th class="p-4 w-12 text-left">
+<input class="h-5 w-5 rounded border-gray-300 dark:border-[#3b4754] bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+</th>
+<th class="p-4 text-left text-gray-600 dark:text-white font-medium">Incident ID</th>
+<th class="p-4 text-left text-gray-600 dark:text-white font-medium">Contract/Transfer ID</th>
+<th class="p-4 text-left text-gray-600 dark:text-white font-medium">Type</th>
+<th class="p-4 text-left text-gray-600 dark:text-white font-medium">Status</th>
+<th class="p-4 text-left text-gray-600 dark:text-white font-medium">Excess amount</th>
+<th class="p-4 text-left text-gray-600 dark:text-white font-medium">Branch</th>
+<th class="p-4 text-right text-gray-600 dark:text-white font-medium w-12"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-[#3b4754]">
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<td class="p-4 w-12">
+<input class="h-5 w-5 rounded border-gray-300 dark:border-[#3b4754] bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+</td>
+<td class="p-4 text-gray-900 dark:text-white font-medium">INC-2023-00451</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">CON-12984</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">Accident</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">Resolved</span>
+</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">$500.00</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">Downtown Airport</td>
+<td class="p-4 text-right">
+<button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<td class="p-4 w-12">
+<input class="h-5 w-5 rounded border-gray-300 dark:border-[#3b4754] bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+</td>
+<td class="p-4 text-gray-900 dark:text-white font-medium">INC-2023-00452</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">TRN-0056</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">Transfer Accident</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300">In Progress</span>
+</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">$1500.00</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">Westside Hub</td>
+<td class="p-4 text-right">
+<button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<td class="p-4 w-12">
+<input class="h-5 w-5 rounded border-gray-300 dark:border-[#3b4754] bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+</td>
+<td class="p-4 text-gray-900 dark:text-white font-medium">INC-2023-00453</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">CON-12991</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">New Damage</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">Pending</span>
+</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">$250.00</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">North Station</td>
+<td class="p-4 text-right">
+<button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<td class="p-4 w-12">
+<input class="h-5 w-5 rounded border-gray-300 dark:border-[#3b4754] bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+</td>
+<td class="p-4 text-gray-900 dark:text-white font-medium">INC-2023-00454</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">CON-13002</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">Theft</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">Pending</span>
+</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">$2500.00</td>
+<td class="p-4 text-gray-500 dark:text-[#9dabb9]">Downtown Airport</td>
+<td class="p-4 text-right">
+<button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-center pt-6">
+<a class="flex size-10 items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white" href="#">
+<span class="material-symbols-outlined">chevron_left</span>
+</a>
+<a class="text-sm font-bold leading-normal flex size-10 items-center justify-center text-white rounded-full bg-primary" href="#">1</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50" href="#">2</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50" href="#">3</a>
+<span class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white rounded-full">...</span>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50" href="#">8</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50" href="#">9</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50" href="#">10</a>
+<a class="flex size-10 items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white" href="#">
+<span class="material-symbols-outlined">chevron_right</span>
+</a>
+</div>
+</div>
+</main>
+</div>
+</body></html>

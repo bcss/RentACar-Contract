@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Risk &amp; Blacklist Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<div class="flex h-full flex-1">
+<!-- SideNavBar -->
+<aside class="flex w-64 flex-col bg-[#111418] p-4 border-r border-white/10">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC2D2JedWyVO_5t_C9x2dSJeYvhrnoDsqJbWHJvY7t6epFMe6xzK8RlX5_In4HNk-iTp15kEsq2K23eAlBAp2sDE_Uip_cRkVEIiVRrRyK22YMYaT53KrmZHtPL3OMST6LqM641qDkz55E0QT1lYoXSXBtXTb_VqWpa3sVcNlDwgoStr1sUEkDb35K0QFOGYyGGKfu7zUOsm2EFUlpmdcgBmUDJaish21FpqsIihG_EsZmsiAqf6PTsjkb33QMpV3m4HpzlqwvaBu8");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-gray-400 text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4 flex-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_add_on</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="mt-auto">
+<button class="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">New Reservation</span>
+</button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<div class="px-6 sm:px-8 md:px-10 lg:px-12 py-8">
+<div class="max-w-7xl mx-auto flex flex-col gap-6">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2">
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="#">Settings</a>
+<span class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">/</span>
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="#">Module Settings</a>
+<span class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">/</span>
+<span class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Risk &amp; Blacklist</span>
+</div>
+<!-- PageHeading and Actions -->
+<div class="flex flex-wrap justify-between items-center gap-4">
+<h2 class="text-gray-900 dark:text-white text-3xl font-black leading-tight tracking-tight">Risk &amp; Blacklist Settings</h2>
+<div class="flex items-center gap-3">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-300 dark:hover:bg-white/20 transition-colors">
+<span class="truncate">Discard Changes</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Save Changes</span>
+</button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="pb-3">
+<div class="flex border-b border-gray-300 dark:border-white/20 gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-gray-900 dark:text-white pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Risk Scoring</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-[13px] pt-4 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Blacklist Defaults</p>
+</a>
+</div>
+</div>
+<!-- Table -->
+<div class="@container">
+<div class="flex overflow-hidden rounded-lg border border-gray-300 dark:border-white/20 bg-background-light dark:bg-background-dark">
+<table class="flex-1 text-sm">
+<thead class="bg-gray-100 dark:bg-white/5">
+<tr class="">
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[12%] text-sm font-medium leading-normal">Category</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[18%] text-sm font-medium leading-normal">Setting</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[25%] text-sm font-medium leading-normal">Description</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[12%] text-sm font-medium leading-normal">Input Type</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[10%] text-sm font-medium leading-normal">Default</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[10%] text-sm font-medium leading-normal">Current</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[13%] text-sm font-medium leading-normal">Scope</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-white/10">
+<tr class="">
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">Customer</td>
+<td class="h-[72px] px-4 py-2 text-gray-900 dark:text-white font-normal leading-normal">Customer Age Weight</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">Importance of customer age in risk calculation.</td>
+<td class="h-[72px] px-4 py-2 font-normal leading-normal">
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-medium leading-normal">
+<span class="truncate">Slider</span>
+</button>
+</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">50</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">75</td>
+<td class="h-[72px] px-4 py-2 font-normal leading-normal">
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-medium leading-normal">
+<span class="truncate">Global</span>
+</button>
+</td>
+</tr>
+<tr class="">
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">Payment</td>
+<td class="h-[72px] px-4 py-2 text-gray-900 dark:text-white font-normal leading-normal">Payment Method Risk Weight</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">Weight assigned based on the payment method's risk profile.</td>
+<td class="h-[72px] px-4 py-2 font-normal leading-normal">
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-medium leading-normal">
+<span class="truncate">Slider</span>
+</button>
+</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">60</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">60</td>
+<td class="h-[72px] px-4 py-2 font-normal leading-normal">
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-medium leading-normal">
+<span class="truncate">Global</span>
+</button>
+</td>
+</tr>
+<tr class="">
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">Reservation</td>
+<td class="h-[72px] px-4 py-2 text-gray-900 dark:text-white font-normal leading-normal">Reservation Duration Weight</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">The impact of the rental duration on the overall risk score.</td>
+<td class="h-[72px] px-4 py-2 font-normal leading-normal">
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-medium leading-normal">
+<span class="truncate">Slider</span>
+</button>
+</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">30</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">45</td>
+<td class="h-[72px] px-4 py-2 font-normal leading-normal">
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-medium leading-normal">
+<span class="truncate">Per Contract</span>
+</button>
+</td>
+</tr>
+<tr class="">
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">Vehicle</td>
+<td class="h-[72px] px-4 py-2 text-gray-900 dark:text-white font-normal leading-normal">Vehicle Class Weight</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">Additional risk associated with high-value vehicle classes.</td>
+<td class="h-[72px] px-4 py-2 font-normal leading-normal">
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-medium leading-normal">
+<span class="truncate">Slider</span>
+</button>
+</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">80</td>
+<td class="h-[72px] px-4 py-2 text-gray-600 dark:text-gray-400 font-normal leading-normal">90</td>
+<td class="h-[72px] px-4 py-2 font-normal leading-normal">
+<button class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-medium leading-normal">
+<span class="truncate">Global</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

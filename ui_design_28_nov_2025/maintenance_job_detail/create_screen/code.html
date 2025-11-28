@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Maintenance Job Detail - KarāraOS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<div class="flex h-full grow flex-row">
+<!-- SideNavBar -->
+<aside class="flex h-screen min-h-[700px] w-64 flex-col justify-between bg-[#111418] p-4 sticky top-0">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA49qNWWkMASmqhDK41NOo8XkgllpXkjsuAfBcZFRAy7OpG-FVuHziNmHaJI-nI42gMZXHAAyAtYbiGyUKkXG0Lsd9eQoP2bHhepcU7pnire8GaCl9vuvxQXSn2XnOAPUV190QD3LZDpakr4Xsu8vaVjK_hoIArj4YwQViZV3pJ5g3YUQNqQ29HOPyxdpcj8JR0q0_VFUNuoi25YRVmzkYgPh8ACpJqFoMiMm2NvQ-vEIj5GTjfX7PYFY6RAppVIJ0XccHqh9dhE9E");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">calendar_add_on</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary" href="#">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1; font-size: 24px;">build</span>
+<p class="text-sm font-medium leading-normal">Maintenance</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-8">
+<div class="mx-auto max-w-4xl">
+<!-- PageHeading -->
+<div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+<div class="flex flex-col gap-2">
+<h1 class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Maintenance Job #Maint-12345</h1>
+<p class="text-slate-500 dark:text-[#9dabb9] text-base font-normal leading-normal">View or edit details for this maintenance job.</p>
+</div>
+<div class="flex items-center gap-3">
+<!-- Chips -->
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-orange-400/20 px-3">
+<p class="text-orange-400 text-sm font-medium leading-normal">IN_PROGRESS</p>
+</div>
+<button class="flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-primary/90">Mark as Complete</button>
+</div>
+</div>
+<!-- Form Section -->
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+<div class="flex flex-col gap-6 lg:col-span-2">
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111418] p-6">
+<h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Job Details</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- TextField: Vehicle Selector -->
+<label class="flex flex-col col-span-1">
+<p class="text-slate-900 dark:text-white text-sm font-medium leading-normal pb-2">Vehicle</p>
+<select class="form-select w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-[#3b4754] bg-slate-50 dark:bg-[#1c2127] h-11 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] px-3 text-base font-normal leading-normal appearance-none bg-no-repeat" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBXNZcd3Rwl6gWuq5SkVacbAfIPHqJwfD3mRHNC1sKxj6miHMH3Fazy6i8MxAyNEPiapzZ0jnWRg1eevAUGx8g6dGsjc2LfDa-Z3Pz8kSpK3b64Hp0tCdGvYgygcMfLkPhShI7lt5mUMze5PqZYa79POZ0Y9wSpG6mBMxzlpwJ-33DPXPxDH3c26IUJqr9WR1_wGc3wW9tcKPm27ZeqRAI__OoPC2qtBB1o5_5XFEajuGQZm7Sh4LPEGbgjTQBHcVVdc0e1s132N_E"); background-position: right 0.5rem center; background-size: 1.5em 1.5em;'>
+<option>Ford Transit - AB12 CDE</option>
+<option>VW Golf - XY34 FGH</option>
+<option>Mercedes Sprinter - JK56 LMN</option>
+</select>
+</label>
+<!-- TextField: Vendor Selector -->
+<label class="flex flex-col col-span-1">
+<p class="text-slate-900 dark:text-white text-sm font-medium leading-normal pb-2">External Vendor (Optional)</p>
+<select class="form-select w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-[#3b4754] bg-slate-50 dark:bg-[#1c2127] h-11 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] px-3 text-base font-normal leading-normal appearance-none bg-no-repeat" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBXNZcd3Rwl6gWuq5SkVacbAfIPHqJwfD3mRHNC1sKxj6miHMH3Fazy6i8MxAyNEPiapzZ0jnWRg1eevAUGx8g6dGsjc2LfDa-Z3Pz8kSpK3b64Hp0tCdGvYgygcMfLkPhShI7lt5mUMze5PqZYa79POZ0Y9wSpG6mBMxzlpwJ-33DPXPxDH3c26IUJqr9WR1_wGc3wW9tcKPm27ZeqRAI__OoPC2qtBB1o5_5XFEajuGQZm7Sh4LPEGbgjTQBHcVVdc0e1s132N_E"); background-position: right 0.5rem center; background-size: 1.5em 1.5em;'>
+<option>None</option>
+<option>City Auto Repairs</option>
+<option>National Service Center</option>
+</select>
+</label>
+<!-- TextField: Reason -->
+<label class="flex flex-col col-span-1 md:col-span-2">
+<p class="text-slate-900 dark:text-white text-sm font-medium leading-normal pb-2">Reason for Maintenance</p>
+<input class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-[#3b4754] bg-slate-50 dark:bg-[#1c2127] h-11 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] px-3 text-base font-normal leading-normal" value="Annual service and oil change"/>
+</label>
+<!-- Date Picker: Start Date -->
+<label class="flex flex-col col-span-1">
+<p class="text-slate-900 dark:text-white text-sm font-medium leading-normal pb-2">Start Date</p>
+<input class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-[#3b4754] bg-slate-50 dark:bg-[#1c2127] h-11 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] px-3 text-base font-normal leading-normal" type="date" value="2023-10-26"/>
+</label>
+<!-- Date Picker: End Date -->
+<label class="flex flex-col col-span-1">
+<p class="text-slate-900 dark:text-white text-sm font-medium leading-normal pb-2">End Date</p>
+<input class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-[#3b4754] bg-slate-50 dark:bg-[#1c2127] h-11 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] px-3 text-base font-normal leading-normal" type="date" value=""/>
+</label>
+<!-- Number Input (Currency): Cost -->
+<label class="flex flex-col col-span-1">
+<p class="text-slate-900 dark:text-white text-sm font-medium leading-normal pb-2">Cost (Optional)</p>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500">$</span>
+<input class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-[#3b4754] bg-slate-50 dark:bg-[#1c2127] h-11 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-7 pr-3 text-base font-normal leading-normal" placeholder="0.00" type="number"/>
+</div>
+</label>
+<!-- Text Area: Comments -->
+<label class="flex flex-col col-span-1 md:col-span-2">
+<p class="text-slate-900 dark:text-white text-sm font-medium leading-normal pb-2">Comments / Notes</p>
+<textarea class="form-textarea w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-[#3b4754] bg-slate-50 dark:bg-[#1c2127] min-h-28 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] p-3 text-base font-normal leading-normal" placeholder="Add any relevant notes here..."></textarea>
+</label>
+</div>
+</div>
+</div>
+<!-- Side Information Panel -->
+<div class="lg:col-span-1">
+<div class="flex flex-col gap-6 sticky top-8">
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111418] p-6">
+<h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Information</h3>
+<div class="flex flex-col gap-3 text-sm">
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400">Created by:</span>
+<span class="font-medium text-slate-700 dark:text-slate-200">Admin User</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400">Date Created:</span>
+<span class="font-medium text-slate-700 dark:text-slate-200">25 Oct 2023</span>
+</div>
+</div>
+</div>
+<div class="rounded-xl border border-teal-500/30 dark:border-teal-500/40 bg-teal-500/10 p-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-teal-400 mt-0.5" style="font-size: 20px;">info</span>
+<p class="text-sm text-teal-200">Upon completion, the vehicle's status will automatically be set to <span class="font-semibold">Available</span>.</p>
+</div>
+</div>
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111418] p-6">
+<h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Status History</h3>
+<ul class="flex flex-col gap-3 text-sm">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-orange-400" style="font-size: 18px;">sync</span>
+<span class="text-slate-500 dark:text-slate-400">Status changed to <strong class="text-orange-400">IN_PROGRESS</strong></span>
+<span class="ml-auto text-slate-400 dark:text-slate-500 text-xs">26 Oct 2023</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-400" style="font-size: 18px;">radio_button_unchecked</span>
+<span class="text-slate-500 dark:text-slate-400">Job status set to <strong class="text-blue-400">OPEN</strong></span>
+<span class="ml-auto text-slate-400 dark:text-slate-500 text-xs">25 Oct 2023</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

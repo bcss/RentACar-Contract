@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Incident Detail Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex h-screen flex-col bg-background-light dark:bg-background-dark border-r border-gray-200 dark:border-gray-800" style="width: 280px;">
+<div class="flex h-full flex-col justify-between p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3 px-3 py-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar image" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD9KwyTVgxulcSDJGedkO7qM4j_PprAaq2sDRh5XyNva0Hqiy7KDSLon4TBhHaYESa965y6rWTxiM8g5MQLsyZQMXQJ7a8wz4s5pKJy3mZKJO1hHqqxcBAwjyd9UjORvNjg9lx9R4_bRKlgOqm4HmiRyGyx9eBOTDs6VE4v3qvwVrj9M9RDStFTbfrKoSD3S2vmLGPW3wHC0M5Dj3VllAcRJlwBPbPunGivIKmXWq9zRIPrWvy5ZX2xRVKDhngrnYIWSTPzR9Kb3KA");'></div>
+<div class="flex flex-col">
+<h1 class="text-gray-900 dark:text-white text-base font-medium leading-normal">Admin User</h1>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">admin@kararaos.com</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+<p class="text-sm font-medium leading-normal">Incidents</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<div class="p-8 mx-auto max-w-7xl">
+<!-- PageHeading -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex flex-col gap-1">
+<p class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Incident #INC-12345</p>
+<div class="flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+</span>
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Status: Under Review</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Export PDF</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Edit Incident</span>
+</button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="mt-8">
+<div class="border-b border-gray-200 dark:border-gray-700">
+<div class="flex -mb-px gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-primary pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Summary</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Excess &amp; Claim</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Financial Impact</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Timeline</p>
+</a>
+</div>
+</div>
+</div>
+<!-- Tab Content: Summary -->
+<div class="grid grid-cols-3 gap-6 mt-6">
+<div class="col-span-3 lg:col-span-2 flex flex-col gap-6">
+<!-- Incident Overview -->
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+<h2 class="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Incident Overview</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Incident Type</p>
+<p class="text-gray-800 dark:text-gray-200 text-sm font-medium">Collision</p>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Date &amp; Time</p>
+<p class="text-gray-800 dark:text-gray-200 text-sm font-medium">15 Aug 2023, 10:30 AM</p>
+</div>
+<div class="col-span-2 flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Description</p>
+<p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-relaxed">Minor front-end collision with a third-party vehicle at a stoplight. Driver reported no injuries. Scratches and a dent on the front bumper are visible.</p>
+</div>
+</div>
+</div>
+<!-- Media -->
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+<h2 class="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Media</h2>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+<img class="aspect-video object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" data-alt="Damaged car front bumper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5OGV6PmIIPXX9lgJ1lrjQ0CEXPpnWDM6rtcRFCLJyEKGYk8oEK80H_y1wJxClMP7_fiZFuyCykOxCaDDIKKhhL0CAh3PYcHAWEBc3SHyGNdIexsv_Sddj9fKc85nA6CFnUvriX_49zcbEs_eR6UWQlIrZTKabOA0xpJl46P2AM_uwvafCMb4KYNT_94SNbFHQ9oE20Yg3p4SRAAXo-iM88GGzZgltsROVPqMb_5TeCVQNtjCHGIOPOUJcuLp9tWJ_cYnuECkDcN8"/>
+<img class="aspect-video object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" data-alt="Damaged car side view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABCRw66YlZloMJ5eWfieDR5HI67sDNYacvIjxLKcBnfjVNHygkS1JhYp9L_3398iC_g0Q0l5g8aFoB_r_-OYvBxWXuT2ZncoVd5s7OxMDsUq6xHEzvl61LrW6IlMzOiyHlOVd9Rf6s1PDb2EE4kS8eemKf6C6d7DymzwtAQvmXcZWuyLIMSG_CgqaUFpra5NqZdQMRlu3cWhcvcEPVo41JM0l4mco9UxUn7uZdfIauy2gpHMB-wb3PEhfgUMg-_p3103lnYSYz1EQ"/>
+<div class="aspect-video rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-col text-gray-500 dark:text-gray-400 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined">description</span>
+<p class="text-xs mt-1">Report.pdf</p>
+</div>
+<div class="aspect-video rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-col text-gray-500 dark:text-gray-400 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined">add_a_photo</span>
+<p class="text-xs mt-1">Add Media</p>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-3 lg:col-span-1 flex flex-col gap-6">
+<!-- Linked Entities -->
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+<h2 class="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Linked Entities</h2>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Contract</p>
+<a class="text-primary text-sm font-medium hover:underline" href="#">CON-67890</a>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Vehicle</p>
+<a class="text-primary text-sm font-medium hover:underline" href="#">Toyota Camry - #VH-456</a>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Customer</p>
+<a class="text-primary text-sm font-medium hover:underline" href="#">Jane Doe</a>
+</div>
+</div>
+</div>
+<!-- Official Reports -->
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+<h2 class="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Official Reports</h2>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Police Reference</p>
+<p class="text-gray-800 dark:text-gray-200 text-sm font-medium">#POL-XYZ-789</p>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Insurer</p>
+<p class="text-gray-800 dark:text-gray-200 text-sm font-medium">Global Insurance Co.</p>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Policy Number</p>
+<p class="text-gray-800 dark:text-gray-200 text-sm font-medium">GIC-POL-2023-991</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cancellation Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-screen w-full flex-col items-center justify-center bg-background-light dark:bg-background-dark p-4 sm:p-6">
+<!-- Modal backdrop -->
+<div class="absolute inset-0 bg-black/50"></div>
+<!-- Modal Container -->
+<div class="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-[#1c2127] shadow-2xl">
+<!-- Modal Header -->
+<div class="flex items-start justify-between border-b border-[#3b4754] p-6">
+<div class="flex flex-col gap-1.5">
+<p class="text-white text-xl font-bold leading-tight">Cancel Contract C1023-45B</p>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Please review the details before proceeding. This action cannot be undone.</p>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-[#9dabb9] transition-colors hover:bg-white/10">
+<span class="material-symbols-outlined text-2xl" data-icon="close">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-6 p-6">
+<!-- Alert Banner -->
+<div class="flex items-start gap-4 rounded-lg bg-yellow-500/10 p-4">
+<span class="material-symbols-outlined text-yellow-400 mt-0.5" data-icon="warning">warning</span>
+<div class="flex flex-col">
+<p class="text-yellow-400 text-base font-semibold">Vehicle Not Returned</p>
+<p class="text-[#9dabb9] text-sm">This contract cannot be cancelled as the vehicle is still on rent. Please ensure the vehicle is returned before proceeding.</p>
+</div>
+</div>
+<!-- Form Section -->
+<div class="flex flex-col gap-4">
+<label class="flex flex-col">
+<p class="pb-2 text-base font-medium leading-normal text-white">Reason for cancellation</p>
+<select class="form-select h-12 w-full flex-1 resize-none overflow-hidden rounded-lg border border-[#3b4754] bg-[#1c2127] p-3 text-base font-normal leading-normal text-white placeholder:text-[#9dabb9] focus:border-primary focus:outline-0 focus:ring-0">
+<option value="select">Select a reason</option>
+<option value="customer">Customer Request</option>
+<option value="maintenance">Vehicle Maintenance Issue</option>
+<option value="payment">Payment Default</option>
+</select>
+</label>
+</div>
+<!-- Financials Section -->
+<div class="flex flex-col gap-2 rounded-lg border border-[#3b4754] p-4">
+<h3 class="text-white font-semibold">Financial Summary</h3>
+<div class="flex justify-between gap-x-6 py-2 border-t border-[#3b4754]">
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Deposit Status</p>
+<p class="text-sm font-medium leading-normal text-right text-green-400">Full Refund of $250.00</p>
+</div>
+<div class="flex justify-between gap-x-6 py-2 border-t border-[#3b4754]">
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Cancellation Fee</p>
+<p class="text-white text-sm font-normal leading-normal text-right">$0.00</p>
+</div>
+</div>
+<!-- Checklist Section -->
+<div>
+<label class="flex items-start gap-x-3 py-3">
+<input class="form-checkbox mt-0.5 h-5 w-5 shrink-0 rounded border-2 border-[#3b4754] bg-transparent text-primary checked:border-primary checked:bg-primary focus:border-primary focus:outline-none focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<p class="text-white text-base font-normal leading-normal">I understand the financial implications and confirm the vehicle has been returned.</p>
+</label>
+</div>
+</div>
+<!-- Modal Footer / Button Group -->
+<div class="flex flex-col-reverse items-center justify-end gap-3 border-t border-[#3b4754] p-6 sm:flex-row">
+<button class="flex h-10 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#283039] px-4 text-sm font-bold leading-normal tracking-[0.015em] text-white sm:w-auto">
+<span class="truncate">Keep Contract</span>
+</button>
+<button class="flex h-10 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-red-600 px-4 text-sm font-bold leading-normal tracking-[0.015em] text-white opacity-50 sm:w-auto" disabled="">
+<span class="truncate">Confirm Cancellation</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

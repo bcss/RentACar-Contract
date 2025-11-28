@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customer Profile Tabs</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+      }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "surface-light": "#ffffff",
+              "surface-dark": "#18232e",
+              "border-light": "#e0e0e0",
+              "border-dark": "#3b4754",
+              "text-light": "#1f2937",
+              "text-dark": "#f3f4f6",
+              "text-muted-light": "#6b7280",
+              "text-muted-dark": "#9dabb9"
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="flex flex-col w-64 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark">
+<div class="flex flex-col h-full justify-between p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCvdLbCLMVq3CZ0E3yBoR49E4ltlFV2DrjTl9zhVoYV_8Aeq7kTdi83UxG57pfi3LfU_kMNTO95Gtj310JpS3m1XYQmjiz5Bde-jPfrUKrYXG5SAvX_G8OSAODYImq498ydRG0AK0hSvHGi8YwJxQ4mmfBJd8oi_zkjRyQGwhAocgwzA--YqE8f3hMJclPEaT33flxA6FAwB6G9snRsTm31bIOkjV1K5i_DO1PJwhNKTBUypjth2vbzZjXATfmsbgNIf3WkHlYY9yg");'></div>
+<div class="flex flex-col">
+<h1 class="text-text-light dark:text-text-dark text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-text-muted-light dark:text-text-muted-dark">dashboard</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-primary/20" href="#">
+<span class="material-symbols-outlined text-primary">group</span>
+<p class="text-primary text-sm font-bold leading-normal">Customers</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-text-muted-light dark:text-text-muted-dark">directions_car</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-text-muted-light dark:text-text-muted-dark">description</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-text-muted-light dark:text-text-muted-dark">calendar_today</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Reservations</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-text-muted-light dark:text-text-muted-dark">settings</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-text-muted-light dark:text-text-muted-dark">help_outline</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-y-auto">
+<div class="max-w-7xl mx-auto">
+<!-- ProfileHeader -->
+<header class="flex p-4 @container bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">
+<div class="flex w-full flex-col gap-4 @[520px]:flex-row @[520px]:justify-between @[520px]:items-center">
+<div class="flex gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-24 w-24" data-alt="Avatar of Jordan Smith" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAYErgLHiPFyaauVJNBx5lDZj9nCPv6AzAszrDNFEZv4PcpnsQlq4UGZwkIJflFXat5b9pXAow7RIibxnFPlJBQjqkJU6WIaLBq6d9fZFWCs9fiAIPsRVAmY9c-QfTR1goZanlqTbcEIVneomXdpszhpN-VetXSbDulO0tyOVmd0nDHfekfc7Kx4NE0rPu_FH71HRCXIZNs2QL731VP7wnmX8ym_hqCqZSt9Qu7JkIKljw52eErHbxJ8k_yqCCIQb5z9trTHJ_5BFA");'></div>
+<div class="flex flex-col justify-center">
+<p class="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em]">Jordan Smith</p>
+<p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal">Customer ID: CUST-00451</p>
+</div>
+</div>
+<div class="flex w-full max-w-[480px] gap-3 @[480px]:w-auto">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-black/5 dark:bg-white/10 text-text-light dark:text-text-dark text-sm font-bold leading-normal tracking-[0.015em] flex-1 @[480px]:flex-auto hover:bg-black/10 dark:hover:bg-white/20 transition-colors">
+<span class="truncate">New Contract</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] flex-1 @[480px]:flex-auto hover:bg-primary/90 transition-colors">
+<span class="truncate">Edit Profile</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Chips -->
+<div class="flex gap-3 p-4 flex-wrap">
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-green-500/20 text-green-700 dark:text-green-300 px-3">
+<p class="text-sm font-medium leading-normal">Status: Active</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-red-500/20 text-red-700 dark:text-red-300 px-3">
+<p class="text-sm font-medium leading-normal">Risk: High</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 px-3">
+<p class="text-sm font-medium leading-normal">Alert: License Expiring</p>
+</div>
+</div>
+<!-- Tabs -->
+<div class="mt-4">
+<div class="border-b border-border-light dark:border-border-dark px-4">
+<nav class="flex gap-8 -mb-px">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-primary pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Profile</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-text-muted-light dark:text-text-muted-dark hover:text-text-light dark:hover:text-text-dark pb-[13px] pt-4 transition-colors" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Contracts</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-text-muted-light dark:text-text-muted-dark hover:text-text-light dark:hover:text-text-dark pb-[13px] pt-4 transition-colors" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Incidents &amp; Risk</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-text-muted-light dark:text-text-muted-dark hover:text-text-light dark:hover:text-text-dark pb-[13px] pt-4 transition-colors" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Documents</p>
+</a>
+</nav>
+</div>
+</div>
+<!-- Tab Content -->
+<div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- Personal Information Card -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">
+<h2 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight px-6 pb-3 pt-5 border-b border-border-light dark:border-border-dark">Personal Information</h2>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+<div>
+<label class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">Full Name</label>
+<p class="mt-1 text-base text-text-light dark:text-text-dark">Jordan Smith</p>
+</div>
+<div>
+<label class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">Email Address</label>
+<p class="mt-1 text-base text-text-light dark:text-text-dark">jordan.smith@example.com</p>
+</div>
+<div>
+<label class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">Phone Number</label>
+<p class="mt-1 text-base text-text-light dark:text-text-dark">+1 (555) 123-4567</p>
+</div>
+<div>
+<label class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">Date of Birth</label>
+<p class="mt-1 text-base text-text-light dark:text-text-dark">October 26, 1990</p>
+</div>
+<div class="md:col-span-2">
+<label class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">Address</label>
+<p class="mt-1 text-base text-text-light dark:text-text-dark">123 Market St, San Francisco, CA 94103</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column -->
+<div class="flex flex-col gap-6">
+<!-- Alerts Card -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">
+<h2 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight px-6 pb-3 pt-5 border-b border-border-light dark:border-border-dark">Alerts</h2>
+<div class="p-6">
+<div class="flex items-start gap-4 p-4 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-400 mt-0.5">warning</span>
+<div>
+<h3 class="font-bold text-amber-800 dark:text-amber-300">Driver's License Expiring Soon</h3>
+<p class="text-sm text-amber-700 dark:text-amber-400 mt-1">Expires in 14 days on Nov 15, 2024.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Preferences Card -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">
+<h2 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight px-6 pb-3 pt-5 border-b border-border-light dark:border-border-dark">Notification Preferences</h2>
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<label class="text-base text-text-light dark:text-text-dark">Email Notifications</label>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle-email" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer" for="toggle-email"></label>
+</div>
+<style>
+                                    .toggle-checkbox:checked { right: 0; border-color: #137fec; }
+                                    .toggle-checkbox:checked + .toggle-label { background-color: #137fec; }
+                                </style>
+</div>
+<div class="flex items-center justify-between">
+<label class="text-base text-text-light dark:text-text-dark">SMS Notifications</label>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle-sms" name="toggle-sms" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer" for="toggle-sms"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

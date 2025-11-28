@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OTP Activation Modal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#137fec",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+</head>
+<body class="font-display">
+<div class="relative flex h-screen min-h-[720px] w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-hidden" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCOucx_tSBMCL_B1IEIQccwrZXEUjtT5Tk09r1W-I46wqDc-5g7Ru5033Kyo0CEzwO5yJqR6GMV0AsV5YjsenPwPZQMorRuaoHsPufQfhGYJyZcD9ndzsXNgbQ3iEaff8G3kXEL-brlqfhzvkiwSsO4v8qUZnLKY7dNeukhyrBtqXP8kj0EAnyLweYnwDerd-99uQFuq5JCU2B5NE6wFsRuVxu8ACbqoA1xHuPRnNTm_rj-ce3S2gzSBQMewEn1Qf_pKnS669ionpQ"); background-size: cover; background-position: center;'>
+<div class="absolute inset-0 bg-background-dark/70 backdrop-blur-sm"></div>
+<div class="layout-container flex h-full grow flex-col items-center justify-center p-4">
+<div class="relative flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-white/10 bg-[#1c2732] shadow-2xl">
+<button class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+<div class="flex flex-col items-center p-8 text-center sm:p-10">
+<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+<span class="material-symbols-outlined text-4xl text-primary">phonelink_lock</span>
+</div>
+<h1 class="text-2xl font-bold leading-tight tracking-tight text-white font-display">Enter Activation Code</h1>
+<p class="mt-2 text-base font-normal leading-normal text-white/70 font-display">For your security, we've sent a 6-digit code to your registered mobile number ending in ****1234.</p>
+<div class="mt-8 flex w-full justify-center">
+<fieldset class="relative flex gap-2 sm:gap-3">
+<input class="flex h-14 w-10 text-center text-xl font-semibold text-white [appearance:textfield] focus:outline-0 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#1c2732] [&amp;::-webkit-inner-spin-button]:appearance-none [&amp;::-webkit-outer-spin-button]:appearance-none rounded-lg border border-[#3b4754] bg-[#101922] transition-colors focus:border-primary sm:w-12" max="9" maxlength="1" min="0" onkeydown="javascript:(event.key=='Backspace'&amp;&amp;this.value===''&amp;&amp;this.previousSibling&amp;&amp;((this.previousSibling.value=''),this.previousSibling.focus()))||(event.key==='ArrowLeft'&amp;&amp;this.previousSibling&amp;&amp;this.previousSibling.focus())||(event.key==='ArrowRight'&amp;&amp;this.nextSibling&amp;&amp;this.nextSibling.focus());" onkeyup="javascript:event.key.match(/^\d$/)&amp;&amp;((this.value.length&gt;1&amp;&amp;((this.nextSibling&amp;&amp;(this.nextSibling.value=this.value.slice(1))),(this.value=this.value[0]))),(this.nextSibling&amp;&amp;this.nextSibling.focus()));" type="number" value=""/>
+<input class="flex h-14 w-10 text-center text-xl font-semibold text-white [appearance:textfield] focus:outline-0 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#1c2732] [&amp;::-webkit-inner-spin-button]:appearance-none [&amp;::-webkit-outer-spin-button]:appearance-none rounded-lg border border-[#3b4754] bg-[#101922] transition-colors focus:border-primary sm:w-12" max="9" maxlength="1" min="0" onkeydown="javascript:(event.key=='Backspace'&amp;&amp;this.value===''&amp;&amp;this.previousSibling&amp;&amp;((this.previousSibling.value=''),this.previousSibling.focus()))||(event.key==='ArrowLeft'&amp;&amp;this.previousSibling&amp;&amp;this.previousSibling.focus())||(event.key==='ArrowRight'&amp;&amp;this.nextSibling&amp;&amp;this.nextSibling.focus());" onkeyup="javascript:event.key.match(/^\d$/)&amp;&amp;((this.value.length&gt;1&amp;&amp;((this.nextSibling&amp;&amp;(this.nextSibling.value=this.value.slice(1))),(this.value=this.value[0]))),(this.nextSibling&amp;&amp;this.nextSibling.focus()));" type="number" value=""/>
+<input class="flex h-14 w-10 text-center text-xl font-semibold text-white [appearance:textfield] focus:outline-0 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#1c2732] [&amp;::-webkit-inner-spin-button]:appearance-none [&amp;::-webkit-outer-spin-button]:appearance-none rounded-lg border border-[#3b4754] bg-[#101922] transition-colors focus:border-primary sm:w-12" max="9" maxlength="1" min="0" onkeydown="javascript:(event.key=='Backspace'&amp;&amp;this.value===''&amp;&amp;this.previousSibling&amp;&amp;((this.previousSibling.value=''),this.previousSibling.focus()))||(event.key==='ArrowLeft'&amp;&amp;this.previousSibling&amp;&amp;this.previousSibling.focus())||(event.key==='ArrowRight'&amp;&amp;this.nextSibling&amp;&amp;this.nextSibling.focus());" onkeyup="javascript:event.key.match(/^\d$/)&amp;&amp;((this.value.length&gt;1&amp;&amp;((this.nextSibling&amp;&amp;(this.nextSibling.value=this.value.slice(1))),(this.value=this.value[0]))),(this.nextSibling&amp;&amp;this.nextSibling.focus()));" type="number" value=""/>
+<input class="flex h-14 w-10 text-center text-xl font-semibold text-white [appearance:textfield] focus:outline-0 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#1c2732] [&amp;::-webkit-inner-spin-button]:appearance-none [&amp;::-webkit-outer-spin-button]:appearance-none rounded-lg border border-[#3b4754] bg-[#101922] transition-colors focus:border-primary sm:w-12" max="9" maxlength="1" min="0" onkeydown="javascript:(event.key=='Backspace'&amp;&amp;this.value===''&amp;&amp;this.previousSibling&amp;&amp;((this.previousSibling.value=''),this.previousSibling.focus()))||(event.key==='ArrowLeft'&amp;&amp;this.previousSibling&amp;&amp;this.previousSibling.focus())||(event.key==='ArrowRight'&amp;&amp;this.nextSibling&amp;&amp;this.nextSibling.focus());" onkeyup="javascript:event.key.match(/^\d$/)&amp;&amp;((this.value.length&gt;1&amp;&amp;((this.nextSibling&amp;&amp;(this.nextSibling.value=this.value.slice(1))),(this.value=this.value[0]))),(this.nextSibling&amp;&amp;this.nextSibling.focus()));" type="number" value=""/>
+<input class="flex h-14 w-10 text-center text-xl font-semibold text-white [appearance:textfield] focus:outline-0 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#1c2732] [&amp;::-webkit-inner-spin-button]:appearance-none [&amp;::-webkit-outer-spin-button]:appearance-none rounded-lg border border-[#3b4754] bg-[#101922] transition-colors focus:border-primary sm:w-12" max="9" maxlength="1" min="0" onkeydown="javascript:(event.key=='Backspace'&amp;&amp;this.value===''&amp;&amp;this.previousSibling&amp;&amp;((this.previousSibling.value=''),this.previousSibling.focus()))||(event.key==='ArrowLeft'&amp;&amp;this.previousSibling&amp;&amp;this.previousSibling.focus())||(event.key==='ArrowRight'&amp;&amp;this.nextSibling&amp;&amp;this.nextSibling.focus());" onkeyup="javascript:event.key.match(/^\d$/)&amp;&amp;((this.value.length&gt;1&amp;&amp;((this.nextSibling&amp;&amp;(this.nextSibling.value=this.value.slice(1))),(this.value=this.value[0]))),(this.nextSibling&amp;&amp;this.nextSibling.focus()));" type="number" value=""/>
+<input class="flex h-14 w-10 text-center text-xl font-semibold text-white [appearance:textfield] focus:outline-0 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#1c2732] [&amp;::-webkit-inner-spin-button]:appearance-none [&amp;::-webkit-outer-spin-button]:appearance-none rounded-lg border border-[#3b4754] bg-[#101922] transition-colors focus:border-primary sm:w-12" max="9" maxlength="1" min="0" onkeydown="javascript:(event.key=='Backspace'&amp;&amp;this.value===''&amp;&amp;this.previousSibling&amp;&amp;((this.previousSibling.value=''),this.previousSibling.focus()))||(event.key==='ArrowLeft'&amp;&amp;this.previousSibling&amp;&amp;this.previousSibling.focus())||(event.key==='ArrowRight'&amp;&amp;this.nextSibling&amp;&amp;this.nextSibling.focus());" onkeyup="javascript:event.key.match(/^\d$/)&amp;&amp;((this.value.length&gt;1&amp;&amp;((this.nextSibling&amp;&amp;(this.nextSibling.value=this.value.slice(1))),(this.value=this.value[0]))),(this.nextSibling&amp;&amp;this.nextSibling.focus()));" type="number" value=""/>
+</fieldset>
+</div>
+<p class="mt-8 text-sm font-normal leading-normal text-[#9dabb9] font-display">Warning: Your account will be temporarily blocked after 3 incorrect attempts.</p>
+<div class="mt-8 flex w-full flex-col items-center">
+<button class="flex min-w-[84px] w-full max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-[1.02] active:scale-[0.98] font-display">
+<span class="truncate">Verify &amp; Activate</span>
+</button>
+<p class="mt-4 text-sm font-normal text-white/50 font-display">
+              Didn't receive the code?
+              <a class="font-medium text-primary/80 underline-offset-2 transition-colors hover:text-primary hover:underline" href="#">Resend</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

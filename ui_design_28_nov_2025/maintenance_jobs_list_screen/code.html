@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Maintenance Jobs List Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+      }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex flex-col w-64 bg-[#111418] p-4 text-white shrink-0">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAs5LVpExTHS_VI0kOgIcyAbgCBLJ3sgxazsgi4uhTSOkfq2gqQEuY4maQR4iCamxjyboOOZ97UbgtWFI4Zl8oCA13Dtzdu9dSZirjv6J5qMCUNYQ_p95ql-kUZ1ft9WTWrWsmJ9Y6riBoZpJEGOk50H7m146s7MTVQex3gGW0tgbYQvsCBi5Cx2hxckjH6Ue9P6m6lhS2BMW8gYNs9CoSI3QsXnFWO58KP2jur0UGbD5uAC71UOTh8OcllLO8911ksMXJtE9B6dtI");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Rental Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">build</span>
+<p class="text-sm font-medium leading-normal">Maintenance</p>
+</a>
+</nav>
+</div>
+<div class="mt-auto flex flex-col gap-4">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Create New Job</span>
+</button>
+<div class="flex flex-col gap-1 border-t border-white/10 pt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col">
+<!-- Page Heading -->
+<header class="flex flex-wrap items-center justify-between gap-4 p-6 border-b border-gray-200 dark:border-gray-700">
+<h1 class="text-black dark:text-white text-3xl font-bold leading-tight">Maintenance Jobs</h1>
+<div class="flex items-center gap-4">
+<button class="hidden lg:flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Create New Job</span>
+</button>
+<div class="flex items-center gap-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD6Ud0XMgnyG40fywSfwqfZCj3llqwqvS1bdfM1tQvpdN8YfaO-zGUDzjREPr6ahWfpnKcKHiIFmZNM_J2-ZLCY7DZ7hYSqW6tcjPVATytG9GPEXosJ4ZXC85SB8zqsJhg6iGjWGGJ6hT80vJoWJn0B3vnMAU5li9CkK9XdxqW4NPwnUOwL9CRRHnhJzZ4UW5uJWRr-rvBFEga1XtxxrqUDa4TfVTtUtO2uXffiZ3XDGN_iRr224Zk8M6XJcHJOL8KZ3i9cUzkzxiA");'></div>
+<div>
+<p class="text-sm font-medium text-black dark:text-white">Alex Doe</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">Admin</p>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Filter Panel -->
+<aside class="w-80 p-6 border-r border-gray-200 dark:border-gray-700 flex flex-col gap-6">
+<h2 class="text-xl font-semibold text-black dark:text-white">Filters</h2>
+<!-- SearchBar -->
+<div class="w-full">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#9dabb9] flex border border-r-0 border-[#3b4754] bg-[#1c2127] items-center justify-center pl-3 rounded-l-lg">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-l-0 border-[#3b4754] bg-[#1c2127] focus:border-[#3b4754] h-full placeholder:text-[#9dabb9] px-4 rounded-l-none text-sm font-normal leading-normal" placeholder="Search by Job ID or Vehicle..." value=""/>
+</div>
+</label>
+</div>
+<!-- TextField: Status -->
+<div class="flex flex-col">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-black dark:text-white text-sm font-medium leading-normal pb-2">Status</p>
+<select class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#3b4754] bg-[#1c2127] focus:border-[#3b4754] h-12 placeholder:text-[#9dabb9] px-3 text-sm font-normal leading-normal">
+<option>All Statuses</option>
+<option>Open</option>
+<option>In Progress</option>
+<option>Completed</option>
+</select>
+</label>
+</div>
+<!-- TextField: Type -->
+<div class="flex flex-col">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-black dark:text-white text-sm font-medium leading-normal pb-2">Type</p>
+<select class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#3b4754] bg-[#1c2127] focus:border-[#3b4754] h-12 placeholder:text-[#9dabb9] px-3 text-sm font-normal leading-normal">
+<option>All Types</option>
+<option>Routine Service</option>
+<option>Repair</option>
+<option>Inspection</option>
+</select>
+</label>
+</div>
+<!-- TextField: Branch -->
+<div class="flex flex-col">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-black dark:text-white text-sm font-medium leading-normal pb-2">Branch</p>
+<select class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#3b4754] bg-[#1c2127] focus:border-[#3b4754] h-12 placeholder:text-[#9dabb9] px-3 text-sm font-normal leading-normal">
+<option>All Branches</option>
+<option>Downtown</option>
+<option>Airport</option>
+<option>Westside</option>
+</select>
+</label>
+</div>
+<div class="mt-auto flex flex-col gap-3">
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Apply Filters</span>
+</button>
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent border border-gray-300 dark:border-gray-600 text-black dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="truncate">Clear</span>
+</button>
+</div>
+</aside>
+<!-- Data Table -->
+<div class="flex-1 p-6 overflow-x-auto">
+<div class="bg-background-light dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+<tr>
+<th class="px-6 py-3" scope="col">Job ID</th>
+<th class="px-6 py-3" scope="col">Vehicle</th>
+<th class="px-6 py-3" scope="col">Type</th>
+<th class="px-6 py-3" scope="col">Status</th>
+<th class="px-6 py-3" scope="col">Created Date</th>
+<th class="px-6 py-3" scope="col">Completed Date</th>
+<th class="px-6 py-3" scope="col">Branch</th>
+<th class="px-6 py-3" scope="col"><span class="sr-only">Actions</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-background-light dark:bg-background-dark border-b dark:border-gray-700">
+<td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">#M84321</td>
+<td class="px-6 py-4">Ford Focus (FGH-345)</td>
+<td class="px-6 py-4">Repair</td>
+<td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">COMPLETED</span></td>
+<td class="px-6 py-4">2023-10-15</td>
+<td class="px-6 py-4">2023-10-18</td>
+<td class="px-6 py-4">Downtown</td>
+<td class="px-6 py-4 text-right"><button class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="bg-background-light dark:bg-background-dark border-b dark:border-gray-700">
+<td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">#M84320</td>
+<td class="px-6 py-4">Honda Civic (JKL-678)</td>
+<td class="px-6 py-4">Routine Service</td>
+<td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">IN PROGRESS</span></td>
+<td class="px-6 py-4">2023-10-20</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4">Airport</td>
+<td class="px-6 py-4 text-right"><button class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="bg-background-light dark:bg-background-dark border-b dark:border-gray-700">
+<td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">#M84319</td>
+<td class="px-6 py-4">Toyota Camry (XYZ-123)</td>
+<td class="px-6 py-4">Inspection</td>
+<td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">OPEN</span></td>
+<td class="px-6 py-4">2023-10-22</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4">Westside</td>
+<td class="px-6 py-4 text-right"><button class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<!-- Add more rows as needed -->
+<tr class="bg-background-light dark:bg-background-dark border-b dark:border-gray-700">
+<td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">#M84318</td>
+<td class="px-6 py-4">Nissan Rogue (ABC-901)</td>
+<td class="px-6 py-4">Repair</td>
+<td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">COMPLETED</span></td>
+<td class="px-6 py-4">2023-10-12</td>
+<td class="px-6 py-4">2023-10-14</td>
+<td class="px-6 py-4">Airport</td>
+<td class="px-6 py-4 text-right"><button class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="bg-background-light dark:bg-background-dark border-b dark:border-gray-700">
+<td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">#M84317</td>
+<td class="px-6 py-4">Chevrolet Malibu (QRS-234)</td>
+<td class="px-6 py-4">Routine Service</td>
+<td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">OPEN</span></td>
+<td class="px-6 py-4">2023-10-23</td>
+<td class="px-6 py-4">-</td>
+<td class="px-6 py-4">Downtown</td>
+<td class="px-6 py-4 text-right"><button class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<nav aria-label="Table navigation" class="flex items-center justify-between pt-4">
+<span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing <span class="font-semibold text-gray-900 dark:text-white">1-5</span> of <span class="font-semibold text-gray-900 dark:text-white">100</span></span>
+<ul class="inline-flex -space-x-px text-sm h-8">
+<li>
+<a class="flex items-center justify-center px-3 h-8 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">Previous</a>
+</li>
+<li>
+<a aria-current="page" class="flex items-center justify-center px-3 h-8 text-primary border border-gray-300 bg-primary/10 hover:bg-primary/20 hover:text-primary dark:border-gray-700 dark:bg-gray-700 dark:text-white" href="#">1</a>
+</li>
+<li>
+<a class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">2</a>
+</li>
+<li>
+<a class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">3</a>
+</li>
+<li>
+<a class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">Next</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</main>
+</div>
+</body></html>

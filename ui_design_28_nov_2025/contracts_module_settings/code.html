@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contracts Module Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex h-screen w-64 flex-col bg-white dark:bg-[#0b1218] border-r border-gray-200 dark:border-gray-800">
+<div class="flex h-full min-h-0 flex-col justify-between p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3 px-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAv-uaHQfQZSwp4aJnJs6iLpTraAOMz0N2eh2_3MpFE4LjLmpDaUJZ2Cy_tceEGgEEB_X0V0JVEyLno04p3fKv9aVjVASBHcB9HCJsdduykl-coULXhTl9NQfeYNFe2K9Pr7pe5Kh3aAI_ZvASIW8qi-nJHzTQqtK21L1jD-0FA4wNJuAIvnwpP2DLQtqauH4rZU2TP4DQFezmcyRRhAO9E-KVNvNBmXqH37SWooMxn_GjU-dOTIQvw4CQTBgoI_WOOjHcwZXYImRg");'></div>
+<div class="flex flex-col">
+<h1 class="text-black dark:text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" href="#">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" href="#">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" href="#">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400">article</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" href="#">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400">calendar_today</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary" href="#">
+<span class="material-symbols-outlined fill text-primary">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90">
+<span class="truncate">New Reservation</span>
+</button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" href="#">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400">help</span>
+<p class="text-sm font-medium leading-normal">Support</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300" href="#">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2 mb-4">
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium hover:text-primary dark:hover:text-primary" href="#">Settings</a>
+<span class="text-gray-500 dark:text-gray-400 text-sm font-medium">/</span>
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium hover:text-primary dark:hover:text-primary" href="#">Module Settings</a>
+<span class="text-gray-500 dark:text-gray-400 text-sm font-medium">/</span>
+<span class="text-black dark:text-white text-sm font-medium">Contracts</span>
+</div>
+<!-- Page Heading -->
+<div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+<h1 class="text-black dark:text-white text-3xl font-bold leading-tight tracking-tight">Contracts Module Settings</h1>
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center gap-2 min-w-[84px] cursor-pointer overflow-hidden rounded-lg h-10 px-4 bg-white dark:bg-[#1a2632] text-black dark:text-white text-sm font-bold border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
+<span>Cancel</span>
+</button>
+<button class="flex items-center justify-center gap-2 min-w-[84px] cursor-pointer overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
+<span>Save Changes</span>
+</button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="mb-6">
+<div class="flex border-b border-gray-200 dark:border-gray-700 gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-3 pt-1 hover:text-black dark:hover:text-white" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">General</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-3 pt-1 hover:text-black dark:hover:text-white" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Fleet</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-primary pb-3 pt-1" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Contracts</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-3 pt-1 hover:text-black dark:hover:text-white" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Reservations</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-3 pt-1 hover:text-black dark:hover:text-white" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Finance</p>
+</a>
+</div>
+</div>
+<!-- Content Area: Settings Table -->
+<div class="bg-white dark:bg-[#0b1218] rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+<!-- SearchBar -->
+<div class="p-4 border-b border-gray-200 dark:border-gray-800">
+<label class="flex flex-col min-w-40 h-11 w-full max-w-sm">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-gray-400 dark:text-gray-500 flex bg-gray-100 dark:bg-[#1a2632] items-center justify-center pl-3.5 rounded-l-lg">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-black dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-gray-100 dark:bg-[#1a2632] h-full placeholder:text-gray-400 dark:placeholder:text-gray-500 px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal" placeholder="Filter settings..." value=""/>
+</div>
+</label>
+</div>
+<!-- Settings Matrix -->
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+<thead class="bg-gray-50 dark:bg-[#1a2632]/50">
+<tr>
+<th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Setting</th>
+<th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Current Value</th>
+<th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Default</th>
+</tr>
+</thead>
+<tbody class="bg-white dark:bg-[#0b1218] divide-y divide-gray-200 dark:divide-gray-800">
+<!-- Category Header -->
+<tr>
+<td class="px-6 py-3 bg-gray-50 dark:bg-[#1a2632]/50" colspan="3">
+<h3 class="text-sm font-semibold text-black dark:text-white">OTP Requirements</h3>
+</td>
+</tr>
+<!-- Setting Row -->
+<tr>
+<td class="px-6 py-4 whitespace-nowrap align-top">
+<p class="text-sm font-medium text-black dark:text-white">Enable OTP for contract activation</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">If enabled, a one-time password will be required to start a new contract.</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary/80 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">Enabled</span>
+</td>
+</tr>
+<!-- Setting Row -->
+<tr>
+<td class="px-6 py-4 whitespace-nowrap align-top">
+<p class="text-sm font-medium text-black dark:text-white">Enable OTP for contract closure</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">If enabled, a one-time password will be required to close a contract.</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary/80 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">Disabled</span>
+</td>
+</tr>
+<!-- Category Header -->
+<tr>
+<td class="px-6 py-3 bg-gray-50 dark:bg-[#1a2632]/50" colspan="3">
+<h3 class="text-sm font-semibold text-black dark:text-white">Minimum Data Rules</h3>
+</td>
+</tr>
+<!-- Setting Row -->
+<tr>
+<td class="px-6 py-4 whitespace-nowrap align-top">
+<p class="text-sm font-medium text-black dark:text-white">Require Customer Driving License</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Enforce the requirement of a valid driving license for contract creation.</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary/80 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">Enabled</span>
+</td>
+</tr>
+<!-- Setting Row -->
+<tr>
+<td class="px-6 py-4 whitespace-nowrap align-top">
+<p class="text-sm font-medium text-black dark:text-white">Require Secondary Contact Info</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Make secondary contact information mandatory for all new contracts.</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary/80 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">Disabled</span>
+</td>
+</tr>
+<!-- Category Header -->
+<tr>
+<td class="px-6 py-3 bg-gray-50 dark:bg-[#1a2632]/50" colspan="3">
+<h3 class="text-sm font-semibold text-black dark:text-white">Cancellation Rules</h3>
+</td>
+</tr>
+<!-- Setting Row -->
+<tr>
+<td class="px-6 py-4 whitespace-nowrap align-top">
+<p class="text-sm font-medium text-black dark:text-white">Free cancellation window</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Timeframe (in hours) before pickup within which a cancellation is free.</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="relative max-w-[150px]">
+<input class="form-input w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1a2632] text-black dark:text-white focus:ring-primary/50 focus:border-primary text-sm" type="number" value="24"/>
+<span class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 dark:text-gray-400">hours</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="text-sm text-gray-500 dark:text-gray-400">48 hours</span>
+</td>
+</tr>
+<!-- Setting Row -->
+<tr>
+<td class="px-6 py-4 whitespace-nowrap align-top">
+<p class="text-sm font-medium text-black dark:text-white">Cancellation Fee Type</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Method for calculating the cancellation fee outside the free window.</p>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<select class="form-select w-full max-w-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1a2632] text-black dark:text-white focus:ring-primary/50 focus:border-primary text-sm">
+<option>Percentage</option>
+<option selected="">Flat Rate</option>
+</select>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="text-sm text-gray-500 dark:text-gray-400">Percentage</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

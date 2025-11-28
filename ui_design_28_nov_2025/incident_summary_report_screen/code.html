@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Incident Summary Report Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex h-screen">
+<!-- SideNavBar -->
+<aside class="flex-shrink-0 w-64 bg-background-light dark:bg-background-dark border-r border-gray-200 dark:border-gray-800">
+<div class="flex flex-col h-full justify-between p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAclwWVL4ZrbyyyLvFYtWhH6vp-fb_co9lY6Ql12zawVqy2zVqL8dLa2_ZE2oiIKeXihQfoJ6NJoTjR6O8f39COD3_iHbOdzKPECHVPIGIhWJRd25ieeXx9c_y3ClEKjaBkgFOPu8OuBwyPRbVkf7GtJIc5WazYXdFBRnKN5KAvLvF7JZLwhmbtl6ROBgmtAyT8LpHL6ZyD-YEdnoJ3rilAtl3YMXn1_N37k9bmFXo2Ba2cJynmIqL3kRS9ILmS7JS9igQ29SfbE3Y");'></div>
+<div class="flex flex-col">
+<h1 class="text-gray-900 dark:text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined text-gray-900 dark:text-white">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined text-gray-900 dark:text-white">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+<p class="text-primary text-sm font-medium leading-normal">Reports</p>
+</a>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">New Reservation</span>
+</button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined text-gray-900 dark:text-white">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-lg" href="#">
+<span class="material-symbols-outlined text-gray-900 dark:text-white">support_agent</span>
+<p class="text-sm font-medium leading-normal">Support</p>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex overflow-hidden">
+<!-- Left Filter Panel -->
+<div class="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 bg-background-light dark:bg-background-dark p-6 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-bold text-gray-900 dark:text-white">Filters</h2>
+<button class="flex items-center gap-2 text-sm text-primary font-medium">
+<span class="material-symbols-outlined text-base">close</span>
+<span>Reset</span>
+</button>
+</div>
+<div class="flex flex-col gap-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="branch-select">Branch(es)</label>
+<select class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-background-dark/50 text-gray-900 dark:text-white focus:ring-primary focus:border-primary" id="branch-select" multiple="">
+<option>Downtown Central</option>
+<option>Airport West</option>
+<option>North Suburbs</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="start-date">Start Date</label>
+<input class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-background-dark/50 text-gray-900 dark:text-white focus:ring-primary focus:border-primary" id="start-date" type="date"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="end-date">End Date</label>
+<input class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-background-dark/50 text-gray-900 dark:text-white focus:ring-primary focus:border-primary" id="end-date" type="date"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Incident Type</label>
+<div class="space-y-2">
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-background-light dark:bg-background-dark" id="type-accident" type="checkbox"/>
+<label class="ml-2 text-sm text-gray-900 dark:text-gray-100" for="type-accident">Accident</label>
+</div>
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-background-light dark:bg-background-dark" id="type-theft" type="checkbox"/>
+<label class="ml-2 text-sm text-gray-900 dark:text-gray-100" for="type-theft">Theft</label>
+</div>
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-background-light dark:bg-background-dark" id="type-mechanical" type="checkbox"/>
+<label class="ml-2 text-sm text-gray-900 dark:text-gray-100" for="type-mechanical">Mechanical Failure</label>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full h-10 px-4 mt-auto bg-primary text-white text-sm font-bold rounded-lg">Apply Filters</button>
+</div>
+<!-- Report Content -->
+<div class="flex-1 overflow-y-auto p-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3 items-center mb-6">
+<div class="flex flex-col gap-1">
+<p class="text-gray-900 dark:text-white text-3xl font-black leading-tight tracking-tight">Incident Summary Report</p>
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Showing data for 01 Jan 2023 - 31 Dec 2023</p>
+</div>
+<div class="flex gap-2">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined text-lg mr-2">ios_share</span>
+<span class="truncate">Export to CSV</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined text-lg mr-2">picture_as_pdf</span>
+<span class="truncate">Export to PDF</span>
+</button>
+</div>
+</div>
+<!-- Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="flex flex-col gap-2 rounded-lg p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50">
+<p class="text-gray-700 dark:text-gray-300 text-base font-medium leading-normal">Total Incidents</p>
+<p class="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight">124</p>
+<p class="text-green-500 text-base font-medium leading-normal">+5.2%</p>
+</div>
+<div class="flex flex-col gap-2 rounded-lg p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50">
+<p class="text-gray-700 dark:text-gray-300 text-base font-medium leading-normal">Total Associated Cost</p>
+<p class="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight">$85,320</p>
+<p class="text-green-500 text-base font-medium leading-normal">+8.1%</p>
+</div>
+<div class="flex flex-col gap-2 rounded-lg p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50">
+<p class="text-gray-700 dark:text-gray-300 text-base font-medium leading-normal">Incident Rate</p>
+<p class="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight">2.1%</p>
+<p class="text-red-500 text-base font-medium leading-normal">-1.5%</p>
+</div>
+<div class="flex flex-col gap-2 rounded-lg p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50">
+<p class="text-gray-700 dark:text-gray-300 text-base font-medium leading-normal">Most Frequent Type</p>
+<p class="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight">Mechanical Failure</p>
+</div>
+</div>
+<!-- Table -->
+<div class="overflow-x-auto">
+<div class="inline-block min-w-full align-middle">
+<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50">
+<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+<thead class="bg-gray-50 dark:bg-gray-800/50">
+<tr>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Branch Name</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Incident Type</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">No. of Incidents</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Total Cost</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Avg. Cost</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Related Contracts</th>
+<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Action</th>
+</tr>
+</thead>
+<tbody class="bg-white dark:bg-gray-900/50 divide-y divide-gray-200 dark:divide-gray-800">
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Downtown Central</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Accident</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">12</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">$15,600</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">$1,300</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">12</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<a class="text-primary hover:text-primary/80" href="#">View Details</a>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Airport West</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Mechanical Failure</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">25</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">$22,500</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">$900</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">25</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<a class="text-primary hover:text-primary/80" href="#">View Details</a>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">North Suburbs</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Theft</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">3</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">$30,000</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">$10,000</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">3</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<a class="text-primary hover:text-primary/80" href="#">View Details</a>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Downtown Central</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Mechanical Failure</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">18</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">$9,720</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">$540</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">18</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<a class="text-primary hover:text-primary/80" href="#">View Details</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-center pt-6">
+<a class="flex size-10 items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-full" href="#">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</a>
+<a class="text-sm font-bold leading-normal flex size-10 items-center justify-center text-white rounded-full bg-primary" href="#">1</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-primary/20 rounded-full" href="#">2</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-primary/20 rounded-full" href="#">3</a>
+<span class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white" href="#">...</span>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-primary/20 rounded-full" href="#">8</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-primary/20 rounded-full" href="#">9</a>
+<a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-primary/20 rounded-full" href="#">10</a>
+<a class="flex size-10 items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary/20 rounded-full" href="#">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</a>
+</div>
+</div>
+</main>
+</div>
+</body></html>

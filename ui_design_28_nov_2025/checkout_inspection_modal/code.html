@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Checkout Inspection Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-6" style="background: radial-gradient(circle at top, rgba(35, 48, 62, 1) 0%, rgba(16, 25, 34, 1) 100%);">
+<div class="flex w-full max-w-2xl flex-col rounded-xl bg-background-light dark:bg-background-dark shadow-2xl">
+<!-- Modal Header -->
+<div class="flex items-start justify-between gap-4 border-b border-white/10 p-4 sm:p-6">
+<div class="flex flex-col gap-1">
+<h1 class="text-xl font-bold text-gray-900 dark:text-white">Checkout Inspection</h1>
+<p class="text-sm text-gray-500 dark:text-gray-400">Toyota Camry - License Plate ABC-123</p>
+</div>
+<button class="flex items-center justify-center rounded-full p-1 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-primary">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+</div>
+<!-- Modal Content -->
+<div class="flex flex-col gap-6 overflow-y-auto p-4 sm:p-6">
+<!-- Vehicle Status Section -->
+<section class="flex flex-col gap-4">
+<h2 class="text-base font-semibold text-gray-900 dark:text-white">Vehicle Status</h2>
+<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+<label class="flex flex-col">
+<p class="pb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Odometer Out (km)</p>
+<input class="form-input h-11 w-full flex-1 resize-none overflow-hidden rounded-lg border border-gray-300 bg-white p-3 text-sm font-normal leading-normal text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/20 dark:bg-[#1C2127] dark:text-white dark:placeholder:text-gray-500" placeholder="Enter current mileage" value="45120"/>
+</label>
+</div>
+<div class="flex flex-col gap-2">
+<p class="text-sm font-medium text-gray-700 dark:text-gray-300">Fuel Level Out</p>
+<div class="flex items-center gap-4">
+<span class="text-sm text-gray-500 dark:text-gray-400">E</span>
+<div class="relative flex-1">
+<input class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer range-lg" max="8" min="0" style="--range-shdw: #137fec; accent-color: #137fec;" type="range" value="8"/>
+</div>
+<span class="text-sm font-bold text-gray-900 dark:text-white">F</span>
+</div>
+</div>
+</section>
+<!-- Vehicle Photos Section -->
+<section class="flex flex-col gap-4">
+<h2 class="text-base font-semibold text-gray-900 dark:text-white">Vehicle Photos</h2>
+<div class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-white/20 p-6 text-center">
+<span class="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500">upload_file</span>
+<p class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Drag &amp; drop photos here or</p>
+<button class="mt-2 rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark">Upload Photos</button>
+</div>
+<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+<div class="relative aspect-square">
+<img class="h-full w-full rounded-lg object-cover" data-alt="Front view of the yellow sports car" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAav1ztSEJ9T5A4rLaYz0k9QQvVqcPgnvVDrtZhdccfKanEY5HoczPuHRhYrn73fGWDumKzRkprf5CToPU-8-b7e1-SxfeH7ERyhuvHxDAhsluEWYp3Cnit2BEvgC65wQ3Sk0758aBQAoGS4-3b3ZFAyZFG6Cjl1CgrzVNXkgwenmRoJrMDBgz9a3rjKL5tM62KOLAWg955pr5QD4cYXanLfwGGeGVTkvv5etQr4vj4S5d3P7MI8IrzgS28UuK2auugHEcU0RKrszU"/>
+<button class="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm hover:bg-black/70">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<div class="relative aspect-square">
+<img class="h-full w-full rounded-lg object-cover" data-alt="Side profile of a red sports car" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGd4n0hqjUoKtOIdler07y_QbdxQ8qqRcdmOWKPbLSXPae4VX84UJ5xJVw6CeKjlFJEZ2LBZU--uK2rYcScSKFLr9_jeofwytj4M8QELdylb8Nw6tcYMvxGQXZ01K20Po8DOl-bJsjMGOJsinzbQgFKx1nBmkaCXHq_0yNsLCWhAb5H1EisrApXcJI9HpNtCGJzb6F3FLY1WCQ7VqVkT_yOxcxOdIZM6zfbsGv5FspgVbfDQ-bm4T_80q5QXYzyA2IagipcfDh1Iw"/>
+<button class="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm hover:bg-black/70">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Existing Damages Section -->
+<section class="flex flex-col gap-4">
+<h2 class="text-base font-semibold text-gray-900 dark:text-white">Report Existing Damages</h2>
+<label class="flex flex-col">
+<p class="pb-2 text-sm font-medium text-gray-700 dark:text-gray-300">General Notes on Existing Damages</p>
+<textarea class="form-textarea w-full resize-y rounded-lg border border-gray-300 bg-white p-3 text-sm font-normal leading-normal text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/20 dark:bg-[#1C2127] dark:text-white dark:placeholder:text-gray-500" placeholder="e.g., Minor scuffs on rear bumper, consistent with previous records." rows="3"></textarea>
+</label>
+<div class="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-white/20 p-4">
+<div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+<label class="flex-1">
+<p class="pb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Damage Description</p>
+<input class="form-input h-11 w-full flex-1 rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/20 dark:bg-[#252c34] dark:text-white dark:placeholder:text-gray-500" placeholder="e.g., Small scratch on driver door"/>
+</label>
+<div class="relative">
+<p class="pb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Severity</p>
+<select class="form-select h-11 w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/20 dark:bg-[#252c34] dark:text-white sm:w-40">
+<option>Minor</option>
+<option>Moderate</option>
+<option>Major</option>
+</select>
+<span class="pointer-events-none absolute bottom-3 right-3 text-gray-400">
+<span class="material-symbols-outlined text-xl">expand_more</span>
+</span>
+</div>
+</div>
+</div>
+<button class="flex items-center justify-center gap-2 self-start rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark">
+<span class="material-symbols-outlined text-xl">add_circle</span>
+                        Add Damage
+                    </button>
+</section>
+</div>
+<!-- Modal Footer -->
+<div class="flex flex-col-reverse gap-3 border-t border-white/10 p-4 sm:flex-row sm:justify-end sm:p-6">
+<button class="flex h-11 items-center justify-center rounded-lg bg-transparent px-6 text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-gray-400">Cancel</button>
+<button class="flex h-11 items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark">Complete Inspection &amp; Checkout</button>
+</div>
+</div>
+</div>
+</body></html>

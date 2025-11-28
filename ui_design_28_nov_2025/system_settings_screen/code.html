@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Settings Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style type="text/css">
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full flex-col">
+<div class="flex h-full flex-1">
+<!-- Side Navigation Bar -->
+<aside class="flex w-64 flex-col bg-[#111418] p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Company Logo for KarāraOS" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBJ0lskyAe7pr9uiATi26GtBGTmorZuYsGrmQBf3c81dVorkBOviqtKVKa8k4wVk_OTTf4gPfDYUSkMezDFX0bYw-keNjsILjTP2t8lbvU77ljOr55tTPdMrVbpzGsT-x46gH7w3WUnfkcm92RKgyq57LahzXMit3YOQwPDxCpN7FnZxVQWwAIvhNm7yZSM9LaBJT31gYOjDnLroiBKNQ9ntDouhyOPEZARnNH3x2Ylkj5J627d00PIenwJi83jSZZXwn3oKgoLIU4");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-[#283039] rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-[#283039] rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-[#283039] rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-[#283039] rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_add_on</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg bg-primary px-3 py-2 text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="mt-auto flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-[#283039] rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help_center</span>
+<p class="text-sm font-medium leading-normal">Help Center</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-[#283039] rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto p-8">
+<div class="mx-auto max-w-4xl">
+<!-- Breadcrumbs -->
+<div class="mb-6 flex flex-wrap items-center gap-2">
+<a class="text-zinc-500 dark:text-zinc-400 text-sm font-medium hover:text-primary dark:hover:text-primary" href="#">Home</a>
+<span class="text-zinc-500 dark:text-zinc-400 text-sm">/</span>
+<a class="text-zinc-500 dark:text-zinc-400 text-sm font-medium hover:text-primary dark:hover:text-primary" href="#">Settings</a>
+<span class="text-zinc-500 dark:text-zinc-400 text-sm">/</span>
+<span class="text-zinc-900 dark:text-white text-sm font-medium">System Settings</span>
+</div>
+<!-- Page Heading -->
+<div class="mb-8 flex flex-wrap justify-between gap-4">
+<div class="flex flex-col gap-2">
+<h1 class="text-zinc-900 dark:text-white text-3xl font-bold leading-tight tracking-tight">System Settings</h1>
+<p class="text-zinc-600 dark:text-zinc-400 text-base font-normal leading-normal">Manage global, headquarters-level configurations for the entire system.</p>
+</div>
+</div>
+<!-- Accordions for Settings -->
+<div class="flex flex-col gap-4">
+<details class="group flex flex-col rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50" open="">
+<summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-4">
+<p class="text-zinc-900 dark:text-white text-base font-medium">Finance &amp; Tax</p>
+<span class="material-symbols-outlined text-zinc-500 dark:text-zinc-400 transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="border-t border-zinc-200 dark:border-zinc-800 p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between gap-4 py-2">
+<div class="flex flex-col">
+<p class="text-zinc-900 dark:text-white text-sm font-medium">VAT Percentage</p>
+<p class="text-zinc-600 dark:text-zinc-400 text-sm">Set the global Value Added Tax rate.</p>
+</div>
+<div class="flex shrink-0 items-center gap-2">
+<input class="w-20 rounded-md border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white p-2 text-sm focus:border-primary focus:ring-primary" type="number" value="19"/>
+<span class="text-zinc-900 dark:text-white text-sm font-medium">%</span>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4 py-2">
+<div class="flex flex-col">
+<p class="text-zinc-900 dark:text-white text-sm font-medium">Currency Rounding Rule</p>
+<p class="text-zinc-600 dark:text-zinc-400 text-sm">Define how final amounts are rounded.</p>
+</div>
+<select class="w-48 shrink-0 rounded-md border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white p-2 text-sm focus:border-primary focus:ring-primary">
+<option>Standard (0.01)</option>
+<option>Round to nearest 0.05</option>
+<option>Round up to nearest 0.10</option>
+</select>
+</div>
+</div>
+</div>
+</details>
+<details class="group flex flex-col rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+<summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-4">
+<p class="text-zinc-900 dark:text-white text-base font-medium">Contracts &amp; Numbering</p>
+<span class="material-symbols-outlined text-zinc-500 dark:text-zinc-400 transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="border-t border-zinc-200 dark:border-zinc-800 p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between gap-4 py-2">
+<div class="flex flex-col">
+<p class="text-zinc-900 dark:text-white text-sm font-medium">Global Contract Numbering Pattern</p>
+<p class="text-zinc-600 dark:text-zinc-400 text-sm">Use YYYY, MM, DD, and # for sequences.</p>
+</div>
+<input class="w-48 shrink-0 rounded-md border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white p-2 text-sm focus:border-primary focus:ring-primary" type="text" value="CON-YYYY-######"/>
+</div>
+<div class="flex items-center justify-between gap-4 py-2">
+<div class="flex flex-col">
+<p class="text-zinc-900 dark:text-white text-sm font-medium">Enable OTP for Contract Activation</p>
+<p class="text-zinc-600 dark:text-zinc-400 text-sm">Require a one-time password to start a new contract.</p>
+</div>
+<label class="relative inline-flex cursor-pointer items-center">
+<input checked="" class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-zinc-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-zinc-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:border-zinc-600 dark:bg-zinc-700"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-4 py-2">
+<div class="flex flex-col">
+<p class="text-zinc-900 dark:text-white text-sm font-medium">Enable OTP for Contract Closure</p>
+<p class="text-zinc-600 dark:text-zinc-400 text-sm">Require a one-time password to close a contract.</p>
+</div>
+<label class="relative inline-flex cursor-pointer items-center">
+<input class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-zinc-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-zinc-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:border-zinc-600 dark:bg-zinc-700"></div>
+</label>
+</div>
+</div>
+</div>
+</details>
+<details class="group flex flex-col rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+<summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-4">
+<p class="text-zinc-900 dark:text-white text-base font-medium">Notifications</p>
+<span class="material-symbols-outlined text-zinc-500 dark:text-zinc-400 transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="border-t border-zinc-200 dark:border-zinc-800 p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between gap-4 py-2">
+<div class="flex flex-col">
+<p class="text-zinc-900 dark:text-white text-sm font-medium">Enable Contract Activation Notifications</p>
+<p class="text-zinc-600 dark:text-zinc-400 text-sm">Send an alert when a contract is activated.</p>
+</div>
+<label class="relative inline-flex cursor-pointer items-center">
+<input checked="" class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-zinc-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-zinc-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:border-zinc-600 dark:bg-zinc-700"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-4 py-2">
+<div class="flex flex-col">
+<p class="text-zinc-900 dark:text-white text-sm font-medium">Enable Payment Received Notifications</p>
+<p class="text-zinc-600 dark:text-zinc-400 text-sm">Send an alert upon successful payment.</p>
+</div>
+<label class="relative inline-flex cursor-pointer items-center">
+<input checked="" class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-zinc-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-zinc-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:border-zinc-600 dark:bg-zinc-700"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-4 py-2">
+<div class="flex flex-col">
+<p class="text-zinc-900 dark:text-white text-sm font-medium">Default Do-Not-Disturb Window</p>
+<p class="text-zinc-600 dark:text-zinc-400 text-sm">Set a time window to pause notifications.</p>
+</div>
+<div class="flex items-center gap-2">
+<input class="w-24 shrink-0 rounded-md border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white p-2 text-sm focus:border-primary focus:ring-primary" type="time" value="22:00"/>
+<span class="text-zinc-500 dark:text-zinc-400">to</span>
+<input class="w-24 shrink-0 rounded-md border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white p-2 text-sm focus:border-primary focus:ring-primary" type="time" value="08:00"/>
+</div>
+</div>
+</div>
+</div>
+</details>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="sticky bottom-0 mt-8 -mx-8 -mb-8 border-t border-zinc-200 dark:border-zinc-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="mx-auto flex max-w-4xl items-center justify-end gap-3 px-8 py-4">
+<button class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800">Cancel</button>
+<button class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50" disabled="">Save Changes</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

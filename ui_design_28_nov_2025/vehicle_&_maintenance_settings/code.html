@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vehicle &amp; Maintenance Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex h-screen w-64 flex-col bg-[#111418] p-4 sticky top-0">
+<div class="flex flex-col gap-4 flex-grow">
+<div class="flex items-center gap-3 mb-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Admin user avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCv6b6elLAvDi0IFZt1nLjqEYzekBeP5cGiO_doThNg6i8uD9ca2zeKD3jpCiqmkQ9zL9BHpEttymVpLtZIuu1S2qDM94AVY4GJngR0euUwnKdjeas4WnjpYoNhs_FFU6GSdPugyFJXhBd9y_T-hVl90uMUMKq_bVPMS7D3EMbgz46BhtlhjBiKzFUh0QzhCMxZdGXUtcV4ZzAXRwwiWDa03EV7W92endkJz5a4s0rv_jCggQUlqrmrxpBE8AW4jQcNqdEumLF7mLQ");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">Admin User</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">admin@kararaos.com</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-primary/20" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-primary/20" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-primary/20" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-primary/20" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">toggle_on</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-primary/20" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-primary/20" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-8">
+<div class="w-full max-w-7xl mx-auto flex flex-col gap-6">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2">
+<a class="text-gray-500 dark:text-[#9dabb9] text-base font-medium leading-normal hover:text-primary" href="#">Module Settings</a>
+<span class="text-gray-500 dark:text-[#9dabb9] text-base font-medium leading-normal">/</span>
+<span class="text-gray-900 dark:text-white text-base font-medium leading-normal">Vehicle &amp; Maintenance</span>
+</div>
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between items-center gap-4">
+<p class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Vehicle &amp; Maintenance Settings</p>
+<!-- New "Save Changes" Button -->
+<button class="flex cursor-pointer items-center justify-center rounded-lg h-10 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] px-4">
+<span class="material-symbols-outlined text-base">save</span>
+<span class="truncate">Save Changes</span>
+</button>
+</div>
+<!-- ToolBar -->
+<div class="flex justify-between items-center gap-2 px-4 py-2 bg-white dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] rounded-lg">
+<div class="flex gap-2 items-center">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">search</span>
+<input class="w-full h-9 pl-10 pr-4 bg-gray-100 dark:bg-[#1c2127] border-transparent focus:border-primary focus:ring-primary rounded-md text-sm text-gray-900 dark:text-white" placeholder="Search settings..." type="text"/>
+</div>
+<button class="p-2 text-gray-600 dark:text-white rounded-md hover:bg-primary/20">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+<button class="flex cursor-pointer items-center justify-center rounded-lg h-9 bg-gray-200 dark:bg-[#283039] text-gray-800 dark:text-white gap-2 text-sm font-medium leading-normal min-w-0 px-4 hover:bg-gray-300 dark:hover:bg-[#3b4754]">
+<span class="material-symbols-outlined text-base">restart_alt</span>
+<span class="truncate">Reset to Default</span>
+</button>
+</div>
+<!-- Table -->
+<div class="w-full">
+<div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#111418]">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-gray-50 dark:bg-[#1c2127]">
+<th class="px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 w-1/6">Category</th>
+<th class="px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 w-1/6">Setting Key</th>
+<th class="px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 w-2/6">Description</th>
+<th class="px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Type</th>
+<th class="px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Default</th>
+<th class="px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 w-1/6">Current Value</th>
+<th class="px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Scope</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-[#3b4754]">
+<tr class="hover:bg-gray-50 dark:hover:bg-[#1c2127]/50">
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Maintenance Reminders</td>
+<td class="h-[72px] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">Odometer Threshold</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Set the odometer reading (in miles) for service alerts.</td>
+<td class="h-[72px] px-4 py-2 text-sm">
+<div class="inline-flex items-center justify-center rounded h-7 px-2 bg-gray-100 dark:bg-[#283039] text-gray-700 dark:text-white text-xs font-medium">Number</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">5000</td>
+<td class="h-[72px] px-4 py-2">
+<input class="w-24 h-9 bg-gray-100 dark:bg-[#1c2127] border-transparent focus:border-primary focus:ring-primary rounded-md text-sm text-gray-900 dark:text-white" type="number" value="5000"/>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">System-wide</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-[#1c2127]/50">
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Maintenance Reminders</td>
+<td class="h-[72px] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">Time-based Threshold</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Set the time (in days) for service alerts, like annual inspections.</td>
+<td class="h-[72px] px-4 py-2 text-sm">
+<div class="inline-flex items-center justify-center rounded h-7 px-2 bg-gray-100 dark:bg-[#283039] text-gray-700 dark:text-white text-xs font-medium">Number</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">365</td>
+<td class="h-[72px] px-4 py-2">
+<input class="w-24 h-9 bg-gray-100 dark:bg-[#1c2127] border-transparent focus:border-primary focus:ring-primary rounded-md text-sm text-gray-900 dark:text-white" type="number" value="365"/>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">System-wide</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-[#1c2127]/50">
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Maintenance Reminders</td>
+<td class="h-[72px] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">Alert Lead Time</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Notify X days before a time-based maintenance is due.</td>
+<td class="h-[72px] px-4 py-2 text-sm">
+<div class="inline-flex items-center justify-center rounded h-7 px-2 bg-gray-100 dark:bg-[#283039] text-gray-700 dark:text-white text-xs font-medium">Number</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">14</td>
+<td class="h-[72px] px-4 py-2">
+<input class="w-24 h-9 bg-gray-100 dark:bg-[#1c2127] border-transparent focus:border-primary focus:ring-primary rounded-md text-sm text-gray-900 dark:text-white" type="number" value="14"/>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">System-wide</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-[#1c2127]/50">
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Vehicle Status Management</td>
+<td class="h-[72px] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">Allow 'In-Service' Override</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Allows admins to manually change status from 'In-Service' to 'Maintenance'.</td>
+<td class="h-[72px] px-4 py-2 text-sm">
+<div class="inline-flex items-center justify-center rounded h-7 px-2 bg-gray-100 dark:bg-[#283039] text-gray-700 dark:text-white text-xs font-medium">Boolean</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">true</td>
+<td class="h-[72px] px-4 py-2">
+<label class="relative inline-flex cursor-pointer items-center">
+<input checked="" class="peer sr-only" type="checkbox"/>
+<div class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:bg-gray-700 dark:border-gray-600"></div>
+</label>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">System-wide</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-[#1c2127]/50">
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Vehicle Status Management</td>
+<td class="h-[72px] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">Restrict 'Sold' Transition</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">Prevents changing status to 'Sold' if active contracts exist.</td>
+<td class="h-[72px] px-4 py-2 text-sm">
+<div class="inline-flex items-center justify-center rounded h-7 px-2 bg-gray-100 dark:bg-[#283039] text-gray-700 dark:text-white text-xs font-medium">Boolean</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">true</td>
+<td class="h-[72px] px-4 py-2">
+<label class="relative inline-flex cursor-pointer items-center">
+<input checked="" class="peer sr-only" type="checkbox"/>
+<div class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:bg-gray-700 dark:border-gray-600"></div>
+</label>
+</td>
+<td class="h-[72px] px-4 py-2 text-sm text-gray-600 dark:text-[#9dabb9]">System-wide</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

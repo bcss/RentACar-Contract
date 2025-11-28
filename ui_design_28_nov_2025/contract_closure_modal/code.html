@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contract Closure Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');">
+<div class="relative flex min-h-screen w-full items-center justify-center p-4">
+<!-- Modal Backdrop -->
+<div aria-hidden="true" class="fixed inset-0 bg-black/50"></div>
+<!-- Modal -->
+<div class="relative w-full max-w-2xl rounded-xl bg-white dark:bg-[#192734] shadow-2xl">
+<div class="p-8">
+<div class="flex items-start justify-between gap-4">
+<div class="flex flex-col gap-1.5">
+<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Close Contract 8459-22</h1>
+<p class="text-sm text-gray-500 dark:text-gray-400">Follow the steps to finalize and close the contract.</p>
+</div>
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="mt-8 flex flex-col gap-4">
+<div>
+<p class="text-sm font-medium text-gray-900 dark:text-white">Step 1 of 2: Pre-closure Checks</p>
+<div class="mt-2 h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+<div class="h-1.5 rounded-full bg-primary" style="width: 50%;"></div>
+</div>
+</div>
+</div>
+<div class="mt-6 flex flex-col gap-4">
+<div class="flex items-center gap-3 rounded-lg bg-green-500/10 p-3 text-green-600 dark:bg-green-500/20 dark:text-green-400">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+<p class="text-sm font-medium">All checks passed. Ready to close.</p>
+</div>
+<div class="divide-y divide-gray-200 dark:divide-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+<div class="flex items-center gap-x-4 p-4">
+<span class="material-symbols-outlined text-green-500">check</span>
+<p class="text-base text-gray-900 dark:text-white">Incidents Resolved</p>
+</div>
+<div class="flex items-center gap-x-4 p-4">
+<span class="material-symbols-outlined text-green-500">check</span>
+<p class="text-base text-gray-900 dark:text-white">Balance is Zero</p>
+</div>
+<div class="flex items-center gap-x-4 p-4">
+<span class="material-symbols-outlined text-green-500">check</span>
+<p class="text-base text-gray-900 dark:text-white">Deposits Cleared</p>
+</div>
+<div class="flex items-center gap-x-4 p-4">
+<span class="material-symbols-outlined text-green-500">check</span>
+<p class="text-base text-gray-900 dark:text-white">All Inspections Done</p>
+</div>
+</div>
+</div>
+<div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+<p class="text-sm text-gray-500 dark:text-gray-400">All checks passed. The contract is ready for final closure. Please confirm to proceed.</p>
+<div class="mt-6 flex items-center justify-between gap-4 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-2xl">shield</span>
+<p class="text-base font-medium text-gray-900 dark:text-white">Require OTP for verification</p>
+</div>
+<label class="relative inline-flex h-6 w-11 cursor-pointer items-center">
+<input class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-600 dark:bg-gray-700"></div>
+</label>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-end gap-4 rounded-b-xl bg-gray-50 dark:bg-[#101922] p-4">
+<button class="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-background-dark">
+                    Cancel
+                </button>
+<button class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-background-dark">
+                    Close Contract
+                </button>
+</div>
+</div>
+</div>
+</body></html>

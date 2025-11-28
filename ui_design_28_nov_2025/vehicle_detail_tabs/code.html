@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vehicle Detail Tabs</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 dark:border-white/10 px-10 py-3 bg-white/5">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-white">
+<div class="size-6 text-primary">
+<svg fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.92 6.07a1 1 0 0 0-1.41 0l-5.18 5.18-2.12-2.12a1 1 0 0 0-1.41 1.41l2.83 2.83a1 1 0 0 0 1.41 0l5.88-5.88a1 1 0 0 0 0-1.42zM21 11a1 1 0 0 0-1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6a1 1 0 1 0 0-2H5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-6a1 1 0 0 0-1-1z"></path></svg>
+</div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">KarāraOS</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-gray-400 dark:text-gray-500 flex border-none bg-black/20 dark:bg-white/5 items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined !text-2xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-black/20 dark:bg-white/5 focus:border-none h-full placeholder:text-gray-400 dark:placeholder:text-gray-500 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search" value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="flex items-center gap-9">
+<a class="text-gray-300 dark:text-gray-300 hover:text-white text-sm font-medium leading-normal" href="#">Dashboard</a>
+<a class="text-white text-sm font-medium leading-normal" href="#">Vehicles</a>
+<a class="text-gray-300 dark:text-gray-300 hover:text-white text-sm font-medium leading-normal" href="#">Contracts</a>
+<a class="text-gray-300 dark:text-gray-300 hover:text-white text-sm font-medium leading-normal" href="#">Reservations</a>
+<a class="text-gray-300 dark:text-gray-300 hover:text-white text-sm font-medium leading-normal" href="#">Finances</a>
+</div>
+<div class="flex gap-2">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-black/20 dark:bg-white/5 text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+<span class="material-symbols-outlined !text-xl">notifications</span>
+</button>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-black/20 dark:bg-white/5 text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+<span class="material-symbols-outlined !text-xl">help</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar image" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBO3afGZqvHOGFlnHEw5DJNIoV-I2XeI8aZ-9mKsc-CCD9aN6q863VlteeB8s4JymT445xa5ZtTNtblYpCCY-DsoqttSxmuYaYL7XQp4868W5pcMjHj-xhhltpqIfWspBR_JTIOfuCcO5IXlxkjK1dN96tIkTZ3UeXqcbL4UtKtCuYS43O-VITDD1KdhKDldr7nRhomaNPty-Z111hG2YB_BOr7-7A3-l1ep5YUorU1pHUCcoaljDs-FMwSmFnF-5GEhAcQqZQDu2I");'></div>
+</div>
+</header>
+<main class="px-4 md:px-10 lg:px-20 xl:px-40 flex flex-1 justify-center py-5">
+<div class="layout-content-container flex flex-col w-full max-w-6xl flex-1">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-4 p-4 items-center">
+<div class="flex min-w-72 flex-col gap-2">
+<p class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Ford Explorer - ABC-123</p>
+<div class="flex items-center gap-2">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+</span>
+<p class="text-green-500 dark:text-green-400 text-base font-medium leading-normal">Available</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2">
+<span class="material-symbols-outlined !text-lg">edit</span>
+<span class="truncate">Edit Vehicle</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2">
+<span class="material-symbols-outlined !text-lg">add</span>
+<span class="truncate">Create Reservation</span>
+</button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="pb-3 mt-4">
+<div class="flex border-b border-gray-200 dark:border-white/10 px-4 gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-gray-900 dark:text-white pb-[13px] pt-4" href="#">
+<p class="text-primary dark:text-white text-sm font-bold leading-normal tracking-[0.015em]">Profile</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-[13px] pt-4 hover:text-gray-800 dark:hover:text-gray-200" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Status Timeline</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-[13px] pt-4 hover:text-gray-800 dark:hover:text-gray-200" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Contracts</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-[13px] pt-4 hover:text-gray-800 dark:hover:text-gray-200" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Incidents</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-[13px] pt-4 hover:text-gray-800 dark:hover:text-gray-200" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Maintenance</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-[13px] pt-4 hover:text-gray-800 dark:hover:text-gray-200" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Transfers</p>
+</a>
+</div>
+</div>
+<div class="p-4">
+<!-- SectionHeader -->
+<h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Vehicle Profile</h2>
+<!-- DescriptionList -->
+<div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4">
+<div class="flex flex-col gap-1 border-t border-solid border-gray-200 dark:border-white/10 py-4 pr-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">VIN</p>
+<p class="text-gray-800 dark:text-white text-sm font-medium leading-normal">1FM5K8D83JGA12345</p>
+</div>
+<div class="flex flex-col gap-1 border-t border-solid border-gray-200 dark:border-white/10 py-4 pl-0 md:pl-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Make</p>
+<p class="text-gray-800 dark:text-white text-sm font-medium leading-normal">Ford</p>
+</div>
+<div class="flex flex-col gap-1 border-t border-solid border-gray-200 dark:border-white/10 py-4 pr-2 lg:pl-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Model</p>
+<p class="text-gray-800 dark:text-white text-sm font-medium leading-normal">Explorer</p>
+</div>
+<div class="flex flex-col gap-1 border-t border-solid border-gray-200 dark:border-white/10 py-4 pr-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Year</p>
+<p class="text-gray-800 dark:text-white text-sm font-medium leading-normal">2023</p>
+</div>
+<div class="flex flex-col gap-1 border-t border-solid border-gray-200 dark:border-white/10 py-4 pl-0 md:pl-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Color</p>
+<p class="text-gray-800 dark:text-white text-sm font-medium leading-normal">Magnetic Gray</p>
+</div>
+<div class="flex flex-col gap-1 border-t border-solid border-gray-200 dark:border-white/10 py-4 pr-2 lg:pl-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Engine Size</p>
+<p class="text-gray-800 dark:text-white text-sm font-medium leading-normal">2.3L EcoBoost</p>
+</div>
+</div>
+<!-- Ownership Section -->
+<h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-8">Ownership</h2>
+<div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4">
+<div class="flex flex-col gap-1 border-t border-solid border-gray-200 dark:border-white/10 py-4 pr-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Current Branch</p>
+<p class="text-gray-800 dark:text-white text-sm font-medium leading-normal">Downtown Central</p>
+</div>
+<div class="flex flex-col gap-1 border-t border-solid border-gray-200 dark:border-white/10 py-4 pl-0 md:pl-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Region</p>
+<p class="text-gray-800 dark:text-white text-sm font-medium leading-normal">West Coast</p>
+</div>
+</div>
+<!-- Tags Section -->
+<h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-8">Tags</h2>
+<div class="p-4">
+<div class="flex flex-wrap gap-2 items-center border-t border-solid border-gray-200 dark:border-white/10 pt-4">
+<span class="inline-flex items-center rounded-full bg-primary/20 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/30 dark:text-blue-200">4x4</span>
+<span class="inline-flex items-center rounded-full bg-primary/20 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/30 dark:text-blue-200">Luxury</span>
+<span class="inline-flex items-center rounded-full bg-primary/20 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/30 dark:text-blue-200">Pet-Friendly</span>
+<span class="inline-flex items-center rounded-full bg-primary/20 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/30 dark:text-blue-200">7-Seater</span>
+<button class="flex items-center justify-center rounded-full h-7 px-3 bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-white/20 text-sm font-medium gap-1">
+<span class="material-symbols-outlined !text-base">add</span>
+<span>Add Tag</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

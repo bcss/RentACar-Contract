@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Payments List Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex h-full w-64 flex-col bg-[#111418] p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAIk1UpvW71E-um9csgtZE1bQ1vaAXtcF1oq0TnCWxp_ASaf4HliNSg4U3etqUykw4V8H7ncU3HIdROv0fb8tBfOBvj5q3O17r6akpU6knAIp7WN2iXGKNHeiPbPzjs1yZD47n6cj9obRXqQsEJDTFD8Uopeq86Qq6CwgoNyVykcYR06Ua951lBhp6ihkp8Oj2O6a8i9uFWK64hfv3jPkG1m3oSdL1oEx8Xh7JyveaAbokJP4YQ3pY0u5P4vVIi2KPv93YY5GRkb9s");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Rental Management</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-[#9dabb9] hover:bg-[#283039] hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#9dabb9] hover:bg-[#283039] hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">image</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#9dabb9] hover:bg-[#283039] hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#9dabb9] hover:bg-[#283039] hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">payment</span>
+<p class="text-sm font-medium leading-normal">Payments</p>
+</a>
+</div>
+</div>
+<div class="flex flex-col gap-4 mt-auto">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">New Reservation</span>
+</button>
+<div class="flex flex-col gap-1 border-t border-white/10 pt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-[#9dabb9] hover:bg-[#283039] hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#9dabb9] hover:bg-[#283039] hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex h-full flex-1 overflow-y-auto">
+<div class="flex w-full">
+<!-- Left Filter Panel -->
+<div class="w-96 border-r border-gray-200 dark:border-gray-700 p-6 flex flex-col bg-white/50 dark:bg-black/20">
+<!-- SearchBar -->
+<div class="py-3">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#9dabb9] flex border-none bg-[#283039] items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#283039] focus:border-none h-full placeholder:text-[#9dabb9] px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal" placeholder="Search by Payment ID or Contract..." value=""/>
+</div>
+</label>
+</div>
+<!-- TitleText -->
+<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-1 text-left pb-2 pt-4">Filters</h2>
+<!-- CalendarPicker -->
+<div class="flex flex-col gap-6 py-4">
+<p class="text-sm font-semibold text-gray-700 dark:text-gray-300 px-1">Date Range</p>
+<div class="flex min-w-72 flex-1 flex-col gap-0.5">
+<div class="flex items-center p-1 justify-between">
+<button class="text-gray-600 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+<span class="material-symbols-outlined flex size-10 items-center justify-center">chevron_left</span>
+</button>
+<p class="text-gray-900 dark:text-white text-base font-bold leading-tight flex-1 text-center">October 2023</p>
+<button class="text-gray-600 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+<span class="material-symbols-outlined flex size-10 items-center justify-center">chevron_right</span>
+</button>
+</div>
+<div class="grid grid-cols-7 text-center">
+<p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">S</p>
+<p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">M</p>
+<p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">T</p>
+<p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">W</p>
+<p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">T</p>
+<p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">F</p>
+<p class="text-gray-500 dark:text-gray-400 text-[13px] font-bold leading-normal tracking-[0.015em] flex h-10 w-full items-center justify-center pb-0.5">S</p>
+<!-- Calendar Dates -->
+<button class="h-10 w-full text-gray-500 dark:text-gray-400 text-sm font-medium">1</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">2</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">3</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">4</button>
+<button class="h-10 w-full rounded-l-full bg-primary/20 text-primary-dark dark:text-white text-sm font-medium"><div class="flex size-full items-center justify-center rounded-l-full bg-primary text-white">5</div></button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">6</button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">7</button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">8</button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">9</button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">10</button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">11</button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">12</button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">13</button>
+<button class="h-10 w-full bg-primary/20 text-gray-900 dark:text-white text-sm font-medium">14</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">15</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">16</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">17</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">18</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">19</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">20</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">21</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">22</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">23</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">24</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">25</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">26</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">27</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">28</button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">29</button>
+<button class="h-10 w-full rounded-r-full bg-primary/20 text-primary-dark dark:text-white text-sm font-medium"><div class="flex size-full items-center justify-center rounded-r-full bg-primary text-white">30</div></button>
+<button class="h-10 w-full text-gray-900 dark:text-white text-sm font-medium">31</button>
+</div>
+</div>
+</div>
+<!-- Other Filters -->
+<div class="flex flex-col gap-6 py-4 border-t border-gray-200 dark:border-gray-700">
+<div class="space-y-2">
+<label class="text-sm font-semibold text-gray-700 dark:text-gray-300 px-1" for="payment-type">Payment Type</label>
+<select class="form-select w-full rounded-lg bg-[#283039] text-white border-none focus:ring-primary" id="payment-type">
+<option>All Types</option>
+<option>Cash</option>
+<option>POS</option>
+<option>Transfer</option>
+<option>Refund</option>
+<option>Deposit</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-semibold text-gray-700 dark:text-gray-300 px-1" for="branch">Branch</label>
+<select class="form-select w-full rounded-lg bg-[#283039] text-white border-none focus:ring-primary" id="branch">
+<option>All Branches</option>
+<option>Downtown</option>
+<option>Airport</option>
+<option>Uptown</option>
+</select>
+</div>
+</div>
+<div class="mt-auto flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+<button class="flex flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200 dark:bg-[#283039] text-gray-800 dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-300 dark:hover:bg-[#3b4652] transition-colors">
+<span class="truncate">Reset</span>
+</button>
+<button class="flex flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Apply</span>
+</button>
+</div>
+</div>
+<!-- Right Content Panel -->
+<div class="flex-1 flex flex-col p-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between items-start gap-4 pb-6">
+<div class="flex min-w-72 flex-col gap-2">
+<p class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Payments</p>
+<p class="text-gray-500 dark:text-[#9dabb9] text-base font-normal leading-normal">Manage all payment records for your fleet.</p>
+</div>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2 hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-base">add</span>
+<span class="truncate">Add New Payment</span>
+</button>
+</div>
+<!-- Data Table Section -->
+<div class="flex flex-col flex-1 bg-white dark:bg-black/20 rounded-xl shadow-sm overflow-hidden">
+<div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+<p class="text-sm text-gray-500 dark:text-gray-400">Showing 1-10 of 2,345 payments</p>
+<button class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
+<span class="material-symbols-outlined text-base">download</span>
+                                Export to CSV
+                            </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/5">
+<tr>
+<th class="p-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider">Payment ID</th>
+<th class="p-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider">Contract</th>
+<th class="p-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider">Date</th>
+<th class="p-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider">Amount</th>
+<th class="p-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider">Type</th>
+<th class="p-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider">Branch</th>
+<th class="p-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider text-right">Balance After</th>
+<th class="p-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">PAY-001254</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">CON-883721</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Oct 29, 2023</td>
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">$350.00</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300"><span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/50 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-300">Deposit</span></td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Airport</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300 text-right">$150.00</td>
+<td class="p-4"><button class="text-gray-500 hover:text-gray-800 dark:hover:text-white"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">PAY-001253</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">CON-883719</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Oct 28, 2023</td>
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">$120.50</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300"><span class="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/50 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-300">POS</span></td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Downtown</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300 text-right">$0.00</td>
+<td class="p-4"><button class="text-gray-500 hover:text-gray-800 dark:hover:text-white"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">PAY-001252</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">CON-883715</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Oct 28, 2023</td>
+<td class="p-4 text-sm font-medium text-red-600 dark:text-red-400">($50.00)</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300"><span class="inline-flex items-center rounded-full bg-red-100 dark:bg-red-900/50 px-2 py-1 text-xs font-medium text-red-800 dark:text-red-300">Refund</span></td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Uptown</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300 text-right">$200.00</td>
+<td class="p-4"><button class="text-gray-500 hover:text-gray-800 dark:hover:text-white"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">PAY-001251</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">CON-883710</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Oct 27, 2023</td>
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">$75.00</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300"><span class="inline-flex items-center rounded-full bg-gray-200 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-800 dark:text-gray-300">Cash</span></td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Airport</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300 text-right">$0.00</td>
+<td class="p-4"><button class="text-gray-500 hover:text-gray-800 dark:hover:text-white"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">PAY-001250</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">CON-883709</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Oct 26, 2023</td>
+<td class="p-4 text-sm font-medium text-gray-900 dark:text-white">$220.00</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300"><span class="inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900/50 px-2 py-1 text-xs font-medium text-purple-800 dark:text-purple-300">Transfer</span></td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300">Downtown</td>
+<td class="p-4 text-sm text-gray-600 dark:text-gray-300 text-right">$50.00</td>
+<td class="p-4"><button class="text-gray-500 hover:text-gray-800 dark:hover:text-white"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center mt-auto">
+<button class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+<span class="material-symbols-outlined text-lg">arrow_back</span>
+                                Previous
+                            </button>
+<div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+<a class="px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" href="#">1</a>
+<a class="px-3 py-1 rounded-md bg-primary text-white" href="#">2</a>
+<a class="px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" href="#">3</a>
+<span>...</span>
+<a class="px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" href="#">235</a>
+</div>
+<button class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                Next
+                                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

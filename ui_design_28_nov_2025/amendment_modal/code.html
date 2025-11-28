@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Amendment Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "card-light": "#ffffff",
+              "card-dark": "#1a2530",
+              "border-light": "#e5e7eb",
+              "border-dark": "#3b4754",
+              "text-primary-light": "#111827",
+              "text-primary-dark": "#ffffff",
+              "text-secondary-light": "#6b7280",
+              "text-secondary-dark": "#9dabb9",
+              "input-bg-light": "#f9fafb",
+              "input-bg-dark": "#2a3541",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full items-center justify-center bg-background-light dark:bg-background-dark/80 p-4">
+<!-- Modal Container -->
+<div class="w-full max-w-2xl rounded-xl bg-card-light dark:bg-card-dark shadow-2xl border border-border-light dark:border-border-dark">
+<!-- Modal Header -->
+<div class="flex items-start justify-between p-6 border-b border-border-light dark:border-border-dark">
+<div class="flex flex-col gap-1">
+<h1 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Amend Contract</h1>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">for Contract #C12345</p>
+</div>
+<button class="p-1 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-gray-100 dark:hover:bg-gray-700">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Stepper -->
+<div class="p-6">
+<div class="flex items-center">
+<div class="flex items-center text-primary">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white">1</div>
+<p class="ml-2 text-sm font-semibold">Initiation</p>
+</div>
+<div class="flex-auto border-t-2 border-primary mx-4"></div>
+<div class="flex items-center text-text-secondary-light dark:text-text-secondary-dark">
+<div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark">2</div>
+<p class="ml-2 text-sm font-semibold">Details</p>
+</div>
+<div class="flex-auto border-t-2 border-border-light dark:border-border-dark mx-4"></div>
+<div class="flex items-center text-text-secondary-light dark:text-text-secondary-dark">
+<div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark">3</div>
+<p class="ml-2 text-sm font-semibold">Review</p>
+</div>
+</div>
+</div>
+<!-- Modal Content -->
+<div class="p-6 space-y-6">
+<!-- Step 1: Initiation -->
+<div class="space-y-6">
+<div class="flex flex-col gap-4 md:flex-row md:gap-6">
+<div class="flex-1">
+<label class="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark pb-2" for="amendment-type">Amendment Type</label>
+<select class="form-select flex w-full min-w-0 resize-none overflow-hidden rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark p-3 text-sm text-text-primary-light dark:text-text-primary-dark focus:border-primary focus:ring-primary h-12" id="amendment-type">
+<option>Extend Duration</option>
+<option>Change Vehicle</option>
+<option>Update Financials</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark pb-2" for="reason">Reason for Amendment</label>
+<textarea class="form-textarea flex w-full min-w-0 resize-none overflow-hidden rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark p-3 text-sm text-text-primary-light dark:text-text-primary-dark focus:border-primary focus:ring-primary min-h-28 placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark" id="reason" placeholder="Enter justification for the change..."></textarea>
+</div>
+<div class="flex items-center justify-between gap-4 rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4">
+<div class="flex flex-col gap-1">
+<p class="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">Require OTP Verification</p>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">A one-time password will be sent to the customer for approval.</p>
+</div>
+<label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-gray-200 dark:bg-border-dark p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+<div class="h-full w-[27px] rounded-full bg-white transition-transform"></div>
+<input class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Step 2: Details (Example for Extend Duration) -->
+<!-- This section would be shown conditionally based on Step 1 selection -->
+<div class="space-y-6 hidden">
+<h3 class="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark border-b border-border-light dark:border-border-dark pb-2">Update Contract Details</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark pb-2">New End Date</label>
+<input class="form-input flex w-full rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark p-3 text-sm text-text-primary-light dark:text-text-primary-dark focus:border-primary focus:ring-primary h-12" type="date" value="2024-09-15"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-text-primary-light dark:text-text-primary-dark pb-2">New End Time</label>
+<input class="form-input flex w-full rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark p-3 text-sm text-text-primary-light dark:text-text-primary-dark focus:border-primary focus:ring-primary h-12" type="time" value="14:00"/>
+</div>
+</div>
+</div>
+<!-- Step 3: Review (Example) -->
+<!-- This section would be shown in the final step -->
+<div class="space-y-6 hidden">
+<h3 class="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark border-b border-border-light dark:border-border-dark pb-2">Review Changes</h3>
+<div class="rounded-lg border border-border-light dark:border-border-dark">
+<table class="w-full text-sm text-left">
+<thead class="bg-gray-50 dark:bg-gray-700/50">
+<tr>
+<th class="p-3 font-semibold text-text-secondary-light dark:text-text-secondary-dark">Field</th>
+<th class="p-3 font-semibold text-text-secondary-light dark:text-text-secondary-dark">Current Value</th>
+<th class="p-3 font-semibold text-text-secondary-light dark:text-text-secondary-dark">New Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-t border-border-light dark:border-border-dark">
+<td class="p-3 font-medium text-text-primary-light dark:text-text-primary-dark">End Date</td>
+<td class="p-3 text-text-secondary-light dark:text-text-secondary-dark">2024-08-31</td>
+<td class="p-3 font-semibold text-primary">2024-09-15</td>
+</tr>
+<tr class="border-t border-border-light dark:border-border-dark">
+<td class="p-3 font-medium text-text-primary-light dark:text-text-primary-dark">End Time</td>
+<td class="p-3 text-text-secondary-light dark:text-text-secondary-dark">10:00 AM</td>
+<td class="p-3 font-semibold text-primary">02:00 PM</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="flex items-center justify-end p-6 border-t border-border-light dark:border-border-dark space-x-3">
+<button class="px-5 py-2.5 text-sm font-semibold text-text-primary-light dark:text-text-primary-dark bg-card-light dark:bg-border-dark hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg border border-border-light dark:border-border-dark" type="button">Cancel</button>
+<button class="px-5 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-lg" type="button">Next</button>
+</div>
+</div>
+</div>
+</body></html>

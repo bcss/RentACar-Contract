@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fleet Dashboard - KarāraOS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#005A9C",
+              "secondary": "#1E88E5",
+              "background-light": "#F4F7FA",
+              "background-dark": "#101922",
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#182431",
+              "text-light": "#212529",
+              "text-dark": "#E5E7EB",
+              "status-green": "#28A745",
+              "status-blue": "#1E88E5",
+              "status-yellow": "#FFC107",
+              "status-orange": "#FD7E14",
+              "status-red": "#DC3545",
+              "status-grey": "#6C757D"
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+<div class="flex h-screen">
+<!-- SideNavBar -->
+<aside class="flex flex-col w-64 bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-gray-700">
+<div class="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
+<h1 class="text-2xl font-bold text-primary">KarāraOS</h1>
+</div>
+<div class="flex flex-col flex-grow p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBwoWvwI2uNyMkUk89MtSjrZovOstkYOJ7RNaxaB8NHceXQgLb81MwjfngUepLm9s1zIaQlHxHos_LgS0ekzay-W3PM11xGSTQCjECWd9cqR3ysTN-NYSPHM4NbjDeVJT_EbNkhEOg9zHu4yn7zLrW2uKxUD0PExNLCCo6J5DT8w2i8pp76XMe3bWXv-lWePqg3yLSRPMeWfYhSJVLzOcZ-xdQE5r0cSCIeSOulkZ3Cbsrmluhr2f2KIxN67QUAjXd4peqofiFcxWw");'></div>
+<div class="flex flex-col">
+<h2 class="text-base font-medium">Branch Manager</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400">manager@kararaos.com</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<p class="text-sm font-medium">Reports</p>
+</a>
+</nav>
+</div>
+<div class="mt-auto">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium">Logout</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<div class="p-8">
+<!-- PageHeading & Header Bar -->
+<header class="flex flex-wrap items-center justify-between gap-4 mb-8">
+<div>
+<h1 class="text-3xl font-bold">Fleet Dashboard</h1>
+<p class="text-gray-500 dark:text-gray-400">Welcome back, Branch Manager!</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<select class="pl-10 pr-4 py-2 text-sm font-medium bg-surface-light dark:bg-surface-dark border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary appearance-none">
+<option>Main Street Branch</option>
+<option>Airport Branch</option>
+<option>Downtown Branch</option>
+</select>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">storefront</span>
+</div>
+<button class="flex items-center justify-center h-10 gap-2 px-4 text-sm font-medium rounded-lg bg-surface-light dark:bg-surface-dark border border-gray-300 dark:border-gray-600">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="truncate">Last 7 Days</span>
+</button>
+</div>
+</header>
+<!-- Chips / Fleet Status Tiles -->
+<section class="grid grid-cols-2 gap-4 mb-8 md:grid-cols-4 lg:grid-cols-7">
+<div class="flex flex-col p-4 rounded-lg bg-surface-light dark:bg-surface-dark cursor-pointer ring-2 ring-transparent hover:ring-status-green">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Available</h3>
+<span class="text-status-green material-symbols-outlined">check_circle</span>
+</div>
+<p class="text-3xl font-bold">128</p>
+</div>
+<div class="flex flex-col p-4 rounded-lg bg-surface-light dark:bg-surface-dark cursor-pointer ring-2 ring-transparent hover:ring-status-blue">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Reserved</h3>
+<span class="text-status-blue material-symbols-outlined">book_online</span>
+</div>
+<p class="text-3xl font-bold">32</p>
+</div>
+<div class="flex flex-col p-4 rounded-lg bg-surface-light dark:bg-surface-dark cursor-pointer ring-2 ring-transparent hover:ring-status-yellow">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Out</h3>
+<span class="text-status-yellow material-symbols-outlined">rv_hookup</span>
+</div>
+<p class="text-3xl font-bold">76</p>
+</div>
+<div class="flex flex-col p-4 rounded-lg bg-surface-light dark:bg-surface-dark cursor-pointer ring-2 ring-transparent hover:ring-status-orange">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Maintenance</h3>
+<span class="text-status-orange material-symbols-outlined">build</span>
+</div>
+<p class="text-3xl font-bold">8</p>
+</div>
+<div class="flex flex-col p-4 rounded-lg bg-surface-light dark:bg-surface-dark cursor-pointer ring-2 ring-transparent hover:ring-status-red">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Under Repair</h3>
+<span class="text-status-red material-symbols-outlined">car_crash</span>
+</div>
+<p class="text-3xl font-bold">3</p>
+</div>
+<div class="flex flex-col p-4 rounded-lg bg-surface-light dark:bg-surface-dark cursor-pointer ring-2 ring-transparent hover:ring-status-blue">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">In Transfer</h3>
+<span class="text-status-blue material-symbols-outlined">local_shipping</span>
+</div>
+<p class="text-3xl font-bold">5</p>
+</div>
+<div class="flex flex-col p-4 rounded-lg bg-surface-light dark:bg-surface-dark cursor-pointer ring-2 ring-transparent hover:ring-status-grey">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Retired</h3>
+<span class="text-status-grey material-symbols-outlined">no_transfer</span>
+</div>
+<p class="text-3xl font-bold">1</p>
+</div>
+</section>
+<!-- Stats & Main content Grid -->
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+<!-- Utilization Gauge -->
+<div class="flex flex-col p-6 rounded-lg lg:col-span-1 bg-surface-light dark:bg-surface-dark">
+<h3 class="text-base font-medium">Fleet Utilization</h3>
+<div class="flex items-center justify-center flex-1 my-4">
+<div class="relative size-48">
+<svg class="size-full" viewbox="0 0 36 36">
+<path class="text-gray-200 dark:text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="78, 100" stroke-dashoffset="-1" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<p class="text-4xl font-bold">78%</p>
+</div>
+</div>
+</div>
+<p class="text-sm font-medium text-center text-status-green">+3.2% vs last 7 days</p>
+</div>
+<!-- Tabbed Panels -->
+<div class="lg:col-span-2">
+<div class="rounded-lg bg-surface-light dark:bg-surface-dark">
+<!-- Tabs -->
+<div class="border-b border-gray-200 dark:border-gray-700">
+<nav aria-label="Tabs" class="flex px-4 -mb-px gap-8">
+<a class="flex items-center justify-center py-4 text-sm font-bold text-primary border-b-2 border-primary" href="#">Action Required</a>
+<a class="flex items-center justify-center py-4 text-sm font-bold text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" href="#">Transfers</a>
+<a class="flex items-center justify-center py-4 text-sm font-bold text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" href="#">Accidents</a>
+</nav>
+</div>
+<!-- Tab Content: Data Table -->
+<div class="p-6">
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+<thead class="">
+<tr>
+<th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400" scope="col">Vehicle ID</th>
+<th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400" scope="col">Model</th>
+<th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400" scope="col">Due Date</th>
+<th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400" scope="col">Task</th>
+<th class="relative px-6 py-3" scope="col"><span class="sr-only">Actions</span></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">#F8C124</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm">Ford Explorer</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-status-red font-medium">2 days ago</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm">Oil Change</td>
+<td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+<a class="text-primary hover:text-secondary" href="#">View Details</a>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">#D4E567</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm">Toyota Camry</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-status-red font-medium">5 days ago</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm">Tire Rotation</td>
+<td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+<a class="text-primary hover:text-secondary" href="#">View Details</a>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">#A9B238</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm">Honda Civic</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-status-orange font-medium">In 3 days</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm">Brake Inspection</td>
+<td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+<a class="text-primary hover:text-secondary" href="#">View Details</a>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">#C1F456</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm">Nissan Rogue</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-status-orange font-medium">In 1 week</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm">Annual Inspection</td>
+<td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+<a class="text-primary hover:text-secondary" href="#">View Details</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

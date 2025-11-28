@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Import Mapping Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4">
+<div class="w-full max-w-6xl rounded-xl bg-[#111418] shadow-2xl flex flex-col">
+<!-- Modal Header -->
+<header class="flex items-start justify-between p-6 border-b border-white/10">
+<div class="flex flex-col gap-2">
+<h1 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Map Your Data Fields</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Drag columns from your file on the left to the matching system fields on the right. Required fields are marked with a *.</p>
+</div>
+<button class="text-[#9dabb9] hover:text-white transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</header>
+<!-- Progress Bar -->
+<div class="px-6 pt-6 pb-4">
+<div class="flex flex-col gap-2">
+<div class="flex gap-6 justify-between">
+<p class="text-white text-sm font-medium leading-normal">Mapping Progress</p>
+</div>
+<div class="rounded-full bg-[#3b4754]">
+<div class="h-2 rounded-full bg-primary" style="width: 60%;"></div>
+</div>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">3 of 5 required fields mapped</p>
+</div>
+</div>
+<!-- Mapping Area -->
+<main class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 overflow-y-auto" style="max-height: 60vh;">
+<!-- Left Column: CSV Columns -->
+<div class="flex flex-col gap-4">
+<h2 class="text-white text-base font-semibold leading-tight tracking-[-0.015em] px-2">Your CSV Columns</h2>
+<div class="flex flex-col gap-2 p-2 rounded-lg bg-[#101922]">
+<!-- ListItem Mapped -->
+<div class="flex items-center gap-4 bg-[#111418] px-4 min-h-14 justify-between opacity-50 cursor-not-allowed">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283039] shrink-0 size-10">
+<span class="material-symbols-outlined text-lg">drag_indicator</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">Vehicle VIN</p>
+</div>
+<div class="shrink-0">
+<div class="text-green-400 flex size-7 items-center justify-center">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+</div>
+</div>
+<!-- ListItem Mapped -->
+<div class="flex items-center gap-4 bg-[#111418] px-4 min-h-14 justify-between opacity-50 cursor-not-allowed">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283039] shrink-0 size-10">
+<span class="material-symbols-outlined text-lg">drag_indicator</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">Start Date</p>
+</div>
+<div class="shrink-0">
+<div class="text-green-400 flex size-7 items-center justify-center">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+</div>
+</div>
+<!-- ListItem Unmapped (Draggable) -->
+<div class="flex items-center gap-4 bg-[#111418] px-4 min-h-14 justify-between border border-transparent hover:border-primary rounded-lg cursor-grab">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283039] shrink-0 size-10">
+<span class="material-symbols-outlined text-lg">drag_indicator</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">first_name</p>
+</div>
+</div>
+<!-- ListItem Unmapped (Draggable) -->
+<div class="flex items-center gap-4 bg-[#111418] px-4 min-h-14 justify-between border border-transparent hover:border-primary rounded-lg cursor-grab">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283039] shrink-0 size-10">
+<span class="material-symbols-outlined text-lg">drag_indicator</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">email</p>
+</div>
+</div>
+<!-- ListItem Unmapped (Draggable) -->
+<div class="flex items-center gap-4 bg-[#111418] px-4 min-h-14 justify-between border border-transparent hover:border-primary rounded-lg cursor-grab">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283039] shrink-0 size-10">
+<span class="material-symbols-outlined text-lg">drag_indicator</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">Customer ID</p>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-[#111418] px-4 min-h-14 justify-between border border-transparent hover:border-primary rounded-lg cursor-grab">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283039] shrink-0 size-10">
+<span class="material-symbols-outlined text-lg">drag_indicator</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">Contract_Type</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: System Fields -->
+<div class="flex flex-col gap-4">
+<h2 class="text-white text-base font-semibold leading-tight tracking-[-0.015em] px-2">KarāraOS System Fields</h2>
+<div class="flex flex-col gap-3">
+<!-- Mapped Field -->
+<div class="rounded-lg bg-[#101922] p-4 border border-green-400/50">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<p class="text-white text-sm font-medium">Vehicle VIN<span class="text-red-400 ml-1">*</span></p>
+<span class="material-symbols-outlined text-sm text-[#9dabb9]">help</span>
+</div>
+<button class="text-sm text-[#9dabb9] hover:text-white">Clear</button>
+</div>
+<p class="text-xs text-[#9dabb9] mb-3">e.g., JN1AZ00A00T000000</p>
+<div class="flex items-center gap-3 rounded-md bg-[#283039] p-3">
+<span class="material-symbols-outlined text-green-400 text-lg">arrow_right_alt</span>
+<p class="text-white text-sm">Vehicle VIN</p>
+</div>
+</div>
+<!-- Mapped Field -->
+<div class="rounded-lg bg-[#101922] p-4 border border-green-400/50">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<p class="text-white text-sm font-medium">Contract Start Date<span class="text-red-400 ml-1">*</span></p>
+<span class="material-symbols-outlined text-sm text-[#9dabb9]">help</span>
+</div>
+<button class="text-sm text-[#9dabb9] hover:text-white">Clear</button>
+</div>
+<p class="text-xs text-[#9dabb9] mb-3">e.g., YYYY-MM-DD</p>
+<div class="flex items-center gap-3 rounded-md bg-[#283039] p-3">
+<span class="material-symbols-outlined text-green-400 text-lg">arrow_right_alt</span>
+<p class="text-white text-sm">Start Date</p>
+</div>
+</div>
+<!-- Dropzone Field (Required) -->
+<div class="rounded-lg bg-[#101922] p-4 border border-dashed border-primary/50 hover:border-primary transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<p class="text-white text-sm font-medium">Customer First Name<span class="text-red-400 ml-1">*</span></p>
+</div>
+</div>
+<p class="text-xs text-[#9dabb9] mb-3">e.g., John</p>
+<div class="flex items-center justify-center h-10 rounded-md bg-transparent">
+<p class="text-[#9dabb9] text-sm">Drag column here or select</p>
+</div>
+</div>
+<!-- Auto-mapped Field (Suggestion) -->
+<div class="rounded-lg bg-[#101922] p-4 border border-primary/30">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<p class="text-white text-sm font-medium">Customer Email<span class="text-red-400 ml-1">*</span></p>
+<span class="material-symbols-outlined text-sm text-[#9dabb9]">help</span>
+</div>
+<button class="text-sm text-[#9dabb9] hover:text-white">Clear</button>
+</div>
+<p class="text-xs text-[#9dabb9] mb-3">e.g., john.doe@example.com</p>
+<div class="flex items-center gap-3 rounded-md bg-[#283039] p-3">
+<span class="material-symbols-outlined text-primary text-lg">auto_awesome</span>
+<p class="text-white text-sm">email</p>
+</div>
+</div>
+<!-- Dropzone Field (Optional) -->
+<div class="rounded-lg bg-[#101922] p-4 border-2 border-dashed border-[#3b4754] hover:border-primary transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<p class="text-white text-sm font-medium">Contract Type</p>
+</div>
+</div>
+<p class="text-xs text-[#9dabb9] mb-3">e.g., Lease, Rental</p>
+<div class="flex items-center justify-center h-10 rounded-md bg-transparent">
+<p class="text-[#9dabb9] text-sm">Drag column here or select</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Modal Footer -->
+<footer class="flex items-center justify-end p-6 border-t border-white/10 mt-auto gap-4">
+<button class="px-4 py-2 text-sm font-semibold text-white bg-transparent rounded-lg hover:bg-white/10 transition-colors">Cancel</button>
+<button class="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="">Review Import</button>
+</footer>
+</div>
+</div>
+</body></html>

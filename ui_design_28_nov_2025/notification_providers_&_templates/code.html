@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notification Providers &amp; Templates</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#137fec",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full flex-col">
+<div class="flex h-full w-full">
+<!-- SideNavBar -->
+<aside class="flex h-screen min-h-full flex-col justify-between bg-white dark:bg-[#111418] p-4 w-64 sticky top-0 border-r border-gray-200 dark:border-gray-800">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCV0IKd_yJVNJlwwMWxV9m29-kZ1QTxQKzzfDt3VYV3xEqVEX_QsWzWK8NsACHmnEgF5FNTC9__MjfYyFAccjrPa6TQP8j9pc-C5kcPa5hlILhH0N5IU0LfiDZ-Hjhoak04R7tM9IVXNA78Kl2UnCs5HX6pmCkY-uIQX3FAht14rVQKHiWzY95CJX54AtCH9Y8FvLywilsWdOuMqTuSuV_xolsubk3em2JTEqiAlf-NTy0kN2A8ZPUTOb2kG6vPE97PITMDeGUIgPM");'></div>
+<div class="flex flex-col">
+<h1 class="text-gray-900 dark:text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-gray-500 dark:text-[#9dabb9] text-sm font-normal leading-normal">Rental Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">book_online</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">admin_panel_settings</span>
+<p class="text-sm font-medium leading-normal">Administration</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">support_agent</span>
+<p class="text-sm font-medium leading-normal">Support</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-6 sm:p-8 md:p-10">
+<div class="mx-auto max-w-7xl">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-4 items-center mb-6">
+<h1 class="text-gray-900 dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">Notification Providers &amp; Templates</h1>
+</div>
+<!-- Tabs -->
+<div class="pb-3 border-b border-gray-200 dark:border-gray-700">
+<div class="flex gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary pb-3" href="#">
+<p class="text-primary text-sm font-bold leading-normal tracking-[0.015em]">Providers</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 pb-3" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Templates</p>
+</a>
+</div>
+</div>
+<!-- ToolBar -->
+<div class="flex justify-end gap-2 py-4">
+<button class="flex items-center justify-center rounded-lg h-10 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] px-4 shadow-sm hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+<span class="truncate">Add Provider</span>
+</button>
+</div>
+<!-- ImageGrid (Providers) -->
+<div class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
+<div class="flex flex-col gap-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-4 transition-shadow hover:shadow-lg">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 bg-center bg-no-repeat bg-contain rounded-lg" data-alt="Twilio logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBurYYSrVXVTBnKGGhDf4RFpWf-p5ieqzB-9e_ntKOj4VtrhPz8TH6hOhx2_EL6gRSj7rGPyNCmyQ6arWv6GvTLUybCTtYEpPxhRVpXjX9q6Ytbtcnn1mzNAuLYOq-bSPme825ALjIYY82ZCRkeSiy_D723TIEMSsGnSFIeFFyzKZXtwHsJ6SZFhGOT0xMpA3cnW1kCJIRq6yc9hy3MUn5Q4IR0DTHHx3PSmNthBrQkyUxp4v81RcwsKEMvI98DtEsskHlLxWVr1Mc");'></div>
+<div class="flex-1">
+<p class="text-gray-900 dark:text-white text-lg font-semibold leading-normal">Twilio SMS</p>
+<p class="text-green-500 dark:text-green-400 text-sm font-medium leading-normal">Status: Active</p>
+</div>
+</div>
+<div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+<p>Success Rate: <span class="font-semibold text-gray-800 dark:text-gray-200">99.8%</span></p>
+<p>Failovers: <span class="font-semibold text-gray-800 dark:text-gray-200">2</span></p>
+</div>
+<button class="mt-3 w-full flex items-center justify-center rounded-md h-9 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 gap-2 text-sm font-medium leading-normal hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-base">settings</span>
+<span>Configure</span>
+</button>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-4 transition-shadow hover:shadow-lg">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 bg-center bg-no-repeat bg-contain rounded-lg" data-alt="SendGrid logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDqW7MC6n1YQr7C8nQz17zwHRUJS1IOsqkOtBlV748WbW_EbnmUgnNJSMxyNUjR0PqpG5_aJu_7D2IBAoL1WcRLfrkn52f2SuB2y1utlHjJQnYpXP8Sv5jxLhviXh075HChpviM9Ke8V8t6R0-uaL3mkfp3ZogdzRaKDwleOhEjfxWouQiYWtkZ43MLLqq4-ja3-Y2widW6kB-j9ULUkkfFoQh2-okOgZJ7GQqqsdqX1mmYHa9ywY1JYzAc5cQ5Y83G6J_IGpRmMzs");'></div>
+<div class="flex-1">
+<p class="text-gray-900 dark:text-white text-lg font-semibold leading-normal">SendGrid Email</p>
+<p class="text-green-500 dark:text-green-400 text-sm font-medium leading-normal">Status: Active</p>
+</div>
+</div>
+<div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+<p>Success Rate: <span class="font-semibold text-gray-800 dark:text-gray-200">99.9%</span></p>
+<p>Failovers: <span class="font-semibold text-gray-800 dark:text-gray-200">1</span></p>
+</div>
+<button class="mt-3 w-full flex items-center justify-center rounded-md h-9 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 gap-2 text-sm font-medium leading-normal hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-base">settings</span>
+<span>Configure</span>
+</button>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-4 transition-shadow hover:shadow-lg">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 bg-center bg-no-repeat bg-contain rounded-lg" data-alt="AWS SNS logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDKgUYML6-WCyWbOo9-trv8eh8jeVkQV7wnkxycSC_Z86ppyfUKjV3o8Sp8z7-WrrM2Ef4lMiMV94C5JgK5Q7zxUQe09ByMr4OsX-6Z5Wjls6f893kcRy352kpQNr0zhD2gDb2v5aAsTmzt5GVIg5Z2M3EgtLdqVvd2o6Am9vTd9tD1coMz_u5s6pwDfXAKyHAsJRmFP0Hl0G-gXdRZ6zZXJZsQGqagTGyKRcLoIfPg0JjZhmr7CG-kx9uaz1XgH6hsucNQ0DsE-zg");'></div>
+<div class="flex-1">
+<p class="text-gray-900 dark:text-white text-lg font-semibold leading-normal">AWS SNS</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">Status: Inactive</p>
+</div>
+</div>
+<div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+<p>Success Rate: <span class="font-semibold text-gray-800 dark:text-gray-200">N/A</span></p>
+<p>Failovers: <span class="font-semibold text-gray-800 dark:text-gray-200">0</span></p>
+</div>
+<button class="mt-3 w-full flex items-center justify-center rounded-md h-9 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 gap-2 text-sm font-medium leading-normal hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-base">settings</span>
+<span>Configure</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

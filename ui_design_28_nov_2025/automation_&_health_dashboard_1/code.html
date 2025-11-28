@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KarāraOS - Automation &amp; Health Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "success": "#28A745",
+              "warning": "#FFC107",
+              "error": "#DC3545",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+      }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex-shrink-0 w-64 bg-[#111418] border-r border-white/10 flex flex-col justify-between p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3 px-3">
+<svg fill="none" height="32" viewbox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<circle cx="16" cy="16" fill="#137fec" r="16"></circle>
+<path d="M12.2929 19.7071C11.9024 20.0976 11.9024 20.7308 12.2929 21.1213C12.6834 21.5118 13.3166 21.5118 13.7071 21.1213L12.2929 19.7071ZM19.7071 13.7071C20.0976 13.3166 20.0976 12.6834 19.7071 12.2929C19.3166 11.9024 18.6834 11.9024 18.2929 12.2929L19.7071 13.7071ZM13.7071 21.1213L19.7071 13.7071L18.2929 12.2929L12.2929 19.7071L13.7071 21.1213Z" fill="white"></path>
+<path d="M12.2929 12.2929C11.9024 12.6834 11.9024 13.3166 12.2929 13.7071C12.6834 14.0976 13.3166 14.0976 13.7071 13.7071L12.2929 12.2929ZM19.7071 21.1213C20.0976 20.7308 20.0976 20.0976 19.7071 19.7071C19.3166 19.3166 18.6834 19.3166 18.2929 19.7071L19.7071 21.1213ZM13.7071 13.7071L19.7071 21.1213L18.2929 19.7071L12.2929 12.2929L13.7071 13.7071Z" fill="white"></path>
+</svg>
+<h1 class="text-xl font-bold text-white">KarāraOS</h1>
+</div>
+<div class="flex items-center gap-3 mt-6">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Admin user avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAiloPR29IcMpPV_QbCpsRCp78v6lb6FzU6Ol-g_yvTONM0rfIAQTGvpsY84nZmgheUDWU03YqnBIkBc55ky78pm2k3cIlSRg5OCCUUCX3pw0c8pwf3GuOn4Uux5qgr_lka6kCUGjNh69ry_7KvS1XVItYKvwcePRx9M6lPkMeLGfLcRbeXinXHNur2sc1O70q-I2JcuyckULj5nqrvGb1NSeCp0n1NCOLAISu1W0S5yzIlisLjqg0XClONzkSR3HAUd4buXfhiNgM");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">Admin User</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">HQ Administrator</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 mt-4">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary">
+<span class="material-symbols-outlined text-white">query_stats</span>
+<p class="text-white text-sm font-medium leading-normal">Dashboard</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">payments</span>
+<p class="text-sm font-medium leading-normal">Finances</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">New Reservation</span>
+</button>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-y-auto">
+<div class="max-w-7xl mx-auto">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+<div class="flex flex-col gap-2">
+<p class="text-white text-4xl font-black leading-tight tracking-[-0.033em]">Automation &amp; Health Dashboard</p>
+<p class="text-[#9dabb9] text-base font-normal leading-normal">Aggregated view of system health and automation processes.</p>
+</div>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-[#283039] text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined text-base">calendar_today</span>
+<span class="truncate">Last 24h</span>
+</button>
+</div>
+<!-- Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Cron Jobs Status -->
+<div class="bg-[#111418] border border-[#3b4754] rounded-xl p-6 col-span-1 lg:col-span-2">
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4">Cron Jobs Status</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-[#1c2127] p-4 rounded-lg flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success">check_circle</span>
+<h3 class="text-white font-medium">Reservations Expiry</h3>
+</div>
+<p class="text-[#9dabb9] text-sm">Last Run: 2 mins ago</p>
+</div>
+<div class="bg-[#1c2127] p-4 rounded-lg flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success">check_circle</span>
+<h3 class="text-white font-medium">Overdue Reminders</h3>
+</div>
+<p class="text-[#9dabb9] text-sm">Last Run: 2 mins ago</p>
+</div>
+<div class="bg-[#1c2127] p-4 rounded-lg flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-warning">warning</span>
+<h3 class="text-white font-medium">Risk Recalculation</h3>
+</div>
+<p class="text-[#9dabb9] text-sm">Last Run: 5 mins ago</p>
+</div>
+<div class="bg-[#1c2127] p-4 rounded-lg flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error">error</span>
+<h3 class="text-white font-medium">Daily Reporting</h3>
+</div>
+<p class="text-[#9dabb9] text-sm">Last Run: Failed 15 mins ago</p>
+</div>
+</div>
+</div>
+<!-- Charts -->
+<div class="flex min-w-72 flex-1 flex-col gap-2 rounded-xl border border-[#3b4754] bg-[#111418] p-6">
+<p class="text-white text-base font-medium leading-normal">Notification Provider Performance</p>
+<p class="text-white tracking-light text-[32px] font-bold leading-tight truncate">99.8% Success</p>
+<div class="flex gap-1">
+<p class="text-[#9dabb9] text-base font-normal leading-normal">Last 24h</p>
+<p class="text-success text-base font-medium leading-normal">+0.1%</p>
+</div>
+<div class="grid min-h-[180px] grid-flow-col gap-6 grid-rows-[1fr_auto] items-end justify-items-center px-3 pt-4">
+<div class="bg-primary/30 w-full" style="height: 50%;"></div>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">Twilio SMS</p>
+<div class="bg-primary/30 w-full" style="height: 90%;"></div>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">Twilio Email</p>
+<div class="bg-primary/30 w-full" style="height: 100%;"></div>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">SendGrid SMS</p>
+<div class="bg-primary/30 w-full" style="height: 10%;"></div>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">SendGrid Email</p>
+</div>
+</div>
+<div class="flex min-w-72 flex-1 flex-col gap-2 rounded-xl border border-[#3b4754] bg-[#111418] p-6">
+<p class="text-white text-base font-medium leading-normal">Queue / Lag</p>
+<p class="text-white tracking-light text-[32px] font-bold leading-tight truncate">1,204 Pending</p>
+<div class="flex gap-1">
+<p class="text-[#9dabb9] text-base font-normal leading-normal">Last 24h</p>
+<p class="text-error text-base font-medium leading-normal">+5.2%</p>
+</div>
+<div class="flex min-h-[180px] flex-1 flex-col gap-8 py-4">
+<svg fill="none" height="148" preserveaspectratio="none" viewbox="-3 0 478 150" width="100%" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25V149H326.769H0V109Z" fill="url(#paint0_linear_1131_5935)"></path>
+<path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25" stroke="#137fec" stroke-linecap="round" stroke-width="3"></path>
+<defs>
+<lineargradient gradientunits="userSpaceOnUse" id="paint0_linear_1131_5935" x1="236" x2="236" y1="1" y2="149">
+<stop stop-color="#137fec" stop-opacity="0.4"></stop>
+<stop offset="1" stop-color="#137fec" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="flex justify-around">
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">12:00</p>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">14:00</p>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">16:00</p>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">18:00</p>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">20:00</p>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">22:00</p>
+<p class="text-[#9dabb9] text-[13px] font-bold leading-normal tracking-[0.015em]">00:00</p>
+</div>
+</div>
+</div>
+<!-- Cron Failure Alerts Log -->
+<div class="bg-[#111418] border border-[#3b4754] rounded-xl p-6 col-span-1 lg:col-span-2">
+<h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4">Cron Failure Alerts Log</h2>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead>
+<tr class="bg-[#1c2127]">
+<th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Job Name</th>
+<th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Last Error</th>
+<th class="px-4 py-3 text-center text-white text-sm font-medium leading-normal">Failure Count</th>
+<th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Branch Impact</th>
+<th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Timestamp</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-t border-t-[#3b4754]">
+<td class="h-[72px] px-4 py-2 text-white text-sm font-normal leading-normal">Daily Reporting</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal truncate max-w-xs">DB Connection Timeout - service mysql:3306 unavailable</td>
+<td class="h-[72px] px-4 py-2 text-center text-white text-sm font-normal leading-normal">
+<span class="bg-error/20 text-error px-2 py-1 rounded-full font-semibold">3</span>
+</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal">All Branches</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal">2023-10-27 09:45:00</td>
+</tr>
+<tr class="border-t border-t-[#3b4754]">
+<td class="h-[72px] px-4 py-2 text-white text-sm font-normal leading-normal">Risk Recalculation</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal truncate max-w-xs">API Limit Exceeded - external_credit_check</td>
+<td class="h-[72px] px-4 py-2 text-center text-white text-sm font-normal leading-normal">
+<span class="bg-warning/20 text-warning px-2 py-1 rounded-full font-semibold">1</span>
+</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal">HQ</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal">2023-10-27 09:55:10</td>
+</tr>
+<tr class="border-t border-t-[#3b4754]">
+<td class="h-[72px] px-4 py-2 text-white text-sm font-normal leading-normal">Invoice Generation</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal truncate max-w-xs">Null pointer exception at line 254</td>
+<td class="h-[72px] px-4 py-2 text-center text-white text-sm font-normal leading-normal">
+<span class="bg-error/20 text-error px-2 py-1 rounded-full font-semibold">5</span>
+</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal">Branch #102</td>
+<td class="h-[72px] px-4 py-2 text-[#9dabb9] text-sm font-normal leading-normal">2023-10-27 08:30:15</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

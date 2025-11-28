@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Blacklist Override Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body class="font-display">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center bg-background-light dark:bg-background-dark p-4 group/design-root">
+<div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+<div class="relative w-full max-w-2xl rounded-xl border border-white/10 bg-[#111418] shadow-2xl">
+<div class="flex flex-col">
+<!-- Modal Header -->
+<div class="flex flex-wrap items-start justify-between gap-3 p-6">
+<div class="flex min-w-72 flex-col gap-1.5">
+<p class="text-white text-2xl font-bold leading-tight tracking-[-0.02em]">Override Customer Blacklist</p>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">You are requesting an override for John Doe (CUS-12345).</p>
+</div>
+<button class="flex items-center justify-center text-[#9dabb9] hover:text-white transition-colors size-8 shrink-0 rounded-lg">
+<span class="material-symbols-outlined !text-2xl">close</span>
+</button>
+</div>
+<!-- Content -->
+<div class="flex flex-col gap-6 px-6 pb-6">
+<!-- Reasons Section -->
+<div class="flex flex-col rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4">
+<h3 class="text-yellow-200 text-base font-bold leading-tight tracking-[-0.015em] pb-3">Reasons for Soft-Block</h3>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-4 min-h-12">
+<div class="text-yellow-400 flex items-center justify-center rounded-lg shrink-0 size-8">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">History of late payments</p>
+</div>
+<div class="flex items-center gap-4 min-h-12">
+<div class="text-yellow-400 flex items-center justify-center rounded-lg shrink-0 size-8">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">Vehicle returned with damage</p>
+</div>
+<div class="flex items-center gap-4 min-h-12">
+<div class="text-yellow-400 flex items-center justify-center rounded-lg shrink-0 size-8">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<p class="text-white text-sm font-normal leading-normal flex-1 truncate">Outstanding balance of $150.00</p>
+</div>
+</div>
+</div>
+<!-- Manager Approval Section -->
+<div class="flex flex-col gap-4">
+<h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Manager Approval Required</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-[#9dabb9] text-sm font-medium leading-normal" for="manager-id">Manager User ID / Email</label>
+<input class="h-10 text-white dark:bg-[#1a232c] border border-white/10 dark:placeholder:text-[#6a7b8f] rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" id="manager-id" placeholder="e.g., manager@kararaos.com" type="text"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[#9dabb9] text-sm font-medium leading-normal" for="manager-password">Manager Password</label>
+<div class="relative">
+<input class="h-10 w-full text-white dark:bg-[#1a232c] border border-white/10 dark:placeholder:text-[#6a7b8f] rounded-lg pl-3 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" id="manager-password" placeholder="Enter password" type="password"/>
+<button class="absolute inset-y-0 right-0 flex items-center pr-3 text-[#9dabb9] hover:text-white">
+<span class="material-symbols-outlined !text-xl">visibility_off</span>
+</button>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[#9dabb9] text-sm font-medium leading-normal" for="override-reason">Reason for Override <span class="text-red-400">*</span></label>
+<textarea class="text-white dark:bg-[#1a232c] border border-white/10 dark:placeholder:text-[#6a7b8f] rounded-lg px-3 py-2 min-h-28 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" id="override-reason" placeholder="Provide a detailed explanation for this override..."></textarea>
+</div>
+</div>
+</div>
+<!-- Footer/Actions -->
+<div class="flex flex-col sm:flex-row-reverse items-center justify-start gap-3 border-t border-white/10 px-6 py-4">
+<button class="w-full sm:w-auto h-10 px-4 flex items-center justify-center whitespace-nowrap bg-primary text-white text-sm font-semibold leading-normal rounded-lg transition-colors hover:bg-primary/90 disabled:bg-primary/40 disabled:cursor-not-allowed">Confirm Override</button>
+<button class="w-full sm:w-auto h-10 px-4 flex items-center justify-center whitespace-nowrap bg-[#283039] text-white text-sm font-semibold leading-normal rounded-lg transition-colors hover:bg-[#39434f]">Cancel</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

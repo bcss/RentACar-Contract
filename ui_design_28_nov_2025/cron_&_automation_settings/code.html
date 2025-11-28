@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cron &amp; Automation Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex h-full w-64 flex-col bg-[#111418] p-4 shrink-0">
+<div class="flex flex-col h-full justify-between">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDEL0Hoiay-zS0IVQoViThjFAukrnaRWG5WhDXnxqikZdRHXXl8TFdHnbZ0jK0dUvrNRC4UV2hktnVfUnOCPpQlW9iAZG-wGKhmUKOfKw7s5MWfyNAiGMLWGz_8kPWr1jtlFDD3-5xzFGtzwHJSaPyN7JdJDyMQc9CMffkreGXAaxpvkQg8uzwLSV6jFKApbwqoAeclPXGe61TZrJq_T86BN93HiVW5L039bBdRdQcoNJys1VEhlWO4S1Nx4f1PXm0kncL7b23QwYE");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-[#283039] rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-[#283039] rounded-lg" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-[#283039] rounded-lg" href="#">
+<span class="material-symbols-outlined">article</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-[#283039] rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-[#283039] rounded-lg" href="#">
+<span class="material-symbols-outlined">request_quote</span>
+<p class="text-sm font-medium leading-normal">Finances</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#283039]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<p class="text-white text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-[#283039] rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-[#283039] rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-y-auto">
+<div class="flex-1 p-6 lg:p-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3 mb-6">
+<h1 class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Module Settings</h1>
+</div>
+<!-- Tabs -->
+<div class="pb-3 border-b border-slate-200 dark:border-[#3b4754]">
+<div class="flex gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-slate-500 dark:text-[#9dabb9] pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">General</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-slate-500 dark:text-[#9dabb9] pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">User Management</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-primary pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Cron &amp; Automation</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-slate-500 dark:text-[#9dabb9] pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">API Keys</p>
+</a>
+</div>
+</div>
+<!-- ToolBar -->
+<div class="flex justify-between items-center gap-2 py-4">
+<div class="flex gap-2 items-center">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">search</span>
+<input class="w-full h-10 pl-10 pr-4 bg-white dark:bg-[#1c2127] border border-slate-200 dark:border-[#3b4754] rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Search settings..." type="text"/>
+</div>
+<button class="p-2 text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-[#283039] rounded-lg">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; font-size: 20px;">save</span>
+<span class="truncate">Save Changes</span>
+</button>
+</div>
+<!-- Table -->
+<div class="mt-2 @container">
+<div class="flex overflow-hidden rounded-lg border border-slate-200 dark:border-[#3b4754] bg-white dark:bg-[#111418]">
+<table class="flex-1 w-full text-left">
+<thead class="bg-slate-50 dark:bg-[#1c2127]">
+<tr>
+<th class="table-col-1 px-4 py-3 text-slate-600 dark:text-white text-sm font-medium leading-normal w-[15%]">Category</th>
+<th class="table-col-2 px-4 py-3 text-slate-600 dark:text-white text-sm font-medium leading-normal w-[15%]">Setting key</th>
+<th class="table-col-3 px-4 py-3 text-slate-600 dark:text-white text-sm font-medium leading-normal w-[25%]">Description</th>
+<th class="table-col-4 px-4 py-3 text-slate-600 dark:text-white text-sm font-medium leading-normal w-[10%]">Type</th>
+<th class="table-col-5 px-4 py-3 text-slate-600 dark:text-white text-sm font-medium leading-normal w-[10%]">Default</th>
+<th class="table-col-6 px-4 py-3 text-slate-600 dark:text-white text-sm font-medium leading-normal w-[15%]">Current value</th>
+<th class="table-col-7 px-4 py-3 text-slate-600 dark:text-white text-sm font-medium leading-normal w-[10%]">Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-t border-t-slate-200 dark:border-t-[#3b4754]">
+<td class="table-col-1 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">Cron Periodicity</td>
+<td class="table-col-2 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">sync.reservations.hourly</td>
+<td class="table-col-3 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">Frequency for syncing new reservations from external platforms.</td>
+<td class="table-col-4 h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white text-sm font-medium leading-normal w-full">
+<span class="truncate">Cron String</span>
+</div>
+</td>
+<td class="table-col-5 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal font-mono">0 * * * *</td>
+<td class="table-col-6 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">
+<input class="w-full h-9 bg-white dark:bg-[#101922] border border-slate-300 dark:border-[#3b4754] rounded-md font-mono text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" type="text" value="0 * * * *"/>
+</td>
+<td class="table-col-7 h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white text-sm font-medium leading-normal w-full">
+<span class="truncate">Global</span>
+</div>
+</td>
+</tr>
+<tr class="border-t border-t-slate-200 dark:border-t-[#3b4754]">
+<td class="table-col-1 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">Alert Thresholds</td>
+<td class="table-col-2 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">alert.contracts.expiry_days</td>
+<td class="table-col-3 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">Days before contract expiration to trigger a warning alert.</td>
+<td class="table-col-4 h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white text-sm font-medium leading-normal w-full">
+<span class="truncate">Number</span>
+</div>
+</td>
+<td class="table-col-5 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal font-mono">30</td>
+<td class="table-col-6 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">
+<input class="w-full h-9 bg-white dark:bg-[#101922] border border-slate-300 dark:border-[#3b4754] rounded-md font-mono text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" type="number" value="14"/>
+</td>
+<td class="table-col-7 h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white text-sm font-medium leading-normal w-full">
+<span class="truncate">Global</span>
+</div>
+</td>
+</tr>
+<tr class="border-t border-t-slate-200 dark:border-t-[#3b4754]">
+<td class="table-col-1 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">Escalation Rules</td>
+<td class="table-col-2 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">escalation.maintenance.critical</td>
+<td class="table-col-3 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">Escalation path for critical vehicle maintenance alerts.</td>
+<td class="table-col-4 h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white text-sm font-medium leading-normal w-full">
+<span class="truncate">Dropdown</span>
+</div>
+</td>
+<td class="table-col-5 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal font-mono">admin_group</td>
+<td class="table-col-6 h-[72px] px-4 py-2 text-slate-600 dark:text-[#9dabb9] text-sm font-normal leading-normal">
+<select class="w-full h-9 bg-white dark:bg-[#101922] border border-slate-300 dark:border-[#3b4754] rounded-md font-mono text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary">
+<option value="admin_group">admin_group</option>
+<option selected="" value="manager_group">manager_group</option>
+<option value="support_tier_1">support_tier_1</option>
+</select>
+</td>
+<td class="table-col-7 h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white text-sm font-medium leading-normal w-full">
+<span class="truncate">Global</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

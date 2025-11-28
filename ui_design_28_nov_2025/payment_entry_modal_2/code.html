@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Common Report Screen Layout</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+        select.form-input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+        }.custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+            border-radius: 10px;
+            border: 3px solid transparent;
+        }
+        html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #a0aec0;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1a2734"
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-80 flex-shrink-0 bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-gray-700 flex flex-col">
+<div class="p-6 border-b border-gray-200 dark:border-gray-700">
+<h2 class="text-lg font-bold text-gray-900 dark:text-white">Filters</h2>
+</div>
+<div class="flex-grow p-6 overflow-y-auto custom-scrollbar">
+<form class="space-y-6">
+<div>
+<label class="text-sm font-medium text-gray-900 dark:text-white" for="branch">Branch(es)</label>
+<select class="form-input mt-2 flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary h-12 bg-[image:--select-button-svg] p-[15px] text-base font-normal leading-normal" id="branch" multiple="" style="--select-button-svg: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(156, 163, 175)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');">
+<option>Main Office</option>
+<option selected="">Airport West</option>
+<option>Downtown East</option>
+<option>North Suburb</option>
+</select>
+</div>
+<div>
+<label class="text-sm font-medium text-gray-900 dark:text-white" for="date-range">Date Range</label>
+<div class="relative mt-2">
+<input class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] pr-10 text-base font-normal leading-normal" id="date-range" type="text" value="01/10/2023 - 31/10/2023"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">calendar_today</span>
+</div>
+</div>
+<div>
+<label class="text-sm font-medium text-gray-900 dark:text-white" for="vehicle-group">Vehicle Groups</label>
+<select class="form-input mt-2 flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary h-12 bg-[image:--select-button-svg] p-[15px] text-base font-normal leading-normal" id="vehicle-group" style="--select-button-svg: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(156, 163, 175)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');">
+<option>All Groups</option>
+<option>Economy</option>
+<option>Compact</option>
+<option>SUV</option>
+<option>Luxury</option>
+</select>
+</div>
+<div>
+<label class="text-sm font-medium text-gray-900 dark:text-white" for="contract-status">Contract Status</label>
+<select class="form-input mt-2 flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary h-12 bg-[image:--select-button-svg] p-[15px] text-base font-normal leading-normal" id="contract-status" style="--select-button-svg: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(156, 163, 175)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');">
+<option>All</option>
+<option>Open</option>
+<option>Closed</option>
+<option>Pending</option>
+</select>
+</div>
+</form>
+</div>
+<div class="p-6 border-t border-gray-200 dark:border-gray-700">
+<button class="w-full px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 focus:ring-4 focus:ring-primary/40" type="button">Apply Filters</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden">
+<header class="flex-shrink-0 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700">
+<div class="flex items-center justify-between p-6">
+<div>
+<h1 class="text-xl font-bold text-gray-900 dark:text-white">Revenue by Branch Report</h1>
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Showing data for October 2023</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+<span class="material-symbols-outlined text-base">download</span>
+                        Export CSV
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+<span class="material-symbols-outlined text-base">picture_as_pdf</span>
+                        Export PDF
+                    </button>
+</div>
+</div>
+</header>
+<div class="flex-shrink-0 p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-background-light dark:bg-background-dark">
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow">
+<p class="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
+<p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">$1,250,450</p>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow">
+<p class="text-sm text-gray-500 dark:text-gray-400">Total Contracts</p>
+<p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">5,820</p>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow">
+<p class="text-sm text-gray-500 dark:text-gray-400">Average Contract Value</p>
+<p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">$214.85</p>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow">
+<p class="text-sm text-gray-500 dark:text-gray-400">Utilization Rate</p>
+<p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">82.5%</p>
+</div>
+</div>
+<div class="flex-1 overflow-auto p-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg overflow-hidden">
+<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
+<tr>
+<th class="px-6 py-4" scope="col">Branch Name</th>
+<th class="px-6 py-4" scope="col">Total Contracts</th>
+<th class="px-6 py-4" scope="col">Total Revenue</th>
+<th class="px-6 py-4" scope="col">Avg. Revenue / Contract</th>
+<th class="px-6 py-4" scope="col">Utilization</th>
+<th class="px-6 py-4" scope="col">
+<span class="sr-only">Actions</span>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-surface-light dark:bg-surface-dark border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">Airport West</td>
+<td class="px-6 py-4">2,150</td>
+<td class="px-6 py-4">$480,200</td>
+<td class="px-6 py-4">$223.35</td>
+<td class="px-6 py-4">88%</td>
+<td class="px-6 py-4 text-right">
+<a class="font-medium text-primary hover:underline" href="#">Drill Down</a>
+</td>
+</tr>
+<tr class="bg-surface-light dark:bg-surface-dark border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">Downtown East</td>
+<td class="px-6 py-4">1,890</td>
+<td class="px-6 py-4">$415,800</td>
+<td class="px-6 py-4">$220.00</td>
+<td class="px-6 py-4">85%</td>
+<td class="px-6 py-4 text-right">
+<a class="font-medium text-primary hover:underline" href="#">Drill Down</a>
+</td>
+</tr>
+<tr class="bg-surface-light dark:bg-surface-dark border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">North Suburb</td>
+<td class="px-6 py-4">980</td>
+<td class="px-6 py-4">$210,500</td>
+<td class="px-6 py-4">$214.80</td>
+<td class="px-6 py-4">75%</td>
+<td class="px-6 py-4 text-right">
+<a class="font-medium text-primary hover:underline" href="#">Drill Down</a>
+</td>
+</tr>
+<tr class="bg-surface-light dark:bg-surface-dark border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">Main Office</td>
+<td class="px-6 py-4">800</td>
+<td class="px-6 py-4">$143,950</td>
+<td class="px-6 py-4">$179.94</td>
+<td class="px-6 py-4">72%</td>
+<td class="px-6 py-4 text-right">
+<a class="font-medium text-primary hover:underline" href="#">Drill Down</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

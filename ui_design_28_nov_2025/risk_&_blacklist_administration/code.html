@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Risk &amp; Blacklist Administration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<div class="flex h-auto min-h-screen flex-col bg-[#111418] p-4 sticky top-0">
+<div class="flex h-full flex-col justify-between">
+<div class="flex flex-col gap-4">
+<div class="flex gap-3 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KararaOS logo placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCObI_DDTGxQPlx_5QT_VixofZTjKlWIoqOuUsptYYABitI1lbAHMtBW11Je8YHseqEEGjz2OnlNQ6X3xy5jx7oueqDe0W9urEjnwFzHwjgQyfAQV9KHC5lyRftGiXs5tih-ahf56gmJABIUG8WBxhQUdIVmy0vldHOvVOcbbItiEVVo8dThsNl_4NU-2Nip4pZD7PpIrg3R5QUVTpFvI_cCVt7p0AU2u4bh4PrGIeHuJC6xxAJFcClvvQ0HP5PpgUS5cpLdxt_Nt4");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 mt-4">
+<div class="flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#283039] rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#283039] rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#283039] rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#283039] rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+<p class="text-sm font-medium leading-normal">Risk &amp; Blacklist</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#283039] rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#283039] rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content -->
+<main class="flex-1 p-8">
+<div class="flex flex-col gap-6 max-w-7xl mx-auto">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3">
+<div class="flex flex-col gap-2">
+<p class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Risk &amp; Blacklist Administration</p>
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Manage blacklist entries and configure system risk parameters.</p>
+</div>
+</div>
+<!-- Tabs -->
+<div class="pb-3">
+<div class="flex border-b border-gray-200 dark:border-gray-700 gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary pb-[13px] pt-4" href="#">
+<p class="text-primary text-sm font-bold leading-normal tracking-[0.015em]">Blacklist / Watchlist</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary pb-[13px] pt-4" href="#">
+<p class="font-bold leading-normal tracking-[0.015em] text-sm">Risk Configuration</p>
+</a>
+</div>
+</div>
+<!-- ToolBar -->
+<div class="flex justify-between items-center gap-2 bg-white dark:bg-[#1C252E] p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+<div class="flex gap-2 items-center">
+<div class="relative w-72">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-background-dark border-gray-200 dark:border-gray-700 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-100" placeholder="Search by name or ID..." type="text"/>
+</div>
+<button class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+<span class="material-symbols-outlined">tune</span>
+</button>
+<button class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+<span class="material-symbols-outlined">calendar_today</span>
+</button>
+</div>
+<button class="flex items-center justify-center overflow-hidden rounded-lg h-10 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] px-4 hover:bg-primary/90">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1, 'wght' 700;">add</span>
+<span class="truncate">Add to Blacklist</span>
+</button>
+</div>
+<!-- Table -->
+<div class="@container">
+<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1C252E]">
+<table class="w-full">
+<thead class="bg-gray-50 dark:bg-background-dark">
+<tr>
+<th class="table-col-1 px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[25%] text-sm font-medium leading-normal">Entity Name/ID</th>
+<th class="table-col-2 px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[15%] text-sm font-medium leading-normal">Entity Type</th>
+<th class="table-col-3 px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[15%] text-sm font-medium leading-normal">Status</th>
+<th class="table-col-4 px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[20%] text-sm font-medium leading-normal">Reason</th>
+<th class="table-col-5 px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[10%] text-sm font-medium leading-normal">Added By</th>
+<th class="table-col-6 px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[10%] text-sm font-medium leading-normal">Date Added</th>
+<th class="table-col-7 px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[5%] text-sm font-medium leading-normal">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+<tr class="hover:bg-gray-50 dark:hover:bg-background-dark">
+<td class="table-col-1 h-[72px] px-4 py-2 w-[25%] text-gray-900 dark:text-white text-sm font-normal leading-normal">John Doe (C-12345)</td>
+<td class="table-col-2 h-[72px] px-4 py-2 w-[15%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Customer</td>
+<td class="table-col-3 h-[72px] px-4 py-2 w-[15%] text-sm font-normal leading-normal">
+<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300">Blacklisted</span>
+</td>
+<td class="table-col-4 h-[72px] px-4 py-2 w-[20%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Fraudulent Activity</td>
+<td class="table-col-5 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">admin_user_1</td>
+<td class="table-col-6 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">2023-10-26</td>
+<td class="table-col-7 h-[72px] px-4 py-2 w-[5%] text-gray-500 dark:text-gray-400 text-sm font-bold leading-normal tracking-[0.015em]">
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"><span class="material-symbols-outlined text-base">more_horiz</span></button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-background-dark">
+<td class="table-col-1 h-[72px] px-4 py-2 w-[25%] text-gray-900 dark:text-white text-sm font-normal leading-normal">Tech Solutions Inc.</td>
+<td class="table-col-2 h-[72px] px-4 py-2 w-[15%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Company</td>
+<td class="table-col-3 h-[72px] px-4 py-2 w-[15%] text-sm font-normal leading-normal">
+<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300">Watchlisted</span>
+</td>
+<td class="table-col-4 h-[72px] px-4 py-2 w-[20%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Multiple Late Payments</td>
+<td class="table-col-5 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">admin_user_2</td>
+<td class="table-col-6 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">2023-10-25</td>
+<td class="table-col-7 h-[72px] px-4 py-2 w-[5%] text-gray-500 dark:text-gray-400 text-sm font-bold leading-normal tracking-[0.015em]">
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"><span class="material-symbols-outlined text-base">more_horiz</span></button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-background-dark">
+<td class="table-col-1 h-[72px] px-4 py-2 w-[25%] text-gray-900 dark:text-white text-sm font-normal leading-normal">Contract #K-5678</td>
+<td class="table-col-2 h-[72px] px-4 py-2 w-[15%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Contract</td>
+<td class="table-col-3 h-[72px] px-4 py-2 w-[15%] text-sm font-normal leading-normal">
+<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300">Soft-Blocked</span>
+</td>
+<td class="table-col-4 h-[72px] px-4 py-2 w-[20%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Vehicle Damage History</td>
+<td class="table-col-5 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">admin_user_1</td>
+<td class="table-col-6 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">2023-10-24</td>
+<td class="table-col-7 h-[72px] px-4 py-2 w-[5%] text-gray-500 dark:text-gray-400 text-sm font-bold leading-normal tracking-[0.015em]">
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"><span class="material-symbols-outlined text-base">more_horiz</span></button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-background-dark">
+<td class="table-col-1 h-[72px] px-4 py-2 w-[25%] text-gray-900 dark:text-white text-sm font-normal leading-normal">Jane Smith (C-67890)</td>
+<td class="table-col-2 h-[72px] px-4 py-2 w-[15%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Customer</td>
+<td class="table-col-3 h-[72px] px-4 py-2 w-[15%] text-sm font-normal leading-normal">
+<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300">Blacklisted</span>
+</td>
+<td class="table-col-4 h-[72px] px-4 py-2 w-[20%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Stolen Vehicle</td>
+<td class="table-col-5 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">system_auto</td>
+<td class="table-col-6 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">2023-10-22</td>
+<td class="table-col-7 h-[72px] px-4 py-2 w-[5%] text-gray-500 dark:text-gray-400 text-sm font-bold leading-normal tracking-[0.015em]">
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"><span class="material-symbols-outlined text-base">more_horiz</span></button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-background-dark">
+<td class="table-col-1 h-[72px] px-4 py-2 w-[25%] text-gray-900 dark:text-white text-sm font-normal leading-normal">Global Transport Ltd.</td>
+<td class="table-col-2 h-[72px] px-4 py-2 w-[15%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Company</td>
+<td class="table-col-3 h-[72px] px-4 py-2 w-[15%] text-sm font-normal leading-normal">
+<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300">Watchlisted</span>
+</td>
+<td class="table-col-4 h-[72px] px-4 py-2 w-[20%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Unpaid Invoices</td>
+<td class="table-col-5 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">admin_user_3</td>
+<td class="table-col-6 h-[72px] px-4 py-2 w-[10%] text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">2023-10-20</td>
+<td class="table-col-7 h-[72px] px-4 py-2 w-[5%] text-gray-500 dark:text-gray-400 text-sm font-bold leading-normal tracking-[0.015em]">
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"><span class="material-symbols-outlined text-base">more_horiz</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<style>
+                        @container(max-width:1024px){.table-col-5, .table-col-6 {display: none;}}
+                        @container(max-width:840px){.table-col-4{display: none;}}
+                        @container(max-width:600px){.table-col-2, .table-col-3{display: none;}}
+                    </style>
+</div>
+</div>
+</main>
+</div>
+</body></html>

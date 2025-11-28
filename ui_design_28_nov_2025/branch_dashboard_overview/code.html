@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KarāraOS - Branch Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "danger": "#DC3545",
+              "warning": "#FFC107",
+              "success": "#28A745",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex flex-col w-64 bg-background-light dark:bg-background-dark border-r border-gray-200 dark:border-gray-800">
+<div class="flex flex-col justify-between flex-1 p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KararaOS logo, an abstract K shape" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA6oiHbg9fVYYB2KAEbVm4C-XARij_NrDXp_oKEXXQk8Ci9mMmus3eIvKb9h0kgRdhEdM25tKYNqhBLxB8eYP4BkGnlQKSs_91xaQk7D1p-FXOZvgdd_njamaGp7EdI7UZV4FjW3uuMBggaWFz8Bvllj9MsUP61Winmrj2NJLcXJMFn6HnITg6XS0Spv_ybxys_ua0VDtyVgCsz8TwqQYInuC-mNlB1aHxrF4cjgN6DJuE6WGU7xNJ-MDsQAbf37mbCBp6m0xOR_No");'></div>
+<div class="flex flex-col">
+<h1 class="text-gray-900 dark:text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">request_quote</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">group</span>
+<p class="text-sm font-medium leading-normal">Customers</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-6 lg:p-8">
+<div class="w-full max-w-7xl mx-auto">
+<!-- PageHeading -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+<div class="flex flex-col gap-2">
+<h1 class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-tight">Branch Dashboard</h1>
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Showing data for: Main Street Branch</p>
+</div>
+<div class="flex items-center gap-4">
+<p class="text-gray-500 dark:text-gray-400 text-sm">Tuesday, 24th October 2023</p>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-medium leading-normal border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+<span class="material-symbols-outlined text-base">filter_list</span>
+<span class="truncate">Filter by Branch</span>
+</button>
+</div>
+</div>
+<!-- Stats Section -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+<p class="text-gray-700 dark:text-gray-300 text-base font-medium leading-normal">Active Contracts</p>
+<p class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">42</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+<p class="text-gray-700 dark:text-gray-300 text-base font-medium leading-normal">Pending Checkout</p>
+<p class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">8</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-warning/10 dark:bg-warning/20 border border-warning/30 dark:border-warning/50">
+<p class="text-yellow-800 dark:text-warning text-base font-medium leading-normal">Action Required</p>
+<p class="text-yellow-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">3</p>
+</div>
+</div>
+<!-- Main Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Column 1: Queues & Alerts -->
+<div class="lg:col-span-1 flex flex-col gap-6">
+<!-- Queues Widget -->
+<div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight p-4 border-b border-gray-200 dark:border-gray-800">Queues &amp; Alerts</h2>
+<div class="p-2">
+<div class="flex h-10 flex-1 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-gray-700 has-[:checked]:shadow-sm has-[:checked]:text-gray-900 dark:has-[:checked]:text-white text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+<span class="truncate">Check-in / Out</span>
+<input checked="" class="invisible w-0" name="queue-toggle" type="radio" value="Check-in / Check-out"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-gray-700 has-[:checked]:shadow-sm has-[:checked]:text-gray-900 dark:has-[:checked]:text-white text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+<span class="truncate">Overdue &amp; Risk</span>
+<input class="invisible w-0" name="queue-toggle" type="radio" value="Overdue &amp; Risk"/>
+</label>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-4">
+<div class="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+<div class="flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined">login</span>
+</div>
+<div class="flex-1">
+<p class="text-gray-900 dark:text-white font-medium text-sm">Toyota Camry <span class="text-gray-500 dark:text-gray-400">ABC-123</span></p>
+<p class="text-gray-600 dark:text-gray-300 text-xs">John Doe</p>
+</div>
+<p class="text-sm font-medium text-warning">Due in 15m</p>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+<div class="flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined">logout</span>
+</div>
+<div class="flex-1">
+<p class="text-gray-900 dark:text-white font-medium text-sm">Ford Explorer <span class="text-gray-500 dark:text-gray-400">XYZ-789</span></p>
+<p class="text-gray-600 dark:text-gray-300 text-xs">Jane Smith</p>
+</div>
+<p class="text-sm font-medium text-success">Due in 45m</p>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-lg bg-danger/10 dark:bg-danger/20">
+<div class="flex items-center justify-center size-10 rounded-full bg-danger/10 text-danger">
+<span class="material-symbols-outlined">login</span>
+</div>
+<div class="flex-1">
+<p class="text-gray-900 dark:text-white font-medium text-sm">Honda Civic <span class="text-gray-500 dark:text-gray-400">JKL-456</span></p>
+<p class="text-gray-600 dark:text-gray-300 text-xs">Mike Johnson</p>
+</div>
+<p class="text-sm font-bold text-danger">Overdue</p>
+</div>
+</div>
+</div>
+<!-- Overdue & Risk -->
+<div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+<h2 class="text-gray-900 dark:text-white text-lg font-bold p-4">Overdue &amp; Risk</h2>
+<div class="p-4 flex flex-col gap-3">
+<div class="flex items-center justify-between p-3 rounded-lg bg-danger/10">
+<div class="flex flex-col">
+<p class="text-sm font-medium text-danger-800 dark:text-danger-100">C. Williams - Nissan Rogue</p>
+<p class="text-xs text-danger-600 dark:text-danger-200">2 days overdue</p>
+</div>
+<span class="material-symbols-outlined text-danger text-xl">warning</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-danger/10">
+<div class="flex flex-col">
+<p class="text-sm font-medium text-danger-800 dark:text-danger-100">BLACKLIST HIT: Sam Bankman</p>
+<p class="text-xs text-danger-600 dark:text-danger-200">Attempted reservation</p>
+</div>
+<span class="material-symbols-outlined text-danger text-xl">gpp_bad</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2 & 3: Tables -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- Pending Financial Actions Widget -->
+<div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+<h2 class="text-gray-900 dark:text-white text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-800">Pending Financial Actions</h2>
+<div class="overflow-x-auto">
+<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+<tr>
+<th class="px-6 py-3" scope="col">Customer</th>
+<th class="px-6 py-3" scope="col">Action Type</th>
+<th class="px-6 py-3 text-right" scope="col">Amount</th>
+<th class="px-6 py-3 text-center" scope="col">Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Alex Ray</td>
+<td class="px-6 py-4"><span class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Settlement</span></td>
+<td class="px-6 py-4 text-right font-mono">$250.75</td>
+<td class="px-6 py-4 text-center">
+<button class="font-medium text-primary hover:underline">Settle</button>
+</td>
+</tr>
+<tr class="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Sarah Connor</td>
+<td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Deposit Refund</span></td>
+<td class="px-6 py-4 text-right font-mono">$500.00</td>
+<td class="px-6 py-4 text-center">
+<button class="font-medium text-primary hover:underline">Refund</button>
+</td>
+</tr>
+<tr class="bg-white dark:bg-gray-900">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Brian Griffin</td>
+<td class="px-6 py-4"><span class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Outstanding</span></td>
+<td class="px-6 py-4 text-right font-mono">$75.20</td>
+<td class="px-6 py-4 text-center">
+<button class="font-medium text-primary hover:underline">Collect</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Today's Reservations Widget -->
+<div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+<h2 class="text-gray-900 dark:text-white text-lg font-bold p-4 border-b border-gray-200 dark:border-gray-800">Today's Reservations</h2>
+<div class="overflow-x-auto">
+<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+<tr>
+<th class="px-6 py-3" scope="col">Customer</th>
+<th class="px-6 py-3" scope="col">Vehicle Class</th>
+<th class="px-6 py-3" scope="col">Status</th>
+<th class="px-6 py-3 text-center" scope="col">Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Maria Garcia</td>
+<td class="px-6 py-4">Full-size SUV</td>
+<td class="px-6 py-4"><span class="text-green-600 dark:text-green-400">New Reservation</span></td>
+<td class="px-6 py-4 text-center">
+<button class="px-4 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90">Convert to Contract</button>
+</td>
+</tr>
+<tr class="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Tom Haverford</td>
+<td class="px-6 py-4">Compact</td>
+<td class="px-6 py-4"><span class="text-yellow-600 dark:text-yellow-400">Expiring Today</span></td>
+<td class="px-6 py-4 text-center">
+<button class="px-4 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90">Convert to Contract</button>
+</td>
+</tr>
+<tr class="bg-white dark:bg-gray-900">
+<td class="px-6 py-4 font-medium text-gray-400 dark:text-gray-500 line-through">Leslie Knope</td>
+<td class="px-6 py-4 text-gray-400 dark:text-gray-500 line-through">Mid-size Sedan</td>
+<td class="px-6 py-4"><span class="text-gray-500 dark:text-gray-400">Auto-expired</span></td>
+<td class="px-6 py-4 text-center">
+<button class="px-4 py-1.5 text-sm font-medium text-white bg-gray-400 dark:bg-gray-600 rounded-md cursor-not-allowed">Expired</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

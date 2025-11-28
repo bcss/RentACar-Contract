@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Outstanding/Aging Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<div class="flex h-full min-h-screen">
+<!-- SideNavBar -->
+<nav class="flex h-full w-64 flex-col justify-between border-r border-slate-200 bg-background-light p-4 dark:border-slate-800 dark:bg-background-dark">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS company logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB8FNvyqgDFAl32M3m-tiOSmzxFcDyuw40_KbrF-cn8LRdBwGFu8Axt1p7jSaQyLMwasBu8irLcAxtnLyi2ztRMiQJK388UAGXJzoqaUFPLQWAy4CUbcNDXsFUZIeUc8rilYBC-9VV09C-NX65QP7W1op1Cpceh-ZqhTBzVy5KtzBc13kGmpQLU5WEss78PcSJr-6Fjmg7vqgC6bh7_z9h5o6KL81hv-kfwPA6ta0aChnZQkd6bj0epxILgo634jtfAIkrXpHv-0K4");'></div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">Fleet Management</p>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined text-2xl">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined text-2xl">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined text-2xl">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined text-2xl">calendar_today</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg bg-primary/10 px-3 py-2 text-primary dark:bg-primary/20" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+<p class="text-sm font-medium leading-normal">Reports</p>
+</a>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined text-2xl">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto">
+<div class="p-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex min-w-72 flex-col gap-2">
+<h1 class="text-slate-900 dark:text-white text-3xl font-black leading-tight tracking-tight">Outstanding / Aging Report</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">View and analyze accounts receivable categorized by age.</p>
+</div>
+</div>
+<!-- Stats -->
+<div class="grid grid-cols-1 gap-4 py-8 sm:grid-cols-2 lg:grid-cols-4">
+<div class="flex flex-1 flex-col gap-2 rounded-lg border border-slate-200 bg-background-light p-6 dark:border-slate-800 dark:bg-slate-900/50">
+<p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Total Outstanding</p>
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">$1,250,830.00</p>
+</div>
+<div class="flex flex-1 flex-col gap-2 rounded-lg border border-slate-200 bg-background-light p-6 dark:border-slate-800 dark:bg-slate-900/50">
+<p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Total Overdue</p>
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">$480,125.50</p>
+</div>
+<div class="flex flex-1 flex-col gap-2 rounded-lg border border-slate-200 bg-background-light p-6 dark:border-slate-800 dark:bg-slate-900/50">
+<p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Overdue Accounts</p>
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">152</p>
+</div>
+<div class="flex flex-1 flex-col gap-2 rounded-lg border border-slate-200 bg-background-light p-6 dark:border-slate-800 dark:bg-slate-900/50">
+<p class="text-slate-600 dark:text-slate-300 text-base font-medium leading-normal">Average Invoice Age</p>
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">48 Days</p>
+</div>
+</div>
+<!-- ToolBar & Table Section -->
+<div class="flex flex-col gap-4">
+<div class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-200 bg-background-light p-3 dark:border-slate-800 dark:bg-slate-900/50">
+<div class="relative w-full max-w-xs">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full rounded-md border-slate-300 bg-background-light py-2 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-background-dark dark:text-slate-200 dark:placeholder:text-slate-500" placeholder="Search accounts..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="flex h-10 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md border border-slate-300 bg-background-light px-4 text-sm font-bold leading-normal text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-lg">download</span>
+<span class="truncate">CSV</span>
+</button>
+<button class="flex h-10 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md border border-slate-300 bg-background-light px-4 text-sm font-bold leading-normal text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+<span class="truncate">PDF</span>
+</button>
+</div>
+</div>
+<!-- Table -->
+<div class="@container">
+<div class="overflow-hidden rounded-lg border border-slate-200 bg-background-light dark:border-slate-800 dark:bg-slate-900/50">
+<table class="min-w-full flex-1">
+<thead class="bg-slate-50 dark:bg-slate-900">
+<tr>
+<th class="table-col-1 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-2/12">Account Name</th>
+<th class="table-col-2 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-1/12">Account ID</th>
+<th class="table-col-3 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-1/12">Total Due</th>
+<th class="table-col-4 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-1/12">0-30 Days</th>
+<th class="table-col-5 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-1/12">31-60 Days</th>
+<th class="table-col-6 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-1/12">61-90 Days</th>
+<th class="table-col-7 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-1/12">&gt;90 Days</th>
+<th class="table-col-8 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-1/12">Last Payment</th>
+<th class="table-col-9 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-1/12"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+<td class="table-col-1 h-[72px] px-4 py-2 text-sm font-medium text-slate-800 dark:text-white">Global Transport Inc.</td>
+<td class="table-col-2 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">C-10234</td>
+<td class="table-col-3 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$15,450.00</td>
+<td class="table-col-4 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$5,000.00</td>
+<td class="table-col-5 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$5,450.00</td>
+<td class="table-col-6 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$5,000.00</td>
+<td class="table-col-7 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-8 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">2024-05-10</td>
+<td class="table-col-9 h-[72px] px-4 py-2 text-sm text-right"><button class="text-primary hover:underline">View</button></td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+<td class="table-col-1 h-[72px] px-4 py-2 text-sm font-medium text-slate-800 dark:text-white">Venture Logistics</td>
+<td class="table-col-2 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">C-10876</td>
+<td class="table-col-3 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$8,200.00</td>
+<td class="table-col-4 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-5 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-6 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$8,200.00</td>
+<td class="table-col-7 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-8 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">2024-03-22</td>
+<td class="table-col-9 h-[72px] px-4 py-2 text-sm text-right"><button class="text-primary hover:underline">View</button></td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+<td class="table-col-1 h-[72px] px-4 py-2 text-sm font-medium text-slate-800 dark:text-white">Apex Haulers</td>
+<td class="table-col-2 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">C-10551</td>
+<td class="table-col-3 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$25,100.00</td>
+<td class="table-col-4 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-5 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-6 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-7 h-[72px] px-4 py-2 text-sm font-medium text-red-500">$25,100.00</td>
+<td class="table-col-8 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">2023-12-15</td>
+<td class="table-col-9 h-[72px] px-4 py-2 text-sm text-right"><button class="text-primary hover:underline">View</button></td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+<td class="table-col-1 h-[72px] px-4 py-2 text-sm font-medium text-slate-800 dark:text-white">City Couriers</td>
+<td class="table-col-2 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">C-11029</td>
+<td class="table-col-3 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$3,750.00</td>
+<td class="table-col-4 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$3,750.00</td>
+<td class="table-col-5 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-6 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-7 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-8 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">2024-06-01</td>
+<td class="table-col-9 h-[72px] px-4 py-2 text-sm text-right"><button class="text-primary hover:underline">View</button></td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+<td class="table-col-1 h-[72px] px-4 py-2 text-sm font-medium text-slate-800 dark:text-white">Reliable Freight Co.</td>
+<td class="table-col-2 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">C-10112</td>
+<td class="table-col-3 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$12,900.00</td>
+<td class="table-col-4 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-5 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$12,900.00</td>
+<td class="table-col-6 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-7 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">$0.00</td>
+<td class="table-col-8 h-[72px] px-4 py-2 text-sm text-slate-500 dark:text-slate-400">2024-04-18</td>
+<td class="table-col-9 h-[72px] px-4 py-2 text-sm text-right"><button class="text-primary hover:underline">View</button></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between pt-4">
+<span class="text-sm text-slate-600 dark:text-slate-400">Showing 1 to 5 of 152 results</span>
+<div class="inline-flex items-center gap-2">
+<button class="rounded border border-slate-300 px-2 py-1 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" disabled="">Previous</button>
+<button class="rounded border border-slate-300 px-2 py-1 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Next</button>
+</div>
+</div>
+<style>
+                                @container(max-width:1200px){.table-col-8{display: none;}}
+                                @container(max-width:1024px){.table-col-2, .table-col-6{display: none;}}
+                                @container(max-width:768px){.table-col-5, .table-col-7, .table-col-9{display: none;}}
+                                @container(max-width:640px){.table-col-4{display: none;}}
+                            </style>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Return Inspection Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4 bg-background-light dark:bg-background-dark" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<!-- Modal Container -->
+<div class="w-full max-w-2xl rounded-xl bg-[#1c2127] shadow-2xl">
+<div class="p-6 md:p-8">
+<!-- PageHeading -->
+<div class="flex flex-col gap-1 pb-6">
+<div class="flex items-center justify-between">
+<h1 class="text-white tracking-light text-2xl font-bold leading-tight">Return Inspection: Toyota Camry - C12345</h1>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-[#9dabb9] transition-colors hover:bg-[#283039] hover:text-white">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+</div>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Record the vehicle's condition upon return.</p>
+</div>
+<!-- Form Content -->
+<div class="flex flex-col gap-6">
+<!-- Odometer Reading -->
+<div class="flex max-w-full flex-wrap items-end gap-4">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-white text-sm font-medium leading-normal pb-2">Odometer In</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#3b4754] bg-[#111418] focus:border-primary h-12 placeholder:text-[#9dabb9] p-3 text-base font-normal leading-normal" placeholder="e.g., 45,678" value=""/>
+</label>
+<div class="pb-3 text-xs text-[#9dabb9]">Odo-Out: 45,123 mi</div>
+</div>
+<!-- Fuel Level -->
+<div>
+<h2 class="text-white text-sm font-medium leading-tight tracking-[-0.015em] pb-2">Fuel Level In</h2>
+<div class="flex h-12 flex-1 items-center justify-center rounded-lg bg-[#111418] p-1 border border-[#3b4754]">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-[#283039] has-[:checked]:text-white text-[#9dabb9] text-sm font-medium leading-normal transition-colors">
+<span class="truncate">Empty</span>
+<input class="invisible w-0" name="fuel-level" type="radio" value="Empty"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-[#283039] has-[:checked]:text-white text-[#9dabb9] text-sm font-medium leading-normal transition-colors">
+<span class="truncate">1/4</span>
+<input class="invisible w-0" name="fuel-level" type="radio" value="1/4"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-[#283039] has-[:checked]:text-white text-[#9dabb9] text-sm font-medium leading-normal transition-colors">
+<span class="truncate">1/2</span>
+<input class="invisible w-0" name="fuel-level" type="radio" value="1/2"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-[#283039] has-[:checked]:text-white text-[#9dabb9] text-sm font-medium leading-normal transition-colors">
+<span class="truncate">3/4</span>
+<input class="invisible w-0" name="fuel-level" type="radio" value="3/4"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-[#283039] has-[:checked]:text-white text-[#9dabb9] text-sm font-medium leading-normal transition-colors">
+<span class="truncate">Full</span>
+<input checked="" class="invisible w-0" name="fuel-level" type="radio" value="Full"/>
+</label>
+</div>
+</div>
+<!-- Vehicle Photos -->
+<div>
+<h2 class="text-white text-sm font-medium leading-tight tracking-[-0.015em] pb-2">Vehicle Photos</h2>
+<div class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#3b4754] bg-[#111418] p-6 text-center">
+<div class="mb-2 text-[#9dabb9]">
+<span class="material-symbols-outlined text-4xl">upload_file</span>
+</div>
+<p class="text-sm text-white">Drag &amp; drop images here or <span class="font-semibold text-primary">browse to upload</span></p>
+<p class="mt-1 text-xs text-[#9dabb9]">PNG, JPG up to 10MB</p>
+</div>
+</div>
+<!-- Damage Assessment -->
+<div class="flex flex-col gap-4 rounded-lg bg-[#111418] border border-[#3b4754] p-4">
+<div class="flex items-center justify-between">
+<label class="text-white text-sm font-medium cursor-pointer" for="damages-toggle">New Damages Found?</label>
+<div class="relative flex items-center cursor-pointer">
+<input class="peer/toggle sr-only" id="damages-toggle" type="checkbox"/>
+<div class="h-6 w-10 rounded-full bg-[#3b4754] peer-checked/toggle:bg-primary transition-colors"></div>
+<div class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked/toggle:translate-x-4"></div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
+<button class="flex h-11 items-center justify-center rounded-lg px-6 text-sm font-semibold text-white transition-colors hover:bg-[#283039]">Cancel</button>
+<button class="flex h-11 items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-white transition-colors hover:bg-primary/90">Complete Return Inspection</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

@@ -13,7 +13,7 @@
   }
 }
 
-/* LIGHT MODE */
+/* LIGHT MODE - KarāraOS Design System (Nov 2025) */
 :root {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
@@ -25,51 +25,57 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 0 0% 99%;
+  /* Semantic status colors */
+  --positive: 142 91% 45%;
+  --positive-foreground: 0 0% 100%;
+  --negative: 11 95% 60%;
+  --negative-foreground: 0 0% 100%;
 
-  --foreground: 220 13% 13%;
+  --background: 210 10% 97%;
 
-  --border: 220 9% 46%;
+  --foreground: 220 13% 12%;
+
+  --border: 216 12% 84%;
 
   --card: 0 0% 100%;
 
-  --card-foreground: 220 13% 13%;
+  --card-foreground: 220 13% 12%;
 
-  --card-border: 220 9% 93%;
+  --card-border: 216 12% 91%;
 
-  --sidebar: 220 9% 96%;
+  --sidebar: 0 0% 100%;
 
-  --sidebar-foreground: 220 13% 13%;
+  --sidebar-foreground: 220 13% 12%;
 
-  --sidebar-border: 220 9% 90%;
+  --sidebar-border: 216 12% 91%;
 
-  --sidebar-primary: 199 89% 48%;
+  --sidebar-primary: 209 88% 51%;
 
   --sidebar-primary-foreground: 0 0% 100%;
 
-  --sidebar-accent: 220 12% 89%;
+  --sidebar-accent: 209 88% 96%;
 
-  --sidebar-accent-foreground: 220 13% 13%;
+  --sidebar-accent-foreground: 209 88% 40%;
 
-  --sidebar-ring: 199 89% 48%;
+  --sidebar-ring: 209 88% 51%;
 
   --popover: 0 0% 100%;
 
-  --popover-foreground: 220 13% 13%;
+  --popover-foreground: 220 13% 12%;
 
-  --popover-border: 220 9% 93%;
+  --popover-border: 216 12% 91%;
 
-  --primary: 199 89% 48%;
+  --primary: 209 88% 51%;
 
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 260 8% 40%;
+  --secondary: 220 9% 46%;
 
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 220 13% 95%;
+  --muted: 210 10% 96%;
 
-  --muted-foreground: 220 13% 40%;
+  --muted-foreground: 220 9% 46%;
 
   --accent: 45 100% 51%;
 
@@ -79,13 +85,13 @@
 
   --destructive-foreground: 0 0% 100%;
 
-  --input: 220 13% 70%;
-  --ring: 199 89% 48%;
-  --chart-1: 199 89% 48%;
+  --input: 216 12% 84%;
+  --ring: 209 88% 51%;
+  --chart-1: 209 88% 51%;
   --chart-2: 142 71% 45%;
   --chart-3: 207 90% 54%;
   --chart-4: 38 92% 50%;
-  --chart-5: 260 8% 40%;
+  --chart-5: 220 9% 46%;
 
   --font-sans: Inter, sans-serif;
   --font-arabic: Cairo, sans-serif;
@@ -134,6 +140,7 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
+/* DARK MODE - KarāraOS Design System (Nov 2025) */
 .dark {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
@@ -144,67 +151,73 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 220 15% 11%;
+  /* Semantic status colors */
+  --positive: 142 71% 50%;
+  --positive-foreground: 0 0% 100%;
+  --negative: 11 85% 55%;
+  --negative-foreground: 0 0% 100%;
+
+  --background: 213 40% 10%;
 
   --foreground: 0 0% 98%;
 
-  --border: 220 10% 40%;
+  --border: 210 19% 28%;
 
-  --card: 220 14% 16%;
+  --card: 210 28% 15%;
 
   --card-foreground: 0 0% 98%;
 
-  --card-border: 220 12% 24%;
+  --card-border: 210 19% 22%;
 
-  --sidebar: 220 14% 16%;
+  --sidebar: 210 28% 15%;
 
   --sidebar-foreground: 0 0% 98%;
 
-  --sidebar-border: 220 12% 21%;
+  --sidebar-border: 210 19% 22%;
 
-  --sidebar-primary: 199 84% 65%;
+  --sidebar-primary: 209 88% 55%;
 
-  --sidebar-primary-foreground: 220 13% 13%;
+  --sidebar-primary-foreground: 0 0% 100%;
 
-  --sidebar-accent: 220 12% 22%;
+  --sidebar-accent: 209 40% 20%;
 
-  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-accent-foreground: 209 88% 75%;
 
-  --sidebar-ring: 199 84% 65%;
+  --sidebar-ring: 209 88% 55%;
 
-  --popover: 220 14% 16%;
+  --popover: 210 28% 15%;
 
   --popover-foreground: 0 0% 98%;
 
-  --popover-border: 220 12% 24%;
+  --popover-border: 210 19% 22%;
 
-  --primary: 199 84% 65%;
+  --primary: 209 88% 55%;
 
-  --primary-foreground: 220 13% 13%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 260 8% 60%;
+  --secondary: 210 15% 67%;
 
   --secondary-foreground: 0 0% 98%;
 
-  --muted: 220 12% 22%;
+  --muted: 210 19% 20%;
 
-  --muted-foreground: 220 9% 70%;
+  --muted-foreground: 210 15% 67%;
 
   --accent: 45 100% 60%;
 
   --accent-foreground: 220 13% 13%;
 
-  --destructive: 0 72% 60%;
+  --destructive: 0 72% 55%;
 
   --destructive-foreground: 0 0% 100%;
 
-  --input: 220 13% 35%;
-  --ring: 199 84% 65%;
-  --chart-1: 199 84% 65%;
-  --chart-2: 142 71% 60%;
-  --chart-3: 207 90% 65%;
-  --chart-4: 38 92% 60%;
-  --chart-5: 260 8% 70%;
+  --input: 210 19% 28%;
+  --ring: 209 88% 55%;
+  --chart-1: 209 88% 55%;
+  --chart-2: 142 71% 55%;
+  --chart-3: 207 90% 60%;
+  --chart-4: 38 92% 55%;
+  --chart-5: 210 15% 67%;
 
   --shadow-2xs: 0px 2px 0px 0px hsl(220 13% 8% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(220 13% 8% / 0.00);

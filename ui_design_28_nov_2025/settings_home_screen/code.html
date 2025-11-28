@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings Home Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full">
+<!-- SideNavBar -->
+<aside class="flex h-screen flex-col bg-[#111418] p-4 sticky top-0 w-64">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="KarāraOS logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDralz6jt30Gnu2HQlpTJwX0ZPKPwjAYvr-t6b1aajVQ4Ab5xB5kTcQhhdieRvm7z6cbMY_YZvVoJ3ks8iDory1h1iuJNiZjF_QHvY-mn8TLDBFgfe8zzEsmPOd7uka8zu-ObmawwR2Bp1Gkxpn6e-BUnsv6retfMpcbSkx4isczcqiOrV557VB9XWODijNj7EeXIVFHerzaKz9Cku2SMws33zqi1p6TNizmbe0gByEHACqXSw3IhKcbbi4Jz50FLe7fqhQVCFIvlw");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-medium leading-normal">KarāraOS</h1>
+<p class="text-[#9dabb9] text-sm font-normal leading-normal">Rental Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<p class="text-sm font-medium leading-normal">Fleet</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-sm font-medium leading-normal">Contracts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_add_on</span>
+<p class="text-sm font-medium leading-normal">Reservations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="mt-auto flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<p class="text-sm font-medium leading-normal">Support</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-8">
+<div class="flex flex-col gap-6">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3">
+<div class="flex min-w-72 flex-col gap-2">
+<h1 class="text-zinc-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Settings</h1>
+<p class="text-zinc-500 dark:text-[#9dabb9] text-base font-normal leading-normal">Manage all system, branch, and module configurations.</p>
+</div>
+</div>
+<!-- Tabs -->
+<div class="border-b border-zinc-200 dark:border-[#3b4754]">
+<div class="flex gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary pb-[13px] pt-4" href="#">
+<p class="text-primary text-sm font-bold leading-normal tracking-[0.015em]">System Settings</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-zinc-500 dark:text-[#9dabb9] pb-[13px] pt-4 hover:border-b-primary/50 hover:text-primary" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Branch Settings</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-zinc-500 dark:text-[#9dabb9] pb-[13px] pt-4 hover:border-b-primary/50 hover:text-primary" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Module Settings</p>
+</a>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<!-- SearchBar and ToolBar -->
+<div class="flex justify-between items-center gap-4">
+<div class="flex-1 max-w-lg">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#9dabb9] flex border-none bg-white dark:bg-[#283039] items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-zinc-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-none bg-white dark:bg-[#283039] h-full placeholder:text-[#9dabb9] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search by setting key or description..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex gap-2">
+<button class="p-3 text-zinc-500 dark:text-white rounded-lg hover:bg-zinc-200 dark:hover:bg-white/10">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="p-3 text-zinc-500 dark:text-white rounded-lg hover:bg-zinc-200 dark:hover:bg-white/10">
+<span class="material-symbols-outlined">download</span>
+</button>
+<button class="p-3 text-zinc-500 dark:text-white rounded-lg hover:bg-zinc-200 dark:hover:bg-white/10">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-12 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] px-4 hover:bg-primary/90">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">save</span>
+<span class="truncate">Save Changes</span>
+</button>
+</div>
+</div>
+<!-- Settings Table -->
+<div class="overflow-x-auto bg-white dark:bg-[#111418] rounded-xl border border-zinc-200 dark:border-[#3b4754]">
+<table class="w-full text-sm text-left text-zinc-500 dark:text-zinc-400">
+<thead class="text-xs text-zinc-700 dark:text-zinc-300 uppercase bg-zinc-50 dark:bg-[#283039]">
+<tr>
+<th class="px-6 py-3" scope="col">Category</th>
+<th class="px-6 py-3" scope="col">Setting Key</th>
+<th class="px-6 py-3" scope="col">Description</th>
+<th class="px-6 py-3" scope="col">Type</th>
+<th class="px-6 py-3" scope="col">Default</th>
+<th class="px-6 py-3" scope="col">Current Value</th>
+<th class="px-6 py-3" scope="col">Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-zinc-200 dark:border-[#3b4754]">
+<td class="px-6 py-4 font-medium text-zinc-900 dark:text-white whitespace-nowrap">Authentication</td>
+<td class="px-6 py-4 font-mono text-zinc-500 dark:text-zinc-400">auth.session.timeout</td>
+<td class="px-6 py-4 max-w-xs">The duration in minutes before an inactive user session expires.</td>
+<td class="px-6 py-4">Integer</td>
+<td class="px-6 py-4">30</td>
+<td class="px-6 py-4">
+<input class="form-input w-24 rounded-md bg-zinc-100 dark:bg-[#283039] border-zinc-300 dark:border-[#3b4754] focus:ring-primary focus:border-primary text-zinc-900 dark:text-white" type="number" value="60"/>
+</td>
+<td class="px-6 py-4"><span class="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Global</span></td>
+</tr>
+<tr class="border-b border-zinc-200 dark:border-[#3b4754]">
+<td class="px-6 py-4 font-medium text-zinc-900 dark:text-white whitespace-nowrap">Authentication</td>
+<td class="px-6 py-4 font-mono text-zinc-500 dark:text-zinc-400">auth.mfa.required</td>
+<td class="px-6 py-4 max-w-xs">Enforce multi-factor authentication for all users.</td>
+<td class="px-6 py-4">Boolean</td>
+<td class="px-6 py-4">false</td>
+<td class="px-6 py-4">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-zinc-200 dark:bg-zinc-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-primary dark:peer-focus:ring-primary/80 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="px-6 py-4"><span class="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Global</span></td>
+</tr>
+<tr class="border-b border-zinc-200 dark:border-[#3b4754]">
+<td class="px-6 py-4 font-medium text-zinc-900 dark:text-white whitespace-nowrap">Billing</td>
+<td class="px-6 py-4 font-mono text-zinc-500 dark:text-zinc-400">billing.currency.default</td>
+<td class="px-6 py-4 max-w-xs">Default currency for all financial transactions and reports.</td>
+<td class="px-6 py-4">String</td>
+<td class="px-6 py-4">USD</td>
+<td class="px-6 py-4">
+<input class="form-input w-24 rounded-md bg-zinc-100 dark:bg-[#283039] border-zinc-300 dark:border-[#3b4754] focus:ring-primary focus:border-primary text-zinc-900 dark:text-white" type="text" value="USD"/>
+</td>
+<td class="px-6 py-4"><span class="bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Branch override</span></td>
+</tr>
+<tr class="border-b border-zinc-200 dark:border-[#3b4754]">
+<td class="px-6 py-4 font-medium text-zinc-900 dark:text-white whitespace-nowrap">Reservations</td>
+<td class="px-6 py-4 font-mono text-zinc-500 dark:text-zinc-400">reservations.lead_time.min</td>
+<td class="px-6 py-4 max-w-xs">Minimum number of hours required before a reservation can start.</td>
+<td class="px-6 py-4">Integer</td>
+<td class="px-6 py-4">2</td>
+<td class="px-6 py-4">
+<input class="form-input w-24 rounded-md bg-zinc-100 dark:bg-[#283039] border-zinc-300 dark:border-[#3b4754] focus:ring-primary focus:border-primary text-zinc-900 dark:text-white" type="number" value="4"/>
+</td>
+<td class="px-6 py-4"><span class="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Global</span></td>
+</tr>
+<tr>
+<td class="px-6 py-4 font-medium text-zinc-900 dark:text-white whitespace-nowrap">Reservations</td>
+<td class="px-6 py-4 font-mono text-zinc-500 dark:text-zinc-400">reservations.allowed_vehicle_classes</td>
+<td class="px-6 py-4 max-w-xs">List of vehicle classes available for online reservations.</td>
+<td class="px-6 py-4">List</td>
+<td class="px-6 py-4">[Economy, Compact]</td>
+<td class="px-6 py-4">
+<button class="text-primary hover:underline text-sm font-medium">Edit List</button>
+</td>
+<td class="px-6 py-4"><span class="bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Module-level</span></td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<nav aria-label="Table navigation" class="flex items-center justify-between p-4">
+<span class="text-sm font-normal text-zinc-500 dark:text-zinc-400">Showing <span class="font-semibold text-zinc-900 dark:text-white">1-5</span> of <span class="font-semibold text-zinc-900 dark:text-white">100</span></span>
+<ul class="inline-flex items-center -space-x-px">
+<li>
+<a class="px-3 h-8 ml-0 leading-tight text-zinc-500 bg-white dark:bg-[#283039] border border-zinc-300 dark:border-[#3b4754] rounded-l-lg hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-[#3b4754] dark:hover:text-white flex items-center" href="#">Previous</a>
+</li>
+<li>
+<a class="px-3 h-8 leading-tight text-zinc-500 bg-white dark:bg-[#283039] border border-zinc-300 dark:border-[#3b4754] hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-[#3b4754] dark:hover:text-white flex items-center" href="#">1</a>
+</li>
+<li>
+<a class="px-3 h-8 leading-tight text-zinc-500 bg-white dark:bg-[#283039] border border-zinc-300 dark:border-[#3b4754] hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-[#3b4754] dark:hover:text-white flex items-center" href="#">2</a>
+</li>
+<li>
+<a aria-current="page" class="z-10 px-3 h-8 leading-tight text-primary bg-primary/10 border border-primary hover:bg-primary/20 flex items-center" href="#">3</a>
+</li>
+<li>
+<span class="px-3 h-8 leading-tight text-zinc-500 bg-white dark:bg-[#283039] border border-zinc-300 dark:border-[#3b4754] flex items-center">...</span>
+</li>
+<li>
+<a class="px-3 h-8 leading-tight text-zinc-500 bg-white dark:bg-[#283039] border border-zinc-300 dark:border-[#3b4754] hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-[#3b4754] dark:hover:text-white flex items-center" href="#">20</a>
+</li>
+<li>
+<a class="px-3 h-8 leading-tight text-zinc-500 bg-white dark:bg-[#283039] border border-zinc-300 dark:border-[#3b4754] rounded-r-lg hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-[#3b4754] dark:hover:text-white flex items-center" href="#">Next</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
