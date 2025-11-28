@@ -1,3 +1,39 @@
+/**
+ * File: shared/schema.ts
+ * @area Database Schema
+ * @checklist Parts 1-16, Appendix C
+ * @purpose Master database schema defining 100+ tables per Master Spec
+ * 
+ * @structure
+ *  Part 1: Users, Authentication, RBAC (users, sessions)
+ *  Part 2: Core Operations (contracts, vehicles, customers, payments)
+ *  Part 3: Contract Lifecycle (contractStatusHistory, contractEdits)
+ *  Part 4: Pricing & Financials (tariffs, charges, seasonalTariffs)
+ *  Part 5: Documents (documentRegistry, documentVersions, otpVerifications)
+ *  Part 6: Reservations (reservations, quotations)
+ *  Part 7: Incidents & Insurance (incidents, insuranceClaims, claimProgressUpdates)
+ *  Part 8: Notifications (notificationTemplates, communicationLogs, campaigns)
+ *  Part 9: Reporting & Analytics (summariesDailyBranch, summariesDailyVehicle)
+ *  Part 10: Drivers (drivers, driverRatePlans, contractDrivers, driverSchedules)
+ *  Part 11: Risk & Blacklist (blacklistEntries, customerRiskScores)
+ *  Part 12: Automation (cronJobDefinitions, sequences)
+ *  Part 13-16: Extensions (approvals, tolls, fines, campaigns)
+ *  Appendix A-F: Lookups, addons, packages (vehicleClasses, vehicleGroups, addons)
+ * 
+ * @compliance
+ *  - 111 DECIMAL financial fields (no varchar for money per Appendix C)
+ *  - Bilingual fields: *En/*Ar pairs throughout
+ *  - Soft-delete: disabled + disabledAt + disabledBy columns (no hard delete)
+ *  - Optimistic locking: version fields on reservations, incidents, insuranceClaims (C.6)
+ *  - Canonical aliases added for service alignment (Nov 2025)
+ * 
+ * @notes
+ *  - Insert schemas: Use createInsertSchema().omit() for auto-generated fields
+ *  - Relations: Defined at bottom of file for Drizzle query builder
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md
+ */
+
 import { sql } from 'drizzle-orm';
 import {
   index,

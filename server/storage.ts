@@ -1,3 +1,32 @@
+/**
+ * File: server/storage.ts
+ * @area Data Access Layer
+ * @checklist Parts 1-16, Appendix C
+ * @purpose Centralized storage interface implementing all CRUD operations per Master Spec
+ * 
+ * @behaviour
+ *  - All database access goes through IStorage interface
+ *  - Disable-only architecture (no hard deletes per §1.3)
+ *  - Dual audit trail: contractEdits + auditLogs
+ *  - DECIMAL handling for all financial fields (111 total per Appendix C)
+ * 
+ * @entities (100+ tables grouped by domain)
+ *  - Core: users, contracts, contractEdits, auditLogs
+ *  - Customers: customers, sponsors, companies, customerRiskScores
+ *  - Vehicles: vehicles, vehicleInspections, vehicleServiceRecords, maintenanceJobs
+ *  - Finance: payments, contractCharges, receipts
+ *  - Insurance: insuranceClaims, claimProgressUpdates, incidents
+ *  - Drivers: drivers, driverRatePlans, contractDrivers, driverSchedules
+ *  - Notifications: notificationTemplates, communicationLogs, campaigns
+ *  - Lookups: sequences, seasonalTariffs, blacklistEntries, etc.
+ * 
+ * @notes
+ *  - 113 pre-existing TypeScript diagnostics (technical debt, non-blocking)
+ *  - Legacy methods removed: IStorage driver rate card methods superseded by driver_rate_plans
+ * 
+ * See: docs/MASTER_SPEC_IMPLEMENTATION_CHECKLIST.md (All Parts)
+ */
+
 import {
   users,
   contracts,
