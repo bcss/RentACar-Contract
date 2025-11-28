@@ -52,116 +52,16 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import {
-  Menu,
-  Sun,
-  Moon,
-  Globe,
-  Car,
-  LayoutDashboard,
-  FileText,
-  Hospital,
-  Folder,
-  BarChart3,
-  ChevronRight,
-  Settings,
-  Building2,
-  BarChart,
-  Users,
-  ShieldCheck,
-  Clock,
-  UserSearch,
-  AlertTriangle,
-  ChevronDown,
-  HelpCircle,
-  FileCheck,
-  Scale,
-  UserCog,
-  Building,
-  Shield,
-  DollarSign,
-  Lock,
-  LogOut,
-  Info,
-  Landmark,
-  AlertOctagon,
-  FileWarning,
-  FolderOpen,
-  Wrench,
-  Receipt,
-  Package,
-  Calendar,
-  Bell,
-  CheckSquare,
-  Mail,
-  MessageSquare,
-  Send,
-  TrendingUp,
-  Target,
-  LineChart,
-  Activity,
-  Headphones,
-} from 'lucide-react';
+import { MaterialSymbol } from '@/components/MaterialSymbol';
 
 interface AppSidebarProps {
   side?: 'left' | 'right';
 }
 
-// Helper function to map icon names to lucide-react components
-const getIconComponent = (iconName: string) => {
-  const iconMap: Record<string, any> = {
-    // Masters
-    'people_outline': Users,
-    'directions_car': Car,
-    'business': Building,
-    'people': Users,
-    // Reports
-    'account_balance': DollarSign,
-    'bar_chart': BarChart,
-    'assessment': BarChart3,
-    // Audit
-    'timeline': Clock,
-    'warning_amber': AlertTriangle,
-    'person_search': UserSearch,
-    // Settings
-    'settings': Settings,
-    'business_center': Building2,
-    'description': FileText,
-    // Help & Legal
-    'help_outline': HelpCircle,
-    'gavel': Scale,
-    'shield': Shield,
-    'info': HelpCircle,
-    // New Features - Wave 1 (Compliance & Operations)
-    'landmark': Landmark,
-    'alert_octagon': AlertOctagon,
-    'file_warning': FileWarning,
-    'folder_open': FolderOpen,
-    // New Features - Wave 2 (Fleet Economics)
-    'wrench': Wrench,
-    'receipt': Receipt,
-    'package': Package,
-    // New Features - Wave 3 (Workforce & Automation)
-    'calendar': Calendar,
-    'bell': Bell,
-    'check_square': CheckSquare,
-    // Communications
-    'mail': Mail,
-    'message_square': MessageSquare,
-    'send': Send,
-    // Predictive Intelligence
-    'trending_up': TrendingUp,
-    'target': Target,
-    'line_chart': LineChart,
-    'activity': Activity,
-    // Design System
-    'dashboard': LayoutDashboard,
-    // Default
-    'default': FileText,
-  };
-  
-  return iconMap[iconName] || FileText;
-};
+// Helper component to render Material Symbol icons
+const SidebarIcon = ({ name, filled = false }: { name: string; filled?: boolean }) => (
+  <MaterialSymbol name={name} size="sm" filled={filled} />
+);
 
 export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const { t, i18n } = useTranslation();
@@ -362,37 +262,37 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     },
     {
       title: t('nav.tollManagement'),
-      icon: 'landmark',
+      icon: 'toll',
       url: '/toll-management',
       show: true,
     },
     {
       title: t('nav.trafficFines'),
-      icon: 'alert_octagon',
+      icon: 'warning',
       url: '/traffic-fines',
       show: true,
     },
     {
       title: t('nav.incidents'),
-      icon: 'file_warning',
+      icon: 'report_problem',
       url: '/incidents',
       show: true,
     },
     {
       title: t('nav.vehicleMaintenance'),
-      icon: 'wrench',
+      icon: 'build',
       url: '/vehicle-maintenance',
       show: true,
     },
     {
       title: t('nav.driverScheduling'),
-      icon: 'calendar',
+      icon: 'event',
       url: '/driver-scheduling',
       show: true,
     },
     {
       title: t('nav.communicationLogs'),
-      icon: 'message_square',
+      icon: 'chat',
       url: '/communication/logs',
       show: isAdmin || isManager,
     },
@@ -404,7 +304,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     },
     {
       title: t('nav.manualNotificationSender'),
-      icon: 'mail',
+      icon: 'email',
       url: '/notifications/send',
       show: isAdmin || isManager || user?.role === 'staff',
     },
@@ -468,13 +368,13 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     },
     {
       title: t('nav.vehicleAccessories'),
-      icon: 'package',
+      icon: 'inventory_2',
       url: '/accessories',
       show: true,
     },
     {
       title: t('nav.publicHolidays'),
-      icon: 'default',
+      icon: 'event_available',
       url: '/public-holidays',
       show: isAdmin,
     },
@@ -484,25 +384,25 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
   const administrationItems = [
     {
       title: t('nav.customerRiskScoring'),
-      icon: 'shield',
+      icon: 'security',
       url: '/risk-scoring',
       show: isAdmin || isManager,
     },
     {
       title: t('nav.approvalWorkflows'),
-      icon: 'check_square',
+      icon: 'checklist',
       url: '/approvals',
       show: isAdmin || isManager,
     },
     {
       title: t('nav.automatedReminders'),
-      icon: 'bell',
+      icon: 'notifications',
       url: '/reminders',
       show: true,
     },
     {
       title: t('nav.communicationProviders'),
-      icon: 'mail',
+      icon: 'email',
       url: '/communication/providers',
       show: isAdmin,
     },
@@ -594,13 +494,13 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     },
     {
       title: t('nav.providerComparison'),
-      icon: 'mail',
+      icon: 'email',
       url: '/provider-comparison',
       show: isAdmin || isManager,
     },
     {
       title: t('nav.fieldStyleShowcase'),
-      icon: 'default',
+      icon: 'text_fields',
       url: '/field-style-showcase',
       show: isAdmin || isManager,
     },
@@ -633,7 +533,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     // Communication & Campaign Analytics
     {
       title: t('nav.campaignAnalytics'),
-      icon: 'activity',
+      icon: 'trending_up',
       url: '/campaign-analytics',
       show: isAdmin || isManager,
     },
@@ -646,7 +546,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     },
     {
       title: 'Fleet Utilization Forecast',
-      icon: 'activity',
+      icon: 'trending_up',
       url: '/reports/predictive/fleet-utilization',
       show: isAdmin || isManager || canAccessReports,
     },
@@ -670,7 +570,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
     },
     {
       title: 'Location Demand Forecast',
-      icon: 'activity',
+      icon: 'trending_up',
       url: '/reports/predictive/demand-forecast',
       show: isAdmin || isManager || canAccessReports,
     },
@@ -851,7 +751,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
                 aria-label={sidebarState === 'expanded' ? t('header.collapseSidebar') : t('header.expandSidebar')}
               >
-                <Menu className="h-4 w-4" />
+                <SidebarIcon name="menu" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
@@ -870,7 +770,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
                 aria-label={theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}
               >
-                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                <SidebarIcon name={theme === 'light' ? 'dark_mode' : 'light_mode'} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
@@ -889,7 +789,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                 className="h-8 w-8 hover-elevate active-elevate-2 shrink-0"
                 aria-label={language === 'en' ? t('header.switchToArabic') : t('header.switchToEnglish')}
               >
-                <Globe className="h-4 w-4" />
+                <SidebarIcon name="language" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
@@ -933,7 +833,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   }}
                 >
                   <Link href="/">
-                    <LayoutDashboard className="h-4 w-4" />
+                    <SidebarIcon name="dashboard" filled={location === '/'} />
                     {sidebarState === 'expanded' && <span>{t('nav.dashboard')}</span>}
                   </Link>
                 </SidebarMenuButton>
@@ -946,10 +846,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     <TooltipTrigger asChild>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton data-testid="nav-operations">
-                          <Activity className="h-4 w-4" />
+                          <SidebarIcon name="work" />
                           {sidebarState === 'expanded' && <span>{t('nav.operations')}</span>}
                           {sidebarState === 'expanded' && (
-                            <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                            <MaterialSymbol name="chevron_right" size="sm" className="ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                           )}
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
@@ -962,19 +862,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   </Tooltip>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {operationsItems.filter(item => item.show).map((item) => {
-                        const IconComponent = getIconComponent(item.icon);
-                        return (
-                          <SidebarMenuSubItem key={item.title}>
-                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
-                              <Link href={item.url}>
-                                <IconComponent className="h-4 w-4" />
-                                {sidebarState === 'expanded' && <span>{item.title}</span>}
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
+                      {operationsItems.filter(item => item.show).map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                            <Link href={item.url}>
+                              <SidebarIcon name={item.icon} filled={location === item.url} />
+                              {sidebarState === 'expanded' && <span>{item.title}</span>}
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -987,10 +884,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     <TooltipTrigger asChild>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton data-testid="nav-masters">
-                          <Folder className="h-4 w-4" />
+                          <SidebarIcon name="folder" />
                           {sidebarState === 'expanded' && <span>{t('nav.masters')}</span>}
                           {sidebarState === 'expanded' && (
-                            <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                            <MaterialSymbol name="chevron_right" size="sm" className="ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                           )}
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
@@ -1003,19 +900,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   </Tooltip>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {masterItems.filter(item => item.show).map((item) => {
-                        const IconComponent = getIconComponent(item.icon);
-                        return (
-                          <SidebarMenuSubItem key={item.title}>
-                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
-                              <Link href={item.url}>
-                                <IconComponent className="h-4 w-4" />
-                                {sidebarState === 'expanded' && <span>{item.title}</span>}
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
+                      {masterItems.filter(item => item.show).map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                            <Link href={item.url}>
+                              <SidebarIcon name={item.icon} filled={location === item.url} />
+                              {sidebarState === 'expanded' && <span>{item.title}</span>}
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -1029,10 +923,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                       <TooltipTrigger asChild>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton data-testid="nav-reports">
-                            <BarChart3 className="h-4 w-4" />
+                            <SidebarIcon name="bar_chart" />
                             {sidebarState === 'expanded' && <span>{t('nav.reports')}</span>}
                             {sidebarState === 'expanded' && (
-                              <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                              <MaterialSymbol name="chevron_right" size="sm" className="ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                             )}
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -1045,19 +939,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {reportItems.filter(item => item.show).map((item) => {
-                          const IconComponent = getIconComponent(item.icon);
-                          return (
-                            <SidebarMenuSubItem key={item.title}>
-                              <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/reports/', '')}-reports`}>
-                                <Link href={item.url}>
-                                  <IconComponent className="h-4 w-4" />
-                                  {sidebarState === 'expanded' && <span>{item.title}</span>}
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
+                        {reportItems.filter(item => item.show).map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/reports/', '')}-reports`}>
+                              <Link href={item.url}>
+                                <SidebarIcon name={item.icon} filled={location === item.url} />
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -1072,10 +963,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                       <TooltipTrigger asChild>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton data-testid="nav-administration">
-                            <ShieldCheck className="h-4 w-4" />
+                            <SidebarIcon name="admin_panel_settings" />
                             {sidebarState === 'expanded' && <span>{t('nav.administration')}</span>}
                             {sidebarState === 'expanded' && (
-                              <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                              <MaterialSymbol name="chevron_right" size="sm" className="ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                             )}
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -1088,19 +979,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {administrationItems.filter(item => item.show).map((item) => {
-                          const IconComponent = getIconComponent(item.icon);
-                          return (
-                            <SidebarMenuSubItem key={item.title}>
-                              <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
-                                <Link href={item.url}>
-                                  <IconComponent className="h-4 w-4" />
-                                  {sidebarState === 'expanded' && <span>{item.title}</span>}
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
+                        {administrationItems.filter(item => item.show).map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                              <Link href={item.url}>
+                                <SidebarIcon name={item.icon} filled={location === item.url} />
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -1115,10 +1003,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                       <TooltipTrigger asChild>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton data-testid="nav-settings">
-                            <Settings className="h-4 w-4" />
+                            <SidebarIcon name="settings" />
                             {sidebarState === 'expanded' && <span>{t('nav.settings')}</span>}
                             {sidebarState === 'expanded' && (
-                              <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                              <MaterialSymbol name="chevron_right" size="sm" className="ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                             )}
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -1131,19 +1019,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {settingsItems.filter(item => item.show).map((item) => {
-                          const IconComponent = getIconComponent(item.icon);
-                          return (
-                            <SidebarMenuSubItem key={item.title}>
-                              <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
-                                <Link href={item.url}>
-                                  <IconComponent className="h-4 w-4" />
-                                  {sidebarState === 'expanded' && <span>{item.title}</span>}
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
+                        {settingsItems.filter(item => item.show).map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                              <Link href={item.url}>
+                                <SidebarIcon name={item.icon} filled={location === item.url} />
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -1158,10 +1043,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                       <TooltipTrigger asChild>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton data-testid="nav-sample">
-                            <LayoutDashboard className="h-4 w-4" />
+                            <SidebarIcon name="palette" />
                             {sidebarState === 'expanded' && <span>{t('nav.sample')}</span>}
                             {sidebarState === 'expanded' && (
-                              <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                              <MaterialSymbol name="chevron_right" size="sm" className="ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                             )}
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -1174,19 +1059,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     </Tooltip>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {sampleItems.filter(item => item.show).map((item) => {
-                          const IconComponent = getIconComponent(item.icon);
-                          return (
-                            <SidebarMenuSubItem key={item.title}>
-                              <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
-                                <Link href={item.url}>
-                                  <IconComponent className="h-4 w-4" />
-                                  {sidebarState === 'expanded' && <span>{item.title}</span>}
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
+                        {sampleItems.filter(item => item.show).map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.replace('/', '')}`}>
+                              <Link href={item.url}>
+                                <SidebarIcon name={item.icon} filled={location === item.url} />
+                                {sidebarState === 'expanded' && <span>{item.title}</span>}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -1200,10 +1082,10 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                     <TooltipTrigger asChild>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton data-testid="nav-help-legal">
-                          <HelpCircle className="h-4 w-4" />
+                          <SidebarIcon name="help_outline" />
                           {sidebarState === 'expanded' && <span>Help & Legal</span>}
                           {sidebarState === 'expanded' && (
-                            <ChevronRight className="ml-auto h-4 w-4 group-data-[state=open]/collapsible:rotate-90 transition-transform" />
+                            <MaterialSymbol name="chevron_right" size="sm" className="ml-auto group-data-[state=open]/collapsible:rotate-90 transition-transform" />
                           )}
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
@@ -1216,19 +1098,16 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   </Tooltip>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {helpLegalItems.filter(item => item.show).map((item) => {
-                        const IconComponent = getIconComponent(item.icon);
-                        return (
-                          <SidebarMenuSubItem key={item.title}>
-                            <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.split('/').pop()}`}>
-                              <Link href={item.url}>
-                                <IconComponent className="h-4 w-4" />
-                                {sidebarState === 'expanded' && <span>{item.title}</span>}
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
+                      {helpLegalItems.filter(item => item.show).map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={location === item.url} data-testid={`nav-${item.url.split('/').pop()}`}>
+                            <Link href={item.url}>
+                              <SidebarIcon name={item.icon} filled={location === item.url} />
+                              {sidebarState === 'expanded' && <span>{item.title}</span>}
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -1248,7 +1127,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   className="flex items-center gap-3 w-full hover-elevate p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"
                   data-testid="button-support"
                 >
-                  <Headphones className="h-5 w-5" />
+                  <MaterialSymbol name="headphones" size="md" />
                   <span className="text-sm font-medium">{t('nav.support')}</span>
                 </button>
               ) : (
@@ -1256,7 +1135,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                   className="flex items-center justify-center w-full hover-elevate p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"
                   data-testid="button-support"
                 >
-                  <Headphones className="h-5 w-5" />
+                  <MaterialSymbol name="headphones" size="md" />
                 </button>
               )}
             </Link>
@@ -1289,7 +1168,7 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
                         {t(`role.${user?.role || 'staff'}`)}
                       </Badge>
                     </div>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    <MaterialSymbol name="expand_more" size="sm" className="text-muted-foreground" />
                   </button>
                 ) : (
                   <button className="flex items-center justify-center w-full hover-elevate p-2 rounded-md" data-testid="button-user-menu">
@@ -1311,12 +1190,12 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
             <DropdownMenuLabel>{t('auth.myAccount')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setIsPasswordDialogOpen(true)} data-testid="button-change-password">
-              <Lock className="mr-2 h-4 w-4" />
+              <MaterialSymbol name="lock" size="sm" className="mr-2" />
               {t('users.changePassword')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
-              <LogOut className="mr-2 h-4 w-4" />
+              <MaterialSymbol name="logout" size="sm" className="mr-2" />
               {t('auth.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
