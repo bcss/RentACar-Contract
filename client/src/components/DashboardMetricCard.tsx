@@ -40,9 +40,9 @@ export function DashboardMetricCard({
       iconColor: 'text-destructive',
     },
     success: {
-      card: 'border border-transparent bg-[hsl(142_76%_36%/0.08)] shadow-md',
-      iconBg: 'bg-[hsl(142_76%_36%/0.15)]',
-      iconColor: 'text-[hsl(142_76%_36%)]',
+      card: 'border border-transparent bg-[hsl(var(--positive)/0.08)] shadow-md',
+      iconBg: 'bg-[hsl(var(--positive)/0.15)]',
+      iconColor: 'text-[hsl(var(--positive))]',
     },
   };
 

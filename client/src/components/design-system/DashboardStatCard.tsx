@@ -57,12 +57,12 @@ export function DashboardStatCard({
         {trend && (
           <div className="flex items-center text-xs text-muted-foreground mt-1" data-testid={`trend-${testId}`}>
             {trend.isPositive ? (
-              <TrendingUp className="mr-1 h-3 w-3 text-emerald-600" data-testid={`icon-trend-up-${testId}`} />
+              <TrendingUp className="mr-1 h-3 w-3 text-[hsl(var(--positive))]" data-testid={`icon-trend-up-${testId}`} />
             ) : (
-              <TrendingDown className="mr-1 h-3 w-3 text-rose-600" data-testid={`icon-trend-down-${testId}`} />
+              <TrendingDown className="mr-1 h-3 w-3 text-[hsl(var(--negative))]" data-testid={`icon-trend-down-${testId}`} />
             )}
             <span 
-              className={`font-medium ${trend.isPositive ? 'text-emerald-600' : 'text-rose-600'}`}
+              className={`font-medium ${trend.isPositive ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}
               data-testid={`trend-value-${testId}`}
             >
               {trend.value}

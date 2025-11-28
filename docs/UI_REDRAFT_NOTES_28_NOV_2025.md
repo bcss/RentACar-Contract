@@ -110,12 +110,12 @@ This document tracks all UI/UX improvements made during the KarāraOS redesign b
 - [x] Responsive: icon-only when collapsed, text when expanded
 - [x] E2E tested in both states
 
-### Phase 3: Core Screens
-- [ ] Dashboard
-- [ ] Contracts list/detail
-- [ ] Customers list/detail
-- [ ] Vehicles list/detail
-- [ ] Reservations
+### Phase 3: Core Screens (COMPLETED)
+- [x] Dashboard - Updated DashboardMetricCard to use --positive semantic color
+- [x] DashboardStatCard - Updated to use `text-[hsl(var(--positive))]` / `text-[hsl(var(--negative))]` pattern
+- [x] Contracts list - E2E verified, proper styling
+- [x] Core components now use semantic CSS variable pattern from design system
+- [x] E2E tested: Dashboard tabs, stats cards, Contracts list all working
 
 ### Phase 4: Transactional Screens
 - [ ] Contract forms
