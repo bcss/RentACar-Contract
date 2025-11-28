@@ -131,10 +131,10 @@ export default function MaintenanceComplianceReport() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Overdue Services</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertCircle className="h-4 w-4 text-[hsl(var(--negative))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{overdueCount}</div>
+            <div className="text-2xl font-bold text-[hsl(var(--negative))]">{overdueCount}</div>
             <p className="text-xs text-muted-foreground mt-1">Requires immediate attention</p>
           </CardContent>
         </Card>

@@ -116,10 +116,10 @@ export default function TrafficFineAgingReport() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Unpaid Amount</CardTitle>
-            <DollarSign className="h-4 w-4 text-red-600" />
+            <DollarSign className="h-4 w-4 text-[hsl(var(--negative))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">AED {totalUnpaidAmount.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-[hsl(var(--negative))]">AED {totalUnpaidAmount.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground mt-1">Outstanding balance</p>
           </CardContent>
         </Card>
@@ -138,10 +138,10 @@ export default function TrafficFineAgingReport() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Recovery Rate</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-[hsl(var(--positive))]">
               {totalFines > 0 ? ((paidCount / totalFines) * 100).toFixed(1) : 0}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">{paidCount} fines paid</p>

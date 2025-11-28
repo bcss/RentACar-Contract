@@ -131,7 +131,7 @@ export default function CustomerChurnRiskReport() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600" data-testid="text-high-risk">
+                <div className="text-2xl font-bold text-[hsl(var(--negative))]" data-testid="text-high-risk">
                   {data.summary.highRiskCount}
                 </div>
               </CardContent>
@@ -157,7 +157,7 @@ export default function CustomerChurnRiskReport() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600" data-testid="text-low-risk">
+                <div className="text-2xl font-bold text-[hsl(var(--positive))]" data-testid="text-low-risk">
                   {data.summary.lowRiskCount}
                 </div>
               </CardContent>

@@ -161,10 +161,10 @@ export default function CustomerRiskScoring() {
   };
 
   const getRiskColor = (score: number) => {
-    if (score <= 30) return "text-green-600";
+    if (score <= 30) return "text-[hsl(var(--positive))]";
     if (score <= 60) return "text-yellow-600";
     if (score <= 80) return "text-orange-600";
-    return "text-red-600";
+    return "text-[hsl(var(--negative))]";
   };
 
   const getRiskBadgeVariant = (category: string): "default" | "secondary" | "destructive" => {

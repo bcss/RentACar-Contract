@@ -182,9 +182,9 @@ export default function VehicleTransfers() {
       case "approved":
         return <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400" data-testid="badge-status-approved">Approved</Badge>;
       case "rejected":
-        return <Badge className="bg-red-500/10 text-red-700 dark:text-red-400" data-testid="badge-status-rejected">Rejected</Badge>;
+        return <Badge className="bg-[hsl(var(--negative)/0.1)] text-[hsl(var(--negative))]" data-testid="badge-status-rejected">Rejected</Badge>;
       case "completed":
-        return <Badge className="bg-green-500/10 text-green-700 dark:text-green-400" data-testid="badge-status-completed">Completed</Badge>;
+        return <Badge className="bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))]" data-testid="badge-status-completed">Completed</Badge>;
       default:
         return <Badge data-testid="badge-status-unknown">{status}</Badge>;
     }

@@ -115,10 +115,10 @@ export default function CustomerRiskTrends() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Low Risk</CardTitle>
-            <Shield className="h-4 w-4 text-green-600" />
+            <Shield className="h-4 w-4 text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{lowRiskCount}</div>
+            <div className="text-2xl font-bold text-[hsl(var(--positive))]">{lowRiskCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {totalCustomers > 0 ? Math.round((lowRiskCount / totalCustomers) * 100) : 0}% of customers
             </p>
@@ -141,10 +141,10 @@ export default function CustomerRiskTrends() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">High Risk</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertTriangle className="h-4 w-4 text-[hsl(var(--negative))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{highRiskCount}</div>
+            <div className="text-2xl font-bold text-[hsl(var(--negative))]">{highRiskCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {totalCustomers > 0 ? Math.round((highRiskCount / totalCustomers) * 100) : 0}% of customers
             </p>

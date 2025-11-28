@@ -292,17 +292,17 @@ export default function DriverRevenueCostReport() {
                         <TableCell className="text-right">{formatCurrency(driver.totalRevenue)}</TableCell>
                         <TableCell className="text-right">{formatCurrency(driver.totalCost)}</TableCell>
                         <TableCell className="text-right">
-                          <span className={driver.profit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          <span className={driver.profit >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}>
                             {formatCurrency(driver.profit)}
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className={driver.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          <span className={driver.profitMargin >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}>
                             {driver.profitMargin.toFixed(1)}%
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className={driver.roi >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          <span className={driver.roi >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}>
                             {driver.roi.toFixed(1)}%
                           </span>
                         </TableCell>

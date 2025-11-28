@@ -238,11 +238,11 @@ export function MyDayTab() {
 
             <Link href="/contracts?status=completed">
               <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-completed-contracts">
-                <div className="absolute top-0 left-0 w-1 h-full bg-green-500 group-hover:bg-primary transition-colors" />
+                <div className="absolute top-0 left-0 w-1 h-full bg-[hsl(var(--positive))] group-hover:bg-primary transition-colors" />
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.completed')}</p>
-                    <Badge className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">{t('contract.status.completed')}</Badge>
+                    <Badge className="text-xs bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))] border-[hsl(var(--positive)/0.2)]">{t('contract.status.completed')}</Badge>
                   </div>
                   <p className="text-3xl font-semibold tabular-nums">{myCompletedContracts.length}</p>
                 </div>

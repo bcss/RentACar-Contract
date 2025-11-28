@@ -110,9 +110,9 @@ export default function RevenueForecastReport() {
                     {data.summary.growthRate.toFixed(1)}%
                   </div>
                   {data.summary.growthRate > 0 ? (
-                    <TrendingUp className="h-5 w-5 text-green-600" />
+                    <TrendingUp className="h-5 w-5 text-[hsl(var(--positive))]" />
                   ) : (
-                    <TrendingDown className="h-5 w-5 text-red-600" />
+                    <TrendingDown className="h-5 w-5 text-[hsl(var(--negative))]" />
                   )}
                 </div>
               </CardContent>

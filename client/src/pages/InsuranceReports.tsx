@@ -349,7 +349,7 @@ export default function InsuranceReports() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-green-600" data-testid="text-total-settled">
+                    <div className="text-2xl font-bold text-[hsl(var(--positive))]" data-testid="text-total-settled">
                       {formatCurrency(report.summary.totalSettledAmount)}
                     </div>
                   </CardContent>
@@ -531,7 +531,7 @@ export default function InsuranceReports() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-red-600" data-testid="text-rejected-claims">
+                    <div className="text-2xl font-bold text-[hsl(var(--negative))]" data-testid="text-rejected-claims">
                       {report.summary.rejectedClaims}
                     </div>
                   </CardContent>

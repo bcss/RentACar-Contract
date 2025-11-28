@@ -79,7 +79,7 @@ export default function CommunicationLogs() {
   const getChannelIcon = (channel: string) => {
     return channel === 'email' 
       ? <Mail className="w-4 h-4 text-blue-600" />
-      : <Phone className="w-4 h-4 text-green-600" />;
+      : <Phone className="w-4 h-4 text-[hsl(var(--positive))]" />;
   };
 
   return (

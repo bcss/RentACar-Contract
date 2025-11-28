@@ -373,8 +373,8 @@ Please attach a screenshot if available.
                   <div className="flex items-center gap-2">
                     {healthData?.webserver.status === 'running' ? (
                       <>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
+                        <CheckCircle className="h-4 w-4 text-[hsl(var(--positive))]" />
+                        <Badge className="bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))] border-[hsl(var(--positive)/0.2)]">
                           Running
                         </Badge>
                       </>
@@ -425,8 +425,8 @@ Please attach a screenshot if available.
                   <div className="flex items-center gap-2">
                     {healthData?.database.status === 'healthy' ? (
                       <>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
+                        <CheckCircle className="h-4 w-4 text-[hsl(var(--positive))]" />
+                        <Badge className="bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))] border-[hsl(var(--positive)/0.2)]">
                           Healthy
                         </Badge>
                       </>

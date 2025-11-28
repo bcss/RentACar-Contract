@@ -255,7 +255,7 @@ export default function DriverUtilizationReport() {
                         <TableCell className="text-right">{formatCurrency(driver.totalRevenue)}</TableCell>
                         <TableCell className="text-right">{formatCurrency(driver.totalCost)}</TableCell>
                         <TableCell className="text-right">
-                          <span className={driver.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          <span className={driver.profitMargin >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}>
                             {formatCurrency(driver.profitMargin)}
                           </span>
                         </TableCell>

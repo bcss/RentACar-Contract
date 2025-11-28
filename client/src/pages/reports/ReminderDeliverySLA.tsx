@@ -123,10 +123,10 @@ export default function ReminderDeliverySLA() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Delivery Rate</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{deliveryRate}%</div>
+            <div className="text-2xl font-bold text-[hsl(var(--positive))]">{deliveryRate}%</div>
             <p className="text-xs text-muted-foreground mt-1">{deliveredCount} delivered</p>
           </CardContent>
         </Card>
@@ -134,10 +134,10 @@ export default function ReminderDeliverySLA() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Failure Rate</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
+            <XCircle className="h-4 w-4 text-[hsl(var(--negative))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{failureRate}%</div>
+            <div className="text-2xl font-bold text-[hsl(var(--negative))]">{failureRate}%</div>
             <p className="text-xs text-muted-foreground mt-1">{failedCount} failed</p>
           </CardContent>
         </Card>

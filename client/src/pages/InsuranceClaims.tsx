@@ -102,9 +102,9 @@ export default function InsuranceClaims() {
       case 'pending':
         return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400';
       case 'approved':
-        return 'bg-green-500/10 text-green-700 dark:text-green-400';
+        return 'bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))]';
       case 'rejected':
-        return 'bg-red-500/10 text-red-700 dark:text-red-400';
+        return 'bg-[hsl(var(--negative)/0.1)] text-[hsl(var(--negative))]';
       case 'settled':
         return 'bg-gray-500/10 text-gray-700 dark:text-gray-400';
       default:

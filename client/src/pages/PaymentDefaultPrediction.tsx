@@ -127,7 +127,7 @@ export default function PaymentDefaultPrediction() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600" data-testid="text-high-risk-contracts">
+                <div className="text-2xl font-bold text-[hsl(var(--negative))]" data-testid="text-high-risk-contracts">
                   {data.summary.highRiskCount}
                 </div>
               </CardContent>

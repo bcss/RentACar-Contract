@@ -160,10 +160,10 @@ export default function DriverUtilizationReport() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Utilization Rate</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
+            <DollarSign className="h-4 w-4 text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-[hsl(var(--positive))]">
               {totalHours > 0 ? ((totalHours / (uniqueDrivers * 160)) * 100).toFixed(1) : '0'}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">vs 160h/month standard</p>

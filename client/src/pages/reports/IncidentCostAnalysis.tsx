@@ -110,10 +110,10 @@ export default function IncidentCostAnalysis() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Estimated Costs</CardTitle>
-            <DollarSign className="h-4 w-4 text-red-600" />
+            <DollarSign className="h-4 w-4 text-[hsl(var(--negative))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">AED {totalEstimatedCost.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-[hsl(var(--negative))]">AED {totalEstimatedCost.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground mt-1">Total financial impact</p>
           </CardContent>
         </Card>
@@ -132,10 +132,10 @@ export default function IncidentCostAnalysis() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Settled Claims</CardTitle>
-            <Shield className="h-4 w-4 text-green-600" />
+            <Shield className="h-4 w-4 text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{settledClaimsCount}</div>
+            <div className="text-2xl font-bold text-[hsl(var(--positive))]">{settledClaimsCount}</div>
             <p className="text-xs text-muted-foreground mt-1">Completed</p>
           </CardContent>
         </Card>

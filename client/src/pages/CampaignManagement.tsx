@@ -464,11 +464,11 @@ export default function CampaignManagement() {
                   <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t">
                     <div>
                       <div className="text-sm text-muted-foreground">{t('campaigns.successCount')}</div>
-                      <div className="font-medium text-green-600">{campaign.successCount}</div>
+                      <div className="font-medium text-[hsl(var(--positive))]">{campaign.successCount}</div>
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground">{t('campaigns.failureCount')}</div>
-                      <div className="font-medium text-red-600">{campaign.failureCount}</div>
+                      <div className="font-medium text-[hsl(var(--negative))]">{campaign.failureCount}</div>
                     </div>
                   </div>
                 )}

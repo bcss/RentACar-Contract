@@ -115,10 +115,10 @@ export default function TollExpenseAnalysis() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Darb (Abu Dhabi)</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <TrendingUp className="h-4 w-4 text-[hsl(var(--positive))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">AED {darbTotal.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-[hsl(var(--positive))]">AED {darbTotal.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {totalExpense > 0 ? ((darbTotal / totalExpense) * 100).toFixed(1) : 0}% of total
             </p>

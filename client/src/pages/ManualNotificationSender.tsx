@@ -325,9 +325,9 @@ export default function ManualNotificationSender() {
 
           {/* Send Status */}
           {sendMutation.isSuccess && (
-            <Card className="mt-4 border-green-200 bg-green-50 dark:bg-green-950">
+            <Card className="mt-4 border-[hsl(var(--positive)/0.2)] bg-[hsl(var(--positive)/0.05)]">
               <CardContent className="pt-6">
-                <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                <div className="flex items-center gap-2 text-[hsl(var(--positive))]">
                   <CheckCircle2 className="w-5 h-5" />
                   <p className="font-medium">Message queued successfully!</p>
                 </div>

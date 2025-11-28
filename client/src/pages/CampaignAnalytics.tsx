@@ -268,7 +268,7 @@ export default function CampaignAnalytics() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{t('communications.totalFailed')}</span>
-                      <span className="font-medium text-red-600">{provider.totalFailed || 0}</span>
+                      <span className="font-medium text-[hsl(var(--negative))]">{provider.totalFailed || 0}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{t('communications.lastUsed')}</span>
