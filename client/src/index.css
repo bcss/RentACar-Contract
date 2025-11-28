@@ -158,42 +158,49 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-/* DARK MODE - KarāraOS Design System (Nov 2025) */
+/* DARK MODE - KarāraOS Reference Design (Nov 2025) */
+/* Colors from ui_design_28_nov_2025 reference:
+   Primary: #137fec, Background: #101922, Surface: #111418
+   Border: #3b4754, Text Secondary: #9dabb9 */
 .dark {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
 
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
+  --opaque-button-border-intensity: 9;
 
-  /* Backgrounds applied on top of other backgrounds when hovered/active */
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  /* Semantic status colors */
-  --positive: 142 71% 50%;
+  /* Semantic status colors - Reference: positive #0bda5b, negative #fa6238 */
+  --positive: 142 91% 45%;
   --positive-foreground: 0 0% 100%;
-  --negative: 11 85% 55%;
+  --negative: 11 95% 60%;
   --negative-foreground: 0 0% 100%;
 
-  --background: 213 40% 10%;
+  /* Background: #101922 */
+  --background: 213 38% 10%;
 
   --foreground: 0 0% 98%;
 
+  /* Border: #3b4754 */
   --border: 210 19% 28%;
 
-  --card: 210 28% 15%;
+  /* Card/Surface: #111418 */
+  --card: 216 20% 8%;
 
   --card-foreground: 0 0% 98%;
 
   --card-border: 210 19% 22%;
 
-  --sidebar: 210 28% 15%;
+  /* Sidebar: #111418 (same as card surface) */
+  --sidebar: 216 20% 8%;
 
   --sidebar-foreground: 0 0% 98%;
 
   --sidebar-border: 210 19% 22%;
 
-  --sidebar-primary: 209 88% 55%;
+  /* Primary: #137fec */
+  --sidebar-primary: 209 88% 51%;
 
   --sidebar-primary-foreground: 0 0% 100%;
 
@@ -201,24 +208,29 @@
 
   --sidebar-accent-foreground: 209 88% 75%;
 
-  --sidebar-ring: 209 88% 55%;
+  --sidebar-ring: 209 88% 51%;
 
-  --popover: 210 28% 15%;
+  /* Popover: #111418 */
+  --popover: 216 20% 8%;
 
   --popover-foreground: 0 0% 98%;
 
   --popover-border: 210 19% 22%;
 
-  --primary: 209 88% 55%;
+  /* Primary: #137fec */
+  --primary: 209 88% 51%;
 
   --primary-foreground: 0 0% 100%;
 
+  /* Secondary/Muted text: #9dabb9 */
   --secondary: 210 15% 67%;
 
   --secondary-foreground: 0 0% 98%;
 
-  --muted: 210 19% 20%;
+  /* Muted background for inputs: #1c2127 */
+  --muted: 213 18% 13%;
 
+  /* Muted foreground: #9dabb9 */
   --muted-foreground: 210 15% 67%;
 
   --accent: 45 100% 60%;
@@ -229,10 +241,11 @@
 
   --destructive-foreground: 0 0% 100%;
 
+  /* Input background: #1c2127, border: #3b4754 */
   --input: 210 19% 28%;
-  --ring: 209 88% 55%;
-  --chart-1: 209 88% 55%;
-  --chart-2: 142 71% 55%;
+  --ring: 209 88% 51%;
+  --chart-1: 209 88% 51%;
+  --chart-2: 142 91% 45%;
   --chart-3: 207 90% 60%;
   --chart-4: 38 92% 55%;
   --chart-5: 210 15% 67%;
@@ -246,7 +259,6 @@
   --shadow-xl: 0px 2px 0px 0px hsl(220 13% 8% / 0.00), 0px 8px 10px -1px hsl(220 13% 8% / 0.00);
   --shadow-2xl: 0px 2px 0px 0px hsl(220 13% 8% / 0.00);
 
-  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
