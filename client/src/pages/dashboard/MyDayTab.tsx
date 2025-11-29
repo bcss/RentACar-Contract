@@ -158,7 +158,7 @@ export function MyDayTab() {
       </Card>
 
       {/* Stats Grid - Compact spacing for 1366px screens */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
         <DashboardMetricCard
           title={t('dashboard.myContracts')}
           value={myContracts.length}
@@ -205,55 +205,47 @@ export function MyDayTab() {
 
       {/* My Contracts Status Breakdown - Compact for 1366px */}
       <Card className="shadow-md" data-testid="card-my-contracts-breakdown">
-        <CardHeader className="py-3 px-4">
-          <CardTitle className="text-base font-semibold tracking-tight">{t('dashboard.myContractsBreakdown')}</CardTitle>
+        <CardHeader className="py-2 px-3">
+          <CardTitle className="text-sm font-semibold tracking-tight">{t('dashboard.myContractsBreakdown')}</CardTitle>
         </CardHeader>
-        <CardContent className="px-4 pb-4 pt-0">
-          <div className="grid gap-2 md:grid-cols-4">
+        <CardContent className="px-3 pb-3 pt-0">
+          <div className="grid gap-1.5 md:grid-cols-4">
             <Link href="/contracts?status=draft">
-              <div className="group relative p-3 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-draft-contracts">
+              <div className="group relative p-2.5 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-draft-contracts">
                 <div className="absolute top-0 ltr:left-0 rtl:right-0 w-1 h-full bg-muted-foreground group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.draft')}</p>
-                  </div>
-                  <p className="text-2xl font-semibold tabular-nums">{myDraftContracts.length}</p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[0.625rem] font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.draft')}</p>
+                  <p className="text-lg font-semibold tabular-nums">{myDraftContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=active">
-              <div className="group relative p-3 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-active-contracts">
+              <div className="group relative p-2.5 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-active-contracts">
                 <div className="absolute top-0 ltr:left-0 rtl:right-0 w-1 h-full bg-primary group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.active')}</p>
-                  </div>
-                  <p className="text-2xl font-semibold tabular-nums text-primary">{myActiveContracts.length}</p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[0.625rem] font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.active')}</p>
+                  <p className="text-lg font-semibold tabular-nums text-primary">{myActiveContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=completed">
-              <div className="group relative p-3 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-completed-contracts">
+              <div className="group relative p-2.5 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-completed-contracts">
                 <div className="absolute top-0 ltr:left-0 rtl:right-0 w-1 h-full bg-[hsl(var(--positive))] group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.completed')}</p>
-                  </div>
-                  <p className="text-2xl font-semibold tabular-nums">{myCompletedContracts.length}</p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[0.625rem] font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.completed')}</p>
+                  <p className="text-lg font-semibold tabular-nums">{myCompletedContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=closed">
-              <div className="group relative p-3 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-closed-contracts">
+              <div className="group relative p-2.5 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-closed-contracts">
                 <div className="absolute top-0 ltr:left-0 rtl:right-0 w-1 h-full bg-muted group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.closed')}</p>
-                  </div>
-                  <p className="text-2xl font-semibold tabular-nums">{myClosedContracts.length}</p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[0.625rem] font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.closed')}</p>
+                  <p className="text-lg font-semibold tabular-nums">{myClosedContracts.length}</p>
                 </div>
               </div>
             </Link>
@@ -264,48 +256,48 @@ export function MyDayTab() {
       {/* My Pending Tasks Details - Compact Design */}
       {(myOverdueReturns.length > 0 || myPendingRefunds.length > 0 || myUnclosedContracts.length > 0) && (
         <Card className="shadow-md border-[hsl(var(--destructive)/0.2)]" data-testid="card-my-pending-tasks-details">
-          <CardHeader className="py-3 px-4 bg-[hsl(var(--destructive)/0.05)]">
-            <CardTitle className="text-base font-semibold tracking-tight flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-destructive" />
+          <CardHeader className="py-2 px-3 bg-[hsl(var(--destructive)/0.05)]">
+            <CardTitle className="text-sm font-semibold tracking-tight flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5 text-destructive" />
               {t('dashboard.myPendingTasks')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
               {myOverdueReturns.length > 0 && (
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-destructive uppercase tracking-wide flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
+                <div className="p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-bold text-destructive uppercase tracking-wide flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5" />
                       {t('dashboard.overdueReturns')}
                     </h4>
-                    <Badge variant="destructive">{myOverdueReturns.length}</Badge>
+                    <Badge variant="destructive" className="text-xs">{myOverdueReturns.length}</Badge>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     {myOverdueReturns.slice(0, 3).map((contract, idx) => {
                       const daysOverdue = contract.rentalEndDate 
                         ? Math.floor((now.getTime() - new Date(contract.rentalEndDate).getTime()) / (1000 * 60 * 60 * 24))
                         : 0;
                       return (
                         <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                          <div className="group flex items-center gap-4 p-3 rounded-lg hover:bg-[hsl(var(--destructive)/0.05)] transition-colors cursor-pointer" data-testid={`row-overdue-${contract.id}`}>
-                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                              <span className="text-sm font-bold text-destructive">{daysOverdue}d</span>
+                          <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-[hsl(var(--destructive)/0.05)] transition-colors cursor-pointer" data-testid={`row-overdue-${contract.id}`}>
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                              <span className="text-xs font-bold text-destructive">{daysOverdue}d</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-sm">#{contract.contractNumber}</p>
-                              <p className="text-xs text-muted-foreground truncate">
+                              <p className="font-semibold text-xs">#{contract.contractNumber}</p>
+                              <p className="text-[0.625rem] text-muted-foreground truncate">
                                 {contract.customerNameEn || 'N/A'} • {contract.vehicleRegistration}
                               </p>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               {contract.rentalEndDate && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
+                                <span className="text-[0.625rem] text-muted-foreground flex items-center gap-0.5">
+                                  <Calendar className="h-2.5 w-2.5" />
                                   {format(new Date(contract.rentalEndDate), 'MMM d')}
                                 </span>
                               )}
-                              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                             </div>
                           </div>
                         </Link>
@@ -316,32 +308,32 @@ export function MyDayTab() {
               )}
 
               {myPendingRefunds.length > 0 && (
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                      <DollarSign className="h-4 w-4" />
+                <div className="p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                      <DollarSign className="h-3.5 w-3.5" />
                       {t('dashboard.pendingRefunds')}
                     </h4>
-                    <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20">{myPendingRefunds.length}</Badge>
+                    <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 text-xs">{myPendingRefunds.length}</Badge>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     {myPendingRefunds.slice(0, 3).map((contract, idx) => (
                       <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                        <div className="group flex items-center gap-4 p-3 rounded-lg hover-elevate transition-colors cursor-pointer" data-testid={`row-refund-${contract.id}`}>
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                            <DollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <div className="group flex items-center gap-3 p-2 rounded-lg hover-elevate transition-colors cursor-pointer" data-testid={`row-refund-${contract.id}`}>
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                            <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm">#{contract.contractNumber}</p>
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="font-semibold text-xs">#{contract.contractNumber}</p>
+                            <p className="text-[0.625rem] text-muted-foreground truncate">
                               {contract.customerNameEn || 'N/A'}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">
                               {currency} {parseFloat(contract.securityDeposit || '0').toLocaleString(i18n.language, { minimumFractionDigits: 0 })}
                             </span>
-                            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                           </div>
                         </div>
                       </Link>
@@ -351,30 +343,30 @@ export function MyDayTab() {
               )}
 
               {myUnclosedContracts.length > 0 && (
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" />
+                <div className="p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wide flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
                       {t('dashboard.unclosedContracts')}
                     </h4>
-                    <Badge variant="outline">{myUnclosedContracts.length}</Badge>
+                    <Badge variant="outline" className="text-xs">{myUnclosedContracts.length}</Badge>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     {myUnclosedContracts.slice(0, 3).map((contract, idx) => (
                       <Link key={contract.id} href={`/contracts/${contract.id}`}>
-                        <div className="group flex items-center gap-4 p-3 rounded-lg hover-elevate transition-colors cursor-pointer" data-testid={`row-unclosed-${contract.id}`}>
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                            <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+                        <div className="group flex items-center gap-3 p-2 rounded-lg hover-elevate transition-colors cursor-pointer" data-testid={`row-unclosed-${contract.id}`}>
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm">#{contract.contractNumber}</p>
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="font-semibold text-xs">#{contract.contractNumber}</p>
+                            <p className="text-[0.625rem] text-muted-foreground truncate">
                               {contract.customerNameEn || 'N/A'} • {contract.vehicleRegistration}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">{t('dashboard.needsClosure')}</span>
-                            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[0.625rem] text-muted-foreground">{t('dashboard.needsClosure')}</span>
+                            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                           </div>
                         </div>
                       </Link>

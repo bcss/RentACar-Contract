@@ -80,24 +80,24 @@ export default function Dashboard() {
   const lastLoginText = getLastLoginText();
 
   return (
-    <div className="p-6 lg:p-8">
-      {/* Page Header - Reference Design Match */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-4xl font-black leading-tight tracking-[-0.033em]" data-testid="text-dashboard-title">
+    <div className="p-4 lg:p-5">
+      {/* Page Header - Compact Design */}
+      <div className="flex flex-wrap justify-between items-center gap-3">
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-2xl font-black leading-tight tracking-[-0.033em]" data-testid="text-dashboard-title">
             {t('dashboard.title')}
           </h1>
-          <p className="text-base text-muted-foreground" data-testid="text-greeting">
+          <p className="text-sm text-muted-foreground" data-testid="text-greeting">
             {greetingText}, <span className="font-medium text-foreground">{firstName}</span>
             {user?.role && (
               <span className="text-primary font-medium"> ({user.role})</span>
             )}
           </p>
-          <p className="text-sm text-muted-foreground" data-testid="text-last-login">
+          <p className="text-xs text-muted-foreground" data-testid="text-last-login">
             {t('dashboard.lastLogin')}: {lastLoginText}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* System Errors Icon Button - Positioned with badge on top-right corner */}
           {isAdmin && unacknowledgedErrors.length > 0 && (
             <div className="relative flex items-center justify-center">
@@ -109,37 +109,37 @@ export default function Dashboard() {
                 title={t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}
                 data-testid="button-system-errors"
               >
-                <MaterialSymbol name="warning" size="md" className="text-destructive" />
+                <MaterialSymbol name="warning" size="sm" className="text-destructive" />
               </Button>
               <Badge 
                 variant="destructive" 
-                className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 h-5 min-w-[20px] px-1 text-[10px] font-bold pointer-events-none"
+                className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 h-4 min-w-[16px] px-0.5 text-[9px] font-bold pointer-events-none"
                 data-testid="badge-error-count"
               >
                 {unacknowledgedErrors.length > 99 ? '99+' : unacknowledgedErrors.length}
               </Badge>
             </div>
           )}
-          <Button asChild className="h-10 px-4 text-sm font-bold gap-2" data-testid="button-new-contract">
+          <Button asChild size="sm" className="font-bold gap-1.5" data-testid="button-new-contract">
             <Link href="/contracts/new">
-              <MaterialSymbol name="add" size="sm" />
+              <MaterialSymbol name="add" size="xs" />
               <span>{t('contracts.newContract')}</span>
             </Link>
           </Button>
         </div>
       </div>
 
-      {/* Tabbed Dashboard - Reference Design Match */}
-      <div className="mt-8">
+      {/* Tabbed Dashboard - Compact Design */}
+      <div className="mt-4">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <div className="border-b border-border">
-            <TabsList className="bg-transparent h-auto p-0 gap-8">
+            <TabsList className="bg-transparent h-auto p-0 gap-5">
               <TabsTrigger 
                 value="my-day" 
                 data-testid="tab-my-day"
-                className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-[13px] pt-4 text-sm font-bold leading-normal tracking-[0.015em] data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:border-b-gray-300 dark:hover:border-b-gray-500 transition-colors"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-2 pt-2 text-xs font-bold leading-normal tracking-[0.015em] data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent hover:border-b-gray-300 dark:hover:border-b-gray-500 transition-colors"
               >
-                <MaterialSymbol name="today" size="sm" className="mr-2" />
+                <MaterialSymbol name="today" size="xs" className="mr-1.5" />
                 {t('dashboard.myDay')}
               </TabsTrigger>
               {canViewManagement && (
@@ -147,17 +147,17 @@ export default function Dashboard() {
                   <TabsTrigger 
                     value="company-today" 
                     data-testid="tab-company-today"
-                    className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-[13px] pt-4 text-sm font-bold leading-normal tracking-[0.015em] data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:border-b-gray-300 dark:hover:border-b-gray-500 transition-colors"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-2 pt-2 text-xs font-bold leading-normal tracking-[0.015em] data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent hover:border-b-gray-300 dark:hover:border-b-gray-500 transition-colors"
                   >
-                    <MaterialSymbol name="domain" size="sm" className="mr-2" />
+                    <MaterialSymbol name="domain" size="xs" className="mr-1.5" />
                     {t('dashboard.companyToday')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="executive-overview" 
                     data-testid="tab-executive-overview"
-                    className="data-[state=active]:border-b-[3px] data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-[13px] pt-4 text-sm font-bold leading-normal tracking-[0.015em] data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-[3px] data-[state=inactive]:border-transparent hover:border-b-gray-300 dark:hover:border-b-gray-500 transition-colors"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary rounded-none bg-transparent px-0 pb-2 pt-2 text-xs font-bold leading-normal tracking-[0.015em] data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b-2 data-[state=inactive]:border-transparent hover:border-b-gray-300 dark:hover:border-b-gray-500 transition-colors"
                   >
-                    <MaterialSymbol name="analytics" size="sm" className="mr-2" />
+                    <MaterialSymbol name="analytics" size="xs" className="mr-1.5" />
                     {t('dashboard.executiveOverview')}
                   </TabsTrigger>
                 </>
@@ -165,17 +165,17 @@ export default function Dashboard() {
             </TabsList>
           </div>
 
-        <TabsContent value="my-day" className="mt-8" data-testid="content-my-day">
+        <TabsContent value="my-day" className="mt-4" data-testid="content-my-day">
           <MyDayTab />
         </TabsContent>
 
         {canViewManagement && (
           <>
-            <TabsContent value="company-today" className="mt-8" data-testid="content-company-today">
+            <TabsContent value="company-today" className="mt-4" data-testid="content-company-today">
               <CompanyTodayTab />
             </TabsContent>
 
-            <TabsContent value="executive-overview" className="mt-8" data-testid="content-executive-overview">
+            <TabsContent value="executive-overview" className="mt-4" data-testid="content-executive-overview">
               <ExecutiveOverviewTab />
             </TabsContent>
           </>
