@@ -10,51 +10,55 @@ This document defines the responsive scaling system for KarāraOS, ensuring UI e
 
 **Solution:** 
 1. Removed `text-sm` from body in `@layer base`
-2. Implemented viewport-aware root font scaling using CSS `clamp()` for 20% reduction
+2. Implemented viewport-aware root font scaling using CSS `clamp()` with 1280px baseline
 3. Added systematic spacing tokens for card sizing consistency
 4. Redesigned dashboard cards with compact layout
 
 ## Viewport-Aware Root Font Scaling
 
-### The Formula (20% Reduction at 1366px)
+### Reference Design Baseline
+The reference UI designs (`ui_design_28_nov_2025/`) were created at **1280x800 resolution**. This is the baseline where all elements should display exactly as designed.
+
+### The Formula (1280px Baseline)
 ```css
 html {
-  font-size: clamp(12.8px, 1.368vw - 5.88px, 17.5px);
+  font-size: clamp(14px, calc(0.625vw + 8px), 20px);
 }
 ```
 
 ### Computed Values by Viewport Width
-| Viewport Width | Computed Font Size | Reduction from 16px |
-|----------------|-------------------|---------------------|
-| 1366px | ~12.8px | **20% smaller** |
-| 1440px | ~13.8px | ~14% smaller |
-| 1536px | ~15.1px | ~6% smaller |
-| 1600px | ~16px | **Reference design baseline** |
-| 1920px | ~17.5px | Maximum |
+| Viewport Width | Computed Font Size | Notes |
+|----------------|-------------------|-------|
+| 1024px | 14px | Minimum (clamped) |
+| 1280px | **16px** | **Reference design baseline** |
+| 1366px | ~16.5px | Common laptop resolution |
+| 1600px | ~18px | Large laptop/small desktop |
+| 1920px | 20px | Maximum (capped) |
 
 ### How It Works
-- **Minimum (12.8px):** 20% reduction from 16px baseline for compact laptop screens
-- **Preferred (1.368vw - 5.88px):** Linear scaling with viewport width
-- **Maximum (17.5px):** Caps scaling to prevent oversized elements on very large screens
+- **Minimum (14px):** Ensures readability on smaller screens
+- **Preferred (0.625vw + 8px):** Linear scaling with viewport width
+- **Maximum (20px):** Caps scaling to prevent oversized elements on very large screens
 
 ### Mathematical Derivation
-To achieve 20% reduction at 1366px while maintaining 16px at 1600px:
-- At 1366px: font-size = 1.368 × 13.66 - 5.88 = 12.8px (exactly 20% smaller than 16px)
-- At 1600px: font-size = 1.368 × 16.00 - 5.88 = 16.0px (baseline)
+To achieve exact 16px at 1280px baseline:
+- Formula: `font-size = 0.625vw + 8px`
+- At 1280px: 0.625 × 12.8 + 8 = 8 + 8 = **16px** ✓
+- At 1920px: 0.625 × 19.2 + 8 = 12 + 8 = **20px** ✓
 
 ## Spacing Tokens System (Compact Density)
 
 ### CSS Variables for Card Sizing
 ```css
 :root {
-  /* Compact sizing for 20% overall reduction */
+  /* Compact sizing for dense layouts */
   --card-padding-xs: 0.375rem;   /* 6px at 16px base */
   --card-padding-sm: 0.5rem;     /* 8px at 16px base */
-  --card-padding: 0.625rem;      /* 10px at 16px base - compact for dense layouts */
+  --card-padding: 0.625rem;      /* 10px at 16px base */
   --card-padding-lg: 0.75rem;    /* 12px at 16px base */
   --dashboard-gap: 0.5rem;       /* 8px at 16px base */
   --section-gap: 0.625rem;       /* 10px at 16px base */
-  --stack-gap-sm: 0.375rem;      /* 6px at 16px base - for tight vertical stacks */
+  --stack-gap-sm: 0.375rem;      /* 6px at 16px base */
 }
 ```
 
@@ -62,51 +66,42 @@ To achieve 20% reduction at 1366px while maintaining 16px at 1600px:
 Since spacing tokens use rem units, they automatically scale with the root font-size:
 | Viewport | Root Font | --card-padding (0.625rem) | --dashboard-gap (0.5rem) |
 |----------|-----------|---------------------------|--------------------------|
-| 1366px | 12.8px | ~8px | ~6.4px |
-| 1600px | 16px | ~10px | ~8px |
-| 1920px | 17.5px | ~10.9px | ~8.75px |
+| 1280px | 16px | 10px | 8px |
+| 1366px | 16.5px | ~10.3px | ~8.25px |
+| 1920px | 20px | 12.5px | 10px |
 
 ## Dashboard Component Density
 
-### Typography Scale (Compact)
-| Element | Class | Size at 1366px | Size at 1600px |
+### Typography Scale
+| Element | Class | Size at 1280px | Size at 1920px |
 |---------|-------|----------------|----------------|
-| Page Title | text-2xl | ~19px | ~24px |
-| Card Title | text-sm | ~11px | ~14px |
-| Metric Value | text-xl | ~16px | ~20px |
-| Labels | text-xs | ~10px | ~12px |
-| Small Text | text-[10px] | ~10px | ~10px |
+| Page Title | text-2xl | 24px | 30px |
+| Card Title | text-sm | 14px | 17.5px |
+| Metric Value | text-xl | 20px | 25px |
+| Labels | text-xs | 12px | 15px |
 
-### Card Padding (Compact)
-| Element | Padding | At 1366px |
-|---------|---------|-----------|
-| Card Content | p-3 | ~9.6px |
-| Card Header | py-2 px-3 | ~6.4px / ~9.6px |
-| List Items | p-2 | ~6.4px |
-| Status Boxes | p-2.5 | ~8px |
-
-### Gap Spacing (Compact)
-| Context | Gap | At 1366px |
-|---------|-----|-----------|
-| Card Grid | gap-2 | ~6.4px |
-| Status Grid | gap-1.5 | ~4.8px |
-| Flex Items | gap-1 | ~3.2px |
+### Card Padding
+| Element | Padding | At 1280px | At 1920px |
+|---------|---------|-----------|-----------|
+| Card Content | p-3 | 12px | 15px |
+| Card Header | py-2 px-3 | 8px/12px | 10px/15px |
+| List Items | p-2 | 8px | 10px |
+| Status Boxes | p-2.5 | 10px | 12.5px |
 
 ## Why This Approach
 
 ### Benefits
-1. **20% Reduction Target Met:** At 1366px viewport, all elements are 20% smaller
-2. **Reference Design Fidelity:** At 1600px viewport, displays exactly as designed (16px base)
-3. **Proportional Scaling:** All rem-based Tailwind classes scale together
-4. **No Per-Component Overrides:** Sidebar, cards, forms all scale automatically
-5. **Smooth Transitions:** No jarring breakpoint-based jumps
-6. **Compact Card Layouts:** Reduced padding and typography for denser information display
+1. **Reference Design Fidelity:** At 1280px viewport, displays exactly as designed (16px base)
+2. **Proportional Scaling:** All rem-based Tailwind classes scale together
+3. **No Per-Component Overrides:** Sidebar, cards, forms all scale automatically
+4. **Smooth Transitions:** No jarring breakpoint-based jumps
+5. **Compact Card Layouts:** Reduced padding and typography for denser information display
 
 ### Design Decision
-The dashboard cards are redesigned with compact styling:
-- Card padding reduced from p-6 to p-3
-- Typography reduced (text-2xl → text-xl for values, text-sm → text-xs for labels)
-- Gaps reduced (gap-6 → gap-2)
+The dashboard cards are designed with compact styling to maximize information density:
+- Card padding uses p-3 (12px at baseline)
+- Typography reduced (text-xl for values, text-xs for labels)
+- Gaps reduced (gap-2 for card grids)
 - Status breakdown cards use p-2.5 with text-lg values
 
 ## Fluid Typography Utilities (Reserved for Special Use)
@@ -140,12 +135,12 @@ The application supports full RTL/LTR direction switching:
 
 ## Testing Checklist
 When modifying responsive behavior, verify at:
-- [ ] 1366×768 (15.6" laptop) - 20% smaller elements
-- [ ] 1600×900 (design baseline) - Exact reference design match
-- [ ] 1920×1080 (full HD desktop) - Maximum scaling
+- [ ] 1280×800 (reference design) - Exact match to design templates
+- [ ] 1366×768 (15.6" laptop) - Slightly scaled up
+- [ ] 1920×1080 (full HD desktop) - Maximum scaling (20px base)
 
 Check that:
-- [ ] Title proportions match reference design
+- [ ] Title proportions match reference design at 1280px
 - [ ] Stats cards have compact padding/text size
 - [ ] Sidebar text is readable and properly sized
 - [ ] All interactive elements are appropriately sized (≥44px touch targets)
