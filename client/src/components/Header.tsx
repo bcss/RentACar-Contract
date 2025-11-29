@@ -10,7 +10,7 @@ import { CompanySettings } from '@shared/schema';
 
 export function Header() {
   const { t, i18n } = useTranslation();
-  const { language, toggleLanguage } = useLanguage();
+  const { language, toggleLanguage, isRTL } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { toggleSidebar } = useSidebar();
   
@@ -20,9 +20,9 @@ export function Header() {
   });
 
   return (
-    <header className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-10">
+    <header className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-10 ltr-flex">
       {/* Sidebar Toggle & Company Name */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 ltr-flex">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -55,7 +55,7 @@ export function Header() {
       </div>
       
       {/* Theme & Language Toggles */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 ltr-flex">
         {/* Theme Toggle */}
         <Tooltip>
           <TooltipTrigger asChild>
