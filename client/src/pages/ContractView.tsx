@@ -639,7 +639,13 @@ export default function ContractView() {
     // Task 11: Check if this is early completion and pass early closure reason
     const isEarlyCompletion = contract?.rentalEndDate && new Date() < new Date(contract.rentalEndDate);
     
+    // Build editReason for audit trail - required by backend
+    const editReason = isEarlyCompletion 
+      ? `Rental completed early: ${earlyClosureReason || 'Vehicle returned before scheduled end date'}` 
+      : 'Rental completed: Vehicle returned on schedule';
+    
     completeMutation.mutate({
+      editReason, // Required for audit trail
       earlyClosureReason: isEarlyCompletion ? earlyClosureReason : undefined,
       timeIn, // Capture actual vehicle return time
       odometerEnd: odometerEndNum,

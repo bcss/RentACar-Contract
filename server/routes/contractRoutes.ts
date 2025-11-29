@@ -1170,16 +1170,7 @@ router.post("/:id/close", isAuthenticated, requireContractCloseAccess, async (re
       });
     }
 
-    // Edit reason validation
-    if (contract.status === 'completed') {
-      const editReasonValidation = validateEditReason(req.body.closureRemark || req.body.editReason);
-      if (!editReasonValidation.valid) {
-        return res.status(400).json({ 
-          message: editReasonValidation.error || "Edit reason/closure remark required when closing completed contract"
-        });
-      }
-    }
-
+    // Status check - must be completed or completed_pending_accident
     if (contract.status !== 'completed' && contract.status !== 'completed_pending_accident') {
       return res.status(400).json({ 
         message: "Contract must be in 'completed' or 'completed_pending_accident' status before closing" 

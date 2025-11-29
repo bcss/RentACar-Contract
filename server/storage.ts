@@ -1075,7 +1075,8 @@ export class DatabaseStorage implements IStorage {
     
     // Build update data - Per Master Spec Part 5.5.1: Deposit application at closure
     // Only mark as 'paid' if there's no outstanding balance
-    const hasRefund = depositApplied?.refundAmount !== undefined && depositApplied.refundAmount > 0;
+    const refundAmount = depositApplied?.refundAmount ?? 0;
+    const hasRefund = refundAmount > 0;
     const hasOutstanding = depositApplied?.hasOutstandingBalance === true;
     
     const updateData: any = {
@@ -1085,8 +1086,8 @@ export class DatabaseStorage implements IStorage {
       closureRemark: closureRemark || null,
       // Only set to 'paid' if no outstanding balance; otherwise set to 'partial' for admin override
       paymentStatus: hasOutstanding ? 'partial' : 'paid',
-      // Set deposit refund flags when applicable
-      depositRefunded: hasRefund,
+      // Set deposit refund amount (numeric field, 0 if no refund) - Per Master Spec §4.4.1
+      depositRefunded: refundAmount.toFixed(2),
       depositRefundedDate: hasRefund ? new Date() : null,
       updatedAt: new Date(),
       version: sql`${contracts.version} + 1`,
