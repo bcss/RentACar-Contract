@@ -53,6 +53,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { MaterialSymbol } from '@/components/MaterialSymbol';
+import kararaosLogo from '@assets/kararaos_logo_1763759128002.png';
 
 interface AppSidebarProps {
   side?: 'left' | 'right';
@@ -740,9 +741,14 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       <SidebarHeader className="p-4 border-b">
         {/* Company branding - Reference Design */}
         <div className="flex items-center gap-3 px-2">
-          {/* Logo placeholder */}
-          <div className="bg-primary rounded-full size-10 flex items-center justify-center flex-shrink-0">
-            <MaterialSymbol name="directions_car" size="sm" className="text-white" />
+          {/* KarāraOS Logo */}
+          <div className="size-10 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg">
+            <img 
+              src={kararaosLogo} 
+              alt="KarāraOS" 
+              className="size-full object-contain"
+              data-testid="img-sidebar-logo"
+            />
           </div>
           {sidebarState === 'expanded' && (
             <div className="flex flex-col min-w-0">

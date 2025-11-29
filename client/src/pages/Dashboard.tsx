@@ -100,11 +100,11 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           {/* System Errors Icon Button - Positioned with badge on top-right corner */}
           {isAdmin && unacknowledgedErrors.length > 0 && (
-            <div className="relative h-10 w-10 flex items-center justify-center">
+            <div className="relative flex items-center justify-center">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 toggle-elevate"
+                className="toggle-elevate"
                 onClick={() => setLocation('/system-errors')}
                 title={t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}
                 data-testid="button-system-errors"
