@@ -2,12 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Material Symbols Outlined - Default settings */
+/* Material Symbols Outlined - Default settings (inherits font-size from component) */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;
+  /* font-size controlled by MaterialSymbol component via Tailwind text-* classes */
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -31,21 +31,21 @@
   }
 }
 
-/* Viewport-aware root font scaling for responsive proportional sizing
-   Reference baseline: 16px at 1280px viewport (matches ui_design_28_nov_2025 templates)
-   Formula: clamp(min, preferred, max) where preferred = 0.625vw + 8px
+/* Viewport-aware root font scaling for 20% size reduction
+   Reference baseline: 12.8px at 1280px viewport (20% smaller than standard 16px)
+   Formula: clamp(min, preferred, max) where preferred = 0.734vw + 3.4px
    
    Computed values by viewport width:
-   - At 1024px: ~14px (minimum, clamped for small screens)
-   - At 1280px: 16px (exact reference design baseline)
-   - At 1366px: ~16.5px (slightly larger for common laptops)
-   - At 1600px: ~18px (proportional scaling)
-   - At 1920px: 20px (maximum, capped for large screens)
+   - At 1024px: ~12px (minimum, clamped for readability)
+   - At 1280px: 12.8px (20% reduction from 16px - matches reference design)
+   - At 1366px: ~13.4px (proportional scaling)
+   - At 1600px: ~15.1px (proportional scaling)
+   - At 1920px: ~17.5px (maximum, capped for large screens)
    
-   This maintains exact reference design ratios while providing responsive scaling.
+   This achieves 20% overall size reduction while maintaining proportional scaling.
    See docs/RESPONSIVE_SCALING_REFERENCE.md for full documentation. */
 html {
-  font-size: clamp(14px, calc(0.625vw + 8px), 20px);
+  font-size: clamp(12px, calc(0.734vw + 3.4px), 17.5px);
 }
 
 /* LIGHT MODE - KarāraOS Reference Design (Nov 2025) */
