@@ -69,13 +69,13 @@ export function MyDayTab() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Quick Actions */}
       <Card className="rounded-xl" data-testid="card-quick-actions">
-        <CardHeader>
-          <CardTitle className="text-base font-medium">{t('dashboard.quickActions')}</CardTitle>
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-sm font-medium">{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-4 pt-0">
           <div className="flex gap-3 flex-wrap">
             {/* Primary Action - Filled Style */}
             <Link href="/contracts/create">
@@ -157,8 +157,8 @@ export function MyDayTab() {
         </CardContent>
       </Card>
 
-      {/* Stats Grid - Reference Design Match */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+      {/* Stats Grid - Compact spacing for 1366px screens */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
         <DashboardMetricCard
           title={t('dashboard.myContracts')}
           value={myContracts.length}
@@ -203,61 +203,57 @@ export function MyDayTab() {
         />
       </div>
 
-      {/* My Contracts Status Breakdown - Reference Design Match */}
-      <Card className="shadow-lg" data-testid="card-my-contracts-breakdown">
-        <CardHeader className="p-6">
-          <CardTitle className="text-xl font-semibold tracking-tight">{t('dashboard.myContractsBreakdown')}</CardTitle>
+      {/* My Contracts Status Breakdown - Compact for 1366px */}
+      <Card className="shadow-md" data-testid="card-my-contracts-breakdown">
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-base font-semibold tracking-tight">{t('dashboard.myContractsBreakdown')}</CardTitle>
         </CardHeader>
-        <CardContent className="p-6 pt-0">
-          <div className="grid gap-4 md:grid-cols-4">
+        <CardContent className="px-4 pb-4 pt-0">
+          <div className="grid gap-2 md:grid-cols-4">
             <Link href="/contracts?status=draft">
-              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-draft-contracts">
-                <div className="absolute top-0 left-0 w-1 h-full bg-muted-foreground group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-3">
+              <div className="group relative p-3 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-draft-contracts">
+                <div className="absolute top-0 ltr:left-0 rtl:right-0 w-1 h-full bg-muted-foreground group-hover:bg-primary transition-colors" />
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.draft')}</p>
-                    <Badge variant="secondary" className="text-xs">{t('contract.status.draft')}</Badge>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.draft')}</p>
                   </div>
-                  <p className="text-3xl font-semibold tabular-nums">{myDraftContracts.length}</p>
+                  <p className="text-2xl font-semibold tabular-nums">{myDraftContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=active">
-              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-active-contracts">
-                <div className="absolute top-0 left-0 w-1 h-full bg-primary group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-3">
+              <div className="group relative p-3 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-active-contracts">
+                <div className="absolute top-0 ltr:left-0 rtl:right-0 w-1 h-full bg-primary group-hover:bg-primary transition-colors" />
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.active')}</p>
-                    <Badge variant="default" className="text-xs">{t('contract.status.active')}</Badge>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.active')}</p>
                   </div>
-                  <p className="text-3xl font-semibold tabular-nums text-primary">{myActiveContracts.length}</p>
+                  <p className="text-2xl font-semibold tabular-nums text-primary">{myActiveContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=completed">
-              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-completed-contracts">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[hsl(var(--positive))] group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-3">
+              <div className="group relative p-3 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-completed-contracts">
+                <div className="absolute top-0 ltr:left-0 rtl:right-0 w-1 h-full bg-[hsl(var(--positive))] group-hover:bg-primary transition-colors" />
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.completed')}</p>
-                    <Badge className="text-xs bg-[hsl(var(--positive)/0.1)] text-[hsl(var(--positive))] border-[hsl(var(--positive)/0.2)]">{t('contract.status.completed')}</Badge>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.completed')}</p>
                   </div>
-                  <p className="text-3xl font-semibold tabular-nums">{myCompletedContracts.length}</p>
+                  <p className="text-2xl font-semibold tabular-nums">{myCompletedContracts.length}</p>
                 </div>
               </div>
             </Link>
 
             <Link href="/contracts?status=closed">
-              <div className="group relative p-5 rounded-xl border-2 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-closed-contracts">
-                <div className="absolute top-0 left-0 w-1 h-full bg-muted group-hover:bg-primary transition-colors" />
-                <div className="flex flex-col gap-3">
+              <div className="group relative p-3 rounded-lg border hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden" data-testid="button-my-closed-contracts">
+                <div className="absolute top-0 ltr:left-0 rtl:right-0 w-1 h-full bg-muted group-hover:bg-primary transition-colors" />
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.closed')}</p>
-                    <Badge variant="outline" className="text-xs">{t('contract.status.closed')}</Badge>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('contract.status.closed')}</p>
                   </div>
-                  <p className="text-3xl font-semibold tabular-nums">{myClosedContracts.length}</p>
+                  <p className="text-2xl font-semibold tabular-nums">{myClosedContracts.length}</p>
                 </div>
               </div>
             </Link>
@@ -265,12 +261,12 @@ export function MyDayTab() {
         </CardContent>
       </Card>
 
-      {/* My Pending Tasks Details - Elegant List Design */}
+      {/* My Pending Tasks Details - Compact Design */}
       {(myOverdueReturns.length > 0 || myPendingRefunds.length > 0 || myUnclosedContracts.length > 0) && (
-        <Card className="shadow-lg border-[hsl(var(--destructive)/0.2)]" data-testid="card-my-pending-tasks-details">
-          <CardHeader className="p-6 bg-[hsl(var(--destructive)/0.05)]">
-            <CardTitle className="text-xl font-semibold tracking-tight flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-destructive" />
+        <Card className="shadow-md border-[hsl(var(--destructive)/0.2)]" data-testid="card-my-pending-tasks-details">
+          <CardHeader className="py-3 px-4 bg-[hsl(var(--destructive)/0.05)]">
+            <CardTitle className="text-base font-semibold tracking-tight flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive" />
               {t('dashboard.myPendingTasks')}
             </CardTitle>
           </CardHeader>

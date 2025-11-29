@@ -145,6 +145,15 @@ html {
   --font-serif: Georgia, serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: .5rem; /* 8px */
+  
+  /* Responsive Spacing Tokens - Scale with root font-size for proportional sizing
+     These use rem units so they scale with the viewport-aware root font-size.
+     card-padding: Compact at 1366px (~0.75rem = 10.8px), standard at 1600px (0.75rem = 12px) */
+  --card-padding-sm: 0.5rem;     /* 8px at 16px base */
+  --card-padding: 0.75rem;       /* 12px at 16px base - compact for 1366px screens */
+  --card-padding-lg: 1rem;       /* 16px at 16px base */
+  --dashboard-gap: 0.75rem;      /* 12px at 16px base */
+  --section-gap: 1rem;           /* 16px at 16px base */
   --shadow-2xs: 0px 2px 0px 0px hsl(220 9% 46% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(220 9% 46% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(220 9% 46% / 0.00), 0px 1px 2px -1px hsl(220 9% 46% / 0.00);
