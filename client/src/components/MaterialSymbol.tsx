@@ -1,14 +1,12 @@
 /**
  * File: client/src/components/MaterialSymbol.tsx
  * @area UI Design System
- * @checklist UI Alignment Phase 2
- * @purpose Material Symbols Outlined icons for reference design alignment
+ * @purpose Material Symbols Outlined icons with responsive scaling
  * 
  * @behaviour
  *  - Renders Material Symbols Outlined font icons
- *  - Supports filled variant via filled prop
- *  - Consistent sizing with text-lg, text-xl, text-2xl
- *  - RTL-aware icon display
+ *  - Uses inline fontSize (rem) to override external stylesheet
+ *  - Scales proportionally with root font-size clamp
  */
 
 interface MaterialSymbolProps {
@@ -18,13 +16,13 @@ interface MaterialSymbolProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
-const sizeClasses = {
-  xs: 'text-sm',
-  sm: 'text-base',
-  md: 'text-lg',
-  lg: 'text-xl',
-  xl: 'text-2xl',
-  '2xl': 'text-3xl',
+const sizeMap: Record<string, string> = {
+  xs: '0.75rem',
+  sm: '0.875rem',
+  md: '1rem',
+  lg: '1.125rem',
+  xl: '1.25rem',
+  '2xl': '1.5rem',
 };
 
 export function MaterialSymbol({ 
@@ -33,14 +31,17 @@ export function MaterialSymbol({
   filled = false,
   size = 'md'
 }: MaterialSymbolProps) {
-  const fillStyle = filled 
-    ? { fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }
-    : { fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" };
+  const style = {
+    fontSize: sizeMap[size],
+    fontVariationSettings: filled 
+      ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+      : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+  };
   
   return (
     <span 
-      className={`material-symbols-outlined ${sizeClasses[size]} ${className}`}
-      style={fillStyle}
+      className={`material-symbols-outlined ${className}`}
+      style={style}
     >
       {name}
     </span>
