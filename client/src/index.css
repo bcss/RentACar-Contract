@@ -33,17 +33,17 @@
 
 /* Viewport-aware root font scaling for responsive proportional sizing
    Reference baseline: 16px at 1600px viewport
-   Formula: clamp(min, preferred, max) where preferred = 0.684vw + 5.1px
+   Formula: clamp(min, preferred, max) where preferred = 1.368vw - 5.88px
    
    Computed values by viewport width:
-   - At 1366px: ~14.4px (~10% smaller than reference for compact laptop screens)
+   - At 1366px: ~12.8px (20% smaller than reference for compact laptop screens)
    - At 1600px: ~16px (matches reference design baseline)
    - At 1920px: ~17.5px (maximum, larger for big screens)
    
    This maintains exact reference design ratios while providing responsive scaling.
    See docs/RESPONSIVE_SCALING_REFERENCE.md for full documentation. */
 html {
-  font-size: clamp(13.8px, 0.684vw + 5.1px, 17.5px);
+  font-size: clamp(12.8px, 1.368vw - 5.88px, 17.5px);
 }
 
 /* LIGHT MODE - KarāraOS Reference Design (Nov 2025) */
@@ -146,14 +146,16 @@ html {
   --font-mono: JetBrains Mono, monospace;
   --radius: .5rem; /* 8px */
   
-  /* Responsive Spacing Tokens - Scale with root font-size for proportional sizing
+  /* Responsive Spacing Tokens - Compact density for 20% size reduction
      These use rem units so they scale with the viewport-aware root font-size.
-     card-padding: Compact at 1366px (~0.75rem = 10.8px), standard at 1600px (0.75rem = 12px) */
+     All values reduced ~20% from previous for tighter card layouts. */
+  --card-padding-xs: 0.375rem;   /* 6px at 16px base */
   --card-padding-sm: 0.5rem;     /* 8px at 16px base */
-  --card-padding: 0.75rem;       /* 12px at 16px base - compact for 1366px screens */
-  --card-padding-lg: 1rem;       /* 16px at 16px base */
-  --dashboard-gap: 0.75rem;      /* 12px at 16px base */
-  --section-gap: 1rem;           /* 16px at 16px base */
+  --card-padding: 0.625rem;      /* 10px at 16px base - compact for dense layouts */
+  --card-padding-lg: 0.75rem;    /* 12px at 16px base */
+  --dashboard-gap: 0.5rem;       /* 8px at 16px base */
+  --section-gap: 0.625rem;       /* 10px at 16px base */
+  --stack-gap-sm: 0.375rem;      /* 6px at 16px base - for tight vertical stacks */
   --shadow-2xs: 0px 2px 0px 0px hsl(220 9% 46% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(220 9% 46% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(220 9% 46% / 0.00), 0px 1px 2px -1px hsl(220 9% 46% / 0.00);
