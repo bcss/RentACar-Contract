@@ -443,6 +443,212 @@ html {
   display: none;
 }
 
+/* ==========================================================================
+   RTL/LTR BIDIRECTIONAL SUPPORT
+   Full right-to-left layout support for Arabic language
+   ========================================================================== */
+
+/* RTL-specific overrides */
+[dir="rtl"] {
+  /* Ensure proper text alignment in RTL mode */
+  text-align: right;
+}
+
+[dir="ltr"] {
+  text-align: left;
+}
+
+/* RTL icon mirroring - flip directional icons */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* Chevron icons should flip in RTL */
+[dir="rtl"] .lucide-chevron-right,
+[dir="rtl"] .lucide-chevron-left,
+[dir="rtl"] .lucide-arrow-right,
+[dir="rtl"] .lucide-arrow-left,
+[dir="rtl"] .lucide-panel-left {
+  transform: scaleX(-1);
+}
+
+/* Material Symbols RTL mirroring for directional icons */
+[dir="rtl"] .material-symbols-outlined.rtl-mirror {
+  transform: scaleX(-1);
+}
+
+/* RTL-aware flex containers - reverse order */
+[dir="rtl"] .rtl-reverse {
+  flex-direction: row-reverse;
+}
+
+/* RTL-aware margin utilities */
+[dir="rtl"] .ms-auto {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+[dir="ltr"] .ms-auto {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+[dir="rtl"] .me-auto {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+[dir="ltr"] .me-auto {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+/* RTL-aware scrollbar positioning */
+[dir="rtl"] ::-webkit-scrollbar {
+  left: 0;
+  right: auto;
+}
+
+/* RTL-aware border radius for elements like sidebars */
+[dir="rtl"] .rounded-r-lg {
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+[dir="rtl"] .rounded-l-lg {
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+/* RTL-aware sidebar positioning */
+[dir="rtl"] [data-side="right"] {
+  left: 0;
+  right: auto;
+}
+
+[dir="rtl"] [data-side="left"] {
+  right: 0;
+  left: auto;
+}
+
+/* Fix sidebar gap and container for RTL */
+[dir="rtl"] [data-slot="sidebar-gap"] {
+  transform: rotate(0deg);
+}
+
+/* RTL-aware dropdown menus */
+[dir="rtl"] [data-radix-popper-content-wrapper] {
+  --radix-popper-anchor-width: auto;
+}
+
+/* RTL-aware form labels */
+[dir="rtl"] label {
+  text-align: right;
+}
+
+/* RTL number display - keep numbers LTR within RTL context */
+[dir="rtl"] .ltr-nums {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* RTL-aware table alignment */
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right;
+}
+
+[dir="rtl"] th:first-child,
+[dir="rtl"] td:first-child {
+  text-align: right;
+}
+
+[dir="rtl"] th:last-child,
+[dir="rtl"] td:last-child {
+  text-align: left;
+}
+
+/* RTL-aware badge positioning */
+[dir="rtl"] .absolute.right-0 {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .absolute.left-0 {
+  left: auto;
+  right: 0;
+}
+
+/* RTL-aware transitions */
+[dir="rtl"] [data-slot="sidebar-container"] {
+  transition-property: left, right, width;
+}
+
+/* Ensure proper flex item ordering in RTL */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .flex-row.ltr-flex {
+  flex-direction: row;
+}
+
+/* Reset flex direction for specific elements that should remain LTR */
+[dir="rtl"] .ltr-always {
+  direction: ltr;
+}
+
+/* RTL-aware gap utilities maintain same behavior */
+[dir="rtl"] .gap-2,
+[dir="rtl"] .gap-3,
+[dir="rtl"] .gap-4 {
+  gap: inherit;
+}
+
+/* Collapsible chevron rotation for RTL */
+[dir="rtl"] [data-state="open"] > .lucide-chevron-right {
+  transform: scaleX(-1) rotate(90deg);
+}
+
+[dir="rtl"] [data-state="closed"] > .lucide-chevron-right {
+  transform: scaleX(-1) rotate(0deg);
+}
+
+/* Calendar RTL support */
+[dir="rtl"] .rdp {
+  direction: rtl;
+}
+
+/* Form field RTL support */
+[dir="rtl"] .form-item {
+  text-align: right;
+}
+
+/* Input placeholder RTL */
+[dir="rtl"] input::placeholder,
+[dir="rtl"] textarea::placeholder {
+  text-align: right;
+}
+
+/* Checkbox/Radio RTL alignment */
+[dir="rtl"] input[type="checkbox"],
+[dir="rtl"] input[type="radio"] {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* RTL-aware progress bars */
+[dir="rtl"] [role="progressbar"] {
+  transform: scaleX(-1);
+}
+
+/* Tooltip positioning for RTL */
+[dir="rtl"] [data-side="left"] {
+  --radix-tooltip-content-transform-origin: right center;
+}
+
+[dir="rtl"] [data-side="right"] {
+  --radix-tooltip-content-transform-origin: left center;
+}
+
 @media print {
   /* Show print-only content when printing */
   .print-only {
