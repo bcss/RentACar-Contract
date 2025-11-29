@@ -166,7 +166,14 @@ export default function ContractView() {
 
   // Fetch inspections for this contract
   const { data: inspections = [], isLoading: isLoadingInspections } = useQuery<any[]>({
-    queryKey: ['/api/contracts', params.id, 'inspections'],
+    queryKey: ['/api/inspections', { contractId: params.id }],
+    queryFn: async () => {
+      const res = await fetch(`/api/inspections?contractId=${params.id}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch inspections');
+      return res.json();
+    },
     enabled: isAuthenticated && !!params.id,
   });
 
@@ -313,8 +320,13 @@ export default function ContractView() {
   // Handle inspection submission and activation
   const handleInspectionSubmit = async (inspectionData: any) => {
     try {
-      // First create the inspection - photos will be handled by backend
-      await apiRequest('POST', `/api/contracts/${params.id}/inspections`, inspectionData);
+      // First create the inspection - POST to /api/inspections with contractId in body
+      await apiRequest('POST', '/api/inspections', {
+        ...inspectionData,
+        contractId: params.id,
+        vehicleId: contract?.vehicleId,
+        inspectionType: 'pre_delivery',
+      });
       
       toast({
         title: t('common.success'),
@@ -322,7 +334,7 @@ export default function ContractView() {
       });
 
       // Invalidate inspections cache to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id, 'inspections'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/inspections', { contractId: params.id }] });
 
       // Then activate the contract
       await activateMutation.mutateAsync();
@@ -339,8 +351,13 @@ export default function ContractView() {
   // Handle post-return inspection submission (opens return dialog after)
   const handlePostReturnInspectionSubmit = async (inspectionData: any) => {
     try {
-      // Create the post-return inspection
-      await apiRequest('POST', `/api/contracts/${params.id}/inspections`, inspectionData);
+      // Create the post-return inspection - POST to /api/inspections with contractId in body
+      await apiRequest('POST', '/api/inspections', {
+        ...inspectionData,
+        contractId: params.id,
+        vehicleId: contract?.vehicleId,
+        inspectionType: 'post_return',
+      });
       
       toast({
         title: t('common.success'),
@@ -348,7 +365,7 @@ export default function ContractView() {
       });
 
       // Invalidate inspections cache to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['/api/contracts', params.id, 'inspections'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/inspections', { contractId: params.id }] });
 
       // Close inspection dialog
       setShowPostReturnInspectionDialog(false);
