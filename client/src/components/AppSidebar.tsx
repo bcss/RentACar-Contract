@@ -1130,35 +1130,6 @@ export function AppSidebar({ side = 'left' }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter className="p-3 space-y-2">
-        {/* Support Button - Quick access to help */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link href="/settings/support">
-              {sidebarState === 'expanded' ? (
-                <button 
-                  className="flex items-center gap-3 w-full hover-elevate p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"
-                  data-testid="button-support"
-                >
-                  <MaterialSymbol name="headphones" size="md" />
-                  <span className="text-sm font-medium">{t('nav.support')}</span>
-                </button>
-              ) : (
-                <button 
-                  className="flex items-center justify-center w-full hover-elevate p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"
-                  data-testid="button-support"
-                >
-                  <MaterialSymbol name="headphones" size="md" />
-                </button>
-              )}
-            </Link>
-          </TooltipTrigger>
-          {sidebarState === 'collapsed' && (
-            <TooltipContent side={language === 'ar' ? 'left' : 'right'}>
-              <p>{t('nav.support')}</p>
-            </TooltipContent>
-          )}
-        </Tooltip>
-
         {/* User menu - Responsive to sidebar state */}
         <DropdownMenu>
           <Tooltip>

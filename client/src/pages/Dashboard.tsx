@@ -98,27 +98,25 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* System Errors Icon Button - Positioned with badge on top-right corner */}
+          {/* System Errors Icon Button - Badge positioned on the icon */}
           {isAdmin && unacknowledgedErrors.length > 0 && (
-            <div className="relative flex items-center justify-center">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="toggle-elevate"
-                onClick={() => setLocation('/system-errors')}
-                title={t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}
-                data-testid="button-system-errors"
-              >
-                <MaterialSymbol name="warning" size="sm" className="text-destructive" />
-              </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative toggle-elevate"
+              onClick={() => setLocation('/system-errors')}
+              title={t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}
+              data-testid="button-system-errors"
+            >
+              <MaterialSymbol name="warning" size="sm" className="text-destructive" />
               <Badge 
                 variant="destructive" 
-                className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 h-4 min-w-[16px] px-0.5 text-[9px] font-bold pointer-events-none"
+                className="absolute -top-1 -right-1 h-4 min-w-[16px] px-0.5 text-[0.5rem] font-bold pointer-events-none"
                 data-testid="badge-error-count"
               >
                 {unacknowledgedErrors.length > 99 ? '99+' : unacknowledgedErrors.length}
               </Badge>
-            </div>
+            </Button>
           )}
           <Button asChild size="sm" className="font-bold gap-1.5" data-testid="button-new-contract">
             <Link href="/contracts/new">
