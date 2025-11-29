@@ -33,17 +33,17 @@
 
 /* Viewport-aware root font scaling for responsive proportional sizing
    Reference baseline: 16px at 1600px viewport
-   Formula: clamp(min, preferred, max) where preferred = 0.46875vw + 8.5px
+   Formula: clamp(min, preferred, max) where preferred = 0.684vw + 5.1px
    
    Computed values by viewport width:
-   - At 1366px: ~14.9px (compact for smaller laptop screens)
+   - At 1366px: ~14.4px (~10% smaller than reference for compact laptop screens)
    - At 1600px: ~16px (matches reference design baseline)
    - At 1920px: ~17.5px (maximum, larger for big screens)
    
    This maintains exact reference design ratios while providing responsive scaling.
    See docs/RESPONSIVE_SCALING_REFERENCE.md for full documentation. */
 html {
-  font-size: clamp(14.8px, 0.46875vw + 8.5px, 17.5px);
+  font-size: clamp(13.8px, 0.684vw + 5.1px, 17.5px);
 }
 
 /* LIGHT MODE - KarāraOS Reference Design (Nov 2025) */

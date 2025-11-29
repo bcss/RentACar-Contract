@@ -83,34 +83,42 @@ export default function Dashboard() {
     <div className="p-6 lg:p-8">
       {/* Page Header - Reference Design Match */}
       <div className="flex flex-wrap justify-between items-center gap-4">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <h1 className="text-4xl font-black leading-tight tracking-[-0.033em]" data-testid="text-dashboard-title">
             {t('dashboard.title')}
           </h1>
           <p className="text-base text-muted-foreground" data-testid="text-greeting">
             {greetingText}, <span className="font-medium text-foreground">{firstName}</span>
+            {user?.role && (
+              <span className="text-primary font-medium"> ({user.role})</span>
+            )}
+          </p>
+          <p className="text-sm text-muted-foreground" data-testid="text-last-login">
+            {t('dashboard.lastLogin')}: {lastLoginText}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {/* System Errors Icon Button - Compact notification like mail count */}
+        <div className="flex items-center gap-4">
+          {/* System Errors Icon Button - Positioned with badge on top-right corner */}
           {isAdmin && unacknowledgedErrors.length > 0 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative toggle-elevate"
-              onClick={() => setLocation('/system-errors')}
-              title={t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}
-              data-testid="button-system-errors"
-            >
-              <MaterialSymbol name="error" size="sm" className="text-destructive" />
+            <div className="relative h-10 w-10 flex items-center justify-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 toggle-elevate"
+                onClick={() => setLocation('/system-errors')}
+                title={t('systemErrors.unacknowledgedCount', { count: unacknowledgedErrors.length })}
+                data-testid="button-system-errors"
+              >
+                <MaterialSymbol name="warning" size="md" className="text-destructive" />
+              </Button>
               <Badge 
                 variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
+                className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 h-5 min-w-[20px] px-1 text-[10px] font-bold pointer-events-none"
                 data-testid="badge-error-count"
               >
                 {unacknowledgedErrors.length > 99 ? '99+' : unacknowledgedErrors.length}
               </Badge>
-            </Button>
+            </div>
           )}
           <Button asChild className="h-10 px-4 text-sm font-bold gap-2" data-testid="button-new-contract">
             <Link href="/contracts/new">
