@@ -67,6 +67,7 @@ const Branches = lazy(() => import("@/pages/Branches"));
 const Drivers = lazy(() => import("@/pages/Drivers"));
 const DriverCompanies = lazy(() => import("@/pages/DriverCompanies"));
 const VehicleTransfers = lazy(() => import("@/pages/VehicleTransfers"));
+const TestDocumentation = lazy(() => import("@/pages/TestDocumentation"));
 
 // Wave 1: Compliance & Operations
 const TollManagement = lazy(() => import("@/pages/TollManagement"));
@@ -294,6 +295,9 @@ function Router() {
       </Route>
       <Route path="/field-style-showcase">
         {() => <ProtectedRoute component={FieldStyleShowcase} />}
+      </Route>
+      <Route path="/test-documentation">
+        {() => <ProtectedRoute component={TestDocumentation} />}
       </Route>
 
       <Route path="/public-holidays">

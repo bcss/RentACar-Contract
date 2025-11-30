@@ -5496,6 +5496,77 @@ export type InsertDocumentVersion = z.infer<typeof insertDocumentVersionSchema>;
 export type DocumentVersion = typeof documentVersions.$inferSelect;
 
 // ===========================
+// Testing Documentation Tables
+// ===========================
+
+// Test Sessions - Tracks a complete testing session
+export const testSessions = pgTable("test_sessions", {
+  id: serial("id").primaryKey(),
+  sessionName: varchar("session_name", { length: 255 }).notNull(),
+  description: text("description"),
+  createdBy: varchar("created_by").references(() => users.id),
+  status: varchar("status", { length: 50 }).notNull().default("in_progress"), // in_progress, completed, exported
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+  totalEntries: integer("total_entries").default(0),
+  exportedAt: timestamp("exported_at"),
+  exportFileName: varchar("export_file_name", { length: 255 }),
+});
+
+export const testSessionsRelations = relations(testSessions, ({ one, many }) => ({
+  createdByUser: one(users, {
+    fields: [testSessions.createdBy],
+    references: [users.id],
+  }),
+  entries: many(testEntries),
+}));
+
+export const insertTestSessionSchema = createInsertSchema(testSessions).omit({
+  id: true,
+  startedAt: true,
+  completedAt: true,
+  exportedAt: true,
+  totalEntries: true,
+});
+
+export type InsertTestSession = z.infer<typeof insertTestSessionSchema>;
+export type TestSession = typeof testSessions.$inferSelect;
+
+// Test Entries - Individual test steps with screenshots and remarks
+export const testEntries = pgTable("test_entries", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").notNull().references(() => testSessions.id, { onDelete: "cascade" }),
+  orderIndex: integer("order_index").notNull(), // For maintaining order
+  subject: varchar("subject", { length: 500 }).notNull(), // What was tested
+  remarks: text("remarks"), // Detailed remarks/notes
+  status: varchar("status", { length: 50 }).default("documented"), // documented, passed, failed, blocked
+  screenshotData: text("screenshot_data"), // Base64 encoded image data (for embedding in HTML)
+  screenshotMimeType: varchar("screenshot_mime_type", { length: 100 }), // image/png, image/jpeg, etc.
+  screenshotFileName: varchar("screenshot_file_name", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_test_entries_session").on(table.sessionId),
+  index("idx_test_entries_order").on(table.sessionId, table.orderIndex),
+]);
+
+export const testEntriesRelations = relations(testEntries, ({ one }) => ({
+  session: one(testSessions, {
+    fields: [testEntries.sessionId],
+    references: [testSessions.id],
+  }),
+}));
+
+export const insertTestEntrySchema = createInsertSchema(testEntries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTestEntry = z.infer<typeof insertTestEntrySchema>;
+export type TestEntry = typeof testEntries.$inferSelect;
+
+// ===========================
 // Predictive Report Response Types
 // ===========================
 

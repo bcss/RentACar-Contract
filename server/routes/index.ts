@@ -52,6 +52,7 @@ import cashClosingRoutes from "./cashClosingRoutes";
 import contractLifecycleRoutes from "./contractLifecycleRoutes";
 import billingRoutes from "./billingRoutes";
 import reservationRoutes from "./reservationRoutes";
+import testDocumentationRoutes from "./testDocumentationRoutes";
 
 /**
  * Register all modular routes with the Express app
@@ -148,6 +149,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Reservations (Master Spec §3.24-3.25)
   app.use('/api/reservations', reservationRoutes);
+  
+  // Testing Documentation (Manual testing support)
+  app.use('/api/test-documentation', testDocumentationRoutes);
   
   // Feature routes
   app.use('/api', paymentRoutes); // Payment routes have mixed base paths
